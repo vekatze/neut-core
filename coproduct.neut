@@ -1,5 +1,3 @@
-(no-implicit-core)
-
 (include "./notation.neut")
 
 (include "./functor.neut")

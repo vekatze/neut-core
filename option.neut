@@ -1,5 +1,3 @@
-(no-implicit-core)
-
 (include "./foundation.neut")
 
 (include "./functor.neut")

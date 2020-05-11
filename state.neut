@@ -1,6 +1,4 @@
 ;; state.neut
-(no-implicit-core)
-
 (include "./functor.neut")
 
 (include "./monad.neut")

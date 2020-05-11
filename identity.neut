@@ -1,8 +1,6 @@
-(no-implicit-core)
+(include "./functor.neut")
 
-(include "core/functor.neut")
-
-(include "core/monad.neut")
+(include "./monad.neut")
 
 (use top)
 

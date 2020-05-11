@@ -1,6 +1,4 @@
-(no-implicit-core)
-
-(include "core/notation.neut")
+(include "./notation.neut")
 
 (define functor-type ((m (hom tau tau)))
   (pi

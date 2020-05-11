@@ -1,6 +1,9 @@
 ;; state.neut
+(no-implicit-core)
 
-(include "core/functor.neut")
+(include "./functor.neut")
+
+(include "./monad.neut")
 
 (use top)
 
@@ -14,7 +17,7 @@
 
 (define map
   ((s tau))
-  (witness (functor-form (state s))
+  (witness (functor-type (state s))
     (λ (_ _ f m)
       (λ (env)
         (destruct (m env)

@@ -1,12 +1,10 @@
-(no-implicit-core)
+(include "./foundation.neut")
 
-(include "core/foundation.neut")
+(include "./functor.neut")
 
-(include "core/functor.neut")
+(include "./monad.neut")
 
-(include "core/monad.neut")
-
-(include "core/identity.neut")
+(include "./identity.neut")
 
 (inductive free ((g (hom tau tau)) (a tau))
   (leaf

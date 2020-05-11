@@ -6,17 +6,17 @@
 ;; (ensure libarchive/3.4.2
 ;;   "https.//www.libarchive.org/downloads/libarchive-3.4.2.tar.gz")
 
-(include "core/notation.neut")
+(include "./notation.neut")
 
-(include "core/option.neut")
+(include "./option.neut")
 
-(include "core/bool.neut")
+(include "./bool.neut")
 
-(include "core/identity.neut")
+(include "./identity.neut")
 
-(include "core/string.neut")
+(include "./string.neut")
 
-(include "core/integer.neut")
+(include "./integer.neut")
 
 (use option)
 

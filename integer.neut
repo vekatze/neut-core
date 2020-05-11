@@ -1,12 +1,10 @@
-(no-implicit-core)
+(include "./foundation.neut")
 
-(include "core/foundation.neut")
+(include "./top.neut")
 
-(include "core/top.neut")
+(include "./bool.neut")
 
-(include "core/bool.neut")
-
-(include "core/string.neut")
+(include "./string.neut")
 
 (section i64)
 

@@ -1,6 +1,4 @@
-(no-implicit-core)
-
-(include "core/foundation.neut")
+(include "./foundation.neut")
 
 (section bool)
 

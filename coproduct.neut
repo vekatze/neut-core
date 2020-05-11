@@ -1,10 +1,10 @@
 (no-implicit-core)
 
-(include "core/notation.neut")
+(include "./notation.neut")
 
-(include "core/functor.neut")
+(include "./functor.neut")
 
-(include "core/monad.neut")
+(include "./monad.neut")
 
 (section coproduct)
 

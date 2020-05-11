@@ -1,19 +1,17 @@
-(no-implicit-core)
+(include "./foundation.neut")
 
-(include "core/foundation.neut")
+(include "./top.neut")
 
-(include "core/top.neut")
+(include "./bool.neut")
 
-(include "core/bool.neut")
+(include "./functor.neut")
 
-(include "core/functor.neut")
+(include "./monad.neut")
 
-(include "core/monad.neut")
+(include "./identity.neut")
 
-(include "core/identity.neut")
+(include "./free.neut")
 
-(include "core/free.neut")
+(include "./string.neut")
 
-(include "core/string.neut")
-
-(include "core/integer.neut")
+(include "./integer.neut")

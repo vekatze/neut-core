@@ -1,0 +1,24 @@
+(no-implicit-core)
+
+(include "core/foundation.neut")
+
+(section bool)
+
+(enum bool
+  (true 1)
+  (false 0))
+
+(define and
+  and-i1)
+
+(define or
+  or-i1)
+
+(define not
+  ((b bool))
+  (witness bool
+    (if b
+      false
+      true)))
+
+(end bool)

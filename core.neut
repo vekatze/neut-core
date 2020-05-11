@@ -1,0 +1,19 @@
+(no-implicit-core)
+
+(include "core/foundation.neut")
+
+(include "core/top.neut")
+
+(include "core/bool.neut")
+
+(include "core/functor.neut")
+
+(include "core/monad.neut")
+
+(include "core/identity.neut")
+
+(include "core/free.neut")
+
+(include "core/string.neut")
+
+(include "core/integer.neut")

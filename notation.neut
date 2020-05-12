@@ -92,7 +92,7 @@
 
 (notation (product t+)
   (Π
-    ((internal.sigma-tau taux)
+    ((internal.sigma-tau tau)
      (_ (Π (to-type-list (with-erasure internal.sigma-tau t+)) internal.sigma-tau)))
     internal.sigma-tau))
 

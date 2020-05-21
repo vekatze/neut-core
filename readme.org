@@ -1,5 +1,5 @@
 #+TITLE: Neut Core Library
-A core library for Neut.
+A possible sketchy implementation of the core library.
 
 * Usage
 #+BEGIN_SRC neut
@@ -7,4 +7,16 @@ A core library for Neut.
   "https://github.com/u2zv1wx/neut-core/raw/master/release/0.1.0.0.tar.gz")
 
 (include "core/0.1.0.0/core.neut")
+
+; to use the either monad
+(include "core/0.1.0.0/coproduct.neut")
+
+; to use list
+(include "core/0.1.0.0/list.neut")
+
+; to use the state monad
+(include "core/0.1.0.0/state.neut")
+
+; to use the free monad
+(include "core/0.1.0.0/free.neut")
 #+END_SRC

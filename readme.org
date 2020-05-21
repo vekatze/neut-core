@@ -8,6 +8,9 @@ A possible sketchy implementation of the core library.
 
 (include "core/0.1.0.0/core.neut")
 
+; to use the option monad
+(include "core/0.1.0.0/option.neut")
+
 ; to use the either monad
 (include "core/0.1.0.0/coproduct.neut")
 

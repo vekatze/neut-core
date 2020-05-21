@@ -8,14 +8,14 @@
 
 (define return-type
   ((m (hom tau tau)))
-  (pi
+  (Π
     ((a tau)
      (_ a))
     (m a)))
 
 (define bind-type
   ((m (hom tau tau)))
-  (pi
+  (Π
     ((a tau)
      (b tau)
      (_ (m a))

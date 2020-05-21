@@ -23,19 +23,19 @@
   tau)
 
 (notation forall
-  pi)
+  Π)
 
-(notation Π
-  pi)
+(notation Pi
+  Π)
 
 (notation switch
   enum-elimination)
 
 (notation lambda
-  pi-introduction)
+  Π-introduction)
 
 (notation λ
-  pi-introduction)
+  Π-introduction)
 
 (notation (witness t e)
   ((λ ((x t)) x) e))
@@ -52,7 +52,7 @@
   (let (x t) e))
 
 (notation assume
-  pi-introduction)
+  Π-introduction)
 
 (notation (if b e1 e2)
   (switch b

@@ -1,7 +1,7 @@
 (include "./notation.neut")
 
 (define functor-type ((m (hom tau tau)))
-  (pi
+  (Π
     ((a tau)
      (b tau)
      (_ (hom a b))

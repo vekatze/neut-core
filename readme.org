@@ -1,0 +1,10 @@
+#+TITLE: Neut Core Library
+A core library for Neut.
+
+* Usage
+#+BEGIN_SRC neut
+(ensure core/1.0.0.0
+  "https://github.com/u2zv1wx/neut-core/raw/master/release/0.1.0.0.tar.gz")
+
+(include "core/0.1.0.0/core.neut")
+#+END_SRC

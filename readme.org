@@ -1,6 +1,8 @@
 #+TITLE: Neut Core Library
 A possible sketchy implementation of the core library.
 
+(You can create a library like this via =$ neut archive PROJ_ROOT/source -o PROJ_ROOT/release/VERSION.tar.gz=)
+
 * Usage
 #+BEGIN_SRC neut
 (ensure core/1.0.0.0

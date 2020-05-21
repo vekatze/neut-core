@@ -33,7 +33,6 @@
 
 (section monad)
 
-;; monadic composition
 (define compose
   ((m (hom tau tau))
    (a tau)

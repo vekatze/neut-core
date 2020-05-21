@@ -54,8 +54,7 @@
           (k x))
         (λ (p val k')
           (node g b p val
-            (λ ((v p))
-              ((bind g) a b (k' v) k))))))))
+            (λ (v) ((bind g) a b (k' v) k))))))))
 
 (define as-monad
   ((g (hom tau tau)))

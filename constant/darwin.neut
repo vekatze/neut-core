@@ -52,24 +52,24 @@
 
 (define rusage
   (struct
-    i64   ;; ru_utime           user CPU time used
-    i64   ;; (microsec)
-    i64   ;; ru_stime           system CPU time used
-    i64   ;; (microsec)
-    i64   ;; ru_maxrss;         maximum resident set size
-    i64   ;; ru_ixrss;          integral shared memory size
-    i64   ;; ru_idrss;          integral unshared data size
-    i64   ;; ru_isrss;          integral unshared stack size
-    i64   ;; ru_minflt;         page reclaims (soft page faults)
-    i64   ;; ru_majflt;         page faults (hard page faults)
-    i64   ;; ru_nswap;          swaps
-    i64   ;; ru_inblock;        block input operations
-    i64   ;; ru_oublock;        block output operations
-    i64   ;; ru_msgsnd;         IPC messages sent
-    i64   ;; ru_msgrcv;         IPC messages received
-    i64   ;; ru_nsignals;       signals received
-    i64   ;; ru_nvcsw;          voluntary context switches
-    i64)) ;; ru_nivcsw;         involuntary context switches
+    i64   ; ru_utime           user CPU time used
+    i64   ; (microsec)
+    i64   ; ru_stime           system CPU time used
+    i64   ; (microsec)
+    i64   ; ru_maxrss;         maximum resident set size
+    i64   ; ru_ixrss;          integral shared memory size
+    i64   ; ru_idrss;          integral unshared data size
+    i64   ; ru_isrss;          integral unshared stack size
+    i64   ; ru_minflt;         page reclaims (soft page faults)
+    i64   ; ru_majflt;         page faults (hard page faults)
+    i64   ; ru_nswap;          swaps
+    i64   ; ru_inblock;        block input operations
+    i64   ; ru_oublock;        block output operations
+    i64   ; ru_msgsnd;         IPC messages sent
+    i64   ; ru_msgrcv;         IPC messages received
+    i64   ; ru_nsignals;       signals received
+    i64   ; ru_nvcsw;          voluntary context switches
+    i64)) ; ru_nivcsw;         involuntary context switches
 
 (constant wait4
   (pi
@@ -81,28 +81,28 @@
 
 (define sockaddr
   (struct
-    i8    ;; total length
-    i8    ;; address family
-    i16   ;; empty (4 byte so far)
-    i32   ;; empty (8 byte so far)
-    i64)) ;; empty (16 byte so far)
+    i8    ; total length
+    i8    ; address family
+    i16   ; empty (4 byte so far)
+    i32   ; empty (8 byte so far)
+    i64)) ; empty (16 byte so far)
 
 (define sockaddr-in
   (struct
-    i8    ;; total length
-    i8    ;; address family
-    i16   ;; ipv4 port
-    i32   ;; ipv4 addr
-    i64)) ;; empty
+    i8    ; total length
+    i8    ; address family
+    i16   ; ipv4 port
+    i32   ; ipv4 addr
+    i64)) ; empty
 
 (define sockaddr-in6
   (struct
-    i8    ;; length of this struct
-    i8    ;; AF_INET6
-    i16   ;; Transport layer port
-    i32   ;; IP6 flow information
-    i32   ;; IP6 address
-    i32)) ;; scope zone index
+    i8    ; length of this struct
+    i8    ; AF_INET6
+    i16   ; Transport layer port
+    i32   ; IP6 flow information
+    i32   ; IP6 address
+    i32)) ; scope zone index
 
 (constant bind
   (pi

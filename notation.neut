@@ -1,5 +1,3 @@
-;; define basic notations
-
 (notation (recursive-0 f e)
   (f e))
 

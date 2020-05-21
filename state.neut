@@ -1,4 +1,3 @@
-;; state.neut
 (include "./functor.neut")
 
 (include "./monad.neut")

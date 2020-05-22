@@ -1,6 +1,6 @@
 (introspect OS
-  (linux (include "./constant/Linux.neut"))
-  (darwin (include "./constant/Darwin.neut")))
+  (linux (include "./Linux.neut"))
+  (darwin (include "./Darwin.neut")))
 
 (include "./notation.neut")
 

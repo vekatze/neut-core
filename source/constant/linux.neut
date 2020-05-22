@@ -11,7 +11,7 @@
 (constant stderr file-descriptor)
 
 (constant read
-  (pi
+  (Π
     ((A i64)
      (in file-descriptor)
      (buf (array A i8))
@@ -19,7 +19,7 @@
     (product (array A i8) i64)))
 
 (constant write
-  (pi
+  (Π
     ((A i64)
      (out file-descriptor)
      (str (array A i8))
@@ -27,13 +27,13 @@
     (product (array A i8) i64)))
 
 (constant exit
-  (pi
+  (Π
     ((A tau)
      (status i64))
     A))
 
 (constant open
-  (pi
+  (Π
     ((A i64)
      (path (array A i8))
      (flags i64)
@@ -41,12 +41,12 @@
     (product (array A i8) file-descriptor)))
 
 (constant close
-  (pi
+  (Π
     ((_ file-descriptor))
     i64))
 
 (constant fork
-  (pi
+  (Π
     ()
     i64))
 
@@ -72,8 +72,8 @@
     i64)) ; ru_nivcsw;         involuntary context switches
 
 (constant wait4
-  (pi
-    ((pid i64)
+  (Π
+    ((Πd i64)
      (stat-loc (array 1 i64))
      (options i64)
      (usage rusage))
@@ -105,35 +105,35 @@
     i32)) ; scope zone index
 
 (constant bind
-  (pi
+  (Π
     ((sock i64)
      (address sockaddr)
      (sock-len i64))
     (product sockaddr i64)))
 
 (constant accept
-  (pi
+  (Π
     ((sock i64)
      (address sockaddr)
      (address-len (array 1 i64)))
     (product sockaddr (array 1 i64) i64)))
 
 (constant connect
-  (pi
+  (Π
     ((sock i64)
      (address sockaddr)
      (address-len i64))
     (product sockaddr i64)))
 
 (constant socket
-  (pi
+  (Π
     ((domain i64)
      (socket-type i64)
      (protocol i64))
     i64))
 
 (constant listen
-  (pi
+  (Π
     ((sock i64)
      (backlog i64))
     i64))

@@ -16,7 +16,7 @@
 
 (section list)
 
-(inductive list ((a tau))
+(data list ((a tau))
   (nil
     ()
     (list a))

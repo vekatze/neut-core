@@ -6,7 +6,7 @@
 
 (include "./identity.neut")
 
-(inductive free ((g (hom tau tau)) (a tau))
+(data free ((g (hom tau tau)) (a tau))
   (leaf
     ((_ a))
     (free g a))

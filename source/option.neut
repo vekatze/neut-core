@@ -6,7 +6,7 @@
 
 (section option)
 
-(inductive option ((a tau))
+(data option ((a tau))
   (none ()
     (option a))
   (some ((x a))

@@ -6,7 +6,7 @@
 
 (section coproduct)
 
-(inductive coproduct
+(data coproduct
   ((e tau)
    (a tau))
   (left ((_ e))

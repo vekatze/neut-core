@@ -1,128 +1,251 @@
-(notation (recursive-0 f e)
-  (f e))
+(enum top unit)
 
-(notation (recursive-0 f e e+)
-  ((splice (f e)) (splice (recursive-0 f e+))))
+(enum bool true false)
 
-(notation (recursive-1 f k e)
-  (f k e))
+(let define-meta-function
+  (lambda (f args body)
+    `(let #f (fix #f #args #body))))
 
-(notation (recursive-1 f k e e+)
-  ((splice (f k e)) (splice (recursive-1 f k e+))))
+(auto-quote define-meta-function)
 
-(notation (with-erasure-base k e)
-  ((erase (k) e)))
+(let define-meta-function+
+  (lambda (f args body)
+    `(let #f (fix+ #f #args #body))))
 
-(notation (with-erasure k e+)
-  (splice (recursive-1 with-erasure-base k e+)))
+(auto-quote define-meta-function+)
 
-(notation type
+(define-meta-function if (cond on-true on-false)
+  (switch cond
+    (bool.true ,on-true)
+    (bool.false ,on-false)))
+
+(define-meta-function map (f xs)
+  (if (is-nil xs)
+    'xs
+    '(cons (f (head xs)) (map f (tail xs)))))
+
+(define-meta-function append (xs ys)
+  (if (is-nil xs)
+    'ys
+    '(cons (head xs) (append (tail xs) ys))))
+
+(define-meta-function define-macro-internal (f body)
+  `(statement
+     (let #f #body)
+     (auto-quote #f)))
+
+(define-meta-function+ define-macro (f rest)
+  (if (is-nil (tail rest))
+    '(define-macro-internal f
+       (head rest))
+    '(define-macro f
+       `(fix #f #(head rest) #(head (tail rest))))))
+
+(auto-quote define-macro)
+
+(define-meta-function define-macro+ (f args body)
+  (define-macro-internal f
+    `(fix+ #f #args #body)))
+
+(auto-quote define-macro+)
+
+;
+; foundational macros
+;
+
+(define-macro tau `tau)
+
+(define-macro * `*)
+
+; fixme: int, floatを対象言語に落とす方法を考える。たぶんleaf/nodeの一種として読むようにしてやればいいけど。
+; （というかメタ言語にint/floatっているか？リストについての再帰でよくね）
+
+(define-macro Π (args body)
+  `(Π #args #body))
+
+; (define-macro Π-introduction (args body)
+;   `(Π-introduction #args #body))
+
+; こっちが正解だった〜。はい。
+; シンボルはシンボル自身に解決させましょうね。
+(define-macro Π-introduction
+  `Π-introduction)
+
+(define-macro+ Π-elimination (fun args)
+  (append `(Π-elimination #fun) args))
+
+; fixme: 対象言語と「fix」が名前で被っているのをどうにかする。
+(define-macro fix-low (self args body)
+  `(fix #self #args #body))
+
+; (fix-low foo bar buz)
+
+(define-macro f16 (x)
+  `(f16 #x))
+
+(define-macro f32 (x)
+  `(f32 #x))
+
+(define-macro f64 (x)
+  `(f64 #x))
+
+; enum-introって構文としているう？
+(define-macro+ enum-elimination (value clauses)
+  (append `(enum-elimination #value) clauses))
+
+(define-macro array (dom kind)
+  `(array #dom #kind))
+
+(define-macro+ array-introduction (kind values)
+  (append `(array-introduction #kind) values))
+
+(define-macro array-elimination (kind xts arr cont)
+  `(array-elimination #kind #xts #arr #cont))
+
+(define-macro+ struct (kinds)
+  (append `(struct) kinds))
+
+; kes = ((kind-1 term-1) ... (kind-n term-n))
+(define-macro+ struct-introduction (kes)
+  (append `(struct-introduction) kes))
+
+(define-macro struct-elimination (xts e1 e2)
+  `(struct-elimination #xts #e1 #e2))
+
+(define-macro question (e)
+  `(question #e))
+
+(define-macro erase (mxs body)
+  `(erase #mxs #body))
+
+(define-macro irreducible (e)
+  `(irreducible #e))
+
+(define-macro+ with (rest)
+  (append `(with) rest))
+
+;
+; auxiliary macros
+;
+
+; (Π-elimination (Π-introduction ((x1 A1) (x2 A2)) FUN_BODY) arg-1 (some-computation aaa))
+
+; tauはすでに定義してあるのでこう書ける
+(define-macro type
   tau)
 
-(notation universe
+(define-macro universe
   tau)
 
-(notation forall
+(define-macro forall
   Π)
 
-(notation Pi
+(define-macro Pi
   Π)
 
-(notation switch
-  enum-elimination)
+; fixme: switchでの名前の衝突
+; (notation switch
+;   enum-elimination)
 
-(notation lambda
+; fixme: lambdaでの名前の衝突
+; (notation lambda
+;   Π-introduction)
+
+(define-macro λ
   Π-introduction)
 
-(notation λ
+; (λ foo bar)
+
+(define-macro witness (t e)
+  `((#λ ((x #t)) x) #e))
+
+(define-meta-function hom-internal (ts)
+  (if (is-nil (tail ts))
+    '(head ts)
+    '`(Π ((_ #(head ts))) #(hom-internal (tail ts)))))
+
+(define-macro+ hom (ts)
+  (hom-internal ts))
+
+(define-macro theorem (x t e)
+  `(literal (let (#x #t) #e)))
+
+(define-macro assume
   Π-introduction)
 
-(notation (witness t e)
-  ((λ ((x t)) x) e))
+; (notation (if b e1 e2)
+;   (switch b
+;     (bool.true
+;       e1)
+;     (bool.false
+;       e2)))
 
-(notation (hom t)
-  t)
+(define-meta-function+ define (f rest)
+  (if (is-nil (tail rest))
+    '`(literal (let #f #(head rest)))
+    '(define f
+       `(fix #f #(head rest) #(head (tail rest))))))
 
-(notation (hom t rest+)
-  (Π
-    ((_ t))
-    (hom rest+)))
+; こうやってunquoteを明示的に入れてやればwitness部分は展開できるが。
+; これの問題は、マクロを展開したい場所ではunquoteを外さないといけないってところ。
+; まあ、witnessは、対象言語の関数として実装すればそれでいいという話はあるが。
+; ただ、そうはいっても、たとえばdefineの中でbeginをつかうようなコードがあるとして、そこが展開されないってのは寒いでしょ。
+; evaluateか〜？
 
-(notation (theorem x t e)
-  (let (x t) e))
+(define-macro sigma (xts t)
+  `(Π ((Z tau)
+       (_ (Π #(append xts `((_ #t))) Z)))
+      Z))
 
-(notation assume
-  Π-introduction)
+(auto-quote Σ)
 
-(notation (if b e1 e2)
-  (switch b
-    (bool.true
-      e1)
-    (bool.false
-      e2)))
+; productも綺麗に書けた。メタ言語でのmapがうまく刺さった。
 
-(notation (define f xts e)
-  (let f (fix f xts e)))
+(define-meta-function product-internal (ts)
+  `(Π ((Z tau)
+       (_ (Π #(map (lambda (t) `(_ #t)) ts) Z)))
+      Z))
 
-(notation (define f e)
-  (let f e))
+(define-macro+ product (ts)
+  (product-internal ts))
 
-(notation (to-type-list-base t)
-  ((_ t)))
+(define-meta-function sigma-introduction-internal (es)
+  `(lambda
+     ((internal.Z tau)
+      (internal.k (Π #(map (lambda (x) `(_ *)) es) internal.Z)))
+     #(append `(internal.k) es)))
 
-(notation (to-type-list t+)
-  (recursive-0 to-type-list-base t+))
+(define-macro+ sigma-introduction (es)
+  (sigma-introduction-internal es))
 
-(notation (with-erasure-plus-base k (x t))
-  ((x (erase (k) t))))
+(define-meta-function sigma-elimination (xts e1 e2)
+  `(#e1 * (lambda #xts #e2)))
 
-(notation (with-erasure-plus k xt+)
-  (recursive-1 with-erasure-plus-base k xt+))
-
-(notation (sigma (xt+) t)
-  (Π
-    ((internal.sigma-tau tau)
-     (_ (Π (with-erasure-plus internal.sigma-tau xt+ (_ t)) internal.sigma-tau)))
-    internal.sigma-tau))
-
-(notation ∑
-  sigma)
-
-(notation (product t+)
-  (Π
-    ((internal.sigma-tau tau)
-     (_ (Π (to-type-list (with-erasure internal.sigma-tau t+)) internal.sigma-tau)))
-    internal.sigma-tau))
-
-(notation (to-asterisk-list-base e)
-  ((_ *)))
-
-(notation (to-asterisk-list t+)
-  (recursive-0 to-asterisk-list-base t+))
-
-(notation (sigma-introduction)
-  (λ
-    ((internal.sigma-tau tau)
-     (internal.sigma-lambda (Π () internal.sigma-tau)))
-    (internal.sigma-lambda)))
-
-(notation (sigma-introduction e+)
-  (λ
-    ((internal.sigma-tau tau)
-     (internal.sigma-lambda (Π (to-asterisk-list e+) internal.sigma-tau)))
-    (internal.sigma-lambda (with-erasure internal.sigma-lambda e+))))
-
-(notation (sigma-elimination () e1 e2)
-  (e1 * (λ () e2)))
-
-(notation (sigma-elimination (xt+) e1 e2)
-  (e1 * (λ (xt+) e2)))
-
-(notation tuple
+(let tuple
   sigma-introduction)
 
-(notation construct
+(let construct
   sigma-introduction)
 
-(notation (destruct e xts rest+)
-  (sigma-elimination xts e (with identity.bind rest+)))
+(define-macro+ destruct (e xts rest)
+  (sigma-elimination xts e (append `(with identity.bind) rest)))
+
+; ; ……というかさ。
+; ; 対象言語でたとえば
+; ; (define some-function (x) ...)
+; ; みたいなものを定義したとするじゃん。で、これを
+; ; (some-function foo)
+; ; みたいに書いたとき、でも、実際には、これはメタ言語のものとして読まれてしまうよね？
+; ; それって問題では？
+; ; ……まあ、毎回letをするようにしていればいいのか。
+; ; 必要ならば、同じことは(let _ foo)でもできるわけであって。
+; ; (execute ...) みたいなstatementを作ればいいだけではある。
+; ; (main ...)とかでもいい。
+; ; あるいは、まあ、束縛されてないのが先頭に来ていたらtreeとして流す、とかでも。
+
+; (define-macro execute (binder e)
+;   `(let-internal _ (with #binder #e)))
+
+; ; こういう感じの。
+; (execute identity.bind
+;   (print "foo"))

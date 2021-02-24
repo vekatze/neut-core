@@ -333,7 +333,6 @@
         (if-meta (leaf-equal (nth 0 e) `erase)
           (begin-meta
             (let erased-vars (tail e))
-            (dump `(erase #erased-vars #(with-internal bind rest)))
             `(erase #erased-vars #(with-internal bind rest)))
           (if-meta (leaf-equal (nth 0 e) `let)
             (begin-meta

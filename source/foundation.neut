@@ -4,7 +4,7 @@
 
 (include "./notation.neut")
 
-(constant unsafe.cast
+(declare-constant unsafe.cast
   (Π ((A tau) (B tau) (_ A)) B))
 
 (define unsafe.cast-to

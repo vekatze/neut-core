@@ -2,15 +2,15 @@
 
 (section os)
 
-(constant file-descriptor tau)
+(declare-constant file-descriptor tau)
 
-(constant stdin file-descriptor)
+(declare-constant stdin file-descriptor)
 
-(constant stdout file-descriptor)
+(declare-constant stdout file-descriptor)
 
-(constant stderr file-descriptor)
+(declare-constant stderr file-descriptor)
 
-(constant read
+(declare-constant read
   (Π
     ((A i64)
      (in file-descriptor)
@@ -18,7 +18,7 @@
      (len i64))
     (product (array A i8) i64)))
 
-(constant write
+(declare-constant write
   (Π
     ((A i64)
      (out file-descriptor)
@@ -26,13 +26,13 @@
      (len i64))
     (product (array A i8) i64)))
 
-(constant exit
+(declare-constant exit
   (Π
     ((A tau)
      (status i64))
     A))
 
-(constant open
+(declare-constant open
   (Π
     ((A i64)
      (path (array A i8))
@@ -40,12 +40,12 @@
      (mode i64))
     (product (array A i8) file-descriptor)))
 
-(constant close
+(declare-constant close
   (Π
     ((_ file-descriptor))
     i64))
 
-(constant fork
+(declare-constant fork
   (Π
     ()
     i64))
@@ -71,7 +71,7 @@
     i64   ; ru_nvcsw;          voluntary context switches
     i64)) ; ru_nivcsw;         involuntary context switches
 
-(constant wait4
+(declare-constant wait4
   (Π
     ((d i64)
      (stat-loc (array 1 i64))
@@ -104,35 +104,35 @@
     i32   ; IP6 address
     i32)) ; scope zone index
 
-(constant bind
+(declare-constant bind
   (Π
     ((sock i64)
      (address sockaddr)
      (sock-len i64))
     (product sockaddr i64)))
 
-(constant accept
+(declare-constant accept
   (Π
     ((sock i64)
      (address sockaddr)
      (address-len (array 1 i64)))
     (product sockaddr (array 1 i64) i64)))
 
-(constant connect
+(declare-constant connect
   (Π
     ((sock i64)
      (address sockaddr)
      (address-len i64))
     (product sockaddr i64)))
 
-(constant socket
+(declare-constant socket
   (Π
     ((domain i64)
      (socket-type i64)
      (protocol i64))
     i64))
 
-(constant listen
+(declare-constant listen
   (Π
     ((sock i64)
      (backlog i64))

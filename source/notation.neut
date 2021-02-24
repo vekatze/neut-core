@@ -137,8 +137,11 @@
 ; statements
 ;
 
-(define-macro constant (name t)
-  `(constant #name #t))
+; (define-macro constant (name t)
+;   `(constant #name #t))
+
+(define-macro declare-constant (name t)
+  `(declare-constant #name #t))
 
 (define-macro-variadic declare-enum (rest)
   (append `(declare-enum) rest))

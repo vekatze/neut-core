@@ -320,6 +320,8 @@
     `(#(take-borrowed-vars xs)
       #(map (lambda-meta (x) (drop-char `& x)) xs))))
 
+; fixme: eraseも処理できるようにしましょう
+; fixme: condで書き直したほうがわかりやすい。condをコンパイラ内部で定義するとよい？
 (define-meta-function with-internal (bind es)
   (if-meta (is-nil (tail es))
     (head es)
@@ -355,3 +357,6 @@
 
 (define-macro-variadic destruct (e xts rest)
   `(sigma-elimination #xts #e #(with-internal `identity.bind rest)))
+
+(define-macro-variadic reduce (es)
+  (with-internal `identity.bind es))

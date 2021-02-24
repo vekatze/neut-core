@@ -10,28 +10,28 @@
 
 (section identity)
 
-(let map
+(define map
   (witness (functor-type identity)
     (lambda (_ _ f value)
       (f value))))
 
-(let return
+(define return
   (witness (return-type identity)
     (lambda (_ x)
       x)))
 
-(let bind
+(define bind
   (witness (bind-type identity)
     (lambda (_ _ comp k)
       (k comp))))
 
-(let as-functor
+(define as-functor
   (witness (functor identity)
     (functor.new
       identity
       identity.map)))
 
-(let as-monad
+(define as-monad
   (witness (monad identity)
     (monad.new
       identity

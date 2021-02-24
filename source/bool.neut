@@ -2,7 +2,7 @@
 
 (section bool)
 
-(enum bool
+(declare-enum bool
   (true 1)
   (false 0))
 

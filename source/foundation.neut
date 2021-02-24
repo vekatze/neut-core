@@ -19,8 +19,14 @@
   (witness a
     (os.exit a 1)))
 
-(notation admit
-  (admit-internal *))
+(define-macro admit
+  `(admit-internal *))
 
-(notation ?admit
-  (question admit))
+(define-macro ?admit
+  `(question admit))
+
+; (notation admit
+;   (admit-internal *))
+
+; (notation ?admit
+;   (question admit))

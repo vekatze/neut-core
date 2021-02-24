@@ -159,20 +159,6 @@
 ;       (append `(data #(head rest) #(head (tail rest))) (tail (tail rest)))
 ;       (append `))))
 
-; (data hoge ((x1 A1) (x2 A2)) foo bar buz)
-
-; (data ((hoge huga)) (foo bar))
-
-; (data free ((g (hom tau tau)) (a tau))
-;   (leaf
-;     ((_ a))
-;     (free g a))
-;   (node
-;     ((b tau)
-;      (_ (g b))
-;      (_ (hom b (free g a))))
-;     (free g a)))
-
 ; (define-macro let (name e)
 ;   `(let #name #e))
 
@@ -279,9 +265,6 @@
 (define-macro construct
   `sigma-introduction)
 
-(define-macro-variadic destruct (e xts rest)
-  `(sigma-elimination #xts #e #(append `(with identity.bind) rest)))
-
 (define-meta-function and (b1 b2)
   (if-meta b1
     (if-meta b2
@@ -310,133 +293,8 @@
     bool.false
     bool.true))
 
-; (define-meta-function with-internal (bind es)
-;   (if-meta (is-nil (tail es))
-;     (head es)
-;     (if-meta (not (is-node (head es)))
-;       `(#bind * * #(head es)
-;         (λ (_) #(with-internal bind (tail es))))
-;       (if-meta (is-nil (head es))
-;         `(#bind * * #(head es)
-;           (λ (_) #(with-internal bind (tail es))))
-;         (if-meta (leaf-equal (head (head es)) `let)
-;           `(#bind * * #(head (tail (tail (head es))))
-;             (λ (#(head (tail (head es)))) #(with-internal bind (tail es))))
-;           `(#bind * * #(head es)
-;             (λ (_) #(with-internal bind (tail es)))))))))
-; (define-meta-function begin-internal (es)
-;   (if-meta (is-nil (tail es))
-;     (head es)
-;     (if-meta (not (is-node (head es)))
-;       ((lambda-meta (_) (begin-internal (tail es)))
-;         (head es))
-;       (if-meta (leaf-equal (head (head es)) `let)
-;         ((lambda-meta (_) (begin-internal (tail es)))
-;          (head (tail (tail (head es)))))
-;         ((lambda-meta (_) (begin-internal (tail es)))
-;          (head es))))))
-
-; (define-meta-function begin-internal (es)
-;   (if-meta (is-nil (tail es))
-;     (head es)
-;     (if-meta (not (is-node (head es)))
-;       ((lambda-meta (_) (begin-internal (tail es)))
-;         (head es))
-;       (if-meta (leaf-equal (head (head es)) `let)
-;         ((lambda-meta (#(head (tail (head es)))) (begin-internal (tail es)))
-;          (head (tail (tail (head es)))))
-;         ((lambda-meta (_) #(begin-internal (tail es)))
-;          (head es))))))
-
-; (evaluate `((lambda-meta (x) `(#x #x)) `foo))
-
-
-; (define-meta-function begin-internal (es)
-;   (if-meta (is-nil (tail es))
-;     (head es)
-;     (if-meta (not (is-node (head es)))
-;       `((lambda-meta (_) #(begin-internal (tail es)))
-;         #(head es))
-;       (if-meta (leaf-equal (head (head es)) `let)
-;         `((lambda-meta (#(head (tail (head es)))) #(begin-internal (tail es)))
-;           #(head (tail (tail (head es)))))
-;         `((lambda-meta (_) #(begin-internal (tail es)))
-;           #(head es))))))
-
-; (define-macro-variadic begin (hoge)
-;   (evaluate (begin-internal hoge)))
-
-; (begin
-;   (let x `foo)
-;   (let y
-;     (begin
-;       (let p `x)
-;       (let q ``bar)
-;       ``(##p ##q)))
-;   (let z `buz)
-;   `(#x #y #z))
-
 (define-meta-function identity-bind (x k)
   (k x))
-
-; (with-meta identity-bind
-;   (let x `foo)
-;   (let y
-;     (with-meta identity-bind
-;       (let p x)
-;       (let q `hoge)
-;       `(#p #q)))
-;   `(#x #y))
-
-; (begin-meta
-;   (let x `foo)
-;   (let y
-;     (begin-meta
-;       (let p x)
-;       (let q `hoge)
-;       `(#p #q)))
-;   `(#x #y))
-
-; (begin-meta
-;   (let x `fooOOOOOOOOO)
-;   (let y
-;     (let p x) ; letはネスト可能
-;     (let q `hoge)
-;     `(#p #q))
-;   `(#x #y))
-
-
-; (leaf-uncons `foo-uncons?)
-
-; (leaf-uncons `&bar-hoge)
-; ~> (foo (foo bar) buz)
-
-; たとえば次のように書くことができない
-; (begin
-;   (let x `foo)
-;   (let y
-;     (begin
-;       (let p x)
-;       (let q `bar)
-;       `(#p #q)))
-;   (let z `buz)
-;   `(#x #y #z))
-
-; tree-matchみたいなのがあると便利そうだな。
-; (tree-match (let foo bar)
-;   ((let x e) ...))
-; みたいな。引数のところにキーワードになるやつをとる。……まあ、複雑すぎる気もする。
-; たんに、
-;  (tree-match e e1 ((x xs) e2))
-; みたいなのがあればいいか。前者はnilのときのやつ、後者はconsのときのやつ、みたいな。
-
-; つぎは、えーと？メタレベルのfilterとかがほしい？
-; 書いた。ちゃんと動いた。
-; こんどはシンボルを切るようなやつ。&foo ~> (&, foo)みたいなやつ。unconsだね。
-; leaf-unconsみたいなのがほしい。
-; applyであることの判定をしたり。(let x (f x1 ... xn))みたいなのがポイント。
-; で、headが&のやつだけをあつめてくる。
-; そしたらそれを(append list `(#var-name))みたいにして、これで引数リストが完成する。
 
 (define-meta-function is-borrowed-var (x)
   (if-meta (is-node x)
@@ -480,14 +338,20 @@
             (let var-list (append borrow-var-list `(#var-name)))
             (let let-body' (append (init let-body) `(#(nth 1 borrow-info))))
             (let s (new-symbol))
+            ; (dump borrow-var-list)
+            ; (dump var-list)
+            ; (dump let-body')
+            ; (dump (with-internal bind rest))
             (if-meta (is-nil borrow-var-list)
-            `(#bind * * #(with-internal bind (tail (tail e))) (λ (#var-name) #(with-internal bind rest)))
-            (with-internal bind
-              `((let #s #let-body')
-                (sigma-elimination #var-list #s #(with-internal bind rest))))))
+              `(#bind * * #(with-internal bind let-body) (λ (#var-name) #(with-internal bind rest)))
+              (with-internal bind
+                `(#(append `(let #s) let-body')
+                  ;(let #s #let-body')
+                  (sigma-elimination #var-list #s #(with-internal bind rest))))))
           `(#bind * * #e (λ (_) #(with-internal bind rest))))))))
-
-(with-internal `some-binder `(foo bar buz qux))
 
 (define-macro-variadic with (bind es)
   (with-internal bind es))
+
+(define-macro-variadic destruct (e xts rest)
+  `(sigma-elimination #xts #e #(with-internal `identity.bind rest)))

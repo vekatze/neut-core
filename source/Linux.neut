@@ -73,7 +73,7 @@
 
 (constant wait4
   (Π
-    ((Πd i64)
+    ((d i64)
      (stat-loc (array 1 i64))
      (options i64)
      (usage rusage))

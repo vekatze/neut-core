@@ -90,13 +90,13 @@
 (define-macro fix (self args body)
   `(fix #self #args #body))
 
-(define-macro f16 (x)
+(define-macro as-f16 (x)
   `(f16 #x))
 
-(define-macro f32 (x)
+(define-macro as-f32 (x)
   `(f32 #x))
 
-(define-macro f64 (x)
+(define-macro as-f64 (x)
   `(f64 #x))
 
 (define-macro-variadic enum-elimination (value clauses)

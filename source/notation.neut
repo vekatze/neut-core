@@ -14,20 +14,25 @@
 
 (auto-quote define-meta-function+)
 
+(define-meta-function force (f)
+  (f))
+
 (define-meta-function if (cond on-true on-false)
-  (switch cond
-    (bool.true ,on-true)
-    (bool.false ,on-false)))
+  (switch (force cond)
+     (bool.true (force on-true))
+     (bool.false (force on-false))))
+
+(auto-thunk if)
 
 (define-meta-function map (f xs)
   (if (is-nil xs)
-    'xs
-    '(cons (f (head xs)) (map f (tail xs)))))
+     xs
+     (cons (f (head xs)) (map f (tail xs)))))
 
 (define-meta-function append (xs ys)
   (if (is-nil xs)
-    'ys
-    '(cons (head xs) (append (tail xs) ys))))
+     ys
+     (cons (head xs) (append (tail xs) ys))))
 
 (define-meta-function define-macro-internal (f body)
   `(statement
@@ -36,10 +41,10 @@
 
 (define-meta-function+ define-macro (f rest)
   (if (is-nil (tail rest))
-    '(define-macro-internal f
-       (head rest))
-    '(define-macro f
-       `(fix #f #(head rest) #(head (tail rest))))))
+    (define-macro-internal f
+      (head rest))
+    (define-macro f
+      `(fix #f #(head rest) #(head (tail rest))))))
 
 (auto-quote define-macro)
 
@@ -63,22 +68,17 @@
 (define-macro Π (args body)
   `(Π #args #body))
 
-; (define-macro Π-introduction (args body)
-;   `(Π-introduction #args #body))
-
-; こっちが正解だった〜。はい。
-; シンボルはシンボル自身に解決させましょうね。
-(define-macro Π-introduction
-  `Π-introduction)
+(define-macro Π-introduction (args body)
+  `(Π-introduction #args #body))
 
 (define-macro+ Π-elimination (fun args)
   (append `(Π-elimination #fun) args))
 
-; fixme: 対象言語と「fix」が名前で被っているのをどうにかする。
+; ; fixme: 対象言語と「fix」が名前で被っているのをどうにかする。
 (define-macro fix-low (self args body)
   `(fix #self #args #body))
 
-; (fix-low foo bar buz)
+; ; (fix-low foo bar buz)
 
 (define-macro f16 (x)
   `(f16 #x))
@@ -89,7 +89,6 @@
 (define-macro f64 (x)
   `(f64 #x))
 
-; enum-introって構文としているう？
 (define-macro+ enum-elimination (value clauses)
   (append `(enum-elimination #value) clauses))
 
@@ -125,12 +124,43 @@
   (append `(with) rest))
 
 ;
+; statements
+;
+
+(define-macro constant (name t)
+  `(constant #name #t))
+
+(define-macro end (arg)
+  `(end #arg))
+
+; (define-macro data (name xts rest)
+;   `(data #name #xts #rest))
+
+; (define-macro let (name t e)
+;   `(let-low #name #t #e))
+
+
+; このときはletに対してaqをおこなってしまう。よくない？
+; (let x `tau)
+
+; x
+
+(define-macro+ record (name xts rest)
+  `(record #name #xts #rest))
+
+(define-macro section (arg)
+  `(section #arg))
+
+(define-macro use (arg)
+  `(use #arg))
+
+(define-macro unuse (arg)
+  `(unuse #arg))
+
+;
 ; auxiliary macros
 ;
 
-; (Π-elimination (Π-introduction ((x1 A1) (x2 A2)) FUN_BODY) arg-1 (some-computation aaa))
-
-; tauはすでに定義してあるのでこう書ける
 (define-macro type
   tau)
 
@@ -154,52 +184,44 @@
 (define-macro λ
   Π-introduction)
 
-; (λ foo bar)
-
 (define-macro witness (t e)
-  `((#λ ((x #t)) x) #e))
+  `(#(λ `((x #t)) `x) #e))
 
 (define-meta-function hom-internal (ts)
   (if (is-nil (tail ts))
-    '(head ts)
-    '`(Π ((_ #(head ts))) #(hom-internal (tail ts)))))
+     (head ts)
+     (Π `((_ #(head ts))) (hom-internal (tail ts)))))
 
 (define-macro+ hom (ts)
   (hom-internal ts))
 
 (define-macro theorem (x t e)
-  `(literal (let (#x #t) #e)))
+  `(let-low (#x #t) #e))
 
 (define-macro assume
   Π-introduction)
 
-; (notation (if b e1 e2)
-;   (switch b
-;     (bool.true
-;       e1)
-;     (bool.false
-;       e2)))
+(define-macro if-obj (cond on-true on-false)
+  `(switch #cond
+      (bool.true #on-true)
+      (bool.false #on-false)))
 
-(define-meta-function+ define (f rest)
+(define-macro+ define (f rest)
   (if (is-nil (tail rest))
-    '`(literal (let #f #(head rest)))
-    '(define f
+     `(literal (let #f #(head rest)))
+     (define f
        `(fix #f #(head rest) #(head (tail rest))))))
 
-; こうやってunquoteを明示的に入れてやればwitness部分は展開できるが。
-; これの問題は、マクロを展開したい場所ではunquoteを外さないといけないってところ。
-; まあ、witnessは、対象言語の関数として実装すればそれでいいという話はあるが。
-; ただ、そうはいっても、たとえばdefineの中でbeginをつかうようなコードがあるとして、そこが展開されないってのは寒いでしょ。
-; evaluateか〜？
+; fixme: int, floatを対象言語に落とす方法を考える。たぶんleaf/nodeの一種として読むようにしてやればいいけど。
+; （というかメタ言語にint/floatっているか？リストについての再帰でよくね）
 
 (define-macro sigma (xts t)
-  `(Π ((Z tau)
-       (_ (Π #(append xts `((_ #t))) Z)))
-      Z))
+  `(forall ((Z tau)
+            (_ (forall #(append xts `((_ #t))) Z)))
+           Z))
 
-(auto-quote Σ)
-
-; productも綺麗に書けた。メタ言語でのmapがうまく刺さった。
+(define-macro exists
+  `sigma)
 
 (define-meta-function product-internal (ts)
   `(Π ((Z tau)
@@ -218,34 +240,23 @@
 (define-macro+ sigma-introduction (es)
   (sigma-introduction-internal es))
 
-(define-meta-function sigma-elimination (xts e1 e2)
+(define-macro sigma-elimination (xts e1 e2)
   `(#e1 * (lambda #xts #e2)))
 
-(let tuple
-  sigma-introduction)
+(sigma-elimination (x1 x2 x3) bar buz)
 
-(let construct
-  sigma-introduction)
+(define-macro tuple
+  `sigma-introduction)
+
+(define-macro construct
+  `sigma-introduction)
 
 (define-macro+ destruct (e xts rest)
-  (sigma-elimination xts e (append `(with identity.bind) rest)))
+  `(sigma-elimination #xts #e #(append `(with identity.bind) rest)))
 
-; ; ……というかさ。
-; ; 対象言語でたとえば
-; ; (define some-function (x) ...)
-; ; みたいなものを定義したとするじゃん。で、これを
-; ; (some-function foo)
-; ; みたいに書いたとき、でも、実際には、これはメタ言語のものとして読まれてしまうよね？
-; ; それって問題では？
-; ; ……まあ、毎回letをするようにしていればいいのか。
-; ; 必要ならば、同じことは(let _ foo)でもできるわけであって。
-; ; (execute ...) みたいなstatementを作ればいいだけではある。
-; ; (main ...)とかでもいい。
-; ; あるいは、まあ、束縛されてないのが先頭に来ていたらtreeとして流す、とかでも。
-
-; (define-macro execute (binder e)
-;   `(let-internal _ (with #binder #e)))
-
-; ; こういう感じの。
-; (execute identity.bind
-;   (print "foo"))
+; (define fact (x)
+;   (witness i64
+;     (if-obj (int-le x 0)
+;       1
+;       (int-mul x (fact (int-sub x (if-obj a b c)))))))
+; これでよくね〜？

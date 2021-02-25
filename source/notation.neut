@@ -337,7 +337,8 @@
           (begin-meta
             (let erased-vars (tail e))
             `(erase #erased-vars #(with-internal bind rest)))
-          (if-meta (leaf-equal (nth 0 e) `let)
+          (if-meta (not (leaf-equal (nth 0 e) `let))
+            (with-internal bind (append `((let _ #e)) rest))
             (begin-meta
               (let var-name (nth 1 e))
               (let let-body (tail (tail e)))
@@ -347,17 +348,11 @@
               (let var-list (append borrow-var-list `(#var-name)))
               (let let-body' (append (init let-body) `(#(nth 1 borrow-info))))
               (let s (new-symbol))
-              ; (dump borrow-var-list)
-              ; (dump var-list)
-              ; (dump let-body')
-              ; (dump (with-internal bind rest))
               (if-meta (is-nil borrow-var-list)
                 `(#bind * * #(with-internal bind let-body) (λ (#var-name) #(with-internal bind rest)))
                 (with-internal bind
                   `(#(append `(let #s) let-body')
-                    ;(let #s #let-body')
-                    (sigma-elimination #var-list #s #(with-internal bind rest))))))
-            `(#bind * * #e (λ (_) #(with-internal bind rest)))))))))
+                    (sigma-elimination #var-list #s #(with-internal bind rest))))))))))))
 
 (define-macro-variadic with (bind es)
   (with-internal bind es))
@@ -367,3 +362,30 @@
 
 (define-macro-variadic reduce (es)
   (with-internal `identity.bind es))
+
+; ; (statement-meta
+; ;   (define id
+; ;     ((A tau)
+; ;      (x A))
+; ;     x)
+; ;   (reduce (i64.print (id i64 2)))
+; ;   (define id2
+; ;     ((A tau)
+; ;      (x A))
+; ;     x)
+; ;   )
+
+; ; (reduce (i64.print (id i64 10)))
+
+;   (define p
+;   ((str string))
+;   (witness i64
+;     (with identity.bind
+;       (let _
+;         (let _ (i64 100))
+;         (string.print &str)
+;         (string.print &str))
+;       (let _ (string.print &str))
+;       (let len (string.print &str))
+;       (erase str)
+;       len)))

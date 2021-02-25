@@ -2,69 +2,41 @@
 
 (declare-enum-meta bool true false)
 
-(let-meta define-meta-function
-  (lambda-meta (f args body)
-    `(let-meta #f (fix-meta #f #args #body))))
-(auto-quote define-meta-function)
-
-(let-meta define-meta-function-variadic
-  (lambda-meta (f args body)
-    `(let-meta #f (fix-meta-variadic #f #args #body))))
-(auto-quote define-meta-function-variadic)
-
-(define-meta-function force (f)
+(define-meta force (f)
   (f))
 
-(define-meta-function if-meta (cond on-true on-false)
+(define-meta if-meta (cond on-true on-false)
   (switch-meta (force cond)
     (bool.true (force on-true))
     (bool.false (force on-false))))
 (auto-thunk if-meta)
 
-(define-meta-function init (xs)
+(define-meta init (xs)
   (if-meta (is-nil (tail xs))
     `()
     (cons (head xs) (init (tail xs)))))
 
-(define-meta-function last (xs)
+(define-meta last (xs)
   (if-meta (is-nil (tail xs))
     (head xs)
     (last (tail xs))))
 
-(define-meta-function map (f xs)
+(define-meta map (f xs)
   (if-meta (is-nil xs)
     xs
     (cons (f (head xs)) (map f (tail xs)))))
 
-(define-meta-function filter (p xs)
+(define-meta filter (p xs)
   (if-meta (is-nil xs)
     xs
     (if-meta (p (head xs))
       (cons (head xs) (filter p (tail xs)))
       (filter p (tail xs)))))
 
-(define-meta-function append (xs ys)
+(define-meta append (xs ys)
   (if-meta (is-nil xs)
     ys
     (cons (head xs) (append (tail xs) ys))))
-
-(define-meta-function define-macro-internal (f body)
-  `(statement-meta
-     (let-meta #f #body)
-     (auto-quote #f)))
-
-(define-meta-function-variadic define-macro (f rest)
-  (if-meta (is-nil (tail rest))
-    (define-macro-internal f
-      (head rest))
-    (define-macro f
-      `(fix-meta #f #(head rest) #(head (tail rest))))))
-(auto-quote define-macro)
-
-(define-meta-function define-macro-variadic (f args body)
-  (define-macro-internal f
-    `(fix-meta-variadic #f #args #body)))
-(auto-quote define-macro-variadic)
 
 ;
 ; foundational macros
@@ -86,18 +58,8 @@
 (define-macro-variadic Π-elimination (fun args)
   (append `(Π-elimination #fun) args))
 
-; ; fixme: 対象言語と「fix」が名前で被っているのをどうにかする。でないとauto-quoteが誤爆する。
 (define-macro fix (self args body)
   `(fix #self #args #body))
-
-; (define-macro as-f16 (x)
-;   `(f16 #x))
-
-; (define-macro as-f32 (x)
-;   `(f32 #x))
-
-; (define-macro as-f64 (x)
-;   `(f64 #x))
 
 (define-macro-variadic enum-elimination (value clauses)
   (append `(enum-elimination #value) clauses))
@@ -130,15 +92,9 @@
 (define-macro irreducible (e)
   `(irreducible #e))
 
-; (define-macro-variadic with (rest)
-;   (append `(with) rest))
-
 ;
 ; statements
 ;
-
-; (define-macro constant (name t)
-;   `(constant #name #t))
 
 (define-macro declare-constant (name t)
   `(declare-constant #name #t))
@@ -154,16 +110,6 @@
 
 (define-macro-variadic data (rest)
   (append `(data) rest))
-
-; (define-macro-variadic data (rest)
-;   (if-meta (is-nil rest)
-;     `(data)
-;     (if-meta (is-leaf (head rest))
-;       (append `(data #(head rest) #(head (tail rest))) (tail (tail rest)))
-;       (append `))))
-
-; (define-macro let (name e)
-;   `(let #name #e))
 
 (define-macro-variadic define (f rest)
   (if-meta (is-nil (tail rest))
@@ -188,27 +134,29 @@
 ;
 
 (define-macro type
-  `tau)
+  tau)
 
 (define-macro universe
-  `type)
+  type)
 
 (define-macro forall
-  `Π)
+  Π)
 
 (define-macro Pi
-  `Π)
+  Π)
 
 (define-macro lambda
-  `Π-introduction)
+  Π-introduction)
 
 (define-macro λ
-  `Π-introduction)
+  Π-introduction)
 
 (define-macro witness (t e)
-  `(#(λ `((x #t)) `x) #e))
+  (begin-meta
+    (let sym (new-symbol))
+    `(#(λ `((#sym #t)) sym) #e)))
 
-(define-meta-function hom-internal (ts)
+(define-meta hom-internal (ts)
   (if-meta (is-nil (tail ts))
     (head ts)
     (Π `((_ #(head ts))) (hom-internal (tail ts)))))
@@ -220,69 +168,72 @@
   `(let (#x #t) #e))
 
 (define-macro assume
-  `Π-introduction)
+  Π-introduction)
 
 (define-macro switch
-  `enum-elimination)
+  enum-elimination)
 
 (define-macro if (cond on-true on-false)
-  `(switch #cond
-     (bool.true #on-true)
-     (bool.false #on-false)))
-
-; fixme: int, floatを対象言語に落とす方法を考える。たぶんleaf/nodeの一種として読むようにしてやればいいけど。
-; （というかメタ言語にint/floatっているか？リストについての再帰でよくね）
+  (switch cond
+    `(bool.true #on-true)
+    `(bool.false #on-false)))
 
 (define-macro sigma (xts t)
-  `(forall ((sigma-internal.Z tau)
-            (_ (forall #(append xts `((_ #t))) sigma-internal.Z)))
-           sigma-internal.Z))
-
+  (begin-meta
+    (let sym (new-symbol))
+    (forall `((#sym #tau)
+              (_ #(forall (append xts `((_ #t))) sym)))
+             sym)))
 
 (define-macro exists
-  `sigma)
+  sigma)
 
-(define-meta-function product-internal (ts)
-  `(Π ((sigma-internal.Z tau)
-       (_ (Π #(map (lambda-meta (t) `(_ #t)) ts) sigma-internal.Z)))
-      sigma-internal.Z))
+(define-meta product-internal (ts)
+  (begin-meta
+    (let sym (new-symbol))
+    (Π `((#sym #tau)
+         (_ #(Π (map (lambda-meta (t) `(_ #t)) ts) sym)))
+        sym)))
 
 (define-macro-variadic product (ts)
   (product-internal ts))
 
-(define-meta-function sigma-introduction-internal (es)
-  `(lambda
-     ((internal.Z tau)
-      (internal.k (Π #(map (lambda-meta (x) `(_ *)) es) internal.Z)))
-     #(append `(internal.k) es)))
+(define-meta sigma-introduction-internal (es)
+  (begin-meta
+    (let Z (new-symbol))
+    (let k (new-symbol))
+    (lambda
+      `((#Z #tau)
+        (#k #(Π (map (lambda-meta (x) `(_ *)) es) Z)))
+      (append `(#k) es))))
 
 (define-macro-variadic sigma-introduction (es)
   (sigma-introduction-internal es))
 
 (define-macro sigma-elimination (xts e1 e2)
-  `(#e1 * (lambda #xts #e2)))
+  `(#e1 * #(lambda xts e2)))
 
 (define-macro tuple
-  `sigma-introduction)
+  sigma-introduction)
 
 (define-macro construct
-  `sigma-introduction)
+  sigma-introduction)
 
-(define-meta-function and (b1 b2)
+(define-meta and (b1 b2)
   (if-meta b1
     (if-meta b2
       bool.true
       bool.false)
     bool.false))
 
-(define-meta-function or (b1 b2)
+(define-meta or (b1 b2)
   (if-meta b1
     bool.true
     (if-meta b2
       bool.true
       bool.false)))
 
-(define-meta-function xor (b1 b2)
+(define-meta xor (b1 b2)
   (if-meta b1
     (if-meta b2
       bool.false
@@ -291,23 +242,23 @@
       bool.true
       bool.false)))
 
-(define-meta-function not (b)
+(define-meta not (b)
   (if-meta b
     bool.false
     bool.true))
 
-(define-meta-function identity-bind (x k)
+(define-meta identity-bind (x k)
   (k x))
 
-(define-meta-function is-borrowed-var (x)
+(define-meta is-borrowed-var (x)
   (if-meta (is-node x)
     bool.false
     (leaf-equal `& (head (leaf-uncons x)))))
 
-(define-meta-function take-borrowed-vars (xs)
+(define-meta take-borrowed-vars (xs)
   (map (lambda-meta (x) (nth 1 (leaf-uncons x))) (filter is-borrowed-var xs)))
 
-(define-meta-function drop-char (ch x)
+(define-meta drop-char (ch x)
   (if-meta (is-node x)
     x
     (begin-meta
@@ -316,23 +267,22 @@
         (nth 1 c-rest)
         x))))
 
-(define-meta-function obtain-borrow-info (xs)
+(define-meta obtain-borrow-info (xs)
   (if-meta (is-leaf xs)
     `(()
       #xs)
     `(#(take-borrowed-vars xs)
       #(map (lambda-meta (x) (drop-char `& x)) xs))))
 
-; fixme: eraseも処理できるようにしましょう
 ; fixme: condで書き直したほうがわかりやすい。condをコンパイラ内部で定義するとよい？
-(define-meta-function with-internal (bind es)
+(define-meta with-internal (bind es)
   (if-meta (is-nil (tail es))
     (head es)
     (begin-meta
       (let e (head es))
       (let rest (tail es))
       (if-meta (is-leaf e)
-        `(#bind * * #e (λ (_) #(with-internal bind rest)))
+        `(#bind * * #e #(λ `(_) (with-internal bind rest)))
         (if-meta (leaf-equal (nth 0 e) `erase)
           (begin-meta
             (let erased-vars (tail e))
@@ -349,43 +299,16 @@
               (let let-body' (append (init let-body) `(#(nth 1 borrow-info))))
               (let s (new-symbol))
               (if-meta (is-nil borrow-var-list)
-                `(#bind * * #(with-internal bind let-body) (λ (#var-name) #(with-internal bind rest)))
+                `(#bind * * #(with-internal bind let-body) #(λ `(#var-name) (with-internal bind rest)))
                 (with-internal bind
                   `(#(append `(let #s) let-body')
-                    (sigma-elimination #var-list #s #(with-internal bind rest))))))))))))
+                    #(sigma-elimination var-list s (with-internal bind rest))))))))))))
 
 (define-macro-variadic with (bind es)
   (with-internal bind es))
 
 (define-macro-variadic destruct (e xts rest)
-  `(sigma-elimination #xts #e #(with-internal `identity.bind rest)))
+  (sigma-elimination xts e (with-internal `identity.bind rest)))
 
 (define-macro-variadic reduce (es)
   (with-internal `identity.bind es))
-
-; ; (statement-meta
-; ;   (define id
-; ;     ((A tau)
-; ;      (x A))
-; ;     x)
-; ;   (reduce (i64.print (id i64 2)))
-; ;   (define id2
-; ;     ((A tau)
-; ;      (x A))
-; ;     x)
-; ;   )
-
-; ; (reduce (i64.print (id i64 10)))
-
-;   (define p
-;   ((str string))
-;   (witness i64
-;     (with identity.bind
-;       (let _
-;         (let _ (i64 100))
-;         (string.print &str)
-;         (string.print &str))
-;       (let _ (string.print &str))
-;       (let len (string.print &str))
-;       (erase str)
-;       len)))

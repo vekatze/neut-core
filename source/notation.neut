@@ -2,41 +2,41 @@
 
 (declare-enum-meta bool true false)
 
-(define-meta force (f)
+(define-macro force-meta (f)
   (f))
 
-(define-meta if-meta (cond on-true on-false)
-  (switch-meta (force cond)
-    (bool.true (force on-true))
-    (bool.false (force on-false))))
+(define-macro if-meta (cond on-true on-false)
+  (switch-meta (force-meta cond)
+    (bool.true (force-meta on-true))
+    (bool.false (force-meta on-false))))
 (auto-thunk if-meta)
 
-(define-meta init (xs)
+(define-macro init-meta (xs)
   (if-meta (is-nil (tail xs))
     `()
-    (cons (head xs) (init (tail xs)))))
+    (cons (head xs) (init-meta (tail xs)))))
 
-(define-meta last (xs)
+(define-macro last-meta (xs)
   (if-meta (is-nil (tail xs))
     (head xs)
-    (last (tail xs))))
+    (last-meta (tail xs))))
 
-(define-meta map (f xs)
+(define-macro map-meta (f xs)
   (if-meta (is-nil xs)
     xs
-    (cons (f (head xs)) (map f (tail xs)))))
+    (cons (f (head xs)) (map-meta f (tail xs)))))
 
-(define-meta filter (p xs)
+(define-macro filter-meta (p xs)
   (if-meta (is-nil xs)
     xs
     (if-meta (p (head xs))
-      (cons (head xs) (filter p (tail xs)))
-      (filter p (tail xs)))))
+      (cons (head xs) (filter-meta p (tail xs)))
+      (filter-meta p (tail xs)))))
 
-(define-meta append (xs ys)
+(define-macro append-meta (xs ys)
   (if-meta (is-nil xs)
     ys
-    (cons (head xs) (append (tail xs) ys))))
+    (cons (head xs) (append-meta (tail xs) ys))))
 
 ;
 ; foundational macros
@@ -56,29 +56,29 @@
   `(Π-introduction #args #body))
 
 (define-macro-variadic Π-elimination (fun args)
-  (append `(Π-elimination #fun) args))
+  (append-meta `(Π-elimination #fun) args))
 
 (define-macro fix (self args body)
   `(fix #self #args #body))
 
 (define-macro-variadic enum-elimination (value clauses)
-  (append `(enum-elimination #value) clauses))
+  (append-meta `(enum-elimination #value) clauses))
 
 (define-macro array (dom kind)
   `(array #dom #kind))
 
 (define-macro-variadic array-introduction (kind values)
-  (append `(array-introduction #kind) values))
+  (append-meta `(array-introduction #kind) values))
 
 (define-macro array-elimination (kind xts arr cont)
   `(array-elimination #kind #xts #arr #cont))
 
 (define-macro-variadic struct (kinds)
-  (append `(struct) kinds))
+  (append-meta `(struct) kinds))
 
 ; kes = ((kind-1 term-1) ... (kind-n term-n))
 (define-macro-variadic struct-introduction (kes)
-  (append `(struct-introduction) kes))
+  (append-meta `(struct-introduction) kes))
 
 (define-macro struct-elimination (xts e1 e2)
   `(struct-elimination #xts #e1 #e2))
@@ -100,7 +100,7 @@
   `(declare-constant #name #t))
 
 (define-macro-variadic declare-enum (rest)
-  (append `(declare-enum) rest))
+  (append-meta `(declare-enum) rest))
 
 (define-macro end (arg)
   `(end #arg))
@@ -109,7 +109,7 @@
 ;   `(data #name #xts #rest))
 
 (define-macro-variadic data (rest)
-  (append `(data) rest))
+  (append-meta `(data) rest))
 
 (define-macro-variadic define (f rest)
   (if-meta (is-nil (tail rest))
@@ -118,13 +118,13 @@
       `(fix #f #(head rest) #(head (tail rest))))))
 
 (define-macro-variadic record (name xts rest)
-  (append `(record #name #xts) rest))
+  (append-meta `(record #name #xts) rest))
 
 (define-macro section (arg)
   `(section #arg))
 
 (define-macro-variadic statement (stmt-list)
-  (append `(statement) stmt-list))
+  (append-meta `(statement) stmt-list))
 
 (define-macro use (arg)
   `(use #arg))
@@ -159,7 +159,7 @@
     (let sym (new-symbol))
     `(#(λ `((#sym #t)) sym) #e)))
 
-(define-meta hom-internal (ts)
+(define-macro hom-internal (ts)
   (if-meta (is-nil (tail ts))
     (head ts)
     (Π `((_ #(head ts))) (hom-internal (tail ts)))))
@@ -185,30 +185,30 @@
   (begin-meta
     (let sym (new-symbol))
     (forall `((#sym #tau)
-              (_ #(forall (append xts `((_ #t))) sym)))
+              (_ #(forall (append-meta xts `((_ #t))) sym)))
              sym)))
 
 (define-macro exists
   sigma)
 
-(define-meta product-internal (ts)
+(define-macro product-internal (ts)
   (begin-meta
     (let sym (new-symbol))
     (Π `((#sym #tau)
-         (_ #(Π (map (lambda-meta (t) `(_ #t)) ts) sym)))
+         (_ #(Π (map-meta (lambda-meta (t) `(_ #t)) ts) sym)))
         sym)))
 
 (define-macro-variadic product (ts)
   (product-internal ts))
 
-(define-meta sigma-introduction-internal (es)
+(define-macro sigma-introduction-internal (es)
   (begin-meta
     (let Z (new-symbol))
     (let k (new-symbol))
     (lambda
       `((#Z #tau)
-        (#k #(Π (map (lambda-meta (x) `(_ *)) es) Z)))
-      (append `(#k) es))))
+        (#k #(Π (map-meta (lambda-meta (x) `(_ *)) es) Z)))
+      (append-meta `(#k) es))))
 
 (define-macro-variadic sigma-introduction (es)
   (sigma-introduction-internal es))
@@ -222,21 +222,21 @@
 (define-macro construct
   sigma-introduction)
 
-(define-meta and (b1 b2)
+(define-macro and-meta (b1 b2)
   (if-meta b1
     (if-meta b2
       bool.true
       bool.false)
     bool.false))
 
-(define-meta or (b1 b2)
+(define-macro or-meta (b1 b2)
   (if-meta b1
     bool.true
     (if-meta b2
       bool.true
       bool.false)))
 
-(define-meta xor (b1 b2)
+(define-macro xor-meta (b1 b2)
   (if-meta b1
     (if-meta b2
       bool.false
@@ -245,23 +245,23 @@
       bool.true
       bool.false)))
 
-(define-meta not (b)
+(define-macro not-meta (b)
   (if-meta b
     bool.false
     bool.true))
 
-(define-meta identity-bind (x k)
+(define-macro identity-bind-meta (x k)
   (k x))
 
-(define-meta is-borrowed-var (x)
+(define-macro is-borrowed-var-meta (x)
   (if-meta (is-node x)
     bool.false
     (leaf-equal `& (head (leaf-uncons x)))))
 
-(define-meta take-borrowed-vars (xs)
-  (map (lambda-meta (x) (nth 1 (leaf-uncons x))) (filter is-borrowed-var xs)))
+(define-macro take-borrowed-vars-meta (xs)
+  (map-meta (lambda-meta (x) (nth 1 (leaf-uncons x))) (filter-meta is-borrowed-var-meta xs)))
 
-(define-meta drop-char (ch x)
+(define-macro drop-char-meta (ch x)
   (if-meta (is-node x)
     x
     (begin-meta
@@ -270,15 +270,15 @@
         (nth 1 c-rest)
         x))))
 
-(define-meta obtain-borrow-info (xs)
+(define-macro obtain-borrow-info-meta (xs)
   (if-meta (is-leaf xs)
     `(()
       #xs)
-    `(#(take-borrowed-vars xs)
-      #(map (lambda-meta (x) (drop-char `& x)) xs))))
+    `(#(take-borrowed-vars-meta xs)
+      #(map-meta (lambda-meta (x) (drop-char-meta `& x)) xs))))
 
 ; fixme: condで書き直したほうがわかりやすい。condをコンパイラ内部で定義するとよい？
-(define-meta with-internal (bind es)
+(define-macro with-internal (bind es)
   (if-meta (is-nil (tail es))
     (head es)
     (begin-meta
@@ -290,21 +290,21 @@
           (begin-meta
             (let erased-vars (tail e))
             `(erase #erased-vars #(with-internal bind rest)))
-          (if-meta (not (leaf-equal (nth 0 e) `let))
-            (with-internal bind (append `((let _ #e)) rest))
+          (if-meta (not-meta (leaf-equal (nth 0 e) `let))
+            (with-internal bind (append-meta `((let _ #e)) rest))
             (begin-meta
               (let var-name (nth 1 e))
               (let let-body (tail (tail e)))
-              (let last-term (last let-body))
-              (let borrow-info (obtain-borrow-info last-term))
+              (let last-term (last-meta let-body))
+              (let borrow-info (obtain-borrow-info-meta last-term))
               (let borrow-var-list (nth 0 borrow-info))
-              (let var-list (append borrow-var-list `(#var-name)))
-              (let let-body' (append (init let-body) `(#(nth 1 borrow-info))))
+              (let var-list (append-meta borrow-var-list `(#var-name)))
+              (let let-body' (append-meta (init-meta let-body) `(#(nth 1 borrow-info))))
               (let s (new-symbol))
               (if-meta (is-nil borrow-var-list)
                 `(#bind * * #(with-internal bind let-body) #(λ `(#var-name) (with-internal bind rest)))
                 (with-internal bind
-                  `(#(append `(let #s) let-body')
+                  `(#(append-meta `(let #s) let-body')
                     #(sigma-elimination var-list s (with-internal bind rest))))))))))))
 
 (define-macro-variadic with (bind es)

@@ -2,9 +2,9 @@
 
 (section bool)
 
-(declare-enum bool
-  (true 1)
-  (false 0))
+; (declare-enum bool
+;   (true 1)
+;   (false 0))
 
 (define and
   and-i1)

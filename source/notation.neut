@@ -1,6 +1,10 @@
 (declare-enum top unit)
 
-(declare-enum bool true false)
+; (declare-enum bool true false)
+
+(declare-enum bool
+  (true 1)
+  (false 0))
 
 (define-macro force-meta (f)
   (f))

@@ -5,11 +5,11 @@
 (define-macro force-meta (f)
   (f))
 
-(define-macro if-meta (cond on-true on-false)
-  (switch-meta (force-meta cond)
-    (bool.true (force-meta on-true))
-    (bool.false (force-meta on-false))))
-(auto-thunk if-meta)
+; (define-macro if-meta (cond on-true on-false)
+;   (switch-meta (force-meta cond)
+;     (bool.true (force-meta on-true))
+;     (bool.false (force-meta on-false))))
+; (auto-thunk if-meta)
 
 (define-macro init-meta (xs)
   (if-meta (is-nil (tail xs))

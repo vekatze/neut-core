@@ -123,6 +123,9 @@
 (define-macro section (arg)
   `(section #arg))
 
+(define-macro-variadic statement (stmt-list)
+  (append `(statement) stmt-list))
+
 (define-macro use (arg)
   `(use #arg))
 

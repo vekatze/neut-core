@@ -16,8 +16,11 @@
   (witness top
     (with identity.bind
       (let char (array-introduction i8 value))
-      (os.write 1 os.stdout char 1)
+      ; (os.write 1 os.stdout char 1)
+      (syscall 1 i64 (arg-immediate os.stdout) (arg-array char) (arg-immediate (i64 1)))
       top.unit)))
+
+
 
 (define string.print
   ((str string))

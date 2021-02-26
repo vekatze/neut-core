@@ -79,6 +79,9 @@
 (define-macro question (e)
   `(question #e))
 
+(define-macro-variadic syscall (es)
+  (append-meta `(syscall) es))
+
 (define-macro irreducible (e)
   `(irreducible #e))
 

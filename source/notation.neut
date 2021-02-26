@@ -1,13 +1,8 @@
 (declare-enum top unit)
 
-; (declare-enum bool true false)
-
 (declare-enum bool
   (true 1)
   (false 0))
-
-(define-macro force-meta (f)
-  (f))
 
 (define-macro init-meta (xs)
   (if-meta (is-nil (tail xs))
@@ -84,9 +79,6 @@
 (define-macro question (e)
   `(question #e))
 
-; (define-macro erase (mxs body)
-;   `(erase #mxs #body))
-
 (define-macro irreducible (e)
   `(irreducible #e))
 
@@ -100,12 +92,6 @@
 (define-macro-variadic declare-enum (rest)
   (append-meta `(declare-enum) rest))
 
-(define-macro end (arg)
-  `(end #arg))
-
-; (define-macro data (name xts rest)
-;   `(data #name #xts #rest))
-
 (define-macro-variadic data (rest)
   (append-meta `(data) rest))
 
@@ -118,17 +104,8 @@
 (define-macro-variadic record (name xts rest)
   (append-meta `(record #name #xts) rest))
 
-(define-macro section (arg)
-  `(section #arg))
-
 (define-macro-variadic statement (stmt-list)
   (append-meta `(statement) stmt-list))
-
-(define-macro use (arg)
-  `(use #arg))
-
-(define-macro unuse (arg)
-  `(unuse #arg))
 
 ;
 ; auxiliary macros
@@ -284,26 +261,22 @@
       (let rest (tail es))
       (if-meta (is-leaf e)
         `(#bind * * #e #(λ `(_) (with-internal bind rest)))
-        (if-meta (leaf-equal (nth 0 e) `erase)
+        (if-meta (not-meta (leaf-equal (nth 0 e) `let))
+          (with-internal bind (append-meta `((let _ #e)) rest))
           (begin-meta
-            (let erased-vars (tail e))
-            `(erase #erased-vars #(with-internal bind rest)))
-          (if-meta (not-meta (leaf-equal (nth 0 e) `let))
-            (with-internal bind (append-meta `((let _ #e)) rest))
-            (begin-meta
-              (let var-name (nth 1 e))
-              (let let-body (tail (tail e)))
-              (let last-term (last-meta let-body))
-              (let borrow-info (obtain-borrow-info-meta last-term))
-              (let borrow-var-list (nth 0 borrow-info))
-              (let var-list (append-meta borrow-var-list `(#var-name)))
-              (let let-body' (append-meta (init-meta let-body) `(#(nth 1 borrow-info))))
-              (let s (new-symbol))
-              (if-meta (is-nil borrow-var-list)
-                `(#bind * * #(with-internal bind let-body) #(λ `(#var-name) (with-internal bind rest)))
-                (with-internal bind
-                  `(#(append-meta `(let #s) let-body')
-                    #(sigma-elimination var-list s (with-internal bind rest))))))))))))
+            (let var-name (nth 1 e))
+            (let let-body (tail (tail e)))
+            (let last-term (last-meta let-body))
+            (let borrow-info (obtain-borrow-info-meta last-term))
+            (let borrow-var-list (nth 0 borrow-info))
+            (let var-list (append-meta borrow-var-list `(#var-name)))
+            (let let-body' (append-meta (init-meta let-body) `(#(nth 1 borrow-info))))
+            (let s (new-symbol))
+            (if-meta (is-nil borrow-var-list)
+              `(#bind * * #(with-internal bind let-body) #(λ `(#var-name) (with-internal bind rest)))
+              (with-internal bind
+                `(#(append-meta `(let #s) let-body')
+                  #(sigma-elimination var-list s (with-internal bind rest)))))))))))
 
 (define-macro-variadic with (bind es)
   (with-internal bind es))

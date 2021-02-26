@@ -26,6 +26,9 @@
 ;      (len i64))
 ;     (product (array A i8) i64)))
 
+(define exit ((A tau) (status i64))
+  (syscall 60 A (arg-immediate status)))
+
 ; (declare-constant exit
 ;   (Π
 ;     ((A tau)

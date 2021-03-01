@@ -43,28 +43,28 @@
 ; （というかメタ言語にint/floatっているか？リストについての再帰でよくね）
 
 (define-macro Π (args body)
-  `(Π #args #body))
+  `(Π ,args ,body))
 
 (define-macro Π-introduction (args body)
-  `(Π-introduction #args #body))
+  `(Π-introduction ,args ,body))
 
 (define-macro-variadic Π-elimination (fun args)
-  (append-meta `(Π-elimination #fun) args))
+  (append-meta `(Π-elimination ,fun) args))
 
 (define-macro fix (self args body)
-  `(fix #self #args #body))
+  `(fix ,self ,args ,body))
 
 (define-macro-variadic enum-elimination (value clauses)
-  (append-meta `(enum-elimination #value) clauses))
+  (append-meta `(enum-elimination ,value) clauses))
 
 (define-macro array (dom kind)
-  `(array #dom #kind))
+  `(array ,dom ,kind))
 
 (define-macro-variadic array-introduction (kind values)
-  (append-meta `(array-introduction #kind) values))
+  (append-meta `(array-introduction ,kind) values))
 
 (define-macro array-elimination (kind xts arr cont)
-  `(array-elimination #kind #xts #arr #cont))
+  `(array-elimination ,kind ,xts ,arr ,cont))
 
 (define-macro-variadic struct (kinds)
   (append-meta `(struct) kinds))
@@ -74,23 +74,23 @@
   (append-meta `(struct-introduction) kes))
 
 (define-macro struct-elimination (xts e1 e2)
-  `(struct-elimination #xts #e1 #e2))
+  `(struct-elimination ,xts ,e1 ,e2))
 
 (define-macro question (e)
-  `(question #e))
+  `(question ,e))
 
-(define-macro-variadic syscall (es)
-  (append-meta `(syscall) es))
+; (define-macro-variadic syscall (es)
+;   (append-meta `(syscall) es))
 
 (define-macro irreducible (e)
-  `(irreducible #e))
+  `(irreducible ,e))
 
 ;
 ; statements
 ;
 
 (define-macro declare-constant (name t)
-  `(declare-constant #name #t))
+  `(declare-constant ,name ,t))
 
 (define-macro-variadic declare-enum (rest)
   (append-meta `(declare-enum) rest))
@@ -100,12 +100,12 @@
 
 (define-macro-variadic define (f rest)
   (if-meta (is-nil (tail rest))
-    `(let #f #(head rest))
+    `(let ,f ,(head rest))
     (define f
-      `(fix #f #(head rest) #(head (tail rest))))))
+      `(fix ,f ,(head rest) ,(head (tail rest))))))
 
-(define-macro-variadic record (name xts rest)
-  (append-meta `(record #name #xts) rest))
+; (define-macro-variadic record (name xts rest)
+;   (append-meta `(record ,name ,xts) rest))
 
 (define-macro-variadic statement (stmt-list)
   (append-meta `(statement) stmt-list))
@@ -135,18 +135,18 @@
 (define-macro witness (t e)
   (begin-meta
     (let sym (new-symbol))
-    `(#(λ `((#sym #t)) sym) #e)))
+    `(,(λ `((,sym ,t)) sym) ,e)))
 
 (define-macro hom-internal (ts)
   (if-meta (is-nil (tail ts))
     (head ts)
-    (Π `((_ #(head ts))) (hom-internal (tail ts)))))
+    (Π `((_ ,(head ts))) (hom-internal (tail ts)))))
 
 (define-macro-variadic hom (ts)
   (hom-internal ts))
 
 (define-macro theorem (x t e)
-  `(let (#x #t) #e))
+  `(let (,x ,t) ,e))
 
 (define-macro assume
   Π-introduction)
@@ -156,14 +156,14 @@
 
 (define-macro if (cond on-true on-false)
   (switch cond
-    `(bool.true #on-true)
-    `(bool.false #on-false)))
+    `(bool.true ,on-true)
+    `(bool.false ,on-false)))
 
 (define-macro sigma (xts t)
   (begin-meta
     (let sym (new-symbol))
-    (forall `((#sym #tau)
-              (_ #(forall (append-meta xts `((_ #t))) sym)))
+    (forall `((,sym ,tau)
+              (_ ,(forall (append-meta xts `((_ ,t))) sym)))
              sym)))
 
 (define-macro exists
@@ -172,8 +172,8 @@
 (define-macro product-internal (ts)
   (begin-meta
     (let sym (new-symbol))
-    (Π `((#sym #tau)
-         (_ #(Π (map-meta (lambda-meta (t) `(_ #t)) ts) sym)))
+    (Π `((,sym ,tau)
+         (_ ,(Π (map-meta (lambda-meta (t) `(_ ,t)) ts) sym)))
         sym)))
 
 (define-macro-variadic product (ts)
@@ -184,15 +184,15 @@
     (let Z (new-symbol))
     (let k (new-symbol))
     (lambda
-      `((#Z #tau)
-        (#k #(Π (map-meta (lambda-meta (x) `(_ *)) es) Z)))
-      (append-meta `(#k) es))))
+      `((,Z ,tau)
+        (,k ,(Π (map-meta (lambda-meta (x) `(_ *)) es) Z)))
+      (append-meta `(,k) es))))
 
 (define-macro-variadic sigma-introduction (es)
   (sigma-introduction-internal es))
 
 (define-macro sigma-elimination (xts e1 e2)
-  `(#e1 * #(lambda xts e2)))
+  `(,e1 * ,(lambda xts e2)))
 
 (define-macro tuple
   sigma-introduction)
@@ -251,9 +251,9 @@
 (define-macro obtain-borrow-info-meta (xs)
   (if-meta (is-leaf xs)
     `(()
-      #xs)
-    `(#(take-borrowed-vars-meta xs)
-      #(map-meta (lambda-meta (x) (drop-char-meta `& x)) xs))))
+      ,xs)
+    `(,(take-borrowed-vars-meta xs)
+      ,(map-meta (lambda-meta (x) (drop-char-meta `& x)) xs))))
 
 ; fixme: condで書き直したほうがわかりやすい。condをコンパイラ内部で定義するとよい？
 (define-macro with-internal (bind es)
@@ -263,23 +263,23 @@
       (let e (head es))
       (let rest (tail es))
       (if-meta (is-leaf e)
-        `(#bind * * #e #(λ `(_) (with-internal bind rest)))
+        `(,bind * * ,e ,(λ `(_) (with-internal bind rest)))
         (if-meta (not-meta (leaf-equal (nth 0 e) `let))
-          (with-internal bind (append-meta `((let _ #e)) rest))
+          (with-internal bind (append-meta `((let _ ,e)) rest))
           (begin-meta
             (let var-name (nth 1 e))
             (let let-body (tail (tail e)))
             (let last-term (last-meta let-body))
             (let borrow-info (obtain-borrow-info-meta last-term))
             (let borrow-var-list (nth 0 borrow-info))
-            (let var-list (append-meta borrow-var-list `(#var-name)))
-            (let let-body' (append-meta (init-meta let-body) `(#(nth 1 borrow-info))))
+            (let var-list (append-meta borrow-var-list `(,var-name)))
+            (let let-body' (append-meta (init-meta let-body) `(,(nth 1 borrow-info))))
             (let s (new-symbol))
             (if-meta (is-nil borrow-var-list)
-              `(#bind * * #(with-internal bind let-body) #(λ `(#var-name) (with-internal bind rest)))
+              `(,bind * * ,(with-internal bind let-body) ,(λ `(,var-name) (with-internal bind rest)))
               (with-internal bind
-                `(#(append-meta `(let #s) let-body')
-                  #(sigma-elimination var-list s (with-internal bind rest)))))))))))
+                `(,(append-meta `(let ,s) let-body')
+                  ,(sigma-elimination var-list s (with-internal bind rest)))))))))))
 
 (define-macro-variadic with (bind es)
   (with-internal bind es))
@@ -289,3 +289,69 @@
 
 (define-macro-variadic reduce (es)
   (with-internal `identity.bind es))
+
+;    (my-record name xts (x1 A1) ... (xn An))
+; ~> (data name xts
+;      (new ((x1 A1) ... (xn An)) (name x1 ... xn)))
+
+(define-macro concat-meta-internal (args)
+  (if-meta (is-nil (tail args))
+    (head args)
+    (leaf-mul (head args) (concat-meta-internal (tail args)))))
+
+(define-macro-variadic concat-meta (args)
+  (concat-meta-internal args))
+
+(define-macro record.generate-projection (name xts yts y t)
+  (begin-meta
+    (let xs (map-meta head xts))
+    (let app (append-meta `(,name) xs))
+    (let v (new-symbol))
+    (let base-args (append-meta xts `((,v ,app))))
+    (let arg-lam (lambda yts y))
+    (let case (concat-meta name `.case))
+    (let proj-type (forall base-args t))
+    `(let (,(concat-meta name `. y) ,proj-type)
+       ,(lambda base-args
+          (append-meta `(,case ,t) (append-meta xs (append-meta `(,v)  `(,arg-lam))))))))
+
+; implement `record` using macro
+(define-macro-variadic record (name xts yts)
+  (begin-meta
+    (let xs (map-meta head xts))
+    (let proj-name-list (map-meta head yts))
+    (let name-list (map-meta (lambda-meta (x) (concat-meta name `. x)) proj-name-list))
+    (let app (append-meta `(,name) xs))
+    (let proj-list (map-meta (lambda-meta (yt) (record.generate-projection name xts yts (nth 0 yt) (nth 1 yt))) yts))
+    (append-meta
+      `(statement
+         (data ,name ,xts
+           (new ,yts ,app)))
+      proj-list)))
+
+; (record some-item ((x1 i32) (x2 i64))
+;   (item1 tau)
+;   (item2 (Pi ((x tau) (y bool)) bool)))
+
+; (reduce
+;   ; (let k
+;   ;   (some-item.some-item.new 10 20 i32 (lambda (x y) bool.true)))
+;   ; ((some-item.item2 (some-item.some-item.new 10 20 i32 (lambda (x y) bool.true))) i64 bool.false)
+;   ?some-item.item2
+;   )
+
+; (define functor-type ((m (hom tau tau)))
+;   (Π
+;     ((a tau)
+;      (b tau)
+;      (_ (hom a b))
+;      (_ (m a)))
+;     (m b)))
+
+; (record functor ((f (hom tau tau)))
+;   (map
+;     (functor-type f)))
+
+; (reduce ?functor.new)
+
+; (generate-projection some-record ((x1 A1) (x2 A2)) ((y1 B1) (y2 B2) (y3 B3)) y2 B2)

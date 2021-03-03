@@ -31,6 +31,14 @@
     ys
     (cons (head xs) (append-meta (tail xs) ys))))
 
+(define-macro list-meta-internal (xss)
+  (if-meta (is-nil xss)
+    `()
+    (append-meta (head xss) (list-meta-internal (tail xss)))))
+
+(define-macro-variadic list-meta (xss)
+  (list-meta-internal xss))
+
 ;
 ; foundational macros
 ;
@@ -134,7 +142,7 @@
 
 (define-macro witness (t e)
   (begin-meta
-    (let sym (new-symbol))
+    (let sym (new-symbol `wit))
     `(,(λ `((,sym ,t)) sym) ,e)))
 
 (define-macro hom-internal (ts)
@@ -161,7 +169,7 @@
 
 (define-macro sigma (xts t)
   (begin-meta
-    (let sym (new-symbol))
+    (let sym (new-symbol `sig))
     (forall `((,sym ,tau)
               (_ ,(forall (append-meta xts `((_ ,t))) sym)))
              sym)))
@@ -171,7 +179,7 @@
 
 (define-macro product-internal (ts)
   (begin-meta
-    (let sym (new-symbol))
+    (let sym (new-symbol `prod))
     (Π `((,sym ,tau)
          (_ ,(Π (map-meta (lambda-meta (t) `(_ ,t)) ts) sym)))
         sym)))
@@ -181,8 +189,8 @@
 
 (define-macro sigma-introduction-internal (es)
   (begin-meta
-    (let Z (new-symbol))
-    (let k (new-symbol))
+    (let Z (new-symbol `sig))
+    (let k (new-symbol `sig-k))
     (lambda
       `((,Z ,tau)
         (,k ,(Π (map-meta (lambda-meta (x) `(_ *)) es) Z)))
@@ -274,7 +282,7 @@
             (let borrow-var-list (nth 0 borrow-info))
             (let var-list (append-meta borrow-var-list `(,var-name)))
             (let let-body' (append-meta (init-meta let-body) `(,(nth 1 borrow-info))))
-            (let s (new-symbol))
+            (let s (new-symbol `with-sig))
             (if-meta (is-nil borrow-var-list)
               `(,bind * * ,(with-internal bind let-body) ,(λ `(,var-name) (with-internal bind rest)))
               (with-internal bind
@@ -302,56 +310,304 @@
 (define-macro-variadic concat-meta (args)
   (concat-meta-internal args))
 
-(define-macro record.generate-projection (name xts yts y t)
+; (define-macro record.generate-projection (name xts yts y t)
+;   (begin-meta
+;     (let xs (map-meta head xts))
+;     (let app (append-meta `(,name) xs))
+;     (let v (new-symbol `rec))
+;     (let base-args (append-meta xts `((,v ,app))))
+;     (let arg-lam (lambda yts y))
+;     (let case (concat-meta name `.case))
+;     (let proj-type (forall base-args t))
+;     `(let (,(concat-meta name `. y) ,proj-type)
+;        ,(lambda base-args
+;           (append-meta `(,case ,t) (append-meta xs (append-meta `(,v)  `(,arg-lam))))))))
+
+; ; implement `record` using macro
+; (define-macro-variadic record (name xts yts)
+;   (begin-meta
+;     (let xs (map-meta head xts))
+;     (let proj-name-list (map-meta head yts))
+;     (let name-list (map-meta (lambda-meta (x) (concat-meta name `. x)) proj-name-list))
+;     (let app (append-meta `(,name) xs))
+;     (let proj-list (map-meta (lambda-meta (yt) (record.generate-projection name xts yts (nth 0 yt) (nth 1 yt))) yts))
+;     (append-meta
+;       `(statement
+;          (data ,name ,xts
+;            (new ,yts ,app)))
+;       proj-list)))
+
+; (define sum ((A tau) (B tau))
+;   (Pi ((Z tau)
+;        (k1 (hom A Z))
+;        (k2 (hom B Z)))
+;       Z))
+
+; (define sum.left ((A tau) (B tau) (x A))
+;   (witness (sum A B)
+;     (lambda (Z k1 k2) (k1 x))))
+
+; (define sum.right ((A tau) (B tau) (y B))
+;   (witness (sum A B)
+;     (lambda (Z k1 k2) (k2 y))))
+
+; ; これが通るんだもんな〜〜。
+; (define list ((A tau))
+;   (sum top (product A (list A))))
+
+
+; ; これはfixを1つだけ展開すれば型が合う
+; (define list.nil ((A tau))
+;   (witness (list A)
+;     (sum.left top (product A (list A)) top.unit)))
+
+; ; これは、fixの展開および、「両方がfix-stuckのとき」の処理で合う
+; (define list.cons ((A tau) (x A) (xs (list A)))
+;   (witness (list A)
+;     (sum.right top (product A (list A)) (tuple x xs))))
+
+; (define list.length ((A tau) (xs (list A)))
+;   (witness i64
+;     (xs i64
+;       (lambda (nil-value) 0)
+;       (lambda (some-tuple)
+;         (sigma-elimination (foo bar) some-tuple
+;           (add-i64 1 (list.length A bar)))))))
+
+; ; ふつうにちゃんと動いてしまった。
+; (define list.sum ((xs (list i64)))
+;   (witness i64
+;     (xs i64
+;       (lambda (nil-value) 0)
+;       (lambda (some-tuple)
+;         (sigma-elimination (foo bar) some-tuple
+;           (add-i64 foo (list.sum bar)))))))
+
+(define-macro to-constructor (Z a xts bts bt)
   (begin-meta
-    (let xs (map-meta head xts))
-    (let app (append-meta `(,name) xs))
-    (let v (new-symbol))
-    (let base-args (append-meta xts `((,v ,app))))
-    (let arg-lam (lambda yts y))
+    (let constructor-name (concat-meta a `. (head bt)))
+    (let constructor-args (append-meta xts (tail bt)))
+    (let inductive-type (append-meta `(,a) (map-meta head xts)))
+    (let args (map-meta head (tail bt)))
+    (let lam-args (append-meta `(,Z) (map-meta head bts)))
+    (define constructor-name constructor-args
+      (witness inductive-type
+        (lambda lam-args
+          (append-meta `(,(head bt)) args)))))) ; ここ、`(,(head bt) @args) って書きたいかな〜？
+
+(define-macro-variadic define-data (a xts bts)
+  (begin-meta
+    (let Z (new-symbol `Z))
+    (let v (new-symbol `value))
+    (let inductive-type (append-meta `(,a) (map-meta head xts)))
+    ; definition of type
+    (let type-list (map-meta (lambda-meta (ts) `(,(head ts) ,(Pi (tail ts) Z))) bts))
+    (let ts-mod (append-meta `((,Z tau)) type-list))
+    (let formation-rule
+      (define a xts (Pi ts-mod Z)))
+    ; definition of constructors
+    (let introduction-rule-list (map-meta (to-constructor Z a xts bts _) bts))
+    ; definition of destructors
+    (let formal-args (list-meta `((,v ,inductive-type)) `((,Z tau))  type-list))
+    (let elimination-rule
+      (define (concat-meta a `.case)
+        (list-meta
+          xts
+          `((,Z tau))
+          `((,v ,inductive-type))
+          type-list)
+        (witness Z
+          (map-meta head formal-args))))
+    ; summing up the result
+    (list-meta
+      `(statement)
+        `(,formation-rule)
+        introduction-rule-list
+        `(,elimination-rule))))
+
+(define-macro record.generate-projection (name xts yts y result-type)
+  (begin-meta
+    (let form-args (map-meta head xts))
+    (let app (list-meta `(,name) form-args))
+    (let record-var (new-symbol `rec))
+    (let base-args (list-meta xts `((,record-var ,app))))
     (let case (concat-meta name `.case))
-    (let proj-type (forall base-args t))
+    (let proj-type (forall base-args result-type))
     `(let (,(concat-meta name `. y) ,proj-type)
        ,(lambda base-args
-          (append-meta `(,case ,t) (append-meta xs (append-meta `(,v)  `(,arg-lam))))))))
+          ; `(,case @form-args ,result-type ,record-var ,(lambda ...)) って書きたい？
+          (list-meta `(,case) form-args `(,result-type ,record-var ,(lambda yts y)))))))
 
 ; implement `record` using macro
-(define-macro-variadic record (name xts yts)
+(define-macro-variadic define-codata (name xts yts)
   (begin-meta
     (let xs (map-meta head xts))
     (let proj-name-list (map-meta head yts))
-    (let name-list (map-meta (lambda-meta (x) (concat-meta name `. x)) proj-name-list))
-    (let app (append-meta `(,name) xs))
+    (let name-list (map-meta (concat-meta name `. _) proj-name-list))
     (let proj-list (map-meta (lambda-meta (yt) (record.generate-projection name xts yts (nth 0 yt) (nth 1 yt))) yts))
-    (append-meta
+    ; `(statement ,(define-data ...) @proj-list) って書きたいだろうか？ ……べんりそう、かなー。さすがに。
+    (list-meta
       `(statement
-         (data ,name ,xts
-           (new ,yts ,app)))
+         ,(define-data name xts
+            (append-meta `(new) yts)))
       proj-list)))
 
-; (record some-item ((x1 i32) (x2 i64))
-;   (item1 tau)
-;   (item2 (Pi ((x tau) (y bool)) bool)))
+; これ、recordのほうをfixにすると、codataみたいになる？
+; newのやつがintroduction ruleになって、proj-listがelimination ruleになるわけだ。
+; define-codataみたいな。
+(define-codata some-environment ((A tau))
+  (v1 i64)
+  (v2 (hom A A)))
+
+; なんか書けたが。とくに書くつもりなかったのに。
+(define-codata stream ((A tau))
+  (head A)
+  (tail (Pi () (stream A))))
+
+(reduce ?stream.new)
+
+; これは無限ループになって終わり、かな。
+; いや、tailのほうをlazyにすればいいだけか。
+(define int-stream-from ((x i64))
+  (witness (stream i64)
+    (stream.new i64 x (lambda () (int-stream-from (add-i64 x 1))))))
+
+(reduce ?some-environment.case)
+
+(reduce ?some-environment.v2)
+
+; これ、合ってんのか？……ちがうね。reflがそもそも違うから。
+; (define-data identity ((A tau) (left-op A) (right-op A))
+;   (idpath (x A) (refl (identity A x x)))) ; path induction
+
+
+; (reduce ?identity.case)
+
+(define-data my-list ((A tau))
+  (nil)
+  (cons (value A) (xs (my-list A))))
+
+(reduce ?my-list.case)
+
+(reduce ?my-list.cons)
+
+(define ident ((A tau) (x A) (y A))
+  (Pi ((F (Pi ((_ A) (_ A)) tau))
+       (z A))
+      (ident A z z)))
+
+; (define ident.refl ((A tau) (x A))
+;   (witness (ident A x x)
+;     (lambda (F z)
+;       )))
+
+; (reduce ?identity.idpath)
+; こっちだと引数のproductが減るぶんだけ高速
+(define list ((A tau))
+  (Pi ((Z tau)
+       (k1 (Pi () Z))
+       (k2 (Pi ((_ A) (_ (list A))) Z)))
+      Z))
+
+
+
+; コンストラクタの構成もほとんど自明。
+; あ、topじゃないほうがいいのか。はい。修正した。
+(define list.nil ((A tau))
+  (witness (list A)
+    (lambda (Z k1 k2) (k1))))
+
+(define list.cons ((A tau) (x A) (xs (list A)))
+  (witness (list A)
+    (lambda (Z k1 k2) (k2 x xs))))
+
+; デストラクタもいちおう定めてみるか。
+; まあ、わりと自明な仕方で書けますね。
+; なんか、そう、相互再帰がなければすぐにでもマクロで書いてしまえそうな感じがある。
+; もとのAST、ほぼそのまんまだし。
+; recordよりもカンタンまである。
+(define list.case
+  ((A tau)
+   (Z tau)
+   (xs (list A))
+   (k1 (Pi () Z))
+   (k2 (Pi ((_ A) (_ (list A))) Z)))
+  (witness Z
+    (xs Z k1 k2)))
+
+; で、ココで "list" という変数をopaqueにする。つまりココ以降ではanalyzeでlistが展開されないようにする。
+; これによって推論速度を上げつつ、推論結果を読みやすくすることができる。
+
+; パターンマッチがこっちのほうが100倍美しくなる。
+(define list.length ((A tau) (xs (list A)))
+  (witness i64
+    (list.case * * xs
+      (lambda () 0)
+      (lambda (y ys)
+        (add-i64 1 (list.length A ys))))))
+
+; なんか、見れば見るほど正しいな。俺たちの知ってるいつものパターンマッチ、って感じ。
+(define list.sum ((xs (list i64)))
+  (witness i64
+    (list.case * * xs
+      (lambda () 0)
+      (lambda (y ys)
+        (add-i64 y (list.sum ys))))))
+
+; こっちでもちゃんと書けていることがわかる。
+; これが書けるならもうオッケーじゃね〜？
+(define my-list.sum ((xs (my-list i64)))
+  (witness i64
+    (my-list.case * * xs
+      (lambda () 0)
+      (lambda (y ys)
+        (add-i64 y (my-list.sum ys))))))
+
+; (define identity ((A tau) (x A) (y A))
+;   (Pi ((F (forall ((_ A) (_ A)) tau))
+;        (_ (forall ((z A)) (F z z))))
+;       (F x y)))
+
+; (theorem zero-is-zero
+;   (identity i64 0 0)
+;   (assume ((F (forall ((_ i64) (_ i64)) tau)) k)
+;     (k 0)))
+
+; (theorem i64-transitivity
+;   (forall ((x i64) (y i64) (z i64))
+;     (hom
+;       (identity i64 x y)
+;       (identity i64 y z)
+;       (identity i64 x z)))
+;   (assume (x y z)
+;     (assume (p1)
+;       (assume (p2)
+;         (assume (F k)
+;           (p2 F k))))))
 
 ; (reduce
-;   ; (let k
-;   ;   (some-item.some-item.new 10 20 i32 (lambda (x y) bool.true)))
-;   ; ((some-item.item2 (some-item.some-item.new 10 20 i32 (lambda (x y) bool.true))) i64 bool.false)
-;   ?some-item.item2
-;   )
+;   (list.cons i64 1 (list.cons * 2 (list.cons * 3 (list.nil *)))))
 
-; (define functor-type ((m (hom tau tau)))
-;   (Π
-;     ((a tau)
-;      (b tau)
-;      (_ (hom a b))
-;      (_ (m a)))
-;     (m b)))
+; ちゃんと4とかって計算できてることが確認できた。
+; (reduce
+;   (list.length i64 (list.cons i64 1 (list.cons * 2 (list.cons * 3 (list.cons * 4 (list.nil *)))))))
 
-; (record functor ((f (hom tau tau)))
-;   (map
-;     (functor-type f)))
+; これもちゃんと10になった。なんか生成されるプログラムがデカいが。型にfixがあるからか。
+; ……fast-listのほうでやったらコードのサイズが1/3とかになった。せやろな。
+(reduce
+  (list.sum (list.cons i64 1 (list.cons * 2 (list.cons * 3 (list.cons * 4 (list.nil *)))))))
 
-; (reduce ?functor.new)
-
-; (generate-projection some-record ((x1 A1) (x2 A2)) ((y1 B1) (y2 B2) (y3 B3)) y2 B2)
+; (data
+;   (even ((_ (nat)))
+;     (zero-is-even
+;       ()
+;       (even (nat.zero)))
+;     (succ-of-odd-is-even
+;       ((n (nat))
+;        (_ (odd n)))
+;       (even (nat.succ n))))
+;   (odd ((_ (nat)))
+;     (succ-of-even-is-odd
+;       ((n (nat))
+;        (_ (even n)))
+;       (odd (nat.succ n)))))

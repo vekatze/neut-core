@@ -1,4 +1,4 @@
-(include "./notation.neut")
+(include "./foundation.neut")
 
 (define functor-type ((m (hom tau tau)))
   (Π
@@ -8,6 +8,6 @@
      (_ (m a)))
     (m b)))
 
-(record functor ((f (hom tau tau)))
+(define-codata functor ((f (hom tau tau)))
   (map
     (functor-type f)))

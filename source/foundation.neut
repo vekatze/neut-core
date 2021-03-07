@@ -1,8 +1,13 @@
+(include "./macro.neut")
+
 (introspect OS
-  (linux (include "./Linux.neut"))
+  (linux
+    (introspect architecture
+      (x86_64 (include "./Linux-x64.neut"))
+      (aarch64 (include "./Linux-arm64.neut"))))
   (darwin (include "./Darwin.neut")))
 
-(include "./notation.neut")
+(declare-enum top unit)
 
 (declare-constant unsafe.cast
   (Π ((A tau) (B tau) (_ A)) B))
@@ -24,9 +29,3 @@
 
 (define-macro ?admit
   `(question admit))
-
-; (notation admit
-;   (admit-internal *))
-
-; (notation ?admit
-;   (question admit))

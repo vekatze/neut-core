@@ -1,5 +1,3 @@
-(declare-enum top unit)
-
 (declare-enum bool
   (true 1)
   (false 0))
@@ -18,6 +16,17 @@
   (if-meta (is-nil xs)
     xs
     (cons (f (head xs)) (map-meta f (tail xs)))))
+
+(define-macro fst-map-meta (f x)
+  `(,(f (nth 0 x)) ,(nth 1 x)))
+
+(define-macro snd-map-meta (f x)
+  `(,(nth 0 x) ,(f (nth 1 x))))
+
+(define-macro compose-meta (f g)
+  (lambda-meta (x) (f (g x))))
+
+; (lambda-meta (x) `(,(var (nth 0 x)) ,(nth 1 x)))
 
 (define-macro filter-meta (p xs)
   (if-meta (is-nil xs)
@@ -38,6 +47,11 @@
 
 (define-macro-variadic list-meta (xss)
   (list-meta-internal xss))
+
+(define-macro var (x)
+  (if-meta (leaf-equal `_ x)
+    (new-symbol x)
+    x))
 
 ;
 ; foundational macros
@@ -224,6 +238,7 @@
     bool.false
     bool.true))
 
+
 (define-macro identity-bind-meta (x k)
   (k x))
 
@@ -251,7 +266,6 @@
     `(,(take-borrowed-vars-meta xs)
       ,(map-meta (lambda-meta (x) (drop-char-meta `& x)) xs))))
 
-; fixme: condで書き直したほうがわかりやすい。condをコンパイラ内部で定義するとよい？
 (define-macro with-internal (bind es)
   (if-meta (is-nil (tail es))
     (head es)
@@ -294,15 +308,13 @@
 (define-macro-variadic concat-meta (args)
   (concat-meta-internal args))
 
-(declare-constant unsafe.cast
-  (Π ((A tau) (B tau) (_ A)) B))
-
-(define-macro to-constructor (lam-args base-type a xts bts bt)
+(define-macro to-constructor (lam-args base-type a xts bt)
   (begin-meta
     (let constructor-name (concat-meta a `. (head bt)))
-    (let constructor-args `(@,xts @,(tail bt)))
+    (let bar (map-meta (fst-map-meta var _) (tail bt)))
+    (let constructor-args `(@,xts @,bar))
     (let inductive-type `(,a @,(map-meta head xts)))
-    (let args (map-meta head (tail bt)))
+    (let args (map-meta head bar))
     (define constructor-name constructor-args
       (witness inductive-type
         `(unsafe.cast ,base-type ,inductive-type
@@ -320,22 +332,21 @@
     (let formation-rule
       (define a xts base-type))
     ; definition of constructors
-    (let introduction-rule-list (map-meta (to-constructor lam-args base-type a xts bts _) bts))
+    (let introduction-rule-list (map-meta (to-constructor lam-args base-type a xts _) bts))
     ; definition of destructors
     (let v (new-symbol `value))
     (let formal-args `(((unsafe.cast ,inductive-type ,base-type ,v) ,inductive-type) (,Z tau) @,type-list))
     (let elimination-rule
-      (define (concat-meta a `.case) `(@,xts (,Z tau) (,v ,inductive-type) @,type-list)
+      (define (concat-meta a `.case) `((,Z tau) @,xts (,v ,inductive-type) @,type-list)
         (witness Z
           (map-meta head formal-args))))
     ; summing up the result
     `(statement
         ,formation-rule
         @,introduction-rule-list
-        ,elimination-rule)
-        ))
+        ,elimination-rule)))
 
-(define-macro record.generate-projection (name xts yts y result-type)
+(define-macro codata.generate-projection (name xts yts y result-type)
   (begin-meta
     (let form-args (map-meta head xts))
     (let app `(,name @,form-args))
@@ -345,178 +356,16 @@
     (let proj-type (forall base-args result-type))
     `(let (,(concat-meta name `. y) ,proj-type)
        ,(lambda base-args
-          `(,case @,form-args ,result-type ,record-var ,(lambda yts y))))))
+          `(,case ,result-type @,form-args ,record-var ,(lambda yts y))))))
 
-; implement `record` using macro
 (define-macro-variadic define-codata (name xts yts)
   (begin-meta
     (let xs (map-meta head xts))
     (let proj-name-list (map-meta head yts))
     (let name-list (map-meta (concat-meta name `. _) proj-name-list))
     (let elimination-rule-list
-      (map-meta (lambda-meta (yt) (record.generate-projection name xts yts (nth 0 yt) (nth 1 yt))) yts))
+      (map-meta (lambda-meta (yt) (codata.generate-projection name xts yts (nth 0 yt) (nth 1 yt))) yts))
     `(statement
        ,(define-data name xts
           `(new @,yts))
        @,elimination-rule-list)))
-
-(define-data my-list ((A tau))
-  (nil)
-  (cons (value A) (xs (my-list A))))
-
-(define-codata stream ((A tau))
-  (head A)
-  (tail (stream A)))
-
-(declare-constant unsafe.pointer tau)
-
-(define unsafe.free ((A tau) (x A))
-  (derangement (external free) i1 (affine x)))
-
-(define malloc ((size i64))
-  (derangement (external malloc) unsafe.pointer (affine size)))
-
-(define unsafe.store ((p unsafe.pointer) (value i64))
-  (derangement (store i64) top (linear p) (affine value)))
-
-(define unsafe.store-i8 ((p unsafe.pointer) (value i8))
-  (derangement (store i8) top (linear p) (affine value)))
-
-(define-macro unsafe.create-raw-array-internal (element-type rest)
-  `(derangement (create-array ,element-type) unsafe.pointer
-     @,(map-meta (lambda-meta (x) `(affine (i8 ,x))) rest)))
-
-(define-macro-variadic unsafe.create-raw-array (element-type rest)
-  (unsafe.create-raw-array-internal element-type rest))
-
-(define-macro raw-string (str)
-  (unsafe.create-raw-array-internal `i8 (string-to-u8-list str)))
-
-(define identity ((a tau))
-  (witness tau
-    a))
-
-(define bind-type
-  ((m (hom tau tau)))
-  (Π
-    ((a tau)
-     (b tau)
-     (_ (m a))
-     (_ (hom a (m b))))
-    (m b)))
-
-(section identity)
-
-; (define return
-;   (witness (return-type identity)
-;     (lambda (_ x)
-;       x)))
-
-(define bind
-  (witness (bind-type identity)
-    (lambda (_ _ comp k)
-      (k comp))))
-
-(end identity)
-
-(define unsafe.calculate-pointer ((p unsafe.pointer) (offset i64))
-  (tuple
-    p
-    (unsafe.cast i64 unsafe.pointer
-      (add-i64
-        (unsafe.cast unsafe.pointer i64 p)
-        offset))))
-
-; (define unsafe.store-with-offset ((p unsafe.pointer) (value i64) (offset i64))
-;   (with identity.bind
-;     (let q (unsafe.calculate-pointer &p offset))
-;     (unsafe.store &q value)
-;     (tuple p top.unit)))
-
-(define unsafe.store-with-offset-i8 ((p unsafe.pointer) (value i8) (offset i64))
-  (with identity.bind
-    (let q (unsafe.calculate-pointer &p offset))
-    (unsafe.store-i8 &q value)
-    (tuple p top.unit)))
-
-(define unsafe.load-i8 ((p unsafe.pointer))
-  (derangement (load i8) i8 (linear p)))
-
-(define load-with-offset-i8 ((p unsafe.pointer) (offset i64))
-  (with identity.bind
-    (let q (unsafe.calculate-pointer &p offset))
-    (let value (unsafe.load-i8 &q))
-    (tuple p value)))
-
-(define copy-i8-array ((dest unsafe.pointer) (src unsafe.pointer) (len i64) (count i64))
-  (witness top
-    (if (icmp-sge-i64 count len)
-      top.unit
-      (with identity.bind
-        (let val (load-with-offset-i8 &src count))
-        (unsafe.store-with-offset-i8 &dest val count)
-        (copy-i8-array dest src len (add-i64 count 1))))))
-
-(define-resource-type safe-string
-  ; ptr -> ()
-  (lambda (x)
-    (with identity.bind
-      (let p (unsafe.cast unsafe.pointer (tensor i64 unsafe.pointer) x))
-      (tensor-elimination (_ value) p
-        (with identity.bind
-          (unsafe.free unsafe.pointer value)
-          (tensor-introduction)))))
-  ; ptr -> (ptr, ptr)
-  (lambda (x)
-    (with identity.bind
-      (let p (unsafe.cast unsafe.pointer (tensor i64 unsafe.pointer) x))
-      (tensor-elimination (length value) p
-        (with identity.bind
-          (let q (malloc length))
-          (copy-i8-array q value length 0)
-          (tensor-introduction
-            (unsafe.cast (tensor i64 unsafe.pointer) unsafe.pointer (tensor-introduction length q))
-            (unsafe.cast (tensor i64 unsafe.pointer) unsafe.pointer (tensor-introduction length value))))))))
-
-; (define-resource-type reference-counted-string
-;   ; ptr -> ()
-;   (lambda (x)
-;     (with identity.bind
-;       (let p (unsafe.cast unsafe.pointer (tensor i64 unsafe.pointer) x))
-;       (tensor-elimination (count value) p
-;         (if (icmp-eq-i64 count 1)
-;           ...
-;           (tensor-introduction (add)))
-;         (with identity.bind
-;           (unsafe.free unsafe.pointer value)
-;           (tensor-introduction)))))
-;   ; ptr -> (ptr, ptr)
-;   (lambda (x)
-;     (with identity.bind
-;       (let p (unsafe.cast unsafe.pointer (tensor i64 unsafe.pointer) x))
-;       (tensor-elimination (count value) p
-;         (with identity.bind
-;           (let q (tensor-introduction (add-i64 count 1) value))
-;           (tensor-introduction
-;             (unsafe.cast (tensor i64 unsafe.pointer) unsafe.pointer q)
-;             (unsafe.cast (tensor i64 unsafe.pointer) unsafe.pointer q)))))))
-
-
-(define-macro new-safe-string (str)
-  `(unsafe.cast (tensor i64 unsafe.pointer) safe-string (tensor-introduction ,(node-length (string-to-u8-list str)) ,(raw-string str))))
-
-(reduce
-  ; (let p (new-auto-discarded-string "abcd"))
-  ; (let p (raw-string "abcd"))
-  ; (let foo (lambda ((x tau)) x))
-  ; (let bar (lambda (y) (foo y)))
-  (let foo (new-safe-string "foobarbuzあおえう"))
-  (let a foo)
-  (let b foo)
-  (let c foo)
-  (let d foo)
-  (let e foo)
-  top.unit
-  ; (derangement (syscall 1) i64 (affine (i64 1)) (linear p) (affine (add-i64 2 2)))
-  ; (derangement (syscall 1) i64 (affine (i64 1)) (linear p) (affine (add-i64 2 2)))
-  )

@@ -2,8 +2,6 @@
 
 (include "./functor.neut")
 
-(include "./top.neut")
-
 (include "./bool.neut")
 
 (define return-type
@@ -22,7 +20,7 @@
      (_ (hom a (m b))))
     (m b)))
 
-(record monad
+(define-codata monad
   ((m (hom tau tau)))
   (as-functor
     (functor m))

@@ -1,0 +1,50 @@
+(include "./foundation.neut")
+
+(include "./identity.neut")
+
+(section unsafe)
+
+(define free ((A tau) (x A))
+  (derangement (external free) i1 (affine x)))
+
+(define malloc ((size i64))
+  (derangement (external malloc) unsafe.pointer (affine size)))
+
+(define calculate-pointer ((p unsafe.pointer) (offset i64))
+  (witness pointer
+    (with identity.bind
+    (let p' (cast pointer i64 p))
+    (let new-pointer (add-i64 p' offset))
+    (cast i64 pointer new-pointer))))
+
+(define-macro store (value-type ptr value)
+  `(derangement (store ,value-type) top (affine ,ptr) (affine ,value)))
+
+(define-macro load (value-type ptr)
+  `(derangement (load ,value-type) ,value-type (affine ,ptr)))
+
+(define-macro store-with-offset (ptr value-type value offset)
+  (begin-meta
+    (let q (new-symbol `pointer))
+    (with `identity.bind
+      `(let ,q (calculate-pointer ,ptr ,offset))
+       (store value-type q value)
+      `top.unit)))
+
+(define-macro load-with-offset (value-type ptr offset)
+  (begin-meta
+    (let q (new-symbol `pointer))
+    (let value (new-symbol `value))
+    (with `identity.bind
+      `(let ,q (calculate-pointer ,ptr ,offset))
+      `(let ,value ,(load value-type q))
+       value)))
+
+(define-macro create-raw-array-internal (element-type rest)
+  `(derangement (create-array ,element-type) unsafe.pointer
+     @,(map-meta (lambda-meta (x) `(affine (i8 ,x))) rest)))
+
+(define-macro-variadic create-raw-array (element-type rest)
+  (unsafe.create-raw-array-internal element-type rest))
+
+(end unsafe)

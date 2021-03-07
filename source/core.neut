@@ -1,7 +1,5 @@
 (include "./foundation.neut")
 
-; (include "./top.neut")
-
 (include "./bool.neut")
 
 (include "./functor.neut")
@@ -14,4 +12,4 @@
 
 (include "./string.neut")
 
-(include "./integer.neut")
+; (include "./integer.neut")

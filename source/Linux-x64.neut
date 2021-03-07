@@ -27,25 +27,15 @@
 
 (define open ((path pointer) (flags i64) (mode i64))
   (witness (product pointer file-descriptor)
-    (derangement (syscall 1) file-descriptor (linear path) (affine flags) (affine mode))))
+    (derangement (syscall 2) file-descriptor (linear path) (affine flags) (affine mode))))
 
-; (declare-constant open
-;   (Π
-;     ((A i64)
-;      (path (array A i8))
-;      (flags i64)
-;      (mode i64))
-;     (product (array A i8) file-descriptor)))
+(define close ((f file-descriptor))
+  (witness i64
+    (derangement (syscall 3) i64 (affine file-descriptor))))
 
-; (declare-constant close
-;   (Π
-;     ((_ file-descriptor))
-;     i64))
-
-; (declare-constant fork
-;   (Π
-;     ()
-;     i64))
+(define fork ()
+  (witness i64
+    (derangement (syscall 57) i64)))
 
 ; (define rusage
 ;   (struct
@@ -134,6 +124,8 @@
 ;     ((sock i64)
 ;      (backlog i64))
 ;     i64))
+
+(unuse unsafe)
 
 (end os)
 

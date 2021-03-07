@@ -1,32 +1,62 @@
 (include "./foundation.neut")
 
-(include "./top.neut")
-
 (include "./identity.neut")
 
-(define string
-  (sigma
-    ((len i64))
-    (array len i8)))
+(include "./memory.neut")
+
+(include "./raw-string.neut")
+
+(use unsafe)
+
+(define-resource-type safe-string
+  ; ptr -> ()
+  (lambda (x)
+    (with identity.bind
+      (let p (cast pointer (tensor i64 pointer) x))
+      (tensor-elimination (_ value) p
+        (with identity.bind
+          (unsafe.free pointer value)
+          (tensor-introduction)))))
+  ; ptr -> (ptr, ptr)
+  (lambda (x)
+    (with identity.bind
+      (let p (cast pointer (tensor i64 pointer) x))
+      (tensor-elimination (length value) p
+        (with identity.bind
+          (let q (malloc length))
+          (copy-i8-array q value length 0)
+          (tensor-introduction
+            (cast (tensor i64 pointer) pointer (tensor-introduction length q))
+            (cast (tensor i64 pointer) pointer (tensor-introduction length value))))))))
 
 (use os)
 
-(define print-character
-  ((value i8))
-  (witness top
+(define-macro safe-string.new (str)
+  `(cast (tensor i64 pointer) safe-string
+     (tensor-introduction
+       ,(node-length (string-to-u8-list str))
+       ,(raw-string.new str))))
+
+(define safe-string.length ((str safe-string))
+  (witness (product safe-string i64)
+    admit))
+
+(define safe-string.print ((str safe-string))
+  (witness (product safe-string i64)
     (with identity.bind
-      (let char (array-introduction i8 value))
-      ; (os.write 1 os.stdout char 1)
-      (syscall 1 i64 (arg-immediate os.stdout) (arg-array char) (arg-immediate (i64 1)))
-      top.unit)))
+      (let str' (cast safe-string (tensor i64 pointer) str))
+      (tensor-elimination (n content) str'
+        (with identity.bind
+          (let len (write stdout &content n))
+          (let str'' (cast (tensor i64 pointer) safe-string (tensor-introduction n content)))
+          (tuple str'' len))))))
 
-
-
-(define string.print
-  ((str string))
-  (witness (product string i64)
-    (destruct str (n content)
-      (let len (write n stdout &content n))
-      (tuple (tuple n content) len))))
+(define print-character ((value i8))
+  (with identity.bind
+    (let p (malloc 1))
+    (store-with-offset p i8 value 0)
+    (let len (write stdout &p 1))
+    (unsafe.free pointer p)
+    top.unit))
 
 (unuse os)

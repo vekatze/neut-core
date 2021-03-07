@@ -1,1 +1,1 @@
-; (declare-enum top unit)
+(declare-enum top unit)

@@ -6,15 +6,12 @@
 
 (include "./identity.neut")
 
-(data free ((g (hom tau tau)) (a tau))
-  (leaf
-    ((_ a))
-    (free g a))
+(define-data free ((g (hom tau tau)) (a tau))
+  (leaf (_ a))
   (node
-    ((b tau)
-     (_ (g b))
-     (_ (hom b (free g a))))
-    (free g a)))
+    (b tau)
+    (_ (g b))
+    (_ (hom b (free g a)))))
 
 (section free)
 
@@ -31,6 +28,7 @@
               (λ ((z p))
                 ((map g) a b f (k z))))
             (node g b p val f')))))))
+
 
 (define as-functor
   ((g (hom tau tau)))

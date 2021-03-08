@@ -1,0 +1,25 @@
+(include "./base.neut")
+
+(section leaf)
+
+(use node)
+
+(define-macro unit
+  (leaf))
+
+(define-macro var (x)
+  (if-meta (leaf.equal `_ x)
+    (new-symbol x)
+    x))
+
+(define-macro concat-internal (args)
+  (if-meta (is-nil (tail args))
+    (head args)
+    (mul (head args) (concat-internal (tail args)))))
+
+(define-macro-variadic concat (args)
+  (concat-internal args))
+
+(unuse node)
+
+(end leaf)

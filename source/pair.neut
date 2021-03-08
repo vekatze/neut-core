@@ -1,0 +1,40 @@
+(include "./base.neut")
+
+(include "./leaf.neut")
+
+(include "./node.neut")
+
+(section pair)
+
+(define-macro first (p)
+  (node.nth 0 p))
+
+(define-macro second (p)
+  (node.nth 1 p))
+
+(define-macro map-right (f p)
+  `(,(first p) ,(f (second p))))
+
+(define-macro map-left (f p)
+  `(,(f (first p)) ,(second p)))
+
+; functor map
+(define-macro map
+  map-right)
+
+; monad return
+(define-macro unit (p)
+  `(,leaf.unit ,p))
+
+; monad bind
+; e.g. (join `(foo (bar buz))) ~> `(foobar buz)
+(define-macro join (pp)
+  `(,(leaf.mul
+       (first pp)
+       (first (second pp)))
+    ,(second (second pp))))
+
+(define-macro swap (p)
+  `(,(second p) ,(first p)))
+
+(end pair)

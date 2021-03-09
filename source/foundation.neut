@@ -1,4 +1,8 @@
-(include "./macro.neut")
+; (include "./macro.neut")
+
+(include "./meta/language.neut")
+
+(include "./base.neut")
 
 (introspect OS
   (linux
@@ -7,10 +11,8 @@
       (aarch64 (include "./Linux-arm64.neut"))))
   (darwin (include "./Darwin.neut")))
 
-(declare-enum top unit)
-
-(declare-constant unsafe.cast
-  (Π ((A tau) (B tau) (_ A)) B))
+; (declare-constant unsafe.cast
+;   (Π ((A tau) (B tau) (_ A)) B))
 
 (define unsafe.cast-to
   ((A tau)

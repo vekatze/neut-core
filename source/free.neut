@@ -29,7 +29,6 @@
                 ((map g) a b f (k z))))
             (node g b p val f')))))))
 
-
 (define as-functor
   ((g (hom tau tau)))
   (witness (functor (free g _))

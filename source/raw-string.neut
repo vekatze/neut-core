@@ -7,7 +7,7 @@
 (use unsafe)
 
 (define-macro raw-string.new (str)
-  (create-raw-array-internal `i8 (string-to-u8-list str)))
+  (create-raw-array-internal `i8 (meta.leaf.string-to-u8-list str)))
 
 (define copy-i8-array ((dest pointer) (src pointer) (len i64) (count i64))
   (witness top

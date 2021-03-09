@@ -1,22 +1,36 @@
 (include "./foundation.neut")
 
+(declare-enum bool
+  (true 1)
+  (false 0))
+
 (section bool)
 
-; (declare-enum bool
-;   (true 1)
-;   (false 0))
+(define and ((b1 bool) (b2 bool))
+  (witness bool
+    (unsafe.cast i1 bool
+      (add-i1
+        (unsafe.cast bool i1 b1)
+        (unsafe.cast bool i1 b2)))))
 
-(define and
-  and-i1)
+(define or ((b1 bool) (b2 bool))
+  (witness bool
+    (unsafe.cast i1 bool
+      (or-i1
+        (unsafe.cast bool i1 b1)
+        (unsafe.cast bool i1 b2)))))
 
-(define or
-  or-i1)
-
-(define not
-  ((b bool))
+(define not ((b bool))
   (witness bool
     (if b
       false
       true)))
+
+(define xor ((b1 bool) (b2 bool))
+  (witness bool
+    (unsafe.cast i1 bool
+      (xor-i1
+        (unsafe.cast bool i1 b1)
+        (unsafe.cast bool i1 b2)))))
 
 (end bool)

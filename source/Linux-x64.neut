@@ -1,21 +1,27 @@
-(include "./macro.neut")
+(include "./meta/language.neut")
 
-(declare-constant unsafe.pointer tau)
+(include "./base.neut")
+
+(declare-enum file-descriptor
+  (stdin 0)
+  (stdout 1)
+  (stderr 2))
 
 (section os)
 
-(declare-constant file-descriptor tau)
+(define stdin
+  file-descriptor.stdin)
 
-(declare-constant stdin file-descriptor)
+(define stdout
+  file-descriptor.stdout)
 
-(declare-constant stdout file-descriptor)
-
-(declare-constant stderr file-descriptor)
+(define stderr
+  file-descriptor.stderr)
 
 (use unsafe)
 
 (define read ((in file-descriptor) (buf pointer) (len i64))
-  (witness (product unsafe.pointer i64)
+  (witness (product pointer i64)
     (derangement (syscall 0) i64 (affine in) (linear buf) (affine len))))
 
 (define write ((out file-descriptor) (buf pointer) (len i64))

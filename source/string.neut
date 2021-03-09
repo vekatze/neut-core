@@ -15,7 +15,7 @@
       (let p (cast pointer (tensor i64 pointer) x))
       (tensor-elimination (_ value) p
         (with identity.bind
-          (unsafe.free pointer value)
+          (free pointer value)
           (tensor-introduction)))))
   ; ptr -> (ptr, ptr)
   (lambda (x)
@@ -32,14 +32,22 @@
 (use os)
 
 (define-macro safe-string.new (str)
-  `(cast (tensor i64 pointer) safe-string
+  `(unsafe.cast (tensor i64 unsafe.pointer) safe-string
      (tensor-introduction
-       ,(node-length (string-to-u8-list str))
+       ,(meta.leaf.from-int (meta.node.length (meta.leaf.string-to-u8-list str)))
        ,(raw-string.new str))))
 
 (define safe-string.length ((str safe-string))
   (witness (product safe-string i64)
     admit))
+
+(define print-character ((value i8))
+  (with identity.bind
+    (let p (malloc 1))
+    (store-with-offset p i8 value 0)
+    (let len (write stdout &p 1))
+    (free pointer p)
+    top.unit))
 
 (define safe-string.print ((str safe-string))
   (witness (product safe-string i64)
@@ -47,16 +55,12 @@
       (let str' (cast safe-string (tensor i64 pointer) str))
       (tensor-elimination (n content) str'
         (with identity.bind
-          (let len (write stdout &content n))
+          (let wrote-length (write stdout &content n))
+          ; (print-character 97)
           (let str'' (cast (tensor i64 pointer) safe-string (tensor-introduction n content)))
-          (tuple str'' len))))))
+          (tuple str'' wrote-length))))))
 
-(define print-character ((value i8))
-  (with identity.bind
-    (let p (malloc 1))
-    (store-with-offset p i8 value 0)
-    (let len (write stdout &p 1))
-    (unsafe.free pointer p)
-    top.unit))
+(define-macro safe-string.print-literal (str)
+  `(safe-string.print ,(safe-string.new str)))
 
 (unuse os)

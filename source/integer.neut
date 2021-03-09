@@ -1,7 +1,5 @@
 (include "./foundation.neut")
 
-; (include "./top.neut")
-
 (include "./bool.neut")
 
 (include "./string.neut")
@@ -25,7 +23,7 @@
   (witness top
     (if (icmp-slt-i64 x 0)
       (with identity.bind
-        (string.print "-")
+        (safe-string.print-literal "-")
         (print (negate x)))
       (if (icmp-slt-i64 x 10)
         (print-digit x)

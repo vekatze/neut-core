@@ -1,18 +1,14 @@
-(include "./notation.neut")
+(include "./foundation.neut")
 
 (include "./functor.neut")
 
 (include "./monad.neut")
 
-(section coproduct)
+(define-data coproduct ((e tau) (a tau))
+  (left (_ e))
+  (right (_ a)))
 
-(data coproduct
-  ((e tau)
-   (a tau))
-  (left ((_ e))
-    (coproduct e a))
-  (right ((_ a))
-    (coproduct e a)))
+(section coproduct)
 
 (define map
   ((e tau)
@@ -21,18 +17,18 @@
    (f (hom a b))
    (m (coproduct e a)))
   (witness (coproduct e b)
-    (coproduct.case (coproduct e b) * * m
+    (coproduct.case (coproduct e b) e a m
       (lambda (err)
-        (left * * err))
+        (left e b err))
       (lambda (val)
-        (right * * (f val))))))
+        (right e b (f val))))))
 
 (define return
   ((e tau)
    (a tau)
    (x a))
   (witness (coproduct e a)
-    (right * * x)))
+    (right e a x)))
 
 (define bind
   ((e tau)
@@ -41,9 +37,9 @@
    (comp (coproduct e a))
    (k (hom a (coproduct e b))))
   (witness (coproduct e b)
-    (coproduct.case (coproduct e b) * * comp
+    (coproduct.case (coproduct e b) e a comp
       (lambda (err)
-        (left * * err))
+        (left e b err))
       (lambda (val)
         (k val)))))
 
@@ -52,7 +48,7 @@
    (a tau)
    (err e))
   (witness (coproduct e a)
-    (left * * err)))
+    (left e a err)))
 
 (define as-functor
   ((e tau))

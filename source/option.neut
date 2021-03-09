@@ -4,18 +4,16 @@
 
 (include "./monad.neut")
 
-(section option)
+(define-data option ((a tau))
+  (none)
+  (some (value a)))
 
-(data option ((a tau))
-  (none ()
-    (option a))
-  (some ((x a))
-    (option a)))
+(section option)
 
 (define map
   (witness (functor-type option)
     (λ (a b f m)
-      (option.case * * m
+      (option.case (option b) a m
         (λ ()
           (none b))
         (λ (x)
@@ -51,8 +49,6 @@
     (functor.new
       option
       option.map)))
-
-?functor.map
 
 (define as-monad
   (witness (monad option)

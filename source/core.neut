@@ -10,7 +10,19 @@
 
 (include "./identity.neut")
 
+(include "./option.neut")
+
+(include "./coproduct.neut")
+
+(include "./list.neut")
+
+(include "./state.neut")
+
 (include "./free.neut")
+
+(include "./memory.neut")
+
+(include "./raw-string.neut")
 
 (include "./string.neut")
 

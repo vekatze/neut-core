@@ -1,4 +1,4 @@
-(include "./notation.neut")
+(include "./language.neut")
 
 (include "./option.neut")
 
@@ -10,39 +10,29 @@
 
 (include "./integer.neut")
 
-(use option)
-
-(use bool)
+(define-data list ((a tau))
+  (nil)
+  (cons (_ a) (_ (list a))))
 
 (section list)
 
-(data list ((a tau))
-  (nil
-    ()
-    (list a))
-  (cons
-    ((_ a)
-     (_ (list a)))
-    (list a)))
+(define-macro new-internal (a vs)
+  (if-meta (meta.is-nil vs)
+    `(list.nil ,a)
+    `(list.cons ,a ,(meta.node.head vs) ,(new-internal a (meta.node.tail vs)))))
 
-(notation (list.new)
-  (list.nil *))
-
-(notation (list.new a)
-  (list.cons * a (list.nil *)))
-
-(notation (list.new a rest+)
-  (list.cons * a (list.new rest+)))
+(define-macro-variadic new (a vs)
+  (new-internal a vs))
 
 (define head
   ((a tau)
    (xs (list a)))
   (witness (option a)
-    (list.case * * xs
+    (list.case (option a) a xs
       (λ ()
-        (none a))
+        (option.none a))
       (λ (h _)
-        (some a h)))))
+        (option.some a h)))))
 
 (define length
   ((a tau)
@@ -71,9 +61,9 @@
   (witness bool
     (list.case bool a xs
       (λ ()
-        true)
+        bool.true)
       (λ (_ _)
-        false))))
+        bool.false))))
 
 (define map
   ((a tau)
@@ -87,11 +77,17 @@
       (λ (y acc)
         (cons b (f y) (map a b f acc))))))
 
+; (define return
+;   ((a tau)
+;    (x a))
+;   (witness (list a)
+;     (list.cons * x (list.nil a))))
+
 (define return
   ((a tau)
    (x a))
   (witness (list a)
-    (list.new x)))
+    (list.new a x)))
 
 (define concatenate
   ((a tau)
@@ -99,16 +95,17 @@
   (witness (list a)
     (list.case (list a) (list a) m
       (λ ()
-        (nil *))
+        (nil a))
       (λ (xs xss)
-        (append * xs (concatenate a xss))))))
+        (append a xs (concatenate a xss))))))
 
+; fixme: listの推論があんまりうまくない。fixで定義したvarはopaqueにするとよいかも。
 (define bind
   ((a tau)
    (b tau)
    (m (list a))
    (k (hom a (list b))))
   (witness (list b)
-    (concatenate * (map * * k m))))
+    (concatenate b (map a * k m))))
 
 (end list)

@@ -18,4 +18,4 @@
   `(admit-internal *))
 
 (define-macro ?admit
-  `(question admit))
+  `(question ,admit))

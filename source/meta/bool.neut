@@ -1,0 +1,35 @@
+(include "./base.neut")
+
+(section meta.bool)
+
+(use meta)
+
+(define-macro and (b1 b2)
+  (if-meta b1
+    (if-meta b2
+      `true
+      nil)
+    nil))
+
+(define-macro or (b1 b2)
+  (if-meta b1
+    `true
+    (if-meta b2
+      `true
+      nil)))
+
+(define-macro xor (b1 b2)
+  (if-meta b1
+    (if-meta b2
+      nil
+      `true)
+    (if-meta b2
+      `true
+      nil)))
+
+(define-macro not (b)
+  (if-meta b
+    nil
+    `true))
+
+(end meta.bool)

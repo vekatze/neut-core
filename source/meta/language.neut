@@ -1,0 +1,276 @@
+(include "./base.neut")
+
+(include "./node.neut")
+
+(include "./leaf.neut")
+
+(include "./pair.neut")
+
+(include "./bool.neut")
+
+(use meta)
+
+(use meta.node)
+
+(define-macro tau `tau)
+
+(define-macro * `*)
+
+(define-macro Π (args body)
+  `(Π ,args ,body))
+
+(define-macro Π-introduction (args body)
+  `(Π-introduction ,args ,body))
+
+(define-macro-variadic Π-elimination (fun args)
+  `(Π-elimination ,fun @,args))
+
+(define-macro fix (self args body)
+  `(fix ,self ,args ,body))
+
+(define-macro-variadic enum-elimination (value clauses)
+  `(enum-elimination ,value @,clauses))
+
+(define-macro question (e)
+  `(question ,e))
+
+;
+; statements
+;
+
+(define-macro declare-constant (name t)
+  `(declare-constant ,name ,t))
+
+(define-macro-variadic declare-enum (rest)
+  `(declare-enum @,rest))
+
+(define-macro-variadic define (f rest)
+  (if-meta (is-nil (tail rest))
+    `(let ,f ,(head rest))
+    (define f
+      `(fix ,f ,(head rest) ,(head (tail rest))))))
+
+(define-macro define-resource-type (name discarder copier)
+  `(define-resource-type ,name ,discarder ,copier))
+
+(define-macro-variadic statement (stmt-list)
+  `(statement @,stmt-list))
+
+;
+; auxiliary macros
+;
+
+(define-macro type
+  tau)
+
+(define-macro universe
+  type)
+
+(define-macro forall
+  Π)
+
+(define-macro Pi
+  Π)
+
+(define-macro lambda
+  Π-introduction)
+
+(define-macro λ
+  Π-introduction)
+
+(define-macro witness (t e)
+  (begin-meta
+    (let sym (leaf.new-symbol `wit))
+    `(,(λ `((,sym ,t)) sym) ,e)))
+
+(define-macro hom-internal (ts)
+  (if-meta (is-nil (tail ts))
+    (head ts)
+    (Π `((_ ,(head ts))) (hom-internal (tail ts)))))
+
+(define-macro-variadic hom (ts)
+  (hom-internal ts))
+
+(define-macro theorem (x t e)
+  `(let (,x ,t) ,e))
+
+(define-macro assume
+  Π-introduction)
+
+(define-macro switch
+  enum-elimination)
+
+(define-macro if (cond on-true on-false)
+  (switch cond
+    `(bool.true ,on-true)
+    `(bool.false ,on-false)))
+
+(define-macro sigma (xts t)
+  (begin-meta
+    (let sym (leaf.new-symbol `sig))
+    (forall `((,sym ,tau)
+              (_ ,(forall `(@,xts (_ ,t)) sym)))
+             sym)))
+
+(define-macro exists
+  sigma)
+
+(define-macro product-internal (ts)
+  (begin-meta
+    (let sym (leaf.new-symbol `prod))
+    (Π `((,sym ,tau)
+         (_ ,(Π (map (lambda-meta (t) `(_ ,t)) ts) sym)))
+        sym)))
+
+(define-macro-variadic product (ts)
+  (product-internal ts))
+
+(define-macro sigma-introduction-internal (es)
+  (begin-meta
+    (let Z (leaf.new-symbol `sig))
+    (let k (leaf.new-symbol `sig-k))
+    (lambda
+      `((,Z ,tau)
+        (,k ,(Π (map (lambda-meta (x) `(_ *)) es) Z)))
+      `(,k @,es))))
+
+(define-macro-variadic sigma-introduction (es)
+  (sigma-introduction-internal es))
+
+(define-macro sigma-elimination (xts e1 e2)
+  `(,e1 * ,(lambda xts e2)))
+
+(define-macro tuple
+  sigma-introduction)
+
+(define-macro construct
+  sigma-introduction)
+
+(define-macro is-borrowed-var-meta (x)
+  (if-meta (is-node x)
+    nil
+    (leaf.equal `& (head (leaf.uncons x)))))
+
+(define-macro take-borrowed-vars-meta (xs)
+  (map (lambda-meta (x) (nth 1 (leaf.uncons x))) (filter is-borrowed-var-meta xs)))
+
+(define-macro drop-char-meta (ch x)
+  (if-meta (is-node x)
+    x
+    (begin-meta
+      (let c-rest (leaf.uncons x))
+      (if-meta (leaf.equal (nth 0 c-rest) ch)
+        (nth 1 c-rest)
+        x))))
+
+(define-macro obtain-borrow-info-meta (xs)
+  (if-meta (is-leaf xs)
+    `(()
+      ,xs)
+    `(,(take-borrowed-vars-meta xs)
+      ,(map (lambda-meta (x) (drop-char-meta `& x)) xs))))
+
+(define-macro with-internal (bind es)
+  (if-meta (is-nil (tail es))
+    (head es)
+    (begin-meta
+      (let e (head es))
+      (let rest (tail es))
+      (if-meta (is-leaf e)
+        `(,bind * * ,e ,(λ `(_) (with-internal bind rest)))
+        (if-meta (bool.not (leaf.equal (nth 0 e) `let))
+          ; (with-internal bind (append `((let _ ,e)) rest))
+          (with-internal bind `((let _ ,e) @,rest))
+          (begin-meta
+            (let var-name (nth 1 e))
+            (let let-body (tail (tail e)))
+            (let last-term (last let-body))
+            (let borrow-info (obtain-borrow-info-meta last-term))
+            (let borrow-var-list (nth 0 borrow-info))
+            (let var-list `(@,borrow-var-list ,var-name))
+            ; (let var-list (append borrow-var-list `(,var-name)))
+            (let let-body' `(@,(init let-body) ,(nth 1 borrow-info)))
+            ; (let let-body' (append (init let-body) `(,(nth 1 borrow-info))))
+            (let s (leaf.new-symbol `with-sig))
+            (if-meta (is-nil borrow-var-list)
+              `(,bind * * ,(with-internal bind let-body) ,(λ `(,var-name) (with-internal bind rest)))
+              (with-internal bind
+                `((let ,s @,let-body')
+                  ,(sigma-elimination var-list s (with-internal bind rest)))))))))))
+                ; `(,(append `(let ,s) let-body')
+                ;   ,(sigma-elimination var-list s (with-internal bind rest)))))))))))
+
+(define-macro-variadic with (bind es)
+  (with-internal bind es))
+
+(define-macro-variadic destruct (e xts rest)
+  (sigma-elimination xts e (with-internal `identity.bind rest)))
+
+(define-macro-variadic reduce (es)
+  (with-internal `identity.bind es))
+
+(define-macro to-constructor (lam-args base-type a xts bt)
+  (begin-meta
+    (let constructor-name (leaf.concat a `. (head bt)))
+    (let bar (map (pair.map-left leaf.replace-if-hole _) (tail bt)))
+    (let constructor-args `(@,xts @,bar))
+    (let inductive-type `(,a @,(map head xts)))
+    (let args (map head bar))
+    (define constructor-name constructor-args
+      (witness inductive-type
+        `(unsafe.cast ,base-type ,inductive-type
+          ,(lambda lam-args
+            `(,(head bt) @,args)))))))
+
+; fixme: コンストラクタの名前をそのまま使うと、その名前の変数がすでに定義されていたときに壊れるので修正。
+; たとえばtrueが (i1 1) で定義されてるときに (data bool () (true) (false)) ってやると壊れる。
+; 対策としては、trueって名前のかわりにbool.trueって名前を使うようにすればよいでしょう。
+; useのほうが優先されるように変更したからこういう調整が必要になってる。
+(define-macro-variadic define-data (a xts bts)
+  (begin-meta
+    (let Z (leaf.new-symbol `Z))
+    (let inductive-type `(,a @,(map head xts)))
+    ; definition of type
+    (let type-list (map (lambda-meta (ts) `(,(head ts) ,(Pi (tail ts) Z))) bts))
+    (let lam-args `((,Z tau) @,type-list))
+    (let base-type (Pi lam-args Z))
+    (let formation-rule
+      (define a xts base-type))
+    ; definition of constructors
+    (let introduction-rule-list (map (to-constructor lam-args base-type a xts _) bts))
+    ; definition of destructors
+    (let v (leaf.new-symbol `value))
+    (let formal-args `(((unsafe.cast ,inductive-type ,base-type ,v) ,inductive-type) (,Z tau) @,type-list))
+    (let elimination-rule
+      (define (leaf.concat a `.case) `((,Z tau) @,xts (,v ,inductive-type) @,type-list)
+        (witness Z
+          (map head formal-args))))
+    ; summing up the result
+    `(statement
+        ,formation-rule
+        @,introduction-rule-list
+        ,elimination-rule)))
+
+(define-macro codata.generate-projection (name xts yts y result-type)
+  (begin-meta
+    (let form-args (map head xts))
+    (let app `(,name @,form-args))
+    (let record-var (leaf.new-symbol `rec))
+    (let base-args `(@,xts (,record-var ,app)))
+    (let case (leaf.concat name `.case))
+    (let proj-type (forall base-args result-type))
+    `(let (,(leaf.concat name `. y) ,proj-type)
+       ,(lambda base-args
+          `(,case ,result-type @,form-args ,record-var ,(lambda yts y))))))
+
+(define-macro-variadic define-codata (name xts yts)
+  (begin-meta
+    (let xs (map head xts))
+    (let proj-name-list (map head yts))
+    (let name-list (map (leaf.concat name `. _) proj-name-list))
+    (let elimination-rule-list
+      (map (lambda-meta (yt) (codata.generate-projection name xts yts (nth 0 yt) (nth 1 yt))) yts))
+    `(statement
+       ,(define-data name xts
+          `(new @,yts))
+       @,elimination-rule-list)))

@@ -18,28 +18,56 @@
 
 (use unsafe)
 
-(define read ((in file-descriptor) (buf pointer) (len i64))
-  (witness (product pointer i64)
-    (derangement (syscall 0) i64 (affine in) (linear buf) (affine len))))
 
-(define write ((out file-descriptor) (buf pointer) (len i64))
-  (witness (product pointer i64)
-    (derangement (syscall 1) i64 (affine out) (linear buf) (affine len))))
+; (section os)
 
-(define exit ((A tau) (status i64))
-  (derangement (syscall 60) A (affine status)))
+; (declare-constant file-descriptor tau)
 
-(define open ((path pointer) (flags i64) (mode i64))
-  (witness (product pointer file-descriptor)
-    (derangement (syscall 2) file-descriptor (linear path) (affine flags) (affine mode))))
+; (declare-constant stdin file-descriptor)
 
-(define close ((f file-descriptor))
-  (witness i64
-    (derangement (syscall 3) i64 (affine file-descriptor))))
+; (declare-constant stdout file-descriptor)
 
-(define fork ()
-  (witness i64
-    (derangement (syscall 57) i64)))
+; (declare-constant stderr file-descriptor)
+
+; (declare-constant read
+;   (Π
+;     ((A i64)
+;      (in file-descriptor)
+;      (buf (array A i8))
+;      (len i64))
+;     (product (array A i8) i64)))
+
+; (declare-constant write
+;   (Π
+;     ((A i64)
+;      (out file-descriptor)
+;      (str (array A i8))
+;      (len i64))
+;     (product (array A i8) i64)))
+
+; (declare-constant exit
+;   (Π
+;     ((A tau)
+;      (status i64))
+;     A))
+
+; (declare-constant open
+;   (Π
+;     ((A i64)
+;      (path (array A i8))
+;      (flags i64)
+;      (mode i64))
+;     (product (array A i8) file-descriptor)))
+
+; (declare-constant close
+;   (Π
+;     ((_ file-descriptor))
+;     i64))
+
+; (declare-constant fork
+;   (Π
+;     ()
+;     i64))
 
 ; (define rusage
 ;   (struct
@@ -129,38 +157,4 @@
 ;      (backlog i64))
 ;     i64))
 
-(unuse unsafe)
-
 (end os)
-
-
-; --- asSyscallMaybe :: OS -> Arch -> T.Text -> Maybe (Syscall, [Arg])
-; --- asSyscallMaybe os arch name =
-; ---   case (os, arch) of
-; ---     (OSLinux, Arch64)
-; ---       | name == nsOS <> "read" ->
-; ---         return (Right ("read", 0), [ArgUnused, ArgImm, ArgArray, ArgImm])
-; ---       | name == nsOS <> "write" ->
-; ---         return (Right ("write", 1), [ArgUnused, ArgImm, ArgArray, ArgImm])
-; ---       | name == nsOS <> "open" ->
-; ---         return (Right ("open", 2), [ArgUnused, ArgArray, ArgImm, ArgImm])
-; ---       | name == nsOS <> "close" ->
-; ---         return (Right ("close", 3), [ArgImm])
-; ---       | name == nsOS <> "socket" ->
-; ---         return (Right ("socket", 41), [ArgImm, ArgImm, ArgImm])
-; ---       | name == nsOS <> "connect" ->
-; ---         return (Right ("connect", 42), [ArgImm, ArgStruct, ArgImm])
-; ---       | name == nsOS <> "accept" ->
-; ---         return (Right ("accept", 43), [ArgImm, ArgStruct, ArgArray])
-; ---       | name == nsOS <> "bind" ->
-; ---         return (Right ("bind", 49), [ArgImm, ArgStruct, ArgImm])
-; ---       | name == nsOS <> "listen" ->
-; ---         return (Right ("listen", 50), [ArgImm, ArgImm])
-; ---       | name == nsOS <> "fork" ->
-; ---         return (Right ("fork", 57), [])
-; ---       | name == nsOS <> "exit" ->
-; ---         return (Right ("exit", 60), [ArgUnused, ArgImm])
-; ---       | name == nsOS <> "wait4" ->
-; ---         return (Right ("wait4", 61), [ArgImm, ArgArray, ArgImm, ArgStruct])
-; ---       | otherwise ->
-; ---         Nothing

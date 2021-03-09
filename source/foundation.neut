@@ -8,7 +8,7 @@
       (aarch64
         (include "./linux-aarch64.neut")))) ; TBD
   (darwin
-    (include "./Darwin.neut"))) ; TBD
+    (include "./darwin.neut"))) ; TBD
 
 (define admit-internal ((a tau))
   (witness a

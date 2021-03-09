@@ -4,15 +4,13 @@
 
 (include "./bool.neut")
 
-(define return-type
-  ((m (hom tau tau)))
+(define return-type ((m (hom tau tau)))
   (Π
     ((a tau)
      (_ a))
     (m a)))
 
-(define bind-type
-  ((m (hom tau tau)))
+(define bind-type ((m (hom tau tau)))
   (Π
     ((a tau)
      (b tau)
@@ -20,8 +18,7 @@
      (_ (hom a (m b))))
     (m b)))
 
-(define-codata monad
-  ((m (hom tau tau)))
+(define-codata monad ((m (hom tau tau)))
   (as-functor
     (functor m))
   (return

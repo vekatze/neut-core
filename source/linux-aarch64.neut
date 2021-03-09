@@ -1,0 +1,69 @@
+(include "./language.neut")
+
+(declare-enum file-descriptor
+  (stdin 0)
+  (stdout 1)
+  (stderr 2))
+
+(section os)
+
+(define stdin
+  file-descriptor.stdin)
+
+(define stdout
+  file-descriptor.stdout)
+
+(define stderr
+  file-descriptor.stderr)
+
+(use unsafe)
+
+(define read ((in file-descriptor) (buf pointer) (len i64))
+  (witness (product unsafe.pointer i64)
+    (derangement (syscall 0x3f) i64 (affine in) (linear buf) (affine len))))
+
+(define write ((out file-descriptor) (buf pointer) (len i64))
+  (witness (product pointer i64)
+    (derangement (syscall 0x40) i64 (affine out) (linear buf) (affine len))))
+
+(define exit ((A tau) (status i64))
+  (derangement (syscall 0x5d) A (affine status)))
+
+(define open ((path pointer) (flags i64) (mode i64))
+  (witness (product pointer file-descriptor)
+    (derangement (syscall 0x400) file-descriptor (linear path) (affine flags) (affine mode))))
+
+(define close ((f file-descriptor))
+  (witness i64
+    (derangement (syscall 0x39) i64 (affine file-descriptor))))
+
+(unuse unsafe)
+
+; (define fork ()
+;   (witness i64
+;     (derangement (syscall ) i64)))
+
+
+; ---       | name == nsOS <> "close" ->
+; ---         return (Right ("close", 0x39), [ArgImm])
+; ---       | name == nsOS <> "read" ->
+; ---         return (Right ("read", 0x3f), [ArgUnused, ArgImm, ArgArray, ArgImm])
+; ---       | name == nsOS <> "write" ->
+; ---         return (Right ("write", 0x40), [ArgUnused, ArgImm, ArgArray, ArgImm])
+; ---       | name == nsOS <> "socket" ->
+; ---         return (Right ("socket", 0xC6), [ArgImm, ArgImm, ArgImm])
+; ---       | name == nsOS <> "bind" ->
+; ---         return (Right ("bind", 0xC8), [ArgImm, ArgStruct, ArgImm])
+; ---       | name == nsOS <> "listen" ->
+; ---         return (Right ("listen", 0xC9), [ArgImm, ArgImm])
+; ---       | name == nsOS <> "accept" ->
+; ---         return (Right ("accept", 0xCA), [ArgImm, ArgStruct, ArgArray])
+; ---       | name == nsOS <> "connect" ->
+; ---         return (Right ("connect", 0xCB), [ArgImm, ArgStruct, ArgImm])
+; ---       | name == nsOS <> "exit" ->
+; ---         return (Right ("exit", 0x5D), [ArgUnused, ArgImm])
+; ---       | name == nsOS <> "wait4" ->
+; ---         return (Right ("wait4", 0x104), [ArgImm, ArgArray, ArgImm, ArgStruct])
+; ---       | name == nsOS <> "open" ->
+; ---         return (Right ("open", 0x400), [ArgUnused, ArgArray, ArgImm, ArgImm])
+; ---       | otherwise ->

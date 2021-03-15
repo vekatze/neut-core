@@ -53,7 +53,7 @@
       (λ ()
         ys)
       (λ (z zs)
-        (cons a z (append a zs ys))))))
+        (cons * z (append * zs ys))))))
 
 (define is-null
   ((a tau)
@@ -87,7 +87,7 @@
   ((a tau)
    (x a))
   (witness (list a)
-    (list.new a x)))
+    (list.new * x)))
 
 (define concatenate
   ((a tau)
@@ -97,15 +97,14 @@
       (λ ()
         (nil a))
       (λ (xs xss)
-        (append a xs (concatenate a xss))))))
+        (append * xs (concatenate * xss))))))
 
-; fixme: listの推論があんまりうまくない。fixで定義したvarはopaqueにするとよいかも。
 (define bind
   ((a tau)
    (b tau)
    (m (list a))
    (k (hom a (list b))))
   (witness (list b)
-    (concatenate b (map a * k m))))
+    (concatenate * (map * * k m))))
 
 (end list)

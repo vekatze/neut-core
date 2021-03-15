@@ -4,115 +4,17 @@
 
 (use meta)
 
-(use meta.int)
-
 ; haskellのdata.listを参考にしつつ。
-
-(define-macro map (f xs)
-  (if-meta (is-nil xs)
-    xs
-    (cons (f (head xs)) (map f (tail xs)))))
 
 (define-macro fold (f z xs)
   (if-meta (is-nil xs)
     z
     (f (head xs) (fold f z (tail xs)))))
 
-(define-macro append (xs ys)
-  (if-meta (is-nil xs)
-    ys
-    (cons (head xs) (append (tail xs) ys))))
-
-(define-macro return (a)
-  `(,a))
-
-(define-macro join (xxs)
-  (fold append `() xxs))
-
-(define-macro init (xs)
-  (if-meta (is-nil (tail xs))
-    `()
-    (cons (head xs) (init (tail xs)))))
-
-(define-macro last (xs)
-  (if-meta (is-nil (tail xs))
-    (head xs)
-    (last (tail xs))))
-
-(define-macro length (xs)
-  (if-meta (is-nil xs)
-    0
-    (add 1 (length (tail xs)))))
-
-(define-macro nth (i xs)
-  (if-meta (eq i 0)
-    (head xs)
-    (nth (sub i 1) (tail xs))))
-
 (define-macro concat-map (f xs)
   (join (map f xs)))
 
-(define-macro filter (p xs)
-  (if-meta (is-nil xs)
-    xs
-    (if-meta (p (head xs))
-      (cons (head xs) (filter p (tail xs)))
-      (filter p (tail xs)))))
-
-(define-macro list-internal (xss)
-  (if-meta (is-nil xss)
-    `()
-    (append (head xss) (list-internal (tail xss)))))
-
-(define-macro-variadic list (xss)
-  (list-internal xss))
-
-(define-macro reverse (xs)
-  (if-meta (is-nil xs)
-    xs
-    (append (reverse (tail xs)) `(,(head xs)))))
-
-(define-macro intersperse (a xs)
-  (if-meta (is-nil xs)
-    xs
-    (if-meta (is-nil (tail xs))
-      xs
-      `(,(head xs) ,a ))))
-
 (define-macro intercalate (xs yss)
   (join (intersperse xs yss)))
-
-(define-macro replicate (n x)
-  (if-meta (eq n 0)
-    `()
-    `(,x @,(replicate (sub n 1) x))))
-
-(define-macro take (n xs)
-  (if-meta (eq n 0)
-    `()
-    (if-meta (is-nil xs)
-      `()
-      `(,(head xs) @,(take (sub n 1) (tail xs))))))
-
-(define-macro drop (n xs)
-  (if-meta (eq n 0)
-    xs
-    (if-meta (is-nil xs)
-      `()
-      (drop (sub n 1) (tail xs)))))
-
-(define-macro take-while (predicate xs)
-  (if-meta (is-nil xs)
-    `()
-    (if-meta (predicate (head xs))
-      `(,(head xs) @,(take-while predicate (tail xs)))
-      `())))
-
-(define-macro drop-while (predicate xs)
-  (if-meta (is-nil xs)
-    `()
-    (if-meta (predicate (head xs))
-      (drop-while predicate (tail xs))
-      xs)))
 
 (end meta.node)

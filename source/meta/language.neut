@@ -46,9 +46,8 @@
 
 (define-macro-variadic define (f rest)
   (if-meta (is-nil (tail rest))
-    `(let ,f ,(head rest))
-    (define f
-      `(fix ,f ,(head rest) ,(head (tail rest))))))
+    `(define ,f ,(head rest))
+    `(define ,f (fix ,f ,(head rest) ,(head (tail rest))))))
 
 (define-macro define-resource-type (name discarder copier)
   `(define-resource-type ,name ,discarder ,copier))

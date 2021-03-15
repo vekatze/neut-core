@@ -258,7 +258,7 @@
     (let base-args `(@,xts (,record-var ,app)))
     (let case (leaf.concat name `.case))
     (let proj-type (forall base-args result-type))
-    `(let (,(leaf.concat name `. y) ,proj-type)
+    `(define (,(leaf.concat name `. y) ,proj-type)
        ,(lambda base-args
           `(,case ,result-type @,form-args ,record-var ,(lambda yts y))))))
 

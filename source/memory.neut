@@ -2,49 +2,70 @@
 
 (include "./identity.neut")
 
-(section unsafe)
+(section memory)
 
-(define free ((A tau) (x A))
+(define deallocate ((A tau) (x A))
   (derangement (external free) i1 (affine x)))
 
-(define malloc ((size i64))
+(define allocate ((size i64))
   (derangement (external malloc) unsafe.pointer (affine size)))
 
 (define calculate-pointer ((p unsafe.pointer) (offset i64))
   (witness unsafe.pointer
     (with identity.bind
-    (let p' (unsafe.cast unsafe.pointer i64 p))
-    (let new-pointer (add-i64 p' offset))
-    (unsafe.cast i64 unsafe.pointer new-pointer))))
+      (let p' (unsafe.cast unsafe.pointer i64 p))
+      (let new-pointer (add-i64 p' offset))
+      (unsafe.cast i64 unsafe.pointer new-pointer))))
 
-(define-macro store (value-type ptr value)
-  `(derangement (store ,value-type) top (affine ,ptr) (affine ,value)))
+; `(,(store i8) some-pointer value)みたいにして使う。
+(define-macro store (low-type)
+  (begin-meta
+    (let ptr (meta.leaf.new-symbol `ptr))
+    (let value (meta.leaf.new-symbol `value))
+    (let high-type (meta.leaf.new-symbol `high-type))
+    (lambda `((,high-type tau) (,ptr unsafe.pointer) (,value ,high-type))
+      `(derangement (store ,low-type) top (affine ,ptr) (affine ,value)))))
 
-(define-macro load (value-type ptr)
-  `(derangement (load ,value-type) ,value-type (affine ,ptr)))
+; こうしておくと、((load-mod i8) foo bar) みたいに使えて便利。
+(define-macro load (low-type)
+  (begin-meta
+    (let high-type (meta.leaf.new-symbol `high-type))
+    (let ptr (meta.leaf.new-symbol `ptr))
+    (lambda `((,high-type tau) (,ptr unsafe.pointer))
+      `(derangement (load ,low-type) ,high-type (affine ,ptr)))))
 
-(define-macro store-with-offset (ptr value-type value offset)
+(define-macro store-with-offset (low-type offset)
   (begin-meta
     (let q (meta.leaf.new-symbol `pointer))
-    (with `identity.bind
-      `(let ,q (unsafe.calculate-pointer ,ptr ,offset))
-       (unsafe.store value-type q value)
-      `top.unit)))
+    (let ptr (meta.leaf.new-symbol `ptr))
+    (let value (meta.leaf.new-symbol `value))
+    (let high-type (meta.leaf.new-symbol `high-type))
+    (lambda `((,high-type tau) (,value ,high-type) (,ptr unsafe.pointer))
+      (with `identity.bind
+        `(let ,q (memory.calculate-pointer ,ptr ,offset))
+        `(,(memory.store low-type) ,high-type ,q ,value)
+        `top.unit))))
 
-(define-macro load-with-offset (value-type ptr offset)
+(define-macro load-with-offset (low-type offset)
   (begin-meta
     (let q (meta.leaf.new-symbol `pointer))
     (let value (meta.leaf.new-symbol `value))
-    (with `identity.bind
-      `(let ,q (unsafe.calculate-pointer ,ptr ,offset))
-      `(let ,value ,(unsafe.load value-type q))
-       value)))
+    (let ptr (meta.leaf.new-symbol `ptr))
+    (let high-type (meta.leaf.new-symbol `high-type))
+    (lambda `((,high-type tau) (,ptr unsafe.pointer))
+      (with `identity.bind
+        `(let ,q (memory.calculate-pointer ,ptr ,offset))
+        `(let ,value (,(memory.load low-type) ,high-type ,q))
+        value))))
 
-(define-macro create-raw-array-internal (element-type rest)
-  `(derangement (create-array ,element-type) unsafe.pointer
-     @,(meta.node.map (lambda-meta (x) `(affine (,element-type ,x))) rest)))
+(define-macro store-with-index (low-type index)
+  (begin-meta
+    (let elem-size (meta.leaf.from-int (meta.size-of low-type)))
+    (store-with-offset low-type `(mul-i64 ,elem-size ,index))))
 
-(define-macro-variadic create-raw-array (element-type rest)
-  (unsafe.create-raw-array-internal element-type rest))
+(define-macro load-with-index (low-type index)
+  (begin-meta
+    (let elem-size (meta.leaf.from-int (meta.size-of low-type)))
+    (load-with-offset low-type `(mul-i64 ,elem-size ,index))))
 
-(end unsafe)
+(end memory)

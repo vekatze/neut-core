@@ -12,10 +12,6 @@
 
 (use meta.node)
 
-(define-macro tau `tau)
-
-(define-macro * `*)
-
 (define-macro Π (args body)
   `(Π ,args ,body))
 
@@ -59,23 +55,32 @@
 ; auxiliary macros
 ;
 
-(define-macro type
-  tau)
+; (define-macro type
+;   tau)
 
-(define-macro universe
-  type)
+; (define-macro universe
+;   type)
 
-(define-macro forall
-  Π)
+(define-macro forall (args t)
+  `(Π ,args ,t))
 
-(define-macro Pi
-  Π)
+(define-macro Pi (args t)
+  `(Π ,args ,t))
 
-(define-macro lambda
-  Π-introduction)
+; (define-macro lambda
+;   Π-introduction)
 
-(define-macro λ
-  Π-introduction)
+(define-macro lambda (xts e)
+  `(Π-introduction ,xts ,e))
+
+; (define-macro λ
+;   Π-introduction)
+
+(define-macro λ (xts e)
+  `(Π-introduction ,xts ,e))
+
+(define-macro assume (xts e)
+  `(Π-introduction ,xts ,e))
 
 (define-macro witness (t e)
   (begin-meta
@@ -93,11 +98,8 @@
 (define-macro theorem (x t e)
   `(let (,x ,t) ,e))
 
-(define-macro assume
-  Π-introduction)
-
-(define-macro switch
-  enum-elimination)
+(define-macro-variadic switch (value clauses)
+  `(enum-elimination ,value @,clauses))
 
 (define-macro if (cond on-true on-false)
   (switch cond
@@ -107,17 +109,17 @@
 (define-macro sigma (xts t)
   (begin-meta
     (let sym (leaf.new-symbol `sig))
-    (forall `((,sym ,tau)
+    (forall `((,sym tau)
               (_ ,(forall `(@,xts (_ ,t)) sym)))
              sym)))
 
-(define-macro exists
-  sigma)
+(define-macro exists (xts t)
+  (sigma xts t))
 
 (define-macro product-internal (ts)
   (begin-meta
     (let sym (leaf.new-symbol `prod))
-    (Π `((,sym ,tau)
+    (Π `((,sym tau)
          (_ ,(Π (map (lambda-meta (t) `(_ ,t)) ts) sym)))
         sym)))
 
@@ -129,7 +131,7 @@
     (let Z (leaf.new-symbol `sig))
     (let k (leaf.new-symbol `sig-k))
     (lambda
-      `((,Z ,tau)
+      `((,Z tau)
         (,k ,(Π (map (lambda-meta (x) `(_ *)) es) Z)))
       `(,k @,es))))
 
@@ -139,11 +141,27 @@
 (define-macro sigma-elimination (xts e1 e2)
   `(,e1 * ,(lambda xts e2)))
 
-(define-macro tuple
-  sigma-introduction)
+(define-macro-variadic tuple (es)
+  (sigma-introduction-internal es))
 
-(define-macro construct
-  sigma-introduction)
+(define-macro-variadic construct (es)
+  (sigma-introduction-internal es))
+
+(define-macro-variadic tensor (ts)
+  `(tensor @,ts))
+
+(define-macro-variadic tensor-introduction (es)
+  `(tensor-introduction @,es))
+
+(define-macro tensor-elimination (xts e1 e2)
+  `(tensor-elimination ,xts ,e1 ,e2))
+
+
+; (define-macro tuple
+;   sigma-introduction)
+
+; (define-macro construct
+;   sigma-introduction)
 
 (define-macro is-borrowed-var-meta (x)
   (if-meta (is-node x)
@@ -169,6 +187,16 @@
     `(,(take-borrowed-vars-meta xs)
       ,(map (lambda-meta (x) (drop-char-meta `& x)) xs))))
 
+; fixme: (let x e)のところが((foo bar) buz)みたいな形になっているとエラーになるので修正すること
+; fixme: (monadic) delimited continuationもたぶんカンタンに実装できるのでやってみるとよい。
+;    (with bind
+;      (let-shift x k body)
+;      rest)
+; ~> (with bind
+;      (let k (lambda (z) (with bind (let x z) rest)))
+;      body)
+; みたいなノリでいけるはず。kの結果がwithで包まれていることが、resetの追加に相当する。
+; fixme: ((let (x1 x2 x3) e) ...)を(sigma-elim (x1 x2 x3) e ...)として処理できるようにする。let-tupleとかでもよい。
 (define-macro with-internal (bind es)
   (if-meta (is-nil (tail es))
     (head es)
@@ -177,27 +205,24 @@
       (let rest (tail es))
       (if-meta (is-leaf e)
         `(,bind * * ,e ,(λ `(_) (with-internal bind rest)))
-        (if-meta (bool.not (leaf.equal (nth 0 e) `let))
-          ; (with-internal bind (append `((let _ ,e)) rest))
+        (if-meta (is-node (nth 0 e))
           (with-internal bind `((let _ ,e) @,rest))
-          (begin-meta
-            (let var-name (nth 1 e))
-            (let let-body (tail (tail e)))
-            (let last-term (last let-body))
-            (let borrow-info (obtain-borrow-info-meta last-term))
-            (let borrow-var-list (nth 0 borrow-info))
-            (let var-list `(@,borrow-var-list ,var-name))
-            ; (let var-list (append borrow-var-list `(,var-name)))
-            (let let-body' `(@,(init let-body) ,(nth 1 borrow-info)))
-            ; (let let-body' (append (init let-body) `(,(nth 1 borrow-info))))
-            (let s (leaf.new-symbol `with-sig))
-            (if-meta (is-nil borrow-var-list)
-              `(,bind * * ,(with-internal bind let-body) ,(λ `(,var-name) (with-internal bind rest)))
-              (with-internal bind
-                `((let ,s @,let-body')
-                  ,(sigma-elimination var-list s (with-internal bind rest)))))))))))
-                ; `(,(append `(let ,s) let-body')
-                ;   ,(sigma-elimination var-list s (with-internal bind rest)))))))))))
+          (if-meta (bool.not (leaf.equal (nth 0 e) `let))
+            (with-internal bind `((let _ ,e) @,rest))
+            (begin-meta
+              (let var-name (nth 1 e))
+              (let let-body (tail (tail e)))
+              (let last-term (last let-body))
+              (let borrow-info (obtain-borrow-info-meta last-term))
+              (let borrow-var-list (nth 0 borrow-info))
+              (let var-list `(@,borrow-var-list ,var-name))
+              (let let-body' `(@,(init let-body) ,(nth 1 borrow-info)))
+              (let s (leaf.new-symbol `with-sig))
+              (if-meta (is-nil borrow-var-list)
+                `(,bind * * ,(with-internal bind let-body) ,(λ `(,var-name) (with-internal bind rest)))
+                (with-internal bind
+                  `((let ,s @,let-body')
+                    ,(sigma-elimination var-list s (with-internal bind rest))))))))))))
 
 (define-macro-variadic with (bind es)
   (with-internal bind es))
@@ -221,6 +246,7 @@
           ,(lambda lam-args
             `(,(head bt) @,args)))))))
 
+; fixme: xtsのほうで名前が重複していてもエラーになるのでreplace-if-holeをほどこすこと。
 ; fixme: コンストラクタの名前をそのまま使うと、その名前の変数がすでに定義されていたときに壊れるので修正。
 ; たとえばtrueが (i1 1) で定義されてるときに (data bool () (true) (false)) ってやると壊れる。
 ; 対策としては、trueって名前のかわりにbool.trueって名前を使うようにすればよいでしょう。

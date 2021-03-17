@@ -4,63 +4,39 @@
 
 (include "./memory.neut")
 
-(include "./raw-string.neut")
+(include "./array.neut")
 
-(use unsafe)
+; irreducibleに設定できるとうれしい？
+(define string
+  i8-array)
 
-(define-resource-type safe-string
-  ; ptr -> ()
-  (lambda (x)
-    (with identity.bind
-      (let p (cast pointer (tensor i64 pointer) x))
-      (tensor-elimination (_ value) p
-        (with identity.bind
-          (free pointer value)
-          (tensor-introduction)))))
-  ; ptr -> (ptr, ptr)
-  (lambda (x)
-    (with identity.bind
-      (let p (cast pointer (tensor i64 pointer) x))
-      (tensor-elimination (length value) p
-        (with identity.bind
-          (let q (malloc length))
-          (copy-i8-array q value length 0)
-          (tensor-introduction
-            (cast (tensor i64 pointer) pointer (tensor-introduction length q))
-            (cast (tensor i64 pointer) pointer (tensor-introduction length value))))))))
-
-(use os)
-
-(define-macro safe-string.new (str)
-  `(unsafe.cast (tensor i64 unsafe.pointer) safe-string
-     (tensor-introduction
-       ,(meta.leaf.from-int (meta.node.length (meta.leaf.string-to-u8-list str)))
-       ,(raw-string.new str))))
-
-(define safe-string.length ((str safe-string))
-  (witness (product safe-string i64)
-    admit))
+(define-macro string.new (str)
+  (i8-array.new (meta.node.map (lambda-meta (x) `(i8 ,x)) (meta.leaf.string-to-i8-list str))))
 
 (define print-character ((value i8))
   (with identity.bind
-    (let p (malloc 1))
-    (store-with-offset p i8 value 0)
-    (let len (write stdout &p 1))
-    (free pointer p)
+    (let p (memory.allocate 1))
+    ((memory.store-with-index i8 0) i8 value p)
+    (let len (os.write os.stdout &p 1))
+    (memory.deallocate unsafe.pointer p)
     top.unit))
 
-(define safe-string.print ((str safe-string))
-  (witness (product safe-string i64)
+(define string.print ((str string))
+  (witness (product string i64)
     (with identity.bind
-      (let str' (cast safe-string (tensor i64 pointer) str))
+      (let str' (unsafe.cast string (tensor i64 unsafe.pointer) str))
       (tensor-elimination (n content) str'
         (with identity.bind
-          (let wrote-length (write stdout &content n))
-          ; (print-character 97)
-          (let str'' (cast (tensor i64 pointer) safe-string (tensor-introduction n content)))
+          (let wrote-length (os.write os.stdout &content n))
+          (let str'' (unsafe.cast (tensor i64 unsafe.pointer) string (tensor-introduction n content)))
           (tuple str'' wrote-length))))))
 
-(define-macro safe-string.print-literal (str)
-  `(safe-string.print ,(safe-string.new str)))
+(define-macro string.print-literal (str)
+  `(string.print ,(string.new str)))
 
-(unuse os)
+; こっちは自動コピーされるやつなのでコンパイルした結果のコードがちょっと大きくなる。
+(reduce
+  (let foo (string.new "hello"))
+  (string.print &foo)
+  (string.print &foo)
+  (string.print foo))

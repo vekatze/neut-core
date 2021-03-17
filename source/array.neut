@@ -1,0 +1,154 @@
+(include "./memory.neut")
+
+(define pointer-array
+  (tensor tau i64 unsafe.pointer))
+
+(define primitive-array
+  (tensor i64 unsafe.pointer))
+
+(define-macro create-array (low-type rest)
+  `(derangement (create-array ,low-type) unsafe.pointer
+     @,(meta.node.map (lambda-meta (x) `(affine ,x)) rest)))
+
+(define-macro copy-array-elements (low-type)
+  (fix `self `((dest unsafe.pointer) (src unsafe.pointer) (high-type tau) (len i64) (count i64))
+    (witness (tensor)
+      (if `(icmp-sge-i64 count len)
+        (tensor-introduction)
+        (with `identity.bind
+          `(let val (,(memory.load-with-index low-type `count) high-type src))
+          `(,(memory.store-with-index low-type `count) high-type val dest)
+          `(self dest src high-type len (add-i64 count 1)))))))
+
+(define-macro discard-array-elements (low-type)
+  (fix `self `((src unsafe.pointer) (high-type tau) (len i64) (count i64))
+    (witness (tensor)
+      (if `(icmp-sge-i64 count len)
+        (tensor-introduction)
+        (with `identity.bind
+          `(let val (,(memory.load-with-index low-type `count) high-type src))
+          `(self src high-type len (add-i64 count 1))))))) ; (val : high-type) isn't used, and thus is discarded as high-type
+
+(define-macro array-introduction (low-type high-type rest)
+  (begin-meta
+    (let arr (meta.leaf.new-symbol `array))
+    (let len-info (meta.leaf.from-int (meta.node.length rest)))
+    (with `identity.bind
+     `(let ,arr ,(create-array low-type rest))
+     `(tensor-introduction ,high-type (i64 ,len-info) ,arr))))
+
+(define-macro array-access (low-type xs index)
+  (begin-meta
+    (let value-var (meta.leaf.new-symbol `elem))
+    (let content-var (meta.leaf.new-symbol `content))
+    (let high-type (meta.leaf.new-symbol `high-type))
+    (let len-var (meta.leaf.new-symbol `len))
+    (witness (product `pointer-array `unsafe.pointer)
+      (tensor-elimination `((,high-type tau) (,len-var i64) (,content-var unsafe.pointer)) xs
+        (with `identity.bind
+         `(let ,value-var (,(memory.load-with-index low-type index) ,high-type ,content-var))
+         `(,(memory.store-with-offset low-type index) ,high-type ,value-var ,content-var)
+          (tuple (tensor-introduction high-type len-var content-var) `(unsafe.cast ,high-type unsafe.pointer ,value-var)))))))
+
+(define-macro primitive-array-introduction (low-type rest)
+  (begin-meta
+    (let arr (meta.leaf.new-symbol `array))
+    (let len-info (meta.leaf.from-int (meta.node.length rest)))
+    (with `identity.bind
+     `(let ,arr ,(create-array low-type rest))
+     `(tensor-introduction (i64 ,len-info) ,arr))))
+
+(define-macro primitive-array-access (low-type xs index)
+  (begin-meta
+    (let value-var (meta.leaf.new-symbol `elem))
+    (let content-var (meta.leaf.new-symbol `content))
+    (let len-var (meta.leaf.new-symbol `len))
+    (witness (product `primitive-array `unsafe.pointer)
+      (tensor-elimination `((,len-var i64) (,content-var unsafe.pointer)) xs
+        (with `identity.bind
+         `(let ,value-var (,(memory.load-with-index low-type index) ,low-type ,content-var))
+         `(,(memory.store-with-offset low-type index) ,low-type ,value-var ,content-var)
+          (tuple (tensor-introduction len-var content-var) `(unsafe.cast ,low-type unsafe.pointer ,value-var)))))))
+
+(define-macro array-template (name low-type)
+ `(define-resource-type ,name
+    ; ptr -> ()
+   ,(lambda `(x)
+      (with `identity.bind
+       `(let p (unsafe.cast unsafe.pointer pointer-array x))
+        (tensor-elimination `(high-type length value) `p
+          (with `identity.bind
+           `(,(discard-array-elements low-type) value high-type length 0)
+           `(memory.deallocate unsafe.pointer value)
+           `(tensor-introduction)))))
+    ; ptr -> (ptr, ptr)
+   ,(lambda `(x)
+      (with `identity.bind
+       `(let p (unsafe.cast unsafe.pointer pointer-array x))
+        (tensor-elimination `(high-type length value) `p
+          (with `identity.bind
+           `(let q (memory.allocate (mul-i64 length 8)))
+           `(,(copy-array-elements low-type) q value high-type length 0)
+           `(tensor-introduction
+              (unsafe.cast pointer-array unsafe.pointer (tensor-introduction high-type length q))
+              (unsafe.cast pointer-array unsafe.pointer (tensor-introduction high-type length value)))))))))
+
+(define-macro primitive-array-template (name low-type)
+ `(define-resource-type ,name
+    ; ptr -> ()
+   ,(lambda `(x)
+      (with `identity.bind
+       `(let p (unsafe.cast unsafe.pointer primitive-array x))
+        (tensor-elimination `(length value) `p
+          (with `identity.bind
+           `(memory.deallocate unsafe.pointer value)
+           `(tensor-introduction)))))
+    ; ptr -> (ptr, ptr)
+   ,(lambda `(x)
+      (with `identity.bind
+       `(let p (unsafe.cast unsafe.pointer primitive-array x))
+        (tensor-elimination `(length value) `p
+          (with `identity.bind
+           `(let q (memory.allocate (mul-i64 length ,(meta.leaf.from-int (meta.size-of low-type))))) ; sizeがいる。修正した。はい。
+           `(,(copy-array-elements low-type) q value ,low-type length 0)
+           `(tensor-introduction
+              (unsafe.cast primitive-array unsafe.pointer (tensor-introduction length q))
+              (unsafe.cast primitive-array unsafe.pointer (tensor-introduction length value)))))))))
+
+; type definitions
+(array-template pointer-array (pointer i8))
+(primitive-array-template i8-array i8)
+(primitive-array-template i16-array i16)
+(primitive-array-template i32-array i32)
+(primitive-array-template i64-array i64)
+(primitive-array-template f16-array f16)
+(primitive-array-template f32-array f32)
+(primitive-array-template f64-array f64)
+
+; introduction
+(define-macro pointer-array.new (rest) `(unsafe.cast pointer-array pointer-array ,(array-introduction `(pointer i8) `unsafe.pointer rest)))
+(define-macro i8-array.new (rest)  `(unsafe.cast primitive-array i8-array  ,(primitive-array-introduction `i8  rest)))
+(define-macro i16-array.new (rest) `(unsafe.cast primitive-array i16-array ,(primitive-array-introduction `i16 rest)))
+(define-macro i32-array.new (rest) `(unsafe.cast primitive-array i32-array ,(primitive-array-introduction `i32 rest)))
+(define-macro i64-array.new (rest) `(unsafe.cast primitive-array i64-array ,(primitive-array-introduction `i64 rest)))
+(define-macro f16-array.new (rest) `(unsafe.cast primitive-array f16-array ,(primitive-array-introduction `f16 rest)))
+(define-macro f32-array.new (rest) `(unsafe.cast primitive-array f32-array ,(primitive-array-introduction `f32 rest)))
+(define-macro f64-array.new (rest) `(unsafe.cast primitive-array f64-array ,(primitive-array-introduction `f64 rest)))
+(define-macro-variadic pointer-array-introduction (rest) (pointer-array.new rest))
+(define-macro-variadic i8-array-introduction  (rest) (i8-array.new  rest))
+(define-macro-variadic i16-array-introduction (rest) (i16-array.new rest))
+(define-macro-variadic i32-array-introduction (rest) (i32-array.new rest))
+(define-macro-variadic i64-array-introduction (rest) (i64-array.new rest))
+(define-macro-variadic f16-array-introduction (rest) (f16-array.new rest))
+(define-macro-variadic f32-array-introduction (rest) (f32-array.new rest))
+(define-macro-variadic f64-array-introduction (rest) (f64-array.new rest))
+
+; elimination
+(define pointer-array-access (xs index) (array-access (pointer i8) xs index))
+(define i8-array-access (xs index)  (primitive-array-access i8 xs index))
+(define i16-array-access (xs index) (primitive-array-access i16 xs index))
+(define i32-array-access (xs index) (primitive-array-access i32 xs index))
+(define i64-array-access (xs index) (primitive-array-access i64 xs index))
+(define f16-array-access (xs index) (primitive-array-access f16 xs index))
+(define f32-array-access (xs index) (primitive-array-access f32 xs index))
+(define f64-array-access (xs index) (primitive-array-access f64 xs index))

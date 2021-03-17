@@ -33,10 +33,3 @@
 
 (define-macro string.print-literal (str)
   `(string.print ,(string.new str)))
-
-; こっちは自動コピーされるやつなのでコンパイルした結果のコードがちょっと大きくなる。
-(reduce
-  (let foo (string.new "hello"))
-  (string.print &foo)
-  (string.print &foo)
-  (string.print foo))

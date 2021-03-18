@@ -13,8 +13,8 @@
 (define calculate-pointer ((p unsafe.pointer) (offset i64))
   (witness unsafe.pointer
     (with identity.bind
-      (let p' (unsafe.cast unsafe.pointer i64 p))
-      (let new-pointer (add-i64 p' offset))
+      (let p (unsafe.cast unsafe.pointer i64 p))
+      (let new-pointer (add-i64 p offset))
       (unsafe.cast i64 unsafe.pointer new-pointer))))
 
 ; `(,(store i8) some-pointer value)みたいにして使う。

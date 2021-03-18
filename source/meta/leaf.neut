@@ -2,10 +2,6 @@
 
 (section meta.leaf)
 
-(use meta)
-
-(use meta.node)
-
 (define-macro unit
   (leaf))
 
@@ -15,9 +11,9 @@
     x))
 
 (define-macro concat-internal (args)
-  (if-meta (is-nil (tail args))
-    (head args)
-    (mul (head args) (concat-internal (tail args)))))
+  (if-meta (meta.is-nil (meta.node.tail args))
+    (meta.node.head args)
+    (mul (meta.node.head args) (concat-internal (meta.node.tail args)))))
 
 (define-macro-variadic concat (args)
   (concat-internal args))

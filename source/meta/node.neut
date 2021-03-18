@@ -2,12 +2,10 @@
 
 (section meta.node)
 
-(use meta)
-
 ; haskellのdata.listを参考にしつつ。
 
 (define-macro fold (f z xs)
-  (if-meta (is-nil xs)
+  (if-meta (meta.is-nil xs)
     z
     (f (head xs) (fold f z (tail xs)))))
 

@@ -23,7 +23,7 @@
   (witness top
     (if (icmp-slt-i64 x 0)
       (with identity.bind
-        (safe-string.print-literal "-")
+        (string.print-literal "-")
         (print (negate x)))
       (if (icmp-slt-i64 x 10)
         (print-digit x)

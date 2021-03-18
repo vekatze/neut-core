@@ -116,7 +116,7 @@
               (unsafe.cast primitive-array unsafe.pointer (tensor-introduction length value)))))))))
 
 ; type definitions
-(array-template pointer-array (pointer i8))
+(array-template object-array (pointer i8))
 (primitive-array-template i8-array i8)
 (primitive-array-template i16-array i16)
 (primitive-array-template i32-array i32)
@@ -126,7 +126,7 @@
 (primitive-array-template f64-array f64)
 
 ; introduction
-(define-macro pointer-array.new (rest) `(unsafe.cast pointer-array pointer-array ,(array-introduction `(pointer i8) `unsafe.pointer rest)))
+(define-macro object-array.new (rest) `(unsafe.cast object-array object-array ,(array-introduction `(pointer i8) `unsafe.pointer rest)))
 (define-macro i8-array.new (rest)  `(unsafe.cast primitive-array i8-array  ,(primitive-array-introduction `i8  rest)))
 (define-macro i16-array.new (rest) `(unsafe.cast primitive-array i16-array ,(primitive-array-introduction `i16 rest)))
 (define-macro i32-array.new (rest) `(unsafe.cast primitive-array i32-array ,(primitive-array-introduction `i32 rest)))
@@ -134,7 +134,7 @@
 (define-macro f16-array.new (rest) `(unsafe.cast primitive-array f16-array ,(primitive-array-introduction `f16 rest)))
 (define-macro f32-array.new (rest) `(unsafe.cast primitive-array f32-array ,(primitive-array-introduction `f32 rest)))
 (define-macro f64-array.new (rest) `(unsafe.cast primitive-array f64-array ,(primitive-array-introduction `f64 rest)))
-(define-macro-variadic pointer-array-introduction (rest) (pointer-array.new rest))
+(define-macro-variadic object-array-introduction (rest) (object-array.new rest))
 (define-macro-variadic i8-array-introduction  (rest) (i8-array.new  rest))
 (define-macro-variadic i16-array-introduction (rest) (i16-array.new rest))
 (define-macro-variadic i32-array-introduction (rest) (i32-array.new rest))
@@ -144,7 +144,7 @@
 (define-macro-variadic f64-array-introduction (rest) (f64-array.new rest))
 
 ; elimination
-(define pointer-array-access (xs index) (array-access (pointer i8) xs index))
+(define object-array-access (xs index) (array-access (pointer i8) xs index))
 (define i8-array-access (xs index)  (primitive-array-access i8 xs index))
 (define i16-array-access (xs index) (primitive-array-access i16 xs index))
 (define i32-array-access (xs index) (primitive-array-access i32 xs index))

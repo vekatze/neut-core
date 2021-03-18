@@ -6,12 +6,13 @@
 
 (include "./array.neut")
 
-; irreducibleに設定できるとうれしい？
 (define string
   i8-array)
 
+; (set-as-opaque string)
+
 (define-macro string.new (str)
-  (i8-array.new (meta.node.map (lambda-meta (x) `(i8 ,x)) (meta.leaf.string-to-i8-list str))))
+  `(unsafe.cast i8-array string ,(i8-array.new (meta.node.map (lambda-meta (x) `(i8 ,x)) (meta.leaf.string-to-i8-list str)))))
 
 (define print-character ((value i8))
   (with identity.bind
@@ -24,12 +25,19 @@
 (define string.print ((str string))
   (witness (product string i64)
     (with identity.bind
-      (let str' (unsafe.cast string (tensor i64 unsafe.pointer) str))
-      (tensor-elimination (n content) str'
+      (let str (unsafe.cast string (tensor i64 unsafe.pointer) str))
+      (tensor-elimination (n content) str
         (with identity.bind
           (let wrote-length (os.write os.stdout &content n))
-          (let str'' (unsafe.cast (tensor i64 unsafe.pointer) string (tensor-introduction n content)))
-          (tuple str'' wrote-length))))))
+          (let str (unsafe.cast (tensor i64 unsafe.pointer) string (tensor-introduction n content)))
+          (tuple str wrote-length))))))
 
 (define-macro string.print-literal (str)
   `(string.print ,(string.new str)))
+
+(reduce
+  (let a (string.new "hello"))
+  (string.print a)
+  (string.print (string.new "hello"))
+  ;(string.print-literal "hello")
+  )

@@ -16,7 +16,6 @@
 (define stderr
   file-descriptor.stderr)
 
-(use unsafe)
 
 
 ; (section os)

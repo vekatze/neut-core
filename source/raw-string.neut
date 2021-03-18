@@ -6,12 +6,10 @@
 
 (include "./array.neut")
 
-(use unsafe)
+; (define-macro raw-string.new (str)
+;   (i8-array.new (meta.leaf.string-to-u8-list str)))
 
-(define-macro raw-string.new (str)
-  (array.i8-array-introduction-non-variadic (meta.leaf.string-to-u8-list str)))
-
-(dry-expand (raw-string.new "hello"))
+; (dry-expand (raw-string.new "hello"))
 
 ; (define copy-i8-array ((dest pointer) (src pointer) (len i64) (count i64))
 ;   (witness top
@@ -21,6 +19,3 @@
 ;         (let val ((memory.load-with-offset i8 count) i8 src)) ; load-with-offsetはマクロ（構文）なので引数はすべて自動でquoteされることに注意。
 ;         ((memory.store-with-offset i8 count) i8 val dest)
 ;         (copy-i8-array dest src len (add-i64 count 1))))))
-
-
-(unuse unsafe)

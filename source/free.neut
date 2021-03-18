@@ -7,8 +7,8 @@
 (include "./identity.neut")
 
 (define-data free ((g (hom tau tau)) (a tau))
-  (leaf (_ a))
-  (node
+  (pure (_ a))
+  (impure
     (b tau)
     (_ (g b))
     (_ (hom b (free g a)))))
@@ -21,13 +21,13 @@
     (λ (a b f m)
       (free.case (free g b) g a m
         (λ (x)
-          (leaf g b (f x)))
+          (pure g b (f x)))
         (λ (p val k)
           (with identity.bind
-            (let f'
+            (let h
               (λ ((z p))
                 ((map g) a b f (k z))))
-            (node g b p val f')))))))
+            (impure g b p val h)))))))
 
 (define as-functor
   ((g (hom tau tau)))
@@ -40,7 +40,7 @@
   ((g (hom tau tau)))
   (witness (return-type (free g _))
     (λ (a x)
-      (leaf g a x))))
+      (pure g a x))))
 
 (define bind
   ((g (hom tau tau)))
@@ -49,9 +49,9 @@
       (free.case (free g b) g a m
         (λ (x)
           (k x))
-        (λ (p val k')
-          (node g b p val
-            (λ (v) ((bind g) a b (k' v) k))))))))
+        (λ (p val h)
+          (impure g b p val
+            (λ (v) ((bind g) a b (h v) k))))))))
 
 (define as-monad
   ((g (hom tau tau)))

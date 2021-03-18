@@ -2,8 +2,6 @@
 
 (include "./monad.neut")
 
-(use top)
-
 (define state
   ((s tau))
   (witness (hom tau tau)
@@ -46,7 +44,7 @@
   ((s tau)
    (env s))
   (witness ((state s) top)
-    (λ (_) (tuple env unit))))
+    (λ (_) (tuple env top.unit))))
 
 (define as-functor
   ((s tau))

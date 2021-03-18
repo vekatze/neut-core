@@ -16,21 +16,19 @@
 (define stderr
   file-descriptor.stderr)
 
-(use unsafe)
-
-(define read ((in file-descriptor) (buf pointer) (len i64))
-  (witness (product pointer i64)
+(define read ((in file-descriptor) (buf unsafe.pointer) (len i64))
+  (witness (product unsafe.pointer i64)
     (derangement (syscall 0) i64 (affine in) (linear buf) (affine len))))
 
-(define write ((out file-descriptor) (buf pointer) (len i64))
-  (witness (product pointer i64)
+(define write ((out file-descriptor) (buf unsafe.pointer) (len i64))
+  (witness (product unsafe.pointer i64)
     (derangement (syscall 1) i64 (affine out) (linear buf) (affine len))))
 
 (define exit ((A tau) (status i64))
   (derangement (syscall 60) A (affine status)))
 
-(define open ((path pointer) (flags i64) (mode i64))
-  (witness (product pointer file-descriptor)
+(define open ((path unsafe.pointer) (flags i64) (mode i64))
+  (witness (product unsafe.pointer file-descriptor)
     (derangement (syscall 2) file-descriptor (linear path) (affine flags) (affine mode))))
 
 (define close ((f file-descriptor))
@@ -128,8 +126,6 @@
 ;     ((sock i64)
 ;      (backlog i64))
 ;     i64))
-
-(unuse unsafe)
 
 (end os)
 

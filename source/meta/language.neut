@@ -48,6 +48,9 @@
 (define-macro define-resource-type (name discarder copier)
   `(define-resource-type ,name ,discarder ,copier))
 
+(define-macro set-as-opaque (x)
+  `(set-as-opaque ,x))
+
 (define-macro-variadic statement (stmt-list)
   `(statement @,stmt-list))
 
@@ -187,7 +190,6 @@
     `(,(take-borrowed-vars-meta xs)
       ,(map (lambda-meta (x) (drop-char-meta `& x)) xs))))
 
-; fixme: (let x e)のところが((foo bar) buz)みたいな形になっているとエラーになるので修正すること
 ; fixme: (monadic) delimited continuationもたぶんカンタンに実装できるのでやってみるとよい。
 ;    (with bind
 ;      (let-shift x k body)
@@ -216,12 +218,11 @@
               (let borrow-info (obtain-borrow-info-meta last-term))
               (let borrow-var-list (nth 0 borrow-info))
               (let var-list `(@,borrow-var-list ,var-name))
-              (let let-body' `(@,(init let-body) ,(nth 1 borrow-info)))
               (let s (leaf.new-symbol `with-sig))
               (if-meta (is-nil borrow-var-list)
                 `(,bind * * ,(with-internal bind let-body) ,(λ `(,var-name) (with-internal bind rest)))
                 (with-internal bind
-                  `((let ,s @,let-body')
+                  `((let ,s @,`(@,(init let-body) ,(nth 1 borrow-info)))
                     ,(sigma-elimination var-list s (with-internal bind rest))))))))))))
 
 (define-macro-variadic with (bind es)

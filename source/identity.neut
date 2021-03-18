@@ -2,8 +2,6 @@
 
 (include "./monad.neut")
 
-(use top)
-
 (define identity ((a tau))
   (witness tau
     a))

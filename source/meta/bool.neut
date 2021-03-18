@@ -2,34 +2,32 @@
 
 (section meta.bool)
 
-(use meta)
-
 (define-macro and (b1 b2)
   (if-meta b1
     (if-meta b2
       `true
-      nil)
-    nil))
+      meta.nil)
+    meta.nil))
 
 (define-macro or (b1 b2)
   (if-meta b1
     `true
     (if-meta b2
       `true
-      nil)))
+      meta.nil)))
 
 (define-macro xor (b1 b2)
   (if-meta b1
     (if-meta b2
-      nil
+      meta.nil
       `true)
     (if-meta b2
       `true
-      nil)))
+      meta.nil)))
 
 (define-macro not (b)
   (if-meta b
-    nil
+    meta.nil
     `true))
 
 (end meta.bool)

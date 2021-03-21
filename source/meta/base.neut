@@ -1,7 +1,7 @@
 (section meta)
 
-(define-macro nil
-  `())
+; (define-macro nil
+;   `())
 
 (define-macro compose (f g)
   (lambda-meta (x) (f (g x))))

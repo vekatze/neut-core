@@ -19,10 +19,10 @@
   ((g (hom tau tau)))
   (witness (functor-type (free g _))
     (λ (a b f m)
-      (free.case (free g b) g a m
-        (λ (x)
+      (case m
+        ((pure x)
           (pure g b (f x)))
-        (λ (p val k)
+        ((impure p val k)
           (with identity.bind
             (let h
               (λ ((z p))
@@ -46,10 +46,10 @@
   ((g (hom tau tau)))
   (witness (bind-type (free g _))
     (λ (a b m k)
-      (free.case (free g b) g a m
-        (λ (x)
+      (case m
+        ((pure x)
           (k x))
-        (λ (p val h)
+        ((impure p val h)
           (impure g b p val
             (λ (v) ((bind g) a b (h v) k))))))))
 

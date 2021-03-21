@@ -22,7 +22,7 @@
 
 (include "./memory.neut")
 
-(include "./raw-string.neut")
+; (include "./raw-string.neut")
 
 (include "./string.neut")
 

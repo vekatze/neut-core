@@ -4,12 +4,6 @@
 
 (include "./bool.neut")
 
-(include "./identity.neut")
-
-(include "./string.neut")
-
-(include "./integer.neut")
-
 (define-data list ((a tau))
   (nil)
   (cons (_ a) (_ (list a))))
@@ -28,20 +22,20 @@
   ((a tau)
    (xs (list a)))
   (witness (option a)
-    (list.case (option a) a xs
-      (λ ()
+    (case xs
+      ((nil)
         (option.none a))
-      (λ (h _)
+      ((cons h _)
         (option.some a h)))))
 
 (define length
   ((a tau)
    (xs (list a)))
   (witness i64
-    (list.case i64 a xs
-      (λ ()
+    (case xs
+      ((nil)
         0)
-      (λ (_ ys)
+      ((cons _ ys)
         (add-i64 1 (length a ys))))))
 
 (define append
@@ -49,20 +43,20 @@
    (xs (list a))
    (ys (list a)))
   (witness (list a)
-    (list.case (list a) a xs
-      (λ ()
+    (case xs
+      ((nil)
         ys)
-      (λ (z zs)
+      ((cons z zs)
         (cons * z (append * zs ys))))))
 
 (define is-null
   ((a tau)
    (xs (list a)))
   (witness bool
-    (list.case bool a xs
-      (λ ()
+    (case xs
+      ((nil)
         bool.true)
-      (λ (_ _)
+      ((cons _ _)
         bool.false))))
 
 (define map
@@ -71,10 +65,10 @@
    (f (hom a b))
    (xs (list a)))
   (witness (list b)
-    (list.case (list b) a xs
-      (λ ()
+    (case xs
+      ((nil)
         (nil b))
-      (λ (y acc)
+      ((cons y acc)
         (cons b (f y) (map a b f acc))))))
 
 ; (define return
@@ -93,10 +87,10 @@
   ((a tau)
    (m (list (list a))))
   (witness (list a)
-    (list.case (list a) (list a) m
-      (λ ()
+    (case m
+      ((nil)
         (nil a))
-      (λ (xs xss)
+      ((cons xs xss)
         (append * xs (concatenate * xss))))))
 
 (define bind

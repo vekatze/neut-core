@@ -168,7 +168,7 @@
 
 (define-macro is-borrowed-var-meta (x)
   (if-meta (is-node x)
-    nil
+    `()
     (leaf.equal `& (head (leaf.uncons x)))))
 
 (define-macro take-borrowed-vars-meta (xs)
@@ -244,8 +244,8 @@
     (define constructor-name constructor-args
       (witness inductive-type
         `(unsafe.cast ,base-type ,inductive-type
-          ,(lambda lam-args
-            `(,(head bt) @,args)))))))
+           (Π-introduction-constructor ,a ,constructor-name ,lam-args
+             (,(head bt) @,args)))))))
 
 ; fixme: xtsのほうで名前が重複していてもエラーになるのでreplace-if-holeをほどこすこと。
 ; fixme: コンストラクタの名前をそのまま使うと、その名前の変数がすでに定義されていたときに壊れるので修正。
@@ -265,17 +265,22 @@
     ; definition of constructors
     (let introduction-rule-list (map (to-constructor lam-args base-type a xts _) bts))
     ; definition of destructors
-    (let v (leaf.new-symbol `value))
-    (let formal-args `(((unsafe.cast ,inductive-type ,base-type ,v) ,inductive-type) (,Z tau) @,type-list))
-    (let elimination-rule
-      (define (leaf.concat a `.case) `((,Z tau) @,xts (,v ,inductive-type) @,type-list)
-        (witness Z
-          (map head formal-args))))
+    ; (let v (leaf.new-symbol `value))
+    ; (let formal-args `(((unsafe.cast ,inductive-type ,base-type ,v) ,inductive-type) (,Z tau) @,type-list))
+    ; (let elimination-rule
+    ;   (define (leaf.concat a `.case) `((,Z tau) @,xts (,v ,inductive-type) @,type-list)
+    ;     (witness Z
+    ;       (map head formal-args))))
+    ; get list of constructor names
+    (let bs (map (leaf.concat a `. _) (map head bts)))
     ; summing up the result
     `(statement
         ,formation-rule
+        (set-as-opaque ,a)
+        (set-as-data ,a ,(meta.leaf.from-int (length xts)) @,bs)
         @,introduction-rule-list
-        ,elimination-rule)))
+        ; ,elimination-rule
+        )))
 
 (define-macro codata.generate-projection (name xts yts y result-type)
   (begin-meta
@@ -287,7 +292,19 @@
     (let proj-type (forall base-args result-type))
     `(define (,(leaf.concat name `. y) ,proj-type)
        ,(lambda base-args
-          `(,case ,result-type @,form-args ,record-var ,(lambda yts y))))))
+          `(case ,record-var ((,(leaf.concat name `.new) @,yts) ,y))))))
+
+; (define-macro codata.generate-projection (name xts yts y result-type)
+;   (begin-meta
+;     (let form-args (map head xts))
+;     (let app `(,name @,form-args))
+;     (let record-var (leaf.new-symbol `rec))
+;     (let base-args `(@,xts (,record-var ,app)))
+;     (let case (leaf.concat name `.case))
+;     (let proj-type (forall base-args result-type))
+;     `(define (,(leaf.concat name `. y) ,proj-type)
+;        ,(lambda base-args
+;           `(,case ,result-type @,form-args ,record-var ,(lambda yts y))))))
 
 (define-macro-variadic define-codata (name xts yts)
   (begin-meta
@@ -296,7 +313,24 @@
     (let name-list (map (leaf.concat name `. _) proj-name-list))
     (let elimination-rule-list
       (map (lambda-meta (yt) (codata.generate-projection name xts yts (nth 0 yt) (nth 1 yt))) yts))
+    (dump elimination-rule-list)
     `(statement
        ,(define-data name xts
           `(new @,yts))
        @,elimination-rule-list)))
+
+; (define functor-type ((m (hom tau tau)))
+;   (Π
+;     ((a tau)
+;      (b tau)
+;      (_ (hom a b))
+;      (_ (m a)))
+;     (m b)))
+
+; (define-codata functor ((f (hom tau tau)))
+;   (map
+;     (functor-type f)))
+
+; (reduce ?functor.new)
+
+; (reduce ?functor.map)

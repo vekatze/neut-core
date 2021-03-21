@@ -13,10 +13,10 @@
 (define map
   (witness (functor-type option)
     (λ (a b f m)
-      (option.case (option b) a m
-        (λ ()
+      (case m
+        ((none)
           (none b))
-        (λ (x)
+        ((some x)
           (some b (f x)))))))
 
 (define return
@@ -27,10 +27,10 @@
 (define bind
   (witness (bind-type option)
     (λ (a b m k)
-      (option.case (option b) a m
-        (λ ()
+      (case m
+        ((none)
           (none b))
-        (λ (x)
+        ((some x)
           (k x))))))
 
 (define from-option
@@ -38,10 +38,10 @@
    (x a)
    (m (option a)))
   (witness a
-    (option.case a a m
-      (λ ()
+    (case m
+      ((none)
         x)
-      (λ (y)
+      ((some y)
         y))))
 
 (define as-functor

@@ -6,28 +6,28 @@
   (if-meta b1
     (if-meta b2
       `true
-      meta.nil)
-    meta.nil))
+      `())
+    `()))
 
 (define-macro or (b1 b2)
   (if-meta b1
     `true
     (if-meta b2
       `true
-      meta.nil)))
+      `())))
 
 (define-macro xor (b1 b2)
   (if-meta b1
     (if-meta b2
-      meta.nil
+      `()
       `true)
     (if-meta b2
       `true
-      meta.nil)))
+      `())))
 
 (define-macro not (b)
   (if-meta b
-    meta.nil
+    `()
     `true))
 
 (end meta.bool)

@@ -1,0 +1,127 @@
+(include "./noesis.neut")
+
+(include "./integer.neut")
+
+(define noema ((s subject) (a tau))
+  tau)
+
+(set-as-opaque noema)
+
+(define-irreducible noema.new ((s subject) (a tau) (x a))
+  (witness (noesis s (product a (noema s a)))
+    ((noesis.return s)
+      (product a (noema s a))
+      (with identity.bind
+        (let tmp (unsafe.cast a unsafe.pointer x))
+        (let x1 (unsafe.cast unsafe.pointer a tmp))
+        (let x2 (unsafe.cast unsafe.pointer (noema s a) tmp))
+        (tuple x1 x2)))))
+
+; (define-data list ((a tau))
+;   (nil)
+;   (cons (_ a) (_ (list a))))
+
+; (define length
+;   ((a tau)
+;    (xs (list a)))
+;   (witness i64
+;     (case xs
+;       ((list.nil)
+;         0)
+;       ((list.cons _ ys)
+;         (add-i64 1 (length a ys))))))
+
+(include "./identity.neut")
+
+; (define test
+;   ((a tau)
+;    (s subject)
+;    (xs (noema s (list a))))
+;   (with identity.bind
+;     (case (unsafe.cast (noema s *) * xs)
+;       ((list.nil)
+;         top.unit)
+;       ((list.cons foo bar)
+;          ((λ ((y *))
+;            top.unit)
+;          (unsafe.cast a (noema s a) foo))))))
+; list.consへの適用によって、foo : aは推論できるはずなんですが…？
+; fooのnoemaへのcastが不明になるのは、これは合ってる。でも、そこじゃないほうは……。
+; いや、fooが使用されていない以上、どこにcastされるべきかは不明だから、これが妥当か。
+
+; (define my-length-internal
+;   ((s subject)
+;    (a tau)
+;    (xs (noema s (list a)))
+;    (acc i64))
+;   (witness i64
+;     (case-noetic xs
+;       ((list.nil)
+;         10)
+;       ((list.cons _ _)
+;         20))))
+;         ; (my-length-internal s a ys (add-i64 acc 1))))))
+
+; (define my-length-internal
+;   ((s subject)
+;    (a tau)
+;    (xs (noema s (list a))))
+;   (witness i64
+;     (case-noetic xs
+;       ((list.nil)
+;         100)
+;       ((list.cons _ ys)
+;         (my-length-internal s a ys)))))
+
+
+; ; こっちのときはfreeされてるように見える
+; (define my-length-internal
+;   ((s subject)
+;    (a tau)
+;    (xs (noema s (list a)))
+;    (acc i64))
+;   (witness i64
+;     (with identity.bind
+;       (let foo xs)
+;       100)))
+;     ; (case-noetic xs
+;     ;   ((list.nil)
+;     ;     acc)
+;     ;   ((list.cons _ ys)
+;     ;     (my-length-internal s a ys (add-i64 acc 1))))))
+
+
+; (define my-length
+;   ((a tau)
+;    (xs (list a)))
+;   (witness (product (list a) i64)
+;     (noesis.run (product (list a) i64)
+;       (lambda ((s subject))
+;         (with (noesis.bind s)
+;           (let xs-ref (noema.new s (list a) &xs))
+;           ((noesis.return s) (product (list a) i64) (tuple xs (my-length-internal s a xs-ref 0))))))))
+
+; (define my-length-2
+;   ((a tau)
+;    (xsp (list a)))
+;   (witness i64
+;     (noesis.run i64
+;       (lambda ((s subject))
+;         (with (noesis.bind s)
+;           (let xs-ref (noema.new s (list a) &xsp)) ; ここで(xs, xs-ref)のうちxsはunusedだから捨てられる
+;           ((noesis.return s) i64 (my-length-internal s a xs-ref)))))))
+; ((noesis.return s) i64 (my-length-internal s a xs-ref 0)))))))
+
+; (define hogehoge
+;   (with identity.bind
+;     ; (let xs (list.cons top top.unit (list.cons top top.unit (list.cons top top.unit (list.nil top)))))
+;     ; (let foo xs)
+;     ; (let bar xs)
+;     (let xs (list.nil top))
+; ; (let val (my-length top &xs))
+;     (let val (my-length-2 top xs))
+;     val
+;     ; (let val2 (my-length-2 top xs))
+;     ; (i64.print val)
+;     ; (i64.print val2)
+;     ))

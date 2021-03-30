@@ -18,11 +18,13 @@
 
 (include "./state.neut")
 
+(include "./noesis.neut")
+
+(include "./noema.neut")
+
 (include "./free.neut")
 
 (include "./memory.neut")
-
-; (include "./raw-string.neut")
 
 (include "./string.neut")
 

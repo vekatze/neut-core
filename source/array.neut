@@ -81,7 +81,7 @@
            `(,(discard-array-elements low-type) value high-type length 0)
            `(memory.deallocate unsafe.pointer value)
            `(tensor-introduction)))))
-    ; ptr -> (ptr, ptr)
+    ; ptr -> ptr
    ,(lambda `(x)
       (with `identity.bind
        `(let p (unsafe.cast unsafe.pointer pointer-array x))
@@ -89,9 +89,53 @@
           (with `identity.bind
            `(let q (memory.allocate (mul-i64 length 8)))
            `(,(copy-array-elements low-type) q value high-type length 0)
-           `(tensor-introduction
-              (unsafe.cast pointer-array unsafe.pointer (tensor-introduction high-type length q))
-              (unsafe.cast pointer-array unsafe.pointer (tensor-introduction high-type length value)))))))))
+           `(unsafe.cast pointer-array unsafe.pointer (tensor-introduction high-type length q))))))))
+
+; (define-macro array-template (name low-type)
+;  `(define-resource-type ,name
+;     ; ptr -> ()
+;    ,(lambda `(x)
+;       (with `identity.bind
+;        `(let p (unsafe.cast unsafe.pointer pointer-array x))
+;         (tensor-elimination `(high-type length value) `p
+;           (with `identity.bind
+;            `(,(discard-array-elements low-type) value high-type length 0)
+;            `(memory.deallocate unsafe.pointer value)
+;            `(tensor-introduction)))))
+;     ; ptr -> (ptr, ptr)
+;    ,(lambda `(x)
+;       (with `identity.bind
+;        `(let p (unsafe.cast unsafe.pointer pointer-array x))
+;         (tensor-elimination `(high-type length value) `p
+;           (with `identity.bind
+;            `(let q (memory.allocate (mul-i64 length 8)))
+;            `(,(copy-array-elements low-type) q value high-type length 0)
+;            `(tensor-introduction
+;               (unsafe.cast pointer-array unsafe.pointer (tensor-introduction high-type length q))
+;               (unsafe.cast pointer-array unsafe.pointer (tensor-introduction high-type length value)))))))))
+
+
+; (define-macro primitive-array-template (name low-type)
+;  `(define-resource-type ,name
+;     ; ptr -> ()
+;    ,(lambda `(x)
+;       (with `identity.bind
+;        `(let p (unsafe.cast unsafe.pointer primitive-array x))
+;         (tensor-elimination `(length value) `p
+;           (with `identity.bind
+;            `(memory.deallocate unsafe.pointer value)
+;            `(tensor-introduction)))))
+;     ; ptr -> (ptr, ptr)
+;    ,(lambda `(x)
+;       (with `identity.bind
+;        `(let p (unsafe.cast unsafe.pointer primitive-array x))
+;         (tensor-elimination `(length value) `p
+;           (with `identity.bind
+;            `(let q (memory.allocate (mul-i64 length ,(meta.leaf.from-int (meta.size-of low-type))))) ; sizeがいる。修正した。はい。
+;            `(,(copy-array-elements low-type) q value ,low-type length 0)
+;            `(tensor-introduction
+;               (unsafe.cast primitive-array unsafe.pointer (tensor-introduction length q))
+;               (unsafe.cast primitive-array unsafe.pointer (tensor-introduction length value)))))))))
 
 (define-macro primitive-array-template (name low-type)
  `(define-resource-type ,name
@@ -103,7 +147,7 @@
           (with `identity.bind
            `(memory.deallocate unsafe.pointer value)
            `(tensor-introduction)))))
-    ; ptr -> (ptr, ptr)
+    ; ptr -> ptr
    ,(lambda `(x)
       (with `identity.bind
        `(let p (unsafe.cast unsafe.pointer primitive-array x))
@@ -111,9 +155,8 @@
           (with `identity.bind
            `(let q (memory.allocate (mul-i64 length ,(meta.leaf.from-int (meta.size-of low-type))))) ; sizeがいる。修正した。はい。
            `(,(copy-array-elements low-type) q value ,low-type length 0)
-           `(tensor-introduction
-              (unsafe.cast primitive-array unsafe.pointer (tensor-introduction length q))
-              (unsafe.cast primitive-array unsafe.pointer (tensor-introduction length value)))))))))
+           `(unsafe.cast primitive-array unsafe.pointer (tensor-introduction length q))))))))
+              ; (unsafe.cast primitive-array unsafe.pointer (tensor-introduction length value)))))))))
 
 ; type definitions
 (array-template object-array (pointer i8))

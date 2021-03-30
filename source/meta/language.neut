@@ -45,11 +45,23 @@
     `(define ,f ,(head rest))
     `(define ,f (fix ,f ,(head rest) ,(head (tail rest))))))
 
+; (define-macro-variadic define-irreducible (f rest)
+;   (if-meta (is-nil (tail rest))
+;     `(define ,f ,(head rest))
+;     `(define ,f (fix-irreducible ,f ,(head rest) ,(head (tail rest))))))
+
+(define-macro define-irreducible (f xts body)
+  `(define ,f (fix-irreducible ,f ,xts ,body)))
+
 (define-macro define-resource-type (name discarder copier)
   `(define-resource-type ,name ,discarder ,copier))
 
 (define-macro set-as-opaque (x)
   `(set-as-opaque ,x))
+
+(define-macro set-as-irreducible (x)
+  `(set-as-irreducible ,x))
+
 
 (define-macro-variadic statement (stmt-list)
   `(statement @,stmt-list))
@@ -160,6 +172,13 @@
   `(tensor-elimination ,xts ,e1 ,e2))
 
 
+    ; (noesis.run (product (list a) i64)
+    ;   (lambda ((s subject))
+    ;     (with (noesis.bind s)
+    ;       (let xs-noema (noema.new s (list a) &xs))
+    ;       ((noesis.return s) (product (list a) i64) (tuple xs (length-internal s a xs-noema 0))))))))
+
+
 ; (define-macro tuple
 ;   sigma-introduction)
 
@@ -227,6 +246,9 @@
 
 (define-macro-variadic with (bind es)
   (with-internal bind es))
+
+(define-macro-variadic with-region (s rest)
+  `(noesis.run * (Π-introduction ((,s subject)) ,(with-internal `(noesis.bind s) rest))))
 
 (define-macro-variadic destruct (e xts rest)
   (sigma-elimination xts e (with-internal `identity.bind rest)))
@@ -313,19 +335,38 @@
     (let name-list (map (leaf.concat name `. _) proj-name-list))
     (let elimination-rule-list
       (map (lambda-meta (yt) (codata.generate-projection name xts yts (nth 0 yt) (nth 1 yt))) yts))
-    (dump elimination-rule-list)
+    ; (dump elimination-rule-list)
     `(statement
        ,(define-data name xts
           `(new @,yts))
        @,elimination-rule-list)))
 
-; (define functor-type ((m (hom tau tau)))
-;   (Π
-;     ((a tau)
-;      (b tau)
-;      (_ (hom a b))
-;      (_ (m a)))
-;     (m b)))
+
+; (define unsafe.cast ((A tau) (B tau) (x A))
+;   (witness B
+;     (derangement nop B (affine x))))
+
+; (define-data list ((a tau))
+;   (nil)
+;   (cons (_ a) (_ (list a))))
+
+; (define length
+;   ((a tau)
+;    (xs (list a)))
+;   (witness i64
+;     (case xs
+;       ((list.nil)
+;         0)
+;       ((list.cons _ ys)
+;         (add-i64 1 (length a ys))))))
+
+
+
+
+
+; (define length-internal
+;   ((a tau)
+;   ))
 
 ; (define-codata functor ((f (hom tau tau)))
 ;   (map

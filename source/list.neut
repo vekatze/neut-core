@@ -4,6 +4,10 @@
 
 (include "./bool.neut")
 
+(include "./noesis.neut")
+
+(include "./noema.neut")
+
 (define-data list ((a tau))
   (nil)
   (cons (_ a) (_ (list a))))
@@ -28,15 +32,25 @@
       ((cons h _)
         (option.some a h)))))
 
+(define length-internal
+  ((s subject)
+   (a tau)
+   (xs (noema s (list a)))
+   (acc i64))
+  (witness i64
+    (case-noetic xs
+      ((list.nil)
+        acc)
+      ((list.cons _ ys)
+        (length-internal s a ys (add-i64 acc 1))))))
+
 (define length
   ((a tau)
    (xs (list a)))
-  (witness i64
-    (case xs
-      ((nil)
-        0)
-      ((cons _ ys)
-        (add-i64 1 (length a ys))))))
+  (witness (product (list a) i64)
+    (with-region s
+      (let xs-noema (noema.new s (list a) &xs))
+      ((noesis.return s) * (tuple xs (length-internal s a xs-noema 0))))))
 
 (define append
   ((a tau)
@@ -70,12 +84,6 @@
         (nil b))
       ((cons y acc)
         (cons b (f y) (map a b f acc))))))
-
-; (define return
-;   ((a tau)
-;    (x a))
-;   (witness (list a)
-;     (list.cons * x (list.nil a))))
 
 (define return
   ((a tau)

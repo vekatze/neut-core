@@ -35,9 +35,9 @@
 (define-macro string.print-literal (str)
   `(string.print ,(string.new str)))
 
-(reduce
-  (let a (string.new "hello"))
-  (string.print a)
-  (string.print (string.new "hello"))
-  ;(string.print-literal "hello")
-  )
+; (reduce
+;   (let a (string.new "hello"))
+;   (string.print a)
+;   (string.print (string.new "hello"))
+;   ;(string.print-literal "hello")
+;   )

@@ -63,12 +63,12 @@
     (let value-var (meta.leaf.new-symbol `elem))
     (let content-var (meta.leaf.new-symbol `content))
     (let len-var (meta.leaf.new-symbol `len))
-    (witness (product `primitive-array `unsafe.pointer)
+    (witness (product `primitive-array low-type)
       (tensor-elimination `((,len-var i64) (,content-var unsafe.pointer)) xs
         (with `identity.bind
          `(let ,value-var (,(memory.load-with-index low-type index) ,low-type ,content-var))
          `(,(memory.store-with-offset low-type index) ,low-type ,value-var ,content-var)
-          (tuple (tensor-introduction len-var content-var) `(unsafe.cast ,low-type unsafe.pointer ,value-var)))))))
+          (tuple (tensor-introduction len-var content-var) value-var))))))
 
 (define-macro array-template (name low-type)
  `(define-resource-type ,name
@@ -188,10 +188,26 @@
 
 ; elimination
 (define object-array-access (xs index) (array-access (pointer i8) xs index))
-(define i8-array-access (xs index)  (primitive-array-access i8 xs index))
-(define i16-array-access (xs index) (primitive-array-access i16 xs index))
-(define i32-array-access (xs index) (primitive-array-access i32 xs index))
-(define i64-array-access (xs index) (primitive-array-access i64 xs index))
-(define f16-array-access (xs index) (primitive-array-access f16 xs index))
-(define f32-array-access (xs index) (primitive-array-access f32 xs index))
-(define f64-array-access (xs index) (primitive-array-access f64 xs index))
+(define i8-array-access ((xs i8-array) (index i64))
+  (unsafe.cast (product primitive-array i8) (product i8-array i8) (primitive-array-access i8 (unsafe.cast i8-array primitive-array xs) index)))
+(define i16-array-access ((xs i16-array) (index i64))
+  (unsafe.cast (product primitive-array i16) (product i16-array i16) (primitive-array-access i16 (unsafe.cast i16-array primitive-array xs) index)))
+(define i32-array-access ((xs i32-array) (index i64))
+  (unsafe.cast (product primitive-array i32) (product i32-array i32) (primitive-array-access i32 (unsafe.cast i32-array primitive-array xs) index)))
+(define i64-array-access ((xs i64-array) (index i64))
+  (unsafe.cast (product primitive-array i64) (product i64-array i64) (primitive-array-access i64 (unsafe.cast i64-array primitive-array xs) index)))
+(define f16-array-access ((xs f16-array) (index i64))
+  (unsafe.cast (product primitive-array f16) (product f16-array f16) (primitive-array-access f16 (unsafe.cast f16-array primitive-array xs) index)))
+(define f32-array-access ((xs f32-array) (index i64))
+  (unsafe.cast (product primitive-array f32) (product f32-array f32) (primitive-array-access f32 (unsafe.cast f32-array primitive-array xs) index)))
+(define f64-array-access ((xs f64-array) (index i64))
+  (unsafe.cast (product primitive-array f64) (product f64-array f64) (primitive-array-access f64 (unsafe.cast f64-array primitive-array xs) index)))
+
+
+
+; (define i16-array-access (xs index) (primitive-array-access i16 xs index))
+; (define i32-array-access (xs index) (primitive-array-access i32 xs index))
+; (define i64-array-access (xs index) (primitive-array-access i64 xs index))
+; (define f16-array-access (xs index) (primitive-array-access f16 xs index))
+; (define f32-array-access (xs index) (primitive-array-access f32 xs index))
+; (define f64-array-access (xs index) (primitive-array-access f64 xs index))

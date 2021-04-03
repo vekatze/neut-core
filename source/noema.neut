@@ -1,6 +1,8 @@
 (include "./noesis.neut")
 
-(include "./integer.neut")
+(include "./identity.neut")
+
+; (include "./integer.neut")
 
 (define noema ((s subject) (a tau))
   tau)

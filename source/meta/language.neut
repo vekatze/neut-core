@@ -45,11 +45,6 @@
     `(define ,f ,(head rest))
     `(define ,f (fix ,f ,(head rest) ,(head (tail rest))))))
 
-; (define-macro-variadic define-irreducible (f rest)
-;   (if-meta (is-nil (tail rest))
-;     `(define ,f ,(head rest))
-;     `(define ,f (fix-irreducible ,f ,(head rest) ,(head (tail rest))))))
-
 (define-macro define-irreducible (f xts body)
   `(define ,f (fix-irreducible ,f ,xts ,body)))
 
@@ -61,7 +56,6 @@
 
 (define-macro set-as-irreducible (x)
   `(set-as-irreducible ,x))
-
 
 (define-macro-variadic statement (stmt-list)
   `(statement @,stmt-list))
@@ -171,20 +165,6 @@
 (define-macro tensor-elimination (xts e1 e2)
   `(tensor-elimination ,xts ,e1 ,e2))
 
-
-    ; (noesis.run (product (list a) i64)
-    ;   (lambda ((s subject))
-    ;     (with (noesis.bind s)
-    ;       (let xs-noema (noema.new s (list a) &xs))
-    ;       ((noesis.return s) (product (list a) i64) (tuple xs (length-internal s a xs-noema 0))))))))
-
-
-; (define-macro tuple
-;   sigma-introduction)
-
-; (define-macro construct
-;   sigma-introduction)
-
 (define-macro is-borrowed-var-meta (x)
   (if-meta (is-node x)
     `()
@@ -224,25 +204,26 @@
     (begin-meta
       (let e (head es))
       (let rest (tail es))
-      (if-meta (is-leaf e)
-        `(,bind * * ,e ,(λ `(_) (with-internal bind rest)))
-        (if-meta (is-node (nth 0 e))
-          (with-internal bind `((let _ ,e) @,rest))
-          (if-meta (bool.not (leaf.equal (nth 0 e) `let))
-            (with-internal bind `((let _ ,e) @,rest))
-            (begin-meta
-              (let var-name (nth 1 e))
-              (let let-body (tail (tail e)))
-              (let last-term (last let-body))
-              (let borrow-info (obtain-borrow-info-meta last-term))
-              (let borrow-var-list (nth 0 borrow-info))
-              (let var-list `(@,borrow-var-list ,var-name))
-              (let s (leaf.new-symbol `with-sig))
-              (if-meta (is-nil borrow-var-list)
-                `(,bind * * ,(with-internal bind let-body) ,(λ `(,var-name) (with-internal bind rest)))
-                (with-internal bind
-                  `((let ,s @,`(@,(init let-body) ,(nth 1 borrow-info)))
-                    ,(sigma-elimination var-list s (with-internal bind rest))))))))))))
+      (cond-meta
+        ((is-leaf e)
+         `(,bind * * ,e ,(λ `(_) (with-internal bind rest))))
+        ((is-node (nth 0 e))
+          (with-internal bind `((let _ ,e) @,rest)))
+        ((bool.not (leaf.equal (nth 0 e) `let))
+           (with-internal bind `((let _ ,e) @,rest)))
+        (begin-meta
+          (let var-name (nth 1 e))
+          (let let-body (tail (tail e)))
+          (let last-term (last let-body))
+          (let borrow-info (obtain-borrow-info-meta last-term))
+          (let borrow-var-list (nth 0 borrow-info))
+          (let var-list `(@,borrow-var-list ,var-name))
+          (let s (leaf.new-symbol `with-sig))
+          (if-meta (is-nil borrow-var-list)
+            `(,bind * * ,(with-internal bind let-body) ,(λ `(,var-name) (with-internal bind rest)))
+            (with-internal bind
+              `((let ,s @,`(@,(init let-body) ,(nth 1 borrow-info)))
+                ,(sigma-elimination var-list s (with-internal bind rest))))))))))
 
 (define-macro-variadic with (bind es)
   (with-internal bind es))
@@ -286,13 +267,6 @@
       (define a xts base-type))
     ; definition of constructors
     (let introduction-rule-list (map (to-constructor lam-args base-type a xts _) bts))
-    ; definition of destructors
-    ; (let v (leaf.new-symbol `value))
-    ; (let formal-args `(((unsafe.cast ,inductive-type ,base-type ,v) ,inductive-type) (,Z tau) @,type-list))
-    ; (let elimination-rule
-    ;   (define (leaf.concat a `.case) `((,Z tau) @,xts (,v ,inductive-type) @,type-list)
-    ;     (witness Z
-    ;       (map head formal-args))))
     ; get list of constructor names
     (let bs (map (leaf.concat a `. _) (map head bts)))
     ; summing up the result
@@ -301,7 +275,6 @@
         (set-as-opaque ,a)
         (set-as-data ,a ,(meta.leaf.from-int (length xts)) @,bs)
         @,introduction-rule-list
-        ; ,elimination-rule
         )))
 
 (define-macro codata.generate-projection (name xts yts y result-type)
@@ -316,18 +289,6 @@
        ,(lambda base-args
           `(case ,record-var ((,(leaf.concat name `.new) @,yts) ,y))))))
 
-; (define-macro codata.generate-projection (name xts yts y result-type)
-;   (begin-meta
-;     (let form-args (map head xts))
-;     (let app `(,name @,form-args))
-;     (let record-var (leaf.new-symbol `rec))
-;     (let base-args `(@,xts (,record-var ,app)))
-;     (let case (leaf.concat name `.case))
-;     (let proj-type (forall base-args result-type))
-;     `(define (,(leaf.concat name `. y) ,proj-type)
-;        ,(lambda base-args
-;           `(,case ,result-type @,form-args ,record-var ,(lambda yts y))))))
-
 (define-macro-variadic define-codata (name xts yts)
   (begin-meta
     (let xs (map head xts))
@@ -340,38 +301,3 @@
        ,(define-data name xts
           `(new @,yts))
        @,elimination-rule-list)))
-
-
-; (define unsafe.cast ((A tau) (B tau) (x A))
-;   (witness B
-;     (derangement nop B (affine x))))
-
-; (define-data list ((a tau))
-;   (nil)
-;   (cons (_ a) (_ (list a))))
-
-; (define length
-;   ((a tau)
-;    (xs (list a)))
-;   (witness i64
-;     (case xs
-;       ((list.nil)
-;         0)
-;       ((list.cons _ ys)
-;         (add-i64 1 (length a ys))))))
-
-
-
-
-
-; (define length-internal
-;   ((a tau)
-;   ))
-
-; (define-codata functor ((f (hom tau tau)))
-;   (map
-;     (functor-type f)))
-
-; (reduce ?functor.new)
-
-; (reduce ?functor.map)

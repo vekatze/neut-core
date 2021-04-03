@@ -9,7 +9,7 @@
 (define string
   i8-array)
 
-; (set-as-opaque string)
+(set-as-opaque string)
 
 (define-macro string.new (str)
   `(unsafe.cast i8-array string ,(i8-array.new (meta.node.map (lambda-meta (x) `(i8 ,x)) (meta.leaf.string-to-i8-list str)))))
@@ -35,9 +35,10 @@
 (define-macro string.print-literal (str)
   `(string.print ,(string.new str)))
 
-; (reduce
-;   (let a (string.new "hello"))
-;   (string.print a)
-;   (string.print (string.new "hello"))
-;   ;(string.print-literal "hello")
-;   )
+(reduce
+  (let a (string.new "hello"))
+  (string.print a)
+  (string.print a)
+  (string.print (string.new "hello"))
+  ;(string.print-literal "hello")
+  )

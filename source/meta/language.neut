@@ -45,17 +45,22 @@
     `(define ,f ,(head rest))
     `(define ,f (fix ,f ,(head rest) ,(head (tail rest))))))
 
+(define-macro-variadic define-opaque (f rest)
+  (if-meta (is-nil (tail rest))
+    `(define-opaque ,f ,(head rest))
+    `(define-opaque ,f (fix ,f ,(head rest) ,(head (tail rest))))))
+
 (define-macro define-irreducible (f xts body)
   `(define ,f (fix-irreducible ,f ,xts ,body)))
 
-(define-macro define-resource-type (name discarder copier)
-  `(define-resource-type ,name ,discarder ,copier))
+; (define-macro define-resource-type (name discarder copier)
+;   `(define-resource-type ,name ,discarder ,copier))
 
-(define-macro set-as-opaque (x)
-  `(set-as-opaque ,x))
+; (define-macro set-as-opaque (x)
+;   `(set-as-opaque ,x))
 
-(define-macro set-as-irreducible (x)
-  `(set-as-irreducible ,x))
+; (define-macro set-as-irreducible (x)
+;   `(set-as-irreducible ,x))
 
 (define-macro-variadic statement (stmt-list)
   `(statement @,stmt-list))
@@ -235,7 +240,10 @@
   (sigma-elimination xts e (with-internal `identity.bind rest)))
 
 (define-macro-variadic reduce (es)
-  (with-internal `identity.bind es))
+  `(reduce ,(with-internal `identity.bind es)))
+
+; (define-macro-variadic reduce (es)
+;   (with-internal `identity.bind es))
 
 (define-macro to-constructor (lam-args base-type a xts bt)
   (begin-meta
@@ -264,7 +272,7 @@
     (let lam-args `((,Z tau) @,type-list))
     (let base-type (Pi lam-args Z))
     (let formation-rule
-      (define a xts base-type))
+      (define-opaque a xts base-type))
     ; definition of constructors
     (let introduction-rule-list (map (to-constructor lam-args base-type a xts _) bts))
     ; get list of constructor names
@@ -272,7 +280,7 @@
     ; summing up the result
     `(statement
         ,formation-rule
-        (set-as-opaque ,a)
+        ; (set-as-opaque ,a)
         (set-as-data ,a ,(meta.leaf.from-int (length xts)) @,bs)
         @,introduction-rule-list
         )))
@@ -301,3 +309,16 @@
        ,(define-data name xts
           `(new @,yts))
        @,elimination-rule-list)))
+
+(define-macro define-resource-type (name discarder copier)
+  (begin-meta
+    (let flag-var (meta.leaf.new-symbol `flag))
+    (let value-var (meta.leaf.new-symbol `value))
+    (define name
+      (with `identity.bind
+       `(let cls
+          (Π-introduction-resource-handler ((,flag-var bool) (,value-var unsafe.pointer))
+            (enum-elimination ,flag-var
+              (bool.false (unsafe.cast top unsafe.pointer (,discarder ,value-var)))
+              (bool.true (,copier ,value-var)))))
+       `(unsafe.cast (Π ((_ bool) (_ unsafe.pointer)) unsafe.pointer) tau cls)))))

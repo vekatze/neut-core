@@ -7,10 +7,10 @@
 
 ; (set-as-opaque subject)
 
-(define noesis ((s subject) (a tau))
+(define-opaque noesis ((s subject) (a tau))
   a)
 
-(set-as-opaque noesis)
+; (set-as-opaque noesis)
 
 (section noesis)
 

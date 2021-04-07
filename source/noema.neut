@@ -4,10 +4,16 @@
 
 ; (include "./integer.neut")
 
-(define noema ((s subject) (a tau))
+(define-opaque noema ((s subject) (a tau))
   tau)
 
-(set-as-opaque noema)
+; (set-as-opaque noema)
+
+; (define noema ((s subject) (a tau))
+;   tau)
+
+; (set-as-opaque noema)
+
 
 (define-irreducible noema.new ((s subject) (a tau) (x a))
   (witness (noesis s (product a (noema s a)))

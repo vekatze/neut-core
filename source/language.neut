@@ -8,4 +8,4 @@
 
 (define unsafe.cast ((A tau) (B tau) (x A))
   (witness B
-    (derangement nop B (affine x))))
+    (derangement nop B x)))

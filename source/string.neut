@@ -9,40 +9,44 @@
 (define-opaque string
   i8-array)
 
-; (define string
-;   i8-array)
-
 (define-macro string.new (str)
   `(unsafe.cast i8-array string ,(i8-array.new (meta.node.map (lambda-meta (x) `(i8 ,x)) (meta.leaf.string-to-i8-list str)))))
+
+(define print-character ((value i8))
+  (with identity.bind
+    (let p (memory.allocate 1))
+    (memory.store-i8-with-index value p 0)
+    (let len (os.write os.stdout p 1))
+    (memory.deallocate unsafe.pointer p)
+    top.unit))
 
 ; (define print-character ((value i8))
 ;   (with identity.bind
 ;     (let p (memory.allocate 1))
-;     ((memory.store-with-index i8 0) i8 value p)
+;     (memory.store-i8-with-index value p 0)
 ;     (let len (os.write os.stdout &p 1))
 ;     (memory.deallocate unsafe.pointer p)
 ;     top.unit))
 
-; これだとtupleの中のptrがstringじゃなくてunsafe.pointerとしてあつかわれてしまう、ってこと？
 (define string.print ((str string))
   (witness (product string i64)
     (with identity.bind
       (let ptr (unsafe.cast string unsafe.pointer str))
       (let n (memory.load-i64 ptr))
       (let content (memory.load-pointer-with-index ptr 1))
-      (let wrote-length (os.write os.stdout &content n))
-      (let str (unsafe.cast unsafe.pointer string ptr)) ; (tuple (unsafe.cast ...) wrote-length) とするとstr部分がunsafe.pointerとしてfreeされてしまうのでダメ。これは注意が必要なところ。
-      (tuple str wrote-length))))
+      (let wrote-length (os.write os.stdout content n))
+      (let str (unsafe.cast unsafe.pointer string ptr))
+      (tuple str wrote-length)))) ; (tuple (unsafe.cast ...) wrote-length) とするとstr部分がunsafe.pointerとしてfreeされてしまうのでダメ。これは注意が必要なところ。
 
 ; (define string.print ((str string))
 ;   (witness (product string i64)
 ;     (with identity.bind
 ;       (let ptr (unsafe.cast string unsafe.pointer str))
-;       (let n (memory.load-i64 &ptr))
-;       (let content (memory.load-pointer-with-index &ptr 1))
+;       (let n (memory.load-i64 ptr))
+;       (let content (memory.load-pointer-with-index ptr 1))
 ;       (let wrote-length (os.write os.stdout &content n))
-;       (tuple (unsafe.cast unsafe.pointer string ptr) wrote-length))))
-
+;       (let str (unsafe.cast unsafe.pointer string ptr))
+;       (tuple str wrote-length)))) ; (tuple (unsafe.cast ...) wrote-length) とするとstr部分がunsafe.pointerとしてfreeされてしまうのでダメ。これは注意が必要なところ。
 
 (define-macro string.print-literal (str)
   `(string.print ,(string.new str)))
@@ -63,12 +67,12 @@
   ; (let _ test)
 
 
-  ; (let test2 (i8-array-introduction (i8 10) (i8 20) (i8 30)))
-  ; (let _ test2)
-  ; (let _ test2)
-  ; (let _ test2)
+  (let test2 (i8-array-introduction (i8 10) (i8 20) (i8 30)))
+  (let _ test2)
+  (let _ test2)
+  (let _ test2)
 
-  (let hello (string.new "hello"))
+  (let hello (string.new "hello\n"))
   (let foo hello)
   (string.print &hello)
   (string.print &hello)

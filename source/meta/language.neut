@@ -161,14 +161,14 @@
 (define-macro-variadic construct (es)
   (sigma-introduction-internal es))
 
-(define-macro-variadic tensor (ts)
-  `(tensor @,ts))
+; (define-macro-variadic tensor (ts)
+;   `(tensor @,ts))
 
-(define-macro-variadic tensor-introduction (es)
-  `(tensor-introduction @,es))
+; (define-macro-variadic tensor-introduction (es)
+;   `(tensor-introduction @,es))
 
-(define-macro tensor-elimination (xts e1 e2)
-  `(tensor-elimination ,xts ,e1 ,e2))
+; (define-macro tensor-elimination (xts e1 e2)
+;   `(tensor-elimination ,xts ,e1 ,e2))
 
 (define-macro is-borrowed-var-meta (x)
   (if-meta (is-node x)

@@ -18,30 +18,31 @@
 
 (define read ((in file-descriptor) (buf unsafe.pointer) (len i64))
   (witness i64
-    (derangement (syscall 0) i64 in buf len)))
+    (derangement (syscall 0) in buf len)))
 
 (define write ((out file-descriptor) (buf unsafe.pointer) (len i64))
   (witness i64
-    (derangement (syscall 1) i64 out buf len)))
+    (derangement (syscall 1) out buf len)))
 
 ; (define write ((out file-descriptor) (buf unsafe.pointer) (len i64))
 ;   (witness (product unsafe.pointer i64)
 ;     (derangement (syscall 1) i64 out (linear buf) len)))
 
 (define exit ((A tau) (status i64))
-  (derangement (syscall 60) A status))
+  (witness A
+    (derangement (syscall 60) status)))
 
 (define open ((path unsafe.pointer) (flags i64) (mode i64))
   (witness file-descriptor
-    (derangement (syscall 2) file-descriptor path flags mode)))
+    (derangement (syscall 2) path flags mode)))
 
 (define close ((f file-descriptor))
   (witness i64
-    (derangement (syscall 3) i64 file-descriptor)))
+    (derangement (syscall 3) file-descriptor)))
 
 (define fork ()
   (witness i64
-    (derangement (syscall 57) i64)))
+    (derangement (syscall 57))))
 
 ; (define rusage
 ;   (struct

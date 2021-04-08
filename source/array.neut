@@ -6,7 +6,7 @@
   (with identity.bind
     (let content (memory.load-pointer-with-index ptr 1))
     (memory.deallocate unsafe.pointer content)
-    (memory.deallocate unsafe.pointer ptr)))
+(memory.deallocate unsafe.pointer ptr)))
 
 (define copy-array-elements
   ((dest unsafe.pointer)
@@ -71,13 +71,7 @@
 ; helper functions to introduce/eliminate safe arrays
 
 (define-macro create-array (low-type rest)
-  `(derangement (create-array ,low-type) unsafe.pointer
-     @,(meta.node.map (lambda-meta (x) x) rest)))
-
-; (define-macro create-array (low-type rest)
-;   `(derangement (create-array ,low-type) unsafe.pointer
-;      @,(meta.node.map (lambda-meta (x) `(affine ,x)) rest)))
-
+  `(derangement (create-array ,low-type) @,rest))
 
 (define-macro array-introduction (low-type rest)
   (begin-meta

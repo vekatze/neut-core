@@ -6,7 +6,7 @@
   (with identity.bind
     (let content (memory.load-pointer-with-index ptr 1))
     (memory.deallocate unsafe.pointer content)
-(memory.deallocate unsafe.pointer ptr)))
+    (memory.deallocate unsafe.pointer ptr)))
 
 (define copy-array-elements
   ((dest unsafe.pointer)

@@ -65,8 +65,8 @@
 ; (define-macro set-as-irreducible (x)
 ;   `(set-as-irreducible ,x))
 
-(define-macro-variadic statement (stmt-list)
-  `(statement @,stmt-list))
+; (define-macro-variadic statement (stmt-list)
+;   `(statement @,stmt-list))
 
 ;
 ; auxiliary macros

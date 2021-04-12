@@ -18,11 +18,14 @@
 (define-macro Π-introduction (args body)
   `(Π-introduction ,args ,body))
 
+(define-macro Π-introduction-fix (self args body)
+  `(Π-introduction-fix ,self ,args ,body))
+
 (define-macro-variadic Π-elimination (fun args)
   `(Π-elimination ,fun @,args))
 
-(define-macro fix (self args body)
-  `(fix ,self ,args ,body))
+; (define-macro fix (self args body)
+;   `(fix ,self ,args ,body))
 
 (define-macro-variadic enum-elimination (value clauses)
   `(enum-elimination ,value @,clauses))
@@ -43,15 +46,15 @@
 (define-macro-variadic define (f rest)
   (if-meta (is-nil (tail rest))
     `(define ,f ,(head rest))
-    `(define ,f (fix ,f ,(head rest) ,(head (tail rest))))))
+    `(define ,f (Π-introduction-fix ,f ,(head rest) ,(head (tail rest))))))
 
 (define-macro-variadic define-opaque (f rest)
   (if-meta (is-nil (tail rest))
     `(define-opaque ,f ,(head rest))
-    `(define-opaque ,f (fix ,f ,(head rest) ,(head (tail rest))))))
+    `(define-opaque ,f (Π-introduction-fix ,f ,(head rest) ,(head (tail rest))))))
 
 (define-macro define-irreducible (f xts body)
-  `(define ,f (fix-irreducible ,f ,xts ,body)))
+  `(define ,f (Π-introduction-fix-irreducible ,f ,xts ,body)))
 
 ; (define-macro define-resource-type (name discarder copier)
 ;   `(define-resource-type ,name ,discarder ,copier))
@@ -100,6 +103,9 @@
   (begin-meta
     (let sym (leaf.new-symbol `wit))
     `(,(λ `((,sym ,t)) sym) ,e)))
+
+(define-macro fix (self xts e)
+  `(Π-introduction-fix ,xts ,e))
 
 (define-macro hom-internal (ts)
   (if-meta (is-nil (tail ts))

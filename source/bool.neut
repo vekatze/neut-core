@@ -1,6 +1,6 @@
 (include "./foundation.neut")
 
-(declare-enum bool
+(define-enum bool
   (true 1)
   (false 0))
 

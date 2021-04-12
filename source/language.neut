@@ -1,10 +1,10 @@
 (include "./meta/language.neut")
 
-(declare-enum top unit)
+(define-enum top unit)
 
-(declare-enum bottom)
+(define-enum bottom)
 
-(declare-enum unsafe.pointer)
+(define-enum unsafe.pointer)
 
 (define unsafe.cast ((A tau) (B tau) (x A))
   (witness B

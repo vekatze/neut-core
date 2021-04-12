@@ -1,6 +1,6 @@
 (include "./language.neut")
 
-(declare-enum file-descriptor
+(define-enum file-descriptor
   (stdin 0)
   (stdout 1)
   (stderr 2))

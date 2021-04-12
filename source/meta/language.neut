@@ -40,8 +40,8 @@
 (define-macro declare-constant (name t)
   `(declare-constant ,name ,t))
 
-(define-macro-variadic declare-enum (rest)
-  `(declare-enum @,rest))
+(define-macro-variadic define-enum (rest)
+  `(define-enum @,rest))
 
 (define-macro-variadic define (f rest)
   (if-meta (is-nil (tail rest))

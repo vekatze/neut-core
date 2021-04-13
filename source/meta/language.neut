@@ -167,14 +167,6 @@
     `(,(take-borrowed-vars-meta xs)
       ,(map (lambda-meta (x) (drop-char-meta `& x)) xs))))
 
-; fixme: (monadic) delimited continuationもたぶんカンタンに実装できるのでやってみるとよい。
-;    (with bind
-;      (let-shift x k body)
-;      rest)
-; ~> (with bind
-;      (let k (lambda (z) (with bind (let x z) rest)))
-;      body)
-; みたいなノリでいけるはず。kの結果がwithで包まれていることが、resetの追加に相当する。
 ; fixme: ((let (tuple x1 x2 x3) e) ...)を(sigma-elim (x1 x2 x3) e ...)として処理できるようにする。let-tupleとかでもよい。
 (define-macro with-internal (bind es)
   (if-meta (is-nil (tail es))
@@ -252,6 +244,7 @@
 
 (define-macro codata.generate-projection (name xts yts y result-type)
   (begin-meta
+    (let xts (map (pair.map-left leaf.replace-if-hole _) xts))
     (let form-args (map head xts))
     (let app `(,name @,form-args))
     (let record-var (leaf.new-symbol `rec))

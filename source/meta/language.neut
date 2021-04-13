@@ -24,9 +24,6 @@
 (define-macro-variadic Π-elimination (fun args)
   `(Π-elimination ,fun @,args))
 
-; (define-macro fix (self args body)
-;   `(fix ,self ,args ,body))
-
 (define-macro-variadic enum-elimination (value clauses)
   `(enum-elimination ,value @,clauses))
 
@@ -36,9 +33,6 @@
 ;
 ; statements
 ;
-
-(define-macro declare-constant (name t)
-  `(declare-constant ,name ,t))
 
 (define-macro-variadic define-enum (rest)
   `(define-enum @,rest))
@@ -56,27 +50,15 @@
 (define-macro define-irreducible (f xts body)
   `(define ,f (Π-introduction-fix-irreducible ,f ,xts ,body)))
 
-; (define-macro define-resource-type (name discarder copier)
-;   `(define-resource-type ,name ,discarder ,copier))
-
-; (define-macro set-as-opaque (x)
-;   `(set-as-opaque ,x))
-
-; (define-macro set-as-irreducible (x)
-;   `(set-as-irreducible ,x))
-
-; (define-macro-variadic statement (stmt-list)
-;   `(statement @,stmt-list))
-
 ;
 ; auxiliary macros
 ;
 
-; (define-macro type
-;   tau)
+(define-macro type
+  `tau)
 
-; (define-macro universe
-;   type)
+(define-macro universe
+  type)
 
 (define-macro forall (args t)
   `(Π ,args ,t))
@@ -84,14 +66,8 @@
 (define-macro Pi (args t)
   `(Π ,args ,t))
 
-; (define-macro lambda
-;   Π-introduction)
-
 (define-macro lambda (xts e)
   `(Π-introduction ,xts ,e))
-
-; (define-macro λ
-;   Π-introduction)
 
 (define-macro λ (xts e)
   `(Π-introduction ,xts ,e))
@@ -167,15 +143,6 @@
 (define-macro-variadic construct (es)
   (sigma-introduction-internal es))
 
-; (define-macro-variadic tensor (ts)
-;   `(tensor @,ts))
-
-; (define-macro-variadic tensor-introduction (es)
-;   `(tensor-introduction @,es))
-
-; (define-macro tensor-elimination (xts e1 e2)
-;   `(tensor-elimination ,xts ,e1 ,e2))
-
 (define-macro is-borrowed-var-meta (x)
   (if-meta (is-node x)
     `()
@@ -208,7 +175,7 @@
 ;      (let k (lambda (z) (with bind (let x z) rest)))
 ;      body)
 ; みたいなノリでいけるはず。kの結果がwithで包まれていることが、resetの追加に相当する。
-; fixme: ((let (x1 x2 x3) e) ...)を(sigma-elim (x1 x2 x3) e ...)として処理できるようにする。let-tupleとかでもよい。
+; fixme: ((let (tuple x1 x2 x3) e) ...)を(sigma-elim (x1 x2 x3) e ...)として処理できるようにする。let-tupleとかでもよい。
 (define-macro with-internal (bind es)
   (if-meta (is-nil (tail es))
     (head es)
@@ -248,9 +215,6 @@
 (define-macro-variadic reduce (es)
   `(reduce ,(with-internal `identity.bind es)))
 
-; (define-macro-variadic reduce (es)
-;   (with-internal `identity.bind es))
-
 (define-macro to-constructor (lam-args base-type a xts bt)
   (begin-meta
     (let constructor-name (leaf.concat a `. (head bt)))
@@ -264,13 +228,9 @@
            (Π-introduction-constructor ,a ,constructor-name ,lam-args
              (,(head bt) @,args)))))))
 
-; fixme: xtsのほうで名前が重複していてもエラーになるのでreplace-if-holeをほどこすこと。
-; fixme: コンストラクタの名前をそのまま使うと、その名前の変数がすでに定義されていたときに壊れるので修正。
-; たとえばtrueが (i1 1) で定義されてるときに (data bool () (true) (false)) ってやると壊れる。
-; 対策としては、trueって名前のかわりにbool.trueって名前を使うようにすればよいでしょう。
-; useのほうが優先されるように変更したからこういう調整が必要になってる。
 (define-macro-variadic define-data (a xts bts)
   (begin-meta
+    (let xts (map (pair.map-left leaf.replace-if-hole _) xts))
     (let Z (leaf.new-symbol `Z))
     (let inductive-type `(,a @,(map head xts)))
     ; definition of type
@@ -286,7 +246,6 @@
     ; summing up the result
     `(statement
         ,formation-rule
-        ; (set-as-opaque ,a)
         (set-as-data ,a ,(meta.leaf.from-int (length xts)) @,bs)
         @,introduction-rule-list
         )))
@@ -310,7 +269,6 @@
     (let name-list (map (leaf.concat name `. _) proj-name-list))
     (let elimination-rule-list
       (map (lambda-meta (yt) (codata.generate-projection name xts yts (nth 0 yt) (nth 1 yt))) yts))
-    ; (dump elimination-rule-list)
     `(statement
        ,(define-data name xts
           `(new @,yts))

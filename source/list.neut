@@ -44,13 +44,20 @@
       ((list.cons _ ys)
         (length-internal s a ys (add-i64 acc 1))))))
 
+; (define length
+;   ((a tau)
+;    (xs (list a)))
+;   (witness (product (list a) i64)
+;     (with-region s
+;       (let xs-noema (noema.new s (list a) &xs))
+;       ((noesis.return s) (product (list a) i64) (tuple xs (length-internal s a xs-noema 0))))))
+
 (define length
   ((a tau)
    (xs (list a)))
   (witness (product (list a) i64)
-    (with-region s
-      (let xs-noema (noema.new s (list a) &xs))
-      ((noesis.return s) * (tuple xs (length-internal s a xs-noema 0))))))
+    (with-subject s (xs)
+      ((noesis.return s) i64 (length-internal s a xs 0)))))
 
 (define append
   ((a tau)

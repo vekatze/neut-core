@@ -198,9 +198,6 @@
 (define-macro-variadic with (bind es)
   (with-internal bind es))
 
-(define-macro-variadic with-region (s rest)
-  `(noesis.run * (Π-introduction ((,s subject)) ,(with-internal `(noesis.bind s) rest))))
-
 (define-macro-variadic destruct (e xts rest)
   (sigma-elimination xts e (with-internal `identity.bind rest)))
 
@@ -279,3 +276,35 @@
               (bool.false (unsafe.cast top unsafe.pointer (,discarder ,value-var)))
               (bool.true (,copier ,value-var)))))
        `(unsafe.cast (Π ((_ bool) (_ unsafe.pointer)) unsafe.pointer) tau cls)))))
+
+(define-macro meta.to-noema (info)
+  (begin-meta
+    (let s (nth 0 info))
+    (let hole (nth 1 info))
+    (let x (nth 2 info))
+   `(let ,x (noema.new ,s (unsafe.hole ,hole) ,x))))
+
+(define-macro meta.from-noema (info)
+  (begin-meta
+    (let s (nth 0 info))
+    (let hole (nth 1 info))
+    (let x (nth 2 info))
+   `(unsafe.cast (noema ,s (unsafe.hole ,hole)) (unsafe.hole ,hole) ,x)))
+
+(define-macro-variadic with-subject (s xs e)
+  (begin-meta
+    (let info-list (map (lambda-meta (x) `(,s ,(meta.leaf.new-int) ,x)) xs))
+    (let cast-list (map meta.to-noema info-list))
+    (let uncast-list (map meta.from-noema info-list))
+    (let ans-hole (meta.leaf.new-int))
+    (let ans-var (meta.leaf.new-symbol `ans))
+   `(noesis.run (unsafe.hole ,ans-hole)
+     ,(lambda `((,s subject))
+        (with-internal `(noesis.bind ,s)
+         `(@,cast-list
+           (let ,ans-var ,(with-internal `(noesis.bind ,s) e))
+           ((noesis.return ,s)
+              (unsafe.hole ,ans-hole)
+             ,(sigma-introduction-internal
+                `(@,uncast-list
+                  ,ans-var)))))))))

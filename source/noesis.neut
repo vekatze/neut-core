@@ -21,18 +21,10 @@
     (lambda ((a tau) (x a))
       (unsafe.cast a (noesis s a) x))))
 
-; (define return ((s subject) (a tau) (x a))
-;   (witness (noesis s a)
-;     (unsafe.cast a (noesis s a) x)))
-
 (define bind ((s subject))
   (witness (bind-type (noesis s _))
     (lambda ((a tau) (b tau) (m (noesis s a)) (k (hom a (noesis s b))))
       (k (unsafe.cast (noesis s a) a m)))))
-
-; (define bind ((s subject) (a tau) (b tau) (m (noesis s a)) (k (hom a (noesis s b))))
-;   (witness (noesis s b)
-;     (k (unsafe.cast (noesis s a) a m))))
 
 (define run ((a tau) (comp (forall ((s subject)) (noesis s a))))
   (witness a

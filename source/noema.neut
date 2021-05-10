@@ -19,3 +19,11 @@
   (witness (noesis s (noema s a))
     ((noesis.return s) (noema s a)
       (unsafe.cast a (noema s a) x))))
+
+(define noema.incarnate ((s subject) (a tau) (x (noema s a)))
+  (witness (product (noema s a) a)
+    (with identity.bind
+      (let tmp (unsafe.cast (noema s a) a x))
+      (let y tmp)
+      (let z (unsafe.cast a (noema s a) tmp))
+      (tuple z y))))

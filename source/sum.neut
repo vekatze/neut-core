@@ -1,0 +1,81 @@
+include "./foundation.neut"
+
+include "./functor.neut"
+
+define-data sum (a : tau) (b : tau)
+- left a
+- right b
+
+define option (a : tau) : tau =
+  sum top a
+
+section sum
+
+-- (section coproduct)
+
+define map (e : tau) (a : tau) (b : tau) (f : a -> b) (m : sum e a) : sum e b =
+  let? value = m in
+  right e b (f value)
+
+define return (e : tau) (a : tau) (x : a) : sum e a =
+  right e a x
+
+define bind (e : tau) (a : tau) (b : tau) (m : sum e a) (k : a -> sum e b) : sum e b =
+  let? value = m in
+  k value
+
+-- (define bind
+--   ((e tau)
+--    (a tau)
+--    (b tau)
+--    (comp (coproduct e a))
+--    (k (hom a (coproduct e b))))
+--   (witness (coproduct e b)
+--     (case comp
+--       ((left err)
+--         (left e b err))
+--       ((right val)
+--         (k val)))))
+
+define throw (e : tau) (a : tau) (error : e) : sum e a =
+  left e a error
+-- (define throw
+--   ((e tau)
+--    (a tau)
+--    (err e))
+--   (witness (coproduct e a)
+--     (left e a err)))
+
+define as-functor (e : tau) : functor (lambda x. sum e x) =
+  functor.new
+    (lambda x. sum e x)
+    (lambda a b c d. sum.map e a b c d)
+-- (define as-functor
+--   ((e tau))
+--   (witness (functor (coproduct e _))
+--     (functor.new
+--       (coproduct e _)
+--       (coproduct.map e _ _ _ _))))
+
+-- (define as-monad
+--   ((e tau))
+--   (witness (monad (coproduct e _))
+--     (monad.new
+--       (coproduct e _)
+--       (as-functor e)
+--       (coproduct.return e _ _)
+--       (coproduct.bind e _ _ _ _))))
+
+-- (end coproduct)
+
+end sum
+
+section option
+
+define none (a : tau) : option a =
+  sum.left top a top.unit
+
+define some (a : tau) (x : a) : option a =
+  sum.right top a x
+
+end option

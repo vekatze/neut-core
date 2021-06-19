@@ -1,13 +1,24 @@
-(include "./foundation.neut")
+include "./foundation.neut"
 
-(define functor-type ((m (hom tau tau)))
-  (Π
-    ((a tau)
-     (b tau)
-     (_ (hom a b))
-     (_ (m a)))
-    (m b)))
+define functor-type (m : tau -> tau) : tau =
+  (a : tau) -> (b : tau) -> (a -> b) -> m a -> m b
 
-(define-codata functor ((f (hom tau tau)))
-  (map
-    (functor-type f)))
+define-codata functor (f : tau -> tau)
+- map : functor-type f
+
+define-codata my-record
+- item : i64
+
+-- (include "./foundation.neut")
+
+-- (define functor-type ((m (hom tau tau)))
+--   (Π
+--     ((a tau)
+--      (b tau)
+--      (_ (hom a b))
+--      (_ (m a)))
+--     (m b)))
+
+-- (define-codata functor ((f (hom tau tau)))
+--   (map
+--     (functor-type f)))

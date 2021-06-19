@@ -1,38 +1,33 @@
-(include "./foundation.neut")
+include "./foundation.neut"
+include "./bool.neut"
+include "./string.neut"
 
-(include "./bool.neut")
+section i64
 
-(include "./string.neut")
+define negate (x : i64) : i64 =
+  mul-i64 x -1
 
-(section i64)
+define print-digit (x : i64) : top =
+  print-character (unsafe.cast i64 i8 (add-i64 x 48))
 
-(define negate
-  ((x i64))
-  (witness i64
-    (mul-i64 x -1)))
+define print (x : i64) : top =
+  if icmp-slt-i64 x 0 then
+    let _ = string.print "-" in
+    print (negate x)
+  else-if icmp-slt-i64 x 10 then
+    print-digit x
+  else
+    let q = sdiv-i64 x 10 in
+    let r = srem-i64 x 10 in
+    let _ = print q in
+    print-digit r
+  end
 
-(define print-digit
-  ((x i64))
-  (witness top
-    (with identity.bind
-      (print-character (unsafe.cast i64 i8 (add-i64 x 48))))))
+define fact (x : i64) : i64 =
+  if icmp-sle-i64 x 0 then
+    1
+  else
+    mul-i64 x (fact (sub-i64 x 1))
+  end
 
-; just for now. should be implemented via a buffer or something.
-(define print
-  ((x i64))
-  (witness top
-    (if (icmp-slt-i64 x 0)
-      (with identity.bind
-        (string.print-literal "-")
-        (print (negate x)))
-      (if (icmp-slt-i64 x 10)
-        (print-digit x)
-        (with identity.bind
-          (let q (sdiv-i64 x 10))
-          (let r (srem-i64 x 10))
-          (print q)
-          (print-digit r))))))
-
-(define add add-i64)
-
-(end i64)
+end i64

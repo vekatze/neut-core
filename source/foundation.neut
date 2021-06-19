@@ -1,21 +1,30 @@
-(include "./language.neut")
+include "./language.neut"
+include "./system.neut"
 
-(introspect OS
-  (linux
-    (introspect architecture
-      (x86_64
-        (include "./linux-x86_64.neut"))
-      (aarch64
-        (include "./linux-aarch64.neut")))) ; TBD
-  (darwin
-    (include "./darwin.neut"))) ; TBD
+define admit-internal (a : tau) : a =
+  os.exit a 1
 
-(define admit-internal ((a tau))
-  (witness a
-    (os.exit a 1)))
+-- (include "./language.neut")
 
-(define-macro admit
-  `(admit-internal *))
+-- (introspect OS
+--   (linux
+--     (introspect architecture
+--       (x86_64
+--         (include "./linux-x86_64.neut"))
+--       (aarch64
+--         (include "./linux-aarch64.neut")))) ; TBD
+--   (darwin
+--     (include "./darwin.neut"))) ; TBD
 
-(define-macro ?admit
-  `(question ,admit))
+-- (define admit-internal ((a tau))
+--   (witness a
+--     (os.exit a 1)))
+
+define admit (a : tau) : a =
+  os.exit a 1
+
+-- (define-macro admit
+--   `(admit-internal *))
+
+-- (define-macro ?admit
+--   `(question ,admit))

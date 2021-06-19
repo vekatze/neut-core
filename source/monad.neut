@@ -1,55 +1,68 @@
-(include "./foundation.neut")
+include "./foundation.neut"
+-- (include "./foundation.neut")
 
-(include "./functor.neut")
+include "./functor.neut"
+-- (include "./functor.neut")
 
-(include "./bool.neut")
+include "./bool.neut"
+-- (include "./bool.neut")
 
-(define return-type ((m (hom tau tau)))
-  (Π
-    ((a tau)
-     (_ a))
-    (m a)))
+define return-type (m : tau -> tau) : tau =
+  (a : tau) -> a -> m a
+-- (define return-type ((m (hom tau tau)))
+--   (Π
+--     ((a tau)
+--      (_ a))
+--     (m a)))
 
-(define bind-type ((m (hom tau tau)))
-  (Π
-    ((a tau)
-     (b tau)
-     (_ (m a))
-     (_ (hom a (m b))))
-    (m b)))
+define bind-type (m : tau -> tau) : tau =
+  (a : tau) -> (b : tau) -> m a -> (a -> m b) -> m b
 
-(define-codata monad ((m (hom tau tau)))
-  (as-functor
-    (functor m))
-  (return
-    (return-type m))
-  (bind
-    (bind-type m)))
+-- (define bind-type ((m (hom tau tau)))
+--   (Π
+--     ((a tau)
+--      (b tau)
+--      (_ (m a))
+--      (_ (hom a (m b))))
+--     (m b)))
 
-(section monad)
+define-codata monad (m : tau -> tau)
+- as-functor : functor m
+- return : return-type m
+- bind : bind-type m
 
-(define compose
-  ((m (hom tau tau))
-   (a tau)
-   (b tau)
-   (c tau)
-   (M (monad m))
-   (f (hom a (m b)))
-   (g (hom b (m c))))
-  (witness (hom a (m c))
-    (lambda (x)
-      (with (bind m M)
-        (let tmp (f x))
-        (g tmp)))))
+-- (define-codata monad ((m (hom tau tau)))
+--   (as-functor
+--     (functor m))
+--   (return
+--     (return-type m))
+--   (bind
+--     (bind-type m)))
 
-(define when
-  ((f (hom tau tau))
-   (M (monad f))
-   (condition bool)
-   (comp (f top)))
-  (witness (f top)
-    (if condition
-      comp
-      ((return f M) top top.unit))))
+-- (section monad)
 
-(end monad)
+-- (define compose
+--   ((m (hom tau tau))
+--    (a tau)
+--    (b tau)
+--    (c tau)
+--    (M (monad m))
+--    (f (hom a (m b)))
+--    (g (hom b (m c))))
+--   (witness (hom a (m c))
+--     (lambda (x)
+--       (with (bind m M)
+--         (let tmp (f x))
+--         (g tmp)))))
+
+-- (define when
+--   ((f (hom tau tau))
+--    (M (monad f))
+--    (condition bool)
+--    (comp (f top)))
+--   (witness (f top)
+--     (if condition
+--       comp
+--       ((return f M) top top.unit))))
+
+-- (end monad)

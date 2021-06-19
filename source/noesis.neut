@@ -30,4 +30,6 @@
   (witness a
     (unsafe.cast (noesis (unsafe.cast i64 subject 0) a) a (comp (unsafe.cast i64 subject 0)))))
 
+; noesis.run : pi (a : tau). (pi (s : subject). a) -> a を作ったほうがよさそう？
+
 (end noesis)

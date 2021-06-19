@@ -1,11 +1,36 @@
-(include "./meta/language.neut")
+define-enum top
+- unit
 
-(define-enum top unit)
+define-enum bottom
 
-(define-enum bottom)
+define-enum unsafe.pointer
 
-(define-enum unsafe.pointer)
+define unsafe.cast (A : tau) (B : tau) (x : A) : B =
+  derangement nop x
 
-(define unsafe.cast ((A tau) (B tau) (x A))
-  (witness B
-    (derangement nop x)))
+define-enum target
+- linux-amd64
+- linux-arm64
+- darwin-amd64
+- darwin-arm64
+
+define compilation.target : target =
+  target-platform
+
+define identity.return (a : tau) (x : a) : a =
+  x
+
+define identity.bind (a : tau) (b : tau) (x : a) (k : a -> b) : b =
+  k x
+
+-- (include "./meta/language.neut")
+
+-- (define-enum top unit)
+
+-- (define-enum bottom)
+
+-- (define-enum unsafe.pointer)
+
+-- (define unsafe.cast ((A tau) (B tau) (x A))
+--   (witness B
+--     (derangement nop x)))

@@ -1,119 +1,97 @@
-(include "./language.neut")
+include "./language.neut"
 
-(include "./option.neut")
+include "./sum.neut"
 
-(include "./bool.neut")
+include "./bool.neut"
 
-(include "./noesis.neut")
+-- (include "./noesis.neut")
 
-(include "./noema.neut")
+-- (include "./noema.neut")
 
-(define-data list ((a tau))
-  (nil)
-  (cons (_ a) (_ (list a))))
+define-data list (a : tau)
+- nil
+- cons a (list a)
 
-(section list)
+section list
 
-(define-macro new-internal (a vs)
-  (if-meta (meta.is-nil vs)
-    `(list.nil ,a)
-    `(list.cons ,a ,(meta.node.head vs) ,(new-internal a (meta.node.tail vs)))))
+-- (define-macro new-internal (a vs)
+--   (if-meta (meta.is-nil vs)
+--     `(list.nil ,a)
+--     `(list.cons ,a ,(meta.node.head vs) ,(new-internal a (meta.node.tail vs)))))
 
-(define-macro-variadic new (a vs)
-  (new-internal a vs))
+-- (define-macro-variadic new (a vs)
+--   (new-internal a vs))
 
-(define head
-  ((a tau)
-   (xs (list a)))
-  (witness (option a)
-    (case xs
-      ((nil)
-        (option.none a))
-      ((cons h _)
-        (option.some a h)))))
+define head (a : tau) (xs : list a) : option a =
+  match xs with
+  - nil ->
+    option.none a
+  - cons y ys ->
+    option.some a y
+  end
 
-(define length-internal
-  ((s subject)
-   (a tau)
-   (xs (noema s (list a)))
-   (acc i64))
-  (witness i64
-    (case-noetic xs
-      ((list.nil)
-        acc)
-      ((list.cons _ ys)
-        (length-internal s a ys (add-i64 acc 1))))))
+-- (define length-internal
+--   ((s subject)
+--    (a tau)
+--    (xs (noema s (list a)))
+--    (acc i64))
+--   (witness i64
+--     (case-noetic xs
+--       ((list.nil)
+--         acc)
+--       ((list.cons _ ys)
+--         (length-internal s a ys (add-i64 acc 1))))))
 
-; (define length
-;   ((a tau)
-;    (xs (list a)))
-;   (witness (product (list a) i64)
-;     (with-region s
-;       (let xs-noema (noema.new s (list a) &xs))
-;       ((noesis.return s) (product (list a) i64) (tuple xs (length-internal s a xs-noema 0))))))
+-- ; (define length
+-- ;   ((a tau)
+-- ;    (xs (list a)))
+-- ;   (witness (product (list a) i64)
+-- ;     (with-region s
+-- ;       (let xs-noema (noema.new s (list a) &xs))
+-- ;       ((noesis.return s) (product (list a) i64) (tuple xs (length-internal s a xs-noema 0))))))
 
-(define length
-  ((a tau)
-   (xs (list a)))
-  (witness (product (list a) i64)
-    (with-subject s (xs)
-      ((noesis.return s) i64 (length-internal s a xs 0)))))
+-- (define length
+--   ((a tau)
+--    (xs (list a)))
+--   (witness (product (list a) i64)
+--     (with-subject s (xs)
+--       ((noesis.return s) i64 (length-internal s a xs 0)))))
 
-(define append
-  ((a tau)
-   (xs (list a))
-   (ys (list a)))
-  (witness (list a)
-    (case xs
-      ((nil)
-        ys)
-      ((cons z zs)
-        (cons * z (append * zs ys))))))
+define append (a : tau) (xs : list a) (ys : list a) : list a =
+  match xs with
+  - list.nil -> ys
+  - list.cons z zs ->
+    cons a z (append a zs ys)
+  end
 
-(define is-null
-  ((a tau)
-   (xs (list a)))
-  (witness bool
-    (case xs
-      ((nil)
-        bool.true)
-      ((cons _ _)
-        bool.false))))
+define is-null (a : tau) (xs : list a) : bool =
+  match xs with
+  - nil ->
+    bool.true
+  - cons _ _ ->
+    bool.false
+  end
 
-(define map
-  ((a tau)
-   (b tau)
-   (f (hom a b))
-   (xs (list a)))
-  (witness (list b)
-    (case xs
-      ((nil)
-        (nil b))
-      ((cons y acc)
-        (cons b (f y) (map a b f acc))))))
+define map (a : tau) (b : tau) (f : a -> b) (xs : list a) : list b =
+  match xs with
+  - nil ->
+    nil b
+  - cons y ys ->
+    cons b (f y) (map a b f ys)
+  end
 
-(define return
-  ((a tau)
-   (x a))
-  (witness (list a)
-    (list.new * x)))
+define return (a : tau) (x : a) : list a =
+  list.cons a x (list.nil a)
 
-(define concatenate
-  ((a tau)
-   (m (list (list a))))
-  (witness (list a)
-    (case m
-      ((nil)
-        (nil a))
-      ((cons xs xss)
-        (append * xs (concatenate * xss))))))
+define join (a : tau) (xss : list (list a)) : list a =
+  match xss with
+  - nil ->
+    nil a
+  - cons ys yss ->
+    append a ys (join a yss)
+  end
 
-(define bind
-  ((a tau)
-   (b tau)
-   (m (list a))
-   (k (hom a (list b))))
-  (witness (list b)
-    (concatenate * (map * * k m))))
+define bind (a : tau) (b : tau) (xs : list a) (k : a -> list b) : list b =
+  join b (map a (list b) k xs)
 
-(end list)
+end list

@@ -1,33 +1,33 @@
-(include "./language.neut")
+include "./language.neut"
 
-(include "./foundation.neut")
+include "./foundation.neut"
 
-(include "./bool.neut")
+include "./bool.neut"
 
-(include "./functor.neut")
+include "./functor.neut"
 
-(include "./monad.neut")
+include "./monad.neut"
 
-(include "./identity.neut")
+-- (include "./identity.neut")
 
-(include "./option.neut")
+-- (include "./option.neut")
 
-(include "./coproduct.neut")
+include "./sum.neut"
 
-(include "./list.neut")
+include "./list.neut"
 
-(include "./state.neut")
+-- (include "./state.neut")
 
-(include "./noesis.neut")
+-- (include "./noesis.neut")
 
-(include "./noema.neut")
+-- (include "./noema.neut")
 
-(include "./free.neut")
+-- (include "./free.neut")
 
-(include "./memory.neut")
+include "./memory.neut"
 
-(include "./array.neut")
+include "./array.neut"
 
-(include "./string.neut")
+include "./string.neut"
 
-(include "./integer.neut")
+include "./integer.neut"

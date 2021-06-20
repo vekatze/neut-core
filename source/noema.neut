@@ -1,29 +1,44 @@
-(include "./noesis.neut")
+include "./foundation.neut"
 
-(include "./identity.neut")
+define subject : tau =
+  tau
 
-(define-opaque noema ((s subject) (a tau))
-  tau)
+define-opaque noema (s : subject) (a : tau) : tau =
+  tau
 
-; (define-irreducible noema.new ((s subject) (a tau) (x a))
-;   (witness (noesis s (product a (noema s a)))
-;     ((noesis.return s)
-;       (product a (noema s a))
-;       (with identity.bind
-;         (let tmp (unsafe.cast a unsafe.pointer x))
-;         (let x1 (unsafe.cast unsafe.pointer a tmp))
-;         (let x2 (unsafe.cast unsafe.pointer (noema s a) tmp))
-;         (tuple x1 x2)))))
+define idea.run (a : tau) (comp : (s : subject) -> a) : a =
+  let dummy = unsafe.cast i64 subject 0 in
+  comp dummy
+-- (define run ((a tau) (comp (forall ((s subject)) (noesis s a))))
+--   (witness a
+--     (unsafe.cast (noesis (unsafe.cast i64 subject 0) a) a (comp (unsafe.cast i64 subject 0)))))
 
-(define-irreducible noema.new ((s subject) (a tau) (x a))
-  (witness (noesis s (noema s a))
-    ((noesis.return s) (noema s a)
-      (unsafe.cast a (noema s a) x))))
+-- (include "./noesis.neut")
 
-(define noema.incarnate ((s subject) (a tau) (x (noema s a)))
-  (witness (product (noema s a) a)
-    (with identity.bind
-      (let tmp (unsafe.cast (noema s a) a x))
-      (let y tmp)
-      (let z (unsafe.cast a (noema s a) tmp))
-      (tuple z y))))
+-- (include "./identity.neut")
+
+-- (define-opaque noema ((s subject) (a tau))
+--   tau)
+
+-- ; (define-irreducible noema.new ((s subject) (a tau) (x a))
+-- ;   (witness (noesis s (product a (noema s a)))
+-- ;     ((noesis.return s)
+-- ;       (product a (noema s a))
+-- ;       (with identity.bind
+-- ;         (let tmp (unsafe.cast a unsafe.pointer x))
+-- ;         (let x1 (unsafe.cast unsafe.pointer a tmp))
+-- ;         (let x2 (unsafe.cast unsafe.pointer (noema s a) tmp))
+-- ;         (tuple x1 x2)))))
+
+-- (define-irreducible noema.new ((s subject) (a tau) (x a))
+--   (witness (noesis s (noema s a))
+--     ((noesis.return s) (noema s a)
+--       (unsafe.cast a (noema s a) x))))
+
+-- (define noema.incarnate ((s subject) (a tau) (x (noema s a)))
+--   (witness (product (noema s a) a)
+--     (with identity.bind
+--       (let tmp (unsafe.cast (noema s a) a x))
+--       (let y tmp)
+--       (let z (unsafe.cast a (noema s a) tmp))
+--       (tuple z y))))

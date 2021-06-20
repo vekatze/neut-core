@@ -4,9 +4,7 @@ include "./sum.neut"
 
 include "./bool.neut"
 
--- (include "./noesis.neut")
-
--- (include "./noema.neut")
+include "./noema.neut"
 
 define-data list (a : tau)
 - nil
@@ -30,36 +28,21 @@ define head (a : tau) (xs : list a) : option a =
     option.some a y
   end
 
--- (define length-internal
---   ((s subject)
---    (a tau)
---    (xs (noema s (list a)))
---    (acc i64))
---   (witness i64
---     (case-noetic xs
---       ((list.nil)
---         acc)
---       ((list.cons _ ys)
---         (length-internal s a ys (add-i64 acc 1))))))
+define length-internal (s : subject) (a : tau) (xs : noema s (list a)) (acc : i64) : i64 =
+  match-noetic xs with
+  - list.nil ->
+    acc
+  - list.cons y ys ->
+    length-internal s a ys (add-i64 acc 1)
+  end
 
--- ; (define length
--- ;   ((a tau)
--- ;    (xs (list a)))
--- ;   (witness (product (list a) i64)
--- ;     (with-region s
--- ;       (let xs-noema (noema.new s (list a) &xs))
--- ;       ((noesis.return s) (product (list a) i64) (tuple xs (length-internal s a xs-noema 0))))))
-
--- (define length
---   ((a tau)
---    (xs (list a)))
---   (witness (product (list a) i64)
---     (with-subject s (xs)
---       ((noesis.return s) i64 (length-internal s a xs 0)))))
+define length (s : subject) (a : tau) (xs : noema s (list a)) : i64 =
+  length-internal s a xs 0
 
 define append (a : tau) (xs : list a) (ys : list a) : list a =
   match xs with
-  - list.nil -> ys
+  - list.nil ->
+    ys
   - list.cons z zs ->
     cons a z (append a zs ys)
   end

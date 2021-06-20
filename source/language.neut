@@ -23,6 +23,9 @@ define identity.return (a : tau) (x : a) : a =
 define identity.bind (a : tau) (b : tau) (x : a) (k : a -> b) : b =
   k x
 
+define discard (a : tau) (x : a) : top =
+  top.unit
+
 -- (include "./meta/language.neut")
 
 -- (define-enum top unit)

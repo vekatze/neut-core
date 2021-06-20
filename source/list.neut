@@ -12,14 +12,6 @@ define-data list (a : tau)
 
 section list
 
--- (define-macro new-internal (a vs)
---   (if-meta (meta.is-nil vs)
---     `(list.nil ,a)
---     `(list.cons ,a ,(meta.node.head vs) ,(new-internal a (meta.node.tail vs)))))
-
--- (define-macro-variadic new (a vs)
---   (new-internal a vs))
-
 define head (a : tau) (xs : list a) : option a =
   match xs with
   - nil ->

@@ -6,9 +6,6 @@ define functor-type (m : tau -> tau) : tau =
 define-codata functor (f : tau -> tau)
 - map : functor-type f
 
-define-codata my-record
-- item : i64
-
 -- (include "./foundation.neut")
 
 -- (define functor-type ((m (hom tau tau)))

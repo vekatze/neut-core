@@ -1,5 +1,6 @@
 include "./bool.neut"
 include "./memory.neut"
+include "./noema.neut"
 
 -- helper functions to define safe arrays
 
@@ -37,6 +38,18 @@ define array-copy (src : unsafe.pointer) (size : i64) (f : unsafe.pointer -> uns
 
 define copy-i8-array-elements (dest : unsafe.pointer) (src : unsafe.pointer) (len : i64) (count : i64) : top =
   copy-array-elements dest src len count i8 memory.load-i8-with-index memory.store-i8-with-index
+define copy-i16-array-elements (dest : unsafe.pointer) (src : unsafe.pointer) (len : i64) (count : i64) : top =
+  copy-array-elements dest src len count i16 memory.load-i16-with-index memory.store-i16-with-index
+define copy-i32-array-elements (dest : unsafe.pointer) (src : unsafe.pointer) (len : i64) (count : i64) : top =
+  copy-array-elements dest src len count i32 memory.load-i32-with-index memory.store-i32-with-index
+define copy-i64-array-elements (dest : unsafe.pointer) (src : unsafe.pointer) (len : i64) (count : i64) : top =
+  copy-array-elements dest src len count i64 memory.load-i64-with-index memory.store-i64-with-index
+define copy-f16-array-elements (dest : unsafe.pointer) (src : unsafe.pointer) (len : i64) (count : i64) : top =
+  copy-array-elements dest src len count f16 memory.load-f16-with-index memory.store-f16-with-index
+define copy-f32-array-elements (dest : unsafe.pointer) (src : unsafe.pointer) (len : i64) (count : i64) : top =
+  copy-array-elements dest src len count f32 memory.load-f32-with-index memory.store-f32-with-index
+define copy-f64-array-elements (dest : unsafe.pointer) (src : unsafe.pointer) (len : i64) (count : i64) : top =
+  copy-array-elements dest src len count f64 memory.load-f64-with-index memory.store-f64-with-index
 -- (define copy-i8-array-elements ((dest unsafe.pointer) (src unsafe.pointer) (len i64) (count i64))
 --   (copy-array-elements dest src len count i8 memory.load-i8-with-index memory.store-i8-with-index))
 -- (define copy-i16-array-elements ((dest unsafe.pointer) (src unsafe.pointer) (len i64) (count i64))
@@ -54,6 +67,18 @@ define copy-i8-array-elements (dest : unsafe.pointer) (src : unsafe.pointer) (le
 
 define i8-array-copy (src : unsafe.pointer) : unsafe.pointer =
   array-copy src 1 copy-i8-array-elements
+define i16-array-copy (src : unsafe.pointer) : unsafe.pointer =
+  array-copy src 2 copy-i16-array-elements
+define i32-array-copy (src : unsafe.pointer) : unsafe.pointer =
+  array-copy src 4 copy-i32-array-elements
+define i64-array-copy (src : unsafe.pointer) : unsafe.pointer =
+  array-copy src 8 copy-i64-array-elements
+define f16-array-copy (src : unsafe.pointer) : unsafe.pointer =
+  array-copy src 2 copy-f16-array-elements
+define f32-array-copy (src : unsafe.pointer) : unsafe.pointer =
+  array-copy src 4 copy-f32-array-elements
+define f64-array-copy (src : unsafe.pointer) : unsafe.pointer =
+  array-copy src 8 copy-f64-array-elements
 -- (define i8-array-copy ((src unsafe.pointer))
 --   (array-copy src 1 copy-i8-array-elements))
 -- (define i16-array-copy ((src unsafe.pointer))
@@ -86,6 +111,12 @@ define i8-array-copy (src : unsafe.pointer) : unsafe.pointer =
 --      `(memory.store-pointer-with-index ,arr ptr 1)
 --      `ptr)))
 
+-- define array-access (a : tau) (xs : a) (index : i64) (elem-type : tau) (accessor : unsafe.pointer -> i64 -> elem-type) : product a elem-type =
+--   let ptr = unsafe.cast a unsafe.pointer xs in
+--   let content = memory.load-pointer-with-index ptr 1 in
+--   let value = accessor content index in
+--   let xs = unsafe.cast unsafe.pointer a ptr in
+--   (xs, value)
 -- (define array-access
 --   ((a tau)
 --    (xs a)
@@ -103,6 +134,12 @@ define i8-array-copy (src : unsafe.pointer) : unsafe.pointer =
 -- ; type definitions
 
 define-resource-type i8-array array-discard i8-array-copy
+define-resource-type i16-array array-discard i16-array-copy
+define-resource-type i32-array array-discard i32-array-copy
+define-resource-type i64-array array-discard i64-array-copy
+define-resource-type f16-array array-discard f16-array-copy
+define-resource-type f32-array array-discard f32-array-copy
+define-resource-type f64-array array-discard f64-array-copy
 
 -- (define-resource-type i8-array array-discard i8-array-copy)
 -- (define-resource-type i16-array array-discard i16-array-copy)
@@ -131,6 +168,37 @@ define-resource-type i8-array array-discard i8-array-copy
 
 -- ; elimination rules
 
+define array-access (a : tau) (b : tau) (s : subject) (xs : noema s a) (index : i64) (loader : unsafe.pointer -> i64 -> b) : b =
+  let ptr = unsafe.cast (noema s a) unsafe.pointer xs in
+  let content = memory.load-pointer-with-index ptr 1 in
+  loader content index
+  -- memory.load-i8-with-index content index
+
+define i8-array-access (s : subject) (xs : noema s i8-array) (index : i64) : i8 =
+  array-access i8-array i8 s xs index memory.load-i8-with-index
+define i16-array-access (s : subject) (xs : noema s i16-array) (index : i64) : i16 =
+  array-access i16-array i16 s xs index memory.load-i16-with-index
+define i32-array-access (s : subject) (xs : noema s i32-array) (index : i64) : i32 =
+  array-access i32-array i32 s xs index memory.load-i32-with-index
+define i64-array-access (s : subject) (xs : noema s i64-array) (index : i64) : i64 =
+  array-access i64-array i64 s xs index memory.load-i64-with-index
+define f16-array-access (s : subject) (xs : noema s f16-array) (index : i64) : f16 =
+  array-access f16-array f16 s xs index memory.load-f16-with-index
+define f32-array-access (s : subject) (xs : noema s f32-array) (index : i64) : f32 =
+  array-access f32-array f32 s xs index memory.load-f32-with-index
+define f64-array-access (s : subject) (xs : noema s f64-array) (index : i64) : f64 =
+  array-access f64-array f64 s xs index memory.load-f64-with-index
+-- let ptr = unsafe.cast (noema s i8-array) unsafe.pointer xs in
+  -- let content = memory.load-pointer-with-index ptr 1 in
+  -- memory.load-i8-with-index content index
+
+
+
+  -- let xs = unsafe.cast unsafe.pointer a ptr in
+  -- (xs, value)
+
+-- define i8-array-access (xs : i8-array) (index : i64) : product i8-array i8 =
+--   array-access i8-array xs index i8 memory.load-i8-with-index
 -- (define i8-array-access ((xs i8-array) (index i64))
 --   (array-access i8-array xs index i8 memory.load-i8-with-index))
 -- (define i16-array-access ((xs i16-array) (index i64))

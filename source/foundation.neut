@@ -1,8 +1,8 @@
 include "./language.neut"
 include "./system.neut"
 
-define admit-internal (a : tau) : a =
-  os.exit a 1
+-- define admit-internal (a : tau) : a =
+--   os.exit a 1
 
 -- (include "./language.neut")
 
@@ -20,8 +20,8 @@ define admit-internal (a : tau) : a =
 --   (witness a
 --     (os.exit a 1)))
 
-define admit (a : tau) : a =
-  os.exit a 1
+-- define admit (a : tau) : a =
+--   os.exit a 1
 
 -- (define-macro admit
 --   `(admit-internal *))

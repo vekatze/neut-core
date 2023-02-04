@@ -1,0 +1,4 @@
+define-data bool() =
+- false
+- true
+end

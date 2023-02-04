@@ -1,0 +1,4 @@
+define-data sum(a: tau, b: tau) =
+- left(a)
+- right(b)
+end

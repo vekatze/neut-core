@@ -1,0 +1,13 @@
+define-data list(a: tau) =
+- nil()
+- cons(a, list(a))
+end
+
+define length<a>(xs: &list(a)): i64 =
+  match-noetic xs with
+  - list.nil() ->
+    0
+  - list.cons(y, ys) ->
+    add-i64(1, length(ys))
+  end
+end

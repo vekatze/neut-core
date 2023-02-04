@@ -1,27 +1,10 @@
-#+TITLE: neut core library
+#+TITLE: core
 A possible sketchy implementation of the core library.
 
-(You can create a library like this via =$ neut archive PROJ_ROOT/source -o PROJ_ROOT/release/VERSION.tar.gz=)
+(You can create a library like this via =$ neut release 1.0.0=)
 
-* Usage
-#+BEGIN_SRC neut
-(ensure core/0.1.0.0
-  "https://github.com/u2zv1wx/neut-core/raw/master/release/0.1.0.0.tar.gz")
+* Installation
 
-(include "core/0.1.0.0/core.neut")
-
-; to use the option monad
-(include "core/0.1.0.0/option.neut")
-
-; to use the either monad
-(include "core/0.1.0.0/coproduct.neut")
-
-; to use list
-(include "core/0.1.0.0/list.neut")
-
-; to use the state monad
-(include "core/0.1.0.0/state.neut")
-
-; to use the free monad
-(include "core/0.1.0.0/free.neut")
-#+END_SRC
+#+begin_src sh
+neut get core https://github.com/vekatze/neut-core/raw/main/release/0.1.0.0.tar.gz
+#+end_src

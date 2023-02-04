@@ -1,0 +1,81 @@
+import
+- this.list
+end
+
+use this.list
+use base.top
+
+define discard-vector-content(ptr: i64, elem-type: tau, counter: i64, length: i64): top() =
+  if eq-i64(counter, length) then
+    top.unit()
+  else
+    let _: elem-type = magic load(pointer(i8), add-i64(ptr, mul-i64(counter, 8))) in
+    discard-vector-content(ptr, elem-type, add-i64(counter, 1), length)
+  end
+end
+
+define copy-vector-content(source-pointer: i64, target-pointer: i64, elem-type: tau, counter: i64, length: i64): top() =
+  if eq-i64(counter, length) then
+    top.unit()
+  else
+    let value: elem-type = magic load(pointer(i8), add-i64(source-pointer, mul-i64(counter, 8))) in
+    let original = value in
+    let clone = value in
+    let _ = magic cast(elem-type, i64, original) in
+    let _: i64 = magic store(pointer(i8), add-i64(target-pointer, mul-i64(counter, 8)), clone) in
+    copy-vector-content(source-pointer, target-pointer, elem-type, add-i64(counter, 1), length)
+  end
+end
+
+define-resource vector-internal =
+- lambda(x: i64) do
+    let length: i64 = magic load(i64, x) in
+    let elem-type: tau = magic load(i64, add-i64(x, 8)) in
+    let _ = discard-vector-content(add-i64(x, 16), elem-type, 0, length) in
+    magic external(free, x)
+  end
+- lambda(source-pointer: i64) do
+    let length: i64 = magic load(i64, source-pointer) in
+    let elem-type: tau = magic load(i64, add-i64(source-pointer, 8)) in
+    let target-pointer = magic external(malloc, add-i64(16, mul-i64(length, 8))) in
+    let _: i64 = magic store(i64, target-pointer, length) in
+    let _: i64 = magic store(i64, add-i64(target-pointer, 8), elem-type) in
+    let _ = copy-vector-content(add-i64(source-pointer, 16), add-i64(target-pointer, 16), elem-type, 0, length) in
+    target-pointer
+  end
+end
+
+define vector(a: tau): tau =
+  vector-internal
+end
+
+define vector-new<a>(xs: list(a)): vector(a) =
+  let len on xs = this.list::length(xs) in
+  let base-pointer = magic external(malloc, add-i64(16, mul-i64(len, 8))) in
+  let _: i64 = magic store(i64, base-pointer, len) in
+  let _: i64 = magic store(i64, add-i64(base-pointer, 8), a) in
+  let content-pointer: i64 = add-i64(base-pointer, 16) in
+  let store-values =
+    define self(values: list(a), index: i64): top() =
+      match values with
+      - list.nil() ->
+        top.unit()
+      - list.cons(v, rest) ->
+        let _: i64 = magic store(pointer(i8), add-i64(content-pointer, mul-i64(index, 8)), v) in
+        self(rest, add-i64(index, 1))
+      end
+    end
+  in
+  let _ = store-values(xs, 0) in
+  magic cast(i64, vector(a), base-pointer)
+end
+
+define-inline vector-access<a>(xs: &vector(a), i: i64): a =
+  let ptr = magic cast(&vector(a), i64, xs) in
+  magic load(pointer(i8), add-i64(add-i64(ptr, 16), mul-i64(8, i)))
+end
+
+define length<a>(xs: &vector(a)): i64 =
+  let ptr = magic cast(&vector(a), i64, xs) in
+  magic load(i64, ptr)
+end

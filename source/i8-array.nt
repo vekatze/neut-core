@@ -1,0 +1,63 @@
+import
+- this.list
+end
+
+use this.list
+use base.top
+
+define copy-i8-array(source-pointer: i64, target-pointer: i64, counter: i64, length: i64): top() =
+  if eq-i64(counter, length) then
+    top.unit()
+  else
+    let value-pointer = add-i64(source-pointer, counter) in
+    let value: i8 = magic load(i8, value-pointer) in
+    let target-value-pointer = add-i64(target-pointer, counter) in
+    let _: i64 = magic store(i8, target-value-pointer, value) in
+    copy-i8-array(source-pointer, target-pointer, add-i64(counter, 1), length)
+  end
+end
+
+define-resource i8-array =
+- lambda(x: i64) do
+    magic external(free, x)
+  end
+- lambda(source-pointer: i64) do
+    let length: i64 = magic load(i64, source-pointer) in
+    let target-pointer = magic external(malloc, add-i64(length, 8)) in
+    let _: i64 = magic store(i64, target-pointer, length) in
+    let _ = copy-i8-array(add-i64(source-pointer, 8), add-i64(target-pointer, 8), 0, length) in
+    target-pointer
+  end
+end
+
+define i8-array-new(xs: list(i8)): i8-array =
+  let len on xs = length(xs) in
+  let base-pointer = magic external(malloc, add-i64(len, 8)) in
+  let _: i64 = magic store(i64, base-pointer, len) in
+  let content-pointer: i64 = add-i64(base-pointer, 8) in
+  let store-values =
+    define self(values: list(i8), index: i64): top() =
+      match values with
+      - list.nil() ->
+        top.unit()
+      - list.cons(v, rest) ->
+        let _: i64 = magic store(i8, add-i64(content-pointer, index), v) in
+        self(rest, add-i64(index, 1))
+      end
+    end
+  in
+  let _ = store-values(xs, 0) in
+  magic cast(i64, i8-array, base-pointer)
+end
+
+define-inline i8-array-access(xs: &i8-array, i: i64): i8 =
+  let ptr = magic cast(&i8-array, i64, xs) in
+  magic load(i8, add-i64(add-i64(ptr, 8), i))
+end
+
+define write(xs: &i8-array): i64 =
+  let ptr = magic cast(&i8-array, i64, xs) in
+  let len: i64 = magic load(i64, ptr) in
+  let content-pointer: i64 = add-i64(ptr, 8) in
+  magic external(write, 1: i64, content-pointer, len)
+end

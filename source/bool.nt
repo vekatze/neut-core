@@ -1,4 +1,4 @@
 define-data bool() =
-- false
-- true
+- false()
+- true()
 end

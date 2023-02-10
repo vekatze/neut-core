@@ -27,7 +27,7 @@ define copy-vector-content(source-pointer: i64, target-pointer: i64, elem-type: 
   end
 end
 
-define-resource vector-internal =
+define-resource vector-internal with
 - lambda(x: i64) do
     let length: i64 = magic load(i64, x) in
     let elem-type: tau = magic load(i64, add-i64(x, 8)) in

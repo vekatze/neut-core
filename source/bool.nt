@@ -1,4 +1,4 @@
-define-data bool() =
+define-data bool() with
 - false()
 - true()
 end

@@ -17,7 +17,7 @@ define copy-i8-array(source-pointer: i64, target-pointer: i64, counter: i64, len
   end
 end
 
-define-resource i8-array =
+define-resource i8-array with
 - lambda(x: i64) do
     magic external(free, x)
   end

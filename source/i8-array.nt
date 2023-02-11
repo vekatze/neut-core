@@ -2,8 +2,10 @@ import
 - this.list
 end
 
-use this.list
-use base.top
+use
+- this.list
+- base.top
+end
 
 define copy-i8-array(source-pointer: i64, target-pointer: i64, counter: i64, length: i64): top() =
   if eq-i64(counter, length) then

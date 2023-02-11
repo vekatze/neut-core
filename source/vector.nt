@@ -2,8 +2,10 @@ import
 - this.list
 end
 
-use this.list
-use base.top
+use
+- this.list
+- base.top
+end
 
 define discard-vector-content(ptr: i64, elem-type: tau, counter: i64, length: i64): top() =
   if eq-i64(counter, length) then

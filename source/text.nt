@@ -3,8 +3,10 @@ import
 - this.list
 end
 
-use this.i8-array
-use this.list
+use
+- this.i8-array
+- this.list
+end
 
 define text(): tau =
   i8-array

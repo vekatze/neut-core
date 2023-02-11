@@ -5,10 +5,12 @@ import
 - this.vector
 end
 
-use this.i8-array
-use this.list
-use this.text
-use this.vector
+use
+- this.i8-array
+- this.list
+- this.text
+- this.vector
+end
 
 define main(): i64 =
   let xs = [104, 101, 108, 108, 111, 10] in

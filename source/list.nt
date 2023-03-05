@@ -3,7 +3,7 @@ define-data list(a: tau) with
 - cons(a, list(a))
 end
 
-define length<a>(xs: &list(a)): i64 =
+define length(a: tau, xs: &list(a)): i64 =
   match-noetic xs with
   - list.nil() ->
     0

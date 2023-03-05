@@ -51,7 +51,7 @@ define vector(a: tau): tau =
   vector-internal
 end
 
-define vector-new<a>(xs: list(a)): vector(a) =
+define vector-new(a: tau, xs: list(a)): vector(a) =
   let len on xs = this.list::length(xs) in
   let base-pointer = magic external(malloc, add-i64(16, mul-i64(len, 8))) in
   let _: i64 = magic store(i64, base-pointer, len) in
@@ -72,12 +72,12 @@ define vector-new<a>(xs: list(a)): vector(a) =
   magic cast(i64, vector(a), base-pointer)
 end
 
-define-inline vector-access<a>(xs: &vector(a), i: i64): a =
+define-inline vector-access(a: tau, xs: &vector(a), i: i64): a =
   let ptr = magic cast(&vector(a), i64, xs) in
   magic load(pointer(i8), add-i64(add-i64(ptr, 16), mul-i64(8, i)))
 end
 
-define length<a>(xs: &vector(a)): i64 =
+define length(a: tau, xs: &vector(a)): i64 =
   let ptr = magic cast(&vector(a), i64, xs) in
   magic load(i64, ptr)
 end

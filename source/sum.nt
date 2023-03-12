@@ -1,4 +1,12 @@
-define-data sum(a: tau, b: tau) with
+import {
+- this.top
+}
+
+data sum(a: tau, b: tau) {
 - left(a)
 - right(b)
-end
+}
+
+define option(a: tau): tau {
+  sum(this.top::top(), a)
+}

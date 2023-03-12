@@ -1,6 +1,5 @@
 dependency = {}
-extra-content = [
-]
+extra-content = []
 target = {
-  core = "core.nt"
+  test = "test.nt"
 }

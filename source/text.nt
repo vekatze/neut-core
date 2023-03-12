@@ -1,24 +1,24 @@
-import
+import {
 - this.i8-array
 - this.list
-end
+}
 
-use
+use {
 - this.i8-array
 - this.list
-end
+}
 
-define text(): tau =
+define text(): tau {
   i8-array
-end
+}
 
-define text-new(xs: list(i8)): text() =
+define text-new(xs: list(i8)): text() {
   magic cast(i8-array, text(), i8-array-new(xs))
-end
+}
 
-define write(xs: &text()): i64 =
-  let ptr = magic cast(&text(), i64, xs) in
-  let len: i64 = magic load(i64, ptr) in
-  let content-pointer: i64 = add-i64(ptr, 8) in
+define write(xs: &text()): i64 {
+  let ptr = magic cast(&text(), i64, xs)
+  let len: i64 = magic load(i64, ptr)
+  let content-pointer: i64 = add-i64(ptr, 8)
   magic external(write, 1: i64, content-pointer, len)
-end
+}

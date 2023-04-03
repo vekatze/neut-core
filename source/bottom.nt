@@ -1,1 +1,1 @@
-data bottom() {}
+enum bottom() {}

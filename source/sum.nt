@@ -2,7 +2,7 @@ import {
 - this.top
 }
 
-data sum(a: tau, b: tau) {
+enum sum(a: tau, b: tau) {
 - left(a)
 - right(b)
 }

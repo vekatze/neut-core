@@ -1,4 +1,4 @@
-data bool() {
+enum bool() {
 - false()
 - true()
 }

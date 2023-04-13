@@ -10,7 +10,7 @@ use {
 
 define copy-i8-array(source-pointer: i64, target-pointer: i64, counter: i64, length: i64): top() {
   if eq-i64(counter, length) {
-    top.unit()
+    top.Unit()
   } else {
     let value-pointer = add-i64(source-pointer, counter)
     let value: i8 = magic load(i8, value-pointer)
@@ -41,9 +41,9 @@ define i8-array-new(xs: list(i8)): i8-array {
   let store-values =
     define self(values: list(i8), index: i64): top() {
       match values {
-      - list.nil() =>
-        top.unit()
-      - list.cons(v, rest) =>
+      - [] =>
+        top.Unit()
+      - v :: rest =>
         let _: i64 = magic store(i8, add-i64(content-pointer, index), v)
         self(rest, add-i64(index, 1))
       }

@@ -1,1 +1,1 @@
-enum bottom() {}
+variant bottom() {}

@@ -1,4 +1,4 @@
-enum bool() {
-- false()
-- true()
+variant bool() {
+- False()
+- True()
 }

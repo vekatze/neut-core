@@ -1,16 +1,4 @@
-import {
-- this.top
-- this.sum
-}
-
-define-inline option(a: tau): tau {
-  this.sum::sum(this.top::top(), a)
-}
-
-define some<a>(x: a): option(a) {
-  this.sum::sum.right(x)
-}
-
-define none<a>(): option(a) {
-  this.sum::sum.left(this.top::top.unit())
+variant option(a) {
+- None()
+- Some(a)
 }

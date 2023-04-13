@@ -8,7 +8,7 @@ use {
 
 define discard-vector-content(ptr: i64, elem-type: tau, counter: i64, length: i64): top() {
   if eq-i64(counter, length) {
-    top.unit()
+    top.Unit()
   } else {
     let _: elem-type = magic load(pointer(i8), add-i64(ptr, mul-i64(counter, 8)))
     discard-vector-content(ptr, elem-type, add-i64(counter, 1), length)
@@ -17,7 +17,7 @@ define discard-vector-content(ptr: i64, elem-type: tau, counter: i64, length: i6
 
 define copy-vector-content(source-pointer: i64, target-pointer: i64, elem-type: tau, counter: i64, length: i64): top() {
   if eq-i64(counter, length) {
-    top.unit()
+    top.Unit()
   } else {
     let value: elem-type = magic load(pointer(i8), add-i64(source-pointer, mul-i64(counter, 8)))
     let original = value
@@ -59,9 +59,9 @@ define vector-new<a>(xs: list(a)): vector(a) {
   let store-values =
     define self(values: list(a), index: i64): top() {
       match values {
-      - list.nil() ->
-        top.unit()
-      - list.cons(v, rest) ->
+      - [] ->
+        top.Unit()
+      - v :: rest ->
         let _: i64 = magic store(pointer(i8), add-i64(content-pointer, mul-i64(index, 8)), v)
         self(rest, add-i64(index, 1))
       }

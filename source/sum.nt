@@ -1,12 +1,4 @@
-import {
-- this.top
-}
-
-enum sum(a: tau, b: tau) {
-- left(a)
-- right(b)
-}
-
-define option(a: tau): tau {
-  sum(this.top::top(), a)
+variant sum(a: tau, b: tau) {
+- Left(a)
+- Right(b)
 }

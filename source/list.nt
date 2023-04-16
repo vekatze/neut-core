@@ -1,4 +1,17 @@
 variant list(a: tau) {
-- Nil()
+- Nil
 - Cons(a, list(a))
+}
+
+define length[a](xs: &list(a)): i64 {
+  let length-tailcall =
+    define rec(acc: i64, xs: &list(a)): i64 {
+      case xs {
+      - [] =>
+        acc
+      - _ :< ys =>
+        rec(add-i64(1, acc), ys)
+      }
+    }
+  length-tailcall(0, xs)
 }

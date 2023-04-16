@@ -3,14 +3,9 @@ import {
 - this.top
 }
 
-use {
-- this.list
-- this.top
-}
-
-define copy-i8-array(source-pointer: i64, target-pointer: i64, counter: i64, length: i64): top() {
+define copy-i8-array(source-pointer: i64, target-pointer: i64, counter: i64, length: i64): top {
   if eq-i64(counter, length) {
-    top.Unit()
+    Unit
   } else {
     let value-pointer = add-i64(source-pointer, counter)
     let value: i8 = magic load(i8, value-pointer)
@@ -39,11 +34,11 @@ define i8-array-new(xs: list(i8)): i8-array {
   let _: i64 = magic store(i64, base-pointer, len)
   let content-pointer: i64 = add-i64(base-pointer, 8)
   let store-values =
-    define self(values: list(i8), index: i64): top() {
+    define self(values: list(i8), index: i64): top {
       match values {
       - [] =>
-        top.Unit()
-      - v :: rest =>
+        Unit
+      - v :< rest =>
         let _: i64 = magic store(i8, add-i64(content-pointer, index), v)
         self(rest, add-i64(index, 1))
       }

@@ -1,4 +1,4 @@
-variant bool() {
-- False()
-- True()
+variant bool {
+- False
+- True
 }

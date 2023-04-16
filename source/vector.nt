@@ -1,4 +1,5 @@
 import {
+- this.bool
 - this.top
 - this.list
 }

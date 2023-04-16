@@ -1,4 +1,5 @@
 import {
+- this.bool
 - this.list
 - this.top
 }
@@ -50,11 +51,4 @@ define i8-array-new(xs: list(i8)): i8-array {
 define-inline i8-array-access(xs: &i8-array, i: i64): i8 {
   let ptr = magic cast(&i8-array, i64, xs)
   magic load(i8, add-i64(add-i64(ptr, 8), i))
-}
-
-define write(xs: &i8-array): i64 {
-  let ptr = magic cast(&i8-array, i64, xs)
-  let len: i64 = magic load(i64, ptr)
-  let content-pointer: i64 = add-i64(ptr, 8)
-  magic external(write, 1: i64, content-pointer, len)
 }

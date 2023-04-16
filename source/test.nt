@@ -19,10 +19,26 @@ define main(): i64 {
   let a = vec
   let b = vec
   let txt = "hello, world! this is me.\n"
-  let txt1 = txt
-  let txt2 = txt
-  let txt3 = txt
-  let _ on txt2 = this.text.write(txt2)
-  let arr-vec = vector-new([arr, arr])
+  // let txt1 = txt
+  // let txt2 = txt
+  // let txt3 = txt
+  let _ = write(txt)
+  let _ = write(txt)
+  let _ = write(txt)
+
+  let real-text = !txt
+
+  let a = real-text
+  let a = real-text
+  let a = real-text
+  let a = real-text
+  let a = real-text
+
+  let _ on a = write(a)
+
+  let _ = write("hello, world!")
+
+  // let _ on txt2 = this.text.write(txt2)
+  // let arr-vec = vector-new([arr, arr])
   10
 }

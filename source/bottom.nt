@@ -1,5 +1,7 @@
-variant bottom {}
+import {}
 
 export {
 - bottom {}
 }
+
+variant bottom {}

@@ -1,3 +1,12 @@
+import {}
+
+export {
+- bool {..}
+- and
+- or
+- not
+}
+
 variant bool {
 - False
 - True
@@ -34,14 +43,4 @@ define not(b: bool): bool {
   } else {
     True
   }
-}
-
-export {
-- bool {
-  - False
-  - True
-  }
-- and
-- or
-- not
 }

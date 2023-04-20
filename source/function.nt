@@ -1,3 +1,12 @@
+import {}
+
+export {
+- flip
+- compose
+- curry
+- uncurry
+}
+
 define flip[a, b, c](f: (a, b) -> c): (b, a) -> c {
   lambda (y, x) {
     f(x, y)
@@ -22,11 +31,4 @@ define uncurry[a, b, c](f: a -> b -> c): (a, b) -> c {
   lambda (x, y) {
     f(x)(y)
   }
-}
-
-export {
-- flip
-- compose
-- curry
-- uncurry
 }

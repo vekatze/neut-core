@@ -1,7 +1,23 @@
+/// list.nt
+
 import {
 - this.bool
 - this.option
 - this.function
+}
+
+export {
+- list {..}
+- length
+- append
+- fold-left
+- fold-right
+- map
+- concat
+- all
+- any
+- range
+- filter-some
 }
 
 variant list(a: tau) {
@@ -86,21 +102,4 @@ define filter-some[a](xs: list(option(a))): list(a) {
   - None :< rest =>
     filter-some(rest)
   }
-}
-
-export {
-- list {
-  - Nil
-  - Cons
-  }
-- length
-- append
-- fold-left
-- fold-right
-- map
-- concat
-- all
-- any
-- range
-- filter-some
 }

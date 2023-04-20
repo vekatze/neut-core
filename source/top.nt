@@ -1,9 +1,9 @@
-variant top {
-- Unit
-}
+import {}
 
 export {
-- top {
-  - Unit
-  }
+- top {..}
+}
+
+variant top {
+- Unit
 }

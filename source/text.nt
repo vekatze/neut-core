@@ -3,6 +3,12 @@ import {
 - this.list
 }
 
+export {
+- text
+- text-new
+- print
+}
+
 alias-opaque text {
   i8-array
 }
@@ -20,10 +26,4 @@ define print(t: &text): i64 {
     let content-pointer: i64 = add-i64(ptr, 8)
     magic external(write, 1: i64, content-pointer, len)
   }
-}
-
-export {
-- text
-- text-new
-- print
 }

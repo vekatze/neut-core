@@ -2,3 +2,10 @@ variant sum(a: tau, b: tau) {
 - Left(a)
 - Right(b)
 }
+
+export {
+- sum {
+  - Left
+  - Right
+  }
+}

@@ -1,4 +1,45 @@
+import {
+- this.bool
+}
+
 variant option(a) {
 - None
 - Some(a)
+}
+
+define is-None[a](x: option(a)): bool {
+  match x {
+  - None =>
+    True
+  - Some(_) =>
+    False
+  }
+}
+
+define is-Some[a](x: option(a)): bool {
+  match x {
+  - None =>
+    False
+  - Some(_) =>
+    True
+  }
+}
+
+define from-option[a](x: a, my: option(a)): a {
+  match my {
+  - Some(y) =>
+    y
+  - None =>
+    x
+  }
+}
+
+export {
+- option {
+  - None
+  - Some
+  }
+- is-None
+- is-Some
+- from-option
 }

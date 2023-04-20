@@ -1,0 +1,19 @@
+struct product(a, b) by Product {
+- left: a
+- right: b
+}
+
+define curry[a, b, c](f: (a, b) -> c): a -> b -> c {
+  lambda (x) {
+    lambda (y) {
+      f(x, y)
+    }
+  }
+}
+
+export {
+- product {
+  - Product
+  }
+- curry
+}

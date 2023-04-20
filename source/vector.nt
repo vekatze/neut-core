@@ -44,7 +44,7 @@ resource vector-internal {
   }
 }
 
-define vector(a: tau): tau {
+define vector(_: tau): tau {
   vector-internal
 }
 
@@ -76,4 +76,11 @@ define-inline vector-access[a](xs: &vector(a), i: i64): a {
 define length[a](xs: &vector(a)): i64 {
   let ptr = magic cast(&vector(a), i64, xs)
   magic load(i64, ptr)
+}
+
+export {
+- vector
+- vector-new
+- vector-access
+- this.vector.length
 }

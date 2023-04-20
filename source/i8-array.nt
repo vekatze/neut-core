@@ -52,3 +52,9 @@ define-inline i8-array-access(xs: &i8-array, i: i64): i8 {
   let ptr = magic cast(&i8-array, i64, xs)
   magic load(i8, add-i64(add-i64(ptr, 8), i))
 }
+
+export {
+- i8-array
+- i8-array-new
+- i8-array-access
+}

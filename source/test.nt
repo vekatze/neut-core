@@ -1,10 +1,13 @@
 import {
 - this.bool
 - this.bottom
+- this.function
 - this.i8-array
 - this.list
 - this.option
+- this.product
 - this.sum
+- this.system
 - this.text
 - this.top
 - this.vector
@@ -22,21 +25,23 @@ define main(): i64 {
   // let txt1 = txt
   // let txt2 = txt
   // let txt3 = txt
-  let _ = write(txt)
-  let _ = write(txt)
-  let _ = write(txt)
+  let _ = print(txt)
+  let _ = print(txt)
+  let _ = print(txt)
+  // let foo: tau = magic syscall(1, tau)
 
   let real-text = !txt
 
   let a = real-text
   let a = real-text
   let a = real-text
+  let b: i64 = add-i64(3, admit)
   let a = real-text
   let a = real-text
 
-  let _ on a = write(a)
+  let _ on a = print(a)
 
-  let _ = write("hello, world!")
+  let _ = print("hello, world!")
 
   // let _ on txt2 = this.text.write(txt2)
   // let arr-vec = vector-new([arr, arr])

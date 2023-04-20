@@ -1,0 +1,18 @@
+import {
+- this.text
+- this.top
+}
+
+define exit[a](status: i64): a {
+  magic external(exit, status)
+}
+
+define admit[a](t: &text): a {
+  let _ = print(t)
+  magic external(exit, 1: i64)
+}
+
+export {
+- exit
+- admit
+}

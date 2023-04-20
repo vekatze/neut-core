@@ -1,6 +1,47 @@
+import {
+- this.bool
+- this.option
+- this.function
+}
+
 variant list(a: tau) {
 - Nil
 - Cons(a, list(a))
+}
+
+define fold-left[a, b](f: (b, a) -> b, acc: b, xs: list(a)): b {
+  match xs {
+  - [] =>
+    acc
+  - y :< ys =>
+    fold-left(f, f(acc, y), ys)
+  }
+}
+
+define fold-right[a, b](f: (a, b) -> b, acc: b, xs: list(a)): b {
+  match xs {
+  - [] =>
+    acc
+  - y :< ys =>
+    f(y, fold-right(f, acc, ys))
+  }
+}
+
+define map[a, b](f: a -> b, xs: list(a)): list(b) {
+  match xs {
+  - [] =>
+    []
+  - y :< ys =>
+    f(y) :< map(f, ys)
+  }
+}
+
+define append[a](xs: list(a), ys: list(a)): list(a) {
+  fold-left(flip(Cons), xs, ys)
+}
+
+define concat[a](xss: list(list(a))): list(a) {
+  fold-left(append, [], xss)
 }
 
 define length[a](xs: &list(a)): i64 {
@@ -14,4 +55,52 @@ define length[a](xs: &list(a)): i64 {
       }
     }
   length-tailcall(0, xs)
+}
+
+// define unzip[a, b](xs: list(a * b)): list(a) * list(b) {
+// }
+
+define all(xs: list(bool)): bool {
+  fold-left(and, True, xs)
+}
+
+define any(xs: list(bool)): bool {
+  fold-left(or, False, xs)
+}
+
+// right-open interval
+define range(from: i64, to: i64): list(i64) {
+  if eq-i64(from, to) {
+    []
+  } else {
+    from :< range(add-i64(from, 1), to)
+  }
+}
+
+define filter-some[a](xs: list(option(a))): list(a) {
+  match xs {
+  - [] =>
+    []
+  - Some(v) :< rest =>
+    v :< filter-some(rest)
+  - None :< rest =>
+    filter-some(rest)
+  }
+}
+
+export {
+- list {
+  - Nil
+  - Cons
+  }
+- length
+- append
+- fold-left
+- fold-right
+- map
+- concat
+- all
+- any
+- range
+- filter-some
 }

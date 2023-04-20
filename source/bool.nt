@@ -2,3 +2,46 @@ variant bool {
 - False
 - True
 }
+
+
+define and(b1: bool, b2: bool): bool {
+  if b1 {
+    if b2 {
+      True
+    } else {
+      False
+    }
+  } else {
+    False
+  }
+}
+
+define or(b1: bool, b2: bool): bool {
+  if b1 {
+    True
+  } else {
+    if b2 {
+      True
+    } else {
+      False
+    }
+  }
+}
+
+define not(b: bool): bool {
+  if b {
+    False
+  } else {
+    True
+  }
+}
+
+export {
+- bool {
+  - False
+  - True
+  }
+- and
+- or
+- not
+}

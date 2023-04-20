@@ -1,0 +1,13 @@
+variant order {
+- LT
+- EQ
+- GT
+}
+
+export {
+- order {
+  - LT
+  - EQ
+  - GT
+  }
+}

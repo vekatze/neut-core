@@ -1,1 +1,5 @@
 variant bottom {}
+
+export {
+- bottom {}
+}

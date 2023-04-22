@@ -5,6 +5,7 @@ import {
 export {
 - flag {..}
 - interpret
+- for-r
 - for-rw
 - for-rw-append
 }
@@ -43,6 +44,10 @@ define interpret(xs: list(flag)): i64 {
   - f :< ys =>
     or-i64(interpret-flag(f), interpret(ys))
   }
+}
+
+define for-r(): list(flag) {
+  [R]
 }
 
 define for-rw(): list(flag) {

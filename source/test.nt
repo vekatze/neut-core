@@ -15,12 +15,37 @@ import {
 - this.file.flag => FF
 - this.file.mode => FM
 - this.file.descriptor => FD
+- this.text.io => text
 }
 
 define main(): i64 {
   let file = open("./sample6", FF.for-rw-append(), FM.default-file-mode())
-  write("hello, world! これは日本語の文章だよ。\n", file)
+  let _ = text.write("hello, world! これは日本語の文章だよ。こんにちは。\n", file)
   close(file)
+
+  let file = open("./sample6", FF.for-r(), FM.default-file-mode())
+  let content = text.read(file)
+  text.print("result:\n")
+  match content {
+  - None =>
+    text.print("couldn't read the file\n")
+  - Some(content) =>
+    let _ on content = text.print(content)
+    let _ = content
+    // write("hello, world! これは日本語の文章だよ。\n", file)
+    close(file)
+  }
+
+  // print("\n")
+
+  // let input = read(FD.stdin(), 800)
+
+  // print("user input:\n")
+
+  // let _ on input = print(input)
+
+  // let size = shl-i64(2, 8)
+  // print-i64(size)
 
   // let str1 = "hello, "
   // let str2 = "world!"

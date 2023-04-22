@@ -5,11 +5,11 @@ import {
 - this.list => L
 - this.product
 - this.top
+- this.memory => memory
 }
 
 export {
 - text
-
 - append
 - create
 - empty
@@ -19,10 +19,6 @@ export {
 - length
 - naive-tail
 - naive-uncons
-- print
-- print-character
-- print-i64
-- print-line
 }
 
 alias-opaque text {
@@ -49,7 +45,7 @@ define append(t1: &text, t2: &text): text {
   let new-len = add-i64(len1, len2)
   let content1: i64 = add-i64(p1, 16)
   let content2: i64 = add-i64(p2, 16)
-  let new-text: i64 = magic external(malloc, add-i64(new-len, 16))
+  let new-text = memory.malloc(add-i64(new-len, 16))
   let _: top = magic store(i64, new-text, 0: i64)
   let _: top = magic store(i64, add-i64(new-text, 8), new-len)
   let store-values =
@@ -74,34 +70,6 @@ define unsafe-get-content-pointer(t: &text): i64 {
   add-i64(add-i64(ptr, 16), from)
 }
 
-define print(t: &text): top {
-  introspect target-os {
-  - darwin =>
-    let ptr = magic cast(&text, i64, t)
-    let from: i64 = magic load(i64, ptr)
-    let to: i64 = magic load(i64, add-i64(ptr, 8))
-    let content-pointer: i64 = add-i64(add-i64(ptr, 16), from)
-    let len = sub-i64(to, from)
-    magic external(write, 1: i64, content-pointer, len)
-  }
-}
-
-define print-line(t: &text): top {
-  print(t)
-  print("\n")
-}
-
-define print-character(char: i8): top {
-  let p: i64 = magic external(malloc, 1: i64)
-  let _: i64 = magic store(i8, p, char)
-  magic external(write, 1: i64, p, 1: i64)
-  magic external(free, p)
-}
-
-define print-digit(x: i8): top {
-  print-character(add-i8(x, 48))
-}
-
 define get-text-length-of-i64(x: i64, acc: i64): i64 {
   if lt-i64(x, 0) {
     get-text-length-of-i64(mul-i64(x, -1), add-i64(acc, 1))
@@ -117,7 +85,7 @@ define get-text-length-of-i64(x: i64, acc: i64): i64 {
 
 define from-i64(x: i64): text {
   let len = get-text-length-of-i64(x, 0)
-  let ptr: i64 = magic external(malloc, add-i64(len, 16))
+  let ptr = memory.malloc(add-i64(len, 16))
   let _: top = magic store(i64, ptr, 0: i64)
   let _: top = magic store(i64, add-i64(ptr, 8), len)
   let content = add-i64(ptr, 16)
@@ -196,11 +164,4 @@ define intercalate(sep: &text, xs: &L.list(&text)): text {
     let _ = str-cont
     result
   }
-}
-
-define print-i64(i: i64): top {
-  let t = from-i64(i)
-  let _ on t = print(t)
-  let _ = t
-  Unit
 }

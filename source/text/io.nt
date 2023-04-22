@@ -1,0 +1,111 @@
+import {
+- this.text
+- this.bool
+- this.top
+- this.option
+- this.list
+- this.file.flag => FF
+- this.file.mode => FM
+- this.file.descriptor => FD
+- this.file.seek => seek
+- this.memory
+- this.file
+}
+
+export {
+- write
+- read
+- print
+- print-line
+- print-character
+- print-i64
+}
+
+// fixme: prefer the sum type
+define write(t: &text, f: FD.descriptor): ?i64 {
+  introspect target-os {
+  - darwin =>
+    let ptr = magic cast(&text, i64, t)
+    let from: i64 = magic load(i64, ptr)
+    let to: i64 = magic load(i64, add-i64(ptr, 8))
+    let content-pointer: i64 = add-i64(add-i64(ptr, 16), from)
+    let len = sub-i64(to, from)
+    let bytes: i64 = magic external(write, f, content-pointer, len)
+    if lt-i64(bytes, 0) {
+      None
+    } else {
+      Some(bytes)
+    }
+  }
+}
+
+// fixme: prefer the sum type
+define read(f: FD.descriptor): ?text {
+  let buffer-size = shl-i64(1, 16)
+  introspect target-os {
+  - darwin =>
+    let size: i64 = magic external(lseek, f, 0: i64, seek.interpret(seek.END))
+    let _: i64 = magic external(lseek, f, 0: i64, seek.interpret(seek.SET))
+    read-file(f, buffer-size, size)
+  }
+}
+
+define read-file(f: FD.descriptor, buffer-size: i64, read-size: i64): ?text {
+  introspect target-os {
+  - darwin =>
+    let ptr = malloc(add-i64(read-size, 16))
+    store-i64(ptr, 0)
+    let content-ptr = add-i64(ptr, 16)
+    let read-size = read-loop(f, content-ptr, buffer-size, read-size, 0)
+    match read-size {
+    - Some(size) =>
+      store-i64(add-i64(ptr, 8), size)
+      Some(magic cast(i64, text, ptr))
+    - None =>
+      free(ptr)
+      None
+    }
+  }
+}
+
+define read-loop(f: FD.descriptor, content-ptr: i64, buffer-size: i64, file-size: i64, acc: i64): ?i64 {
+  introspect target-os {
+  - darwin =>
+    let bytes: i64 = magic external(read, f, content-ptr, buffer-size)
+    if lt-i64(bytes, 0) {
+      None
+    } else-if lt-i64(bytes, buffer-size) {
+      Some(add-i64(acc, bytes))
+    } else {
+      read-loop(f, add-i64(content-ptr, bytes), buffer-size, file-size, add-i64(acc, bytes))
+    }
+  }
+}
+
+define print(t: &text): top {
+  let _ = write(t, FD.stdout())
+  Unit
+}
+
+define print-line(t: &text): top {
+  print(t)
+  print("\n")
+}
+
+define print-character(char: i8): top {
+  let p: i64 = magic external(malloc, 1: i64)
+  let _: i64 = magic store(i8, p, char)
+  magic external(write, 1: i64, p, 1: i64)
+  magic external(free, p)
+}
+
+define print-digit(x: i8): top {
+  print-character(add-i8(x, 48))
+}
+
+define print-i64(i: i64): top {
+  let t = from-i64(i)
+  let _ on t = print(t)
+  let _ = t
+  Unit
+}

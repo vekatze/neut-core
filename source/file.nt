@@ -1,16 +1,17 @@
 import {
 - this.text
+- this.bool
 - this.top
 - this.list
 - this.file.flag => FF
 - this.file.mode => FM
 - this.file.descriptor => FD
+- this.memory
 }
 
 export {
 - open
 - close
-- write
 }
 
 // fixme: use the coproduct type to detect errors
@@ -29,17 +30,5 @@ define close(f: FD.descriptor): top {
   introspect target-os {
   - darwin =>
     magic external(close, f)
-  }
-}
-
-define write(t: &text, f: FD.descriptor): top {
-  introspect target-os {
-  - darwin =>
-    let ptr = magic cast(&text, i64, t)
-    let from: i64 = magic load(i64, ptr)
-    let to: i64 = magic load(i64, add-i64(ptr, 8))
-    let content-pointer: i64 = add-i64(add-i64(ptr, 16), from)
-    let len = sub-i64(to, from)
-    magic external(write, f, content-pointer, len)
   }
 }

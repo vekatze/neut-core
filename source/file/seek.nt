@@ -1,0 +1,22 @@
+export {
+- seek {..}
+- interpret
+}
+
+// https://opensource.apple.com/source/xnu/xnu-3248.30.4/bsd/sys/_types/_seek_set.h.auto.html
+variant seek {
+- SET
+- CUR
+- END
+}
+
+define interpret(s: seek): i64 {
+  match s {
+  - SET =>
+    0
+  - CUR =>
+    1
+  - END =>
+    2
+  }
+}

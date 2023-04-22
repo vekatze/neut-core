@@ -14,36 +14,53 @@ import {
 }
 
 define main(): i64 {
-  let xs = [104, 101, 108, 108, 111, 10]
-  let arr = i8-array-new(xs)
-  let vec = vector-new(xs)
-  let v1 on arr = i8-array-access(arr, 2)
-  let v0 on vec = vector-access(vec, 2)
-  let a = vec
-  let b = vec
-  let txt = "hello, world! this is me.\n"
-  // let txt1 = txt
-  // let txt2 = txt
-  // let txt3 = txt
-  let _ = print(txt)
-  let _ = print(txt)
-  let _ = print(txt)
-  // let foo: tau = magic syscall(1, tau)
+  // let str1 = "hello, "
+  // let str2 = "world!"
+  let text-from-int = from-i64(-9874123849123749)
+  let _ on text-from-int = print-line(text-from-int)
+  print-i64(1234)
+  // print-line(str1)
+  // print-line(str2)
+  // let str = this.text.append(str1, str2)
+  // let _ on str = {
+  //   print-line("↓↓↓")
+  //   print-line(str)
+  //   print-line("↑↑↑")
+  // }
+  // print-character(48)
+  // print-line("print-i64: ")
+  // print-i64(-4218934)
+  // print-line("here")
+  // let xs = [104, 101, 108, 108, 111, 10]
+  // let arr = i8-array-new(xs)
+  // let vec = vector-new(xs)
+  // let v1 on arr = i8-array-access(arr, 2)
+  // let v0 on vec = vector-access(vec, 2)
+  // let a = vec
+  // let b = vec
+  // let txt = "hello, world! this is me.\n"
+  // // let txt1 = txt
+  // // let txt2 = txt
+  // // let txt3 = txt
+  // let _ = print(txt)
+  // let _ = print(txt)
+  // let _ = print(txt)
+  // // let foo: tau = magic syscall(1, tau)
 
-  let real-text = !txt
+  // let real-text = !txt
 
-  let a = real-text
-  let a = real-text
-  let a = real-text
-  let b: i64 = add-i64(3, admit)
-  let a = real-text
-  let a = real-text
+  // let a = real-text
+  // let a = real-text
+  // let a = real-text
+  // let b: i64 = add-i64(3, admit)
+  // let a = real-text
+  // let a = real-text
 
-  let _ on a = print(a)
+  // let _ on a = print(a)
 
-  let _ = print("hello, world!")
+  // let _ = print("hello, world!")
 
-  // let _ on txt2 = this.text.write(txt2)
-  // let arr-vec = vector-new([arr, arr])
+  // // let _ on txt2 = this.text.write(txt2)
+  // // let arr-vec = vector-new([arr, arr])
   10
 }

@@ -1,24 +1,60 @@
 import {
 - this.i8-array
+- this.bool
 - this.list
+- this.top
 }
 
 export {
 - text
-- text-new
+- create
 - print
+- print-line
+- print-character
+- print-i64
+- from-i64
+- this.text.append
 }
 
 alias-opaque text {
   i8-array
 }
 
-define text-new(xs: list(i8)): text {
+define create(xs: list(i8)): text {
   magic cast(i8-array, text, i8-array-new(xs))
 }
 
+define empty(): text {
+  create([])
+}
 
-define print(t: &text): i64 {
+define append(t1: &text, t2: &text): text {
+  let p1: i64 = magic cast(&text, i64, t1)
+  let p2: i64 = magic cast(&text, i64, t2)
+  let len1: i64 = magic load(i64, p1)
+  let len2: i64 = magic load(i64, p2)
+  let new-len = add-i64(len1, len2)
+  let content1: i64 = add-i64(p1, 8)
+  let content2: i64 = add-i64(p2, 8)
+  let new-text: i64 = magic external(malloc, add-i64(new-len, 8))
+  let _: top = magic store(i64, new-text, new-len)
+  let store-values =
+    define self(target-pointer: i64, content-array: i64, current-index: i64, array-length: i64): top {
+      if eq-i64(current-index, array-length) {
+        Unit
+      } else {
+        let char: i64 = magic load(i8, add-i64(content-array, current-index))
+        let _: i64 = magic store(i8, add-i64(target-pointer, current-index), char)
+        self(target-pointer, content-array, add-i64(current-index, 1), array-length)
+      }
+    }
+  let str-pointer = add-i64(new-text, 8)
+  store-values(str-pointer, content1, 0, len1)
+  store-values(add-i64(str-pointer, len1), content2, 0, len2)
+  magic cast(i64, text, new-text)
+}
+
+define print(t: &text): top {
   introspect target-os {
   - darwin =>
     let ptr = magic cast(&text, i64, t)
@@ -26,4 +62,67 @@ define print(t: &text): i64 {
     let content-pointer: i64 = add-i64(ptr, 8)
     magic external(write, 1: i64, content-pointer, len)
   }
+}
+
+define print-line(t: &text): top {
+  print(t)
+  print("\n")
+}
+
+define print-character(char: i8): top {
+  let p: i64 = magic external(malloc, 1: i64)
+  let _: i64 = magic store(i8, p, char)
+  magic external(write, 1: i64, p, 1: i64)
+  magic external(free, p)
+}
+
+define print-digit(x: i8): top {
+  print-character(add-i8(x, 48))
+}
+
+define get-text-length-of-i64(x: i64, acc: i64): i64 {
+  if lt-i64(x, 0) {
+    get-text-length-of-i64(mul-i64(x, -1), add-i64(acc, 1))
+  } else {
+    let q = div-i64(x, 10)
+    if eq-i64(q, 0) {
+      add-i64(acc, 1)
+    } else {
+      get-text-length-of-i64(q, add-i64(acc, 1))
+    }
+  }
+}
+
+define from-i64(x: i64): text {
+  let len = get-text-length-of-i64(x, 0)
+  let ptr: i64 = magic external(malloc, add-i64(len, 8))
+  let _: top = magic store(i64, ptr, len)
+  let content = add-i64(ptr, 8)
+  let store-positive-values =
+    define loop(y: i64, index: i64): top {
+      if lt-i64(y, 10) {
+        let digit-char = add-i8(magic cast(i64, i8, y), 48) // 48 == "0"
+        magic store(i8, add-i64(content, index), digit-char)
+      } else {
+        let q = div-i64(y, 10)
+        let r = rem-i64(y, 10)
+        let digit-char = add-i8(magic cast(i64, i8, r), 48)
+        magic store(i8, add-i64(content, index), digit-char)
+        loop(q, sub-i64(index, 1))
+      }
+    }
+  if lt-i64(x, 0) {
+    magic store(i8, content, 45: i64) // 45 == "-"
+    store-positive-values(mul-i64(x, -1), sub-i64(len, 1))
+  } else {
+    store-positive-values(x, sub-i64(len, 1))
+  }
+  magic cast(i64, text, ptr)
+}
+
+define print-i64(i: i64): top {
+  let t = from-i64(i)
+  let _ on t = print(t)
+  let _ = t
+  Unit
 }

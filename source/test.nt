@@ -16,25 +16,44 @@ import {
 - this.file.mode => FM
 - this.file.descriptor => FD
 - this.text.io => text
+- this.memory => mem
 }
 
 define main(): i64 {
-  let file = open("./sample6", FF.for-rw-append(), FM.default-file-mode())
-  let _ = text.write("hello, world! これは日本語の文章だよ。こんにちは。\n", file)
-  close(file)
-
-  let file = open("./sample6", FF.for-r(), FM.default-file-mode())
-  let content = text.read(file)
-  text.print("result:\n")
-  match content {
+  text.print("input> ")
+  let input-or-none = text.get-line()
+  let _ = input-or-none
+  let _ = input-or-none
+  let _ = input-or-none
+  let _ = input-or-none
+  let copy = input-or-none
+  // let ptr = mem.malloc(30)
+  // let ptr2: i64 = magic external(realloc, ptr, 50:i64)
+  match copy {
   - None =>
-    text.print("couldn't read the file\n")
-  - Some(content) =>
-    let _ on content = text.print(content)
-    let _ = content
-    // write("hello, world! これは日本語の文章だよ。\n", file)
-    close(file)
+    text.print-line("couldn't get from input")
+  - Some(input) =>
+    text.print-line("result:")
+    let _ on input = text.print-line(input)
+    let _ = input
+    Unit
   }
+
+  // let file = open("./sample6", FF.for-rw-append(), FM.default-file-mode())
+  // let _ = text.write("hello, world!\n", file)
+  // close(file)
+
+  // let file = open("./sample6", FF.for-r(), FM.default-file-mode())
+  // let content = text.read(file)
+  // text.print("result:\n")
+  // match content {
+  // - None =>
+  //   text.print("couldn't read the file\n")
+  // - Some(content) =>
+  //   let _ on content = text.print(content)
+  //   let _ = content
+  //   close(file)
+  // }
 
   // print("\n")
 

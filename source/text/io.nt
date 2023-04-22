@@ -15,6 +15,7 @@ import {
 export {
 - write
 - read
+- get-line
 - print
 - print-line
 - print-character
@@ -50,13 +51,13 @@ define read(f: FD.descriptor): ?text {
   }
 }
 
-define read-file(f: FD.descriptor, buffer-size: i64, read-size: i64): ?text {
+define read-file(f: FD.descriptor, buffer-size: i64, max-read-size: i64): ?text {
   introspect target-os {
   - darwin =>
-    let ptr = malloc(add-i64(read-size, 16))
+    let ptr = malloc(add-i64(max-read-size, 16))
     store-i64(ptr, 0)
     let content-ptr = add-i64(ptr, 16)
-    let read-size = read-loop(f, content-ptr, buffer-size, read-size, 0)
+    let read-size = read-loop(f, content-ptr, buffer-size, max-read-size, 0)
     match read-size {
     - Some(size) =>
       store-i64(add-i64(ptr, 8), size)
@@ -68,7 +69,7 @@ define read-file(f: FD.descriptor, buffer-size: i64, read-size: i64): ?text {
   }
 }
 
-define read-loop(f: FD.descriptor, content-ptr: i64, buffer-size: i64, file-size: i64, acc: i64): ?i64 {
+define read-loop(f: FD.descriptor, content-ptr: i64, buffer-size: i64, max-read-size: i64, acc: i64): ?i64 {
   introspect target-os {
   - darwin =>
     let bytes: i64 = magic external(read, f, content-ptr, buffer-size)
@@ -77,7 +78,7 @@ define read-loop(f: FD.descriptor, content-ptr: i64, buffer-size: i64, file-size
     } else-if lt-i64(bytes, buffer-size) {
       Some(add-i64(acc, bytes))
     } else {
-      read-loop(f, add-i64(content-ptr, bytes), buffer-size, file-size, add-i64(acc, bytes))
+      read-loop(f, add-i64(content-ptr, bytes), buffer-size, max-read-size, add-i64(acc, bytes))
     }
   }
 }
@@ -85,6 +86,48 @@ define read-loop(f: FD.descriptor, content-ptr: i64, buffer-size: i64, file-size
 define print(t: &text): top {
   let _ = write(t, FD.stdout())
   Unit
+}
+
+define print-char(x: i8): top {
+  let ptr = malloc(1)
+  store-i8(ptr, x)
+  magic external(write, FD.stdout(), ptr, 1: i64)
+  free(ptr)
+}
+
+define get-line(): ?text {
+  let max-input-size = 1024
+  let ptr-size = add-i64(max-input-size, 16)
+  let ptr = malloc(ptr-size)
+  store-i64(ptr, 0)
+  get-line-inner(ptr, ptr-size, 0, 1024)
+}
+
+define get-line-inner(ptr: i64, ptr-size: i64, current-index: i64, buffer-size: i64): ?text {
+  introspect target-os {
+  - darwin =>
+    let content-size = sub-i64(ptr-size, 16)
+    if lt-i64(content-size, add-i64(current-index, buffer-size)) {
+      let new-size = mul-i64(ptr-size, 2)
+      let new-ptr = realloc(ptr, new-size)
+      get-line-inner(new-ptr, new-size, current-index, buffer-size)
+    } else {
+      let content-ptr = add-i64(ptr, add-i64(16, current-index))
+      let bytes: i64 = magic external(read, FD.stdin(), content-ptr, buffer-size)
+      let next-index = add-i64(current-index, bytes)
+      let last-char-ptr = add-i64(content-ptr, sub-i64(bytes, 1))
+      let last-char: i8 = magic load(i8, last-char-ptr)
+      if lt-i64(bytes, 0) {
+        free(ptr)
+        None
+      } else-if or(lt-i64(bytes, buffer-size), eq-i8(last-char, 10)) {
+        store-i64(add-i64(ptr, 8), next-index)
+        Some(magic cast(i64, text, ptr))
+      } else {
+        get-line-inner(ptr, ptr-size, next-index, buffer-size)
+      }
+    }
+  }
 }
 
 define print-line(t: &text): top {

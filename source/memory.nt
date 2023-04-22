@@ -5,6 +5,7 @@ import {
 export {
 - malloc
 - free
+- realloc
 - store-i8
 - store-i64
 }
@@ -20,6 +21,13 @@ define free(ptr: i64): top {
   introspect target-os {
   - darwin =>
     magic external(free, ptr)
+  }
+}
+
+define realloc(ptr: i64, size: i64): i64 {
+  introspect target-os {
+  - darwin =>
+    magic external(realloc, ptr, size)
   }
 }
 

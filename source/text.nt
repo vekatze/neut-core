@@ -5,7 +5,7 @@ import {
 - this.list => L
 - this.product
 - this.top
-- this.memory => memory
+- this.external => ext
 }
 
 export {
@@ -45,7 +45,7 @@ define append(t1: &text, t2: &text): text {
   let new-len = add-i64(len1, len2)
   let content1: i64 = add-i64(p1, 16)
   let content2: i64 = add-i64(p2, 16)
-  let new-text = memory.malloc(add-i64(new-len, 16))
+  let new-text = ext.malloc(add-i64(new-len, 16))
   let _: top = magic store(i64, new-text, 0: i64)
   let _: top = magic store(i64, add-i64(new-text, 8), new-len)
   let store-values =
@@ -85,7 +85,7 @@ define get-text-length-of-i64(x: i64, acc: i64): i64 {
 
 define from-i64(x: i64): text {
   let len = get-text-length-of-i64(x, 0)
-  let ptr = memory.malloc(add-i64(len, 16))
+  let ptr = ext.malloc(add-i64(len, 16))
   let _: top = magic store(i64, ptr, 0: i64)
   let _: top = magic store(i64, add-i64(ptr, 8), len)
   let content = add-i64(ptr, 16)

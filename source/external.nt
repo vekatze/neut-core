@@ -1,0 +1,96 @@
+import {
+- this.top
+- this.file.seek => seek
+- this.file.descriptor => FD
+}
+
+export {
+- exit
+- malloc
+- free
+- realloc
+- open
+- close
+- write
+- read
+- lseek
+- store-i8
+- store-i64
+}
+
+define exit[a](status: i64): a {
+  introspect target-os {
+  - darwin =>
+    magic external(exit, status)
+  }
+}
+
+define malloc(size: i64): i64 {
+  introspect target-os {
+  - darwin =>
+    magic external(malloc, size)
+  }
+}
+
+define free(ptr: i64): top {
+  introspect target-os {
+  - darwin =>
+    magic external(free, ptr)
+  }
+}
+
+define realloc(ptr: i64, size: i64): i64 {
+  introspect target-os {
+  - darwin =>
+    magic external(realloc, ptr, size)
+  }
+}
+
+define open(path-address: i64, oflag: i64, mode: i64): FD.descriptor {
+  introspect target-os {
+  - darwin =>
+    magic external(open, path-address, oflag, mode)
+  }
+}
+
+define close(f: FD.descriptor): top {
+  introspect target-os {
+  - darwin =>
+    magic external(close, f)
+  }
+}
+
+define write(f: FD.descriptor, content-pointer: i64, len: i64): i64 {
+  introspect target-os {
+  - darwin =>
+    magic external(write, f, content-pointer, len)
+  }
+}
+
+define read(f: FD.descriptor, content-pointer: i64, max-read-size: i64): i64 {
+  introspect target-os {
+  - darwin =>
+    magic external(read, f, content-pointer, max-read-size)
+  }
+}
+
+define lseek(f: FD.descriptor, offset: i64, seek-mode: i64): i64 {
+  introspect target-os {
+  - darwin =>
+    magic external(lseek, f, offset: i64, seek-mode)
+  }
+}
+
+define store-i64(address: i64, value: i64): top {
+  introspect target-os {
+  - darwin =>
+    magic store(i64, address, value)
+  }
+}
+
+define store-i8(address: i64, value: i8): top {
+  introspect target-os {
+  - darwin =>
+    magic store(i8, address, value)
+  }
+}

@@ -6,7 +6,7 @@ import {
 - this.file.flag => FF
 - this.file.mode => FM
 - this.file.descriptor => FD
-- this.memory
+- this.external => ext
 }
 
 export {
@@ -16,19 +16,16 @@ export {
 
 // fixme: use the coproduct type to detect errors
 define open(path: &text, xs: list(FF.flag), ms: list(FM.mode)): FD.descriptor {
-  introspect target-os {
-  - darwin =>
-    let path' = this.text.append(path, "\0")
-    let actual-path-string on path' = unsafe-get-content-pointer(path')
-    let fd = magic external(open, actual-path-string, FF.interpret(xs), FM.interpret(ms))
-    let _ = path'
-    fd
-  }
+  let path' = this.text.append(path, "\0")
+  let actual-path-string on path' = unsafe-get-content-pointer(path')
+  let fd = ext.open(actual-path-string, FF.interpret(xs), FM.interpret(ms))
+  let _ = path'
+  fd
 }
 
 define close(f: FD.descriptor): top {
   introspect target-os {
   - darwin =>
-    magic external(close, f)
+    ext.close(f)
   }
 }

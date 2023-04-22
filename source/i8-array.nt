@@ -2,6 +2,7 @@ import {
 - this.bool
 - this.list
 - this.top
+- this.external
 }
 
 export {
@@ -22,13 +23,13 @@ define copy-i8-array(source-pointer: i64, target-pointer: i64, index: i64, from:
 
 resource i8-array {
 - lambda(x: i64) {
-    magic external(free, x)
+    magic cast(top, i64, free(x))
   }
 - lambda(source-pointer: i64) {
     let from: i64 = magic load(i64, source-pointer)
     let to: i64 = magic load(i64, add-i64(source-pointer, 8))
     let length = sub-i64(to, from)
-    let target-pointer = magic external(malloc, add-i64(length, 16))
+    let target-pointer = malloc(add-i64(length, 16))
     let _: i64 = magic store(i64, target-pointer, 0: i64)
     let _: i64 = magic store(i64, add-i64(target-pointer, 8), length)
     let _ = copy-i8-array(add-i64(source-pointer, 16), add-i64(target-pointer, 16), 0, from, to)
@@ -38,7 +39,7 @@ resource i8-array {
 
 define i8-array-new(xs: list(i8)): i8-array {
   let len on xs = length(xs)
-  let base-pointer = magic external(malloc, add-i64(len, 16))
+  let base-pointer = malloc(add-i64(len, 16))
   let _: i64 = magic store(i64, base-pointer, 0: i64)
   let _: i64 = magic store(i64, add-i64(base-pointer, 8), len)
   let content-pointer: i64 = add-i64(base-pointer, 16)

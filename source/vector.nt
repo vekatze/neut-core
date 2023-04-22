@@ -2,6 +2,7 @@ import {
 - this.bool
 - this.top
 - this.list
+- this.external
 }
 
 export {
@@ -38,12 +39,12 @@ resource vector-internal {
     let length: i64 = magic load(i64, x)
     let elem-type: tau = magic load(i64, add-i64(x, 8))
     let _ = discard-vector-content(add-i64(x, 16), elem-type, 0, length)
-    magic external(free, x)
+    magic cast(top, i64, free(x))
   }
 - lambda(source-pointer: i64) {
     let length: i64 = magic load(i64, source-pointer)
     let elem-type: tau = magic load(i64, add-i64(source-pointer, 8))
-    let target-pointer = magic external(malloc, add-i64(16, mul-i64(length, 8)))
+    let target-pointer = malloc(add-i64(16, mul-i64(length, 8)))
     let _: i64 = magic store(i64, target-pointer, length)
     let _: i64 = magic store(i64, add-i64(target-pointer, 8), elem-type)
     let _ = copy-vector-content(add-i64(source-pointer, 16), add-i64(target-pointer, 16), elem-type, 0, length)
@@ -57,7 +58,7 @@ define vector(_: tau): tau {
 
 define vector-new[a](xs: list(a)): vector(a) {
   let len on xs = this.list.length(xs)
-  let base-pointer = magic external(malloc, add-i64(16, mul-i64(len, 8)))
+  let base-pointer = malloc(add-i64(16, mul-i64(len, 8)))
   let _: i64 = magic store(i64, base-pointer, len)
   let _: i64 = magic store(i64, add-i64(base-pointer, 8), a)
   let content-pointer: i64 = add-i64(base-pointer, 16)

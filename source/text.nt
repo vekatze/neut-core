@@ -2,30 +2,33 @@ import {
 - this.i8-array
 - this.bool
 - this.option
-- this.list
+- this.list => L
 - this.product
 - this.top
 }
 
 export {
 - text
-- empty
+
+- append
 - create
-- print
-- print-line
-- print-character
-- print-i64
+- empty
 - from-i64
+- intercalate
+- length
 - naive-tail
 - naive-uncons
-- this.text.append
+- print
+- print-character
+- print-i64
+- print-line
 }
 
 alias-opaque text {
   i8-array
 }
 
-define create(xs: list(i8)): text {
+define create(xs: L.list(i8)): text {
   magic cast(i8-array, text, i8-array-new(xs))
 }
 
@@ -161,6 +164,30 @@ define naive-tail(t: text): ?text {
   } else {
     let _: text = magic cast(i64, text, ptr)
     None
+  }
+}
+
+define length(t: &text): i64 {
+  let ptr = magic cast(&text, i64, t)
+  let from: i64 = magic load(i64, ptr)
+  let to: i64 = magic load(i64, add-i64(ptr, 8))
+  sub-i64(to, from)
+}
+
+// a slow implementation; optimizable using direct malloc
+define intercalate(sep: &text, xs: &L.list(&text)): text {
+  case xs {
+  - [] =>
+    empty()
+  - [t] =>
+    !!t
+  - t :< ts =>
+    let str-head = this.text.append(!t, sep)
+    let str-cont = intercalate(sep, ts)
+    let result on str-head, str-cont = this.text.append(str-head, str-cont)
+    let _ = str-head
+    let _ = str-cont
+    result
   }
 }
 

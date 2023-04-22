@@ -45,6 +45,10 @@ define main(): i64 {
     print-line("done")
   }
 
+  let xs = ["foo", "bar", "buz"]
+  let sample on xs = intercalate(", ", xs)
+  let _ on sample = print-line(sample)
+
   // print-character(48)
   // print-line("print-i64: ")
   // print-i64(-4218934)

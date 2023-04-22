@@ -1,18 +1,23 @@
 import {
 - this.i8-array
 - this.bool
+- this.option
 - this.list
+- this.product
 - this.top
 }
 
 export {
 - text
+- empty
 - create
 - print
 - print-line
 - print-character
 - print-i64
 - from-i64
+- naive-tail
+- naive-uncons
 - this.text.append
 }
 
@@ -31,13 +36,18 @@ define empty(): text {
 define append(t1: &text, t2: &text): text {
   let p1: i64 = magic cast(&text, i64, t1)
   let p2: i64 = magic cast(&text, i64, t2)
-  let len1: i64 = magic load(i64, p1)
-  let len2: i64 = magic load(i64, p2)
+  let from1: i64 = magic load(i64, p1)
+  let from2: i64 = magic load(i64, p2)
+  let to1: i64 = magic load(i64, add-i64(p1, 8))
+  let to2: i64 = magic load(i64, add-i64(p2, 8))
+  let len1 = sub-i64(to1, from1)
+  let len2 = sub-i64(to2, from2)
   let new-len = add-i64(len1, len2)
-  let content1: i64 = add-i64(p1, 8)
-  let content2: i64 = add-i64(p2, 8)
-  let new-text: i64 = magic external(malloc, add-i64(new-len, 8))
-  let _: top = magic store(i64, new-text, new-len)
+  let content1: i64 = add-i64(p1, 16)
+  let content2: i64 = add-i64(p2, 16)
+  let new-text: i64 = magic external(malloc, add-i64(new-len, 16))
+  let _: top = magic store(i64, new-text, 0: i64)
+  let _: top = magic store(i64, add-i64(new-text, 8), new-len)
   let store-values =
     define self(target-pointer: i64, content-array: i64, current-index: i64, array-length: i64): top {
       if eq-i64(current-index, array-length) {
@@ -48,9 +58,9 @@ define append(t1: &text, t2: &text): text {
         self(target-pointer, content-array, add-i64(current-index, 1), array-length)
       }
     }
-  let str-pointer = add-i64(new-text, 8)
-  store-values(str-pointer, content1, 0, len1)
-  store-values(add-i64(str-pointer, len1), content2, 0, len2)
+  let str-pointer = add-i64(new-text, 16)
+  store-values(str-pointer, add-i64(content1, from2), 0, len1)
+  store-values(add-i64(str-pointer, len1), add-i64(content2, from2), 0, len2)
   magic cast(i64, text, new-text)
 }
 
@@ -58,8 +68,10 @@ define print(t: &text): top {
   introspect target-os {
   - darwin =>
     let ptr = magic cast(&text, i64, t)
-    let len: i64 = magic load(i64, ptr)
-    let content-pointer: i64 = add-i64(ptr, 8)
+    let from: i64 = magic load(i64, ptr)
+    let to: i64 = magic load(i64, add-i64(ptr, 8))
+    let content-pointer: i64 = add-i64(add-i64(ptr, 16), from)
+    let len = sub-i64(to, from)
     magic external(write, 1: i64, content-pointer, len)
   }
 }
@@ -95,9 +107,10 @@ define get-text-length-of-i64(x: i64, acc: i64): i64 {
 
 define from-i64(x: i64): text {
   let len = get-text-length-of-i64(x, 0)
-  let ptr: i64 = magic external(malloc, add-i64(len, 8))
-  let _: top = magic store(i64, ptr, len)
-  let content = add-i64(ptr, 8)
+  let ptr: i64 = magic external(malloc, add-i64(len, 16))
+  let _: top = magic store(i64, ptr, 0: i64)
+  let _: top = magic store(i64, add-i64(ptr, 8), len)
+  let content = add-i64(ptr, 16)
   let store-positive-values =
     define loop(y: i64, index: i64): top {
       if lt-i64(y, 10) {
@@ -118,6 +131,37 @@ define from-i64(x: i64): text {
     store-positive-values(x, sub-i64(len, 1))
   }
   magic cast(i64, text, ptr)
+}
+
+define cast(t: text): i64 {
+  magic cast(text, i64, t)
+}
+
+define naive-uncons(t: text): ?product(i64, text) {
+  let ptr = cast(t)
+  let from: i64 = magic load(i64, ptr)
+  let to: i64 = magic load(i64, add-i64(ptr, 8))
+  if lt-i64(add-i64(from, 1), to) {
+    let head-char: i64 = magic load(i64, add-i64(add-i64(ptr, 16), from))
+    let _: i64 = magic store(i64, ptr, add-i64(from, 1))
+    Some(Product(head-char, magic cast(i64, text, ptr)))
+  } else {
+    let _: text = magic cast(i64, text, ptr)
+    None
+  }
+}
+
+define naive-tail(t: text): ?text {
+  let ptr = cast(t) // must be irreducible
+  let from: i64 = magic load(i64, ptr)
+  let to: i64 = magic load(i64, add-i64(ptr, 8))
+  if lt-i64(add-i64(from, 1), to) {
+    let _: i64 = magic store(i64, ptr, add-i64(from, 1))
+    Some(magic cast(i64, text, ptr))
+  } else {
+    let _: text = magic cast(i64, text, ptr)
+    None
+  }
 }
 
 define print-i64(i: i64): top {

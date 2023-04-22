@@ -16,6 +16,7 @@ import {
 - this.file.mode => FM
 - this.file.descriptor => FD
 - this.text.io => text
+- this.external => ext
 }
 
 define main(): i64 {
@@ -31,6 +32,7 @@ define main(): i64 {
     text.print-line("couldn't get from input")
   - Some(input) =>
     text.print-line("result:")
+    ext.sleep(3)
     let _ on input = text.print-line(input)
     let _ = input
     Unit

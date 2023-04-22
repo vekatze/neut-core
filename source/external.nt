@@ -14,8 +14,6 @@ export {
 - write
 - read
 - lseek
-- store-i8
-- store-i64
 }
 
 define exit[a](status: i64): a {
@@ -78,19 +76,5 @@ define lseek(f: FD.descriptor, offset: i64, seek-mode: i64): i64 {
   introspect target-os {
   - darwin =>
     magic external(lseek, f, offset: i64, seek-mode)
-  }
-}
-
-define store-i64(address: i64, value: i64): top {
-  introspect target-os {
-  - darwin =>
-    magic store(i64, address, value)
-  }
-}
-
-define store-i8(address: i64, value: i8): top {
-  introspect target-os {
-  - darwin =>
-    magic store(i8, address, value)
   }
 }

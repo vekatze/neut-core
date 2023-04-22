@@ -1,0 +1,38 @@
+import {
+- this.top
+}
+
+export {
+- store-i64
+- store-i8
+- load-i64
+- load-i8
+}
+
+define-inline store-i64(address: i64, value: i64): top {
+  introspect target-os {
+  - darwin =>
+    magic store(i64, address, value)
+  }
+}
+
+define-inline store-i8(address: i64, value: i8): top {
+  introspect target-os {
+  - darwin =>
+    magic store(i8, address, value)
+  }
+}
+
+define-inline load-i64(address: i64): i64 {
+  introspect target-os {
+  - darwin =>
+    magic load(i64, address)
+  }
+}
+
+define-inline load-i8(address: i64): i8 {
+  introspect target-os {
+  - darwin =>
+    magic load(i8, address)
+  }
+}

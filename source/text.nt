@@ -14,6 +14,7 @@ export {
 - create
 - empty
 - from-i64
+- unsafe-get-content-pointer
 - intercalate
 - length
 - naive-tail
@@ -65,6 +66,12 @@ define append(t1: &text, t2: &text): text {
   store-values(str-pointer, add-i64(content1, from2), 0, len1)
   store-values(add-i64(str-pointer, len1), add-i64(content2, from2), 0, len2)
   magic cast(i64, text, new-text)
+}
+
+define unsafe-get-content-pointer(t: &text): i64 {
+  let ptr = magic cast(&text, i64, t)
+  let from: i64 = magic load(i64, ptr)
+  add-i64(add-i64(ptr, 16), from)
 }
 
 define print(t: &text): top {

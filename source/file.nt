@@ -1,0 +1,45 @@
+import {
+- this.text
+- this.top
+- this.list
+- this.file.flag => FF
+- this.file.mode => FM
+- this.file.descriptor => FD
+}
+
+export {
+- open
+- close
+- write
+}
+
+// fixme: use the coproduct type to detect errors
+define open(path: &text, xs: list(FF.flag), ms: list(FM.mode)): FD.descriptor {
+  introspect target-os {
+  - darwin =>
+    let path' = this.text.append(path, "\0")
+    let actual-path-string on path' = unsafe-get-content-pointer(path')
+    let fd = magic external(open, actual-path-string, FF.interpret(xs), FM.interpret(ms))
+    let _ = path'
+    fd
+  }
+}
+
+define close(f: FD.descriptor): top {
+  introspect target-os {
+  - darwin =>
+    magic external(close, f)
+  }
+}
+
+define write(t: &text, f: FD.descriptor): top {
+  introspect target-os {
+  - darwin =>
+    let ptr = magic cast(&text, i64, t)
+    let from: i64 = magic load(i64, ptr)
+    let to: i64 = magic load(i64, add-i64(ptr, 8))
+    let content-pointer: i64 = add-i64(add-i64(ptr, 16), from)
+    let len = sub-i64(to, from)
+    magic external(write, f, content-pointer, len)
+  }
+}

@@ -1,0 +1,20 @@
+export {
+- descriptor {..}
+- stdin
+- stdout
+- stderr
+}
+
+variant descriptor {}
+
+define stdin(): descriptor {
+  magic cast(i64, descriptor, 0)
+}
+
+define stdout(): descriptor {
+  magic cast(i64, descriptor, 1)
+}
+
+define stderr(): descriptor {
+  magic cast(i64, descriptor, 2)
+}

@@ -1,0 +1,65 @@
+import {
+- this.list
+}
+
+export {
+- mode {..}
+- interpret
+- default-file-mode
+}
+
+variant mode {
+- Owner-R
+- Owner-W
+- Owner-X
+- Group-R
+- Group-W
+- Group-X
+- Other-R
+- Other-W
+- Other-X
+}
+
+define interpret-mode(flag: mode): i64 {
+  introspect target-os {
+  - darwin =>
+    // https://github.com/apple/darwin-xnu/blob/main/bsd/sys/fcntl.h
+    match flag {
+    - Owner-R =>
+      0o400
+    - Owner-W =>
+      0o200
+    - Owner-X =>
+      0o100
+    - Group-R =>
+      0o40
+    - Group-W =>
+      0o20
+    - Group-X =>
+      0o10
+    - Other-R =>
+      0o4
+    - Other-W =>
+      0o2
+    - Other-X =>
+      0o1
+    }
+  }
+}
+
+define interpret(xs: list(mode)): i64 {
+  match xs {
+  - [] =>
+    0
+  - m :< ms =>
+    or-i64(interpret-mode(m), interpret(ms))
+  }
+}
+
+define default-file-mode(): list(mode) {
+  [Owner-R, Owner-W, Group-R, Other-R] // 644
+}
+
+define default-directory-mode(): list(mode) {
+  [Owner-R, Owner-W, Owner-X, Group-R, Group-X, Other-R, Other-X] // 755
+}

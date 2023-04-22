@@ -1,0 +1,54 @@
+import {
+- this.list
+}
+
+export {
+- flag {..}
+- interpret
+- for-rw
+- for-rw-append
+}
+
+variant flag {
+- R
+- W
+- RW
+- Append
+- Create
+}
+
+define interpret-flag(flag: flag): i64 {
+  introspect target-os {
+  - darwin =>
+    // https://github.com/apple/darwin-xnu/blob/main/bsd/sys/fcntl.h
+    match flag {
+    - R =>
+      0x0000
+    - W =>
+      0x0001
+    - RW =>
+      0x0002
+    - Create =>
+      0x00000200
+    - Append =>
+      0x0008
+    }
+  }
+}
+
+define interpret(xs: list(flag)): i64 {
+  match xs {
+  - [] =>
+    0
+  - f :< ys =>
+    or-i64(interpret-flag(f), interpret(ys))
+  }
+}
+
+define for-rw(): list(flag) {
+  [RW, Create]
+}
+
+define for-rw-append(): list(flag) {
+  [RW, Create, Append]
+}

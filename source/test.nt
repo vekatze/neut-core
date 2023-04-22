@@ -11,43 +11,51 @@ import {
 - this.text
 - this.top
 - this.vector
+- this.file
+- this.file.flag => FF
+- this.file.mode => FM
+- this.file.descriptor => FD
 }
 
 define main(): i64 {
-  let str1 = "hello, "
-  let str2 = "world!"
-  // let txt = !"hello, world"
-  // let a = txt
-  // let a = txt
-  // let a = txt
-  // print-line("hello, world!\n")
-  let text-from-int = from-i64(-9874123849123749)
-  let _ on text-from-int = print-line(text-from-int)
-  // print-i64(1234)
-  // print-line(str1)
-  // print-line(str2)
-  let str = this.text.append(str1, str2)
-  let _ on str = {
-    print-line("↓↓↓")
-    print-line(str)
-    print-line("↑↑↑")
-  }
-  let empty = empty()
-  match naive-tail(empty) {
-  - None =>
-    print-line("nothing")
-  - Some(new-str) =>
-    let _ on new-str = print-line(new-str)
-    let a = new-str
-    let a = new-str
-    let a = new-str
-    let a = new-str
-    print-line("done")
-  }
+  let file = open("./sample6", FF.for-rw-append(), FM.default-file-mode())
+  write("hello, world! これは日本語の文章だよ。\n", file)
+  close(file)
 
-  let xs = ["foo", "bar", "buz"]
-  let sample on xs = intercalate(", ", xs)
-  let _ on sample = print-line(sample)
+  // let str1 = "hello, "
+  // let str2 = "world!"
+  // // let txt = !"hello, world"
+  // // let a = txt
+  // // let a = txt
+  // // let a = txt
+  // // print-line("hello, world!\n")
+  // let text-from-int = from-i64(-9874123849123749)
+  // let _ on text-from-int = print-line(text-from-int)
+  // // print-i64(1234)
+  // // print-line(str1)
+  // // print-line(str2)
+  // let str = this.text.append(str1, str2)
+  // let _ on str = {
+  //   print-line("↓↓↓")
+  //   print-line(str)
+  //   print-line("↑↑↑")
+  // }
+  // let empty = empty()
+  // match naive-tail(empty) {
+  // - None =>
+  //   print-line("nothing")
+  // - Some(new-str) =>
+  //   let _ on new-str = print-line(new-str)
+  //   let a = new-str
+  //   let a = new-str
+  //   let a = new-str
+  //   let a = new-str
+  //   print-line("done")
+  // }
+
+  // let xs = ["foo", "bar", "buz"]
+  // let sample on xs = intercalate(", ", xs)
+  // let _ on sample = print-line(sample)
 
   // print-character(48)
   // print-line("print-i64: ")

@@ -24,8 +24,5 @@ define open(path: &text, xs: list(FF.flag), ms: list(FM.mode)): FD.descriptor {
 }
 
 define close(f: FD.descriptor): top {
-  introspect target-os {
-  - darwin =>
-    ext.close(f)
-  }
+  ext.close(f)
 }

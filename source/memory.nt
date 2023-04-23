@@ -5,8 +5,10 @@ import {
 export {
 - store-i64
 - store-i8
+- store-i1
 - load-i64
 - load-i8
+- load-i1
 }
 
 define-inline store-i64(address: i64, value: i64): top {
@@ -23,6 +25,13 @@ define-inline store-i8(address: i64, value: i8): top {
   }
 }
 
+define-inline store-i1(address: i64, value: i1): top {
+  introspect target-os {
+  - darwin =>
+    magic store(i1, address, value)
+  }
+}
+
 define-inline load-i64(address: i64): i64 {
   introspect target-os {
   - darwin =>
@@ -34,5 +43,12 @@ define-inline load-i8(address: i64): i8 {
   introspect target-os {
   - darwin =>
     magic load(i8, address)
+  }
+}
+
+define-inline load-i1(address: i64): i1 {
+  introspect target-os {
+  - darwin =>
+    magic load(i1, address)
   }
 }

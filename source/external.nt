@@ -1,5 +1,7 @@
 import {
+- this.bool
 - this.top
+- this.option
 - this.file.seek => seek
 - this.file.descriptor => FD
 }
@@ -15,6 +17,9 @@ export {
 - read
 - lseek
 - sleep
+- pthread-create
+- pthread-exit
+- pthread-join
 }
 
 define exit[a](status: i64): a {
@@ -84,5 +89,26 @@ define sleep(seconds: u64): top {
   introspect target-os {
   - darwin =>
     magic external(sleep, seconds)
+  }
+}
+
+define pthread-create(id-ptr: i64, thread-func-addr: i64, thread-env-addr: i64): i64 {
+  introspect target-os {
+  - darwin =>
+    magic external(pthread_create, id-ptr, 0: i64, thread-func-addr, thread-env-addr)
+  }
+}
+
+define pthread-exit(result-addr: i64): top {
+  introspect target-os {
+  - darwin =>
+    magic external(pthread_exit, result-addr)
+  }
+}
+
+define pthread-join(id: i64, result-addr: i64): top {
+  introspect target-os {
+  - darwin =>
+    magic external(pthread_join, id, result-addr)
   }
 }

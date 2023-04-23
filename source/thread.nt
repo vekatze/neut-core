@@ -1,0 +1,95 @@
+import {
+- this.bool
+- this.top
+- this.text
+- this.text.io => io
+- this.system
+- this.memory => mem
+- this.magic => magic
+- this.external => ext
+}
+
+export {
+- promise
+- async
+- await
+}
+
+resource promise-inner {
+- lambda (p: i64) {
+    // io.print("[warning] awaiting a promise to discard it\n")
+    let elem-type = magic.cast(i64, tau, mem.load-i64(add-i64(p, 8)))
+    let pr: promise(elem-type) = magic.cast(i64, promise(elem-type), p)
+    let _: elem-type = explicit-await(elem-type, pr: promise(elem-type)) // await & discard
+    0
+  }
+- lambda (addr: i64) {
+    // io.print("[warning] awaiting a promise to copy it\n")
+    await-and-write-result(addr)
+    let thread-id = mem.load-i64(addr)
+    let elem-type = magic.cast(i64, tau, mem.load-i64(add-i64(addr, 8)))
+    let elem-value: &elem-type = magic.cast(i64, &elem-type, mem.load-i64(add-i64(addr, 16)))
+    let new-addr = ext.malloc(25)
+    mem.store-i64(new-addr, thread-id)
+    mem.store-i64(add-i64(new-addr, 8), magic.cast(tau, i64, elem-type))
+    let cloned-value: elem-type = embody(elem-type, elem-value)
+    mem.store-i64(add-i64(new-addr, 16), magic.cast(elem-type, i64, cloned-value))
+    mem.store-i1(add-i64(new-addr, 24), 1) // already finished
+    new-addr
+  }
+}
+
+define embody(a: tau, x: &a): a {
+  !x
+}
+
+define promise(_: tau) {
+  promise-inner
+}
+
+define async[a](f: () -> a): promise(a) {
+  let thread-func =
+    lambda () {
+      ext.pthread-exit(magic.cast(a, i64, f()))
+    }
+  let closure = magic.cast(() -> top, i64, thread-func)
+  let closure-env = mem.load-i64(add-i64(closure, 8))
+  let closure-label = mem.load-i64(add-i64(closure, 16))
+  ext.free(closure)
+  let thread-id-pointer = ext.malloc(8)
+  let _ = ext.pthread-create(thread-id-pointer, closure-label, closure-env)
+  let thread-id = mem.load-i64(thread-id-pointer)
+  ext.free(thread-id-pointer)
+  let ptr = ext.malloc(25)
+  mem.store-i64(ptr, thread-id)
+  mem.store-i64(add-i64(ptr, 8), magic.cast(tau, i64, a))
+  mem.store-i64(add-i64(ptr, 16), 0)
+  mem.store-i1(add-i64(ptr, 24), 0)
+  magic.cast(i64, promise(a), ptr)
+}
+
+define await[a](e: promise(a)): a {
+  let addr = magic.cast(promise(a), i64, e)
+  await-and-write-result(addr)
+  let value-ptr = add-i64(addr, 16)
+  let value = mem.load-i64(value-ptr)
+  ext.free(addr)
+  magic.cast(i64, a, value)
+}
+
+define explicit-await(a: tau, x: promise(a)): a {
+  await(x)
+}
+
+define await-and-write-result(addr: i64): top {
+  let finished-flag-ptr = add-i64(addr, 24)
+  let finished-flag = mem.load-i1(finished-flag-ptr)
+  if eq-i1(finished-flag, 0) {
+    let thread-id = mem.load-i64(addr)
+    let value-ptr = add-i64(addr, 16)
+    ext.pthread-join(thread-id, value-ptr)
+    mem.store-i1(finished-flag-ptr, 1)
+  } else {
+    Unit
+  }
+}

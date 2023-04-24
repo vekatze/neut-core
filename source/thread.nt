@@ -10,21 +10,21 @@ import {
 }
 
 export {
-- promise
-- async
-- await
+- flow-inner
+- this.thread.detach
+- this.thread.attach
 }
 
-resource promise-inner {
+resource flow-inner {
 - lambda (p: i64) {
-    // io.print("[warning] awaiting a promise to discard it\n")
+    // io.print("[warning] awaiting a flow to discard it\n")
     let elem-type = magic.cast(i64, tau, mem.load-i64(add-i64(p, 8)))
-    let pr: promise(elem-type) = magic.cast(i64, promise(elem-type), p)
-    let _: elem-type = explicit-await(elem-type, pr: promise(elem-type)) // await & discard
+    let pr: flow elem-type = magic.cast(i64, flow elem-type, p)
+    let _: elem-type = this.thread.attach(elem-type, pr: flow elem-type) // await & discard
     0
   }
 - lambda (addr: i64) {
-    // io.print("[warning] awaiting a promise to copy it\n")
+    // io.print("[warning] awaiting a flow to copy it\n")
     await-and-write-result(addr)
     let thread-id = mem.load-i64(addr)
     let elem-type = magic.cast(i64, tau, mem.load-i64(add-i64(addr, 8)))
@@ -39,15 +39,12 @@ resource promise-inner {
   }
 }
 
-define embody(a: tau, x: &a): a {
+define-inline embody(a: tau, x: &a): a {
   !x
 }
 
-define promise(_: tau) {
-  promise-inner
-}
-
-define async[a](f: () -> a): promise(a) {
+// (thread-id, result-type, result-value, finished-flag): flow(result-type)
+define detach(a: tau, f: () -> a): flow a {
   let thread-func =
     lambda () {
       ext.pthread-exit(magic.cast(a, i64, f()))
@@ -65,20 +62,16 @@ define async[a](f: () -> a): promise(a) {
   mem.store-i64(add-i64(ptr, 8), magic.cast(tau, i64, a))
   mem.store-i64(add-i64(ptr, 16), 0)
   mem.store-i1(add-i64(ptr, 24), 0)
-  magic.cast(i64, promise(a), ptr)
+  magic.cast(i64, flow a, ptr)
 }
 
-define await[a](e: promise(a)): a {
-  let addr = magic.cast(promise(a), i64, e)
+define attach(a: tau, e: flow a): a {
+  let addr = magic.cast(flow a, i64, e)
   await-and-write-result(addr)
   let value-ptr = add-i64(addr, 16)
   let value = mem.load-i64(value-ptr)
   ext.free(addr)
   magic.cast(i64, a, value)
-}
-
-define explicit-await(a: tau, x: promise(a)): a {
-  await(x)
 }
 
 define await-and-write-result(addr: i64): top {

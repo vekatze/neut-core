@@ -27,39 +27,41 @@ variant item {
 define main(): i64 {
   text.print("thread testing.\n")
   let some-text = "hello, world!\n"
-  let p1 = t.async(lambda () {
-    ext.sleep(3)
-    text.print("I'm thread 1.\n")
-    text.print(some-text)
-    // Bar(20)
-    lambda () { 20: i64 }
-    // 20: i64
-  })
-  let p1-copy = p1
-  let p1-copy = p1
-  let p2 = t.async(lambda () {
-    ext.sleep(2)
-    text.print("I'm thread 2\n")
-    text.print(some-text)
-    2: i64
-  })
-  let continue = t.async(lambda () {
-    let value = t.await(p2)
-    text.print("I'm the continuation of thread 2\n")
-    text.print(some-text)
-    add-i64(value, 10)
-  })
-  let p3 = t.async(lambda () {
-    ext.sleep(1)
-    text.print("I'm thread 3\n")
-    text.print(some-text)
-    3: i64
-  })
-  text.print("spawned three threads. awaiting...\n")
-  // let v1 = t.await(p1)
-  let v1 = t.await(p1)
-  let v3 = t.await(p3)
-  let v2 = t.await(continue)
+  let f1: flow () -> i64  =
+    detach {
+      ext.sleep(3)
+      text.print("I'm flow 1.\n")
+      text.print(some-text)
+      lambda () { 20: i64 }
+    }
+  // let flow1-copy = flow1
+  // // let _ = eq-i64(flow1-copy, tau)
+  // let flow1-copy = flow1
+  let flow2 =
+    detach {
+      ext.sleep(2)
+      text.print("I'm flow 2\n")
+      text.print(some-text)
+      2: i64
+    }
+  let longer-flow =
+    detach {
+      let value = attach flow2
+      text.print("I'm the continuation of flow 2\n")
+      text.print(some-text)
+      add-i64(value, 10)
+    }
+  let p3 =
+    detach {
+      ext.sleep(1)
+      text.print("I'm flow 3\n")
+      text.print(some-text)
+      3: i64
+    }
+  text.print("spawned three flows. awaiting...\n")
+  let v1 = attach f1
+  let v3 = attach p3
+  let v2 = attach longer-flow
   text.print("done. results: \n")
   // let Bar(result) = v1
   // text.print-i64(result)

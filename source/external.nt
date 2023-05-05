@@ -95,20 +95,20 @@ define sleep(seconds: u64): top {
 define thread-create(id-ptr: i64, thread-func-addr: i64, thread-env-addr: i64): i64 {
   introspect target-os {
   - darwin =>
-    magic external(thread_create, id-ptr, 0: i64, thread-func-addr, thread-env-addr)
+    magic external(pthread_create, id-ptr, 0: i64, thread-func-addr, thread-env-addr)
   }
 }
 
 define thread-exit(result-addr: i64): top {
   introspect target-os {
   - darwin =>
-    magic external(thread_exit, result-addr)
+    magic external(pthread_exit, result-addr)
   }
 }
 
 define thread-join(id: i64, result-addr: i64): top {
   introspect target-os {
   - darwin =>
-    magic external(thread_join, id, result-addr)
+    magic external(pthread_join, id, result-addr)
   }
 }

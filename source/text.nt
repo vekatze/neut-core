@@ -19,8 +19,8 @@ export {
 - unsafe-get-content-pointer
 - intercalate
 - length
-- naive-tail
-- naive-uncons
+- tail
+- uncons
 }
 
 alias-opaque text {
@@ -113,21 +113,21 @@ define from-i64(x: i64): text {
   magic.cast(i64, text, ptr)
 }
 
-define naive-uncons(t: text): ?product(i64, text) {
+define uncons(t: text): ?product(i64, text) {
   let ptr = magic.cast(text, i64, t)
   let from = mem.load-i64(ptr)
   let to = mem.load-i64(add-i64(ptr, 8))
   if lt-i64(add-i64(from, 1), to) {
     let head-char = mem.load-i64(add-i64(add-i64(ptr, 16), from))
     mem.store-i64(ptr, add-i64(from, 1))
-    Some(Product(head-char, magic.cast(i64, text, ptr)))
+    Some(tuple(head-char, magic.cast(i64, text, ptr)))
   } else {
     let _: text = magic.cast(i64, text, ptr)
     None
   }
 }
 
-define naive-tail(t: text): ?text {
+define tail(t: text): ?text {
   let ptr = magic.cast(text, i64, t) // must be irreducible
   let from = mem.load-i64(ptr)
   let to = mem.load-i64(add-i64(ptr, 8))

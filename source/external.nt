@@ -17,9 +17,9 @@ export {
 - read
 - lseek
 - sleep
-- pthread-create
-- pthread-exit
-- pthread-join
+- thread-create
+- thread-exit
+- thread-join
 }
 
 define exit[a](status: i64): a {
@@ -92,23 +92,23 @@ define sleep(seconds: u64): top {
   }
 }
 
-define pthread-create(id-ptr: i64, thread-func-addr: i64, thread-env-addr: i64): i64 {
+define thread-create(id-ptr: i64, thread-func-addr: i64, thread-env-addr: i64): i64 {
   introspect target-os {
   - darwin =>
-    magic external(pthread_create, id-ptr, 0: i64, thread-func-addr, thread-env-addr)
+    magic external(thread_create, id-ptr, 0: i64, thread-func-addr, thread-env-addr)
   }
 }
 
-define pthread-exit(result-addr: i64): top {
+define thread-exit(result-addr: i64): top {
   introspect target-os {
   - darwin =>
-    magic external(pthread_exit, result-addr)
+    magic external(thread_exit, result-addr)
   }
 }
 
-define pthread-join(id: i64, result-addr: i64): top {
+define thread-join(id: i64, result-addr: i64): top {
   introspect target-os {
   - darwin =>
-    magic external(pthread_join, id, result-addr)
+    magic external(thread_join, id, result-addr)
   }
 }

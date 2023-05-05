@@ -4,6 +4,7 @@ import {
 - this.bool
 - this.option
 - this.function
+- this.product
 }
 
 export {
@@ -14,6 +15,8 @@ export {
 - fold-right
 - map
 - concat
+- unzip
+- uncons
 - all
 - any
 - range
@@ -73,8 +76,24 @@ define length[a](xs: &list(a)): i64 {
   length-tailcall(0, xs)
 }
 
-// define unzip[a, b](xs: list(a * b)): list(a) * list(b) {
-// }
+define unzip[a, b](xs: list(a * b)): list(a) * list(b) {
+  match xs {
+  - [] =>
+    tuple([], [])
+  - tuple(l, r) :< rest =>
+    let tuple(rest-l, rest-r) = unzip(rest)
+    tuple(l :< rest-l, r :< rest-r)
+  }
+}
+
+define uncons[a](xs: list(a)): ?product(a, list(a)) {
+  match xs {
+  - [] =>
+    None
+  - y :< ys =>
+    Some(tuple(y, ys))
+  }
+}
 
 define all(xs: list(bool)): bool {
   fold-left(and, True, xs)

@@ -47,14 +47,14 @@ define-inline embody(a: tau, x: &a): a {
 define detach(a: tau, f: () -> a): flow a {
   let thread-func =
     lambda () {
-      ext.pthread-exit(magic.cast(a, i64, f()))
+      ext.thread-exit(magic.cast(a, i64, f()))
     }
   let closure = magic.cast(() -> top, i64, thread-func)
   let closure-env = mem.load-i64(add-i64(closure, 8))
   let closure-label = mem.load-i64(add-i64(closure, 16))
   ext.free(closure)
   let thread-id-pointer = ext.malloc(8)
-  let _ = ext.pthread-create(thread-id-pointer, closure-label, closure-env)
+  let _ = ext.thread-create(thread-id-pointer, closure-label, closure-env)
   let thread-id = mem.load-i64(thread-id-pointer)
   ext.free(thread-id-pointer)
   let ptr = ext.malloc(25)
@@ -80,7 +80,7 @@ define await-and-write-result(addr: i64): top {
   if eq-i1(finished-flag, 0) {
     let thread-id = mem.load-i64(addr)
     let value-ptr = add-i64(addr, 16)
-    ext.pthread-join(thread-id, value-ptr)
+    ext.thread-join(thread-id, value-ptr)
     mem.store-i1(finished-flag-ptr, 1)
   } else {
     Unit

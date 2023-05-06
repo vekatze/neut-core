@@ -95,17 +95,16 @@ define await-and-write-result(addr: i64): top {
   }
 }
 
-// (queue, mutex, cond, type)
+// (queue, mutex, cond)
 define channel-internal(_: tau): tau {
   tau
 }
 
 define new-channel[a](): channel-internal(a) {
-  let ptr = ext.malloc(128) // 8 + 64 + 48 + 8
+  let ptr = ext.malloc(120) // 8 + 64 + 48
   mem.store-i64(ptr, magic.cast(Q.queue(i64), i64, Q.empty()))
   ext.thread-mutex-init(add-i64(ptr, 8))
   ext.thread-cond-init(add-i64(ptr, 72))
-  mem.store-i64(add-i64(ptr, 120), magic.cast(tau, i64, i64))
   magic.cast(i64, channel-internal(a), ptr)
 }
 

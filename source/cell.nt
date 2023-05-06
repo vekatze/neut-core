@@ -1,0 +1,44 @@
+import {
+- this.top
+- this.channel
+- this.magic => magic
+}
+
+export {
+- cell
+- new-cell
+- mutate
+- borrow
+- clone
+}
+
+define cell(a) {
+  channel(a)
+}
+
+define new-cell[a](x: a): cell(a) {
+  let ch = new-channel(a)
+  let _ on ch = send(ch, x)
+  magic.cast(channel(a), cell(a), ch)
+}
+
+define mutate[a](ch: &cell(a), f: a -> a): top {
+  let ch = magic.cast(&cell(a), &channel(a), ch)
+  let v = receive(ch)
+  send(ch, f(v))
+}
+
+define borrow[a, b](ch: &cell(a), f: &a -> b): b {
+  let ch = magic.cast(&cell(a), &channel(a), ch)
+  let v = receive(ch)
+  let result on v = f(v)
+  send(ch, v)
+  result
+}
+
+define clone[a](ch: &cell(a)): a {
+  let ch = magic.cast(&cell(a), &channel(a), ch)
+  let v = receive(ch)
+  send(ch, v)
+  v
+}

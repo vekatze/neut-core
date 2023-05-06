@@ -1,0 +1,38 @@
+import {
+- this.list
+- this.option
+- this.product
+}
+
+export {
+- this.queue.queue
+- this.queue.empty
+- this.queue.dequeue
+- this.queue.enqueue
+}
+
+// naive queue
+define-inline queue(a: tau): tau {
+  product(list(a), list(a))
+}
+
+define empty[a](): queue(a) {
+  tuple([], [])
+}
+
+define dequeue[a](q: queue(a)): ?product(a, queue(a)) {
+  let tuple(ls, rs) = q
+  match ls, rs {
+  - Nil, Nil =>
+    None
+  - Cons(l, ls-rest), rs =>
+    Some(tuple(l, tuple(ls-rest, rs)))
+  - Nil, rs =>
+    dequeue(tuple(reverse(rs), []))
+  }
+}
+
+define enqueue[a](x: a, q: queue(a)): queue(a) {
+  let tuple(ls, rs) = q
+  tuple(ls, x :< rs)
+}

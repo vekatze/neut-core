@@ -2,6 +2,7 @@ import {
 - this.list
 - this.option
 - this.product
+- this.bool
 }
 
 export {
@@ -9,6 +10,8 @@ export {
 - this.queue.empty
 - this.queue.dequeue
 - this.queue.enqueue
+- this.queue.size
+- this.queue.is-empty
 }
 
 // naive queue
@@ -35,4 +38,22 @@ define dequeue[a](q: queue(a)): ?product(a, queue(a)) {
 define enqueue[a](x: a, q: queue(a)): queue(a) {
   let tuple(ls, rs) = q
   tuple(ls, x :< rs)
+}
+
+define size[a](q: &queue(a)): i64 {
+  case q {
+  - tuple(ls, rs) =>
+    let l1 = length(ls)
+    let l2 = length(rs)
+    add-i64(l1, l2)
+  }
+}
+
+define is-empty[a](q: &queue(a)): bool {
+  case q {
+  - tuple([], []) =>
+    True
+  - _ =>
+    False
+  }
 }

@@ -9,6 +9,7 @@ import {
 
 export {
 - list {..}
+- reverse
 - length
 - append
 - fold-left
@@ -61,6 +62,19 @@ define append[a](xs: list(a), ys: list(a)): list(a) {
 
 define concat[a](xss: list(list(a))): list(a) {
   fold-left(append, [], xss)
+}
+
+define reverse[a](xs: list(a)): list(a) {
+  reverse-helper(xs, [])
+}
+
+define reverse-helper[a](xs: list(a), acc: list(a)): list(a) {
+  match xs {
+  - [] =>
+    acc
+  - y :< ys =>
+    reverse-helper(ys, y :< acc)
+  }
 }
 
 define length[a](xs: &list(a)): i64 {

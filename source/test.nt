@@ -16,8 +16,10 @@ import {
 - this.file.mode => FM
 - this.file.descriptor => FD
 - this.text.io => text
+- this.queue => Q
 - this.external => ext
 - this.thread => t
+- this.magic => magic
 }
 
 variant item {
@@ -25,53 +27,110 @@ variant item {
 }
 
 define main(): i64 {
-  text.print("thread testing.\n")
-  let some-text = "hello, world!\n"
-  let f1: flow () -> i64  =
+  // channel test
+  // t.raw-test()
+  // let ch-orig = t.new-channel()
+  // text.print("created a channel\n")
+  // t.test-lock(ch-orig)
+
+  let ch-orig: t.channel-internal(() -> i64) = t.new-channel()
+  text.print("created a channel\n")
+  // t.test-lock(ch-orig)
+  let ch = magic.cast(t.channel-internal(() -> i64), i64, ch-orig)
+  t.send-to-channel(lambda () {1}, magic.cast(i64, t.channel-internal(() -> i64), ch))
+  t.send-to-channel(lambda () {2}, magic.cast(i64, t.channel-internal(() -> i64), ch))
+  let f =
+    detach {
+      text.print("I'm the thread that does downloading...\n")
+      ext.sleep(2)
+      text.print("sending from another thread\n")
+      t.send-to-channel(lambda () {3}, magic.cast(i64, t.channel-internal(() -> i64), ch))
+      text.print("done\n")
+    }
+  let g =
     detach {
       ext.sleep(3)
-      text.print("I'm flow 1.\n")
-      text.print(some-text)
-      lambda () { 20: i64 }
+      text.print("sending from another thread (GGG)\n")
+      t.send-to-channel(lambda () {4}, magic.cast(i64, t.channel-internal(() -> i64), ch))
+      text.print("done\n")
     }
-  // let flow1-copy = flow1
-  // // let _ = eq-i64(flow1-copy, tau)
-  // let flow1-copy = flow1
-  let flow2 =
-    detach {
-      ext.sleep(2)
-      text.print("I'm flow 2\n")
-      text.print(some-text)
-      2: i64
-    }
-  let longer-flow =
-    detach {
-      let value = attach flow2
-      text.print("I'm the continuation of flow 2\n")
-      text.print(some-text)
-      add-i64(value, 10)
-    }
-  let p3 =
-    detach {
-      ext.sleep(1)
-      text.print("I'm flow 3\n")
-      text.print(some-text)
-      3: i64
-    }
-  text.print("spawned three flows. awaiting...\n")
-  let v1 = attach f1
-  let v3 = attach p3
-  let v2 = attach longer-flow
-  text.print("done. results: \n")
-  // let Bar(result) = v1
+  let v1 = t.receive-from-channel(magic.cast(i64, t.channel-internal(() -> i64), ch))
+  let v2 = t.receive-from-channel(magic.cast(i64, t.channel-internal(() -> i64), ch))
+  let v3 = t.receive-from-channel(magic.cast(i64, t.channel-internal(() -> i64), ch))
+  // let v4 = t.receive-from-channel(magic.cast(i64, t.channel-internal(() -> i64), ch))
+
+  // let result = add-i64(v1(), add-i64(v2(), add-i64(v3(), v4())))
+
+  attach f
+  attach g
+  // text.print("hello, got the result: ")
   // text.print-i64(result)
+  // text.print("\n")
+
+  t.discard-channel(magic.cast(i64, t.channel-internal(i64), ch))
+
+
+  // let q: Q.queue(i64) = Q.empty()
+  // let q = Q.enqueue(1, q)
+  // let q = Q.enqueue(2, q)
+  // let q = Q.enqueue(3, q)
+  // match Q.dequeue(q) {
+  // - None =>
+  //   Unit
+  // - Some(tuple(v, rest)) =>
+  //   text.print("the first element: ")
+  //   text.print-i64(v)
+  //   text.print("\n")
+  //   Unit
+  // }
+
+  // text.print("thread testing.\n")
+  // let some-text = "hello, world!\n"
+  // let f1: flow(() -> i64)  =
+  //   detach {
+  //     ext.sleep(3)
+  //     text.print("I'm flow 1.\n")
+  //     text.print(some-text)
+  //     lambda () { 20: i64 }
+  //   }
+  // // let flow1-copy = flow1
+  // // // let _ = eq-i64(flow1-copy, tau)
+  // // let flow1-copy = flow1
+  // let flow2 =
+  //   detach {
+  //     ext.sleep(2)
+  //     text.print("I'm flow 2\n")
+  //     text.print(some-text)
+  //     2: i64
+  //   }
+  // let longer-flow =
+  //   detach {
+  //     let value = attach flow2
+  //     text.print("I'm the continuation of flow 2\n")
+  //     text.print(some-text)
+  //     add-i64(value, 10)
+  //   }
+  // let p3 =
+  //   detach {
+  //     ext.sleep(1)
+  //     text.print("I'm flow 3\n")
+  //     text.print(some-text)
+  //     3: i64
+  //   }
+  // text.print("spawned three flows. awaiting...\n")
+  // let v1 = attach f1
+  // let v3 = attach p3
+  // let v2 = attach longer-flow
+  // text.print("done. results: \n")
+  // // let Bar(result) = v1
+  // // text.print-i64(result)
+  // // text.print-i64(v1())
   // text.print-i64(v1())
-  text.print-i64(v1())
-  text.print("\n")
-  text.print-i64(v2)
-  text.print("\n")
-  text.print-i64(v3)
-  text.print("\n")
+  // text.print("\n")
+  // text.print-i64(v2)
+  // text.print("\n")
+  // text.print-i64(v3)
+  // text.print("\n")
 
 
   // text.print("input> ")

@@ -20,6 +20,14 @@ export {
 - thread-create
 - thread-exit
 - thread-join
+- thread-mutex-init
+- thread-mutex-destroy
+- thread-mutex-lock
+- thread-mutex-unlock
+- thread-cond-init
+- thread-cond-destroy
+- thread-cond-wait
+- thread-cond-signal
 }
 
 define exit[a](status: i64): a {
@@ -110,5 +118,79 @@ define thread-join(id: i64, result-addr: i64): top {
   introspect target-os {
   - darwin =>
     magic external(pthread_join, id, result-addr)
+  }
+}
+
+define thread-mutex-size(): i64 {
+  introspect target-platform {
+  - amd64-darwin =>
+    64
+  - arm64-darwin =>
+    64
+  }
+}
+
+define thread-mutex-init(mutex-ptr: i64): top {
+  introspect target-os {
+  - darwin =>
+    magic external(pthread_mutex_init, mutex-ptr, 0: i64)
+  }
+}
+
+define thread-mutex-destroy(mutex-ptr: i64): top {
+  introspect target-os {
+  - darwin =>
+    magic external(pthread_mutex_destroy, mutex-ptr)
+  }
+}
+
+define thread-mutex-lock(mutex-ptr: i64): top {
+  introspect target-os {
+  - darwin =>
+    magic external(pthread_mutex_lock, mutex-ptr)
+  }
+}
+
+define thread-mutex-unlock(mutex-ptr: i64): top {
+  introspect target-os {
+  - darwin =>
+    magic external(pthread_mutex_unlock, mutex-ptr)
+  }
+}
+
+define thread-cond-size(): i64 {
+  introspect target-platform {
+  - amd64-darwin =>
+    48
+  - arm64-darwin =>
+    48
+  }
+}
+
+define thread-cond-init(cond-ptr: i64): top {
+  introspect target-os {
+  - darwin =>
+    magic external(pthread_cond_init, cond-ptr, 0: i64)
+  }
+}
+
+define thread-cond-destroy(cond-ptr: i64): top {
+  introspect target-os {
+  - darwin =>
+    magic external(pthread_cond_destroy, cond-ptr)
+  }
+}
+
+define thread-cond-signal(cond-ptr: i64): top {
+  introspect target-os {
+  - darwin =>
+    magic external(pthread_cond_signal, cond-ptr)
+  }
+}
+
+define thread-cond-wait(cond-ptr: i64, mutex-ptr: i64): top {
+  introspect target-os {
+  - darwin =>
+    magic external(pthread_cond_wait, cond-ptr, mutex-ptr)
   }
 }

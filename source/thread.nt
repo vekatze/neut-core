@@ -1,26 +1,34 @@
 import {
 - this.bool
+- this.option
 - this.top
 - this.text
 - this.text.io => io
 - this.system
 - this.memory => mem
 - this.magic => magic
+- this.product
 - this.external => ext
+- this.queue => Q
 }
 
 export {
 - flow-inner
 - this.thread.detach
 - this.thread.attach
+- channel-internal
+- discard-channel
+- new-channel
+- send-to-channel
+- receive-from-channel
 }
 
 resource flow-inner {
 - lambda (p: i64) {
     // io.print("[warning] awaiting a flow to discard it\n")
     let elem-type = magic.cast(i64, tau, mem.load-i64(add-i64(p, 8)))
-    let pr: flow elem-type = magic.cast(i64, flow elem-type, p)
-    let _: elem-type = this.thread.attach(elem-type, pr: flow elem-type) // await & discard
+    let pr: flow(elem-type) = magic.cast(i64, flow(elem-type), p)
+    let _: elem-type = this.thread.attach(elem-type, pr: flow(elem-type)) // await & discard
     0
   }
 - lambda (addr: i64) {
@@ -44,7 +52,7 @@ define-inline embody(a: tau, x: &a): a {
 }
 
 // (thread-id, result-type, result-value, finished-flag): flow(result-type)
-define detach(a: tau, f: () -> a): flow a {
+define detach(a: tau, f: () -> a): flow(a) {
   let thread-func =
     lambda () {
       ext.thread-exit(magic.cast(a, i64, f()))
@@ -62,11 +70,11 @@ define detach(a: tau, f: () -> a): flow a {
   mem.store-i64(add-i64(ptr, 8), magic.cast(tau, i64, a))
   mem.store-i64(add-i64(ptr, 16), 0)
   mem.store-i1(add-i64(ptr, 24), 0)
-  magic.cast(i64, flow a, ptr)
+  magic.cast(i64, flow(a), ptr)
 }
 
-define attach(a: tau, e: flow a): a {
-  let addr = magic.cast(flow a, i64, e)
+define attach(a: tau, e: flow(a)): a {
+  let addr = magic.cast(flow(a), i64, e)
   await-and-write-result(addr)
   let value-ptr = add-i64(addr, 16)
   let value = mem.load-i64(value-ptr)
@@ -84,5 +92,62 @@ define await-and-write-result(addr: i64): top {
     mem.store-i1(finished-flag-ptr, 1)
   } else {
     Unit
+  }
+}
+
+// (queue, mutex, cond, type)
+define channel-internal(_: tau): tau {
+  tau
+}
+
+define new-channel[a](): channel-internal(a) {
+  let ptr = ext.malloc(128) // 8 + 64 + 48 + 8
+  mem.store-i64(ptr, magic.cast(Q.queue(i64), i64, Q.empty()))
+  ext.thread-mutex-init(add-i64(ptr, 8))
+  ext.thread-cond-init(add-i64(ptr, 72))
+  mem.store-i64(add-i64(ptr, 120), magic.cast(tau, i64, i64))
+  magic.cast(i64, channel-internal(a), ptr)
+}
+
+define discard-channel[a](ch: channel-internal(a)): top {
+  let ch = magic.cast(channel-internal(a), i64, ch)
+  ext.thread-cond-destroy(add-i64(ch, 72))
+  ext.thread-mutex-destroy(add-i64(ch, 8))
+  let _: Q.queue(a) = magic cast(i64, Q.queue(a), mem.load-i64(ch))
+  ext.free(ch)
+}
+
+define send-to-channel[a](x: a, ch-orig: channel-internal(a)): top {
+  let ch = magic.cast(channel-internal(a), i64, ch-orig)
+  let mutex-ptr = add-i64(ch, 8)
+  ext.thread-mutex-lock(mutex-ptr)
+  let q-base: i64 = mem.load-i64(ch)
+  let q: Q.queue(a) = magic.cast(i64, Q.queue(a), q-base)
+  let q = Q.enqueue(x, q)
+  mem.store-i64(ch, magic.cast(Q.queue(a), i64, q))
+  ext.thread-cond-signal(add-i64(ch, 72))
+  ext.thread-mutex-unlock(mutex-ptr)
+  Unit
+}
+
+define receive-from-channel[a](ch: channel-internal(a)): a {
+  let ch = magic.cast(channel-internal(a), i64, ch)
+  let mutex-ptr = add-i64(ch, 8)
+  ext.thread-mutex-lock(mutex-ptr)
+  receive-from-channel-inner(ch, mutex-ptr)
+}
+
+define receive-from-channel-inner[a](ch: i64, mutex-ptr: i64): a {
+  let q: Q.queue(a) = magic.cast(i64, Q.queue(a), mem.load-i64(ch))
+  match Q.dequeue(q) {
+  - Some(tuple(v, q)) =>
+    mem.store-i64(ch, magic.cast(Q.queue(a), i64, q))
+    ext.thread-mutex-unlock(mutex-ptr)
+    v
+  - None =>
+    mem.store-i64(ch, magic.cast(Q.queue(i64), i64, Q.empty()))
+    let cond-ptr = add-i64(ch, 72)
+    ext.thread-cond-wait(cond-ptr, mutex-ptr)
+    receive-from-channel-inner(ch, mutex-ptr)
   }
 }

@@ -30,7 +30,7 @@ define interpret-flag(flag: flag): i64 {
     - RW =>
       0x0002
     - Create =>
-      0x00000200
+      0x0200
     - Append =>
       0x0008
     }

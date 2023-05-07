@@ -17,10 +17,6 @@ export {
 - empty
 - from-i64
 - unsafe-get-content-pointer
-- intercalate
-- length
-- tail
-- uncons
 }
 
 alias-opaque text {
@@ -111,55 +107,4 @@ define from-i64(x: i64): text {
     store-positive-values(x, sub-i64(len, 1))
   }
   magic.cast(i64, text, ptr)
-}
-
-define uncons(t: text): ?product(i64, text) {
-  let ptr = magic.cast(text, i64, t)
-  let from = mem.load-i64(ptr)
-  let to = mem.load-i64(add-i64(ptr, 8))
-  if lt-i64(add-i64(from, 1), to) {
-    let head-char = mem.load-i64(add-i64(add-i64(ptr, 16), from))
-    mem.store-i64(ptr, add-i64(from, 1))
-    Some(tuple(head-char, magic.cast(i64, text, ptr)))
-  } else {
-    let _: text = magic.cast(i64, text, ptr)
-    None
-  }
-}
-
-define tail(t: text): ?text {
-  let ptr = magic.cast(text, i64, t) // must be irreducible
-  let from = mem.load-i64(ptr)
-  let to = mem.load-i64(add-i64(ptr, 8))
-  if lt-i64(add-i64(from, 1), to) {
-    mem.store-i64(ptr, add-i64(from, 1))
-    Some(magic.cast(i64, text, ptr))
-  } else {
-    let _: text = magic.cast(i64, text, ptr)
-    None
-  }
-}
-
-define length(t: &text): i64 {
-  let ptr = magic.cast(&text, i64, t)
-  let from = mem.load-i64(ptr)
-  let to = mem.load-i64(add-i64(ptr, 8))
-  sub-i64(to, from)
-}
-
-// a slow implementation; optimizable using direct malloc
-define intercalate(sep: &text, xs: &L.list(&text)): text {
-  case xs {
-  - [] =>
-    empty()
-  - [t] =>
-    !!t
-  - t :< ts =>
-    let str-head = this.text.append(!t, sep)
-    let str-cont = intercalate(sep, ts)
-    let result on str-head, str-cont = this.text.append(str-head, str-cont)
-    let _ = str-head
-    let _ = str-cont
-    result
-  }
 }

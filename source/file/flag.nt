@@ -34,6 +34,20 @@ define interpret-flag(flag: flag): i64 {
     - Append =>
       0x0008
     }
+  - linux =>
+    // https://github.com/torvalds/linux/blob/master/include/uapi/asm-generic/fcntl.h
+    match flag {
+    - R =>
+      0o00000000
+    - W =>
+      0o00000001
+    - RW =>
+      0o00000002
+    - Create =>
+      0o00000100
+    - Append =>
+      0o00002000
+    }
   }
 }
 

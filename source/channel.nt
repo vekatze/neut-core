@@ -49,7 +49,7 @@ define new-channel(a: tau): channel(a) {
 }
 
 define new-channel-internal(a: tau, q: Q.queue(a)): channel(a) {
-  let ptr = ext.malloc(128) // 8 + 64 + 48 + 8
+  let ptr = ext.malloc(128) // 8 + 64 + 48 + 8 (FIXME: remove this hardcoded value)
   mem.store-i64(ptr, magic.cast(Q.queue(a), i64, q))
   ext.thread-mutex-init(add-i64(ptr, 8))
   ext.thread-cond-init(add-i64(ptr, 72))

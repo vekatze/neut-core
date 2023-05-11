@@ -1,4 +1,6 @@
 import {
+- this.bool
+- this.list
 - this.text
 - this.text.io
 - this.top
@@ -7,9 +9,36 @@ import {
 
 export {
 - admit
+- get-argc
+- get-argv
 }
 
 define admit[a](t: &text): a {
   let _ = print(t)
   exit(1)
+}
+
+define get-argc(): i64 {
+  let argc-ptr: i64 = magic global("neut-unsafe-argc", pointer)
+  let argc: i64 = magic load(i64, argc-ptr)
+  argc
+}
+
+define get-argv(): list(text) {
+  let argc = get-argc()
+  let argv-ptr: i64 = magic global("neut-unsafe-argv", pointer)
+  let argv: i64 = magic load(i64, argv-ptr)
+  let f =
+    define get-argv-helper(i: i64): list(text) {
+      if eq-i64(i, argc) {
+        []
+      } else {
+        let rest = get-argv-helper(add-i64(i, 1))
+        let str-ptr-ptr = add-i64(argv, mul-i64(i, 8))
+        let str-ptr = magic load(i64, str-ptr-ptr)
+        let t = unsafe-from-c-string(str-ptr)
+        t :< rest
+      }
+    }
+  f(0)
 }

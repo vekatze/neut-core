@@ -11,15 +11,16 @@ export {
 - i8-array
 - i8-array-new
 - i8-array-access
+- unsafe-copy-i8-array
 }
 
-define copy-i8-array(source-pointer: i64, target-pointer: i64, index: i64, from: i64, to: i64): top {
+define unsafe-copy-i8-array(source-pointer: i64, target-pointer: i64, index: i64, from: i64, to: i64): top {
   if eq-i64(from, to) {
     Unit
   } else {
     let value: i8 = mem.load-i8(add-i64(source-pointer, from))
     mem.store-i8(add-i64(target-pointer, index), value)
-    copy-i8-array(source-pointer, target-pointer, add-i64(index, 1), add-i64(from, 1), to)
+    unsafe-copy-i8-array(source-pointer, target-pointer, add-i64(index, 1), add-i64(from, 1), to)
   }
 }
 
@@ -34,7 +35,7 @@ resource i8-array {
     let target-pointer = malloc(add-i64(length, 16))
     mem.store-i64(target-pointer, 0: i64)
     mem.store-i64(add-i64(target-pointer, 8), length)
-    copy-i8-array(add-i64(source-pointer, 16), add-i64(target-pointer, 16), 0, from, to)
+    unsafe-copy-i8-array(add-i64(source-pointer, 16), add-i64(target-pointer, 16), 0, from, to)
     target-pointer
   }
 }

@@ -17,6 +17,7 @@ export {
 - empty
 - from-i64
 - unsafe-get-content-pointer
+- unsafe-from-c-string
 }
 
 alias-opaque text {
@@ -107,4 +108,22 @@ define from-i64(x: i64): text {
     store-positive-values(x, sub-i64(len, 1))
   }
   magic.cast(i64, text, ptr)
+}
+
+define unsafe-from-c-string(old-ptr: i64): text {
+  let len = unsafe-get-c-string-length(old-ptr, 0)
+  let new-ptr = ext.malloc(add-i64(len, 16))
+  mem.store-i64(new-ptr, 0: i64)
+  mem.store-i64(add-i64(new-ptr, 8), len)
+  unsafe-copy-i8-array(old-ptr, add-i64(new-ptr, 16), 0, 0, len)
+  magic.cast(i64, text, new-ptr)
+}
+
+define unsafe-get-c-string-length(ptr: i64, index: i64): i64 {
+  let c = mem.load-i8(add-i64(ptr, index))
+  if eq-i8(c, 0) {
+    index
+  } else {
+    unsafe-get-c-string-length(ptr, add-i64(index, 1))
+  }
 }

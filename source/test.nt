@@ -28,19 +28,41 @@ variant item {
 - Bar(i64)
 }
 
-define main(): i64 {
-  let c = new-cell([10]): cell(list(i64))
-  let _ on c = {
-    mutate(c, lambda (xs) {1 :< xs})
-    mutate(c, lambda (xs) {2 :< xs})
-    mutate(c, lambda (xs) {3 :< xs})
-    borrow(c, lambda (xs) {
-      text.print("value: ")
-      text.print-i64(this.list.length(xs))
-      text.print("\n")
-    })
-    mutate(c, lambda (_) {clone(c)})
+define show-texts(xs: list(text)): top {
+  match xs {
+  - [] =>
+    Unit
+  - t :< ts =>
+    let _ on t = text.print(t)
+    let _ = t
+    text.print("\n")
+    show-texts(ts)
   }
+}
+
+define main(): i64 {
+  //
+  // test args
+  //
+  let argc = get-argc()
+  text.print-i64(argc)
+  text.print("\n")
+  let argv = get-argv()
+  text.print("arguments:\n")
+  show-texts(argv)
+
+  // let c = new-cell([10]): cell(list(i64))
+  // let _ on c = {
+  //   mutate(c, lambda (xs) {1 :< xs})
+  //   mutate(c, lambda (xs) {2 :< xs})
+  //   mutate(c, lambda (xs) {3 :< xs})
+  //   borrow(c, lambda (xs) {
+  //     text.print("value: ")
+  //     text.print-i64(this.list.length(xs))
+  //     text.print("\n")
+  //   })
+  //   // mutate(c, lambda (_) {clone(c)})
+  // }
   // channel test
   // t.raw-test()
   // let ch-orig = t.new-channel()
@@ -60,7 +82,7 @@ define main(): i64 {
   //     detach {
   //       text.print("I'm the thread that does downloading...\n")
   //       ext.sleep(4)
-  //       text.print("sending from another thread\n")
+  //               text.print("sending from another thread\n")
   //       send(ch-clone, lambda () {3})
   //       text.print("done\n")
   //     }

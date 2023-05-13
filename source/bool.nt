@@ -1,5 +1,3 @@
-import {}
-
 export {
 - bool {..}
 - and
@@ -11,7 +9,6 @@ variant bool {
 - False
 - True
 }
-
 
 define and(b1: bool, b2: bool): bool {
   if b1 {

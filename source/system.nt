@@ -5,6 +5,8 @@ import {
 - this.text.io
 - this.top
 - this.external
+- this.memory
+- this.arch => arch
 }
 
 export {
@@ -18,24 +20,25 @@ define admit[a](t: &text): a {
   exit(1)
 }
 
-define get-argc(): i64 {
-  let argc-ptr: i64 = magic global("neut-unsafe-argc", pointer)
-  let argc: i64 = magic load(i64, argc-ptr)
+define get-argc(): int {
+  let argc-ptr: int = magic global("neut-unsafe-argc", pointer)
+  let argc: int = load-int(argc-ptr)
   argc
 }
 
 define get-argv(): list(text) {
   let argc = get-argc()
-  let argv-ptr: i64 = magic global("neut-unsafe-argv", pointer)
-  let argv: i64 = magic load(i64, argv-ptr)
+  let argv-ptr: int = magic global("neut-unsafe-argv", pointer)
+  let argv: int = load-int(argv-ptr)
+  let u = arch.unit()
   let f =
-    define get-argv-helper(i: i64): list(text) {
-      if eq-i64(i, argc) {
+    define get-argv-helper(i: int): list(text) {
+      if eq-int(i, argc) {
         []
       } else {
-        let rest = get-argv-helper(add-i64(i, 1))
-        let str-ptr-ptr = add-i64(argv, mul-i64(i, 8))
-        let str-ptr = magic load(i64, str-ptr-ptr)
+        let rest = get-argv-helper(add-int(i, 1))
+        let str-ptr-ptr = add-int(argv, mul-int(i, u))
+        let str-ptr = load-int(str-ptr-ptr)
         let t = unsafe-from-c-string(str-ptr)
         t :< rest
       }

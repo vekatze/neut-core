@@ -3,34 +3,39 @@ import {
 }
 
 export {
-- store-i64
+- store-int
 - store-i8
 - store-i1
-- load-i64
+- load-int
 - load-i8
 - load-i1
 }
 
-define-inline store-i64(address: i64, value: i64): top {
-  magic store(i64, address, value)
+define-inline store-int(address: int, value: int): top {
+  introspect target-arch {
+  - amd64 =>
+    magic store(i64, address, value)
+  - arm64 =>
+    magic store(i64, address, value)
+  }
 }
 
-define-inline store-i8(address: i64, value: i8): top {
+define-inline store-i8(address: int, value: i8): top {
   magic store(i8, address, value)
 }
 
-define-inline store-i1(address: i64, value: i1): top {
+define-inline store-i1(address: int, value: i1): top {
   magic store(i1, address, value)
 }
 
-define-inline load-i64(address: i64): i64 {
+define-inline load-int(address: int): int {
   magic load(i64, address)
 }
 
-define-inline load-i8(address: i64): i8 {
+define-inline load-i8(address: int): i8 {
   magic load(i8, address)
 }
 
-define-inline load-i1(address: i64): i1 {
+define-inline load-i1(address: int): i1 {
   magic load(i1, address)
 }

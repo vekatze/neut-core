@@ -5,6 +5,7 @@ import {
 - this.list => L
 - this.product
 - this.top
+- this.arch => arch
 - this.external => ext
 - this.memory => mem
 - this.magic => magic
@@ -15,7 +16,7 @@ export {
 - append
 - create
 - empty
-- from-i64
+- from-int
 - unsafe-get-content-pointer
 - unsafe-from-c-string
 }
@@ -33,97 +34,104 @@ define empty(): text {
 }
 
 define append(t1: &text, t2: &text): text {
-  let p1 = magic.cast(&text, i64, t1)
-  let p2 = magic.cast(&text, i64, t2)
-  let from1 = mem.load-i64(p1)
-  let from2 = mem.load-i64(p2)
-  let to1 = mem.load-i64(add-i64(p1, 8))
-  let to2 = mem.load-i64(add-i64(p2, 8))
-  let len1 = sub-i64(to1, from1)
-  let len2 = sub-i64(to2, from2)
-  let new-len = add-i64(len1, len2)
-  let content1 = add-i64(p1, 16)
-  let content2 = add-i64(p2, 16)
-  let new-text = ext.malloc(add-i64(new-len, 16))
-  mem.store-i64(new-text, 0: i64)
-  mem.store-i64(add-i64(new-text, 8), new-len)
+  let p1 = magic.cast(&text, int, t1)
+  let p2 = magic.cast(&text, int, t2)
+  let from1 = mem.load-int(p1)
+  let from2 = mem.load-int(p2)
+  let u = arch.unit()
+  let u2 = mul-int(u, 2)
+  let to1 = mem.load-int(add-int(p1, u))
+  let to2 = mem.load-int(add-int(p2, u))
+  let len1 = sub-int(to1, from1)
+  let len2 = sub-int(to2, from2)
+  let new-len = add-int(len1, len2)
+  let content1 = add-int(p1, u2)
+  let content2 = add-int(p2, u2)
+  let new-text = ext.malloc(add-int(new-len, u2))
+  mem.store-int(new-text, 0)
+  mem.store-int(add-int(new-text, u), new-len)
   let store-values =
-    define self(target-pointer: i64, content-array: i64, current-index: i64, array-length: i64): top {
-      if eq-i64(current-index, array-length) {
+    define self(target-pointer: int, content-array: int, current-index: int, array-length: int): top {
+      if eq-int(current-index, array-length) {
         Unit
       } else {
-        let char = mem.load-i8(add-i64(content-array, current-index))
-        mem.store-i8(add-i64(target-pointer, current-index), char)
-        self(target-pointer, content-array, add-i64(current-index, 1), array-length)
+        let char = mem.load-i8(add-int(content-array, current-index))
+        mem.store-i8(add-int(target-pointer, current-index), char)
+        self(target-pointer, content-array, add-int(current-index, 1), array-length)
       }
     }
-  let str-pointer = add-i64(new-text, 16)
-  store-values(str-pointer, add-i64(content1, from2), 0, len1)
-  store-values(add-i64(str-pointer, len1), add-i64(content2, from2), 0, len2)
-  magic.cast(i64, text, new-text)
+  let str-pointer = add-int(new-text, u2)
+  store-values(str-pointer, add-int(content1, from2), 0, len1)
+  store-values(add-int(str-pointer, len1), add-int(content2, from2), 0, len2)
+  magic.cast(int, text, new-text)
 }
 
-define unsafe-get-content-pointer(t: &text): i64 {
-  let ptr = magic.cast(&text, i64, t)
-  let from = mem.load-i64(ptr)
-  add-i64(add-i64(ptr, 16), from)
+define unsafe-get-content-pointer(t: &text): int {
+  let ptr = magic.cast(&text, int, t)
+  let from = mem.load-int(ptr)
+  let u = arch.unit()
+  add-int(add-int(ptr, mul-int(u, 2)), from)
 }
 
-define get-text-length-of-i64(x: i64, acc: i64): i64 {
-  if lt-i64(x, 0) {
-    get-text-length-of-i64(mul-i64(x, -1), add-i64(acc, 1))
+define get-text-length-of-int(x: int, acc: int): int {
+  if lt-int(x, 0) {
+    get-text-length-of-int(mul-int(x, -1), add-int(acc, 1))
   } else {
-    let q = div-i64(x, 10)
-    if eq-i64(q, 0) {
-      add-i64(acc, 1)
+    let q = div-int(x, 10)
+    if eq-int(q, 0) {
+      add-int(acc, 1)
     } else {
-      get-text-length-of-i64(q, add-i64(acc, 1))
+      get-text-length-of-int(q, add-int(acc, 1))
     }
   }
 }
 
-define from-i64(x: i64): text {
-  let len = get-text-length-of-i64(x, 0)
-  let ptr = ext.malloc(add-i64(len, 16))
-  mem.store-i64(ptr, 0: i64)
-  mem.store-i64(add-i64(ptr, 8), len)
-  let content = add-i64(ptr, 16)
+define from-int(x: int): text {
+  let u = arch.unit()
+  let u2 = mul-int(u, 2)
+  let len = get-text-length-of-int(x, 0)
+  let ptr = ext.malloc(add-int(len, u2))
+  mem.store-int(ptr, 0)
+  mem.store-int(add-int(ptr, u), len)
+  let content = add-int(ptr, u2)
   let store-positive-values =
-    define loop(y: i64, index: i64): top {
-      if lt-i64(y, 10) {
-        let digit-char = add-i8(magic.cast(i64, i8, y), 48) // 48 == "0"
-        mem.store-i8(add-i64(content, index), digit-char)
+    define loop(y: int, index: int): top {
+      if lt-int(y, 10) {
+        let digit-char = add-i8(magic.cast(int, i8, y), 48) // 48 == "0"
+        mem.store-i8(add-int(content, index), digit-char)
       } else {
-        let q = div-i64(y, 10)
-        let r = rem-i64(y, 10)
-        let digit-char = add-i8(magic.cast(i64, i8, r), 48)
-        mem.store-i8(add-i64(content, index), digit-char)
-        loop(q, sub-i64(index, 1))
+        let q = div-int(y, 10)
+        let r = rem-int(y, 10)
+        let digit-char = add-i8(magic.cast(int, i8, r), 48)
+        mem.store-i8(add-int(content, index), digit-char)
+        loop(q, sub-int(index, 1))
       }
     }
-  if lt-i64(x, 0) {
+  if lt-int(x, 0) {
     mem.store-i8(content, 45) // 45 == "-"
-    store-positive-values(mul-i64(x, -1), sub-i64(len, 1))
+    store-positive-values(mul-int(x, -1), sub-int(len, 1))
   } else {
-    store-positive-values(x, sub-i64(len, 1))
+    store-positive-values(x, sub-int(len, 1))
   }
-  magic.cast(i64, text, ptr)
+  magic.cast(int, text, ptr)
 }
 
-define unsafe-from-c-string(old-ptr: i64): text {
+define unsafe-from-c-string(old-ptr: int): text {
+  let u = arch.unit()
+  let u2 = mul-int(u, 2)
   let len = unsafe-get-c-string-length(old-ptr, 0)
-  let new-ptr = ext.malloc(add-i64(len, 16))
-  mem.store-i64(new-ptr, 0: i64)
-  mem.store-i64(add-i64(new-ptr, 8), len)
-  unsafe-copy-i8-array(old-ptr, add-i64(new-ptr, 16), 0, 0, len)
-  magic.cast(i64, text, new-ptr)
+  let new-ptr = ext.malloc(add-int(len, u2))
+  mem.store-int(new-ptr, 0)
+  mem.store-int(add-int(new-ptr, u), len)
+  unsafe-copy-i8-array(old-ptr, add-int(new-ptr, u2), 0, 0, len)
+  magic.cast(int, text, new-ptr)
 }
 
-define unsafe-get-c-string-length(ptr: i64, index: i64): i64 {
-  let c = mem.load-i8(add-i64(ptr, index))
+define unsafe-get-c-string-length(ptr: int, index: int): int {
+  let c = mem.load-i8(add-int(ptr, index))
   if eq-i8(c, 0) {
     index
   } else {
-    unsafe-get-c-string-length(ptr, add-i64(index, 1))
+    unsafe-get-c-string-length(ptr, add-int(index, 1))
   }
 }

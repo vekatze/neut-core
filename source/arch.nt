@@ -1,0 +1,12 @@
+export {
+- unit
+}
+
+define-inline unit(): int {
+  introspect target-arch {
+  - amd64 =>
+    8
+  - arm64 =>
+    8
+  }
+}

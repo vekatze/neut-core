@@ -77,14 +77,14 @@ define reverse-helper[a](xs: list(a), acc: list(a)): list(a) {
   }
 }
 
-define length[a](xs: &list(a)): i64 {
+define length[a](xs: &list(a)): int {
   let length-tailcall =
-    define rec(acc: i64, xs: &list(a)): i64 {
+    define rec(acc: int, xs: &list(a)): int {
       case xs {
       - [] =>
         acc
       - _ :< ys =>
-        rec(add-i64(1, acc), ys)
+        rec(add-int(1, acc), ys)
       }
     }
   length-tailcall(0, xs)
@@ -118,11 +118,11 @@ define any(xs: list(bool)): bool {
 }
 
 // right-open interval
-define range(from: i64, to: i64): list(i64) {
-  if eq-i64(from, to) {
+define range(from: int, to: int): list(int) {
+  if eq-int(from, to) {
     []
   } else {
-    from :< range(add-i64(from, 1), to)
+    from :< range(add-int(from, 1), to)
   }
 }
 

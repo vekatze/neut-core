@@ -40,12 +40,12 @@ define enqueue[a](x: a, q: queue(a)): queue(a) {
   tuple(ls, x :< rs)
 }
 
-define size[a](q: &queue(a)): i64 {
+define size[a](q: &queue(a)): int {
   case q {
   - tuple(ls, rs) =>
     let l1 = length(ls)
     let l2 = length(rs)
-    add-i64(l1, l2)
+    add-int(l1, l2)
   }
 }
 

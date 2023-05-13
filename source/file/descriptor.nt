@@ -8,13 +8,13 @@ export {
 variant descriptor {}
 
 define stdin(): descriptor {
-  magic cast(i64, descriptor, 0)
+  magic cast(int, descriptor, 0)
 }
 
 define stdout(): descriptor {
-  magic cast(i64, descriptor, 1)
+  magic cast(int, descriptor, 1)
 }
 
 define stderr(): descriptor {
-  magic cast(i64, descriptor, 2)
+  magic cast(int, descriptor, 2)
 }

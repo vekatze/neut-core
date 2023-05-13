@@ -1,0 +1,20 @@
+import {
+- this.list
+}
+
+export {
+- sum-int
+}
+
+define sum-int(xs: list(int)): int {
+  let f =
+    define loop(ys: list(int), acc: int): int {
+      match ys {
+      - [] =>
+        acc
+      - z :< zs =>
+        loop(zs, add-int(z, acc))
+      }
+    }
+  f(xs, 0)
+}

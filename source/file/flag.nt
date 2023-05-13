@@ -18,7 +18,7 @@ variant flag {
 - Create
 }
 
-define interpret-flag(flag: flag): i64 {
+define interpret-flag(flag: flag): int {
   introspect target-os {
   - darwin =>
     // https://github.com/apple/darwin-xnu/blob/main/bsd/sys/fcntl.h
@@ -51,12 +51,12 @@ define interpret-flag(flag: flag): i64 {
   }
 }
 
-define interpret(xs: list(flag)): i64 {
+define interpret(xs: list(flag)): int {
   match xs {
   - [] =>
     0
   - f :< ys =>
-    or-i64(interpret-flag(f), interpret(ys))
+    or-int(interpret-flag(f), interpret(ys))
   }
 }
 

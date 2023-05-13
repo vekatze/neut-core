@@ -4,6 +4,7 @@ import {
 - this.top
 - this.external
 - this.memory => mem
+- this.arch => arch
 - this.magic => magic
 }
 
@@ -14,53 +15,59 @@ export {
 - unsafe-copy-i8-array
 }
 
-define unsafe-copy-i8-array(source-pointer: i64, target-pointer: i64, index: i64, from: i64, to: i64): top {
-  if eq-i64(from, to) {
+define unsafe-copy-i8-array(source-pointer: int, target-pointer: int, index: int, from: int, to: int): top {
+  if eq-int(from, to) {
     Unit
   } else {
-    let value: i8 = mem.load-i8(add-i64(source-pointer, from))
-    mem.store-i8(add-i64(target-pointer, index), value)
-    unsafe-copy-i8-array(source-pointer, target-pointer, add-i64(index, 1), add-i64(from, 1), to)
+    let value = mem.load-i8(add-int(source-pointer, from))
+    mem.store-i8(add-int(target-pointer, index), value)
+    unsafe-copy-i8-array(source-pointer, target-pointer, add-int(index, 1), add-int(from, 1), to)
   }
 }
 
 resource i8-array {
-- lambda(x: i64) {
-    magic.cast(top, i64, free(x))
+- lambda(x: int) {
+    magic.cast(top, int, free(x))
   }
-- lambda(source-pointer: i64) {
-    let from: i64 = mem.load-i64(source-pointer)
-    let to: i64 = mem.load-i64(add-i64(source-pointer, 8))
-    let length = sub-i64(to, from)
-    let target-pointer = malloc(add-i64(length, 16))
-    mem.store-i64(target-pointer, 0: i64)
-    mem.store-i64(add-i64(target-pointer, 8), length)
-    unsafe-copy-i8-array(add-i64(source-pointer, 16), add-i64(target-pointer, 16), 0, from, to)
+- lambda(source-pointer: int) {
+    let u = arch.unit()
+    let u2 = mul-int(u, 2)
+    let from = mem.load-int(source-pointer)
+    let to = mem.load-int(add-int(source-pointer, u))
+    let length = sub-int(to, from)
+    let target-pointer = malloc(add-int(length, u2))
+    mem.store-int(target-pointer, 0)
+    mem.store-int(add-int(target-pointer, u), length)
+    unsafe-copy-i8-array(add-int(source-pointer, u2), add-int(target-pointer, u2), 0, from, to)
     target-pointer
   }
 }
 
 define i8-array-new(xs: list(i8)): i8-array {
   let len on xs = length(xs)
-  let base-pointer = malloc(add-i64(len, 16))
-  mem.store-i64(base-pointer, 0: i64)
-  mem.store-i64(add-i64(base-pointer, 8), len)
-  let content-pointer: i64 = add-i64(base-pointer, 16)
+  let u = arch.unit()
+  let u2 = mul-int(u, 2)
+  let base-pointer = malloc(add-int(len, u2))
+  mem.store-int(base-pointer, 0)
+  mem.store-int(add-int(base-pointer, u), len)
+  let content-pointer: int = add-int(base-pointer, u2)
   let store-values =
-    define self(values: list(i8), index: i64): top {
+    define self(values: list(i8), index: int): top {
       match values {
       - [] =>
         Unit
       - v :< rest =>
-        mem.store-i8(add-i64(content-pointer, index), v)
-        self(rest, add-i64(index, 1))
+        mem.store-i8(add-int(content-pointer, index), v)
+        self(rest, add-int(index, 1))
       }
     }
   let _ = store-values(xs, 0)
-  magic.cast(i64, i8-array, base-pointer)
+  magic.cast(int, i8-array, base-pointer)
 }
 
-define-inline i8-array-access(xs: &i8-array, i: i64): i8 {
-  let ptr = magic.cast(&i8-array, i64, xs)
-  mem.load-i8(add-i64(add-i64(ptr, 16), i))
+define-inline i8-array-access(xs: &i8-array, i: int): i8 {
+  let ptr = magic.cast(&i8-array, int, xs)
+  let u = arch.unit()
+  let u2 = mul-int(u, 2)
+  mem.load-i8(add-int(add-int(ptr, u2), i))
 }

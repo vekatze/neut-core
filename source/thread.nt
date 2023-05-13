@@ -5,6 +5,7 @@ import {
 - this.text
 - this.text.io => io
 - this.system
+- this.arch => arch
 - this.memory => mem
 - this.magic => magic
 - this.product
@@ -19,25 +20,30 @@ export {
 }
 
 resource flow-inner {
-- lambda (p: i64) {
+- lambda (p: int) {
     // io.print("[warning] awaiting a flow to discard it\n")
-    let elem-type = magic.cast(i64, tau, mem.load-i64(add-i64(p, 8)))
-    let pr: flow(elem-type) = magic.cast(i64, flow(elem-type), p)
+    let u = arch.unit()
+    let elem-type = magic.cast(int, tau, mem.load-int(add-int(p, u)))
+    let pr: flow(elem-type) = magic.cast(int, flow(elem-type), p)
     let _: elem-type = this.thread.attach(elem-type, pr: flow(elem-type)) // await & discard
     0
   }
-- lambda (addr: i64) {
+- lambda (addr: int) {
     // io.print("[warning] awaiting a flow to copy it\n")
+    let u = arch.unit()
+    let u2 = mul-int(u, 2)
+    let u3 = mul-int(u, 3)
     await-and-write-result(addr)
-    let thread-id = mem.load-i64(addr)
-    let elem-type = magic.cast(i64, tau, mem.load-i64(add-i64(addr, 8)))
-    let elem-value: &elem-type = magic.cast(i64, &elem-type, mem.load-i64(add-i64(addr, 16)))
-    let new-addr = ext.malloc(25)
-    mem.store-i64(new-addr, thread-id)
-    mem.store-i64(add-i64(new-addr, 8), magic.cast(tau, i64, elem-type))
+    let thread-id = mem.load-int(addr)
+    let elem-type = magic.cast(int, tau, mem.load-int(add-int(addr, u)))
+    let elem-value: &elem-type = magic.cast(int, &elem-type, mem.load-int(add-int(addr, u2)))
+    // let new-addr = ext.malloc(25)
+    let new-addr = ext.malloc(flow-size())
+    mem.store-int(new-addr, thread-id)
+    mem.store-int(add-int(new-addr, u), magic.cast(tau, int, elem-type))
     let cloned-value: elem-type = embody(elem-type, elem-value)
-    mem.store-i64(add-i64(new-addr, 16), magic.cast(elem-type, i64, cloned-value))
-    mem.store-i1(add-i64(new-addr, 24), 1) // already finished
+    mem.store-int(add-int(new-addr, u2), magic.cast(elem-type, int, cloned-value))
+    mem.store-i1(add-int(new-addr, u3), 1) // already finished
     new-addr
   }
 }
@@ -46,43 +52,55 @@ define-inline embody(a: tau, x: &a): a {
   !x
 }
 
+define-inline flow-size(): int {
+  let u = arch.unit()
+  add-int(mul-int(u, 3), 1)
+}
+
 // (thread-id, result-type, result-value, finished-flag): flow(result-type)
 define detach(a: tau, f: () -> a): flow(a) {
   let thread-func =
     lambda () {
-      ext.thread-exit(magic.cast(a, i64, f()))
+      ext.thread-exit(magic.cast(a, int, f()))
     }
-  let closure = magic.cast(() -> top, i64, thread-func)
-  let closure-env = mem.load-i64(add-i64(closure, 8))
-  let closure-label = mem.load-i64(add-i64(closure, 16))
+  let u = arch.unit()
+  let u2 = mul-int(u, 2)
+  let u3 = mul-int(u, 3)
+  let closure = magic.cast(() -> top, int, thread-func)
+  let closure-env = mem.load-int(add-int(closure, u))
+  let closure-label = mem.load-int(add-int(closure, u2))
   ext.free(closure)
-  let thread-id-pointer = ext.malloc(8)
+  let thread-id-pointer = ext.malloc(u)
   let _ = ext.thread-create(thread-id-pointer, closure-label, closure-env)
-  let thread-id = mem.load-i64(thread-id-pointer)
+  let thread-id = mem.load-int(thread-id-pointer)
   ext.free(thread-id-pointer)
-  let ptr = ext.malloc(25)
-  mem.store-i64(ptr, thread-id)
-  mem.store-i64(add-i64(ptr, 8), magic.cast(tau, i64, a))
-  mem.store-i64(add-i64(ptr, 16), 0)
-  mem.store-i1(add-i64(ptr, 24), 0)
-  magic.cast(i64, flow(a), ptr)
+  let ptr = ext.malloc(flow-size())
+  mem.store-int(ptr, thread-id)
+  mem.store-int(add-int(ptr, u), magic.cast(tau, int, a))
+  mem.store-int(add-int(ptr, u2), 0)
+  mem.store-i1(add-int(ptr, u3), 0)
+  magic.cast(int, flow(a), ptr)
 }
 
 define attach(a: tau, e: flow(a)): a {
-  let addr = magic.cast(flow(a), i64, e)
+  let addr = magic.cast(flow(a), int, e)
   await-and-write-result(addr)
-  let value-ptr = add-i64(addr, 16)
-  let value = mem.load-i64(value-ptr)
+  let u = arch.unit()
+  let value-ptr = add-int(addr, mul-int(u, 2))
+  let value = mem.load-int(value-ptr)
   ext.free(addr)
-  magic.cast(i64, a, value)
+  magic.cast(int, a, value)
 }
 
-define await-and-write-result(addr: i64): top {
-  let finished-flag-ptr = add-i64(addr, 24)
+define await-and-write-result(addr: int): top {
+  let u = arch.unit()
+  let u2 = mul-int(u, 2)
+  let u3 = mul-int(u, 3)
+  let finished-flag-ptr = add-int(addr, u3)
   let finished-flag = mem.load-i1(finished-flag-ptr)
   if eq-i1(finished-flag, 0) {
-    let thread-id = mem.load-i64(addr)
-    let value-ptr = add-i64(addr, 16)
+    let thread-id = mem.load-int(addr)
+    let value-ptr = add-int(addr, u2)
     ext.thread-join(thread-id, value-ptr)
     mem.store-i1(finished-flag-ptr, 1)
   } else {

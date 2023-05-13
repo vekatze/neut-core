@@ -20,7 +20,7 @@ variant mode {
 - Other-X
 }
 
-define interpret-mode(flag: mode): i64 {
+define interpret-mode(flag: mode): int {
   introspect target-os {
   - darwin =>
     // https://github.com/apple/darwin-xnu/blob/main/bsd/sys/fcntl.h
@@ -69,12 +69,12 @@ define interpret-mode(flag: mode): i64 {
   }
 }
 
-define interpret(xs: list(mode)): i64 {
+define interpret(xs: list(mode)): int {
   match xs {
   - [] =>
     0
   - m :< ms =>
-    or-i64(interpret-mode(m), interpret(ms))
+    or-int(interpret-mode(m), interpret(ms))
   }
 }
 

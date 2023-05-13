@@ -11,6 +11,7 @@ import {
 
 export {
 - admit
+- assert
 - get-argc
 - get-argv
 }
@@ -18,6 +19,25 @@ export {
 define admit[a](t: &text): a {
   let _ = print(t)
   exit(1)
+}
+
+define-inline assert(message: &text, check: () -> bool): top {
+  introspect build-mode {
+  - release =>
+    let _ = check
+    let _ = message
+    Unit
+  - default =>
+    assert-inner(message, check)
+  }
+}
+
+define assert-inner(message: &text, check: () -> bool): top {
+  if check() {
+    Unit
+  } else {
+    print(message)
+  }
 }
 
 define get-argc(): int {

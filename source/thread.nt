@@ -1,7 +1,7 @@
 import {
 - this.bool
 - this.option
-- this.top
+- this.unit
 - this.text
 - this.text.io => io
 - this.system
@@ -66,7 +66,7 @@ define detach(a: tau, f: () -> a): flow(a) {
   let u = arch.unit()
   let u2 = mul-int(u, 2)
   let u3 = mul-int(u, 3)
-  let closure = magic.cast(() -> top, int, thread-func)
+  let closure = magic.cast(() -> unit, int, thread-func)
   let closure-env = mem.load-int(add-int(closure, u))
   let closure-label = mem.load-int(add-int(closure, u2))
   ext.free(closure)
@@ -76,7 +76,17 @@ define detach(a: tau, f: () -> a): flow(a) {
   ext.free(thread-id-pointer)
   let ptr = ext.malloc(flow-size())
   mem.store-int(ptr, thread-id)
-  mem.store-int(add-int(ptr, u), magic.cast(tau, int, a))
+  // io.print("type-addr: ")
+  // io.print-int(add-int(ptr, u))
+  // io.print("\n")
+  // io.print("elem-type: ")
+  // io.print-int(magic.cast(tau, int, a))
+  // io.print("\n")
+  // io.print("tau-addr (discard): ")
+  // io.print-int(magic.cast(tau, int, tau))
+  // io.print("\n")
+  // mem.store-int(add-int(ptr, u), magic.cast(tau, int, a))
+  mem.store-int(add-int(ptr, u), magic.cast(tau, int, a)) // debug
   mem.store-int(add-int(ptr, u2), 0)
   mem.store-i1(add-int(ptr, u3), 0)
   magic.cast(int, flow(a), ptr)
@@ -92,7 +102,7 @@ define attach(a: tau, e: flow(a)): a {
   magic.cast(int, a, value)
 }
 
-define await-and-write-result(addr: int): top {
+define await-and-write-result(addr: int): unit {
   let u = arch.unit()
   let u2 = mul-int(u, 2)
   let u3 = mul-int(u, 3)

@@ -1,7 +1,7 @@
 import {
 - this.bool
 - this.list
-- this.top
+- this.unit
 - this.external
 - this.memory => mem
 - this.arch => arch
@@ -15,7 +15,7 @@ export {
 - unsafe-copy-i8-array
 }
 
-define unsafe-copy-i8-array(source-pointer: int, target-pointer: int, index: int, from: int, to: int): top {
+define unsafe-copy-i8-array(source-pointer: int, target-pointer: int, index: int, from: int, to: int): unit {
   if eq-int(from, to) {
     Unit
   } else {
@@ -27,7 +27,7 @@ define unsafe-copy-i8-array(source-pointer: int, target-pointer: int, index: int
 
 resource i8-array {
 - lambda(x: int) {
-    magic.cast(top, int, free(x))
+    magic.cast(unit, int, free(x))
   }
 - lambda(source-pointer: int) {
     let u = arch.unit()
@@ -52,7 +52,7 @@ define i8-array-new(xs: list(i8)): i8-array {
   mem.store-int(add-int(base-pointer, u), len)
   let content-pointer: int = add-int(base-pointer, u2)
   let store-values =
-    define self(values: list(i8), index: int): top {
+    define self(values: list(i8), index: int): unit {
       match values {
       - [] =>
         Unit

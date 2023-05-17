@@ -1,5 +1,5 @@
 import {
-- this.top
+- this.unit
 - this.channel
 - this.magic => magic
 }
@@ -22,7 +22,7 @@ define new-cell[a](x: a): cell(a) {
   magic.cast(channel(a), cell(a), ch)
 }
 
-define mutate[a](ch: &cell(a), f: a -> a): top {
+define mutate[a](ch: &cell(a), f: a -> a): unit {
   let ch = magic.cast(&cell(a), &channel(a), ch)
   let v = receive(ch)
   send(ch, f(v))

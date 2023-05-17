@@ -9,7 +9,7 @@ import {
 - this.sum
 - this.system
 - this.text
-- this.top
+- this.unit
 - this.vector
 - this.file
 - this.file.flag => FF
@@ -28,7 +28,7 @@ variant item {
 - Bar(int)
 }
 
-define show-texts(xs: list(text)): top {
+define show-texts(xs: list(text)): unit {
   match xs {
   - [] =>
     Unit
@@ -40,16 +40,34 @@ define show-texts(xs: list(text)): top {
   }
 }
 
+variant my-list(a: tau) {
+- Nil()
+- Cons(my-list(a))
+}
+
+
 define main(): int {
+  // let item: this.queue.queue(tau) = this.queue.empty()
+  // let _ = item
+
+  // let xs: my-list(int) = this.test.Nil()
+  // let xs-cell = new-cell(xs)
+  // let _ = xs-cell
+  // test
+  // test
   //
   // test args
   //
-  let argc = get-argc()
-  text.print-int(argc)
-  text.print("\n")
-  let argv = get-argv()
-  text.print("arguments:\n")
-  show-texts(argv)
+  // let argc = get-argc()
+  // text.print-int(argc)
+  // text.print("\n")
+  // let argv = get-argv()
+  // text.print("arguments:\n")
+  // show-texts(argv)
+  let f1: flow(tau) =
+    detach {
+      tau
+    }
 
   // let c = new-cell([10]): cell(list(int))
   // let _ on c = {

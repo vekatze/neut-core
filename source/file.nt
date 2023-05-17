@@ -1,7 +1,7 @@
 import {
 - this.text
 - this.bool
-- this.top
+- this.unit
 - this.list
 - this.file.flag => FF
 - this.file.mode => FM
@@ -23,6 +23,6 @@ define open(path: &text, xs: list(FF.flag), ms: list(FM.mode)): FD.descriptor {
   fd
 }
 
-define close(f: FD.descriptor): top {
+define close(f: FD.descriptor): unit {
   ext.close(f)
 }

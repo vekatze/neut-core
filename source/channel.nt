@@ -1,7 +1,7 @@
 import {
 - this.bool
 - this.option
-- this.top
+- this.unit
 - this.text
 - this.int
 - this.list => list
@@ -74,7 +74,7 @@ define new-channel-internal(a: tau, q: Q.queue(a)): channel(a) {
   magic.cast(int, channel(a), ptr)
 }
 
-define send[a](ch: &channel(a), x: a): top {
+define send[a](ch: &channel(a), x: a): unit {
   let ch = magic.cast(&channel(a), int, ch)
   let u = arch.unit()
   let mutex-ptr = add-int(ch, u)

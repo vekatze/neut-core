@@ -1,7 +1,7 @@
 import {
 - this.text
 - this.bool
-- this.top
+- this.unit
 - this.option
 - this.list
 - this.file.flag => FF
@@ -76,12 +76,12 @@ define read-loop(f: FD.descriptor, content-ptr: int, buffer-size: int, max-read-
   }
 }
 
-define print(t: &text): top {
+define print(t: &text): unit {
   let _ = write(t, FD.stdout())
   Unit
 }
 
-define print-char(x: i8): top {
+define print-char(x: i8): unit {
   let ptr = ext.malloc(1)
   mem.store-i8(ptr, x)
   let _ = ext.write(FD.stdout(), ptr, 1: int)
@@ -122,23 +122,23 @@ define get-line-inner(ptr: int, ptr-size: int, current-index: int, buffer-size: 
   }
 }
 
-define print-line(t: &text): top {
+define print-line(t: &text): unit {
   print(t)
   print("\n")
 }
 
-define print-character(char: i8): top {
+define print-character(char: i8): unit {
   let p: int = ext.malloc(1)
   mem.store-i8(p, char)
   let _ = ext.write(FD.stdin(), p, 1)
   ext.free(p)
 }
 
-define print-digit(x: i8): top {
+define print-digit(x: i8): unit {
   print-character(add-i8(x, 48)) // 48 == '0'
 }
 
-define print-int(i: int): top {
+define print-int(i: int): unit {
   let t = from-int(i)
   let _ on t = print(t)
   let _ = t

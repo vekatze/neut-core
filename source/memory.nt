@@ -1,5 +1,5 @@
 import {
-- this.top
+- this.unit
 }
 
 export {
@@ -11,7 +11,7 @@ export {
 - load-i1
 }
 
-define-inline store-int(address: int, value: int): top {
+define-inline store-int(address: int, value: int): unit {
   introspect target-arch {
   - amd64 =>
     magic store(i64, address, value)
@@ -20,11 +20,11 @@ define-inline store-int(address: int, value: int): top {
   }
 }
 
-define-inline store-i8(address: int, value: i8): top {
+define-inline store-i8(address: int, value: i8): unit {
   magic store(i8, address, value)
 }
 
-define-inline store-i1(address: int, value: i1): top {
+define-inline store-i1(address: int, value: i1): unit {
   magic store(i1, address, value)
 }
 

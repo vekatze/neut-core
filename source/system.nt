@@ -3,7 +3,7 @@ import {
 - this.list
 - this.text
 - this.text.io
-- this.top
+- this.unit
 - this.external
 - this.memory
 - this.arch => arch
@@ -21,7 +21,7 @@ define admit[a](t: &text): a {
   exit(1)
 }
 
-define-inline assert(message: &text, check: () -> bool): top {
+define-inline assert(message: &text, check: () -> bool): unit {
   introspect build-mode {
   - release =>
     let _ = check
@@ -32,7 +32,7 @@ define-inline assert(message: &text, check: () -> bool): top {
   }
 }
 
-define assert-inner(message: &text, check: () -> bool): top {
+define assert-inner(message: &text, check: () -> bool): unit {
   if check() {
     Unit
   } else {

@@ -4,7 +4,7 @@ import {
 - this.option
 - this.list => L
 - this.product
-- this.top
+- this.unit
 - this.arch => arch
 - this.external => ext
 - this.memory => mem
@@ -51,7 +51,7 @@ define append(t1: &text, t2: &text): text {
   mem.store-int(new-text, 0)
   mem.store-int(add-int(new-text, u), new-len)
   let store-values =
-    define self(target-pointer: int, content-array: int, current-index: int, array-length: int): top {
+    define self(target-pointer: int, content-array: int, current-index: int, array-length: int): unit {
       if eq-int(current-index, array-length) {
         Unit
       } else {
@@ -95,7 +95,7 @@ define from-int(x: int): text {
   mem.store-int(add-int(ptr, u), len)
   let content = add-int(ptr, u2)
   let store-positive-values =
-    define loop(y: int, index: int): top {
+    define loop(y: int, index: int): unit {
       if lt-int(y, 10) {
         let digit-char = add-i8(magic.cast(int, i8, y), 48) // 48 == "0"
         mem.store-i8(add-int(content, index), digit-char)

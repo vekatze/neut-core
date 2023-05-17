@@ -1,6 +1,6 @@
 import {
 - this.bool
-- this.top
+- this.unit
 - this.list
 - this.external
 - this.arch => arch
@@ -15,7 +15,7 @@ export {
 - this.vector.length
 }
 
-define discard-vector-content(ptr: int, elem-type: tau, counter: int, length: int): top {
+define discard-vector-content(ptr: int, elem-type: tau, counter: int, length: int): unit {
   if eq-int(counter, length) {
     Unit
   } else {
@@ -25,7 +25,7 @@ define discard-vector-content(ptr: int, elem-type: tau, counter: int, length: in
   }
 }
 
-define copy-vector-content(source-pointer: int, target-pointer: int, elem-type: tau, counter: int, length: int): top {
+define copy-vector-content(source-pointer: int, target-pointer: int, elem-type: tau, counter: int, length: int): unit {
   if eq-int(counter, length) {
     Unit
   } else {
@@ -43,7 +43,7 @@ resource vector-internal {
     let u = arch.unit()
     let elem-type = magic.cast(int, tau, mem.load-int(add-int(x, u)))
     discard-vector-content(add-int(x, mul-int(u, 2)), elem-type, 0, length)
-    magic.cast(top, int, free(x))
+    magic.cast(unit, int, free(x))
   }
 - lambda(source-pointer: int) {
     let u = arch.unit()
@@ -71,7 +71,7 @@ define vector-new[a](xs: list(a)): vector(a) {
   mem.store-int(add-int(base-pointer, u), magic.cast(tau, int, a))
   let content-pointer: int = add-int(base-pointer, u2)
   let store-values =
-    define self(values: list(a), index: int): top {
+    define self(values: list(a), index: int): unit {
       match values {
       - [] =>
         Unit

@@ -9,7 +9,7 @@ import {
 - this.text.io => io
 - this.memory => mem
 - this.magic => magic
-- this.product
+- this.both
 - this.external => ext
 - this.queue => Q
 }
@@ -100,7 +100,7 @@ define receive[a](ch: &channel(a)): a {
 define receive-from-channel-inner[a](ch: int, mutex-ptr: int): a {
   let q: Q.queue(a) = magic.cast(int, Q.queue(a), mem.load-int(ch))
   match Q.dequeue(q) {
-  - Some(tuple(v, q)) =>
+  - Some(Tuple(v, q)) =>
     mem.store-int(ch, magic.cast(Q.queue(a), int, q))
     ext.thread-mutex-unlock(mutex-ptr)
     v

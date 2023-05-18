@@ -5,7 +5,6 @@ import {
 - this.i8-array
 - this.list
 - this.option
-- this.product
 - this.sum
 - this.system
 - this.text
@@ -46,7 +45,7 @@ variant my-list(a: tau) {
 }
 
 
-define main(): int {
+define main(): unit {
   // let item: this.queue.queue(tau) = this.queue.empty()
   // let _ = item
 
@@ -344,5 +343,5 @@ define main(): int {
 
   // // let _ on txt2 = this.text.write(txt2)
   // // let arr-vec = vector-new([arr, arr])
-  10
+  Unit
 }

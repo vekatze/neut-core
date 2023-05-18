@@ -3,7 +3,6 @@ import {
 - this.bool
 - this.option
 - this.list => L
-- this.product
 - this.unit
 - this.arch => arch
 - this.external => ext

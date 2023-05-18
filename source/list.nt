@@ -2,9 +2,9 @@
 
 import {
 - this.bool
+- this.both
 - this.option
 - this.function
-- this.product
 }
 
 export {
@@ -90,22 +90,22 @@ define length[a](xs: &list(a)): int {
   length-tailcall(0, xs)
 }
 
-define unzip[a, b](xs: list(a * b)): list(a) * list(b) {
+define unzip[a, b](xs: list(tuple(a, b))): tuple(list(a), list(b)) {
   match xs {
   - [] =>
-    tuple([], [])
-  - tuple(l, r) :< rest =>
-    let tuple(rest-l, rest-r) = unzip(rest)
-    tuple(l :< rest-l, r :< rest-r)
+    Tuple([], [])
+  - Tuple(l, r) :< rest =>
+    let Tuple(rest-l, rest-r) = unzip(rest)
+    Tuple(l :< rest-l, r :< rest-r)
   }
 }
 
-define uncons[a](xs: list(a)): ?product(a, list(a)) {
+define uncons[a](xs: list(a)): ?tuple(a, list(a)) {
   match xs {
   - [] =>
     None
   - y :< ys =>
-    Some(tuple(y, ys))
+    Some(Tuple(y, ys))
   }
 }
 

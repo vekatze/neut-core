@@ -1,7 +1,7 @@
 import {
 - this.list
 - this.option
-- this.product
+- this.both
 - this.bool
 }
 
@@ -16,33 +16,33 @@ export {
 
 // naive queue
 define-inline queue(a: tau): tau {
-  product(list(a), list(a))
+  tuple(list(a), list(a))
 }
 
 define empty[a](): queue(a) {
-  tuple([], [])
+  Tuple([], [])
 }
 
-define dequeue[a](q: queue(a)): ?product(a, queue(a)) {
-  let tuple(ls, rs) = q
+define dequeue[a](q: queue(a)): ?tuple(a, queue(a)) {
+  let Tuple(ls, rs) = q
   match ls, rs {
   - Nil, Nil =>
     None
   - Cons(l, ls-rest), rs =>
-    Some(tuple(l, tuple(ls-rest, rs)))
+    Some(Tuple(l, Tuple(ls-rest, rs)))
   - Nil, rs =>
-    dequeue(tuple(reverse(rs), []))
+    dequeue(Tuple(reverse(rs), []))
   }
 }
 
 define enqueue[a](x: a, q: queue(a)): queue(a) {
-  let tuple(ls, rs) = q
-  tuple(ls, x :< rs)
+  let Tuple(ls, rs) = q
+  Tuple(ls, x :< rs)
 }
 
 define size[a](q: &queue(a)): int {
   case q {
-  - tuple(ls, rs) =>
+  - Tuple(ls, rs) =>
     let l1 = length(ls)
     let l2 = length(rs)
     add-int(l1, l2)
@@ -51,7 +51,7 @@ define size[a](q: &queue(a)): int {
 
 define is-empty[a](q: &queue(a)): bool {
   case q {
-  - tuple([], []) =>
+  - Tuple([], []) =>
     True
   - _ =>
     False

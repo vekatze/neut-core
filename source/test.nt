@@ -1,6 +1,6 @@
 import {
 - this.bool
-- this.bottom
+- this.void
 - this.function
 - this.i8-array
 - this.list

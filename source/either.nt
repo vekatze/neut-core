@@ -1,0 +1,10 @@
+import {}
+
+export {
+- either {..}
+}
+
+variant either(a: tau, b: tau) {
+- Left(a)
+- Right(b)
+}

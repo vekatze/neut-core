@@ -4,8 +4,9 @@ import {
 - this.function
 - this.i8-array
 - this.list
+- this.both
 - this.option
-- this.sum
+- this.either
 - this.system
 - this.text
 - this.unit
@@ -44,6 +45,10 @@ variant my-list(a: tau) {
 - Cons(my-list(a))
 }
 
+define sample[a, b](x: either(a, b)): either(a, b) {
+  let+ aoeu = x
+  Right(aoeu)
+}
 
 define main(): unit {
   // let item: this.queue.queue(tau) = this.queue.empty()
@@ -62,6 +67,8 @@ define main(): unit {
   // text.print("\n")
   // let argv = get-argv()
   // text.print("arguments:\n")
+  let a: either(tau, tau) = Left(tau)
+  let b: both(tau, int) = Both(tau, 10)
   // show-texts(argv)
   let f1: flow(tau) =
     detach {

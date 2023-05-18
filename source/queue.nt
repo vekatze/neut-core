@@ -1,6 +1,6 @@
 import {
 - this.list
-- this.option
+- this.either
 - this.both
 - this.bool
 }

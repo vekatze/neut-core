@@ -1,6 +1,6 @@
 import {
 - this.bool
-- this.option
+- this.either
 - this.unit
 - this.text
 - this.int

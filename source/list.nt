@@ -3,7 +3,7 @@
 import {
 - this.bool
 - this.both
-- this.option
+- this.either
 - this.function
 }
 

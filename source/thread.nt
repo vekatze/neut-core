@@ -1,6 +1,5 @@
 import {
 - this.bool
-- this.option
 - this.unit
 - this.text
 - this.text.io => io

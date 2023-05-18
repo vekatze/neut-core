@@ -5,7 +5,6 @@ import {
 - this.i8-array
 - this.list
 - this.both
-- this.option
 - this.either
 - this.system
 - this.text
@@ -46,7 +45,7 @@ variant my-list(a: tau) {
 }
 
 define sample[a, b](x: either(a, b)): either(a, b) {
-  let+ aoeu = x
+  let? aoeu = x
   Right(aoeu)
 }
 

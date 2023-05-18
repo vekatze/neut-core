@@ -1,7 +1,6 @@
 import {
 - this.bool
 - this.unit
-- this.option
 - this.file.seek => seek
 - this.file.descriptor => FD
 }

@@ -1,10 +1,58 @@
-import {}
+import {
+- this.unit
+- this.bool
+}
 
 export {
 - either {..}
+- option
+- none-internal
+- some-internal
+- is-None
+- is-Some
+- from-option
 }
 
 variant either(a: tau, b: tau) {
 - Left(a)
 - Right(b)
+}
+
+define-inline option(a: tau): tau {
+  either(unit, a)
+}
+
+define-inline none-internal[a](): option(a) {
+  Left(Unit)
+}
+
+define-inline some-internal[a](x: a): option(a) {
+  Right(x)
+}
+
+define is-None[a](x: option(a)): bool {
+  match x {
+  - Left(_) =>
+    True
+  - Right(_) =>
+    False
+  }
+}
+
+define is-Some[a](x: option(a)): bool {
+  match x {
+  - Left(_) =>
+    False
+  - Right(_) =>
+    True
+  }
+}
+
+define from-option[a](x: a, my: option(a)): a {
+  match my {
+  - Right(y) =>
+    y
+  - Left(_) =>
+    x
+  }
 }

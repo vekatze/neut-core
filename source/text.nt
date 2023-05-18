@@ -1,7 +1,7 @@
 import {
 - this.i8-array
 - this.bool
-- this.option
+- this.either
 - this.list => L
 - this.unit
 - this.arch => arch

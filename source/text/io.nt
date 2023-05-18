@@ -2,7 +2,7 @@ import {
 - this.text
 - this.bool
 - this.unit
-- this.option
+- this.either
 - this.list
 - this.file.flag => FF
 - this.file.mode => FM

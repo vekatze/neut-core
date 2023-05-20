@@ -22,7 +22,7 @@ export {
 }
 
 resource channel-internal {
-- lambda (ch: int) {
+- (ch: int) => {
     let u = arch.unit()
     let mutex-size = ext.thread-mutex-size()
     let cond-size = ext.thread-cond-size()
@@ -35,7 +35,7 @@ resource channel-internal {
     ext.free(ch)
     0
   }
-- lambda (ch: int)  {
+- (ch: int) => {
     let u = arch.unit()
     let mutex-size = ext.thread-mutex-size()
     let cond-size = ext.thread-cond-size()

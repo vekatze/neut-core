@@ -8,27 +8,27 @@ export {
 }
 
 define flip[a, b, c](f: (a, b) -> c): (b, a) -> c {
-  lambda (y, x) {
+  (y, x) => {
     f(x, y)
   }
 }
 
 define compose[a, b, c](f: a -> b, g: b -> c): a -> c {
-  lambda (x) {
+  (x) => {
     g(f(x))
   }
 }
 
 define curry[a, b, c](f: (a, b) -> c): a -> b -> c {
-  lambda (x) {
-    lambda (y) {
+  (x) => {
+    (y) => {
       f(x, y)
     }
   }
 }
 
 define uncurry[a, b, c](f: a -> b -> c): (a, b) -> c {
-  lambda (x, y) {
+  (x, y) => {
     f(x)(y)
   }
 }

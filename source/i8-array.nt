@@ -26,10 +26,10 @@ define unsafe-copy-i8-array(source-pointer: int, target-pointer: int, index: int
 }
 
 resource i8-array {
-- lambda(x: int) {
+- (x: int) => {
     magic.cast(unit, int, free(x))
   }
-- lambda(source-pointer: int) {
+- (source-pointer: int) => {
     let u = arch.unit()
     let u2 = mul-int(u, 2)
     let from = mem.load-int(source-pointer)

@@ -18,7 +18,7 @@ export {
 }
 
 resource flow-inner {
-- lambda (p: int) {
+- (p: int) => {
     // io.print("[warning] awaiting a flow to discard it\n")
     let u = arch.unit()
     let elem-type = magic.cast(int, tau, mem.load-int(add-int(p, u)))
@@ -26,7 +26,7 @@ resource flow-inner {
     let _: elem-type = this.thread.attach(elem-type, pr: flow(elem-type)) // await & discard
     0
   }
-- lambda (addr: int) {
+- (addr: int) => {
     // io.print("[warning] awaiting a flow to copy it\n")
     let u = arch.unit()
     let u2 = mul-int(u, 2)
@@ -57,7 +57,7 @@ define-inline flow-size(): int {
 // (thread-id, result-type, result-value, finished-flag): flow(result-type)
 define detach(a: tau, f: () -> a): flow(a) {
   let thread-func =
-    lambda () {
+    () => {
       ext.thread-exit(magic.cast(a, int, f()))
     }
   let u = arch.unit()

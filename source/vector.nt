@@ -38,14 +38,14 @@ define copy-vector-content(source-pointer: int, target-pointer: int, elem-type: 
 }
 
 resource vector-internal {
-- lambda(x: int) {
+- (x: int) => {
     let length = mem.load-int(x)
     let u = arch.unit()
     let elem-type = magic.cast(int, tau, mem.load-int(add-int(x, u)))
     discard-vector-content(add-int(x, mul-int(u, 2)), elem-type, 0, length)
     magic.cast(unit, int, free(x))
   }
-- lambda(source-pointer: int) {
+- (source-pointer: int) => {
     let u = arch.unit()
     let u2 = mul-int(u, 2)
     let length: int = mem.load-int(source-pointer)

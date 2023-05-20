@@ -55,7 +55,7 @@ define interpret(xs: list(flag)): int {
   match xs {
   - [] =>
     0
-  - f :< ys =>
+  - f :: ys =>
     or-int(interpret-flag(f), interpret(ys))
   }
 }

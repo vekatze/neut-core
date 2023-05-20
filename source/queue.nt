@@ -37,7 +37,7 @@ define dequeue[a](q: queue(a)): ?tuple(a, queue(a)) {
 
 define enqueue[a](x: a, q: queue(a)): queue(a) {
   let Tuple(ls, rs) = q
-  Tuple(ls, x :< rs)
+  Tuple(ls, x :: rs)
 }
 
 define size[a](q: &queue(a)): int {

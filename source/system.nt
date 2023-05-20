@@ -60,7 +60,7 @@ define get-argv(): list(text) {
         let str-ptr-ptr = add-int(argv, mul-int(i, u))
         let str-ptr = load-int(str-ptr-ptr)
         let t = unsafe-from-c-string(str-ptr)
-        t :< rest
+        t :: rest
       }
     }
   f(0)

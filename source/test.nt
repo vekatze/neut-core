@@ -31,7 +31,7 @@ define show-texts(xs: list(text)): unit {
   match xs {
   - [] =>
     Unit
-  - t :< ts =>
+  - t :: ts =>
     let _ on t = text.print(t)
     let _ = t
     text.print("\n")
@@ -49,9 +49,66 @@ define sample[a, b](x: either(a, b)): either(a, b) {
   Right(aoeu)
 }
 
+define some-rand(): int {
+  magic external(arc4random_uniform, 10000: int)
+}
+
+define rand-list(len: int, acc: list(int)): list(int) {
+  if eq-int(len, 0) {
+    acc
+  } else {
+    // let val = some-rand()
+    let val = len
+    rand-list(sub-int(len, 1), val :: acc)
+  }
+}
+
+define detach-send(x: int, ch: &channel(int)): flow(unit) {
+  detach {
+    send(ch, x)
+  }
+}
+
+define send-all(xs: list(int), ch: &channel(int), acc: list(flow(unit))): list(flow(unit)) {
+  match xs {
+  - [] =>
+    acc
+  - y :: rest =>
+    let fl = detach-send(y, ch)
+    send-all(rest, ch, fl :: acc)
+  }
+}
+
+define receive-one-by-one(xs: list(flow(unit)), ch: &channel(int)): unit {
+  match xs {
+  - [] =>
+    Unit
+  - fl :: rest =>
+    let _ = attach fl
+    let _ = receive(ch)
+    receive-one-by-one(rest, ch)
+  }
+}
+
 define main(): unit {
   // let item: this.queue.queue(tau) = this.queue.empty()
   // let _ = item
+
+  let ch = new-channel(int)
+  let xs = rand-list(14000, [])
+  let _ on ch = {
+    let fs = send-all(xs, ch, [])
+    text.print("sent.\n")
+    receive-one-by-one(fs, ch)
+    text.print("received.\n")
+  }
+  // let xs = rand-list(10000, [])
+  // let _ on ch = {
+  //   let fs = send-all(xs, ch, [])
+  //   receive-all-at-once(fs, ch)
+  // }
+  let _ = ch
+  Unit
 
   // let xs: my-list(int) = this.test.Nil()
   // let xs-cell = new-cell(xs)
@@ -66,19 +123,19 @@ define main(): unit {
   // text.print("\n")
   // let argv = get-argv()
   // text.print("arguments:\n")
-  let a: either(tau, tau) = Left(tau)
-  let b: both(tau, int) = Both(tau, 10)
-  // show-texts(argv)
-  let f1: flow(tau) =
-    detach {
-      tau
-    }
+  // let a: either(tau, tau) = Left(tau)
+  // let b: both(tau, int) = Both(tau, 10)
+  // // show-texts(argv)
+  // let f1: flow(tau) =
+  //   detach {
+  //     tau
+  //   }
 
   // let c = new-cell([10]): cell(list(int))
   // let _ on c = {
-  //   mutate(c, lambda (xs) {1 :< xs})
-  //   mutate(c, lambda (xs) {2 :< xs})
-  //   mutate(c, lambda (xs) {3 :< xs})
+  //   mutate(c, lambda (xs) {1 :: xs})
+  //   mutate(c, lambda (xs) {2 :: xs})
+  //   mutate(c, lambda (xs) {3 :: xs})
   //   borrow(c, lambda (xs) {
   //     text.print("value: ")
   //     text.print-int(this.list.length(xs))

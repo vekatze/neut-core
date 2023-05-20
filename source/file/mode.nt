@@ -73,7 +73,7 @@ define interpret(xs: list(mode)): int {
   match xs {
   - [] =>
     0
-  - m :< ms =>
+  - m :: ms =>
     or-int(interpret-mode(m), interpret(ms))
   }
 }

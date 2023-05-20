@@ -33,7 +33,7 @@ define fold-left[a, b](f: (b, a) -> b, acc: b, xs: list(a)): b {
   match xs {
   - [] =>
     acc
-  - y :< ys =>
+  - y :: ys =>
     fold-left(f, f(acc, y), ys)
   }
 }
@@ -42,7 +42,7 @@ define fold-right[a, b](f: (a, b) -> b, acc: b, xs: list(a)): b {
   match xs {
   - [] =>
     acc
-  - y :< ys =>
+  - y :: ys =>
     f(y, fold-right(f, acc, ys))
   }
 }
@@ -51,8 +51,8 @@ define map[a, b](f: a -> b, xs: list(a)): list(b) {
   match xs {
   - [] =>
     []
-  - y :< ys =>
-    f(y) :< map(f, ys)
+  - y :: ys =>
+    f(y) :: map(f, ys)
   }
 }
 
@@ -72,8 +72,8 @@ define reverse-helper[a](xs: list(a), acc: list(a)): list(a) {
   match xs {
   - [] =>
     acc
-  - y :< ys =>
-    reverse-helper(ys, y :< acc)
+  - y :: ys =>
+    reverse-helper(ys, y :: acc)
   }
 }
 
@@ -83,7 +83,7 @@ define length[a](xs: &list(a)): int {
       case xs {
       - [] =>
         acc
-      - _ :< ys =>
+      - _ :: ys =>
         rec(add-int(1, acc), ys)
       }
     }
@@ -94,9 +94,9 @@ define unzip[a, b](xs: list(tuple(a, b))): tuple(list(a), list(b)) {
   match xs {
   - [] =>
     Tuple([], [])
-  - Tuple(l, r) :< rest =>
+  - Tuple(l, r) :: rest =>
     let Tuple(rest-l, rest-r) = unzip(rest)
-    Tuple(l :< rest-l, r :< rest-r)
+    Tuple(l :: rest-l, r :: rest-r)
   }
 }
 
@@ -104,7 +104,7 @@ define uncons[a](xs: list(a)): ?tuple(a, list(a)) {
   match xs {
   - [] =>
     None
-  - y :< ys =>
+  - y :: ys =>
     Some(Tuple(y, ys))
   }
 }
@@ -122,7 +122,7 @@ define range(from: int, to: int): list(int) {
   if eq-int(from, to) {
     []
   } else {
-    from :< range(add-int(from, 1), to)
+    from :: range(add-int(from, 1), to)
   }
 }
 
@@ -130,9 +130,20 @@ define filter-some[a](xs: list(option(a))): list(a) {
   match xs {
   - [] =>
     []
-  - Some(v) :< rest =>
-    v :< filter-some(rest)
-  - None :< rest =>
+  - Some(v) :: rest =>
+    v :: filter-some(rest)
+  - None :: rest =>
     filter-some(rest)
   }
 }
+
+// define filter-some<a>(xs: list(option(a))): list(a) {
+//   match xs {
+//   - [] =>
+//     []
+//   - Some(v) :: rest =>
+//     v :: filter-some(rest)
+//   - None :: rest =>
+//     filter-some(rest)
+//   }
+// }

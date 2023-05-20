@@ -56,7 +56,7 @@ define i8-array-new(xs: list(i8)): i8-array {
       match values {
       - [] =>
         Unit
-      - v :< rest =>
+      - v :: rest =>
         mem.store-i8(add-int(content-pointer, index), v)
         self(rest, add-int(index, 1))
       }

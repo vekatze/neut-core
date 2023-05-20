@@ -75,7 +75,7 @@ define vector-new[a](xs: list(a)): vector(a) {
       match values {
       - [] =>
         Unit
-      - v :< rest =>
+      - v :: rest =>
         mem.store-int(add-int(content-pointer, mul-int(index, u)), magic.cast(a, int, v))
         self(rest, add-int(index, 1))
       }

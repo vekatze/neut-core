@@ -12,7 +12,7 @@ define sum-int(xs: list(int)): int {
       match ys {
       - [] =>
         acc
-      - z :< zs =>
+      - z :: zs =>
         loop(zs, add-int(z, acc))
       }
     }

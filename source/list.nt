@@ -15,6 +15,7 @@ export {
 - fold-left
 - fold-right
 - map
+- for
 - concat
 - unzip
 - uncons
@@ -47,12 +48,22 @@ define fold-right[a, b](f: (a, b) -> b, acc: b, xs: list(a)): b {
   }
 }
 
-define map[a, b](f: a -> b, xs: list(a)): list(b) {
-  match xs {
-  - [] =>
-    []
-  - y :: ys =>
-    f(y) :: map(f, ys)
+define-inline map[a, b](f: a -> b, xs: list(a)): list(b) {
+  map-internal(f)(xs)
+}
+
+define-inline for[a, b](xs: list(a), f: a -> b): list(b) {
+  map-internal(f)(xs)
+}
+
+define-inline map-internal[a, b](f: a -> b): list(a) -> list(b) {
+  mu loop(xs) {
+    match xs {
+    - [] =>
+      []
+    - y :: ys =>
+      f(y) :: loop(ys)
+    }
   }
 }
 

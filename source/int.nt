@@ -8,7 +8,7 @@ export {
 
 define sum-int(xs: list(int)): int {
   let f =
-    define loop(ys: list(int), acc: int): int {
+    mu loop(ys: list(int), acc: int): int {
       match ys {
       - [] =>
         acc

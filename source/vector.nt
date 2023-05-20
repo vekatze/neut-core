@@ -71,7 +71,7 @@ define vector-new[a](xs: list(a)): vector(a) {
   mem.store-int(add-int(base-pointer, u), magic.cast(tau, int, a))
   let content-pointer: int = add-int(base-pointer, u2)
   let store-values =
-    define self(values: list(a), index: int): unit {
+    mu self(values: list(a), index: int): unit {
       match values {
       - [] =>
         Unit

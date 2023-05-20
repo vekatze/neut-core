@@ -69,7 +69,7 @@ define detach(a: tau, f: () -> a): flow(a) {
   ext.free(closure)
   let thread-id-pointer = ext.malloc(u)
   let thread-create =
-    define naive-loop() {
+    mu naive-loop() {
       let result = ext.thread-create(thread-id-pointer, closure-label, closure-env)
       if eq-int(result, 0) {
         Unit

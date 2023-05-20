@@ -52,7 +52,7 @@ define get-argv(): list(text) {
   let argv: int = load-int(argv-ptr)
   let u = arch.unit()
   let f =
-    define get-argv-helper(i: int): list(text) {
+    mu get-argv-helper(i: int): list(text) {
       if eq-int(i, argc) {
         []
       } else {

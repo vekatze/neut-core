@@ -79,7 +79,7 @@ define reverse-helper[a](xs: list(a), acc: list(a)): list(a) {
 
 define length[a](xs: &list(a)): int {
   let length-tailcall =
-    define rec(acc: int, xs: &list(a)): int {
+    mu rec(acc: int, xs: &list(a)): int {
       case xs {
       - [] =>
         acc
@@ -136,14 +136,3 @@ define filter-some[a](xs: list(option(a))): list(a) {
     filter-some(rest)
   }
 }
-
-// define filter-some<a>(xs: list(option(a))): list(a) {
-//   match xs {
-//   - [] =>
-//     []
-//   - Some(v) :: rest =>
-//     v :: filter-some(rest)
-//   - None :: rest =>
-//     filter-some(rest)
-//   }
-// }

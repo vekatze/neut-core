@@ -52,7 +52,7 @@ define i8-array-new(xs: list(i8)): i8-array {
   mem.store-int(add-int(base-pointer, u), len)
   let content-pointer: int = add-int(base-pointer, u2)
   let store-values =
-    define self(values: list(i8), index: int): unit {
+    mu self(values: list(i8), index: int): unit {
       match values {
       - [] =>
         Unit

@@ -28,12 +28,11 @@ define mutate[a](ch: &cell(a), f: a -> a): unit {
   send(ch, f(v))
 }
 
-define borrow[a, b](ch: &cell(a), f: &a -> b): b {
+define borrow[a](ch: &cell(a), f: &a -> unit): unit {
   let ch = magic.cast(&cell(a), &channel(a), ch)
   let v = receive(ch)
-  let result on v = f(v)
+  let _ on v = f(v)
   send(ch, v)
-  result
 }
 
 define clone[a](ch: &cell(a)): a {

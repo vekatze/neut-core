@@ -46,7 +46,7 @@ resource flow-inner {
 }
 
 define-inline embody(a: tau, x: &a): a {
-  !x
+  *x
 }
 
 define-inline flow-size(): int {

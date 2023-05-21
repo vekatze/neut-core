@@ -48,7 +48,7 @@ resource channel-internal {
 }
 
 define-inline get-clone(a: tau, x: &a): a {
-  !x
+  *x
 }
 
 // (queue, mutex, cond, queue-elem-type)

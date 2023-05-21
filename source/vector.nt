@@ -31,7 +31,7 @@ define copy-vector-content(source-pointer: int, target-pointer: int, elem-type: 
   } else {
     let u = arch.unit()
     let original = magic.cast(int, &elem-type, mem.load-int(add-int(source-pointer, mul-int(counter, u))))
-    let clone = !original
+    let clone = *original
     mem.store-int(add-int(target-pointer, mul-int(counter, u)), magic.cast(elem-type, int, clone))
     copy-vector-content(source-pointer, target-pointer, elem-type, add-int(counter, 1), length)
   }

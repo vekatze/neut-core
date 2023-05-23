@@ -17,27 +17,27 @@ define cell(a) {
 }
 
 define new-cell[a](x: a): cell(a) {
-  let ch = new-channel(a)
-  let _ on ch = send(ch, x)
+  let ch = new-channel(a) in
+  let _ on ch = send(ch, x) in
   magic.cast(channel(a), cell(a), ch)
 }
 
 define mutate[a](ch: &cell(a), f: a -> a): unit {
-  let ch = magic.cast(&cell(a), &channel(a), ch)
-  let v = receive(ch)
+  let ch = magic.cast(&cell(a), &channel(a), ch) in
+  let v = receive(ch) in
   send(ch, f(v))
 }
 
 define borrow[a](ch: &cell(a), f: &a -> unit): unit {
-  let ch = magic.cast(&cell(a), &channel(a), ch)
-  let v = receive(ch)
-  let _ on v = f(v)
+  let ch = magic.cast(&cell(a), &channel(a), ch) in
+  let v = receive(ch) in
+  let _ on v = f(v) in
   send(ch, v)
 }
 
 define clone[a](ch: &cell(a)): a {
-  let ch = magic.cast(&cell(a), &channel(a), ch)
-  let v = receive(ch)
+  let ch = magic.cast(&cell(a), &channel(a), ch) in
+  let v = receive(ch) in
   send(ch, v)
   v
 }

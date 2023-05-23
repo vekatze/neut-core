@@ -98,6 +98,7 @@ define length[a](xs: &list(a)): int {
         rec(add-int(1, acc), ys)
       }
     }
+  in
   length-tailcall(0, xs)
 }
 
@@ -106,7 +107,7 @@ define unzip[a, b](xs: list(tuple(a, b))): tuple(list(a), list(b)) {
   - [] =>
     Tuple([], [])
   - Tuple(l, r) :: rest =>
-    let Tuple(rest-l, rest-r) = unzip(rest)
+    let Tuple(rest-l, rest-r) = unzip(rest) in
     Tuple(l :: rest-l, r :: rest-r)
   }
 }

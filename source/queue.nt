@@ -24,7 +24,7 @@ define empty[a](): queue(a) {
 }
 
 define dequeue[a](q: queue(a)): ?tuple(a, queue(a)) {
-  let Tuple(ls, rs) = q
+  let Tuple(ls, rs) = q in
   match ls, rs {
   - Nil, Nil =>
     None
@@ -36,15 +36,15 @@ define dequeue[a](q: queue(a)): ?tuple(a, queue(a)) {
 }
 
 define enqueue[a](x: a, q: queue(a)): queue(a) {
-  let Tuple(ls, rs) = q
+  let Tuple(ls, rs) = q in
   Tuple(ls, x :: rs)
 }
 
 define size[a](q: &queue(a)): int {
   case q {
   - Tuple(ls, rs) =>
-    let l1 = length(ls)
-    let l2 = length(rs)
+    let l1 = length(ls) in
+    let l2 = length(rs) in
     add-int(l1, l2)
   }
 }

@@ -38,6 +38,6 @@ define borrow[a](ch: &cell(a), f: &a -> unit): unit {
 define clone[a](ch: &cell(a)): a {
   let ch = magic.cast(&cell(a), &channel(a), ch) in
   let v = receive(ch) in
-  send(ch, v)
+  send(ch, v);
   v
 }

@@ -47,22 +47,22 @@ define append(t1: &text, t2: &text): text {
   let content1 = add-int(p1, u2) in
   let content2 = add-int(p2, u2) in
   let new-text = ext.malloc(add-int(new-len, u2)) in
-  mem.store-int(new-text, 0)
-  mem.store-int(add-int(new-text, u), new-len)
+  mem.store-int(new-text, 0);
+  mem.store-int(add-int(new-text, u), new-len);
   let store-values =
     mu store-values(target-pointer: int, content-array: int, current-index: int, array-length: int): unit {
       if eq-int(current-index, array-length) {
         Unit
       } else {
         let char = mem.load-i8(add-int(content-array, current-index)) in
-        mem.store-i8(add-int(target-pointer, current-index), char)
+        mem.store-i8(add-int(target-pointer, current-index), char);
         store-values(target-pointer, content-array, add-int(current-index, 1), array-length)
       }
     }
   in
   let str-pointer = add-int(new-text, u2) in
-  store-values(str-pointer, add-int(content1, from2), 0, len1)
-  store-values(add-int(str-pointer, len1), add-int(content2, from2), 0, len2)
+  store-values(str-pointer, add-int(content1, from2), 0, len1);
+  store-values(add-int(str-pointer, len1), add-int(content2, from2), 0, len2);
   magic.cast(int, text, new-text)
 }
 
@@ -91,8 +91,8 @@ define from-int(x: int): text {
   let u2 = mul-int(u, 2) in
   let len = get-text-length-of-int(x, 0) in
   let ptr = ext.malloc(add-int(len, u2)) in
-  mem.store-int(ptr, 0)
-  mem.store-int(add-int(ptr, u), len)
+  mem.store-int(ptr, 0);
+  mem.store-int(add-int(ptr, u), len);
   let content = add-int(ptr, u2) in
   let store-positive-values =
     mu loop(y: int, index: int): unit {
@@ -103,17 +103,17 @@ define from-int(x: int): text {
         let q = div-int(y, 10) in
         let r = rem-int(y, 10) in
         let digit-char = add-i8(magic.cast(int, i8, r), 48) in
-        mem.store-i8(add-int(content, index), digit-char)
+        mem.store-i8(add-int(content, index), digit-char);
         loop(q, sub-int(index, 1))
       }
     }
   in
   if lt-int(x, 0) {
-    mem.store-i8(content, 45) // 45 == "-"
+    mem.store-i8(content, 45); // 45 == "-"
     store-positive-values(mul-int(x, -1), sub-int(len, 1))
   } else {
     store-positive-values(x, sub-int(len, 1))
-  }
+  };
   magic.cast(int, text, ptr)
 }
 
@@ -122,9 +122,9 @@ define unsafe-from-c-string(old-ptr: int): text {
   let u2 = mul-int(u, 2) in
   let len = unsafe-get-c-string-length(old-ptr, 0) in
   let new-ptr = ext.malloc(add-int(len, u2)) in
-  mem.store-int(new-ptr, 0)
-  mem.store-int(add-int(new-ptr, u), len)
-  unsafe-copy-i8-array(old-ptr, add-int(new-ptr, u2), 0, 0, len)
+  mem.store-int(new-ptr, 0);
+  mem.store-int(add-int(new-ptr, u), len);
+  unsafe-copy-i8-array(old-ptr, add-int(new-ptr, u2), 0, 0, len);
   magic.cast(int, text, new-ptr)
 }
 

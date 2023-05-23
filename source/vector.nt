@@ -32,7 +32,7 @@ define copy-vector-content(source-pointer: int, target-pointer: int, elem-type: 
     let u = arch.unit() in
     let original = magic.cast(int, &elem-type, mem.load-int(add-int(source-pointer, mul-int(counter, u)))) in
     let clone = *original in
-    mem.store-int(add-int(target-pointer, mul-int(counter, u)), magic.cast(elem-type, int, clone))
+    mem.store-int(add-int(target-pointer, mul-int(counter, u)), magic.cast(elem-type, int, clone));
     copy-vector-content(source-pointer, target-pointer, elem-type, add-int(counter, 1), length)
   }
 }
@@ -42,7 +42,7 @@ resource vector-internal {
     let length = mem.load-int(x) in
     let u = arch.unit() in
     let elem-type = magic.cast(int, tau, mem.load-int(add-int(x, u))) in
-    discard-vector-content(add-int(x, mul-int(u, 2)), elem-type, 0, length)
+    discard-vector-content(add-int(x, mul-int(u, 2)), elem-type, 0, length);
     magic.cast(unit, int, free(x))
   }
 - (source-pointer: int) => {
@@ -51,9 +51,9 @@ resource vector-internal {
     let length: int = mem.load-int(source-pointer) in
     let elem-type: tau = magic.cast(int, tau, mem.load-int(add-int(source-pointer, u))) in
     let target-pointer = malloc(add-int(u2, mul-int(length, u))) in
-    mem.store-int(target-pointer, length)
-    mem.store-int(add-int(target-pointer, u), magic.cast(tau, int, elem-type))
-    copy-vector-content(add-int(source-pointer, u2), add-int(target-pointer, u2), elem-type, 0, length)
+    mem.store-int(target-pointer, length);
+    mem.store-int(add-int(target-pointer, u), magic.cast(tau, int, elem-type));
+    copy-vector-content(add-int(source-pointer, u2), add-int(target-pointer, u2), elem-type, 0, length);
     target-pointer
   }
 }
@@ -67,8 +67,8 @@ define vector-new[a](xs: list(a)): vector(a) {
   let u2 = mul-int(u, 2) in
   let len on xs = this.list.length(xs) in
   let base-pointer = malloc(add-int(u2, mul-int(len, u))) in
-  mem.store-int(base-pointer, len)
-  mem.store-int(add-int(base-pointer, u), magic.cast(tau, int, a))
+  mem.store-int(base-pointer, len);
+  mem.store-int(add-int(base-pointer, u), magic.cast(tau, int, a));
   let content-pointer: int = add-int(base-pointer, u2) in
   let store-values =
     mu self(values: list(a), index: int): unit {
@@ -76,7 +76,7 @@ define vector-new[a](xs: list(a)): vector(a) {
       - [] =>
         Unit
       - v :: rest =>
-        mem.store-int(add-int(content-pointer, mul-int(index, u)), magic.cast(a, int, v))
+        mem.store-int(add-int(content-pointer, mul-int(index, u)), magic.cast(a, int, v));
         self(rest, add-int(index, 1))
       }
     }

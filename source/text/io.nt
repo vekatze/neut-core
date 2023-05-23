@@ -52,15 +52,15 @@ define read(f: FD.descriptor): ?text {
 define read-file(f: FD.descriptor, buffer-size: int, max-read-size: int): ?text {
   let u = arch.unit() in
   let ptr = ext.malloc(add-int(max-read-size, mul-int(u, 2))) in
-  mem.store-int(ptr, 0)
+  mem.store-int(ptr, 0);
   let content-ptr = add-int(ptr, mul-int(u, 2)) in
   let read-size = read-loop(f, content-ptr, buffer-size, max-read-size, 0) in
   match read-size {
   - Some(size) =>
-    mem.store-int(add-int(ptr, u), size)
+    mem.store-int(add-int(ptr, u), size);
     Some(magic.cast(int, text, ptr))
   - None =>
-    ext.free(ptr)
+    ext.free(ptr);
     None
   }
 }
@@ -83,7 +83,7 @@ define print(t: &text): unit {
 
 define print-char(x: i8): unit {
   let ptr = ext.malloc(1) in
-  mem.store-i8(ptr, x)
+  mem.store-i8(ptr, x);
   let _ = ext.write(FD.stdout(), ptr, 1: int) in
   ext.free(ptr)
 }
@@ -93,7 +93,7 @@ define get-line(): ?text {
   let u = arch.unit() in
   let ptr-size = add-int(default-input-size, mul-int(u, 2)) in
   let ptr = ext.malloc(ptr-size) in
-  mem.store-int(ptr, 0)
+  mem.store-int(ptr, 0);
   get-line-inner(ptr, ptr-size, 0, default-input-size)
 }
 
@@ -111,10 +111,10 @@ define get-line-inner(ptr: int, ptr-size: int, current-index: int, buffer-size: 
     let last-char-ptr = add-int(content-ptr, sub-int(bytes, 1)) in
     let last-char = mem.load-i8(last-char-ptr) in
     if lt-int(bytes, 0) {
-      ext.free(ptr)
+      ext.free(ptr);
       None
     } else-if or(lt-int(bytes, buffer-size), eq-i8(last-char, 10)) {
-      mem.store-int(add-int(ptr, u), next-index)
+      mem.store-int(add-int(ptr, u), next-index);
       Some(magic.cast(int, text, ptr))
     } else {
       get-line-inner(ptr, ptr-size, next-index, buffer-size)
@@ -123,13 +123,13 @@ define get-line-inner(ptr: int, ptr-size: int, current-index: int, buffer-size: 
 }
 
 define print-line(t: &text): unit {
-  print(t)
+  print(t);
   print("\n")
 }
 
 define print-character(char: i8): unit {
   let p: int = ext.malloc(1) in
-  mem.store-i8(p, char)
+  mem.store-i8(p, char);
   let _ = ext.write(FD.stdin(), p, 1) in
   ext.free(p)
 }

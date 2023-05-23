@@ -34,7 +34,7 @@ define show-texts(xs: list(text)): unit {
   - t :: ts =>
     let _ on t = text.print(t) in
     let _ = t in
-    text.print("\n")
+    text.print("\n");
     show-texts(ts)
   }
 }
@@ -98,8 +98,8 @@ define main(): unit {
   let xs = rand-list(14000, []) in
   let _ on ch = {
     let fs = send-all(xs, ch, []) in
-    text.print("sent.\n")
-    receive-one-by-one(fs, ch)
+    text.print("sent.\n");
+    receive-one-by-one(fs, ch);
     text.print("received.\n")
   }
   in
@@ -109,7 +109,6 @@ define main(): unit {
   //   receive-all-at-once(fs, ch)
   // }
   let _ = ch in
-  Unit
 
   // let xs: my-list(int) = this.test.Nil()
   // let xs-cell = new-cell(xs)

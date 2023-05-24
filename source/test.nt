@@ -32,9 +32,9 @@ define show-texts(xs: list(text)): unit {
   - [] =>
     Unit
   - t :: ts =>
-    let _ on t = text.print(t) in
-    let _ = t in
-    text.print("\n");
+    let _ on t = text.print(t)
+    let _ = t
+    text.print("\n")
     show-texts(ts)
   }
 }
@@ -45,7 +45,7 @@ variant my-list(a: tau) {
 }
 
 define sample[a, b](x: either(a, b)): either(a, b) {
-  let? aoeu = x in
+  let? aoeu = x
   Right(aoeu)
 }
 
@@ -58,7 +58,7 @@ define rand-list(len: int, acc: list(int)): list(int) {
     acc
   } else {
     // let val = some-rand()
-    let val = len in
+    let val = len
     rand-list(sub-int(len, 1), val :: acc)
   }
 }
@@ -74,7 +74,7 @@ define send-all(xs: list(int), ch: &channel(int), acc: list(flow(unit))): list(f
   - [] =>
     acc
   - y :: rest =>
-    let fl = detach-send(y, ch) in
+    let fl = detach-send(y, ch)
     send-all(rest, ch, fl :: acc)
   }
 }
@@ -84,8 +84,8 @@ define receive-one-by-one(xs: list(flow(unit)), ch: &channel(int)): unit {
   - [] =>
     Unit
   - fl :: rest =>
-    let _ = attach fl in
-    let _ = receive(ch) in
+    let _ = attach fl
+    let _ = receive(ch)
     receive-one-by-one(rest, ch)
   }
 }
@@ -94,21 +94,21 @@ define main(): unit {
   // let item: this.queue.queue(tau) = this.queue.empty()
   // let _ = item
 
-  let ch = new-channel(int) in
-  let xs = rand-list(14000, []) in
+  let ch = new-channel(int)
+  let xs = rand-list(14000, [])
   let _ on ch = {
-    let fs = send-all(xs, ch, []) in
-    text.print("sent.\n");
-    receive-one-by-one(fs, ch);
+    let fs = send-all(xs, ch, [])
+    text.print("sent.\n")
+    receive-one-by-one(fs, ch)
     text.print("received.\n")
   }
-  in
+
   // let xs = rand-list(10000, [])
   // let _ on ch = {
   //   let fs = send-all(xs, ch, [])
   //   receive-all-at-once(fs, ch)
   // }
-  let _ = ch in
+  let _ = ch
 
   // let xs: my-list(int) = this.test.Nil()
   // let xs-cell = new-cell(xs)

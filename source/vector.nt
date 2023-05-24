@@ -19,8 +19,8 @@ define discard-vector-content(ptr: int, elem-type: tau, counter: int, length: in
   if eq-int(counter, length) {
     Unit
   } else {
-    let u = arch.unit() in
-    let _ = magic.cast(int, elem-type, mem.load-int(add-int(ptr, mul-int(counter, u)))) in
+    let u = arch.unit()
+    let _ = magic.cast(int, elem-type, mem.load-int(add-int(ptr, mul-int(counter, u))))
     discard-vector-content(ptr, elem-type, add-int(counter, 1), length)
   }
 }
@@ -29,31 +29,31 @@ define copy-vector-content(source-pointer: int, target-pointer: int, elem-type: 
   if eq-int(counter, length) {
     Unit
   } else {
-    let u = arch.unit() in
-    let original = magic.cast(int, &elem-type, mem.load-int(add-int(source-pointer, mul-int(counter, u)))) in
-    let clone = *original in
-    mem.store-int(add-int(target-pointer, mul-int(counter, u)), magic.cast(elem-type, int, clone));
+    let u = arch.unit()
+    let original = magic.cast(int, &elem-type, mem.load-int(add-int(source-pointer, mul-int(counter, u))))
+    let clone = *original
+    mem.store-int(add-int(target-pointer, mul-int(counter, u)), magic.cast(elem-type, int, clone))
     copy-vector-content(source-pointer, target-pointer, elem-type, add-int(counter, 1), length)
   }
 }
 
 resource vector-internal {
 - (x: int) => {
-    let length = mem.load-int(x) in
-    let u = arch.unit() in
-    let elem-type = magic.cast(int, tau, mem.load-int(add-int(x, u))) in
-    discard-vector-content(add-int(x, mul-int(u, 2)), elem-type, 0, length);
+    let length = mem.load-int(x)
+    let u = arch.unit()
+    let elem-type = magic.cast(int, tau, mem.load-int(add-int(x, u)))
+    discard-vector-content(add-int(x, mul-int(u, 2)), elem-type, 0, length)
     magic.cast(unit, int, free(x))
   }
 - (source-pointer: int) => {
-    let u = arch.unit() in
-    let u2 = mul-int(u, 2) in
-    let length: int = mem.load-int(source-pointer) in
-    let elem-type: tau = magic.cast(int, tau, mem.load-int(add-int(source-pointer, u))) in
-    let target-pointer = malloc(add-int(u2, mul-int(length, u))) in
-    mem.store-int(target-pointer, length);
-    mem.store-int(add-int(target-pointer, u), magic.cast(tau, int, elem-type));
-    copy-vector-content(add-int(source-pointer, u2), add-int(target-pointer, u2), elem-type, 0, length);
+    let u = arch.unit()
+    let u2 = mul-int(u, 2)
+    let length: int = mem.load-int(source-pointer)
+    let elem-type: tau = magic.cast(int, tau, mem.load-int(add-int(source-pointer, u)))
+    let target-pointer = malloc(add-int(u2, mul-int(length, u)))
+    mem.store-int(target-pointer, length)
+    mem.store-int(add-int(target-pointer, u), magic.cast(tau, int, elem-type))
+    copy-vector-content(add-int(source-pointer, u2), add-int(target-pointer, u2), elem-type, 0, length)
     target-pointer
   }
 }
@@ -63,36 +63,35 @@ define vector(_: tau): tau {
 }
 
 define vector-new[a](xs: list(a)): vector(a) {
-  let u = arch.unit() in
-  let u2 = mul-int(u, 2) in
-  let len on xs = this.list.length(xs) in
-  let base-pointer = malloc(add-int(u2, mul-int(len, u))) in
-  mem.store-int(base-pointer, len);
-  mem.store-int(add-int(base-pointer, u), magic.cast(tau, int, a));
-  let content-pointer: int = add-int(base-pointer, u2) in
+  let u = arch.unit()
+  let u2 = mul-int(u, 2)
+  let len on xs = this.list.length(xs)
+  let base-pointer = malloc(add-int(u2, mul-int(len, u)))
+  mem.store-int(base-pointer, len)
+  mem.store-int(add-int(base-pointer, u), magic.cast(tau, int, a))
+  let content-pointer: int = add-int(base-pointer, u2)
   let store-values =
     mu self(values: list(a), index: int): unit {
       match values {
       - [] =>
         Unit
       - v :: rest =>
-        mem.store-int(add-int(content-pointer, mul-int(index, u)), magic.cast(a, int, v));
+        mem.store-int(add-int(content-pointer, mul-int(index, u)), magic.cast(a, int, v))
         self(rest, add-int(index, 1))
       }
     }
-  in
-  let _ = store-values(xs, 0) in
+  let _ = store-values(xs, 0)
   magic cast(int, vector(a), base-pointer)
 }
 
 define-inline vector-access[a](xs: &vector(a), i: int): a {
-  let u = arch.unit() in
-  let u2 = mul-int(u, 2) in
-  let ptr = magic.cast(&vector(a), int, xs) in
+  let u = arch.unit()
+  let u2 = mul-int(u, 2)
+  let ptr = magic.cast(&vector(a), int, xs)
   magic.cast(int, a, mem.load-int(add-int(add-int(ptr, u2), mul-int(u, i))))
 }
 
 define length[a](xs: &vector(a)): int {
-  let ptr = magic.cast(&vector(a), int, xs) in
+  let ptr = magic.cast(&vector(a), int, xs)
   mem.load-int(ptr)
 }

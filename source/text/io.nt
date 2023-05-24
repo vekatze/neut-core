@@ -27,13 +27,13 @@ export {
 
 // fixme: prefer the sum type
 define write(t: &text, f: FD.descriptor): ?int {
-  let ptr = magic.cast(&text, int, t) in
-  let u = arch.unit() in
-  let from = mem.load-int(ptr) in
-  let to = mem.load-int(add-int(ptr, u)) in
-  let content-pointer: int = add-int(add-int(ptr, mul-int(u, 2)), from) in
-  let len = sub-int(to, from) in
-  let bytes: int = ext.write(f, content-pointer, len) in
+  let ptr = magic.cast(&text, int, t)
+  let u = arch.unit()
+  let from = mem.load-int(ptr)
+  let to = mem.load-int(add-int(ptr, u))
+  let content-pointer: int = add-int(add-int(ptr, mul-int(u, 2)), from)
+  let len = sub-int(to, from)
+  let bytes: int = ext.write(f, content-pointer, len)
   if lt-int(bytes, 0) {
     None
   } else {
@@ -43,30 +43,30 @@ define write(t: &text, f: FD.descriptor): ?int {
 
 // fixme: prefer the sum type
 define read(f: FD.descriptor): ?text {
-  let buffer-size = shl-int(1, 16) in // for now
-  let size = ext.lseek(f, 0, seek.interpret(seek.END)) in
-  let _ = ext.lseek(f, 0, seek.interpret(seek.SET)) in
+  let buffer-size = shl-int(1, 16) // for now
+  let size = ext.lseek(f, 0, seek.interpret(seek.END))
+  let _ = ext.lseek(f, 0, seek.interpret(seek.SET))
   read-file(f, buffer-size, size)
 }
 
 define read-file(f: FD.descriptor, buffer-size: int, max-read-size: int): ?text {
-  let u = arch.unit() in
-  let ptr = ext.malloc(add-int(max-read-size, mul-int(u, 2))) in
-  mem.store-int(ptr, 0);
-  let content-ptr = add-int(ptr, mul-int(u, 2)) in
-  let read-size = read-loop(f, content-ptr, buffer-size, max-read-size, 0) in
+  let u = arch.unit()
+  let ptr = ext.malloc(add-int(max-read-size, mul-int(u, 2)))
+  mem.store-int(ptr, 0)
+  let content-ptr = add-int(ptr, mul-int(u, 2))
+  let read-size = read-loop(f, content-ptr, buffer-size, max-read-size, 0)
   match read-size {
   - Some(size) =>
-    mem.store-int(add-int(ptr, u), size);
+    mem.store-int(add-int(ptr, u), size)
     Some(magic.cast(int, text, ptr))
   - None =>
-    ext.free(ptr);
+    ext.free(ptr)
     None
   }
 }
 
 define read-loop(f: FD.descriptor, content-ptr: int, buffer-size: int, max-read-size: int, acc: int): ?int {
-  let bytes = ext.read(f, content-ptr, buffer-size) in
+  let bytes = ext.read(f, content-ptr, buffer-size)
   if lt-int(bytes, 0) {
     None
   } else-if lt-int(bytes, buffer-size) {
@@ -77,44 +77,44 @@ define read-loop(f: FD.descriptor, content-ptr: int, buffer-size: int, max-read-
 }
 
 define print(t: &text): unit {
-  let _ = write(t, FD.stdout()) in
+  let _ = write(t, FD.stdout())
   Unit
 }
 
 define print-char(x: i8): unit {
-  let ptr = ext.malloc(1) in
-  mem.store-i8(ptr, x);
-  let _ = ext.write(FD.stdout(), ptr, 1: int) in
+  let ptr = ext.malloc(1)
+  mem.store-i8(ptr, x)
+  let _ = ext.write(FD.stdout(), ptr, 1: int)
   ext.free(ptr)
 }
 
 define get-line(): ?text {
-  let default-input-size = 1024 in
-  let u = arch.unit() in
-  let ptr-size = add-int(default-input-size, mul-int(u, 2)) in
-  let ptr = ext.malloc(ptr-size) in
-  mem.store-int(ptr, 0);
+  let default-input-size = 1024
+  let u = arch.unit()
+  let ptr-size = add-int(default-input-size, mul-int(u, 2))
+  let ptr = ext.malloc(ptr-size)
+  mem.store-int(ptr, 0)
   get-line-inner(ptr, ptr-size, 0, default-input-size)
 }
 
 define get-line-inner(ptr: int, ptr-size: int, current-index: int, buffer-size: int): ?text {
-  let u = arch.unit() in
-  let content-size = sub-int(ptr-size, mul-int(u, 2)) in
+  let u = arch.unit()
+  let content-size = sub-int(ptr-size, mul-int(u, 2))
   if lt-int(content-size, add-int(current-index, buffer-size)) {
-    let new-size = mul-int(ptr-size, 2) in
-    let new-ptr = ext.realloc(ptr, new-size) in
+    let new-size = mul-int(ptr-size, 2)
+    let new-ptr = ext.realloc(ptr, new-size)
     get-line-inner(new-ptr, new-size, current-index, buffer-size)
   } else {
-    let content-ptr = add-int(ptr, add-int(mul-int(u, 2), current-index)) in
-    let bytes = ext.read(FD.stdin(), content-ptr, buffer-size) in
-    let next-index = add-int(current-index, bytes) in
-    let last-char-ptr = add-int(content-ptr, sub-int(bytes, 1)) in
-    let last-char = mem.load-i8(last-char-ptr) in
+    let content-ptr = add-int(ptr, add-int(mul-int(u, 2), current-index))
+    let bytes = ext.read(FD.stdin(), content-ptr, buffer-size)
+    let next-index = add-int(current-index, bytes)
+    let last-char-ptr = add-int(content-ptr, sub-int(bytes, 1))
+    let last-char = mem.load-i8(last-char-ptr)
     if lt-int(bytes, 0) {
-      ext.free(ptr);
+      ext.free(ptr)
       None
     } else-if or(lt-int(bytes, buffer-size), eq-i8(last-char, 10)) {
-      mem.store-int(add-int(ptr, u), next-index);
+      mem.store-int(add-int(ptr, u), next-index)
       Some(magic.cast(int, text, ptr))
     } else {
       get-line-inner(ptr, ptr-size, next-index, buffer-size)
@@ -123,14 +123,14 @@ define get-line-inner(ptr: int, ptr-size: int, current-index: int, buffer-size: 
 }
 
 define print-line(t: &text): unit {
-  print(t);
+  print(t)
   print("\n")
 }
 
 define print-character(char: i8): unit {
-  let p: int = ext.malloc(1) in
-  mem.store-i8(p, char);
-  let _ = ext.write(FD.stdin(), p, 1) in
+  let p: int = ext.malloc(1)
+  mem.store-i8(p, char)
+  let _ = ext.write(FD.stdin(), p, 1)
   ext.free(p)
 }
 
@@ -139,8 +139,8 @@ define print-digit(x: i8): unit {
 }
 
 define print-int(i: int): unit {
-  let t = from-int(i) in
-  let _ on t = print(t) in
-  let _ = t in
+  let t = from-int(i)
+  let _ on t = print(t)
+  let _ = t
   Unit
 }

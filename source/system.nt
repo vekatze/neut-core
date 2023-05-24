@@ -17,15 +17,15 @@ export {
 }
 
 define admit[a](t: &text): a {
-  let _ = print(t) in
+  let _ = print(t)
   exit(1)
 }
 
 define-inline assert(message: &text, check: () -> bool): unit {
   introspect build-mode {
   - release =>
-    let _ = check in
-    let _ = message in
+    let _ = check
+    let _ = message
     Unit
   - default =>
     assert-inner(message, check)
@@ -41,28 +41,27 @@ define assert-inner(message: &text, check: () -> bool): unit {
 }
 
 define get-argc(): int {
-  let argc-ptr: int = magic global("neut-unsafe-argc", pointer) in
-  let argc: int = load-int(argc-ptr) in
+  let argc-ptr: int = magic global("neut-unsafe-argc", pointer)
+  let argc: int = load-int(argc-ptr)
   argc
 }
 
 define get-argv(): list(text) {
-  let argc = get-argc() in
-  let argv-ptr: int = magic global("neut-unsafe-argv", pointer) in
-  let argv: int = load-int(argv-ptr) in
-  let u = arch.unit() in
+  let argc = get-argc()
+  let argv-ptr: int = magic global("neut-unsafe-argv", pointer)
+  let argv: int = load-int(argv-ptr)
+  let u = arch.unit()
   let f =
     mu get-argv-helper(i: int): list(text) {
       if eq-int(i, argc) {
         []
       } else {
-        let rest = get-argv-helper(add-int(i, 1)) in
-        let str-ptr-ptr = add-int(argv, mul-int(i, u)) in
-        let str-ptr = load-int(str-ptr-ptr) in
-        let t = unsafe-from-c-string(str-ptr) in
+        let rest = get-argv-helper(add-int(i, 1))
+        let str-ptr-ptr = add-int(argv, mul-int(i, u))
+        let str-ptr = load-int(str-ptr-ptr)
+        let t = unsafe-from-c-string(str-ptr)
         t :: rest
       }
     }
-  in
   f(0)
 }

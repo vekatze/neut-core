@@ -13,7 +13,7 @@ export {
 - from-option
 }
 
-variant either(a: tau, b: tau) {
+data either(a: tau, b: tau) {
 - Left(a)
 - Right(b)
 }

@@ -23,7 +23,7 @@ import {
 - this.magic => magic
 }
 
-variant item {
+data item {
 - Bar(int)
 }
 
@@ -39,7 +39,7 @@ define show-texts(xs: list(text)): unit {
   }
 }
 
-variant my-list(a: tau) {
+data my-list(a: tau) {
 - Nil()
 - Cons(my-list(a))
 }

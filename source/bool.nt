@@ -5,7 +5,7 @@ export {
 - not
 }
 
-variant bool {
+data bool {
 - False
 - True
 }

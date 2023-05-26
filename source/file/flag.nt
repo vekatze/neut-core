@@ -10,7 +10,7 @@ export {
 - for-rw-append
 }
 
-variant flag {
+data flag {
 - R
 - W
 - RW

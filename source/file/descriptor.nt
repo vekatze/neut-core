@@ -5,7 +5,7 @@ export {
 - stderr
 }
 
-variant descriptor {}
+data descriptor {}
 
 define stdin(): descriptor {
   magic cast(int, descriptor, 0)

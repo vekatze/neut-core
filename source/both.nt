@@ -4,6 +4,6 @@ export {
 - both {..}
 }
 
-variant both(a, b) {
+data both(a, b) {
 - Both(left: a, right: b)
 }

@@ -4,7 +4,7 @@ export {
 }
 
 // https://opensource.apple.com/source/xnu/xnu-3248.30.4/bsd/sys/_types/_seek_set.h.auto.html
-variant seek {
+data seek {
 - SET
 - CUR
 - END

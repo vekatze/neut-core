@@ -4,4 +4,4 @@ export {
 - void {}
 }
 
-variant void {}
+data void {}

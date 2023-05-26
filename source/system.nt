@@ -21,7 +21,7 @@ define admit[a](t: &text): a {
   exit(1)
 }
 
-define-inline assert(message: &text, check: () -> bool): unit {
+inline assert(message: &text, check: () -> bool): unit {
   introspect build-mode {
   - release =>
     let _ = check

@@ -11,7 +11,7 @@ export {
 - load-i1
 }
 
-define-inline store-int(address: int, value: int): unit {
+inline store-int(address: int, value: int): unit {
   introspect target-arch {
   - amd64 =>
     magic store(i64, address, value)
@@ -20,22 +20,22 @@ define-inline store-int(address: int, value: int): unit {
   }
 }
 
-define-inline store-i8(address: int, value: i8): unit {
+inline store-i8(address: int, value: i8): unit {
   magic store(i8, address, value)
 }
 
-define-inline store-i1(address: int, value: i1): unit {
+inline store-i1(address: int, value: i1): unit {
   magic store(i1, address, value)
 }
 
-define-inline load-int(address: int): int {
+inline load-int(address: int): int {
   magic load(i64, address)
 }
 
-define-inline load-i8(address: int): i8 {
+inline load-i8(address: int): i8 {
   magic load(i8, address)
 }
 
-define-inline load-i1(address: int): i1 {
+inline load-i1(address: int): i1 {
   magic load(i1, address)
 }

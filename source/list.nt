@@ -46,15 +46,15 @@ define fold-right[a, b](f: (a, b) -> b, acc: b, xs: list(a)): b {
   }
 }
 
-define-inline map[a, b](f: a -> b, xs: list(a)): list(b) {
+inline map[a, b](f: a -> b, xs: list(a)): list(b) {
   map-internal(f)(xs)
 }
 
-define-inline for[a, b](xs: list(a), f: a -> b): list(b) {
+inline for[a, b](xs: list(a), f: a -> b): list(b) {
   map-internal(f)(xs)
 }
 
-define-inline map-internal[a, b](f: a -> b): list(a) -> list(b) {
+inline map-internal[a, b](f: a -> b): list(a) -> list(b) {
   mu loop(xs) {
     match xs {
     - [] =>

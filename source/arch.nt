@@ -2,7 +2,7 @@ export {
 - unit
 }
 
-define-inline unit(): int {
+inline unit(): int {
   introspect target-arch {
   - amd64 =>
     8

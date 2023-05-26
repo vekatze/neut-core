@@ -84,7 +84,7 @@ define vector-new[a](xs: list(a)): vector(a) {
   magic cast(int, vector(a), base-pointer)
 }
 
-define-inline vector-access[a](xs: &vector(a), i: int): a {
+inline vector-access[a](xs: &vector(a), i: int): a {
   let u = arch.unit()
   let u2 = mul-int(u, 2)
   let ptr = magic.cast(&vector(a), int, xs)

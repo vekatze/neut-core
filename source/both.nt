@@ -4,7 +4,6 @@ export {
 - both {..}
 }
 
-struct both(a, b) by Both {
-- left: a
-- right: b
+variant both(a, b) {
+- Both(left: a, right: b)
 }

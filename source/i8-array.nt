@@ -66,7 +66,7 @@ define i8-array-new(xs: list(i8)): i8-array {
   magic.cast(int, i8-array, base-pointer)
 }
 
-define-inline i8-array-access(xs: &i8-array, i: int): i8 {
+inline i8-array-access(xs: &i8-array, i: int): i8 {
   let ptr = magic.cast(&i8-array, int, xs)
   let u = arch.unit()
   let u2 = mul-int(u, 2)

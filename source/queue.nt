@@ -15,7 +15,7 @@ export {
 }
 
 // naive queue
-define-inline queue(a: tau): tau {
+inline queue(a: tau): tau {
   tuple(list(a), list(a))
 }
 

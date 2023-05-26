@@ -18,15 +18,15 @@ variant either(a: tau, b: tau) {
 - Right(b)
 }
 
-define-inline option(a: tau): tau {
+inline option(a: tau): tau {
   either(unit, a)
 }
 
-define-inline none-internal[a](): option(a) {
+inline none-internal[a](): option(a) {
   Left(Unit)
 }
 
-define-inline some-internal[a](x: a): option(a) {
+inline some-internal[a](x: a): option(a) {
   Right(x)
 }
 

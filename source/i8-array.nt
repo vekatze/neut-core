@@ -20,7 +20,7 @@ define unsafe-copy-i8-array(source-pointer: int, target-pointer: int, index: int
     Unit
   } else {
     let value = mem.load-i8(add-int(source-pointer, from))
-    mem.store-i8(add-int(target-pointer, index), value)
+    mem.store-i8(value, add-int(target-pointer, index))
     unsafe-copy-i8-array(source-pointer, target-pointer, add-int(index, 1), add-int(from, 1), to)
   }
 }
@@ -36,8 +36,8 @@ resource i8-array {
     let to = mem.load-int(add-int(source-pointer, u))
     let length = sub-int(to, from)
     let target-pointer = malloc(add-int(length, u2))
-    mem.store-int(target-pointer, 0)
-    mem.store-int(add-int(target-pointer, u), length)
+    mem.store-int(0, target-pointer)
+    mem.store-int(length, add-int(target-pointer, u))
     unsafe-copy-i8-array(add-int(source-pointer, u2), add-int(target-pointer, u2), 0, from, to)
     target-pointer
   }
@@ -48,8 +48,8 @@ define i8-array-new(xs: list(i8)): i8-array {
   let u = arch.unit()
   let u2 = mul-int(u, 2)
   let base-pointer = malloc(add-int(len, u2))
-  mem.store-int(base-pointer, 0)
-  mem.store-int(add-int(base-pointer, u), len)
+  mem.store-int(0, base-pointer)
+  mem.store-int(len, add-int(base-pointer, u))
   let content-pointer: int = add-int(base-pointer, u2)
   let store-values =
     mu self(values: list(i8), index: int): unit {
@@ -57,7 +57,7 @@ define i8-array-new(xs: list(i8)): i8-array {
       - [] =>
         Unit
       - v :: rest =>
-        mem.store-i8(add-int(content-pointer, index), v)
+        mem.store-i8(v, add-int(content-pointer, index))
         self(rest, add-int(index, 1))
       }
     }

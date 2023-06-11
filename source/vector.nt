@@ -32,7 +32,7 @@ define copy-vector-content(source-pointer: int, target-pointer: int, elem-type: 
     let u = arch.unit()
     let original = magic.cast(int, &elem-type, mem.load-int(add-int(source-pointer, mul-int(counter, u))))
     let clone = *original
-    mem.store-int(add-int(target-pointer, mul-int(counter, u)), magic.cast(elem-type, int, clone))
+    mem.store-int(magic.cast(elem-type, int, clone), add-int(target-pointer, mul-int(counter, u)))
     copy-vector-content(source-pointer, target-pointer, elem-type, add-int(counter, 1), length)
   }
 }
@@ -51,8 +51,8 @@ resource vector-internal {
     let length: int = mem.load-int(source-pointer)
     let elem-type: tau = magic.cast(int, tau, mem.load-int(add-int(source-pointer, u)))
     let target-pointer = malloc(add-int(u2, mul-int(length, u)))
-    mem.store-int(target-pointer, length)
-    mem.store-int(add-int(target-pointer, u), magic.cast(tau, int, elem-type))
+    mem.store-int(length, target-pointer)
+    mem.store-int(magic.cast(tau, int, elem-type), add-int(target-pointer, u))
     copy-vector-content(add-int(source-pointer, u2), add-int(target-pointer, u2), elem-type, 0, length)
     target-pointer
   }
@@ -67,8 +67,8 @@ define vector-new[a](xs: list(a)): vector(a) {
   let u2 = mul-int(u, 2)
   let len on xs = this.list.length(xs)
   let base-pointer = malloc(add-int(u2, mul-int(len, u)))
-  mem.store-int(base-pointer, len)
-  mem.store-int(add-int(base-pointer, u), magic.cast(tau, int, a))
+  mem.store-int(len, base-pointer)
+  mem.store-int(magic.cast(tau, int, a), add-int(base-pointer, u))
   let content-pointer: int = add-int(base-pointer, u2)
   let store-values =
     mu self(values: list(a), index: int): unit {
@@ -76,7 +76,7 @@ define vector-new[a](xs: list(a)): vector(a) {
       - [] =>
         Unit
       - v :: rest =>
-        mem.store-int(add-int(content-pointer, mul-int(index, u)), magic.cast(a, int, v))
+        mem.store-int(magic.cast(a, int, v), add-int(content-pointer, mul-int(index, u)))
         self(rest, add-int(index, 1))
       }
     }

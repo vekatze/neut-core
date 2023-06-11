@@ -65,10 +65,10 @@ define new-channel-internal(a: tau, q: Q.queue(a)): channel(a) {
   let cond-size = ext.thread-cond-size()
   let u = arch.unit()
   let ptr = ext.malloc(sum-int([u, mutex-size, cond-size, u]))
-  mem.store-int(ptr, magic.cast(Q.queue(a), int, q))
+  mem.store-int(magic.cast(Q.queue(a), int, q), ptr)
   ext.thread-mutex-init(add-int(ptr, u))
   ext.thread-cond-init(add-int(ptr, add-int(u, mutex-size)))
-  mem.store-int(add-int(ptr, add-int(u, add-int(mutex-size, cond-size))), magic.cast(tau, int, a))
+  mem.store-int(magic.cast(tau, int, a), add-int(ptr, add-int(u, add-int(mutex-size, cond-size))))
   magic.cast(int, channel(a), ptr)
 }
 
@@ -80,7 +80,7 @@ define send[a](ch: &channel(a), x: a): unit {
   let q-base: int = mem.load-int(ch)
   let q: Q.queue(a) = magic.cast(int, Q.queue(a), q-base)
   let q = Q.enqueue(x, q)
-  mem.store-int(ch, magic.cast(Q.queue(a), int, q))
+  mem.store-int(magic.cast(Q.queue(a), int, q), ch)
   let mutex-size = ext.thread-mutex-size()
   ext.thread-cond-signal(add-int(ch, add-int(u, mutex-size)))
   ext.thread-mutex-unlock(mutex-ptr)
@@ -98,11 +98,11 @@ define receive-from-channel-inner[a](ch: int, mutex-ptr: int): a {
   let q: Q.queue(a) = magic.cast(int, Q.queue(a), mem.load-int(ch))
   match Q.dequeue(q) {
   - Some(Tuple(v, q)) =>
-    mem.store-int(ch, magic.cast(Q.queue(a), int, q))
+    mem.store-int(magic.cast(Q.queue(a), int, q), ch)
     ext.thread-mutex-unlock(mutex-ptr)
     v
   - None =>
-    mem.store-int(ch, magic.cast(Q.queue(int), int, Q.empty()))
+    mem.store-int(magic.cast(Q.queue(int), int, Q.empty()), ch)
     let u = arch.unit()
     let mutex-size = ext.thread-mutex-size()
     let cond-ptr = add-int(ch, add-int(u, mutex-size))

@@ -52,12 +52,12 @@ define read(f: FD.descriptor): ?text {
 define read-file(f: FD.descriptor, buffer-size: int, max-read-size: int): ?text {
   let u = arch.unit()
   let ptr = ext.malloc(add-int(max-read-size, mul-int(u, 2)))
-  mem.store-int(ptr, 0)
+  mem.store-int(0, ptr)
   let content-ptr = add-int(ptr, mul-int(u, 2))
   let read-size = read-loop(f, content-ptr, buffer-size, max-read-size, 0)
   match read-size {
   - Some(size) =>
-    mem.store-int(add-int(ptr, u), size)
+    mem.store-int(size, add-int(ptr, u))
     Some(magic.cast(int, text, ptr))
   - None =>
     ext.free(ptr)
@@ -83,7 +83,7 @@ define print(t: &text): unit {
 
 define print-char(x: i8): unit {
   let ptr = ext.malloc(1)
-  mem.store-i8(ptr, x)
+  mem.store-i8(x, ptr)
   let _ = ext.write(FD.stdout(), ptr, 1: int)
   ext.free(ptr)
 }
@@ -93,7 +93,7 @@ define get-line(): ?text {
   let u = arch.unit()
   let ptr-size = add-int(default-input-size, mul-int(u, 2))
   let ptr = ext.malloc(ptr-size)
-  mem.store-int(ptr, 0)
+  mem.store-int(0, ptr)
   get-line-inner(ptr, ptr-size, 0, default-input-size)
 }
 
@@ -114,7 +114,7 @@ define get-line-inner(ptr: int, ptr-size: int, current-index: int, buffer-size: 
       ext.free(ptr)
       None
     } else-if or(lt-int(bytes, buffer-size), eq-i8(last-char, 10)) {
-      mem.store-int(add-int(ptr, u), next-index)
+      mem.store-int(next-index, add-int(ptr, u))
       Some(magic.cast(int, text, ptr))
     } else {
       get-line-inner(ptr, ptr-size, next-index, buffer-size)
@@ -129,7 +129,7 @@ define print-line(t: &text): unit {
 
 define print-character(char: i8): unit {
   let p: int = ext.malloc(1)
-  mem.store-i8(p, char)
+  mem.store-i8(char, p)
   let _ = ext.write(FD.stdin(), p, 1)
   ext.free(p)
 }

@@ -23,6 +23,10 @@ import {
 - this.magic => magic
 }
 
+declare {
+- arc4random_uniform(i64): i64
+}
+
 data item {
 - Bar(int)
 }

@@ -31,6 +31,28 @@ export {
 - thread-cond-signal
 }
 
+declare {
+- exit(i64): void
+- realloc(pointer, i64): void
+- open(pointer, i64): i64
+- close(i64): i64
+- write(i64, pointer, i64): i64
+- read(i64, pointer, i64): i64
+- lseek(i64, i64, i64): i64
+- sleep(i64): i64
+- pthread_create(pointer, pointer, pointer, pointer): i64
+- pthread_exit(pointer): void
+- pthread_join(pointer, pointer): i64
+- pthread_mutex_init(pointer, pointer): i64
+- pthread_mutex_destroy(pointer): i64
+- pthread_mutex_lock(pointer): i64
+- pthread_mutex_unlock(pointer): i64
+- pthread_cond_init(pointer, pointer): i64
+- pthread_cond_destroy(pointer): int
+- pthread_cond_signal(pointer): int
+- pthread_cond_wait(pointer, pointer): int
+}
+
 define exit[a](status: int): a {
   introspect target-os {
   - darwin =>

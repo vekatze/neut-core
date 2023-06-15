@@ -32,22 +32,22 @@ export {
 }
 
 declare {
-- exit(i64): void
-- realloc(pointer, i64): void
-- open(pointer, i64, i64): i64
-- close(i64): i64
-- write(i64, pointer, i64): i64
-- read(i64, pointer, i64): i64
-- lseek(i64, i64, i64): i64
-- sleep(i64): i64
-- pthread_create(pointer, pointer, pointer, pointer): i64
+- exit(int): void
+- realloc(pointer, int): void
+- open(pointer, int, int): int
+- close(int): int
+- write(int, pointer, int): int
+- read(int, pointer, int): int
+- lseek(int, int, int): int
+- sleep(int): int
+- pthread_create(pointer, pointer, pointer, pointer): int
 - pthread_exit(pointer): void
-- pthread_join(pointer, pointer): i64
-- pthread_mutex_init(pointer, pointer): i64
-- pthread_mutex_destroy(pointer): i64
-- pthread_mutex_lock(pointer): i64
-- pthread_mutex_unlock(pointer): i64
-- pthread_cond_init(pointer, pointer): i64
+- pthread_join(pointer, pointer): int
+- pthread_mutex_init(pointer, pointer): int
+- pthread_mutex_destroy(pointer): int
+- pthread_mutex_lock(pointer): int
+- pthread_mutex_unlock(pointer): int
+- pthread_cond_init(pointer, pointer): int
 - pthread_cond_destroy(pointer): int
 - pthread_cond_signal(pointer): int
 - pthread_cond_wait(pointer, pointer): int

@@ -34,7 +34,7 @@ export {
 declare {
 - exit(i64): void
 - realloc(pointer, i64): void
-- open(pointer, i64): i64
+- open(pointer, i64, i64): i64
 - close(i64): i64
 - write(i64, pointer, i64): i64
 - read(i64, pointer, i64): i64

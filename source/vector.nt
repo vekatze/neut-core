@@ -1,18 +1,11 @@
 import {
 - this.bool
-- this.unit
-- this.list
-- this.external
+- this.unit => [unit, Unit]
+- this.list => [list]
+- this.external => [free, malloc]
 - this.arch => arch
 - this.memory => mem
 - this.magic => magic
-}
-
-export {
-- vector
-- vector-new
-- vector-access
-- this.vector.length
 }
 
 define discard-vector-content(ptr: int, elem-type: tau, counter: int, length: int): unit {

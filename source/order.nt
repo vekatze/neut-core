@@ -1,9 +1,3 @@
-import {}
-
-export {
-- order {..}
-}
-
 data order {
 - LT
 - EQ

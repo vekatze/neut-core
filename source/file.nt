@@ -1,17 +1,11 @@
 import {
-- this.text
-- this.bool
-- this.unit
-- this.list
+- this.text => [text, unsafe-get-content-pointer]
+- this.unit => [unit]
+- this.list => [list]
 - this.file.flag => FF
 - this.file.mode => FM
 - this.file.descriptor => FD
 - this.external => ext
-}
-
-export {
-- open
-- close
 }
 
 // fixme: use the coproduct type to detect errors

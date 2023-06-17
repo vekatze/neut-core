@@ -1,34 +1,7 @@
 import {
-- this.bool
-- this.unit
+- this.unit => [unit, Unit]
 - this.file.seek => seek
 - this.file.descriptor => FD
-}
-
-export {
-- exit
-- malloc
-- free
-- realloc
-- open
-- close
-- write
-- read
-- lseek
-- sleep
-- thread-create
-- thread-exit
-- thread-join
-- thread-mutex-size
-- thread-cond-size
-- thread-mutex-init
-- thread-mutex-destroy
-- thread-mutex-lock
-- thread-mutex-unlock
-- thread-cond-init
-- thread-cond-destroy
-- thread-cond-wait
-- thread-cond-signal
 }
 
 declare {

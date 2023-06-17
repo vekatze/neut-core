@@ -1,26 +1,8 @@
 import {
-- this.bool
+- this.bool => [bool, True, False, and, or]
 - this.both
-- this.either
-- this.function
-}
-
-export {
-- list {..}
-- reverse
-- length
-- append
-- fold-left
-- fold-right
-- map
-- for
-- concat
-- unzip
-- uncons
-- all
-- any
-- range
-- filter-some
+- this.either => [option]
+- this.function => [flip]
 }
 
 data list(a: tau) {

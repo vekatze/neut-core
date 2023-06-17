@@ -1,19 +1,12 @@
 import {
-- this.bool
-- this.list
-- this.text
-- this.text.io
-- this.unit
-- this.external
-- this.memory
+- this.bool => [bool]
+- this.list => [list]
+- this.text => [text, unsafe-from-c-string]
+- this.text.io => [print]
+- this.unit => [unit, Unit]
+- this.external => [exit]
+- this.memory => [load-int]
 - this.arch => arch
-}
-
-export {
-- admit
-- assert
-- get-argc
-- get-argv
 }
 
 define admit[a](t: &text): a {

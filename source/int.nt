@@ -1,9 +1,5 @@
 import {
-- this.list
-}
-
-export {
-- sum-int
+- this.list => [list]
 }
 
 define sum-int(xs: list(int)): int {

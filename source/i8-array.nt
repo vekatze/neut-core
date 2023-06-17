@@ -1,18 +1,11 @@
 import {
 - this.bool
-- this.list
-- this.unit
-- this.external
+- this.list => [list, length]
+- this.unit => [unit, Unit]
+- this.external => [free, malloc]
 - this.memory => mem
 - this.arch => arch
 - this.magic => magic
-}
-
-export {
-- i8-array
-- i8-array-new
-- i8-array-access
-- unsafe-copy-i8-array
 }
 
 define unsafe-copy-i8-array(source-pointer: int, target-pointer: int, index: int, from: int, to: int): unit {

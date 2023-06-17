@@ -3,12 +3,12 @@ import {
 - this.void
 - this.function
 - this.i8-array
-- this.list
+- this.list => [list]
 - this.both
-- this.either
+- this.either => [either, Right]
 - this.system
-- this.text
-- this.unit
+- this.text => [text]
+- this.unit => [unit, Unit]
 - this.vector
 - this.file
 - this.file.flag => FF
@@ -18,7 +18,7 @@ import {
 - this.queue => Q
 - this.external => ext
 - this.thread => t
-- this.channel
+- this.channel => [channel, new-channel, send, receive]
 - this.cell
 - this.magic => magic
 }

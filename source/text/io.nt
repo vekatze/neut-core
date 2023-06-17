@@ -1,7 +1,7 @@
 import {
-- this.text
-- this.bool
-- this.unit
+- this.text => [text, from-int]
+- this.bool => [or]
+- this.unit => [unit, Unit]
 - this.either
 - this.list
 - this.file.flag => FF
@@ -13,16 +13,6 @@ import {
 - this.file
 - this.arch => arch
 - this.magic => magic
-}
-
-export {
-- write
-- read
-- get-line
-- print
-- print-line
-- print-character
-- print-int
 }
 
 // fixme: prefer the sum type

@@ -1,13 +1,5 @@
 import {
-- this.list
-}
-
-export {
-- flag {..}
-- interpret
-- for-r
-- for-rw
-- for-rw-append
+- this.list => [list]
 }
 
 data flag {

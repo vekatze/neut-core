@@ -1,24 +1,14 @@
 import {
-- this.bool
 - this.either
-- this.unit
-- this.text
-- this.int
+- this.unit => [unit]
+- this.int => [sum-int]
 - this.list => list
 - this.arch => arch
-- this.text.io => io
 - this.memory => mem
 - this.magic => magic
 - this.both
 - this.external => ext
 - this.queue => Q
-}
-
-export {
-- channel
-- new-channel
-- send
-- receive
 }
 
 resource channel-internal {

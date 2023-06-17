@@ -1,14 +1,5 @@
 import {
-- this.unit
-}
-
-export {
-- store-int
-- store-i8
-- store-i1
-- load-int
-- load-i8
-- load-i1
+- this.unit => [unit]
 }
 
 inline store-int(value: int, address: int): unit {

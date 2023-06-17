@@ -1,15 +1,7 @@
 import {
-- this.unit
-- this.channel
+- this.unit => [unit]
+- this.channel => [channel, new-channel, send, receive]
 - this.magic => magic
-}
-
-export {
-- cell
-- new-cell
-- mutate
-- borrow
-- clone
 }
 
 define cell(a) {

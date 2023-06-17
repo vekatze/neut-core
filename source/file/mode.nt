@@ -1,11 +1,5 @@
 import {
-- this.list
-}
-
-export {
-- mode {..}
-- interpret
-- default-file-mode
+- this.list => [list]
 }
 
 data mode {

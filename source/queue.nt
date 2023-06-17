@@ -1,17 +1,8 @@
 import {
-- this.list
+- this.list => [list, Nil, Cons, reverse, length]
 - this.either
 - this.both
-- this.bool
-}
-
-export {
-- this.queue.queue
-- this.queue.empty
-- this.queue.dequeue
-- this.queue.enqueue
-- this.queue.size
-- this.queue.is-empty
+- this.bool => [bool, True, False]
 }
 
 // naive queue

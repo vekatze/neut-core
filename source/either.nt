@@ -1,16 +1,6 @@
 import {
-- this.unit
-- this.bool
-}
-
-export {
-- either {..}
-- option
-- none-internal
-- some-internal
-- is-None
-- is-Some
-- from-option
+- this.unit => [unit, Unit]
+- this.bool => [bool, True, False]
 }
 
 data either(a: tau, b: tau) {

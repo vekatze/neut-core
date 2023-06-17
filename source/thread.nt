@@ -1,6 +1,6 @@
 import {
 - this.bool
-- this.unit
+- this.unit => [unit, Unit]
 - this.text
 - this.text.io => io
 - this.system
@@ -9,12 +9,6 @@ import {
 - this.magic => magic
 - this.external => ext
 - this.queue => Q
-}
-
-export {
-- flow-inner
-- this.thread.detach
-- this.thread.attach
 }
 
 resource flow-inner {

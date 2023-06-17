@@ -1,23 +1,13 @@
 import {
-- this.i8-array
+- this.i8-array => [i8-array, i8-array-new, unsafe-copy-i8-array]
 - this.bool
 - this.either
 - this.list => L
-- this.unit
+- this.unit => [unit, Unit]
 - this.arch => arch
 - this.external => ext
 - this.memory => mem
 - this.magic => magic
-}
-
-export {
-- text
-- append
-- create
-- empty
-- from-int
-- unsafe-get-content-pointer
-- unsafe-from-c-string
 }
 
 alias-opaque text {

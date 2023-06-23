@@ -5,28 +5,28 @@ import {
 inline store-int(value: int, address: int): unit {
   introspect target-arch {
   - amd64 =>
-    magic store(i64, value, address)
+    magic store(int64, value, address)
   - arm64 =>
-    magic store(i64, value, address)
+    magic store(int64, value, address)
   }
 }
 
-inline store-i8(value: i8, address: int): unit {
-  magic store(i8, value, address)
+inline store-int8(value: int8, address: int): unit {
+  magic store(int8, value, address)
 }
 
-inline store-i1(value: i1, address: int): unit {
-  magic store(i1, value, address)
+inline store-int1(value: int1, address: int): unit {
+  magic store(int1, value, address)
 }
 
 inline load-int(address: int): int {
-  magic load(i64, address)
+  magic load(int64, address)
 }
 
-inline load-i8(address: int): i8 {
-  magic load(i8, address)
+inline load-int8(address: int): int8 {
+  magic load(int8, address)
 }
 
-inline load-i1(address: int): i1 {
-  magic load(i1, address)
+inline load-int1(address: int): int1 {
+  magic load(int1, address)
 }

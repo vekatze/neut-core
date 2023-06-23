@@ -2,6 +2,7 @@ import {
 - this.list => [list, Nil, Cons, reverse, length]
 - this.either
 - this.both
+- this.unit => [unit, Unit]
 - this.bool => [bool, True, False]
 }
 
@@ -22,7 +23,19 @@ define dequeue[a](q: queue(a)): ?tuple(a, queue(a)) {
   - Cons(l, ls-rest), rs =>
     Some(Tuple(l, Tuple(ls-rest, rs)))
   - Nil, rs =>
-    dequeue(Tuple(reverse(rs), []))
+    // dequeue(Tuple(reverse(rs), []))
+    dequeue(Tuple(rs, []))
+  }
+}
+
+define test-dequeue[a](ls: list(a), rs: list(a)): unit {
+  match ls, rs {
+  - [], [] =>
+    Unit
+  - Cons(_, _), _ =>
+    Unit
+  - [], rs =>
+    test-dequeue(rs, [])
   }
 }
 

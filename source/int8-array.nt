@@ -8,17 +8,17 @@ import {
 - this.magic => magic
 }
 
-define unsafe-copy-i8-array(source-pointer: int, target-pointer: int, index: int, from: int, to: int): unit {
+define unsafe-copy-int8-array(source-pointer: int, target-pointer: int, index: int, from: int, to: int): unit {
   if eq-int(from, to) {
     Unit
   } else {
-    let value = mem.load-i8(add-int(source-pointer, from))
-    mem.store-i8(value, add-int(target-pointer, index))
-    unsafe-copy-i8-array(source-pointer, target-pointer, add-int(index, 1), add-int(from, 1), to)
+    let value = mem.load-int8(add-int(source-pointer, from))
+    mem.store-int8(value, add-int(target-pointer, index))
+    unsafe-copy-int8-array(source-pointer, target-pointer, add-int(index, 1), add-int(from, 1), to)
   }
 }
 
-resource i8-array {
+resource int8-array {
 - (x: int) => {
     magic.cast(unit, int, free(x))
   }
@@ -31,12 +31,12 @@ resource i8-array {
     let target-pointer = malloc(add-int(length, u2))
     mem.store-int(0, target-pointer)
     mem.store-int(length, add-int(target-pointer, u))
-    unsafe-copy-i8-array(add-int(source-pointer, u2), add-int(target-pointer, u2), 0, from, to)
+    unsafe-copy-int8-array(add-int(source-pointer, u2), add-int(target-pointer, u2), 0, from, to)
     target-pointer
   }
 }
 
-define i8-array-new(xs: list(i8)): i8-array {
+define int8-array-new(xs: list(int8)): int8-array {
   let len on xs = length(xs)
   let u = arch.unit()
   let u2 = mul-int(u, 2)
@@ -45,23 +45,23 @@ define i8-array-new(xs: list(i8)): i8-array {
   mem.store-int(len, add-int(base-pointer, u))
   let content-pointer: int = add-int(base-pointer, u2)
   let store-values =
-    mu self(values: list(i8), index: int): unit {
+    mu self(values: list(int8), index: int): unit {
       match values {
       - [] =>
         Unit
       - v :: rest =>
-        mem.store-i8(v, add-int(content-pointer, index))
+        mem.store-int8(v, add-int(content-pointer, index))
         self(rest, add-int(index, 1))
       }
     }
 
   let _ = store-values(xs, 0)
-  magic.cast(int, i8-array, base-pointer)
+  magic.cast(int, int8-array, base-pointer)
 }
 
-inline i8-array-access(xs: &i8-array, i: int): i8 {
-  let ptr = magic.cast(&i8-array, int, xs)
+inline int8-array-access(xs: &int8-array, i: int): int8 {
+  let ptr = magic.cast(&int8-array, int, xs)
   let u = arch.unit()
   let u2 = mul-int(u, 2)
-  mem.load-i8(add-int(add-int(ptr, u2), i))
+  mem.load-int8(add-int(add-int(ptr, u2), i))
 }

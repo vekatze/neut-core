@@ -34,7 +34,7 @@ resource flow-inner {
     mem.store-int(magic.cast(tau, int, elem-type), add-int(new-addr, u))
     let cloned-value: elem-type = embody(elem-type, elem-value)
     mem.store-int(magic.cast(elem-type, int, cloned-value), add-int(new-addr, u2))
-    mem.store-i1(1, add-int(new-addr, u3)) // already finished
+    mem.store-int1(1, add-int(new-addr, u3)) // already finished
     new-addr
   }
 }
@@ -78,7 +78,7 @@ define detach(a: tau, f: () -> a): flow(a) {
   mem.store-int(thread-id, ptr)
   mem.store-int(magic.cast(tau, int, a), add-int(ptr, u))
   mem.store-int(0, add-int(ptr, u2))
-  mem.store-i1(0, add-int(ptr, u3))
+  mem.store-int1(0, add-int(ptr, u3))
   magic.cast(int, flow(a), ptr)
 }
 
@@ -97,12 +97,12 @@ define await-and-write-result(addr: int): unit {
   let u2 = mul-int(u, 2)
   let u3 = mul-int(u, 3)
   let finished-flag-ptr = add-int(addr, u3)
-  let finished-flag = mem.load-i1(finished-flag-ptr)
-  if eq-i1(finished-flag, 0) {
+  let finished-flag = mem.load-int1(finished-flag-ptr)
+  if eq-int1(finished-flag, 0) {
     let thread-id = mem.load-int(addr)
     let value-ptr = add-int(addr, u2)
     ext.thread-join(thread-id, value-ptr)
-    mem.store-i1(1, finished-flag-ptr)
+    mem.store-int1(1, finished-flag-ptr)
   } else {
     Unit
   }

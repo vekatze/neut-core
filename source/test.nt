@@ -2,7 +2,7 @@ import {
 - this.bool
 - this.void
 - this.function
-- this.i8-array
+- this.int8-array
 - this.list => [list]
 - this.both
 - this.either => [either, Right]
@@ -24,7 +24,7 @@ import {
 }
 
 declare {
-- arc4random_uniform(i64): i64
+- arc4random_uniform(int64): int64
 }
 
 data item {
@@ -97,22 +97,27 @@ define receive-one-by-one(xs: list(flow(unit)), ch: &channel(int)): unit {
 define main(): unit {
   // let item: this.queue.queue(tau) = this.queue.empty()
   // let _ = item
+  // let q: Q.queue(int) = Q.empty()
+  // let _ = Q.dequeue(q)
+  let ls: list(int) = []
+  let rs = []
+  let _ = Q.test-dequeue(ls, rs)
 
-  let ch = new-channel(int)
-  let xs = rand-list(14000, [])
-  let _ on ch = {
-    let fs = send-all(xs, ch, [])
-    text.print("sent.\n")
-    receive-one-by-one(fs, ch)
-    text.print("received.\n")
-  }
-
-  // let xs = rand-list(10000, [])
+  // let ch = new-channel(int)
+  // let xs = rand-list(14000, [])
   // let _ on ch = {
   //   let fs = send-all(xs, ch, [])
-  //   receive-all-at-once(fs, ch)
+  //   text.print("sent.\n")
+  //   receive-one-by-one(fs, ch)
+  //   text.print("received.\n")
   // }
-  let _ = ch
+
+  // // let xs = rand-list(10000, [])
+  // // let _ on ch = {
+  // //   let fs = send-all(xs, ch, [])
+  // //   receive-all-at-once(fs, ch)
+  // // }
+  // let _ = ch
 
   // let xs: my-list(int) = this.test.Nil()
   // let xs-cell = new-cell(xs)
@@ -380,9 +385,9 @@ define main(): unit {
   // print-int(-4218934)
   // print-line("here")
   // let xs = [104, 101, 108, 108, 111, 10]
-  // let arr = i8-array-new(xs)
+  // let arr = int8-array-new(xs)
   // let vec = vector-new(xs)
-  // let v1 on arr = i8-array-access(arr, 2)
+  // let v1 on arr = int8-array-access(arr, 2)
   // let v0 on vec = vector-access(vec, 2)
   // let a = vec
   // let b = vec

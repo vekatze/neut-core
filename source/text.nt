@@ -1,5 +1,5 @@
 import {
-- this.i8-array => [i8-array, i8-array-new, unsafe-copy-i8-array]
+- this.int8-array => [int8-array, int8-array-new, unsafe-copy-int8-array]
 - this.bool
 - this.either
 - this.list => L
@@ -11,11 +11,11 @@ import {
 }
 
 alias-opaque text {
-  i8-array
+  int8-array
 }
 
-define create(xs: L.list(i8)): text {
-  magic cast(i8-array, text, i8-array-new(xs))
+define create(xs: L.list(int8)): text {
+  magic cast(int8-array, text, int8-array-new(xs))
 }
 
 define empty(): text {
@@ -44,8 +44,8 @@ define append(t1: &text, t2: &text): text {
       if eq-int(current-index, array-length) {
         Unit
       } else {
-        let char = mem.load-i8(add-int(content-array, current-index))
-        mem.store-i8(char, add-int(target-pointer, current-index))
+        let char = mem.load-int8(add-int(content-array, current-index))
+        mem.store-int8(char, add-int(target-pointer, current-index))
         store-values(target-pointer, content-array, add-int(current-index, 1), array-length)
       }
     }
@@ -87,19 +87,19 @@ define from-int(x: int): text {
   let store-positive-values =
     mu loop(y: int, index: int): unit {
       if lt-int(y, 10) {
-        let digit-char = add-i8(magic.cast(int, i8, y), 48) // 48 == "0"
-        mem.store-i8(digit-char, add-int(content, index))
+        let digit-char = add-int8(magic.cast(int, int8, y), 48) // 48 == "0"
+        mem.store-int8(digit-char, add-int(content, index))
       } else {
         let q = div-int(y, 10)
         let r = rem-int(y, 10)
-        let digit-char = add-i8(magic.cast(int, i8, r), 48)
-        mem.store-i8(digit-char, add-int(content, index))
+        let digit-char = add-int8(magic.cast(int, int8, r), 48)
+        mem.store-int8(digit-char, add-int(content, index))
         loop(q, sub-int(index, 1))
       }
     }
 
   if lt-int(x, 0) {
-    mem.store-i8(45, content) // 45 == "-"
+    mem.store-int8(45, content) // 45 == "-"
     store-positive-values(mul-int(x, -1), sub-int(len, 1))
   } else {
     store-positive-values(x, sub-int(len, 1))
@@ -114,13 +114,13 @@ define unsafe-from-c-string(old-ptr: int): text {
   let new-ptr = ext.malloc(add-int(len, u2))
   mem.store-int(0, new-ptr)
   mem.store-int(len, add-int(new-ptr, u))
-  unsafe-copy-i8-array(old-ptr, add-int(new-ptr, u2), 0, 0, len)
+  unsafe-copy-int8-array(old-ptr, add-int(new-ptr, u2), 0, 0, len)
   magic.cast(int, text, new-ptr)
 }
 
 define unsafe-get-c-string-length(ptr: int, index: int): int {
-  let c = mem.load-i8(add-int(ptr, index))
-  if eq-i8(c, 0) {
+  let c = mem.load-int8(add-int(ptr, index))
+  if eq-int8(c, 0) {
     index
   } else {
     unsafe-get-c-string-length(ptr, add-int(index, 1))

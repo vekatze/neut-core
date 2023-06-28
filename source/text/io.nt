@@ -1,5 +1,5 @@
 import {
-- this.text => [text, from-int]
+- this.text => [text, from-int, unsafe-get-content-pointer, text-byte-length]
 - this.bool => [or]
 - this.unit => [unit, Unit]
 - this.either
@@ -13,6 +13,10 @@ import {
 - this.file
 - this.arch => arch
 - this.magic => magic
+}
+
+declare {
+- printf(pointer): void
 }
 
 // fixme: prefer the sum type
@@ -67,15 +71,10 @@ define read-loop(f: FD.descriptor, content-ptr: int, buffer-size: int, max-read-
 }
 
 define print(t: &text): unit {
-  let _ = write(t, FD.stdout())
-  Unit
-}
-
-define print-char(x: int8): unit {
-  let ptr = ext.malloc(1)
-  mem.store-int8(x, ptr)
-  let _ = ext.write(FD.stdout(), ptr, 1: int)
-  ext.free(ptr)
+  let fmt = unsafe-get-content-pointer("%.*s\0")
+  let len = text-byte-length(t)
+  let val = unsafe-get-content-pointer(t)
+  magic external(printf, fmt; len, val)
 }
 
 define get-line(): ?text {
@@ -113,24 +112,18 @@ define get-line-inner(ptr: int, ptr-size: int, current-index: int, buffer-size: 
 }
 
 define print-line(t: &text): unit {
-  print(t)
-  print("\n")
+  let fmt = unsafe-get-content-pointer("%.*s\n\0")
+  let len = text-byte-length(t)
+  let val = unsafe-get-content-pointer(t)
+  magic external(printf, fmt; len, val)
 }
 
-define print-character(char: int8): unit {
-  let p: int = ext.malloc(1)
-  mem.store-int8(char, p)
-  let _ = ext.write(FD.stdin(), p, 1)
-  ext.free(p)
+define print-float(x: float): unit {
+  let fmt = unsafe-get-content-pointer("%f\0")
+  magic external(printf, fmt; x)
 }
 
-define print-digit(x: int8): unit {
-  print-character(add-int8(x, 48)) // 48 == '0'
-}
-
-define print-int(i: int): unit {
-  let t = from-int(i)
-  let _ on t = print(t)
-  let _ = t
-  Unit
+define print-int(x: int): unit {
+  let fmt = unsafe-get-content-pointer("%d\0")
+  magic external(printf, fmt; x)
 }

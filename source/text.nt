@@ -1,5 +1,5 @@
 import {
-- this.int8-array => [int8-array, int8-array-new, unsafe-copy-int8-array]
+- this.int8-array => [int8-array, int8-array-new, unsafe-copy-int8-array, int8-array-length]
 - this.bool
 - this.either
 - this.list => L
@@ -74,6 +74,11 @@ define get-text-length-of-int(x: int, acc: int): int {
       get-text-length-of-int(q, add-int(acc, 1))
     }
   }
+}
+
+inline text-byte-length(t: &text): int {
+  let ptr = magic cast(&text, int8-array, t)
+  int8-array-length(ptr)
 }
 
 define from-int(x: int): text {

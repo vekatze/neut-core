@@ -3,13 +3,14 @@ import {
 - this.void
 - this.function
 - this.int8-array
-- this.list => [list]
+- this.list => [list, map]
 - this.both
 - this.either => [either, Right]
 - this.system
 - this.text => [text]
 - this.unit => [unit, Unit]
-- this.vector
+- this.vector => vector
+- this.vector => [vector]
 - this.file
 - this.file.flag => FF
 - this.file.mode => FM
@@ -95,13 +96,45 @@ define receive-one-by-one(xs: list(flow(unit)), ch: &channel(int)): unit {
 }
 
 define main(): unit {
+  // text.print-int(add-int(2, 3))
+  // let ys: list(int) = [1, 2, 3]
+  // let xs: vector(Succ(Succ(Succ(Zero))), int) = vector.new([1, 2, 3])
+  let xs: vector(3, int) = vector.new([1, 2, 3])
+  text.print("hellこんにちはo\n")
+  text.print-line("how \"are\" youだよ〜。おはよう。またね。")
+  text.print-float(3.823)
+  // let ys: matrix(2, 3, int) = mat-by-list(3, [vector.new([1, 2, 3]), vector.new([4, 5, 6])])
+  // // 2 * 3
+  // let zs: matrix(_, _, int) =
+  //   vector.new([
+  //     vector.new([1, 2, 3]),
+  //     vector.new([4, 5, 6])
+  //   ])
+  // // 3 * 1
+  // let ws: matrix(_, _, int) =
+  //   vector.new([
+  //     vector.new([1, 4]),
+  //     vector.new([2, 4]),
+  //     vector.new([3, 4])
+  //   ])
+  // let ks = mul-matrix(zs, ws)
+  // let ys: matrix(_, _, int) = vector.new([xs, xs])
+  // let xs: s.sized-list(_, int) = s.cons(1, s.cons(2, s.cons(3, s.nil())))
+  // let Tuple(val, rest) = s.uncons(xs)
+  // text.print-int(val)
+  // let Tuple(val, rest) = s.uncons(rest)
+  // text.print-int(val)
+  // let Tuple(val, rest) = s.uncons(rest)
+  // text.print-int(val)
+
+  // let Tuple(val, rest) = s.uncons(rest)
   // let item: this.queue.queue(tau) = this.queue.empty()
   // let _ = item
   // let q: Q.queue(int) = Q.empty()
   // let _ = Q.dequeue(q)
-  let ls: list(int) = []
-  let rs = []
-  let _ = Q.test-dequeue(ls, rs)
+  // let ls: list(int) = []
+  // let rs = []
+  // let _ = Q.test-dequeue(ls, rs)
 
   // let ch = new-channel(int)
   // let xs = rand-list(14000, [])
@@ -201,7 +234,7 @@ define main(): unit {
 
 
 
-    // t.send-to-channel(lambda () {1}, magic.cast(int, t.channel-internal(() -> int), ch))
+    // t.send-to-channel(lambd () {1}, magic.cast(int, t.channel-internal(() -> int), ch))
     // t.send-to-channel(lambda () {2}, magic.cast(int, t.channel-internal(() -> int), ch))
     // let f =
     //   detach {

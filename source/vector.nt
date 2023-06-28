@@ -51,16 +51,26 @@ resource vector-internal {
   }
 }
 
-define vector(_: tau): tau {
+lucent -list-length[a](xs: list(a)): nat {
+  match xs {
+  - [] =>
+    0
+  - _ :: rest =>
+    Succ(-list-length(rest))
+  }
+}
+
+define vector(_: nat, _: tau): tau {
   vector-internal
 }
 
-define vector-new[a](xs: list(a)): vector(a) {
+// define vector-new[a](xs: list(a)): vector(a) {
+define new[a](xs: list(a)): vector(-list-length(xs), a) {
   let u = arch.unit()
   let u2 = mul-int(u, 2)
-  let len on xs = this.list.length(xs)
-  let base-pointer = malloc(add-int(u2, mul-int(len, u)))
-  mem.store-int(len, base-pointer)
+  let n on xs = this.list.length(xs)
+  let base-pointer = malloc(add-int(u2, mul-int(n, u)))
+  mem.store-int(n, base-pointer)
   mem.store-int(magic.cast(tau, int, a), add-int(base-pointer, u))
   let content-pointer: int = add-int(base-pointer, u2)
   let store-values =
@@ -74,17 +84,16 @@ define vector-new[a](xs: list(a)): vector(a) {
       }
     }
   let _ = store-values(xs, 0)
-  magic cast(int, vector(a), base-pointer)
+  magic cast(int, _, base-pointer)
 }
 
-inline vector-access[a](xs: &vector(a), i: int): a {
+inline access[a, n](xs: &vector(n, a), i: int): a {
   let u = arch.unit()
   let u2 = mul-int(u, 2)
-  let ptr = magic.cast(&vector(a), int, xs)
+  let ptr = magic.cast(&vector(n, a), int, xs)
   magic.cast(int, a, mem.load-int(add-int(add-int(ptr, u2), mul-int(u, i))))
 }
 
-define length[a](xs: &vector(a)): int {
-  let ptr = magic.cast(&vector(a), int, xs)
-  mem.load-int(ptr)
+define length[a, n](_: &vector(n, a)): int {
+  magic cast(nat, int, n)
 }

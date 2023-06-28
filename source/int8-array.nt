@@ -36,6 +36,14 @@ resource int8-array {
   }
 }
 
+define int8-array-length(xs: int8-array): int {
+  let source-pointer = magic cast(int8-array, int, xs)
+  let u = arch.unit()
+  let from = mem.load-int(source-pointer)
+  let to = mem.load-int(add-int(source-pointer, u))
+  sub-int(to, from)
+}
+
 define int8-array-new(xs: list(int8)): int8-array {
   let len on xs = length(xs)
   let u = arch.unit()

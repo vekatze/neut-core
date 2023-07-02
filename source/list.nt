@@ -3,6 +3,9 @@ import {
 - this.both
 - this.either => [option]
 - this.function => [flip]
+- this.data.semigroup => s
+- this.data.monoid => m
+- this.data.functor => f
 }
 
 data list(a: tau) {
@@ -10,65 +13,85 @@ data list(a: tau) {
 - Cons(a, list(a))
 }
 
-define fold-left[a, b](f: (b, a) -> b, acc: b, xs: list(a)): b {
+define fold-left of {
+- elem-type: tau
+- result-type: tau
+- consumer: (result-type, elem-type) -> result-type
+- acc: result-type
+- xs: list(elem-type)
+}: result-type {
+  let loop =
+    mu rec(acc: result-type, xs: list(elem-type)) {
+      match xs {
+      - [] =>
+        acc
+      - y :: ys =>
+        rec(consumer(acc, y), ys)
+      }
+    }
+  in
+  loop(acc, xs)
+}
+
+define fold-right of {
+- elem-type: tau
+- result-type: tau
+- consumer: (elem-type, result-type) -> result-type
+- acc: result-type
+- xs: list(elem-type)
+}: result-type {
   match xs {
   - [] =>
     acc
   - y :: ys =>
-    fold-left(f, f(acc, y), ys)
+    consumer(y, fold-right(elem-type, result-type, consumer, acc, ys))
   }
 }
 
-define fold-right[a, b](f: (a, b) -> b, acc: b, xs: list(a)): b {
-  match xs {
-  - [] =>
-    acc
-  - y :: ys =>
-    f(y, fold-right(f, acc, ys))
-  }
+inline map(a: tau, b: tau, f: a -> b, xs: list(a)): list(b) {
+  map-internal(a, b, f)(xs)
 }
 
-inline map[a, b](f: a -> b, xs: list(a)): list(b) {
-  map-internal(f)(xs)
+inline for(a: tau, b: tau, xs: list(a), f: a -> b): list(b) {
+  map-internal(a, b, f)(xs)
 }
 
-inline for[a, b](xs: list(a), f: a -> b): list(b) {
-  map-internal(f)(xs)
-}
-
-inline map-internal[a, b](f: a -> b): list(a) -> list(b) {
+inline map-internal(a: tau, b: tau, f: a -> b): list(a) -> list(b) {
   mu loop(xs) {
     match xs {
     - [] =>
       []
     - y :: ys =>
-      f(y) :: loop(ys)
+      Cons(f(y), loop(ys))
     }
   }
 }
 
-define append[a](xs: list(a), ys: list(a)): list(a) {
-  fold-left(flip(Cons), xs, ys)
+define append(a: tau, xs: list(a), ys: list(a)): list(a) {
+  let flip-cons = (xs, x) => { Cons(x, xs) } in
+  fold-left(a, list(a), flip-cons, xs, ys)
 }
 
-define concat[a](xss: list(list(a))): list(a) {
-  fold-left(append, [], xss)
+define concat(a: tau, xss: list(list(a))): list(a) {
+  let partial-append = (xs, ys) => { append(a, xs, ys) } in
+  fold-left(list(a), list(a), partial-append, [], xss)
 }
 
-define reverse[a](xs: list(a)): list(a) {
-  reverse-helper(xs, [])
+define reverse(a: tau, xs: list(a)): list(a) {
+  let helper =
+    mu rec(xs: list(a), acc: list(a)) {
+      match xs {
+      - [] =>
+        acc
+      - y :: ys =>
+        rec(ys, y :: acc)
+      }
+    }
+  in
+  helper(xs, [])
 }
 
-define reverse-helper[a](xs: list(a), acc: list(a)): list(a) {
-  match xs {
-  - [] =>
-    acc
-  - y :: ys =>
-    reverse-helper(ys, y :: acc)
-  }
-}
-
-define length[a](xs: &list(a)): int {
+define length(a: tau, xs: &list(a)): int {
   let length-tailcall =
     mu rec(acc: int, xs: &list(a)): int {
       case xs {
@@ -78,20 +101,21 @@ define length[a](xs: &list(a)): int {
         rec(add-int(1, acc), ys)
       }
     }
+  in
   length-tailcall(0, xs)
 }
 
-define unzip[a, b](xs: list(tuple(a, b))): tuple(list(a), list(b)) {
+define unzip(a: tau, b: tau, xs: list(tuple(a, b))): tuple(list(a), list(b)) {
   match xs {
   - [] =>
     Tuple([], [])
   - Tuple(l, r) :: rest =>
-    let Tuple(rest-l, rest-r) = unzip(rest)
+    let Tuple(rest-l, rest-r) = unzip(a, b, rest) in
     Tuple(l :: rest-l, r :: rest-r)
   }
 }
 
-define uncons[a](xs: list(a)): ?tuple(a, list(a)) {
+define uncons(a: tau, xs: list(a)): ?tuple(a, list(a)) {
   match xs {
   - [] =>
     None
@@ -101,11 +125,11 @@ define uncons[a](xs: list(a)): ?tuple(a, list(a)) {
 }
 
 define all(xs: list(bool)): bool {
-  fold-left(and, True, xs)
+  fold-left(bool, bool, and, True, xs)
 }
 
 define any(xs: list(bool)): bool {
-  fold-left(or, False, xs)
+  fold-left(bool, bool, or, False, xs)
 }
 
 // right-open interval
@@ -117,13 +141,38 @@ define range(from: int, to: int): list(int) {
   }
 }
 
-define filter-some[a](xs: list(option(a))): list(a) {
+define filter-some(a: tau, xs: list(option(a))): list(a) {
   match xs {
   - [] =>
     []
   - Some(v) :: rest =>
-    v :: filter-some(rest)
+    v :: filter-some(a, rest)
   - None :: rest =>
-    filter-some(rest)
+    filter-some(a, rest)
+  }
+}
+
+inline as-semigroup(a: tau): s.semigroup(list(a)) {
+  s.Semigroup of {
+  - append =>
+    (x, y) => {
+      append(a, x, y)
+    }
+  }
+}
+
+inline as-monoid(a: tau): m.monoid(list(a)) {
+  m.Monoid of {
+  - as-semigroup =>
+    as-semigroup(a)
+  - empty =>
+    []
+  }
+}
+
+inline as-functor(): f.functor(list) {
+  f.Functor of {
+  - map =>
+    map
   }
 }

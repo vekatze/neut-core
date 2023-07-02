@@ -12,15 +12,15 @@ inline option(a: tau): tau {
   either(unit, a)
 }
 
-inline none-internal[a](): option(a) {
+inline none-internal(a: tau): option(a) {
   Left(Unit)
 }
 
-inline some-internal[a](x: a): option(a) {
+inline some-internal(a: tau, x: a): option(a) {
   Right(x)
 }
 
-define is-None[a](x: option(a)): bool {
+define is-None(a: tau, x: option(a)): bool {
   match x {
   - Left(_) =>
     True
@@ -29,7 +29,7 @@ define is-None[a](x: option(a)): bool {
   }
 }
 
-define is-Some[a](x: option(a)): bool {
+define is-Some(a: tau, x: option(a)): bool {
   match x {
   - Left(_) =>
     False
@@ -38,7 +38,7 @@ define is-Some[a](x: option(a)): bool {
   }
 }
 
-define from-option[a](x: a, my: option(a)): a {
+define from-option(a: tau, x: a, my: option(a)): a {
   match my {
   - Right(y) =>
     y

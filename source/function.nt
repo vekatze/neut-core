@@ -1,16 +1,16 @@
-define flip[a, b, c](f: (a, b) -> c): (b, a) -> c {
+define flip(a: tau, b: tau, c: tau, f: (a, b) -> c): (b, a) -> c {
   (y, x) => {
     f(x, y)
   }
 }
 
-define compose[a, b, c](f: a -> b, g: b -> c): a -> c {
+define compose(a: tau, b: tau, c: tau, f: a -> b, g: b -> c): a -> c {
   (x) => {
     g(f(x))
   }
 }
 
-define curry[a, b, c](f: (a, b) -> c): a -> b -> c {
+define curry(a: tau, b: tau, c: tau, f: (a, b) -> c): a -> b -> c {
   (x) => {
     (y) => {
       f(x, y)
@@ -18,7 +18,7 @@ define curry[a, b, c](f: (a, b) -> c): a -> b -> c {
   }
 }
 
-define uncurry[a, b, c](f: a -> b -> c): (a, b) -> c {
+define uncurry(a: tau, b: tau, c: tau, f: a -> b -> c): (a, b) -> c {
   (x, y) => {
     f(x)(y)
   }

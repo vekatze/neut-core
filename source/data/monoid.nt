@@ -1,0 +1,10 @@
+import {
+- this.data.semigroup => s
+}
+
+data monoid(a) {
+- Monoid of {
+  - as-semigroup: s.semigroup(a) via s.Semigroup
+  - empty: a
+  }
+}

@@ -12,5 +12,6 @@ define sum-int(xs: list(int)): int {
         loop(zs, add-int(z, acc))
       }
     }
+  in
   f(xs, 0)
 }

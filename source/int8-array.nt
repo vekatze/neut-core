@@ -12,8 +12,8 @@ define unsafe-copy-int8-array(source-pointer: int, target-pointer: int, index: i
   if eq-int(from, to) {
     Unit
   } else {
-    let value = mem.load-int8(add-int(source-pointer, from))
-    mem.store-int8(value, add-int(target-pointer, index))
+    let value = mem.load-int8(add-int(source-pointer, from)) in
+    mem.store-int8(value, add-int(target-pointer, index));
     unsafe-copy-int8-array(source-pointer, target-pointer, add-int(index, 1), add-int(from, 1), to)
   }
 }
@@ -23,53 +23,53 @@ resource int8-array {
     magic.cast(unit, int, free(x))
   }
 - (source-pointer: int) => {
-    let u = arch.unit()
-    let u2 = mul-int(u, 2)
-    let from = mem.load-int(source-pointer)
-    let to = mem.load-int(add-int(source-pointer, u))
-    let length = sub-int(to, from)
-    let target-pointer = malloc(add-int(length, u2))
-    mem.store-int(0, target-pointer)
-    mem.store-int(length, add-int(target-pointer, u))
-    unsafe-copy-int8-array(add-int(source-pointer, u2), add-int(target-pointer, u2), 0, from, to)
+    let u = arch.unit() in
+    let u2 = mul-int(u, 2) in
+    let from = mem.load-int(source-pointer) in
+    let to = mem.load-int(add-int(source-pointer, u)) in
+    let length = sub-int(to, from) in
+    let target-pointer = malloc(add-int(length, u2)) in
+    mem.store-int(0, target-pointer);
+    mem.store-int(length, add-int(target-pointer, u));
+    unsafe-copy-int8-array(add-int(source-pointer, u2), add-int(target-pointer, u2), 0, from, to);
     target-pointer
   }
 }
 
 define int8-array-length(xs: int8-array): int {
-  let source-pointer = magic cast(int8-array, int, xs)
-  let u = arch.unit()
-  let from = mem.load-int(source-pointer)
-  let to = mem.load-int(add-int(source-pointer, u))
+  let source-pointer = magic cast(int8-array, int, xs) in
+  let u = arch.unit() in
+  let from = mem.load-int(source-pointer) in
+  let to = mem.load-int(add-int(source-pointer, u)) in
   sub-int(to, from)
 }
 
 define int8-array-new(xs: list(int8)): int8-array {
-  let len on xs = length(xs)
-  let u = arch.unit()
-  let u2 = mul-int(u, 2)
-  let base-pointer = malloc(add-int(len, u2))
-  mem.store-int(0, base-pointer)
-  mem.store-int(len, add-int(base-pointer, u))
-  let content-pointer: int = add-int(base-pointer, u2)
+  let len on xs = length(int8, xs) in
+  let u = arch.unit() in
+  let u2 = mul-int(u, 2) in
+  let base-pointer = malloc(add-int(len, u2)) in
+  mem.store-int(0, base-pointer);
+  mem.store-int(len, add-int(base-pointer, u));
+  let content-pointer: int = add-int(base-pointer, u2) in
   let store-values =
     mu self(values: list(int8), index: int): unit {
       match values {
       - [] =>
         Unit
       - v :: rest =>
-        mem.store-int8(v, add-int(content-pointer, index))
+        mem.store-int8(v, add-int(content-pointer, index));
         self(rest, add-int(index, 1))
       }
     }
-
-  let _ = store-values(xs, 0)
+  in
+  let _ = store-values(xs, 0) in
   magic.cast(int, int8-array, base-pointer)
 }
 
 inline int8-array-access(xs: &int8-array, i: int): int8 {
-  let ptr = magic.cast(&int8-array, int, xs)
-  let u = arch.unit()
-  let u2 = mul-int(u, 2)
+  let ptr = magic.cast(&int8-array, int, xs) in
+  let u = arch.unit() in
+  let u2 = mul-int(u, 2) in
   mem.load-int8(add-int(add-int(ptr, u2), i))
 }

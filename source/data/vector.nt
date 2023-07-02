@@ -1,0 +1,99 @@
+import {
+- this.bool
+- this.unit => [unit, Unit]
+- this.list => [list]
+- this.external => [free, malloc]
+- this.arch => arch
+- this.memory => mem
+- this.magic => magic
+}
+
+define discard-vector-content(ptr: int, elem-type: tau, counter: int, length: int): unit {
+  if eq-int(counter, length) {
+    Unit
+  } else {
+    let u = arch.unit() in
+    let _ = magic.cast(int, elem-type, mem.load-int(add-int(ptr, mul-int(counter, u)))) in
+    discard-vector-content(ptr, elem-type, add-int(counter, 1), length)
+  }
+}
+
+define copy-vector-content(source-pointer: int, target-pointer: int, elem-type: tau, counter: int, length: int): unit {
+  if eq-int(counter, length) {
+    Unit
+  } else {
+    let u = arch.unit() in
+    let original = magic.cast(int, &elem-type, mem.load-int(add-int(source-pointer, mul-int(counter, u)))) in
+    let clone = *original in
+    mem.store-int(magic.cast(elem-type, int, clone), add-int(target-pointer, mul-int(counter, u)));
+    copy-vector-content(source-pointer, target-pointer, elem-type, add-int(counter, 1), length)
+  }
+}
+
+resource vector-internal {
+- (x: int) => {
+    let length = mem.load-int(x) in
+    let u = arch.unit() in
+    let elem-type = magic.cast(int, tau, mem.load-int(add-int(x, u))) in
+    discard-vector-content(add-int(x, mul-int(u, 2)), elem-type, 0, length);
+    magic.cast(unit, int, free(x))
+  }
+- (source-pointer: int) => {
+    let u = arch.unit() in
+    let u2 = mul-int(u, 2) in
+    let length: int = mem.load-int(source-pointer) in
+    let elem-type: tau = magic.cast(int, tau, mem.load-int(add-int(source-pointer, u))) in
+    let target-pointer = malloc(add-int(u2, mul-int(length, u))) in
+    mem.store-int(length, target-pointer);
+    mem.store-int(magic.cast(tau, int, elem-type), add-int(target-pointer, u));
+    copy-vector-content(add-int(source-pointer, u2), add-int(target-pointer, u2), elem-type, 0, length);
+    target-pointer
+  }
+}
+
+lucent -list-length(a: tau, xs: list(a)): nat {
+  match xs {
+  - [] =>
+    0
+  - _ :: rest =>
+    Succ(-list-length(a, rest))
+  }
+}
+
+define vector(_: nat, _: tau): tau {
+  vector-internal
+}
+
+define new(a: tau, xs: list(a)): vector(-list-length(a, xs), a) {
+  let u = arch.unit() in
+  let u2 = mul-int(u, 2) in
+  let n on xs = this.list.length(a, xs) in
+  let base-pointer = malloc(add-int(u2, mul-int(n, u))) in
+  mem.store-int(n, base-pointer);
+  mem.store-int(magic.cast(tau, int, a), add-int(base-pointer, u));
+  let content-pointer: int = add-int(base-pointer, u2) in
+  let store-values =
+    mu self(values: list(a), index: int): unit {
+      match values {
+      - [] =>
+        Unit
+      - v :: rest =>
+        mem.store-int(magic.cast(a, int, v), add-int(content-pointer, mul-int(index, u)));
+        self(rest, add-int(index, 1))
+      }
+    }
+  in
+  let _ = store-values(xs, 0) in
+  magic cast(int, _, base-pointer)
+}
+
+inline access(a: tau, n: nat, xs: &vector(n, a), i: int): a {
+  let u = arch.unit() in
+  let u2 = mul-int(u, 2) in
+  let ptr = magic.cast(&vector(n, a), int, xs) in
+  magic.cast(int, a, mem.load-int(add-int(add-int(ptr, u2), mul-int(u, i))))
+}
+
+define length(a: tau, n: nat, _: &vector(n, a)): int {
+  magic cast(nat, int, n)
+}

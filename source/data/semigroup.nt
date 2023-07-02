@@ -1,0 +1,5 @@
+data semigroup(a) {
+- Semigroup of {
+  - append: (a, a) -> a
+  }
+}

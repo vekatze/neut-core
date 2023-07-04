@@ -17,6 +17,7 @@ import {
 
 declare {
 - printf(pointer): void
+- fflush(pointer): void
 }
 
 // fixme: prefer the sum type
@@ -126,4 +127,12 @@ define print-float(x: float): unit {
 define print-int(x: int): unit {
   let fmt = unsafe-get-content-pointer("%d\0") in
   magic external(printf, fmt; x)
+}
+
+define fflush(ptr: int): unit {
+  magic external(fflush, ptr)
+}
+
+define fflush-all(): unit {
+  magic external(fflush, 0: int)
 }

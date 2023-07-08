@@ -1,6 +1,2 @@
-antecedent = []
-dependency = {}
-extra-content = []
-target = {
-  test = "test.nt"
-}
+(target
+  (test "test.nt"))

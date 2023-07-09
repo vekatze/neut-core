@@ -1,0 +1,124 @@
+import {
+- this.bool
+- this.list => [list, length]
+- this.unit => [unit, Unit]
+- this.external => [free, malloc]
+- this.memory => mem
+- this.arch => arch
+- this.magic => magic
+- this.both
+- this.either
+- this.system
+- this.text
+- this.text.io => io
+}
+
+define unsafe-copy-float-array(source-pointer: int, target-pointer: int, index: int, from: int, to: int): unit {
+  if eq-int(from, to) {
+    Unit
+  } else {
+    let u = arch.unit() in
+    let value = mem.load-float(add-int(source-pointer, mul-int(u, from))) in
+    mem.store-float(value, add-int(target-pointer, mul-int(u, index)));
+    unsafe-copy-float-array(source-pointer, target-pointer, add-int(index, 1), add-int(from, 1), to)
+  }
+}
+
+resource float-array {
+- (x: int) => {
+    magic.cast(unit, int, free(x))
+  }
+- (source-pointer: int) => {
+    let u = arch.unit() in
+    let u2 = mul-int(u, 2) in
+    let from = mem.load-int(source-pointer) in
+    let to = mem.load-int(add-int(source-pointer, u)) in
+    let length = sub-int(to, from) in
+    let target-pointer = malloc(add-int(mul-int(u, length), u2)) in
+    mem.store-int(0, target-pointer);
+    mem.store-int(length, add-int(target-pointer, u));
+    unsafe-copy-float-array(add-int(source-pointer, u2), add-int(target-pointer, u2), 0, from, to);
+    target-pointer
+  }
+}
+
+define length(xs: &float-array): int {
+  let source-pointer = magic cast(&float-array, int, xs) in
+  let u = arch.unit() in
+  let from = mem.load-int(source-pointer) in
+  let to = mem.load-int(add-int(source-pointer, u)) in
+  sub-int(to, from)
+}
+
+define new(xs: list(float)): float-array {
+  let len on xs = this.list.length(float, xs) in
+  let u = arch.unit() in
+  let u2 = mul-int(u, 2) in
+  let base-pointer = malloc(add-int(mul-int(u, len), u2)) in
+  mem.store-int(0, base-pointer);
+  mem.store-int(len, add-int(base-pointer, u));
+  let content-pointer: int = add-int(base-pointer, u2) in
+  let store-values =
+    mu self(values: list(float), index: int): unit {
+      match values {
+      - [] =>
+        Unit
+      - v :: rest =>
+        mem.store-float(v, add-int(content-pointer, mul-int(u, index)));
+        self(rest, add-int(index, 1))
+      }
+    }
+  in
+  let _ = store-values(xs, 0) in
+  magic.cast(int, float-array, base-pointer)
+}
+
+inline access(xs: &float-array, i: int): float {
+  let ptr = magic.cast(&float-array, int, xs) in
+  let u = arch.unit() in
+  let from = mem.load-int(ptr) in
+  let u2 = mul-int(u, 2) in
+  mem.load-float(add-int(add-int(ptr, u2), mul-int(u, add-int(from, i))))
+}
+
+define tail(xs: float-array): float-array {
+  let ptr = magic.cast(float-array, int, xs) in
+  let from = mem.load-int(ptr) in
+  mem.store-int(add-int(from, 1), ptr);
+  magic.cast(int, float-array, ptr)
+}
+
+define uncons(xs: float-array): ?tuple(float, float-array) {
+  let len on xs = this.float-array.length(xs) in
+  if eq-int(len, 0) {
+    None
+  } else {
+    let head-content on xs = access(xs, 0) in
+    Some(Tuple(head-content, tail(xs)))
+  }
+}
+
+define for-each(xs: &float-array, f: float -> unit): unit {
+  let ptr = magic.cast(&float-array, int, xs) in
+  let u = arch.unit() in
+  let from = mem.load-int(ptr) in
+  let to = mem.load-int(add-int(ptr, u)) in
+  io.print("from: ");
+  io.print-int(from);
+  io.print("\nto: ");
+  io.print-int(to);
+  io.print("\n");
+  let len = sub-int(to, from) in
+  let for-each-helper =
+    mu self(cursor: int) {
+      if eq-int(cursor, len) {
+        Unit
+      } else {
+        let val = access(xs, cursor) in
+        f(val);
+        self(add-int(cursor, 1))
+      }
+    }
+  in
+  for-each-helper(0)
+}

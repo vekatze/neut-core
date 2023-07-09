@@ -30,3 +30,11 @@ inline load-int8(address: int): int8 {
 inline load-int1(address: int): int1 {
   magic load(int1, address)
 }
+
+inline store-float(value: float, address: int): unit {
+  magic store(float, value, address)
+}
+
+inline load-float(address: int): float {
+  magic load(float, address)
+}

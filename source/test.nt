@@ -5,7 +5,7 @@ import {
 - this.int8-array
 - this.list => [list, map]
 - this.both
-- this.either => [either, Right]
+- this.either => [either, Right, Left]
 - this.system
 - this.text => [text]
 - this.unit => [unit, Unit]
@@ -22,9 +22,36 @@ import {
 - this.channel => [channel, new-channel, send, receive]
 - this.cell
 - this.magic => magic
+- this.float-array => fa
 }
 
 define main(): unit {
+  // text.print-int(3)
+  let arr = fa.new([1.2, -3.8712349812, 5.92378]) in
+  let item on arr =
+    fa.for-each(arr, (x) => {
+      text.print-float(x);
+      text.print("\n")
+    })
+  in
+  let _ = arr in
+  let _ = arr in
+  let _ = arr in
+  match fa.uncons(arr) {
+  - None =>
+    text.print-line("empty-array")
+  - Some(this.both.Both(val, arr)) =>
+    text.print("head-element: ");
+    text.print-float(val);
+    text.print-line("\ntail: ");
+    let foo on arr =
+      fa.for-each(arr, (x) => {
+        text.print-float(x);
+        text.print("\n")
+      })
+    in
+    Unit
+  };
   let foo =
     let bar = tau in
     let buz = tau in

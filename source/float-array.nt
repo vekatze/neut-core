@@ -108,6 +108,14 @@ define uncons(xs: float-array): ?tuple(float, float-array) {
   }
 }
 
+// O(1)
+define swap(xs: float-array, i: int, j: int): float-array {
+  let v1 on xs = access(xs, i) in
+  let v2 on xs = access(xs, j) in
+  let xs = store(xs, i, v2) in
+  store(xs, j, v1)
+}
+
 define for-each(xs: &float-array, f: float -> unit): unit {
   let ptr = magic.cast(&float-array, int, xs) in
   let u = arch.unit() in

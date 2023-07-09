@@ -103,11 +103,6 @@ define for-each(xs: &float-array, f: float -> unit): unit {
   let u = arch.unit() in
   let from = mem.load-int(ptr) in
   let to = mem.load-int(add-int(ptr, u)) in
-  io.print("from: ");
-  io.print-int(from);
-  io.print("\nto: ");
-  io.print-int(to);
-  io.print("\n");
   let len = sub-int(to, from) in
   let for-each-helper =
     mu self(cursor: int) {

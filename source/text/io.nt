@@ -75,7 +75,7 @@ define print(t: &text): unit {
   let fmt = unsafe-get-content-pointer("%.*s\0") in
   let len = text-byte-length(t) in
   let val = unsafe-get-content-pointer(t) in
-  magic external(printf, fmt; len, val)
+  magic external(printf, fmt; len int, val pointer)
 }
 
 define get-line(): ?text {
@@ -116,17 +116,17 @@ define print-line(t: &text): unit {
   let fmt = unsafe-get-content-pointer("%.*s\n\0") in
   let len = text-byte-length(t) in
   let val = unsafe-get-content-pointer(t) in
-  magic external(printf, fmt; len, val)
+  magic external(printf, fmt; len int, val pointer)
 }
 
 define print-float(x: float): unit {
-  let fmt = unsafe-get-content-pointer("%f\0") in
-  magic external(printf, fmt; x)
+  let fmt = unsafe-get-content-pointer("%lf\0") in
+  magic external(printf, fmt; x float)
 }
 
 define print-int(x: int): unit {
-  let fmt = unsafe-get-content-pointer("%d\0") in
-  magic external(printf, fmt; x)
+  let fmt = unsafe-get-content-pointer("%ld\0") in
+  magic external(printf, fmt; x int)
 }
 
 define fflush(ptr: int): unit {

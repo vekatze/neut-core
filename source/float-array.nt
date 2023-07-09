@@ -81,6 +81,16 @@ inline access(xs: &float-array, i: int): float {
   mem.load-float(add-int(add-int(ptr, u2), mul-int(u, add-int(from, i))))
 }
 
+inline store(xs: float-array, i: int, x: float): float-array {
+  let ptr = magic.cast(float-array, int, xs) in
+  let u = arch.unit() in
+  let from = mem.load-int(ptr) in
+  let u2 = mul-int(u, 2) in
+  mem.store-float(x, add-int(add-int(ptr, u2), mul-int(u, add-int(from, i))));
+  magic.cast(int, float-array, ptr)
+}
+
+// O(1)
 define tail(xs: float-array): float-array {
   let ptr = magic.cast(float-array, int, xs) in
   let from = mem.load-int(ptr) in

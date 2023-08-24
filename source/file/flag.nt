@@ -11,7 +11,7 @@ data flag {
 }
 
 define interpret-flag(flag: flag): int {
-  introspect target-os {
+  introspect os {
   - darwin =>
     // https://github.com/apple/darwin-xnu/blob/main/bsd/sys/fcntl.h
     match flag {

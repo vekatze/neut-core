@@ -3,7 +3,7 @@ import {
 }
 
 inline store-int(value: int, address: int): unit {
-  introspect target-arch {
+  introspect arch {
   - amd64 =>
     magic store(int64, value, address)
   - arm64 =>

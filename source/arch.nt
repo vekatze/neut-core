@@ -1,5 +1,5 @@
 inline unit(): int {
-  introspect target-arch {
+  introspect arch {
   - amd64 =>
     8
   - arm64 =>

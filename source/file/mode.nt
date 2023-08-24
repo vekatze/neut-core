@@ -15,7 +15,7 @@ data mode {
 }
 
 define interpret-mode(flag: mode): int {
-  introspect target-os {
+  introspect os {
   - darwin =>
     // https://github.com/apple/darwin-xnu/blob/main/bsd/sys/fcntl.h
     match flag {

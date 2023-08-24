@@ -1,7 +1,7 @@
 import {
-- this.text => [text, unsafe-get-content-pointer]
-- this.unit => [unit]
-- this.list => [list]
+- this.text [text, unsafe-get-content-pointer]
+- this.unit [unit]
+- this.list [list]
 - this.file.flag => FF
 - this.file.mode => FM
 - this.file.descriptor => FD

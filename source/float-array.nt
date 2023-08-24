@@ -1,16 +1,17 @@
 import {
 - this.bool
-- this.list => [list, length]
-- this.unit => [unit, Unit]
-- this.external => [free, malloc]
+- this.list [list, length, minimum]
+- this.unit [unit, Unit]
+- this.external [free, malloc]
 - this.memory => mem
 - this.arch => arch
 - this.magic => magic
 - this.both
-- this.either
+- this.either [from-option]
 - this.system
 - this.text
 - this.text.io => io
+- this.int => int
 }
 
 define unsafe-copy-float-array(source-pointer: int, target-pointer: int, index: int, from: int, to: int): unit {
@@ -98,6 +99,7 @@ define tail(xs: float-array): float-array {
   magic.cast(int, float-array, ptr)
 }
 
+// O(1)
 define uncons(xs: float-array): ?tuple(float, float-array) {
   let len on xs = this.float-array.length(xs) in
   if eq-int(len, 0) {
@@ -134,4 +136,24 @@ define for-each(xs: &float-array, f: float -> unit): unit {
     }
   in
   for-each-helper(0)
+}
+
+define zip-with(f: (float, float) -> float, xs: &float-array, ys: &float-array): float-array {
+  let u = arch.unit() in
+  let len1 = this.float-array.length(xs) in
+  let len2 = this.float-array.length(ys) in
+  let len-or-none = minimum[1](int.as-ordered())([len1, len2]) in
+  let len = from-option[1](0, len-or-none) in
+  let zip-with-helper =
+    mu self(cursor: int) {
+      if eq-int(cursor, len) {
+        []
+      } else {
+        let val1 = access(xs, cursor) in
+        let val2 = access(ys, cursor) in
+        f(val1, val2) :: self(add-int(cursor, 1))
+      }
+    }
+  in
+  new(zip-with-helper(0))
 }

@@ -1,5 +1,31 @@
 import {
-- this.list => [list]
+- this.list [list]
+- this.data.entity => e
+- this.data.ordered => o
+- this.ordering [GT, LT, EQ]
+- this.bool
+}
+
+define as-entity(): e.entity(int) {
+  e.Entity of {
+  - identity => eq-int
+  }
+}
+
+inline as-ordered(): o.ordered(int) {
+  o.Ordered of {
+  - as-entity => as-entity()
+  - order =>
+    (x, y) => {
+      if gt-int(x, y) {
+        GT
+      } else-if lt-int(x, y) {
+        LT
+      } else {
+        EQ
+      }
+    }
+  }
 }
 
 define sum-int(xs: list(int)): int {

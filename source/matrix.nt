@@ -1,0 +1,91 @@
+import {
+- this.float-array => fa
+- this.list [list] => l
+- this.system
+- this.text [text]
+- this.int => i
+- this.either [from-option]
+- this.unit [unit, Unit]
+- this.bool
+- this.text.io => io
+}
+
+data matrix {
+- Matrix of {
+  - row-size: int
+  - col-size: int
+  - content: fa.float-array
+  }
+}
+
+define new(xs: list(list(float))): matrix {
+  let get-len = (xs) => { l.length[1](xs) } in
+  let len-list on xs = l.map-noetic[2](get-len, xs) in
+  let col-size = l.minimum[1](i.as-ordered())(len-list) in
+  let row-size on xs = l.length[1](xs) in
+  Matrix of {
+  - row-size => row-size
+  - col-size => from-option[1](0, col-size)
+  - content => fa.new(l.concat[1](xs))
+  }
+}
+
+define get-row-size(mat: &matrix): int {
+  link Matrix(..) = mat in
+  *row-size
+}
+
+define get-col-size(mat: &matrix): int {
+  link Matrix(..) = mat in
+  *col-size
+}
+
+define get-content(mat: &matrix): &fa.float-array {
+  link Matrix(..) = mat in
+  content
+}
+
+define print-mat(mat: &matrix): unit {
+  let row-size = get-row-size(mat) in
+  let col-size = get-col-size(mat) in
+  let content = get-content(mat) in
+  l.for[1](l.range(0, row-size), (row) => {
+    l.for[1](l.range(0, col-size), (col) => {
+      let index = add-int(col, mul-int(col-size, row)) in
+      let elem = fa.access(content, index) in
+      io.print-float(elem);
+      io.print(" ")
+    });
+    io.print("\n")
+  })
+}
+
+define add-mat(mat1: &matrix, mat2: &matrix): matrix {
+  let vec1 = get-content(mat1) in
+  let vec2 = get-content(mat2) in
+  let new-vec = fa.zip-with(add-float, vec1, vec2) in
+  let row-size = get-row-size(mat1) in
+  assert "row-size(mat1) == row-size(mat2)" {
+    let row-size-2 = get-row-size(mat2) in
+    eq-int(row-size, row-size-2)
+  };
+  let col-size = get-col-size(mat1) in
+  assert "col-size(mat1) == col-size(mat2)" {
+    let col-size-2 = get-col-size(mat2) in
+    eq-int(col-size, col-size-2)
+  };
+  Matrix of {
+  - row-size => row-size
+  - col-size => col-size
+  - content => new-vec
+  }
+}
+
+define mul-mat(mat1: &matrix, mat2: &matrix): matrix {
+  let row-size-2 = get-row-size(mat2) in
+  let col-size-1 = get-col-size(mat1) in
+  assert "col-size(mat1) == row-size(mat2)" {
+    eq-int(col-size-1, row-size-2)
+  };
+  admit
+}

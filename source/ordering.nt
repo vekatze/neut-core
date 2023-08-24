@@ -1,4 +1,4 @@
-data order {
+data ordering {
 - LT
 - EQ
 - GT

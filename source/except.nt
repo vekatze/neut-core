@@ -3,46 +3,46 @@ import {
 - this.bool [bool, True, False]
 }
 
-data either(a: tau, b: tau) {
-- Left(a)
-- Right(b)
+data except(a: tau, b: tau) {
+- Fail(a)
+- Success(b)
 }
 
 inline option(a: tau): tau {
-  either(unit, a)
+  except(unit, a)
 }
 
 inline none-internal(a: tau): option(a) {
-  Left(Unit)
+  Fail(Unit)
 }
 
 inline some-internal(a: tau, x: a): option(a) {
-  Right(x)
+  Success(x)
 }
 
 define is-None(a: tau, x: option(a)): bool {
   match x {
-  - Left(_) =>
+  - Fail(_) =>
     True
-  - Right(_) =>
+  - Success(_) =>
     False
   }
 }
 
 define is-Some(a: tau, x: option(a)): bool {
   match x {
-  - Left(_) =>
+  - Fail(_) =>
     False
-  - Right(_) =>
+  - Success(_) =>
     True
   }
 }
 
 define from-option(a: tau, x: a, my: option(a)): a {
   match my {
-  - Right(y) =>
+  - Success(y) =>
     y
-  - Left(_) =>
+  - Fail(_) =>
     x
   }
 }

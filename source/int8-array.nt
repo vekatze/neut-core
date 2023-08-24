@@ -1,8 +1,8 @@
 import {
 - this.bool
-- this.list => [list, length]
-- this.unit => [unit, Unit]
-- this.external => [free, malloc]
+- this.list [list, length]
+- this.unit [unit, Unit]
+- this.external [free, malloc]
 - this.memory => mem
 - this.arch => arch
 - this.magic => magic

@@ -1,5 +1,5 @@
 import {
-- this.list => [list]
+- this.list [list]
 }
 
 data mode {

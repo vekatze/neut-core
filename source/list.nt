@@ -1,11 +1,14 @@
 import {
-- this.bool => [bool, True, False, and, or]
+- this.bool [bool, True, False, and, or]
 - this.both
-- this.either => [option]
-- this.function => [flip]
-- this.data.semigroup => s
-- this.data.monoid => m
-- this.data.functor => f
+- this.either [option]
+- this.function [flip]
+- this.data.semigroup [semigroup, Semigroup]
+- this.data.monoid [monoid, Monoid]
+- this.data.functor [functor, Functor]
+- this.data.ordered [ordered, Ordered]
+- this.ordering [LT, GT]
+- this.unit [unit, Unit]
 }
 
 data list(a: tau) {
@@ -52,8 +55,13 @@ inline map(a: tau, b: tau, f: a -> b, xs: list(a)): list(b) {
   map-internal(a, b, f)(xs)
 }
 
-inline for(a: tau, b: tau, xs: list(a), f: a -> b): list(b) {
+inline for-each(a: tau, b: tau, xs: list(a), f: a -> b): list(b) {
   map-internal(a, b, f)(xs)
+}
+
+inline for(a: tau, xs: list(a), f: a -> unit): unit {
+  let _ = map-internal(a, unit, f)(xs) in
+  Unit
 }
 
 inline map-internal(a: tau, b: tau, f: a -> b): list(a) -> list(b) {
@@ -67,9 +75,17 @@ inline map-internal(a: tau, b: tau, f: a -> b): list(a) -> list(b) {
   }
 }
 
+define map-noetic(a: tau, b: tau, f: &a -> b, xs: &list(a)): list(b) {
+  case xs {
+  - [] =>
+    []
+  - y :: ys =>
+    f(y) :: map-noetic[2](f, ys)
+  }
+}
+
 define append(a: tau, xs: list(a), ys: list(a)): list(a) {
-  let flip-cons = (xs, x) => { Cons(x, xs) } in
-  fold-left(a, list(a), flip-cons, xs, ys)
+  fold-right[2](Cons, ys, xs)
 }
 
 define concat(a: tau, xss: list(list(a))): list(a) {
@@ -152,8 +168,59 @@ define filter-some(a: tau, xs: list(option(a))): list(a) {
   }
 }
 
-inline as-semigroup(a: tau): s.semigroup(list(a)) {
-  s.Semigroup of {
+inline minimum(a: tau, as-ord: ordered(a))(xs: list(a)): ?a {
+  let Ordered(..) = as-ord in
+  let helper =
+    mu self(cand: a, ys: list(a)): a {
+      match ys {
+      - [] =>
+        cand
+      - z :: zs =>
+        match order(cand, z) {
+        - LT =>
+          self(cand, zs)
+        - _ =>
+          self(z, zs)
+        }
+      }
+    }
+  in
+  match xs {
+  - [] =>
+    None
+  - y :: ys =>
+    Some(helper(y, ys))
+  }
+}
+
+inline maximum(a: tau, as-ord: ordered(a))(xs: list(a)): ?a {
+  let Ordered(..) = as-ord in
+  let helper =
+    mu self(cand: a, ys: list(a)): a {
+      match ys {
+      - [] =>
+        cand
+      - z :: zs =>
+        match order(cand, z) {
+        - GT =>
+          self(cand, zs)
+        - _ =>
+          self(z, zs)
+        }
+      }
+    }
+  in
+  match xs {
+  - [] =>
+    None
+  - y :: ys =>
+    Some(helper(y, ys))
+  }
+}
+
+
+inline as-semigroup(a: tau): semigroup(list(a)) {
+  Semigroup of {
   - append =>
     (x, y) => {
       append(a, x, y)
@@ -161,8 +228,8 @@ inline as-semigroup(a: tau): s.semigroup(list(a)) {
   }
 }
 
-inline as-monoid(a: tau): m.monoid(list(a)) {
-  m.Monoid of {
+inline as-monoid(a: tau): monoid(list(a)) {
+  Monoid of {
   - as-semigroup =>
     as-semigroup(a)
   - empty =>
@@ -170,8 +237,8 @@ inline as-monoid(a: tau): m.monoid(list(a)) {
   }
 }
 
-inline as-functor(): f.functor(list) {
-  f.Functor of {
+inline as-functor(): functor(list) {
+  Functor of {
   - map =>
     map
   }

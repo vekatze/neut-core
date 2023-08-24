@@ -1,7 +1,7 @@
 import {
 - this.either
-- this.unit => [unit]
-- this.int => [sum-int]
+- this.unit [unit]
+- this.int [sum-int]
 - this.list => list
 - this.arch => arch
 - this.memory => mem

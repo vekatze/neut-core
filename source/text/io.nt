@@ -1,7 +1,7 @@
 import {
-- this.text => [text, from-int, unsafe-get-content-pointer, text-byte-length]
-- this.bool => [or]
-- this.unit => [unit, Unit]
+- this.text [text, from-int, unsafe-get-content-pointer, text-byte-length]
+- this.bool [or]
+- this.unit [unit, Unit]
 - this.either
 - this.list
 - this.file.flag => FF

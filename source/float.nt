@@ -1,0 +1,28 @@
+import {
+- this.data.entity => e
+- this.data.ordered => o
+- this.ordering [GT, LT, EQ]
+- this.bool
+}
+
+inline as-entity(): e.entity(float) {
+  e.Entity of {
+  - identity => eq-float // no reflexivity due to NaN
+  }
+}
+
+inline as-ordered(): o.ordered(float) {
+  o.Ordered of {
+  - as-entity => as-entity()
+  - order =>
+    (x, y) => {
+      if gt-float(x, y) {
+        GT
+      } else-if lt-float(x, y) {
+        LT
+      } else {
+        EQ
+      }
+    }
+  }
+}

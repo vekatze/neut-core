@@ -5,7 +5,7 @@ import {
 
 data except(a: tau, b: tau) {
 - Fail(a)
-- Success(b)
+- Pass(b)
 }
 
 inline option(a: tau): tau {
@@ -17,14 +17,14 @@ inline none-internal(a: tau): option(a) {
 }
 
 inline some-internal(a: tau, x: a): option(a) {
-  Success(x)
+  Pass(x)
 }
 
 define is-None(a: tau, x: option(a)): bool {
   match x {
   - Fail(_) =>
     True
-  - Success(_) =>
+  - Pass(_) =>
     False
   }
 }
@@ -33,14 +33,14 @@ define is-Some(a: tau, x: option(a)): bool {
   match x {
   - Fail(_) =>
     False
-  - Success(_) =>
+  - Pass(_) =>
     True
   }
 }
 
 define from-option(a: tau, x: a, my: option(a)): a {
   match my {
-  - Success(y) =>
+  - Pass(y) =>
     y
   - Fail(_) =>
     x

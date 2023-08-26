@@ -80,12 +80,12 @@ define map-noetic(a: tau, b: tau, f: &a -> b, xs: &list(a)): list(b) {
   - [] =>
     []
   - y :: ys =>
-    f(y) :: map-noetic[2](f, ys)
+    f(y) :: map-noetic/2(f, ys)
   }
 }
 
 define append(a: tau, xs: list(a), ys: list(a)): list(a) {
-  fold-right[2](Cons, ys, xs)
+  fold-right/2(Cons, ys, xs)
 }
 
 define concat(a: tau, xss: list(list(a))): list(a) {

@@ -142,8 +142,8 @@ define zip-with(f: (float, float) -> float, xs: &float-array, ys: &float-array):
   let u = arch.unit() in
   let len1 = this.float-array.length(xs) in
   let len2 = this.float-array.length(ys) in
-  let len-or-none = minimum[1](int.as-ordered())([len1, len2]) in
-  let len = from-option[1](0, len-or-none) in
+  let len-or-none = minimum/1(int.as-ordered())([len1, len2]) in
+  let len = from-option/1(0, len-or-none) in
   let zip-with-helper =
     mu self(cursor: int) {
       if eq-int(cursor, len) {

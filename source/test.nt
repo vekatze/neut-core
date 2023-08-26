@@ -23,23 +23,24 @@ import {
 - this.magic => magic
 - this.float-array => fa
 - this.float => f
-- this.matrix => m
+- this.data.matrix => m
 }
 
 define main(): unit {
-  let mat =
-    m.new([
-      [1, 2.812374, 3],
-      [4, 5, 6]
-    ])
-  in
-  let mat2 =
-    m.new([
-      [31.2, 2.812, 8],
-      [-1234, -5, 23]
-    ])
-  in
-  let sum-mat on mat, mat2 = m.add-mat(mat, mat2) in
-  let _ on sum-mat = m.print-mat(sum-mat) in
   Unit
+  // let mat =
+  //   m.new([
+  //     [1, 2.812374, 3],
+  //     [4, 5, 6]
+  //   ])
+  // in
+  // let mat2 =
+  //   m.new([
+  //     [31.2, 2.812, 8],
+  //     [-1234, -5, 23]
+  //   ])
+  // in
+  // let sum-mat on mat, mat2 = m.add-mat(mat, mat2) in
+  // let _ on sum-mat = m.print-mat(sum-mat) in
+  // Unit
 }

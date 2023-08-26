@@ -51,20 +51,11 @@ resource vector-internal {
   }
 }
 
-lucent -list-length(a: tau, xs: list(a)): nat {
-  match xs {
-  - [] =>
-    0
-  - _ :: rest =>
-    Succ(-list-length(a, rest))
-  }
-}
-
-define vector(_: nat, _: tau): tau {
+define vector(_: tau): tau {
   vector-internal
 }
 
-define new(a: tau, xs: list(a)): vector(-list-length(a, xs), a) {
+define new(a: tau, xs: list(a)): vector(a) {
   let u = arch.unit() in
   let u2 = mul-int(u, 2) in
   let n on xs = this.list.length(a, xs) in
@@ -87,13 +78,9 @@ define new(a: tau, xs: list(a)): vector(-list-length(a, xs), a) {
   magic cast(int, _, base-pointer)
 }
 
-inline access(a: tau, n: nat, xs: &vector(n, a), i: int): a {
+inline access(a: tau, xs: &vector(a), i: int): a {
   let u = arch.unit() in
   let u2 = mul-int(u, 2) in
-  let ptr = magic.cast(&vector(n, a), int, xs) in
+  let ptr = magic.cast(&vector(a), int, xs) in
   magic.cast(int, a, mem.load-int(add-int(add-int(ptr, u2), mul-int(u, i))))
-}
-
-define length(a: tau, n: nat, _: &vector(n, a)): int {
-  magic cast(nat, int, n)
 }

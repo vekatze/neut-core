@@ -44,7 +44,7 @@ define enqueue(a: tau, x: a, q: queue(a)): queue(a) {
 }
 
 define size(a: tau, q: *queue(a)): int {
-  case q {
+  match* q {
   - Tuple(ls, rs) =>
     let l1 = length(a, ls) in
     let l2 = length(a, rs) in
@@ -53,7 +53,7 @@ define size(a: tau, q: *queue(a)): int {
 }
 
 define is-empty(a: tau, q: *queue(a)): bool {
-  case q {
+  match* q {
   - Tuple([], []) =>
     True
   - _ =>

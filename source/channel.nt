@@ -31,14 +31,14 @@ resource channel-internal {
     let cond-size = ext.thread-cond-size() in
     let type-offset = add-int(u, add-int(mutex-size, cond-size)) in
     let a = magic.cast(int, tau, mem.load-int(add-int(ch, type-offset))) in
-    let q: &Q.queue(a) = magic.cast(int, &Q.queue(a), mem.load-int(ch)) in
+    let q: *Q.queue(a) = magic.cast(int, *Q.queue(a), mem.load-int(ch)) in
     let q-clone: Q.queue(a) = get-clone(Q.queue(a), q) in
     magic.cast(channel(a), int, new-channel-internal(a, q-clone))
   }
 }
 
-inline get-clone(a: tau, x: &a): a {
-  *x
+inline get-clone(a: tau, x: *a): a {
+  !x
 }
 
 // (queue, mutex, cond, queue-elem-type)
@@ -62,8 +62,8 @@ define new-channel-internal(a: tau, q: Q.queue(a)): channel(a) {
   magic.cast(int, channel(a), ptr)
 }
 
-define send(a: tau, ch: &channel(a), x: a): unit {
-  let ch = magic.cast(&channel(a), int, ch) in
+define send(a: tau, ch: *channel(a), x: a): unit {
+  let ch = magic.cast(*channel(a), int, ch) in
   let u = arch.unit() in
   let mutex-ptr = add-int(ch, u) in
   ext.thread-mutex-lock(mutex-ptr);
@@ -76,8 +76,8 @@ define send(a: tau, ch: &channel(a), x: a): unit {
   ext.thread-mutex-unlock(mutex-ptr)
 }
 
-define receive(a: tau, ch: &channel(a)): a {
-  let ch = magic.cast(&channel(a), int, ch) in
+define receive(a: tau, ch: *channel(a)): a {
+  let ch = magic.cast(*channel(a), int, ch) in
   let u = arch.unit() in
   let mutex-ptr = add-int(ch, u) in
   ext.thread-mutex-lock(mutex-ptr);

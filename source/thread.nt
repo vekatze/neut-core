@@ -17,7 +17,7 @@ resource flow-inner {
     let u = arch.unit() in
     let elem-type = magic.cast(int, tau, mem.load-int(add-int(p, u))) in
     let pr: flow(elem-type) = magic.cast(int, flow(elem-type), p) in
-    let _: elem-type = this.thread.attach(elem-type, pr: flow(elem-type)) in // await & discard
+    let _: elem-type = this.thread.attach(elem-type, pr: flow(elem-type)) in // await * discard
     0
   }
 - (addr: int) => {
@@ -28,7 +28,7 @@ resource flow-inner {
     await-and-write-result(addr);
     let thread-id = mem.load-int(addr) in
     let elem-type = magic.cast(int, tau, mem.load-int(add-int(addr, u))) in
-    let elem-value: &elem-type = magic.cast(int, &elem-type, mem.load-int(add-int(addr, u2))) in
+    let elem-value: *elem-type = magic.cast(int, *elem-type, mem.load-int(add-int(addr, u2))) in
     let new-addr = ext.malloc(flow-size()) in
     mem.store-int(thread-id, new-addr);
     mem.store-int(magic.cast(tau, int, elem-type), add-int(new-addr, u));
@@ -39,8 +39,8 @@ resource flow-inner {
   }
 }
 
-inline embody(a: tau, x: &a): a {
-  *x
+inline embody(a: tau, x: *a): a {
+  !x
 }
 
 inline flow-size(): int {

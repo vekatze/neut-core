@@ -43,8 +43,8 @@ resource float-array {
   }
 }
 
-define length(xs: &float-array): int {
-  let source-pointer = magic cast(&float-array, int, xs) in
+define length(xs: *float-array): int {
+  let source-pointer = magic cast(*float-array, int, xs) in
   let u = arch.unit() in
   let from = mem.load-int(source-pointer) in
   let to = mem.load-int(add-int(source-pointer, u)) in
@@ -74,8 +74,8 @@ define new(xs: list(float)): float-array {
   magic.cast(int, float-array, base-pointer)
 }
 
-inline access(xs: &float-array, i: int): float {
-  let ptr = magic.cast(&float-array, int, xs) in
+inline access(xs: *float-array, i: int): float {
+  let ptr = magic.cast(*float-array, int, xs) in
   let u = arch.unit() in
   let from = mem.load-int(ptr) in
   let u2 = mul-int(u, 2) in
@@ -118,8 +118,8 @@ define swap(xs: float-array, i: int, j: int): float-array {
   store(xs, j, v1)
 }
 
-define for-each(xs: &float-array, f: float -> unit): unit {
-  let ptr = magic.cast(&float-array, int, xs) in
+define for-each(xs: *float-array, f: float -> unit): unit {
+  let ptr = magic.cast(*float-array, int, xs) in
   let u = arch.unit() in
   let from = mem.load-int(ptr) in
   let to = mem.load-int(add-int(ptr, u)) in
@@ -138,7 +138,7 @@ define for-each(xs: &float-array, f: float -> unit): unit {
   for-each-helper(0)
 }
 
-define zip-with(f: (float, float) -> float, xs: &float-array, ys: &float-array): float-array {
+define zip-with(f: (float, float) -> float, xs: *float-array, ys: *float-array): float-array {
   let u = arch.unit() in
   let len1 = this.float-array.length(xs) in
   let len2 = this.float-array.length(ys) in

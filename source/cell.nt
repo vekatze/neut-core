@@ -14,21 +14,21 @@ define new-cell(a: tau, x: a): cell(a) {
   magic.cast(channel(a), cell(a), ch)
 }
 
-define mutate(a: tau, ch: &cell(a), f: a -> a): unit {
-  let ch = magic.cast(&cell(a), &channel(a), ch) in
+define mutate(a: tau, ch: *cell(a), f: a -> a): unit {
+  let ch = magic.cast(*cell(a), *channel(a), ch) in
   let v = receive(a, ch) in
   send(a, ch, f(v))
 }
 
-define borrow(a: tau, ch: &cell(a), f: &a -> unit): unit {
-  let ch = magic.cast(&cell(a), &channel(a), ch) in
+define borrow(a: tau, ch: *cell(a), f: *a -> unit): unit {
+  let ch = magic.cast(*cell(a), *channel(a), ch) in
   let v = receive(a, ch) in
   let _ on v = f(v) in
   send(a, ch, v)
 }
 
-define clone(a: tau, ch: &cell(a)): a {
-  let ch = magic.cast(&cell(a), &channel(a), ch) in
+define clone(a: tau, ch: *cell(a)): a {
+  let ch = magic.cast(*cell(a), *channel(a), ch) in
   let v = receive(a, ch) in
   send(a, ch, v);
   v

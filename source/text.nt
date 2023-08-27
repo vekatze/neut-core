@@ -22,9 +22,9 @@ define empty(): text {
   create([])
 }
 
-define append(t1: &text, t2: &text): text {
-  let p1 = magic.cast(&text, int, t1) in
-  let p2 = magic.cast(&text, int, t2) in
+define append(t1: *text, t2: *text): text {
+  let p1 = magic.cast(*text, int, t1) in
+  let p2 = magic.cast(*text, int, t2) in
   let from1 = mem.load-int(p1) in
   let from2 = mem.load-int(p2) in
   let u = arch.unit() in
@@ -56,8 +56,8 @@ define append(t1: &text, t2: &text): text {
   magic.cast(int, text, new-text)
 }
 
-define unsafe-get-content-pointer(t: &text): int {
-  let ptr = magic.cast(&text, int, t) in
+define unsafe-get-content-pointer(t: *text): int {
+  let ptr = magic.cast(*text, int, t) in
   let from = mem.load-int(ptr) in
   let u = arch.unit() in
   add-int(add-int(ptr, mul-int(u, 2)), from)
@@ -76,8 +76,8 @@ define get-text-length-of-int(x: int, acc: int): int {
   }
 }
 
-inline text-byte-length(t: &text): int {
-  let ptr = magic cast(&text, int8-array, t) in
+inline text-byte-length(t: *text): int {
+  let ptr = magic cast(*text, int8-array, t) in
   int8-array-length(ptr)
 }
 

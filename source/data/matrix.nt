@@ -31,17 +31,17 @@ define new(xs: list(list(float))): matrix {
 }
 
 define get-row-size(mat: &matrix): int {
-  link Matrix(..) = mat in
+  tie Matrix(..) = mat in
   *row-size
 }
 
 define get-col-size(mat: &matrix): int {
-  link Matrix(..) = mat in
+  tie Matrix(..) = mat in
   *col-size
 }
 
 define get-content(mat: &matrix): &fa.float-array {
-  link Matrix(..) = mat in
+  tie Matrix(..) = mat in
   content
 }
 

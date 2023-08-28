@@ -1,7 +1,7 @@
 import {
 - this.bool [bool, True, False, and, or]
-- this.both
-- this.either [option]
+- this.pair
+- this.except [option]
 - this.function [flip]
 - this.data.semigroup [semigroup, Semigroup]
 - this.data.monoid [monoid, Monoid]

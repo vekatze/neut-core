@@ -1,3 +1,0 @@
-data both(a, b) {
-- Both(left: a, right: b)
-}

@@ -4,7 +4,7 @@ import {
 - this.system
 - this.text [text]
 - this.int => i
-- this.either [from-option]
+- this.except [from-option]
 - this.unit [unit, Unit]
 - this.bool
 - this.text.io => io

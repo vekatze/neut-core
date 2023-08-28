@@ -4,8 +4,7 @@ import {
 - this.function
 - this.int8-array
 - this.list [list, map, minimum, maximum]
-- this.both
-- this.either [either, Right, Left]
+- this.pair
 - this.system
 - this.text [text]
 - this.unit [unit, Unit]

@@ -1,7 +1,7 @@
 import {
 - this.list [list, Nil, Cons, reverse, length]
-- this.either
-- this.both
+- this.except
+- this.pair
 - this.unit [unit, Unit]
 - this.bool [bool, True, False]
 }

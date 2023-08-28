@@ -6,8 +6,8 @@ import {
 - this.memory => mem
 - this.arch => arch
 - this.magic => magic
-- this.both
-- this.either [from-option]
+- this.pair
+- this.except [from-option]
 - this.system
 - this.text
 - this.text.io => io

@@ -2,7 +2,7 @@ import {
 - this.text [text, from-int, unsafe-get-content-pointer, text-byte-length]
 - this.bool [or]
 - this.unit [unit, Unit]
-- this.either
+- this.except
 - this.list
 - this.file.flag => FF
 - this.file.mode => FM

@@ -1,3 +1,4 @@
+(archive "archive/")
 (source "source/")
 (target
   (test "test.nt"))

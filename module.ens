@@ -1,2 +1,3 @@
+(source "source/")
 (target
   (test "test.nt"))

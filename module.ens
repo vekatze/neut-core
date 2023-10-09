@@ -1,5 +1,5 @@
-(archive "archive/")
-(build "build/")
-(source "source/")
-(target
-  (test "test.nt"))
+{
+  target {
+    test "test.nt"
+  }
+}

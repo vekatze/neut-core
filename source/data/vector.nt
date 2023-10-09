@@ -23,7 +23,7 @@ define copy-vector-content(source-pointer: int, target-pointer: int, elem-type: 
     Unit
   } else {
     let u = arch.unit() in
-    let original = magic.cast(int, *elem-type, mem.load-int(add-int(source-pointer, mul-int(counter, u)))) in
+    let original = magic.cast(int, &elem-type, mem.load-int(add-int(source-pointer, mul-int(counter, u)))) in
     let clone = !original in
     mem.store-int(magic.cast(elem-type, int, clone), add-int(target-pointer, mul-int(counter, u)));
     copy-vector-content(source-pointer, target-pointer, elem-type, add-int(counter, 1), length)
@@ -78,9 +78,9 @@ define new(a: tau, xs: list(a)): vector(a) {
   magic cast(int, _, base-pointer)
 }
 
-inline access(a: tau, xs: *vector(a), i: int): a {
+inline access(a: tau, xs: &vector(a), i: int): a {
   let u = arch.unit() in
   let u2 = mul-int(u, 2) in
-  let ptr = magic.cast(*vector(a), int, xs) in
+  let ptr = magic.cast(&vector(a), int, xs) in
   magic.cast(int, a, mem.load-int(add-int(add-int(ptr, u2), mul-int(u, i))))
 }

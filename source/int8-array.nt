@@ -67,8 +67,8 @@ define int8-array-new(xs: list(int8)): int8-array {
   magic.cast(int, int8-array, base-pointer)
 }
 
-inline int8-array-access(xs: *int8-array, i: int): int8 {
-  let ptr = magic.cast(*int8-array, int, xs) in
+inline int8-array-access(xs: &int8-array, i: int): int8 {
+  let ptr = magic.cast(&int8-array, int, xs) in
   let u = arch.unit() in
   let u2 = mul-int(u, 2) in
   mem.load-int8(add-int(add-int(ptr, u2), i))

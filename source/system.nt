@@ -9,12 +9,12 @@ import {
 - this.arch => arch
 }
 
-define admit(a: tau, t: *text): a {
+define admit(a: tau, t: &text): a {
   print(t);
   exit(a, 1)
 }
 
-inline assert(message: *text, check: () -> bool): unit {
+inline assert(message: &text, check: () -> bool): unit {
   introspect build-mode {
   - release =>
     let _ = check in
@@ -25,7 +25,7 @@ inline assert(message: *text, check: () -> bool): unit {
   }
 }
 
-define assert-inner(message: *text, check: () -> bool): unit {
+define assert-inner(message: &text, check: () -> bool): unit {
   if check() {
     Unit
   } else {

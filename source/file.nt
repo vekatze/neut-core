@@ -9,7 +9,7 @@ import {
 }
 
 // fixme: use the coproduct type to detect errors
-define open(path: *text, xs: list(FF.flag), ms: list(FM.mode)): FD.descriptor {
+define open(path: &text, xs: list(FF.flag), ms: list(FM.mode)): FD.descriptor {
   let path' = this.text.append(path, "\0") in
   let actual-path-string on path' = unsafe-get-content-pointer(path') in
   let fd = ext.open(actual-path-string, FF.interpret(xs), FM.interpret(ms)) in

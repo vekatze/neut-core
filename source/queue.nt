@@ -43,8 +43,8 @@ define enqueue(a: tau, x: a, q: queue(a)): queue(a) {
   Tuple(ls, x :: rs)
 }
 
-define size(a: tau, q: *queue(a)): int {
-  match* q {
+define size(a: tau, q: &queue(a)): int {
+  &match q {
   - Tuple(ls, rs) =>
     let l1 = length(a, ls) in
     let l2 = length(a, rs) in
@@ -52,8 +52,8 @@ define size(a: tau, q: *queue(a)): int {
   }
 }
 
-define is-empty(a: tau, q: *queue(a)): bool {
-  match* q {
+define is-empty(a: tau, q: &queue(a)): bool {
+  &match q {
   - Tuple([], []) =>
     True
   - _ =>

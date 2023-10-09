@@ -30,22 +30,22 @@ define new(xs: list(list(float))): matrix {
   }
 }
 
-define get-row-size(mat: *matrix): int {
-  let* Matrix(..) = mat in
+define get-row-size(mat: &matrix): int {
+  &let Matrix(..) = mat in
   !row-size
 }
 
-define get-col-size(mat: *matrix): int {
-  let* Matrix(..) = mat in
+define get-col-size(mat: &matrix): int {
+  &let Matrix(..) = mat in
   !col-size
 }
 
-define get-content(mat: *matrix): *fa.float-array {
-  let* Matrix(..) = mat in
+define get-content(mat: &matrix): &fa.float-array {
+  &let Matrix(..) = mat in
   content
 }
 
-define print-mat(mat: *matrix): unit {
+define print-mat(mat: &matrix): unit {
   let row-size = get-row-size(mat) in
   let col-size = get-col-size(mat) in
   let content = get-content(mat) in
@@ -60,7 +60,7 @@ define print-mat(mat: *matrix): unit {
   })
 }
 
-define add-mat(mat1: *matrix, mat2: *matrix): matrix {
+define add-mat(mat1: &matrix, mat2: &matrix): matrix {
   let vec1 = get-content(mat1) in
   let vec2 = get-content(mat2) in
   let new-vec = fa.zip-with(add-float, vec1, vec2) in
@@ -81,7 +81,7 @@ define add-mat(mat1: *matrix, mat2: *matrix): matrix {
   }
 }
 
-define mul-mat(mat1: *matrix, mat2: *matrix): matrix {
+define mul-mat(mat1: &matrix, mat2: &matrix): matrix {
   let row-size-2 = get-row-size(mat2) in
   let col-size-1 = get-col-size(mat1) in
   assert "col-size(mat1) == row-size(mat2)" {

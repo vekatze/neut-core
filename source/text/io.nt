@@ -21,8 +21,8 @@ declare {
 }
 
 // fixme: prefer the sum type
-define write(t: *text, f: FD.descriptor): ?int {
-  let ptr = magic.cast(*text, int, t) in
+define write(t: &text, f: FD.descriptor): ?int {
+  let ptr = magic.cast(&text, int, t) in
   let u = arch.unit() in
   let from = mem.load-int(ptr) in
   let to = mem.load-int(add-int(ptr, u)) in
@@ -71,7 +71,7 @@ define read-loop(f: FD.descriptor, content-ptr: int, buffer-size: int, max-read-
   }
 }
 
-define print(t: *text): unit {
+define print(t: &text): unit {
   let fmt = unsafe-get-content-pointer("%.*s\0") in
   let len = text-byte-length(t) in
   let val = unsafe-get-content-pointer(t) in
@@ -112,7 +112,7 @@ define get-line-inner(ptr: int, ptr-size: int, current-index: int, buffer-size: 
   }
 }
 
-define print-line(t: *text): unit {
+define print-line(t: &text): unit {
   let fmt = unsafe-get-content-pointer("%.*s\n\0") in
   let len = text-byte-length(t) in
   let val = unsafe-get-content-pointer(t) in

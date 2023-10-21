@@ -1,6 +1,8 @@
 import {
 - this.bool
-- this.void
+- this.cell
+- this.channel [channel, new-channel, send, receive]
+- this.file
 - this.function
 - this.int8-array
 - this.list [list, map, minimum, maximum]
@@ -8,21 +10,18 @@ import {
 - this.system
 - this.text [text]
 - this.unit [unit, Unit]
-- this.data.vector [vector] => vector
-- this.file
-- this.file.flag => FF
-- this.file.mode => FM
-- this.file.descriptor => FD
-- this.text.io => text
-- this.queue => Q
-- this.external => ext
-- this.thread => t
-- this.channel [channel, new-channel, send, receive]
-- this.cell
-- this.magic => magic
-- this.float-array => fa
-- this.float => f
-- this.data.matrix => m
+- this.void
+- FD
+- FF
+- FM
+- Q
+- ext
+- f
+- fa
+- m
+- magic
+- tio
+- vector [vector]
 }
 
 define main(): unit {

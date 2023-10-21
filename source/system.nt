@@ -1,12 +1,12 @@
 import {
 - this.bool [bool]
+- this.external [exit]
 - this.list [list]
+- this.memory [load-int]
 - this.text [text, unsafe-from-c-string]
 - this.text.io [print]
 - this.unit [unit, Unit]
-- this.external [exit]
-- this.memory [load-int]
-- this.arch => arch
+- arch
 }
 
 define admit(a: tau, t: &text): a {

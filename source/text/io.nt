@@ -1,18 +1,18 @@
 import {
-- this.text [text, from-int, unsafe-get-content-pointer, text-byte-length]
 - this.bool [or]
-- this.unit [unit, Unit]
 - this.except
 - this.list
-- this.file.flag => FF
-- this.file.mode => FM
-- this.file.descriptor => FD
-- this.file.seek => seek
-- this.external => ext
-- this.memory => mem
+- this.text [text, from-int, unsafe-get-content-pointer, text-byte-length]
+- this.unit [unit, Unit]
+- FD
+- FF
+- FM
+- arch
+- ext
+- magic
+- mem
+- seek
 - this.file
-- this.arch => arch
-- this.magic => magic
 }
 
 declare {

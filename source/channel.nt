@@ -1,14 +1,14 @@
 import {
 - this.except
-- this.unit [unit]
 - this.int [sum-int]
-- this.list => list
-- this.arch => arch
-- this.memory => mem
-- this.magic => magic
+- this.unit [unit]
+- Q
+- arch
+- ext
+- list
+- magic
+- mem
 - this.pair
-- this.external => ext
-- this.queue => Q
 }
 
 resource channel-internal {

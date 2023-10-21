@@ -1,5 +1,5 @@
 import {
-- this.data.semigroup => s
+- s
 }
 
 data monoid(a) {

@@ -1,13 +1,13 @@
 import {
-- this.float-array => fa
-- this.list [list] => l
+- this.bool
+- this.except [from-option]
 - this.system
 - this.text [text]
-- this.int => i
-- this.except [from-option]
 - this.unit [unit, Unit]
-- this.bool
-- this.text.io => io
+- L [list]
+- fa
+- int
+- tio
 }
 
 data matrix {
@@ -19,14 +19,14 @@ data matrix {
 }
 
 define new(xs: list(list(float))): matrix {
-  let get-len = (xs) => { l.length/1(xs) } in
-  let len-list on xs = l.map-noetic/2(get-len, xs) in
-  let col-size = l.minimum/1(i.as-ordered())(len-list) in
-  let row-size on xs = l.length/1(xs) in
+  let get-len = (xs) => { L.length/1(xs) } in
+  let len-list on xs = L.map-noetic/2(get-len, xs) in
+  let col-size = L.minimum/1(int.as-ordered())(len-list) in
+  let row-size on xs = L.length/1(xs) in
   Matrix of {
   - row-size => row-size
   - col-size => from-option/1(0, col-size)
-  - content => fa.new(l.concat/1(xs))
+  - content => fa.new(L.concat/1(xs))
   }
 }
 
@@ -49,14 +49,14 @@ define print-mat(mat: &matrix): unit {
   let row-size = get-row-size(mat) in
   let col-size = get-col-size(mat) in
   let content = get-content(mat) in
-  l.for/1(l.range(0, row-size), (row) => {
-    l.for/1(l.range(0, col-size), (col) => {
+  L.for/1(L.range(0, row-size), (row) => {
+    L.for/1(L.range(0, col-size), (col) => {
       let index = add-int(col, mul-int(col-size, row)) in
       let elem = fa.access(content, index) in
-      io.print-float(elem);
-      io.print(" ")
+      tio.print-float(elem);
+      tio.print(" ")
     });
-    io.print("\n")
+    tio.print("\n")
   })
 }
 

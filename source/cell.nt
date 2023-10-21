@@ -1,7 +1,7 @@
 import {
-- this.unit [unit]
 - this.channel [channel, new-channel, send, receive]
-- this.magic => magic
+- this.unit [unit]
+- magic
 }
 
 define cell(a) {

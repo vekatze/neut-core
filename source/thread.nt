@@ -1,19 +1,19 @@
 import {
 - this.bool
-- this.unit [unit, Unit]
-- this.text
-- this.text.io => io
 - this.system
-- this.arch => arch
-- this.memory => mem
-- this.magic => magic
-- this.external => ext
-- this.queue => Q
+- this.text
+- this.unit [unit, Unit]
+- Q
+- arch
+- ext
+- magic
+- mem
+- tio
 }
 
 resource flow-inner {
 - (p: int) => {
-    // io.print("[warning] awaiting a flow to discard it\n")
+    // tio.print("[warning] awaiting a flow to discard it\n")
     let u = arch.unit() in
     let elem-type = magic.cast(int, tau, mem.load-int(add-int(p, u))) in
     let pr: flow(elem-type) = magic.cast(int, flow(elem-type), p) in
@@ -21,7 +21,7 @@ resource flow-inner {
     0
   }
 - (addr: int) => {
-    // io.print("[warning] awaiting a flow to copy it\n")
+    // tio.print("[warning] awaiting a flow to copy it\n")
     let u = arch.unit() in
     let u2 = mul-int(u, 2) in
     let u3 = mul-int(u, 3) in

@@ -1,6 +1,6 @@
 import {
-- this.ordering => o
 - this.data.entity [entity, Entity]
+- o
 }
 
 data ordered(a) {

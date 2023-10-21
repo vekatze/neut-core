@@ -1,13 +1,13 @@
 import {
 - this.bool [bool, True, False, and, or]
-- this.pair
+- this.data.functor [functor, Functor]
+- this.data.monoid [monoid, Monoid]
+- this.data.ordered [ordered, Ordered]
+- this.data.semigroup [semigroup, Semigroup]
 - this.except [option]
 - this.function [flip]
-- this.data.semigroup [semigroup, Semigroup]
-- this.data.monoid [monoid, Monoid]
-- this.data.functor [functor, Functor]
-- this.data.ordered [ordered, Ordered]
 - this.ordering [LT, GT]
+- this.pair
 - this.unit [unit, Unit]
 }
 

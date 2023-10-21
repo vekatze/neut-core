@@ -1,9 +1,9 @@
 import {
-- this.list [list, Nil, Cons, reverse, length]
+- this.bool [bool, True, False]
 - this.except
+- this.list [list, Nil, Cons, reverse, length]
 - this.pair
 - this.unit [unit, Unit]
-- this.bool [bool, True, False]
 }
 
 // naive queue

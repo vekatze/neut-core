@@ -1,6 +1,6 @@
 import {
-- this.unit [unit, Unit]
 - this.bool [bool, True, False]
+- this.unit [unit, Unit]
 }
 
 data except(a: tau, b: tau) {

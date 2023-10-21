@@ -1,8 +1,8 @@
 import {
-- this.data.entity => e
-- this.data.ordered => o
-- this.ordering [GT, LT, EQ]
 - this.bool
+- this.ordering [GT, LT, EQ]
+- e
+- ordered [ordered, Ordered]
 }
 
 inline as-entity(): e.entity(float) {
@@ -11,8 +11,8 @@ inline as-entity(): e.entity(float) {
   }
 }
 
-inline as-ordered(): o.ordered(float) {
-  o.Ordered of {
+inline as-ordered(): ordered(float) {
+  Ordered of {
   - as-entity => as-entity()
   - order =>
     (x, y) => {

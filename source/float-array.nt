@@ -1,17 +1,16 @@
 import {
 - this.bool
-- this.list [list, length, minimum]
-- this.unit [unit, Unit]
-- this.external [free, malloc]
-- this.memory => mem
-- this.arch => arch
-- this.magic => magic
-- this.pair
 - this.except [from-option]
+- this.external [free, malloc]
+- this.list [list, length, minimum]
+- this.pair
 - this.system
 - this.text
-- this.text.io => io
-- this.int => int
+- this.unit [unit, Unit]
+- arch
+- int
+- magic
+- mem
 }
 
 define unsafe-copy-float-array(source-pointer: int, target-pointer: int, index: int, from: int, to: int): unit {

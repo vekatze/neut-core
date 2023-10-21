@@ -1,11 +1,11 @@
 import {
+- this.list [list]
 - this.text [text, unsafe-get-content-pointer]
 - this.unit [unit]
-- this.list [list]
-- this.file.flag => FF
-- this.file.mode => FM
-- this.file.descriptor => FD
-- this.external => ext
+- FF
+- FM
+- FD
+- ext
 }
 
 // fixme: use the coproduct type to detect errors

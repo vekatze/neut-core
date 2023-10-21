@@ -1,4 +1,27 @@
 {
+  prefix {
+    FD "this.file.descriptor"
+    FF "this.file.flag"
+    FM "this.file.mode"
+    L "this.list"
+    Q "this.queue"
+    arch "this.arch"
+    e "this.data.entity"
+    ext "this.external"
+    f "this.float"
+    fa "this.float-array"
+    int "this.int"
+    list "this.list"
+    m "this.data.matrix"
+    magic "this.magic"
+    mem "this.memory"
+    o "this.ordering"
+    ordered "this.data.ordered"
+    s "this.data.semigroup"
+    seek "this.file.seek"
+    tio "this.text.io"
+    vector "this.data.vector"
+  }
   target {
     test "test.nt"
   }

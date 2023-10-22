@@ -215,7 +215,7 @@ inline maximum[a](as-ord: ordered(a))(xs: list(a)): ?a {
 }
 
 
-inline as-semigroup(a: tau): semigroup(list(a)) {
+inline as-semigroup[a](): semigroup(list(a)) {
   Semigroup of {
   - append =>
     (x, y) => {
@@ -224,10 +224,10 @@ inline as-semigroup(a: tau): semigroup(list(a)) {
   }
 }
 
-inline as-monoid(a: tau): monoid(list(a)) {
+inline as-monoid[a](): monoid(list(a)) {
   Monoid of {
   - as-semigroup =>
-    as-semigroup(a)
+    as-semigroup()
   - empty =>
     []
   }

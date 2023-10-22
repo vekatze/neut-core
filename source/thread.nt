@@ -39,6 +39,10 @@ resource flow-inner {
   }
 }
 
+define flow(_: tau) {
+  flow-inner
+}
+
 inline embody(a: tau, x: &a): a {
   !x
 }

@@ -45,7 +45,7 @@ define int8-array-length(xs: int8-array): int {
 }
 
 define int8-array-new(xs: list(int8)): int8-array {
-  let len on xs = length(int8, xs) in
+  let len on xs = length(xs) in
   let u = arch.unit() in
   let u2 = mul-int(u, 2) in
   let base-pointer = malloc(add-int(len, u2)) in

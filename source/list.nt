@@ -16,9 +16,7 @@ data list(a: tau) {
 - Cons(a, list(a))
 }
 
-define fold-left of {
-- elem-type: tau
-- result-type: tau
+define fold-left[elem-type, result-type] of {
 - consumer: (result-type, elem-type) -> result-type
 - acc: result-type
 - xs: list(elem-type)
@@ -36,9 +34,7 @@ define fold-left of {
   loop(acc, xs)
 }
 
-define fold-right of {
-- elem-type: tau
-- result-type: tau
+define fold-right[elem-type, result-type] of {
 - consumer: (elem-type, result-type) -> result-type
 - acc: result-type
 - xs: list(elem-type)
@@ -47,19 +43,19 @@ define fold-right of {
   - [] =>
     acc
   - y :: ys =>
-    consumer(y, fold-right(elem-type, result-type, consumer, acc, ys))
+    consumer(y, fold-right(consumer, acc, ys))
   }
 }
 
-inline map(a: tau, b: tau, f: a -> b, xs: list(a)): list(b) {
+inline map[a, b](f: a -> b, xs: list(a)): list(b) {
   map-internal(a, b, f)(xs)
 }
 
-inline for-each(a: tau, b: tau, xs: list(a), f: a -> b): list(b) {
+inline for-each[a, b](xs: list(a), f: a -> b): list(b) {
   map-internal(a, b, f)(xs)
 }
 
-inline for(a: tau, xs: list(a), f: a -> unit): unit {
+inline for[a](xs: list(a), f: a -> unit): unit {
   let _ = map-internal(a, unit, f)(xs) in
   Unit
 }
@@ -75,25 +71,25 @@ inline map-internal(a: tau, b: tau, f: a -> b): list(a) -> list(b) {
   }
 }
 
-define map-noetic(a: tau, b: tau, f: &a -> b, xs: &list(a)): list(b) {
+define map-noetic[a, b](f: &a -> b, xs: &list(a)): list(b) {
   &match xs {
   - [] =>
     []
   - y :: ys =>
-    f(y) :: map-noetic/2(f, ys)
+    f(y) :: map-noetic(f, ys)
   }
 }
 
-define append(a: tau, xs: list(a), ys: list(a)): list(a) {
-  fold-right/2(Cons, ys, xs)
+define append[a](xs: list(a), ys: list(a)): list(a) {
+  fold-right(Cons, ys, xs)
 }
 
-define concat(a: tau, xss: list(list(a))): list(a) {
-  let partial-append = (xs, ys) => { append(a, xs, ys) } in
-  fold-left(list(a), list(a), partial-append, [], xss)
+define concat[a](xss: list(list(a))): list(a) {
+  let partial-append = (xs, ys) => { append(xs, ys) } in
+  fold-left(partial-append, [], xss)
 }
 
-define reverse(a: tau, xs: list(a)): list(a) {
+define reverse[a](xs: list(a)): list(a) {
   let helper =
     mu rec(xs: list(a), acc: list(a)) {
       match xs {
@@ -107,7 +103,7 @@ define reverse(a: tau, xs: list(a)): list(a) {
   helper(xs, [])
 }
 
-define length(a: tau, xs: &list(a)): int {
+define length[a](xs: &list(a)): int {
   let length-tailcall =
     mu rec(acc: int, xs: &list(a)): int {
       &match xs {
@@ -121,17 +117,17 @@ define length(a: tau, xs: &list(a)): int {
   length-tailcall(0, xs)
 }
 
-define unzip(a: tau, b: tau, xs: list(tuple(a, b))): tuple(list(a), list(b)) {
+define unzip[a, b](xs: list(tuple(a, b))): tuple(list(a), list(b)) {
   match xs {
   - [] =>
     Tuple([], [])
   - Tuple(l, r) :: rest =>
-    let Tuple(rest-l, rest-r) = unzip(a, b, rest) in
+    let Tuple(rest-l, rest-r) = unzip(rest) in
     Tuple(l :: rest-l, r :: rest-r)
   }
 }
 
-define uncons(a: tau, xs: list(a)): ?tuple(a, list(a)) {
+define uncons[a](xs: list(a)): ?tuple(a, list(a)) {
   match xs {
   - [] =>
     None
@@ -141,11 +137,11 @@ define uncons(a: tau, xs: list(a)): ?tuple(a, list(a)) {
 }
 
 define all(xs: list(bool)): bool {
-  fold-left(bool, bool, and, True, xs)
+  fold-left(and, True, xs)
 }
 
 define any(xs: list(bool)): bool {
-  fold-left(bool, bool, or, False, xs)
+  fold-left(or, False, xs)
 }
 
 // right-open interval
@@ -157,18 +153,18 @@ define range(from: int, to: int): list(int) {
   }
 }
 
-define filter-some(a: tau, xs: list(option(a))): list(a) {
+define filter-some[a](xs: list(option(a))): list(a) {
   match xs {
   - [] =>
     []
   - Some(v) :: rest =>
-    v :: filter-some(a, rest)
+    v :: filter-some(rest)
   - None :: rest =>
-    filter-some(a, rest)
+    filter-some(rest)
   }
 }
 
-inline minimum(a: tau, as-ord: ordered(a))(xs: list(a)): ?a {
+inline minimum[a](as-ord: ordered(a))(xs: list(a)): ?a {
   let Ordered(..) = as-ord in
   let helper =
     mu self(cand: a, ys: list(a)): a {
@@ -193,7 +189,7 @@ inline minimum(a: tau, as-ord: ordered(a))(xs: list(a)): ?a {
   }
 }
 
-inline maximum(a: tau, as-ord: ordered(a))(xs: list(a)): ?a {
+inline maximum[a](as-ord: ordered(a))(xs: list(a)): ?a {
   let Ordered(..) = as-ord in
   let helper =
     mu self(cand: a, ys: list(a)): a {
@@ -223,7 +219,7 @@ inline as-semigroup(a: tau): semigroup(list(a)) {
   Semigroup of {
   - append =>
     (x, y) => {
-      append(a, x, y)
+      append(x, y)
     }
   }
 }
@@ -240,6 +236,6 @@ inline as-monoid(a: tau): monoid(list(a)) {
 inline as-functor(): functor(list) {
   Functor of {
   - map =>
-    map
+    (_, _, f, xs) => { map(f, xs) }
   }
 }

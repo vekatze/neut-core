@@ -11,11 +11,11 @@ inline queue(a: tau): tau {
   tuple(list(a), list(a))
 }
 
-define empty(a: tau): queue(a) {
+define empty[a](): queue(a) {
   Tuple([], [])
 }
 
-define dequeue(a: tau, q: queue(a)): ?tuple(a, queue(a)) {
+define dequeue[a](q: queue(a)): ?tuple(a, queue(a)) {
   let Tuple(ls, rs) = q in
   match ls, rs {
   - Nil, Nil =>
@@ -23,36 +23,25 @@ define dequeue(a: tau, q: queue(a)): ?tuple(a, queue(a)) {
   - Cons(l, ls-rest), rs =>
     Some(Tuple(l, Tuple(ls-rest, rs)))
   - Nil, rs =>
-    dequeue(a, Tuple(rs, []))
+    dequeue(Tuple(rs, []))
   }
 }
 
-define test-dequeue(a: tau, ls: list(a), rs: list(a)): unit {
-  match ls, rs {
-  - [], [] =>
-    Unit
-  - Cons(_, _), _ =>
-    Unit
-  - [], rs =>
-    test-dequeue(a, rs, [])
-  }
-}
-
-define enqueue(a: tau, x: a, q: queue(a)): queue(a) {
+define enqueue[a](x: a, q: queue(a)): queue(a) {
   let Tuple(ls, rs) = q in
   Tuple(ls, x :: rs)
 }
 
-define size(a: tau, q: &queue(a)): int {
+define size[a](q: &queue(a)): int {
   &match q {
   - Tuple(ls, rs) =>
-    let l1 = length(a, ls) in
-    let l2 = length(a, rs) in
+    let l1 = length(ls) in
+    let l2 = length(rs) in
     add-int(l1, l2)
   }
 }
 
-define is-empty(a: tau, q: &queue(a)): bool {
+define is-empty[a](q: &queue(a)): bool {
   &match q {
   - Tuple([], []) =>
     True

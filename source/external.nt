@@ -26,7 +26,7 @@ declare {
 - pthread_cond_wait(pointer, pointer): int
 }
 
-define exit(a: tau, status: int): a {
+define exit[a](status: int): a {
   introspect os {
   - darwin =>
     magic external(exit, status)

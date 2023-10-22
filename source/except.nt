@@ -20,7 +20,7 @@ inline some-internal(a: tau, x: a): option(a) {
   Pass(x)
 }
 
-define is-None(a: tau, x: option(a)): bool {
+define is-None[a](x: option(a)): bool {
   match x {
   - Fail(_) =>
     True
@@ -29,7 +29,7 @@ define is-None(a: tau, x: option(a)): bool {
   }
 }
 
-define is-Some(a: tau, x: option(a)): bool {
+define is-Some[a](x: option(a)): bool {
   match x {
   - Fail(_) =>
     False
@@ -38,7 +38,7 @@ define is-Some(a: tau, x: option(a)): bool {
   }
 }
 
-define from-option(a: tau, x: a, my: option(a)): a {
+define from-option[a](x: a, my: option(a)): a {
   match my {
   - Pass(y) =>
     y

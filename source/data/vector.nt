@@ -55,10 +55,10 @@ define vector(_: tau): tau {
   vector-internal
 }
 
-define new(a: tau, xs: list(a)): vector(a) {
+define new[a](xs: list(a)): vector(a) {
   let u = arch.unit() in
   let u2 = mul-int(u, 2) in
-  let n on xs = this.list.length(a, xs) in
+  let n on xs = this.list.length(xs) in
   let base-pointer = malloc(add-int(u2, mul-int(n, u))) in
   mem.store-int(n, base-pointer);
   mem.store-int(magic.cast(tau, int, a), add-int(base-pointer, u));
@@ -78,7 +78,7 @@ define new(a: tau, xs: list(a)): vector(a) {
   magic cast(int, _, base-pointer)
 }
 
-inline access(a: tau, xs: &vector(a), i: int): a {
+inline access[a](xs: &vector(a), i: int): a {
   let u = arch.unit() in
   let u2 = mul-int(u, 2) in
   let ptr = magic.cast(&vector(a), int, xs) in

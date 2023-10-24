@@ -4,7 +4,7 @@ import {
 
 data monoid(a) {
 - Monoid of {
-  - as-semigroup: s.semigroup(a) via s.Semigroup
+  - as-semigroup: s.semigroup(a)
   - empty: a
   }
 }

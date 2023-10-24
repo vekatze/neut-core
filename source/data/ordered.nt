@@ -5,7 +5,7 @@ import {
 
 data ordered(a) {
 - Ordered of {
-  - as-entity: entity(a) via Entity
+  - as-entity: entity(a)
   - order: (a, a) -> o.ordering
   }
 }

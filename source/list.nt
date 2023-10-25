@@ -165,7 +165,7 @@ define filter-some[a](xs: list(option(a))): list(a) {
 }
 
 inline minimum[a](as-ord: ordered(a))(xs: list(a)): ?a {
-  let Ordered(..) = as-ord in
+  let Ordered of { order } = as-ord in
   let helper =
     mu self(cand: a, ys: list(a)): a {
       match ys {
@@ -190,7 +190,7 @@ inline minimum[a](as-ord: ordered(a))(xs: list(a)): ?a {
 }
 
 inline maximum[a](as-ord: ordered(a))(xs: list(a)): ?a {
-  let Ordered(..) = as-ord in
+  let Ordered of { order } = as-ord in
   let helper =
     mu self(cand: a, ys: list(a)): a {
       match ys {

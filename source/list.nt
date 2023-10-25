@@ -164,53 +164,57 @@ define filter-some[a](xs: list(option(a))): list(a) {
   }
 }
 
-inline minimum[a](as-ord: ordered(a))(xs: list(a)): ?a {
-  let Ordered of { order } = as-ord in
-  let helper =
-    mu self(cand: a, ys: list(a)): a {
-      match ys {
-      - [] =>
-        cand
-      - z :: zs =>
-        match order(cand, z) {
-        - LT =>
-          self(cand, zs)
-        - _ =>
-          self(z, zs)
+inline minimum[a](as-ord: ordered(a)): list(a) -> ?a {
+  (xs) => {
+    let Ordered of { order } = as-ord in
+    let helper =
+      mu self(cand: a, ys: list(a)): a {
+        match ys {
+        - [] =>
+          cand
+        - z :: zs =>
+          match order(cand, z) {
+          - LT =>
+            self(cand, zs)
+          - _ =>
+            self(z, zs)
+          }
         }
       }
+    in
+    match xs {
+    - [] =>
+      None
+    - y :: ys =>
+      Some(helper(y, ys))
     }
-  in
-  match xs {
-  - [] =>
-    None
-  - y :: ys =>
-    Some(helper(y, ys))
   }
 }
 
-inline maximum[a](as-ord: ordered(a))(xs: list(a)): ?a {
-  let Ordered of { order } = as-ord in
-  let helper =
-    mu self(cand: a, ys: list(a)): a {
-      match ys {
-      - [] =>
-        cand
-      - z :: zs =>
-        match order(cand, z) {
-        - GT =>
-          self(cand, zs)
-        - _ =>
-          self(z, zs)
+inline maximum[a](as-ord: ordered(a)): list(a) -> ?a {
+  (xs) => {
+    let Ordered of { order } = as-ord in
+    let helper =
+      mu self(cand: a, ys: list(a)): a {
+        match ys {
+        - [] =>
+          cand
+        - z :: zs =>
+          match order(cand, z) {
+          - GT =>
+            self(cand, zs)
+          - _ =>
+            self(z, zs)
+          }
         }
       }
+    in
+    match xs {
+    - [] =>
+      None
+    - y :: ys =>
+      Some(helper(y, ys))
     }
-  in
-  match xs {
-  - [] =>
-    None
-  - y :: ys =>
-    Some(helper(y, ys))
   }
 }
 

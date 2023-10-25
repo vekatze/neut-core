@@ -32,12 +32,12 @@ define new(xs: list(list(float))): matrix {
 
 define get-row-size(mat: &matrix): int {
   &let Matrix of { row-size } = mat in
-  !row-size
+  *row-size
 }
 
 define get-col-size(mat: &matrix): int {
   &let Matrix of { col-size } = mat in
-  !col-size
+  *col-size
 }
 
 define get-content(mat: &matrix): &fa.float-array {

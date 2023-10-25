@@ -44,7 +44,7 @@ define flow(_: tau) {
 }
 
 inline embody(a: tau, x: &a): a {
-  !x
+  *x
 }
 
 inline flow-size(): int {

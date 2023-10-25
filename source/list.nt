@@ -72,7 +72,7 @@ inline map-internal(a: tau, b: tau, f: a -> b): list(a) -> list(b) {
 }
 
 define map-noetic[a, b](f: &a -> b, xs: &list(a)): list(b) {
-  &match xs {
+  case xs {
   - [] =>
     []
   - y :: ys =>
@@ -106,7 +106,7 @@ define reverse[a](xs: list(a)): list(a) {
 define length[a](xs: &list(a)): int {
   let length-tailcall =
     mu rec(acc: int, xs: &list(a)): int {
-      &match xs {
+      case xs {
       - [] =>
         acc
       - _ :: ys =>

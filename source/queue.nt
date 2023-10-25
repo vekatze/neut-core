@@ -33,7 +33,7 @@ define enqueue[a](x: a, q: queue(a)): queue(a) {
 }
 
 define size[a](q: &queue(a)): int {
-  &match q {
+  case q {
   - Tuple(ls, rs) =>
     let l1 = length(ls) in
     let l2 = length(rs) in
@@ -42,7 +42,7 @@ define size[a](q: &queue(a)): int {
 }
 
 define is-empty[a](q: &queue(a)): bool {
-  &match q {
+  case q {
   - Tuple([], []) =>
     True
   - _ =>

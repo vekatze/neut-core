@@ -14,7 +14,7 @@ define admit(a: tau, t: &text): a {
   exit(1)
 }
 
-inline assert(message: &text, check: () -> bool): unit {
+define assert(message: &text, check: () -> bool): unit {
   introspect build-mode {
   - release =>
     let _ = check in

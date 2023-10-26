@@ -1,5 +1,5 @@
 import {
-- this.except
+- this.except [Pass, Fail]
 - this.int [sum-int]
 - this.unit [unit]
 - Q
@@ -37,7 +37,7 @@ resource channel-internal {
   }
 }
 
-inline get-clone(a: tau, x: &a): a {
+define get-clone(a: tau, x: &a): a {
   *x
 }
 
@@ -87,11 +87,11 @@ define receive[a](ch: &channel(a)): a {
 define receive-from-channel-inner(a: tau, ch: int, mutex-ptr: int): a {
   let q: Q.queue(a) = magic.cast(int, Q.queue(a), mem.load-int(ch)) in
   match Q.dequeue(q) {
-  - Some(Tuple(v, q)) =>
+  - Pass(Tuple(v, q)) =>
     mem.store-int(magic.cast(Q.queue(a), int, q), ch);
     ext.thread-mutex-unlock(mutex-ptr);
     v
-  - None =>
+  - Fail(_) =>
     mem.store-int(magic.cast(Q.queue(int), int, Q.empty()), ch);
     let u = arch.unit() in
     let mutex-size = ext.thread-mutex-size() in

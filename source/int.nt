@@ -12,7 +12,7 @@ define as-entity(): e.entity(int) {
   }
 }
 
-inline as-ordered(): ordered.ordered(int) {
+define as-ordered(): ordered.ordered(int) {
   Ordered of {
   - as-entity => as-entity()
   - order =>

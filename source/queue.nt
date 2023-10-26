@@ -1,40 +1,40 @@
 import {
 - this.bool [bool, True, False]
-- this.except
+- this.except [Pass, Fail, none]
 - this.list [list, Nil, Cons, reverse, length]
 - this.pair
 - this.unit [unit, Unit]
 }
 
 // naive queue
-inline queue(a: tau): tau {
-  tuple(list(a), list(a))
+data queue(a: tau) {
+- Queue(list(a), list(a))
 }
 
 define empty[a](): queue(a) {
-  Tuple([], [])
+  Queue([], [])
 }
 
 define dequeue[a](q: queue(a)): ?tuple(a, queue(a)) {
-  let Tuple(ls, rs) = q in
+  let Queue(ls, rs) = q in
   match ls, rs {
   - Nil, Nil =>
-    None
+    none()
   - Cons(l, ls-rest), rs =>
-    Some(Tuple(l, Tuple(ls-rest, rs)))
+    Pass(Tuple(l, Queue(ls-rest, rs)))
   - Nil, rs =>
-    dequeue(Tuple(rs, []))
+    dequeue(Queue(rs, []))
   }
 }
 
 define enqueue[a](x: a, q: queue(a)): queue(a) {
-  let Tuple(ls, rs) = q in
-  Tuple(ls, x :: rs)
+  let Queue(ls, rs) = q in
+  Queue(ls, x :: rs)
 }
 
 define size[a](q: &queue(a)): int {
   case q {
-  - Tuple(ls, rs) =>
+  - Queue(ls, rs) =>
     let l1 = length(ls) in
     let l2 = length(rs) in
     add-int(l1, l2)
@@ -43,7 +43,7 @@ define size[a](q: &queue(a)): int {
 
 define is-empty[a](q: &queue(a)): bool {
   case q {
-  - Tuple([], []) =>
+  - Queue([], []) =>
     True
   - _ =>
     False

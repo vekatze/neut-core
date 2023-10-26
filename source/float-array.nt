@@ -1,6 +1,6 @@
 import {
 - this.bool
-- this.except [from-option]
+- this.except [from-option, Pass, Fail, none]
 - this.external [free, malloc]
 - this.list [list, length, minimum]
 - this.pair
@@ -73,7 +73,7 @@ define new(xs: list(float)): float-array {
   magic.cast(int, float-array, base-pointer)
 }
 
-inline access(xs: &float-array, i: int): float {
+define access(xs: &float-array, i: int): float {
   let ptr = magic.cast(&float-array, int, xs) in
   let u = arch.unit() in
   let from = mem.load-int(ptr) in
@@ -81,7 +81,7 @@ inline access(xs: &float-array, i: int): float {
   mem.load-float(add-int(add-int(ptr, u2), mul-int(u, add-int(from, i))))
 }
 
-inline store(xs: float-array, i: int, x: float): float-array {
+define store(xs: float-array, i: int, x: float): float-array {
   let ptr = magic.cast(float-array, int, xs) in
   let u = arch.unit() in
   let from = mem.load-int(ptr) in
@@ -102,10 +102,10 @@ define tail(xs: float-array): float-array {
 define uncons(xs: float-array): ?tuple(float, float-array) {
   let len on xs = this.float-array.length(xs) in
   if eq-int(len, 0) {
-    None
+    none()
   } else {
     let head-content on xs = access(xs, 0) in
-    Some(Tuple(head-content, tail(xs)))
+    Pass(Tuple(head-content, tail(xs)))
   }
 }
 

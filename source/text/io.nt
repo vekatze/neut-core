@@ -1,6 +1,6 @@
 import {
 - this.bool [or]
-- this.except
+- this.except [none, Pass, Fail]
 - this.list
 - this.text [text, from-int, unsafe-get-content-pointer, text-byte-length]
 - this.unit [unit, Unit]
@@ -30,9 +30,9 @@ define write(t: &text, f: FD.descriptor): ?int {
   let len = sub-int(to, from) in
   let bytes: int = ext.write(f, content-pointer, len) in
   if lt-int(bytes, 0) {
-    None
+    none()
   } else {
-    Some(bytes)
+    Pass(bytes)
   }
 }
 
@@ -51,21 +51,21 @@ define read-file(f: FD.descriptor, buffer-size: int, max-read-size: int): ?text 
   let content-ptr = add-int(ptr, mul-int(u, 2)) in
   let read-size = read-loop(f, content-ptr, buffer-size, max-read-size, 0) in
   match read-size {
-  - Some(size) =>
+  - Pass(size) =>
     mem.store-int(size, add-int(ptr, u));
-    Some(magic.cast(int, text, ptr))
-  - None =>
+    Pass(magic.cast(int, text, ptr))
+  - Fail(_) =>
     ext.free(ptr);
-    None
+    none()
   }
 }
 
 define read-loop(f: FD.descriptor, content-ptr: int, buffer-size: int, max-read-size: int, acc: int): ?int {
   let bytes = ext.read(f, content-ptr, buffer-size) in
   if lt-int(bytes, 0) {
-    None
+    none()
   } else-if lt-int(bytes, buffer-size) {
-    Some(add-int(acc, bytes))
+    Pass(add-int(acc, bytes))
   } else {
     read-loop(f, add-int(content-ptr, bytes), buffer-size, max-read-size, add-int(acc, bytes))
   }
@@ -102,10 +102,10 @@ define get-line-inner(ptr: int, ptr-size: int, current-index: int, buffer-size: 
     let last-char = mem.load-int8(last-char-ptr) in
     if lt-int(bytes, 0) {
       ext.free(ptr);
-      None
+      none()
     } else-if or(lt-int(bytes, buffer-size), eq-int8(last-char, 10)) {
       mem.store-int(next-index, add-int(ptr, u));
-      Some(magic.cast(int, text, ptr))
+      Pass(magic.cast(int, text, ptr))
     } else {
       get-line-inner(ptr, ptr-size, next-index, buffer-size)
     }

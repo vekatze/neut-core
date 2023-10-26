@@ -2,7 +2,7 @@ import {
 - this.unit [unit]
 }
 
-inline store-int(value: int, address: int): unit {
+define store-int(value: int, address: int): unit {
   introspect arch {
   - amd64 =>
     magic store(int64, value, address)
@@ -11,30 +11,30 @@ inline store-int(value: int, address: int): unit {
   }
 }
 
-inline store-int8(value: int8, address: int): unit {
+define store-int8(value: int8, address: int): unit {
   magic store(int8, value, address)
 }
 
-inline store-int1(value: int1, address: int): unit {
+define store-int1(value: int1, address: int): unit {
   magic store(int1, value, address)
 }
 
-inline load-int(address: int): int {
+define load-int(address: int): int {
   magic load(int64, address)
 }
 
-inline load-int8(address: int): int8 {
+define load-int8(address: int): int8 {
   magic load(int8, address)
 }
 
-inline load-int1(address: int): int1 {
+define load-int1(address: int): int1 {
   magic load(int1, address)
 }
 
-inline store-float(value: float, address: int): unit {
+define store-float(value: float, address: int): unit {
   magic store(float, value, address)
 }
 
-inline load-float(address: int): float {
+define load-float(address: int): float {
   magic load(float, address)
 }

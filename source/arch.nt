@@ -1,4 +1,4 @@
-inline unit(): int {
+define unit(): int {
   introspect arch {
   - amd64 =>
     8

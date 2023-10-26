@@ -4,7 +4,7 @@ import {
 - this.data.monoid [monoid, Monoid]
 - this.data.ordered [ordered, Ordered]
 - this.data.semigroup [semigroup, Semigroup]
-- this.except [option]
+- this.except [none, Pass, Fail]
 - this.function [flip]
 - this.ordering [LT, GT]
 - this.pair
@@ -47,20 +47,20 @@ define fold-right[elem-type, result-type] of {
   }
 }
 
-inline map[a, b](f: a -> b, xs: list(a)): list(b) {
+define map[a, b](f: a -> b, xs: list(a)): list(b) {
   map-internal(a, b, f)(xs)
 }
 
-inline for-each[a, b](xs: list(a), f: a -> b): list(b) {
+define for-each[a, b](xs: list(a), f: a -> b): list(b) {
   map-internal(a, b, f)(xs)
 }
 
-inline for[a](xs: list(a), f: a -> unit): unit {
+define for[a](xs: list(a), f: a -> unit): unit {
   let _ = map-internal(a, unit, f)(xs) in
   Unit
 }
 
-inline map-internal(a: tau, b: tau, f: a -> b): list(a) -> list(b) {
+define map-internal(a: tau, b: tau, f: a -> b): list(a) -> list(b) {
   mu loop(xs) {
     match xs {
     - [] =>
@@ -130,9 +130,9 @@ define unzip[a, b](xs: list(tuple(a, b))): tuple(list(a), list(b)) {
 define uncons[a](xs: list(a)): ?tuple(a, list(a)) {
   match xs {
   - [] =>
-    None
+    none()
   - y :: ys =>
-    Some(Tuple(y, ys))
+    Pass(Tuple(y, ys))
   }
 }
 
@@ -153,18 +153,18 @@ define range(from: int, to: int): list(int) {
   }
 }
 
-define filter-some[a](xs: list(option(a))): list(a) {
+define filter-some[a](xs: list(?a)): list(a) {
   match xs {
   - [] =>
     []
-  - Some(v) :: rest =>
+  - Pass(v) :: rest =>
     v :: filter-some(rest)
-  - None :: rest =>
+  - Fail(_) :: rest =>
     filter-some(rest)
   }
 }
 
-inline minimum[a](as-ord: ordered(a)): list(a) -> ?a {
+define minimum[a](as-ord: ordered(a)): list(a) -> ?a {
   (xs) => {
     let Ordered of { order } = as-ord in
     let helper =
@@ -184,14 +184,14 @@ inline minimum[a](as-ord: ordered(a)): list(a) -> ?a {
     in
     match xs {
     - [] =>
-      None
+      none()
     - y :: ys =>
-      Some(helper(y, ys))
+      Pass(helper(y, ys))
     }
   }
 }
 
-inline maximum[a](as-ord: ordered(a)): list(a) -> ?a {
+define maximum[a](as-ord: ordered(a)): list(a) -> ?a {
   (xs) => {
     let Ordered of { order } = as-ord in
     let helper =
@@ -211,15 +211,15 @@ inline maximum[a](as-ord: ordered(a)): list(a) -> ?a {
     in
     match xs {
     - [] =>
-      None
+      none()
     - y :: ys =>
-      Some(helper(y, ys))
+      Pass(helper(y, ys))
     }
   }
 }
 
 
-inline as-semigroup[a](): semigroup(list(a)) {
+define as-semigroup[a](): semigroup(list(a)) {
   Semigroup of {
   - append =>
     (x, y) => {
@@ -228,7 +228,7 @@ inline as-semigroup[a](): semigroup(list(a)) {
   }
 }
 
-inline as-monoid[a](): monoid(list(a)) {
+define as-monoid[a](): monoid(list(a)) {
   Monoid of {
   - as-semigroup =>
     as-semigroup()
@@ -237,7 +237,7 @@ inline as-monoid[a](): monoid(list(a)) {
   }
 }
 
-inline as-functor(): functor(list) {
+define as-functor(): functor(list) {
   Functor of {
   - map =>
     (_, _, f, xs) => { map(f, xs) }

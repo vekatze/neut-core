@@ -76,7 +76,7 @@ define get-text-length-of-int(x: int, acc: int): int {
   }
 }
 
-inline text-byte-length(t: &text): int {
+define text-byte-length(t: &text): int {
   let ptr = magic cast(&text, int8-array, t) in
   int8-array-length(ptr)
 }

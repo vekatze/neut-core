@@ -10,8 +10,8 @@ import {
 - mem
 }
 
-alias-opaque text {
-  int8-array
+data text {
+- Text(content: int8-array)
 }
 
 define create(xs: L.list(int8)): text {

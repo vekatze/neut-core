@@ -8,7 +8,7 @@ data except(a: tau, b: tau) {
 - Pass(b)
 }
 
-define none[a](): ?a {
+inline none[a](): ?a {
   Fail(Unit)
 }
 

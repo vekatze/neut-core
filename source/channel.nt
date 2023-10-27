@@ -37,7 +37,7 @@ resource channel-internal {
   }
 }
 
-define get-clone(a: tau, x: &a): a {
+inline get-clone(a: tau, x: &a): a {
   *x
 }
 

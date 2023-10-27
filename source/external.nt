@@ -143,7 +143,7 @@ define thread-join(id: int, result-addr: int): unit {
   }
 }
 
-define thread-mutex-size(): int {
+inline thread-mutex-size(): int {
   introspect platform {
   - amd64-darwin =>
     64
@@ -192,7 +192,7 @@ define thread-mutex-unlock(mutex-ptr: int): unit {
   }
 }
 
-define thread-cond-size(): int {
+inline thread-cond-size(): int {
   introspect platform {
   - amd64-darwin =>
     48

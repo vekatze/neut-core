@@ -73,7 +73,7 @@ define new(xs: list(float)): float-array {
   magic.cast(int, float-array, base-pointer)
 }
 
-define access(xs: &float-array, i: int): float {
+inline access(xs: &float-array, i: int): float {
   let ptr = magic.cast(&float-array, int, xs) in
   let u = arch.unit() in
   let from = mem.load-int(ptr) in
@@ -81,7 +81,7 @@ define access(xs: &float-array, i: int): float {
   mem.load-float(add-int(add-int(ptr, u2), mul-int(u, add-int(from, i))))
 }
 
-define store(xs: float-array, i: int, x: float): float-array {
+inline store(xs: float-array, i: int, x: float): float-array {
   let ptr = magic.cast(float-array, int, xs) in
   let u = arch.unit() in
   let from = mem.load-int(ptr) in

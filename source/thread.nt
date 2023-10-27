@@ -43,11 +43,11 @@ define flow(_: tau) {
   flow-inner
 }
 
-define embody(a: tau, x: &a): a {
+inline embody(a: tau, x: &a): a {
   *x
 }
 
-define flow-size(): int {
+inline flow-size(): int {
   let u = arch.unit() in
   add-int(mul-int(u, 3), 1)
 }

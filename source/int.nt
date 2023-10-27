@@ -6,13 +6,13 @@ import {
 - ordered [ordered, Ordered]
 }
 
-define as-entity(): e.entity(int) {
+inline as-entity(): e.entity(int) {
   e.Entity of {
   - identity => eq-int
   }
 }
 
-define as-ordered(): ordered.ordered(int) {
+inline as-ordered(): ordered.ordered(int) {
   Ordered of {
   - as-entity => as-entity()
   - order =>

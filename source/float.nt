@@ -5,13 +5,13 @@ import {
 - ordered [ordered, Ordered]
 }
 
-define as-entity(): e.entity(float) {
+inline as-entity(): e.entity(float) {
   e.Entity of {
   - identity => eq-float // no reflexivity due to NaN
   }
 }
 
-define as-ordered(): ordered(float) {
+inline as-ordered(): ordered(float) {
   Ordered of {
   - as-entity => as-entity()
   - order =>

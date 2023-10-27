@@ -47,20 +47,20 @@ define fold-right[elem-type, result-type] of {
   }
 }
 
-define map[a, b](f: a -> b, xs: list(a)): list(b) {
+inline map[a, b](f: a -> b, xs: list(a)): list(b) {
   map-internal(a, b, f)(xs)
 }
 
-define for-each[a, b](xs: list(a), f: a -> b): list(b) {
+inline for-each[a, b](xs: list(a), f: a -> b): list(b) {
   map-internal(a, b, f)(xs)
 }
 
-define for[a](xs: list(a), f: a -> unit): unit {
+inline for[a](xs: list(a), f: a -> unit): unit {
   let _ = map-internal(a, unit, f)(xs) in
   Unit
 }
 
-define map-internal(a: tau, b: tau, f: a -> b): list(a) -> list(b) {
+inline map-internal(a: tau, b: tau, f: a -> b): list(a) -> list(b) {
   mu loop(xs) {
     match xs {
     - [] =>
@@ -164,7 +164,7 @@ define filter-some[a](xs: list(?a)): list(a) {
   }
 }
 
-define minimum[a](as-ord: ordered(a)): list(a) -> ?a {
+inline minimum[a](as-ord: ordered(a)): list(a) -> ?a {
   (xs) => {
     let Ordered of { order } = as-ord in
     let helper =
@@ -191,7 +191,7 @@ define minimum[a](as-ord: ordered(a)): list(a) -> ?a {
   }
 }
 
-define maximum[a](as-ord: ordered(a)): list(a) -> ?a {
+inline maximum[a](as-ord: ordered(a)): list(a) -> ?a {
   (xs) => {
     let Ordered of { order } = as-ord in
     let helper =
@@ -219,7 +219,7 @@ define maximum[a](as-ord: ordered(a)): list(a) -> ?a {
 }
 
 
-define as-semigroup[a](): semigroup(list(a)) {
+inline as-semigroup[a](): semigroup(list(a)) {
   Semigroup of {
   - append =>
     (x, y) => {
@@ -228,7 +228,7 @@ define as-semigroup[a](): semigroup(list(a)) {
   }
 }
 
-define as-monoid[a](): monoid(list(a)) {
+inline as-monoid[a](): monoid(list(a)) {
   Monoid of {
   - as-semigroup =>
     as-semigroup()
@@ -237,7 +237,7 @@ define as-monoid[a](): monoid(list(a)) {
   }
 }
 
-define as-functor(): functor(list) {
+inline as-functor(): functor(list) {
   Functor of {
   - map =>
     (_, _, f, xs) => { map(f, xs) }

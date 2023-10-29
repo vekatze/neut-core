@@ -1,6 +1,8 @@
 import {
 - this.bool
 - this.ordering [GT, LT, EQ]
+- this.field [field, Field]
+- this.rig [rig, from-field]
 - e
 - ordered [ordered, Ordered]
 }
@@ -23,4 +25,19 @@ inline as-ordered(): ordered(float) {
       }
     }
   }
+}
+
+inline as-field(): field(float) {
+  Field of {
+  - zero => 0
+  - add => add-float
+  - sub => sub-float
+  - one => 1
+  - mul => mul-float
+  - div => div-float
+  }
+}
+
+inline as-rig(): rig(float) {
+  from-field(as-field())
 }

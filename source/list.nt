@@ -85,7 +85,7 @@ define loop(count: int, f: int -> unit): unit {
   helper(0)
 }
 
-define repeat[a](count: int, f: int -> a): list(a) {
+inline repeat[a](count: int, f: int -> a): list(a) {
   let helper =
     mu self(cursor) {
       if ge-int(cursor, count) {

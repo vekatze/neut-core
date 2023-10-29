@@ -1,12 +1,12 @@
 import {
-- this.bool
+- this.bool [and]
 - this.except [from-option]
 - this.rig [rig, Rig]
 - this.system
 - this.text [text]
 - this.unit [unit, Unit]
 - vector [vector]
-- L [list, loop]
+- L [list, loop, repeat]
 - fa
 - int
 - s
@@ -21,16 +21,31 @@ data matrix(a) {
   }
 }
 
-define new[a](xs: list(list(a))): matrix(a) {
+define new[a](content-list: list(list(a))): matrix(a) {
   let get-len = (xs) => { L.length(xs) } in
-  let len-list on xs = L.map-noetic(get-len, xs) in
+  let len-list on content-list = L.map-noetic(get-len, content-list) in
   let col-size = L.minimum(int.as-ordered())(len-list) in
-  let row-size on xs = L.length(xs) in
+  let row-size on content-list = L.length(content-list) in
   Matrix of {
   - row-size => row-size
   - col-size => from-option(0, col-size)
-  - content => vector.new(L.concat(xs))
+  - content => vector.new(L.concat(content-list))
   }
+}
+
+define access[a](mat: &matrix(a), row: int, col: int): a {
+  tie Matrix of { row-size, col-size, content } = mat in
+  assert "0 <= row < row-size" {
+    let b1 = le-int(0, row) in
+    let b2 = lt-int(row, *row-size) in
+    and(b1, b2)
+  };
+  assert "0 <= col < col-size" {
+    let b1 = le-int(0, col) in
+    let b2 = lt-int(col, *col-size) in
+    and(b1, b2)
+  };
+  vector.access(content, add-int(mul-int(*col-size, row), col))
 }
 
 define get-row-size[a](mat: &matrix(a)): int {
@@ -51,11 +66,9 @@ define get-content[a](mat: &matrix(a)): &vector(a) {
 define print-mat[a](show: a -> unit, mat: &matrix(a)): unit {
   let row-size = get-row-size(mat) in
   let col-size = get-col-size(mat) in
-  let content = get-content(mat) in
   loop(row-size, (row) => {
     loop(col-size, (col) => {
-      let index = add-int(col, mul-int(col-size, row)) in
-      let elem = vector.access(content, index) in
+      let elem = access(mat, row, col) in
       show(elem);
       tio.print(" ")
     });
@@ -85,12 +98,39 @@ define add-mat[a](sg: s.semigroup(a), mat1: &matrix(a), mat2: &matrix(a)): matri
   }
 }
 
+inline _repeat-sum[a](r: rig(a), count: int, k: int -> a): a {
+  let Rig of { zero, add } = r in
+  let helper =
+    mu self(acc: a, cursor: int): a {
+      if ge-int(cursor, count) {
+        acc
+      } else {
+        self(add(acc, k(cursor)), add-int(cursor, 1))
+      }
+    }
+  in
+  helper(zero, 0)
+}
+
 define mul-mat[a](r: rig(a), mat1: &matrix(a), mat2: &matrix(a)): matrix(a) {
+  let row-size-1 = get-row-size(mat1) in
   let row-size-2 = get-row-size(mat2) in
   let col-size-1 = get-col-size(mat1) in
+  let col-size-2 = get-col-size(mat2) in
   assert "col-size(mat1) == row-size(mat2)" {
     eq-int(col-size-1, row-size-2)
   };
-  let Rig of { add, mul } = r in
-  admit
+  let Rig of { mul } = r in
+  new of {
+  - content-list =>
+    repeat(row-size-1, (i) => {
+      repeat(col-size-2, (j) => {
+        _repeat-sum(r, col-size-1, (k) => {
+          let a_i_k = access(mat1, i, k) in
+          let b_k_j = access(mat2, k, j) in
+          mul(a_i_k, b_k_j)
+        })
+      })
+    })
+  }
 }

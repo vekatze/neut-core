@@ -2,6 +2,8 @@ import {
 - this.bool
 - this.list [list]
 - this.ordering [GT, LT, EQ]
+- this.ring [ring, Ring]
+- this.rig [rig, from-ring]
 - e
 - ordered [ordered, Ordered]
 }
@@ -38,4 +40,18 @@ define sum-int(xs: list(int)): int {
     }
   in
   f(xs, 0)
+}
+
+inline as-ring(): ring(int) {
+  Ring of {
+  - zero => 0
+  - add => add-int
+  - sub => sub-int
+  - one => 1
+  - mul => mul-int
+  }
+}
+
+inline as-rig(): rig(int) {
+  from-ring(as-ring())
 }

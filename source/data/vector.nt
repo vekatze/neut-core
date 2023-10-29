@@ -1,53 +1,81 @@
 import {
 - this.bool
 - this.external [free, malloc]
-- this.list [list]
+- this.list [list, loop, repeat, minimum]
 - this.unit [unit, Unit]
+- this.pair
+- this.except [Pass, none, from-option]
 - arch
-- mem
+- int
 - magic
+- mem
 }
 
-define discard-vector-content(ptr: int, elem-type: tau, counter: int, length: int): unit {
-  if eq-int(counter, length) {
+data unsafeVecInfo {
+- UnsafeVecInfo of {
+  - word-size: int
+  - from-ptr: int
+  - to-ptr: int
+  - type-ptr: int
+  - content-ptr: int
+  }
+}
+
+define _get-vec-info[a](xs: &vector(a)): unsafeVecInfo {
+  let from-ptr = magic.cast(&vector(a), int, xs) in
+  let word-size = arch.unit() in
+  let to-ptr = add-int(from-ptr, word-size) in
+  let type-ptr = add-int(from-ptr, mul-int(word-size, 2)) in
+  let content-ptr = add-int(from-ptr, mul-int(word-size, 3)) in
+  UnsafeVecInfo of { word-size, from-ptr, to-ptr, type-ptr, content-ptr }
+}
+
+define _discard-vector-content(ptr: int, elem-type: tau, counter: int, size: int): unit {
+  if eq-int(counter, size) {
     Unit
   } else {
     let u = arch.unit() in
     let _ = magic.cast(int, elem-type, mem.load-int(add-int(ptr, mul-int(counter, u)))) in
-    discard-vector-content(ptr, elem-type, add-int(counter, 1), length)
+    _discard-vector-content(ptr, elem-type, add-int(counter, 1), size)
   }
 }
 
-define copy-vector-content(source-pointer: int, target-pointer: int, elem-type: tau, counter: int, length: int): unit {
-  if eq-int(counter, length) {
+define _copy-vector-content(source-pointer: int, target-pointer: int, elem-type: tau, counter: int, size: int): unit {
+  if eq-int(counter, size) {
     Unit
   } else {
     let u = arch.unit() in
     let original = magic.cast(int, &elem-type, mem.load-int(add-int(source-pointer, mul-int(counter, u)))) in
     let clone = *original in
     mem.store-int(magic.cast(elem-type, int, clone), add-int(target-pointer, mul-int(counter, u)));
-    copy-vector-content(source-pointer, target-pointer, elem-type, add-int(counter, 1), length)
+    _copy-vector-content(source-pointer, target-pointer, elem-type, add-int(counter, 1), size)
   }
 }
 
 resource vector-internal {
-- (x: int) => {
-    let length = mem.load-int(x) in
-    let u = arch.unit() in
-    let elem-type = magic.cast(int, tau, mem.load-int(add-int(x, u))) in
-    discard-vector-content(add-int(x, mul-int(u, 2)), elem-type, 0, length);
-    magic.cast(unit, int, free(x))
+- (ptr: int) => {
+    let base-ptr = magic.cast(int, &vector(int), ptr) in
+    let UnsafeVecInfo of { from-ptr, to-ptr, type-ptr, content-ptr } = _get-vec-info(base-ptr) in
+    let from: int = mem.load-int(from-ptr) in
+    let to: int = mem.load-int(to-ptr) in
+    let size = sub-int(to, from) in
+    let elem-type = magic.cast(int, tau, mem.load-int(type-ptr)) in
+    _discard-vector-content(content-ptr, elem-type, 0, size);
+    magic.cast(unit, int, free(from-ptr))
   }
-- (source-pointer: int) => {
-    let u = arch.unit() in
-    let u2 = mul-int(u, 2) in
-    let length: int = mem.load-int(source-pointer) in
-    let elem-type: tau = magic.cast(int, tau, mem.load-int(add-int(source-pointer, u))) in
-    let target-pointer = malloc(add-int(u2, mul-int(length, u))) in
-    mem.store-int(length, target-pointer);
-    mem.store-int(magic.cast(tau, int, elem-type), add-int(target-pointer, u));
-    copy-vector-content(add-int(source-pointer, u2), add-int(target-pointer, u2), elem-type, 0, length);
-    target-pointer
+- (ptr: int) => {
+    let base-ptr = magic.cast(int, &vector(int), ptr) in
+    let UnsafeVecInfo of { word-size, from-ptr, to-ptr, type-ptr, content-ptr } = _get-vec-info(base-ptr) in
+    let from: int = mem.load-int(from-ptr) in
+    let to: int = mem.load-int(to-ptr) in
+    let size = sub-int(to, from) in
+    let elem-type: tau = magic.cast(int, tau, mem.load-int(type-ptr)) in
+    let target-ptr = malloc(mul-int(word-size, add-int(size, 3))) in
+    mem.store-int(0, target-ptr);
+    mem.store-int(size, add-int(target-ptr, word-size));
+    mem.store-int(magic.cast(tau, int, elem-type), add-int(target-ptr, mul-int(word-size, 2)));
+    _copy-vector-content(content-ptr, add-int(target-ptr, mul-int(word-size, 3)), elem-type, 0, size);
+    target-ptr
   }
 }
 
@@ -55,32 +83,77 @@ define vector(_: tau): tau {
   vector-internal
 }
 
-define new[a](xs: list(a)): vector(a) {
-  let u = arch.unit() in
-  let u2 = mul-int(u, 2) in
-  let n on xs = this.list.length(xs) in
-  let base-pointer = malloc(add-int(u2, mul-int(n, u))) in
-  mem.store-int(n, base-pointer);
-  mem.store-int(magic.cast(tau, int, a), add-int(base-pointer, u));
-  let content-pointer: int = add-int(base-pointer, u2) in
+define new[a](base-list: list(a)): vector(a) {
+  let word-size = arch.unit() in
+  let n on base-list = this.list.length(base-list) in
+  let ptr0 = malloc(mul-int(word-size, add-int(3, n))) in
+  let ptr1 = add-int(ptr0, word-size) in
+  let ptr2 = add-int(ptr0, mul-int(word-size, 2)) in
+  let ptr3 = add-int(ptr0, mul-int(word-size, 3)) in
+  mem.store-int(0, ptr0);
+  mem.store-int(n, ptr1);
+  mem.store-int(magic.cast(tau, int, a), ptr2);
   let store-values =
     mu self(values: list(a), index: int): unit {
       match values {
       - [] =>
         Unit
       - v :: rest =>
-        mem.store-int(magic.cast(a, int, v), add-int(content-pointer, mul-int(index, u)));
+        mem.store-int(magic.cast(a, int, v), add-int(ptr3, mul-int(index, word-size)));
         self(rest, add-int(index, 1))
       }
     }
   in
-  let _ = store-values(xs, 0) in
-  magic cast(int, _, base-pointer)
+  let _ = store-values(base-list, 0) in
+  magic cast(int, _, ptr0)
 }
 
 inline access[a](xs: &vector(a), i: int): a {
-  let u = arch.unit() in
-  let u2 = mul-int(u, 2) in
-  let ptr = magic.cast(&vector(a), int, xs) in
-  magic.cast(int, a, mem.load-int(add-int(add-int(ptr, u2), mul-int(u, i))))
+  let UnsafeVecInfo of { from-ptr, content-ptr, word-size } = _get-vec-info(xs) in
+  let from = mem.load-int(from-ptr) in
+  let elem-address = add-int(content-ptr, mul-int(word-size, add-int(from, i))) in
+  let val = magic.cast(int, &a, mem.load-int(elem-address)) in
+  *val
+}
+
+define size[a](xs: &vector(a)): int {
+  let UnsafeVecInfo of { from-ptr, to-ptr } = _get-vec-info(xs) in
+  let from = mem.load-int(from-ptr) in
+  let to = mem.load-int(to-ptr) in
+  sub-int(to, from)
+}
+
+inline for-each[a](xs: &vector(a), f: a -> unit): unit {
+  loop(size(xs), (i) => {
+    f(access(xs, i))
+  })
+}
+
+inline for[a, b](xs: &vector(a), f: a -> b): vector(b) {
+  new of {
+  - base-list =>
+    repeat(size(xs), (i) => {
+      f(access(xs, i))
+    })
+  }
+}
+
+define zip-with[a](f: (a, a) -> a, xs: &vector(a), ys: &vector(a)): vector(a) {
+  let len1 = size(xs) in
+  let len2 = size(ys) in
+  let min-func = minimum(int.as-ordered()) in
+  let len-or-none = min-func([len1, len2]) in
+  let len = from-option(0, len-or-none) in
+  let zip-with-helper =
+    mu self(cursor: int) {
+      if eq-int(cursor, len) {
+        []
+      } else {
+        let val1 = access(xs, cursor) in
+        let val2 = access(ys, cursor) in
+        f(val1, val2) :: self(add-int(cursor, 1))
+      }
+    }
+  in
+  new(zip-with-helper(0))
 }

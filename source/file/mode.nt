@@ -1,5 +1,5 @@
 import {
-- this.list [list]
+- this.list [list, fold-left]
 }
 
 data mode {
@@ -64,12 +64,9 @@ define interpret-mode(flag: mode): int {
 }
 
 define interpret(xs: list(mode)): int {
-  match xs {
-  - [] =>
-    0
-  - m :: ms =>
-    or-int(interpret-mode(m), interpret(ms))
-  }
+  fold-left(0, xs, (acc, x) => {
+    or-int(acc, interpret-mode(x))
+  })
 }
 
 define default-file-mode(): list(mode) {

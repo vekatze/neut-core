@@ -1,5 +1,5 @@
 import {
-- this.list [list]
+- this.list [list, fold-left]
 }
 
 data flag {
@@ -10,7 +10,7 @@ data flag {
 - Create
 }
 
-define interpret-flag(flag: flag): int {
+define _interpret-flag(flag: flag): int {
   introspect os {
   - darwin =>
     // https://github.com/apple/darwin-xnu/blob/main/bsd/sys/fcntl.h
@@ -44,12 +44,9 @@ define interpret-flag(flag: flag): int {
 }
 
 define interpret(xs: list(flag)): int {
-  match xs {
-  - [] =>
-    0
-  - f :: ys =>
-    or-int(interpret-flag(f), interpret(ys))
-  }
+  fold-left(0, xs, (acc, x) => {
+    or-int(acc, _interpret-flag(x))
+  })
 }
 
 define for-r(): list(flag) {

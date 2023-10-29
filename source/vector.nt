@@ -11,8 +11,8 @@ import {
 - mem
 }
 
-data unsafeVecInfo {
-- UnsafeVecInfo of {
+data _vecInfo {
+- _VecInfo of {
   - word-size: int
   - from-ptr: int
   - to-ptr: int
@@ -21,13 +21,13 @@ data unsafeVecInfo {
   }
 }
 
-define _get-vec-info[a](xs: &vector(a)): unsafeVecInfo {
+define _get-vec-info[a](xs: &vector(a)): _vecInfo {
   let from-ptr = magic.cast(&vector(a), int, xs) in
   let word-size = arch.unit() in
   let to-ptr = add-int(from-ptr, word-size) in
   let type-ptr = add-int(from-ptr, mul-int(word-size, 2)) in
   let content-ptr = add-int(from-ptr, mul-int(word-size, 3)) in
-  UnsafeVecInfo of { word-size, from-ptr, to-ptr, type-ptr, content-ptr }
+  _VecInfo of { word-size, from-ptr, to-ptr, type-ptr, content-ptr }
 }
 
 define _discard-vector-content(ptr: int, elem-type: tau, counter: int, size: int): unit {
@@ -55,7 +55,7 @@ define _copy-vector-content(source-pointer: int, target-pointer: int, elem-type:
 resource vector-internal {
 - (ptr: int) => {
     let base-ptr = magic.cast(int, &vector(int), ptr) in
-    let UnsafeVecInfo of { from-ptr, to-ptr, type-ptr, content-ptr } = _get-vec-info(base-ptr) in
+    let _VecInfo of { from-ptr, to-ptr, type-ptr, content-ptr } = _get-vec-info(base-ptr) in
     let from: int = mem.load-int(from-ptr) in
     let to: int = mem.load-int(to-ptr) in
     let size = sub-int(to, from) in
@@ -65,7 +65,7 @@ resource vector-internal {
   }
 - (ptr: int) => {
     let base-ptr = magic.cast(int, &vector(int), ptr) in
-    let UnsafeVecInfo of { word-size, from-ptr, to-ptr, type-ptr, content-ptr } = _get-vec-info(base-ptr) in
+    let _VecInfo of { word-size, from-ptr, to-ptr, type-ptr, content-ptr } = _get-vec-info(base-ptr) in
     let from: int = mem.load-int(from-ptr) in
     let to: int = mem.load-int(to-ptr) in
     let size = sub-int(to, from) in
@@ -109,7 +109,7 @@ define new[a](base-list: list(a)): vector(a) {
 }
 
 inline access[a](xs: &vector(a), i: int): a {
-  let UnsafeVecInfo of { from-ptr, content-ptr, word-size } = _get-vec-info(xs) in
+  let _VecInfo of { from-ptr, content-ptr, word-size } = _get-vec-info(xs) in
   let from = mem.load-int(from-ptr) in
   let elem-address = add-int(content-ptr, mul-int(word-size, add-int(from, i))) in
   let val = magic.cast(int, &a, mem.load-int(elem-address)) in
@@ -117,7 +117,7 @@ inline access[a](xs: &vector(a), i: int): a {
 }
 
 define size[a](xs: &vector(a)): int {
-  let UnsafeVecInfo of { from-ptr, to-ptr } = _get-vec-info(xs) in
+  let _VecInfo of { from-ptr, to-ptr } = _get-vec-info(xs) in
   let from = mem.load-int(from-ptr) in
   let to = mem.load-int(to-ptr) in
   sub-int(to, from)

@@ -2,11 +2,13 @@ import {
 - this.bool
 - this.cell
 - this.channel [channel, new-channel, send, receive]
-- this.file
+- this.except [Pass, Fail]
+- this.errno [Errno]
+- this.file [open, close]
 - this.function
 - this.float [as-semiring]
 - this.int8-array
-- this.list [list, map, minimum, maximum]
+- this.list [list, map, minimum, maximum, reverse]
 - this.pair
 - this.system
 - this.text [text]
@@ -26,23 +28,39 @@ import {
 }
 
 define main(): unit {
-  let mat1: m.matrix(float) =
+  // let f = open("test", FF.for-r(), FM.default-file-mode()) in
+  // match f {
+  // - Fail(Errno(num)) =>
+  //   tio.print("fail: ");
+  //   tio.print-int(num);
+  //   tio.print("\n")
+  // - Pass(_) =>
+  //   Unit
+  // };
+  // let g = close(magic.cast(int, _, 30)) in
+  // match g {
+  // - Fail(Errno(num)) =>
+  //   tio.print("fail: ");
+  //   tio.print-int(num);
+  //   tio.print("\n")
+  // - Pass(_) =>
+  //   Unit
+  // };
+  let mat1: m.matrix(int) =
     m.new([
-      [1, 5, 9]
-      // [3, 4],
-      // [5, 6]
+      reverse([1, 5, 9])
     ])
   in
-  let mat2: m.matrix(float) =
-    m.new([
-      [8, 4, 2],
-      [1, 3, -6],
-      [-7, 0, 5]
-    ])
-  in
-  let mat on mat1, mat2 = m.mul-mat(as-semiring(), mat1, mat2) in
-  let _ on mat = m.print-mat(tio.print-float, mat) in
-  // let _ on mat = m.print-mat(tio.print-int, mat) in
+  // let mat2: m.matrix(float) =
+  //   m.new([
+  //     [8, 4, 2],
+  //     [1, 3, -6],
+  //     [-7, 0, 5]
+  //   ])
+  // in
+  // let mat on mat1, mat2 = m.mul-mat(as-semiring(), mat1, mat2) in
+  // let _ on mat = m.print-mat(tio.print-float, mat) in
+  let _ on mat1 = m.print-mat(tio.print-int, mat1) in
   // tio.print("\n");
   // tio.print("row-size: ");
   // let row-size on mat = m.get-row-size(mat) in

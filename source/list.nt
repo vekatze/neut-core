@@ -16,59 +16,98 @@ data list(a: tau) {
 - Cons(a, list(a))
 }
 
-define fold-left[elem-type, result-type] of {
-- consumer: (result-type, elem-type) -> result-type
+// folds are optimized into loops
+inline fold-left[elem-type, result-type] of {
 - acc: result-type
 - xs: list(elem-type)
+- consumer: (result-type, elem-type) -> result-type
 }: result-type {
-  let loop =
-    mu rec(acc: result-type, xs: list(elem-type)) {
+  let helper =
+    mu loop(acc, xs) {
       match xs {
       - [] =>
         acc
       - y :: ys =>
-        rec(consumer(acc, y), ys)
+        loop(consumer(acc, y), ys)
       }
     }
   in
-  loop(acc, xs)
+  helper(acc, xs)
 }
 
-define fold-right[elem-type, result-type] of {
-- consumer: (elem-type, result-type) -> result-type
+inline fold-left-noetic[elem-type, result-type] of {
 - acc: result-type
-- xs: list(elem-type)
+- xs: &list(elem-type)
+- consumer: (result-type, &elem-type) -> result-type
 }: result-type {
-  match xs {
-  - [] =>
-    acc
-  - y :: ys =>
-    consumer(y, fold-right(consumer, acc, ys))
-  }
+  let helper =
+    mu loop(acc, xs) {
+      case xs {
+      - [] =>
+        acc
+      - y :: ys =>
+        loop(consumer(acc, y), ys)
+      }
+    }
+  in
+  helper(acc, xs)
+}
+
+inline fold-right[elem-type, result-type] of {
+- xs: list(elem-type)
+- acc: result-type
+- consumer: (elem-type, result-type) -> result-type
+}: result-type {
+  let helper =
+    mu loop(xs, acc) {
+      match xs {
+      - [] =>
+        acc
+      - y :: ys =>
+        consumer(y, loop(ys, acc))
+      }
+    }
+  in
+  helper(xs, acc)
+}
+
+inline fold-right-noetic[elem-type, result-type] of {
+- xs: &list(elem-type)
+- acc: result-type
+- consumer: (&elem-type, result-type) -> result-type
+}: result-type {
+  let helper =
+    mu loop(xs, acc) {
+      case xs {
+      - [] =>
+        acc
+      - y :: ys =>
+        consumer(y, loop(ys, acc))
+      }
+    }
+  in
+  helper(xs, acc)
 }
 
 inline map[a, b](f: a -> b, xs: list(a)): list(b) {
-  map-internal(a, b, f)(xs)
+  fold-right(xs, [], (x, acc) => {
+    f(x) :: acc
+  })
+}
+
+inline map-noetic[a, b](f: &a -> b, xs: &list(a)): list(b) {
+  fold-right-noetic(xs, [], (x, acc) => {
+    f(x) :: acc
+  })
 }
 
 inline for-each[a, b](xs: list(a), f: a -> b): list(b) {
-  map-internal(a, b, f)(xs)
+  map(f, xs)
 }
 
 inline for[a](xs: list(a), f: a -> unit): unit {
-  let _ = map-internal(a, unit, f)(xs) in
+  let _ = map(f, xs) in
   Unit
-}
-
-inline map-internal(a: tau, b: tau, f: a -> b): list(a) -> list(b) {
-  mu loop(xs) {
-    match xs {
-    - [] =>
-      []
-    - y :: ys =>
-      Cons(f(y), loop(ys))
-    }
-  }
 }
 
 define loop(count: int, f: int -> unit): unit {
@@ -98,60 +137,36 @@ inline repeat[a](count: int, f: int -> a): list(a) {
   helper(0)
 }
 
-define map-noetic[a, b](f: &a -> b, xs: &list(a)): list(b) {
-  case xs {
-  - [] =>
-    []
-  - y :: ys =>
-    f(y) :: map-noetic(f, ys)
-  }
-}
-
 define append[a](xs: list(a), ys: list(a)): list(a) {
-  fold-right(Cons, ys, xs)
+  fold-right(xs, ys, (x, acc) => {
+    Cons(x, acc)
+  })
 }
 
 define concat[a](xss: list(list(a))): list(a) {
-  let partial-append = (xs, ys) => { append(xs, ys) } in
-  fold-left(partial-append, [], xss)
+  fold-left([], xss, (acc, xs) => {
+    append(acc, xs)
+  })
 }
 
 define reverse[a](xs: list(a)): list(a) {
-  let helper =
-    mu rec(xs: list(a), acc: list(a)) {
-      match xs {
-      - [] =>
-        acc
-      - y :: ys =>
-        rec(ys, y :: acc)
-      }
-    }
-  in
-  helper(xs, [])
+  fold-left([], xs, (acc, x) => {
+    x :: acc
+  })
 }
 
 define length[a](xs: &list(a)): int {
-  let length-tailcall =
-    mu rec(acc: int, xs: &list(a)): int {
-      case xs {
-      - [] =>
-        acc
-      - _ :: ys =>
-        rec(add-int(1, acc), ys)
-      }
-    }
-  in
-  length-tailcall(0, xs)
+  fold-left-noetic(0, xs, (acc, _) => {
+    add-int(1, acc)
+  })
 }
 
 define unzip[a, b](xs: list(tuple(a, b))): tuple(list(a), list(b)) {
-  match xs {
-  - [] =>
-    Tuple([], [])
-  - Tuple(l, r) :: rest =>
-    let Tuple(rest-l, rest-r) = unzip(rest) in
+  fold-right(xs, Tuple([], []), (x, acc) => {
+    let Tuple(l, r) = x in
+    let Tuple(rest-l, rest-r) = acc in
     Tuple(l :: rest-l, r :: rest-r)
-  }
+  })
 }
 
 define uncons[a](xs: list(a)): ?tuple(a, list(a)) {
@@ -164,11 +179,11 @@ define uncons[a](xs: list(a)): ?tuple(a, list(a)) {
 }
 
 define all(xs: list(bool)): bool {
-  fold-left(and, True, xs)
+  fold-left(True, xs, and)
 }
 
 define any(xs: list(bool)): bool {
-  fold-left(or, False, xs)
+  fold-left(False, xs, or)
 }
 
 // right-open interval
@@ -181,39 +196,31 @@ define range(from: int, to: int): list(int) {
 }
 
 define filter-some[a](xs: list(?a)): list(a) {
-  match xs {
-  - [] =>
-    []
-  - Pass(v) :: rest =>
-    v :: filter-some(rest)
-  - Fail(_) :: rest =>
-    filter-some(rest)
-  }
+  fold-right(xs, [], (x, acc) => {
+    match x {
+    - Pass(v) =>
+      v :: acc
+    - Fail(_) =>
+      acc
+    }
+  })
 }
 
 inline minimum[a](as-ord: ordered(a)): list(a) -> ?a {
   (xs) => {
     let Ordered of { order } = as-ord in
-    let helper =
-      mu self(cand: a, ys: list(a)): a {
-        match ys {
-        - [] =>
-          cand
-        - z :: zs =>
-          match order(cand, z) {
-          - LT =>
-            self(cand, zs)
-          - _ =>
-            self(z, zs)
-          }
-        }
-      }
-    in
     match xs {
     - [] =>
       none()
     - y :: ys =>
-      Pass(helper(y, ys))
+      Pass(fold-left(y, ys, (acc, y) => {
+        match order(acc, y) {
+        - LT =>
+          acc
+        - _ =>
+          y
+        }
+      }))
     }
   }
 }

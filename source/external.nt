@@ -5,6 +5,8 @@ import {
 }
 
 declare {
+- __error(): int
+- __errno_location(): int
 - exit(int): void
 - realloc(pointer, int): void
 - open(pointer, int, int): int
@@ -24,6 +26,15 @@ declare {
 - pthread_cond_destroy(pointer): int
 - pthread_cond_signal(pointer): int
 - pthread_cond_wait(pointer, pointer): int
+}
+
+define errno-location(): int {
+  introspect os {
+  - darwin =>
+    magic external(__error)
+  - linux =>
+    magic external(__errno_location)
+  }
 }
 
 define exit[a](status: int): a {
@@ -71,7 +82,7 @@ define open(path-address: int, oflag: int, mode: int): FD.descriptor {
   }
 }
 
-define close(f: FD.descriptor): unit {
+define close(f: FD.descriptor): int {
   introspect os {
   - darwin =>
     magic external(close, f)

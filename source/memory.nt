@@ -19,6 +19,10 @@ inline store-int1(value: int1, address: int): unit {
   magic store(int1, value, address)
 }
 
+inline load-int32(address: int): int {
+  magic load(int32, address)
+}
+
 inline load-int(address: int): int {
   magic load(int64, address)
 }

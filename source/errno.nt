@@ -1,3 +1,18 @@
+import {
+- this.except [except]
+- this.external [errno-location]
+- this.memory [load-int32]
+}
+
+type sys(a) {
+  except(errno, a)
+}
+
 data errno {
 - Errno(int)
+}
+
+define get-errno(): int {
+  let errno-ptr = errno-location() in
+  load-int32(errno-ptr)
 }

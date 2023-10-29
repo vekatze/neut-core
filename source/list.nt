@@ -1,13 +1,13 @@
 import {
 - this.bool [bool, True, False, and, or]
-- this.data.functor [functor, Functor]
-- this.data.monoid [monoid, Monoid]
-- this.data.ordered [ordered, Ordered]
-- this.data.semigroup [semigroup, Semigroup]
 - this.except [none, Pass, Fail]
 - this.function [flip]
+- this.functor [functor, Functor]
+- this.monoid [monoid, Monoid]
+- this.ordered [ordered, Ordered]
 - this.ordering [LT, GT]
 - this.pair
+- this.semigroup [semigroup, Semigroup, from-monoid]
 - this.unit [unit, Unit]
 }
 
@@ -69,6 +69,33 @@ inline map-internal(a: tau, b: tau, f: a -> b): list(a) -> list(b) {
       Cons(f(y), loop(ys))
     }
   }
+}
+
+define loop(count: int, f: int -> unit): unit {
+  let helper =
+    mu self(cursor) {
+      if ge-int(cursor, count) {
+        Unit
+      } else {
+        f(cursor);
+        self(add-int(cursor, 1))
+      }
+    }
+  in
+  helper(0)
+}
+
+define repeat[a](count: int, f: int -> a): list(a) {
+  let helper =
+    mu self(cursor) {
+      if ge-int(cursor, count) {
+        []
+      } else {
+        f(cursor) :: self(add-int(cursor, 1))
+      }
+    }
+  in
+  helper(0)
 }
 
 define map-noetic[a, b](f: &a -> b, xs: &list(a)): list(b) {
@@ -218,23 +245,19 @@ inline maximum[a](as-ord: ordered(a)): list(a) -> ?a {
   }
 }
 
-
-inline as-semigroup[a](): semigroup(list(a)) {
-  Semigroup of {
-  - append =>
+inline as-monoid[a](): monoid(list(a)) {
+  Monoid of {
+  - one =>
+    []
+  - mul =>
     (x, y) => {
       append(x, y)
     }
   }
 }
 
-inline as-monoid[a](): monoid(list(a)) {
-  Monoid of {
-  - as-semigroup =>
-    as-semigroup()
-  - empty =>
-    []
-  }
+inline as-semigroup[a](): semigroup(list(a)) {
+  from-monoid(as-monoid())
 }
 
 inline as-functor(): functor(list) {

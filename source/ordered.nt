@@ -1,11 +1,11 @@
 import {
-- this.data.entity [entity, Entity]
+- this.bool [bool]
 - o
 }
 
 data ordered(a) {
 - Ordered of {
-  - as-entity: entity(a)
+  - identity: (a, a) -> bool
   - order: (a, a) -> o.ordering
   }
 }

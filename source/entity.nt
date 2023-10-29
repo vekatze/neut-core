@@ -1,0 +1,15 @@
+import {
+- this.bool [bool]
+- this.ordered [ordered, Ordered]
+}
+
+data entity(a) {
+- Entity of {
+  - identity: (a, a) -> bool // no entity without identity
+  }
+}
+
+inline from-ordered[a](x: ordered(a)): entity(a) {
+  let Ordered of { identity } = x in
+  Entity of { identity }
+}

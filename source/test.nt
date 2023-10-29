@@ -21,10 +21,48 @@ import {
 - m
 - magic
 - tio
-- vector [vector]
+- vector [vector, zip-with]
 }
 
 define main(): unit {
+  let mat: m.matrix(int) =
+    m.new([
+      [1, 2, 3],
+      [4, 5, 6]
+    ])
+  in
+  let _ on mat = m.print-mat(tio.print-int, mat) in
+  // let v: vector(int) = vector.new([1, 2, 3, 4]) in
+  // let _ on v =
+  //   vector.for-each(v, (x) => {
+  //     // tio.print("hello ");
+  //     tio.print-int(x)
+  //     // tio.print("\n")
+  //   })
+  // in
+  // // let _ on v = vector.swap(v, 1, 2) in
+  // // let _ on v = vector.next(v) in
+  // // let _ on v =
+  // //   vector.for-each(v, (x) => {
+  // //     tio.print("hello ");
+  // //     tio.print-int(x);
+  // //     tio.print("\n")
+  // //   })
+  // // in
+  // let newvec on v =
+  //   vector.for(v, (x) => {
+  //     add-int(x, 10)
+  //   })
+  // in
+  // let vec3 on v, newvec = zip-with(add-int, v, newvec) in
+  // let _ on vec3 =
+  //   vector.for-each(vec3, (x) => {
+  //     tio.print("hello ");
+  //     tio.print-int(x);
+  //     tio.print("\n")
+  //   })
+  // in
+  // let _ = v in
   Unit
   // let mat =
   //   m.new([

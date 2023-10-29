@@ -1,0 +1,14 @@
+import {
+- this.monoid [monoid, Monoid]
+}
+
+data semigroup(a) {
+- Semigroup of {
+  - mul: (a, a) -> a
+  }
+}
+
+inline from-monoid[a](m: monoid(a)): semigroup(a) {
+  let Monoid of { mul } = m in
+  Semigroup of { mul }
+}

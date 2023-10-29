@@ -1,5 +1,5 @@
 import {
-- this.data.monoid [monoid]
+- this.monoid [monoid]
 }
 
 data foldable(t: tau -> tau) {

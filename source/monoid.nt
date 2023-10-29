@@ -1,0 +1,15 @@
+import {
+- this.group [group, Group]
+}
+
+data monoid(a) {
+- Monoid of {
+  - one: a
+  - mul: (a, a) -> a
+  }
+}
+
+inline from-group[a](f: group(a)): monoid(a) {
+  let Group of { one, mul } = f in
+  Monoid of { one, mul }
+}

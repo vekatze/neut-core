@@ -1,9 +1,0 @@
-import {
-- this.bool [bool]
-}
-
-data entity(a) {
-- Entity of {
-  - identity: (a, a) -> bool // no entity without identity
-  }
-}

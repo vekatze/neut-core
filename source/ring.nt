@@ -1,0 +1,18 @@
+import {
+- this.field [field, Field]
+}
+
+data ring(a) {
+- Ring of {
+  - zero: a
+  - add: (a, a) -> a
+  - sub: (a, a) -> a
+  - one: a
+  - mul: (a, a) -> a
+  }
+}
+
+inline from-field[a](f: field(a)): ring(a) {
+  let Field of { zero, add, sub, one, mul } = f in
+  Ring of { zero, add, sub, one, mul }
+}

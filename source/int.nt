@@ -6,15 +6,9 @@ import {
 - ordered [ordered, Ordered]
 }
 
-inline as-entity(): e.entity(int) {
-  e.Entity of {
-  - identity => eq-int
-  }
-}
-
 inline as-ordered(): ordered.ordered(int) {
   Ordered of {
-  - as-entity => as-entity()
+  - identity => eq-int
   - order =>
     (x, y) => {
       if gt-int(x, y) {
@@ -26,6 +20,10 @@ inline as-ordered(): ordered.ordered(int) {
       }
     }
   }
+}
+
+inline as-entity(): e.entity(int) {
+  e.from-ordered(as-ordered())
 }
 
 define sum-int(xs: list(int)): int {

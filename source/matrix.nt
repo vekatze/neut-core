@@ -1,24 +1,27 @@
 import {
 - this.bool
 - this.except [from-option]
+- this.rig [rig, Rig]
 - this.system
 - this.text [text]
 - this.unit [unit, Unit]
-- L [list]
+- vector [vector]
+- L [list, loop]
 - fa
 - int
+- s
 - tio
 }
 
-data matrix {
+data matrix(a) {
 - Matrix of {
   - row-size: int
   - col-size: int
-  - content: fa.float-array
+  - content: vector(a)
   }
 }
 
-define new(xs: list(list(float))): matrix {
+define new[a](xs: list(list(a))): matrix(a) {
   let get-len = (xs) => { L.length(xs) } in
   let len-list on xs = L.map-noetic(get-len, xs) in
   let col-size = L.minimum(int.as-ordered())(len-list) in
@@ -26,44 +29,43 @@ define new(xs: list(list(float))): matrix {
   Matrix of {
   - row-size => row-size
   - col-size => from-option(0, col-size)
-  - content => fa.new(L.concat(xs))
+  - content => vector.new(L.concat(xs))
   }
 }
 
-define get-row-size(mat: &matrix): int {
+define get-row-size[a](mat: &matrix(a)): int {
   tie Matrix of { row-size } = mat in
   *row-size
 }
 
-define get-col-size(mat: &matrix): int {
+define get-col-size[a](mat: &matrix(a)): int {
   tie Matrix of { col-size } = mat in
   *col-size
 }
 
-define get-content(mat: &matrix): &fa.float-array {
+define get-content[a](mat: &matrix(a)): &vector(a) {
   tie Matrix of { content } = mat in
   content
 }
 
-define print-mat(mat: &matrix): unit {
+define print-mat[a](show: a -> unit, mat: &matrix(a)): unit {
   let row-size = get-row-size(mat) in
   let col-size = get-col-size(mat) in
   let content = get-content(mat) in
-  L.for(L.range(0, row-size), (row) => {
-    L.for(L.range(0, col-size), (col) => {
+  loop(row-size, (row) => {
+    loop(col-size, (col) => {
       let index = add-int(col, mul-int(col-size, row)) in
-      let elem = fa.access(content, index) in
-      tio.print-float(elem);
+      let elem = vector.access(content, index) in
+      show(elem);
       tio.print(" ")
     });
     tio.print("\n")
   })
 }
 
-define add-mat(mat1: &matrix, mat2: &matrix): matrix {
+define add-mat[a](sg: s.semigroup(a), mat1: &matrix(a), mat2: &matrix(a)): matrix(a) {
   let vec1 = get-content(mat1) in
   let vec2 = get-content(mat2) in
-  let new-vec = fa.zip-with(add-float, vec1, vec2) in
   let row-size = get-row-size(mat1) in
   assert "row-size(mat1) == row-size(mat2)" {
     let row-size-2 = get-row-size(mat2) in
@@ -77,15 +79,18 @@ define add-mat(mat1: &matrix, mat2: &matrix): matrix {
   Matrix of {
   - row-size => row-size
   - col-size => col-size
-  - content => new-vec
+  - content =>
+    let s.Semigroup of { mul } = sg in
+    vector.zip-with(mul, vec1, vec2)
   }
 }
 
-define mul-mat(mat1: &matrix, mat2: &matrix): matrix {
+define mul-mat[a](r: rig(a), mat1: &matrix(a), mat2: &matrix(a)): matrix(a) {
   let row-size-2 = get-row-size(mat2) in
   let col-size-1 = get-col-size(mat1) in
   assert "col-size(mat1) == row-size(mat2)" {
     eq-int(col-size-1, row-size-2)
   };
+  let Rig of { add, mul } = r in
   admit
 }

@@ -1,0 +1,23 @@
+import {
+- this.field [field, Field]
+- this.ring [ring, Ring]
+}
+
+data rig(a) {
+- Rig of {
+  - zero: a
+  - add: (a, a) -> a
+  - one: a
+  - mul: (a, a) -> a
+  }
+}
+
+inline from-field[a](f: field(a)): rig(a) {
+  let Field of { zero, add, one, mul } = f in
+  Rig of { zero, add, one, mul }
+}
+
+inline from-ring[a](f: ring(a)): rig(a) {
+  let Ring of { zero, add, one, mul } = f in
+  Rig of { zero, add, one, mul }
+}

@@ -2,7 +2,7 @@ import {
 - this.bool
 - this.ordering [GT, LT, EQ]
 - this.field [field, Field]
-- this.rig [rig, from-field]
+- this.semiring [semiring, from-field]
 - e
 - ordered [ordered, Ordered]
 }
@@ -38,6 +38,6 @@ inline as-field(): field(float) {
   }
 }
 
-inline as-rig(): rig(float) {
+inline as-semiring(): semiring(float) {
   from-field(as-field())
 }

@@ -4,7 +4,7 @@ import {
 - this.channel [channel, new-channel, send, receive]
 - this.file
 - this.function
-- this.float [as-rig]
+- this.float [as-semiring]
 - this.int8-array
 - this.list [list, map, minimum, maximum]
 - this.pair
@@ -40,7 +40,7 @@ define main(): unit {
       [-7, 0, 5]
     ])
   in
-  let mat on mat1, mat2 = m.mul-mat(as-rig(), mat1, mat2) in
+  let mat on mat1, mat2 = m.mul-mat(as-semiring(), mat1, mat2) in
   let _ on mat = m.print-mat(tio.print-float, mat) in
   // let _ on mat = m.print-mat(tio.print-int, mat) in
   // tio.print("\n");

@@ -3,7 +3,7 @@ import {
 - this.list [list]
 - this.ordering [GT, LT, EQ]
 - this.ring [ring, Ring]
-- this.rig [rig, from-ring]
+- this.semiring [semiring, from-ring]
 - e
 - ordered [ordered, Ordered]
 }
@@ -52,6 +52,6 @@ inline as-ring(): ring(int) {
   }
 }
 
-inline as-rig(): rig(int) {
+inline as-semiring(): semiring(int) {
   from-ring(as-ring())
 }

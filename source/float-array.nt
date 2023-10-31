@@ -140,7 +140,7 @@ define for-each(xs: &float-array, f: float -> unit): unit {
 define zip-with(f: (float, float) -> float, xs: &float-array, ys: &float-array): float-array {
   let len1 = this.float-array.length(xs) in
   let len2 = this.float-array.length(ys) in
-  let len-or-none = minimum(int.as-ordered())([len1, len2]) in
+  let len-or-none = minimum(int.as-loset)([len1, len2]) in
   let len = from-option(0, len-or-none) in
   let zip-with-helper =
     mu self(cursor: int) {

@@ -1,0 +1,10 @@
+import {
+- this.bool [bool, False]
+- this.order [order]
+}
+
+data loset(a) {
+- Loset of {
+  - cmp: (a, a) -> order
+  }
+}

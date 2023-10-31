@@ -1,13 +1,13 @@
 data descriptor {}
 
-define stdin(): descriptor {
+constant stdin: descriptor {
   magic cast(int, descriptor, 0)
 }
 
-define stdout(): descriptor {
+constant stdout: descriptor {
   magic cast(int, descriptor, 1)
 }
 
-define stderr(): descriptor {
+constant stderr: descriptor {
   magic cast(int, descriptor, 2)
 }

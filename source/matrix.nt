@@ -24,7 +24,7 @@ data matrix(a) {
 define new[a](content-list: list(list(a))): matrix(a) {
   let get-len = (xs) => { L.length(xs) } in
   let len-list on content-list = L.map-noetic(get-len, content-list) in
-  let col-size = L.minimum(int.as-ordered())(len-list) in
+  let col-size = L.minimum(int.as-loset)(len-list) in
   let row-size on content-list = L.length(content-list) in
   Matrix of {
   - row-size => row-size

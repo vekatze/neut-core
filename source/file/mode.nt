@@ -69,10 +69,10 @@ define interpret(xs: list(mode)): int {
   })
 }
 
-define default-file-mode(): list(mode) {
+constant default-file-mode: list(mode) {
   [Owner-R, Owner-W, Group-R, Other-R] // 644
 }
 
-define default-directory-mode(): list(mode) {
+constant default-directory-mode: list(mode) {
   [Owner-R, Owner-W, Owner-X, Group-R, Group-X, Other-R, Other-X] // 755
 }

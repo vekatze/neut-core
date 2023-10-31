@@ -1,6 +1,7 @@
 import {
-- this.bool [bool]
-- this.ordered [ordered, Ordered]
+- this.bool [bool, True, False]
+- o [EQ]
+- lo [loset, Loset]
 }
 
 data entity(a) {
@@ -9,7 +10,17 @@ data entity(a) {
   }
 }
 
-inline from-ordered[a](x: ordered(a)): entity(a) {
-  let Ordered of { identity } = x in
-  Entity of { identity }
+inline from-loset[a](x: loset(a)): entity(a) {
+  let Loset of { cmp } = x in
+  Entity of {
+  - identity =>
+    (x, y) => {
+      match cmp(x, y) {
+      - EQ =>
+        True
+      - _ =>
+        False
+      }
+    }
+  }
 }

@@ -49,14 +49,14 @@ define interpret(xs: list(flag)): int {
   })
 }
 
-define for-r(): list(flag) {
+constant for-r: list(flag) {
   [R]
 }
 
-define for-rw(): list(flag) {
+constant for-rw: list(flag) {
   [RW, Create]
 }
 
-define for-rw-append(): list(flag) {
+constant for-rw-append: list(flag) {
   [RW, Create, Append]
 }

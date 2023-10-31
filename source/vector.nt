@@ -141,7 +141,7 @@ inline for[a, b](xs: &vector(a), f: a -> b): vector(b) {
 define zip-with[a](f: (a, a) -> a, xs: &vector(a), ys: &vector(a)): vector(a) {
   let len1 = size(xs) in
   let len2 = size(ys) in
-  let min-func = minimum(int.as-ordered()) in
+  let min-func = minimum(int.as-loset) in
   let len-or-none = min-func([len1, len2]) in
   let len = from-option(0, len-or-none) in
   let zip-with-helper =

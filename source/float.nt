@@ -1,20 +1,19 @@
 import {
 - this.bool
-- this.ordering [GT, LT, EQ]
 - this.field [field, Field]
 - this.semiring [semiring, from-field]
 - e
-- ordered [ordered, Ordered]
+- lo [loset, Loset]
+- o [GT, LT, EQ]
 }
 
 inline as-entity(): e.entity(float) {
-  e.from-ordered(as-ordered())
+  e.from-loset(as-loset())
 }
 
-inline as-ordered(): ordered(float) {
-  Ordered of {
-  - identity => eq-float
-  - order =>
+inline as-loset(): loset(float) {
+  Loset of {
+  - cmp =>
     (x, y) => {
       if gt-float(x, y) {
         GT

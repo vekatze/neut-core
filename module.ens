@@ -15,8 +15,9 @@
     m "this.matrix"
     magic "this.magic"
     mem "this.memory"
-    o "this.ordering"
-    ordered "this.ordered"
+    o "this.order"
+    lo "this.loset"
+    po "this.poset"
     s "this.semigroup"
     seek "this.file.seek"
     tio "this.text.io"
@@ -25,4 +26,5 @@
   target {
     test "test.nt"
   }
+  inline-limit 100000
 }

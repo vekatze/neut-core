@@ -1,0 +1,23 @@
+import {
+- this.bool [bool]
+- this.except [Pass]
+- this.loset [loset, Loset]
+- this.order [order]
+- this.unit
+}
+
+data poset(a) {
+- Poset of {
+  - cmp: (a, a) -> ?order
+  }
+}
+
+inline from-loset[a](_loset: loset(a)): poset(a) {
+  let Loset of { cmp } = _loset in
+  Poset of {
+  - cmp =>
+    (x, y) => {
+      Pass(cmp(x, y))
+    }
+  }
+}

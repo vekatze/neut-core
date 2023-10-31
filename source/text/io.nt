@@ -96,7 +96,7 @@ define get-line-inner(ptr: int, ptr-size: int, current-index: int, buffer-size: 
     get-line-inner(new-ptr, new-size, current-index, buffer-size)
   } else {
     let content-ptr = add-int(ptr, add-int(mul-int(u, 2), current-index)) in
-    let bytes = ext.read(FD.stdin(), content-ptr, buffer-size) in
+    let bytes = ext.read(FD.stdin, content-ptr, buffer-size) in
     let next-index = add-int(current-index, bytes) in
     let last-char-ptr = add-int(content-ptr, sub-int(bytes, 1)) in
     let last-char = mem.load-int8(last-char-ptr) in

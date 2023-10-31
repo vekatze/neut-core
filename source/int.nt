@@ -1,31 +1,13 @@
 import {
 - this.bool
 - this.list [list]
-- this.ordering [GT, LT, EQ]
 - this.ring [ring, Ring]
+- this.monoid [monoid, from-group]
+- this.group [group, Group]
 - this.semiring [semiring, from-ring]
 - e
-- ordered [ordered, Ordered]
-}
-
-inline as-ordered(): ordered.ordered(int) {
-  Ordered of {
-  - identity => eq-int
-  - order =>
-    (x, y) => {
-      if gt-int(x, y) {
-        GT
-      } else-if lt-int(x, y) {
-        LT
-      } else {
-        EQ
-      }
-    }
-  }
-}
-
-inline as-entity(): e.entity(int) {
-  e.from-ordered(as-ordered())
+- lo [loset, Loset]
+- o [GT, LT, EQ]
 }
 
 define sum-int(xs: list(int)): int {
@@ -42,7 +24,7 @@ define sum-int(xs: list(int)): int {
   f(xs, 0)
 }
 
-inline as-ring(): ring(int) {
+constant as-ring: ring(int) {
   Ring of {
   - zero => 0
   - add => add-int
@@ -52,6 +34,37 @@ inline as-ring(): ring(int) {
   }
 }
 
-inline as-semiring(): semiring(int) {
-  from-ring(as-ring())
+constant as-semiring: semiring(int) {
+  from-ring(as-ring)
+}
+
+constant as-group: group(int) {
+  Group of {
+  - one => 0
+  - mul => add-int
+  - div => sub-int
+  }
+}
+
+constant as-monoid: monoid(int) {
+  from-group(as-group)
+}
+
+constant as-loset: loset(int) {
+  Loset of {
+  - cmp =>
+    (x, y) => {
+      if gt-int(x, y) {
+        GT
+      } else-if lt-int(x, y) {
+        LT
+      } else {
+        EQ
+      }
+    }
+  }
+}
+
+constant as-entity: e.entity(int) {
+  e.from-loset(as-loset)
 }

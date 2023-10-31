@@ -8,8 +8,9 @@ import {
 - this.function
 - this.float [as-semiring]
 - this.int8-array
-- this.list [list, map, minimum, maximum, reverse]
+- this.list [list, map, minimum, maximum, reverse, sum]
 - this.pair
+- this.int [as-monoid]
 - this.system
 - this.text [text]
 - this.unit [unit, Unit]
@@ -27,7 +28,40 @@ import {
 - vector [vector, zip-with]
 }
 
+
+constant hey: tau {
+  tau
+}
+
+
+// inline loop(a: tau): a {
+//   loop(a)
+// }
+
+constant self: unit {
+  // tio.print("hello")
+  Unit
+}
+
+data foo {
+- Foo(bar)
+}
+
+data bar {
+- Bar(foo)
+}
+
+// inline fact(x: int): int {
+//   if eq-int(x, 0) {
+//     1
+//   } else {
+//     mul-int(x, fact(sub-int(x, 1)))
+//   }
+// }
+
 define main(): unit {
+  let val = sum(as-monoid, [1, 2, 3]) in
+  tio.print-int(val);
   // let f = open("test", FF.for-r(), FM.default-file-mode()) in
   // match f {
   // - Fail(Errno(num)) =>
@@ -46,11 +80,11 @@ define main(): unit {
   // - Pass(_) =>
   //   Unit
   // };
-  let mat1: m.matrix(int) =
-    m.new([
-      reverse([1, 5, 9])
-    ])
-  in
+  // let mat1: m.matrix(int) =
+  //   m.new([
+  //     reverse([1, 5, 9])
+  //   ])
+  // in
   // let mat2: m.matrix(float) =
   //   m.new([
   //     [8, 4, 2],
@@ -60,7 +94,7 @@ define main(): unit {
   // in
   // let mat on mat1, mat2 = m.mul-mat(as-semiring(), mat1, mat2) in
   // let _ on mat = m.print-mat(tio.print-float, mat) in
-  let _ on mat1 = m.print-mat(tio.print-int, mat1) in
+  // let _ on mat1 = m.print-mat(tio.print-int, mat1) in
   // tio.print("\n");
   // tio.print("row-size: ");
   // let row-size on mat = m.get-row-size(mat) in

@@ -4,11 +4,11 @@ import {
 - this.function [flip]
 - this.functor [functor, Functor]
 - this.monoid [monoid, Monoid]
-- this.ordered [ordered, Ordered]
-- this.ordering [LT, GT]
+- this.order [LT, GT]
 - this.pair
 - this.semigroup [semigroup, Semigroup, from-monoid]
 - this.unit [unit, Unit]
+- lo [loset, Loset]
 }
 
 data list(a: tau) {
@@ -206,15 +206,20 @@ define filter-some[a](xs: list(?a)): list(a) {
   })
 }
 
-inline minimum[a](as-ord: ordered(a)): list(a) -> ?a {
+inline sum[a](as-monoid: monoid(a), xs: list(a)): a {
+  let Monoid of { one, mul } = as-monoid in
+  fold-left(one, xs, (acc, x) => { mul(acc, x) })
+}
+
+inline minimum[a](as-ord: loset(a)): list(a) -> ?a {
   (xs) => {
-    let Ordered of { order } = as-ord in
+    let Loset of { cmp } = as-ord in
     match xs {
     - [] =>
       none()
     - y :: ys =>
       Pass(fold-left(y, ys, (acc, y) => {
-        match order(acc, y) {
+        match cmp(acc, y) {
         - LT =>
           acc
         - _ =>
@@ -225,16 +230,16 @@ inline minimum[a](as-ord: ordered(a)): list(a) -> ?a {
   }
 }
 
-inline maximum[a](as-ord: ordered(a)): list(a) -> ?a {
+inline maximum[a](as-ord: loset(a)): list(a) -> ?a {
   (xs) => {
-    let Ordered of { order } = as-ord in
+    let Loset of { cmp } = as-ord in
     let helper =
       mu self(cand: a, ys: list(a)): a {
         match ys {
         - [] =>
           cand
         - z :: zs =>
-          match order(cand, z) {
+          match cmp(cand, z) {
           - GT =>
             self(cand, zs)
           - _ =>

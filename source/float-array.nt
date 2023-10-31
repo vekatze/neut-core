@@ -17,7 +17,7 @@ define unsafe-copy-float-array(source-pointer: int, target-pointer: int, index: 
   if eq-int(from, to) {
     Unit
   } else {
-    let u = arch.unit() in
+    let u = arch.unit in
     let value = mem.load-float(add-int(source-pointer, mul-int(u, from))) in
     mem.store-float(value, add-int(target-pointer, mul-int(u, index)));
     unsafe-copy-float-array(source-pointer, target-pointer, add-int(index, 1), add-int(from, 1), to)
@@ -29,7 +29,7 @@ resource float-array {
     magic.cast(unit, int, free(x))
   }
 - (source-pointer: int) => {
-    let u = arch.unit() in
+    let u = arch.unit in
     let u2 = mul-int(u, 2) in
     let from = mem.load-int(source-pointer) in
     let to = mem.load-int(add-int(source-pointer, u)) in
@@ -44,7 +44,7 @@ resource float-array {
 
 define length(xs: &float-array): int {
   let source-pointer = magic cast(&float-array, int, xs) in
-  let u = arch.unit() in
+  let u = arch.unit in
   let from = mem.load-int(source-pointer) in
   let to = mem.load-int(add-int(source-pointer, u)) in
   sub-int(to, from)
@@ -52,7 +52,7 @@ define length(xs: &float-array): int {
 
 define new(xs: list(float)): float-array {
   let len on xs = this.list.length(xs) in
-  let u = arch.unit() in
+  let u = arch.unit in
   let u2 = mul-int(u, 2) in
   let base-pointer = malloc(add-int(mul-int(u, len), u2)) in
   mem.store-int(0, base-pointer);
@@ -75,7 +75,7 @@ define new(xs: list(float)): float-array {
 
 inline access(xs: &float-array, i: int): float {
   let ptr = magic.cast(&float-array, int, xs) in
-  let u = arch.unit() in
+  let u = arch.unit in
   let from = mem.load-int(ptr) in
   let u2 = mul-int(u, 2) in
   mem.load-float(add-int(add-int(ptr, u2), mul-int(u, add-int(from, i))))
@@ -83,7 +83,7 @@ inline access(xs: &float-array, i: int): float {
 
 inline store(xs: float-array, i: int, x: float): float-array {
   let ptr = magic.cast(float-array, int, xs) in
-  let u = arch.unit() in
+  let u = arch.unit in
   let from = mem.load-int(ptr) in
   let u2 = mul-int(u, 2) in
   mem.store-float(x, add-int(add-int(ptr, u2), mul-int(u, add-int(from, i))));
@@ -119,7 +119,7 @@ define swap(xs: float-array, i: int, j: int): float-array {
 
 define for-each(xs: &float-array, f: float -> unit): unit {
   let ptr = magic.cast(&float-array, int, xs) in
-  let u = arch.unit() in
+  let u = arch.unit in
   let from = mem.load-int(ptr) in
   let to = mem.load-int(add-int(ptr, u)) in
   let len = sub-int(to, from) in

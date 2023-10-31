@@ -23,7 +23,7 @@ resource int8-array {
     magic.cast(unit, int, free(x))
   }
 - (source-pointer: int) => {
-    let u = arch.unit() in
+    let u = arch.unit in
     let u2 = mul-int(u, 2) in
     let from = mem.load-int(source-pointer) in
     let to = mem.load-int(add-int(source-pointer, u)) in
@@ -38,7 +38,7 @@ resource int8-array {
 
 define int8-array-length(xs: int8-array): int {
   let source-pointer = magic cast(int8-array, int, xs) in
-  let u = arch.unit() in
+  let u = arch.unit in
   let from = mem.load-int(source-pointer) in
   let to = mem.load-int(add-int(source-pointer, u)) in
   sub-int(to, from)
@@ -46,7 +46,7 @@ define int8-array-length(xs: int8-array): int {
 
 define int8-array-new(xs: list(int8)): int8-array {
   let len on xs = length(xs) in
-  let u = arch.unit() in
+  let u = arch.unit in
   let u2 = mul-int(u, 2) in
   let base-pointer = malloc(add-int(len, u2)) in
   mem.store-int(0, base-pointer);
@@ -69,7 +69,7 @@ define int8-array-new(xs: list(int8)): int8-array {
 
 define int8-array-access(xs: &int8-array, i: int): int8 {
   let ptr = magic.cast(&int8-array, int, xs) in
-  let u = arch.unit() in
+  let u = arch.unit in
   let u2 = mul-int(u, 2) in
   mem.load-int8(add-int(add-int(ptr, u2), i))
 }

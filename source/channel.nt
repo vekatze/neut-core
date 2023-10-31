@@ -13,7 +13,7 @@ import {
 
 resource channel-internal {
 - (ch: int) => {
-    let u = arch.unit() in
+    let u = arch.unit in
     let mutex-size = ext.thread-mutex-size() in
     let cond-size = ext.thread-cond-size() in
     let cond-offset = add-int(u, mutex-size) in
@@ -26,7 +26,7 @@ resource channel-internal {
     0
   }
 - (ch: int) => {
-    let u = arch.unit() in
+    let u = arch.unit in
     let mutex-size = ext.thread-mutex-size() in
     let cond-size = ext.thread-cond-size() in
     let type-offset = add-int(u, add-int(mutex-size, cond-size)) in
@@ -53,7 +53,7 @@ define new-channel[a](): channel(a) {
 define new-channel-internal(a: tau, q: Q.queue(a)): channel(a) {
   let mutex-size = ext.thread-mutex-size() in
   let cond-size = ext.thread-cond-size() in
-  let u = arch.unit() in
+  let u = arch.unit in
   let ptr = ext.malloc(sum-int([u, mutex-size, cond-size, u])) in
   mem.store-int(magic.cast(Q.queue(a), int, q), ptr);
   ext.thread-mutex-init(add-int(ptr, u));
@@ -64,7 +64,7 @@ define new-channel-internal(a: tau, q: Q.queue(a)): channel(a) {
 
 define send[a](ch: &channel(a), x: a): unit {
   let ch = magic.cast(&channel(a), int, ch) in
-  let u = arch.unit() in
+  let u = arch.unit in
   let mutex-ptr = add-int(ch, u) in
   ext.thread-mutex-lock(mutex-ptr);
   let q-base: int = mem.load-int(ch) in
@@ -78,7 +78,7 @@ define send[a](ch: &channel(a), x: a): unit {
 
 define receive[a](ch: &channel(a)): a {
   let ch = magic.cast(&channel(a), int, ch) in
-  let u = arch.unit() in
+  let u = arch.unit in
   let mutex-ptr = add-int(ch, u) in
   ext.thread-mutex-lock(mutex-ptr);
   receive-from-channel-inner(a, ch, mutex-ptr)
@@ -93,7 +93,7 @@ define receive-from-channel-inner(a: tau, ch: int, mutex-ptr: int): a {
     v
   - Fail(_) =>
     mem.store-int(magic.cast(Q.queue(int), int, Q.empty()), ch);
-    let u = arch.unit() in
+    let u = arch.unit in
     let mutex-size = ext.thread-mutex-size() in
     let cond-ptr = add-int(ch, add-int(u, mutex-size)) in
     ext.thread-cond-wait(cond-ptr, mutex-ptr);

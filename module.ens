@@ -26,5 +26,4 @@
   target {
     test "test.nt"
   }
-  inline-limit 100000
 }

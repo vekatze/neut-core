@@ -28,37 +28,6 @@ import {
 - vector [vector, zip-with]
 }
 
-
-constant hey: tau {
-  tau
-}
-
-
-// inline loop(a: tau): a {
-//   loop(a)
-// }
-
-constant self: unit {
-  // tio.print("hello")
-  Unit
-}
-
-data foo {
-- Foo(bar)
-}
-
-data bar {
-- Bar(foo)
-}
-
-// inline fact(x: int): int {
-//   if eq-int(x, 0) {
-//     1
-//   } else {
-//     mul-int(x, fact(sub-int(x, 1)))
-//   }
-// }
-
 define main(): unit {
   let val = sum(as-monoid, [1, 2, 3]) in
   tio.print-int(val);

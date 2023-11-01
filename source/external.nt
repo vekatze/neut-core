@@ -112,9 +112,9 @@ define read(f: FD.descriptor, content-pointer: int, max-read-size: int): int {
 define lseek(f: FD.descriptor, offset: int, seek-mode: int): int {
   introspect os {
   - darwin =>
-    magic external(lseek, f, offset: int, seek-mode)
+    magic external(lseek, f, offset, seek-mode)
   - linux =>
-    magic external(lseek, f, offset: int, seek-mode)
+    magic external(lseek, f, offset, seek-mode)
   }
 }
 
@@ -128,11 +128,12 @@ define sleep(seconds: int): unit {
 }
 
 define thread-create(id-ptr: int, thread-func-addr: int, thread-env-addr: int): int {
+  let zero: int = 0 in
   introspect os {
   - darwin =>
-    magic external(pthread_create, id-ptr, 0: int, thread-func-addr, thread-env-addr)
+    magic external(pthread_create, id-ptr, zero, thread-func-addr, thread-env-addr)
   - linux =>
-    magic external(pthread_create, id-ptr, 0: int, thread-func-addr, thread-env-addr)
+    magic external(pthread_create, id-ptr, zero, thread-func-addr, thread-env-addr)
   }
 }
 
@@ -168,11 +169,12 @@ inline thread-mutex-size(): int {
 }
 
 define thread-mutex-init(mutex-ptr: int): unit {
+  let zero: int = 0 in
   introspect os {
   - darwin =>
-    magic external(pthread_mutex_init, mutex-ptr, 0: int)
+    magic external(pthread_mutex_init, mutex-ptr, zero)
   - linux =>
-    magic external(pthread_mutex_init, mutex-ptr, 0: int)
+    magic external(pthread_mutex_init, mutex-ptr, zero)
   }
 }
 
@@ -217,11 +219,12 @@ inline thread-cond-size(): int {
 }
 
 define thread-cond-init(cond-ptr: int): unit {
+  let zero: int = 0 in
   introspect os {
   - darwin =>
-    magic external(pthread_cond_init, cond-ptr, 0: int)
+    magic external(pthread_cond_init, cond-ptr, zero)
   - linux =>
-    magic external(pthread_cond_init, cond-ptr, 0: int)
+    magic external(pthread_cond_init, cond-ptr, zero)
   }
 }
 

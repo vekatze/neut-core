@@ -134,5 +134,6 @@ define fflush(ptr: int): unit {
 }
 
 define fflush-all(): unit {
-  magic external(fflush, 0: int)
+  let zero: int = 0 in
+  magic external(fflush, zero)
 }

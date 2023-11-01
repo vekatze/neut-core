@@ -5,19 +5,17 @@ import {
 
 data semiring(a) {
 - Semiring of {
-  - zero: a
   - add: (a, a) -> a
-  - one: a
   - mul: (a, a) -> a
   }
 }
 
 inline from-field[a](f: field(a)): semiring(a) {
-  let Field of { zero, add, one, mul } = f in
-  Semiring of { zero, add, one, mul }
+  let Field of { add, mul } = f in
+  Semiring of { add, mul }
 }
 
 inline from-ring[a](f: ring(a)): semiring(a) {
-  let Ring of { zero, add, one, mul } = f in
-  Semiring of { zero, add, one, mul }
+  let Ring of { add, mul } = f in
+  Semiring of { add, mul }
 }

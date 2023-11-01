@@ -131,7 +131,7 @@ inline for-each[a](xs: &vector(a), f: a -> unit): unit {
 
 inline for[a, b](xs: &vector(a), f: a -> b): vector(b) {
   new of {
-  - base-list =>
+  - base-list =
     repeat(size(xs), (i) => {
       f(access(xs, i))
     })

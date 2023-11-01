@@ -13,7 +13,7 @@ inline as-entity(): e.entity(float) {
 
 inline as-loset(): loset(float) {
   Loset of {
-  - cmp =>
+  - cmp =
     (x, y) => {
       if gt-float(x, y) {
         GT
@@ -28,12 +28,12 @@ inline as-loset(): loset(float) {
 
 inline as-field(): field(float) {
   Field of {
-  - zero => 0
-  - add => add-float
-  - sub => sub-float
-  - one => 1
-  - mul => mul-float
-  - div => div-float
+  - zero = 0
+  - add = add-float
+  - sub = sub-float
+  - one = 1
+  - mul = mul-float
+  - div = div-float
   }
 }
 

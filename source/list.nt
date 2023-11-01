@@ -259,9 +259,9 @@ inline maximum[a](as-ord: loset(a)): list(a) -> ?a {
 
 inline as-monoid[a](): monoid(list(a)) {
   Monoid of {
-  - one =>
+  - one =
     []
-  - mul =>
+  - mul =
     (x, y) => {
       append(x, y)
     }
@@ -274,7 +274,7 @@ inline as-semigroup[a](): semigroup(list(a)) {
 
 inline as-functor(): functor(list) {
   Functor of {
-  - map =>
+  - map =
     (_, _, f, xs) => { map(f, xs) }
   }
 }

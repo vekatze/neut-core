@@ -26,11 +26,11 @@ define sum-int(xs: list(int)): int {
 
 constant as-ring: ring(int) {
   Ring of {
-  - zero => 0
-  - add => add-int
-  - sub => sub-int
-  - one => 1
-  - mul => mul-int
+  - zero = 0
+  - add = add-int
+  - sub = sub-int
+  - one = 1
+  - mul = mul-int
   }
 }
 
@@ -40,9 +40,9 @@ constant as-semiring: semiring(int) {
 
 constant as-group: group(int) {
   Group of {
-  - one => 0
-  - mul => add-int
-  - div => sub-int
+  - one = 0
+  - mul = add-int
+  - div = sub-int
   }
 }
 
@@ -52,7 +52,7 @@ constant as-monoid: monoid(int) {
 
 constant as-loset: loset(int) {
   Loset of {
-  - cmp =>
+  - cmp =
     (x, y) => {
       if gt-int(x, y) {
         GT

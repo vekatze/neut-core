@@ -1,4 +1,4 @@
-constant unit: int {
+constant size: int {
   introspect arch {
   - amd64 =>
     8

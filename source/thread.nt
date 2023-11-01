@@ -4,17 +4,17 @@ import {
 - this.text
 - this.unit [unit, Unit]
 - Q
-- arch
 - ext
 - magic
 - mem
 - tio
+- word
 }
 
 resource flow-inner {
 - (p: int) => {
     // tio.print("[warning] awaiting a flow to discard it\n")
-    let u = arch.unit in
+    let u = word.size in
     let elem-type = magic.cast(int, tau, mem.load-int(add-int(p, u))) in
     let pr: flow(elem-type) = magic.cast(int, flow(elem-type), p) in
     let _: elem-type = this.thread.attach(elem-type, pr: flow(elem-type)) in // await * discard
@@ -22,7 +22,7 @@ resource flow-inner {
   }
 - (addr: int) => {
     // tio.print("[warning] awaiting a flow to copy it\n")
-    let u = arch.unit in
+    let u = word.size in
     let u2 = mul-int(u, 2) in
     let u3 = mul-int(u, 3) in
     await-and-write-result(addr);
@@ -48,7 +48,7 @@ inline embody(a: tau, x: &a): a {
 }
 
 inline flow-size(): int {
-  let u = arch.unit in
+  let u = word.size in
   add-int(mul-int(u, 3), 1)
 }
 
@@ -59,7 +59,7 @@ define detach(a: tau, f: () -> a): flow(a) {
       ext.thread-exit(magic.cast(a, int, f()))
     }
   in
-  let u = arch.unit in
+  let u = word.size in
   let u2 = mul-int(u, 2) in
   let u3 = mul-int(u, 3) in
   let closure = magic.cast(() -> unit, int, thread-func) in
@@ -91,7 +91,7 @@ define detach(a: tau, f: () -> a): flow(a) {
 define attach(a: tau, e: flow(a)): a {
   let addr = magic.cast(flow(a), int, e) in
   await-and-write-result(addr);
-  let u = arch.unit in
+  let u = word.size in
   let value-ptr = add-int(addr, mul-int(u, 2)) in
   let value = mem.load-int(value-ptr) in
   ext.free(addr);
@@ -99,7 +99,7 @@ define attach(a: tau, e: flow(a)): a {
 }
 
 define await-and-write-result(addr: int): unit {
-  let u = arch.unit in
+  let u = word.size in
   let u2 = mul-int(u, 2) in
   let u3 = mul-int(u, 3) in
   let finished-flag-ptr = add-int(addr, u3) in

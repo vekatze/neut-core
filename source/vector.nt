@@ -5,10 +5,10 @@ import {
 - this.unit [unit, Unit]
 - this.pair
 - this.except [Pass, none, from-option]
-- arch
 - int
 - magic
 - mem
+- word
 }
 
 data _vecInfo {
@@ -23,7 +23,7 @@ data _vecInfo {
 
 define _get-vec-info[a](xs: &vector(a)): _vecInfo {
   let from-ptr = magic.cast(&vector(a), int, xs) in
-  let word-size = arch.unit in
+  let word-size = word.size in
   let to-ptr = add-int(from-ptr, word-size) in
   let type-ptr = add-int(from-ptr, mul-int(word-size, 2)) in
   let content-ptr = add-int(from-ptr, mul-int(word-size, 3)) in
@@ -34,7 +34,7 @@ define _discard-vector-content(ptr: int, elem-type: tau, counter: int, size: int
   if eq-int(counter, size) {
     Unit
   } else {
-    let u = arch.unit in
+    let u = word.size in
     let _ = magic.cast(int, elem-type, mem.load-int(add-int(ptr, mul-int(counter, u)))) in
     _discard-vector-content(ptr, elem-type, add-int(counter, 1), size)
   }
@@ -44,7 +44,7 @@ define _copy-vector-content(source-pointer: int, target-pointer: int, elem-type:
   if eq-int(counter, size) {
     Unit
   } else {
-    let u = arch.unit in
+    let u = word.size in
     let original = magic.cast(int, &elem-type, mem.load-int(add-int(source-pointer, mul-int(counter, u)))) in
     let clone = *original in
     mem.store-int(magic.cast(elem-type, int, clone), add-int(target-pointer, mul-int(counter, u)));
@@ -84,7 +84,7 @@ define vector(_: tau): tau {
 }
 
 define new[a](base-list: list(a)): vector(a) {
-  let word-size = arch.unit in
+  let word-size = word.size in
   let n on base-list = this.list.length(base-list) in
   let ptr0 = malloc(mul-int(word-size, add-int(3, n))) in
   let ptr1 = add-int(ptr0, word-size) in

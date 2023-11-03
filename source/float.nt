@@ -1,7 +1,8 @@
 import {
 - this.bool
 - this.field [field, Field]
-- this.semiring [semiring, from-field]
+- this.ring [ring]
+- this.semiring [semiring]
 - e
 - lo [loset, Loset]
 - o [GT, LT, EQ]
@@ -26,7 +27,7 @@ inline as-loset(): loset(float) {
   }
 }
 
-inline as-field(): field(float) {
+constant as-field: field(float) {
   Field of {
   - zero = 0
   - add = add-float
@@ -37,6 +38,10 @@ inline as-field(): field(float) {
   }
 }
 
-inline as-semiring(): semiring(float) {
-  from-field(as-field())
+constant as-ring: ring(float) {
+  this.ring.from-field(as-field)
+}
+
+constant as-semiring: semiring(float) {
+  this.semiring.from-field(as-field)
 }

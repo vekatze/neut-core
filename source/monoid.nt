@@ -1,5 +1,6 @@
 import {
 - this.group [group, Group]
+- this.ring [ring, Ring]
 }
 
 data monoid(a) {
@@ -11,5 +12,10 @@ data monoid(a) {
 
 inline from-group[a](f: group(a)): monoid(a) {
   let Group of { one, mul } = f in
+  Monoid of { one, mul }
+}
+
+inline from-ring[a](asRing: ring(a)): monoid(a) {
+  let Ring of { one, mul } = asRing in
   Monoid of { one, mul }
 }

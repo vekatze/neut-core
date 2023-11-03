@@ -15,9 +15,9 @@ inline as-loset(): loset(float) {
   Loset of {
   - cmp =
     (x, y) => {
-      if gt-float(x, y) {
+      if gt-float(*x, *y) {
         GT
-      } else-if lt-float(x, y) {
+      } else-if lt-float(*x, *y) {
         LT
       } else {
         EQ

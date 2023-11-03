@@ -5,6 +5,7 @@
     FM "this.file.mode"
     L "this.list"
     Q "this.queue"
+    dict "this.dict"
     e "this.entity"
     ext "this.external"
     f "this.float"

@@ -8,7 +8,7 @@ import {
 
 data poset(a) {
 - Poset of {
-  - cmp: (a, a) -> ?order
+  - cmp: (&a, &a) -> ?order
   }
 }
 

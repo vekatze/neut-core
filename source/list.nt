@@ -219,7 +219,8 @@ inline minimum[a](as-ord: loset(a)): list(a) -> ?a {
       none()
     - y :: ys =>
       Pass(fold-left(y, ys, (acc, y) => {
-        match cmp(acc, y) {
+        let order on acc, y = cmp(acc, y) in
+        match order {
         - LT =>
           acc
         - _ =>
@@ -239,7 +240,8 @@ inline maximum[a](as-ord: loset(a)): list(a) -> ?a {
         - [] =>
           cand
         - z :: zs =>
-          match cmp(cand, z) {
+          let order on cand, z = cmp(cand, z) in
+          match order {
           - GT =>
             self(cand, zs)
           - _ =>

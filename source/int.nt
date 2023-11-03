@@ -54,9 +54,9 @@ constant as-loset: loset(int) {
   Loset of {
   - cmp =
     (x, y) => {
-      if gt-int(x, y) {
+      if gt-int(*x, *y) {
         GT
-      } else-if lt-int(x, y) {
+      } else-if lt-int(*x, *y) {
         LT
       } else {
         EQ

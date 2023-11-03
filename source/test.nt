@@ -10,11 +10,12 @@ import {
 - this.int8-array
 - this.list [list, map, minimum, maximum, reverse, sum]
 - this.pair
-- this.int [as-monoid]
+- this.int [as-monoid, as-loset]
 - this.system
 - this.text [text]
 - this.unit [unit, Unit]
 - this.void
+- dict [dict, size, empty, insert, Dict, fromLoset]
 - FD
 - FF
 - FM
@@ -29,8 +30,35 @@ import {
 }
 
 define main(): unit {
-  let val = sum(as-monoid, [1, 2, 3]) in
-  tio.print-int(val);
+  let dict.Dict of { empty, insert, lookup, delete } = fromLoset(as-loset) in
+  let d: dict(int, &text) = empty in
+  // let d: dict(int, &text) = dict.empty() in
+  let d = insert(10, "hello\n", d) in
+  let d = insert(20, "this\n", d) in
+  let d = insert(30, "yo\n", d) in
+  let key = 10 in
+  let _ on d, key =
+    let val = lookup(key, d) in
+    match val {
+    - Fail(_) =>
+      tio.print("found nothing\n")
+    - Pass(val) =>
+      tio.print(*val)
+    }
+  in
+  let d = delete(key, d) in
+  let key = 10 in
+  let _ on d, key =
+    let val = lookup(key, d) in
+    match val {
+    - Fail(_) =>
+      tio.print("found nothing\n")
+    - Pass(val) =>
+      tio.print(*val)
+    }
+  in
+  // let val = sum(as-monoid, [1, 2, 3]) in
+  // tio.print-int(val);
   // let f = open("test", FF.for-r(), FM.default-file-mode()) in
   // match f {
   // - Fail(Errno(num)) =>

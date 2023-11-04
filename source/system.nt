@@ -29,7 +29,8 @@ define assert-inner(message: &text, check: () -> bool): unit {
   if check() {
     Unit
   } else {
-    print(message)
+    print(message);
+    exit(1)
   }
 }
 

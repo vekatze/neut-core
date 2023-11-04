@@ -116,6 +116,13 @@ inline access[a](xs: &vector(a), i: int): a {
   *val
 }
 
+inline accessN[a](xs: &vector(a), i: int): &a {
+  let _VecInfo of { from-ptr, content-ptr, word-size } = _get-vec-info(xs) in
+  let from = mem.load-int(from-ptr) in
+  let elem-address = add-int(content-ptr, mul-int(word-size, add-int(from, i))) in
+  magic.cast(int, &a, mem.load-int(elem-address))
+}
+
 define size[a](xs: &vector(a)): int {
   let _VecInfo of { from-ptr, to-ptr } = _get-vec-info(xs) in
   let from = mem.load-int(from-ptr) in
@@ -136,6 +143,25 @@ inline for[a, b](xs: &vector(a), f: a -> b): vector(b) {
       f(access(xs, i))
     })
   }
+}
+
+inline foldLN[elem-type, result-type] of {
+- acc: result-type
+- xs: &vector(elem-type)
+- consumer: (result-type, &elem-type) -> result-type
+}: result-type {
+  let sz = size(xs) in
+  let helper =
+    mu loop(cursor: int, acc, xs) {
+      if eq-int(cursor, sz) {
+        acc
+      } else {
+        let y = accessN(xs, cursor) in
+        loop(add-int(cursor, 1), consumer(acc, y), xs)
+      }
+    }
+  in
+  helper(0, acc, xs)
 }
 
 define zip-with[a](f: (a, a) -> a, xs: &vector(a), ys: &vector(a)): vector(a) {

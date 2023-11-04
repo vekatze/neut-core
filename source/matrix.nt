@@ -213,3 +213,13 @@ inline mul-mat[a](r: rig(a)): (&matrix(a), &matrix(a)) -> matrix(a) {
     }
   }
 }
+
+define for[a, b](mat: &matrix(a), f: a -> b): matrix(b) {
+  let vec = get-content(mat) in
+  Matrix of {
+  - row-size = get-row-size(mat)
+  - col-size = get-col-size(mat)
+  - content =
+    vector.for(vec, f)
+  }
+}

@@ -32,6 +32,7 @@ data overRing(a) {
   - sub: (&matrix(a), &matrix(a)) -> matrix(a)
   - mkOne: int -> matrix(a)
   - mul: (&matrix(a), &matrix(a)) -> matrix(a)
+  - mul-pointwise: (&matrix(a), &matrix(a)) -> matrix(a)
   }
 }
 
@@ -44,6 +45,7 @@ inline fromRing[a](asRing: ring(a)): overRing(a) {
   - sub = sub-mat(asRing)
   - mkOne = one(asRing)
   - mul = mul-mat(asRig)
+  - mul-pointwise = mul-mat-pointwise(asRing)
   }
 }
 
@@ -210,6 +212,30 @@ inline mul-mat[a](r: rig(a)): (&matrix(a), &matrix(a)) -> matrix(a) {
           })
         })
       })
+    }
+  }
+}
+
+inline mul-mat-pointwise[a](rg: ring(a)): (&matrix(a), &matrix(a)) -> matrix(a) {
+  let Ring of { mul } = rg in
+  mu _(mat1: &matrix(a), mat2: &matrix(a)) {
+    let vec1 = get-content(mat1) in
+    let vec2 = get-content(mat2) in
+    let row-size = get-row-size(mat1) in
+    assert "row-size(mat1) == row-size(mat2)" {
+      let row-size-2 = get-row-size(mat2) in
+      eq-int(row-size, row-size-2)
+    };
+    let col-size = get-col-size(mat1) in
+    assert "col-size(mat1) == col-size(mat2)" {
+      let col-size-2 = get-col-size(mat2) in
+      eq-int(col-size, col-size-2)
+    };
+    Matrix of {
+    - row-size = row-size
+    - col-size = col-size
+    - content =
+      vector.zip-with(mul, vec1, vec2)
     }
   }
 }

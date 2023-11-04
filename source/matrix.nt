@@ -2,7 +2,7 @@ import {
 - this.bool [and]
 - this.except [from-option]
 - this.rig [rig, Rig]
-- this.monoid [from-ring]
+- this.monoid [from-ring-additive]
 - this.semigroup [from-monoid]
 - this.ring [ring, Ring]
 - this.system
@@ -37,12 +37,10 @@ data overRing(a) {
 
 inline fromRing[a](asRing: ring(a)): overRing(a) {
   let asRig = this.rig.from-ring(asRing) in
-  let asMonoid = from-ring(asRing) in
-  let asSemigroup = from-monoid(asMonoid) in
   OverRing of {
   - mk = new
   - mkZero = zero(asRing)
-  - add = add-mat(asSemigroup)
+  - add = add-mat(asRing)
   - sub = sub-mat(asRing)
   - mkOne = one(asRing)
   - mul = mul-mat(asRig)
@@ -129,8 +127,8 @@ define print-mat[a](show: a -> unit, mat: &matrix(a)): unit {
   })
 }
 
-inline add-mat[a](sg: s.semigroup(a)): (&matrix(a), &matrix(a)) -> matrix(a) {
-  let s.Semigroup of { mul } = sg in
+inline add-mat[a](rg: ring(a)): (&matrix(a), &matrix(a)) -> matrix(a) {
+  let Ring of { add } = rg in
   mu _(mat1: &matrix(a), mat2: &matrix(a)) {
     let vec1 = get-content(mat1) in
     let vec2 = get-content(mat2) in
@@ -148,7 +146,7 @@ inline add-mat[a](sg: s.semigroup(a)): (&matrix(a), &matrix(a)) -> matrix(a) {
     - row-size = row-size
     - col-size = col-size
     - content =
-      vector.zip-with(mul, vec1, vec2)
+      vector.zip-with(add, vec1, vec2)
     }
   }
 }

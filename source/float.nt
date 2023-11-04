@@ -8,11 +8,18 @@ import {
 - o [GT, LT, EQ]
 }
 
-inline as-entity(): e.entity(float) {
-  e.from-loset(as-loset())
+constant as-field: field(float) {
+  Field of {
+  - zero = 0
+  - add = add-float
+  - sub = sub-float
+  - one = 1
+  - mul = mul-float
+  - div = div-float
+  }
 }
 
-inline as-loset(): loset(float) {
+constant as-loset: loset(float) {
   Loset of {
   - cmp =
     (x, y) => {
@@ -27,21 +34,14 @@ inline as-loset(): loset(float) {
   }
 }
 
-constant as-field: field(float) {
-  Field of {
-  - zero = 0
-  - add = add-float
-  - sub = sub-float
-  - one = 1
-  - mul = mul-float
-  - div = div-float
-  }
-}
-
 constant as-ring: ring(float) {
   this.ring.from-field(as-field)
 }
 
 constant as-semiring: semiring(float) {
   this.semiring.from-field(as-field)
+}
+
+constant as-entity: e.entity(float) {
+  e.from-loset(as-loset)
 }

@@ -207,8 +207,8 @@ define filter-some[a](xs: list(?a)): list(a) {
 }
 
 inline sum[a](as-monoid: monoid(a), xs: list(a)): a {
-  let Monoid of { one, mul } = as-monoid in
-  fold-left(one, xs, (acc, x) => { mul(acc, x) })
+  let Monoid of { e, op } = as-monoid in
+  fold-left(e, xs, (acc, x) => { op(acc, x) })
 }
 
 inline minimum[a](as-ord: loset(a)): list(a) -> ?a {
@@ -261,9 +261,9 @@ inline maximum[a](as-ord: loset(a)): list(a) -> ?a {
 
 inline as-monoid[a](): monoid(list(a)) {
   Monoid of {
-  - one =
+  - e =
     []
-  - mul =
+  - op =
     (x, y) => {
       append(x, y)
     }
@@ -274,7 +274,7 @@ inline as-semigroup[a](): semigroup(list(a)) {
   from-monoid(as-monoid())
 }
 
-inline as-functor(): functor(list) {
+constant as-functor: functor(list) {
   Functor of {
   - map =
     (_, _, f, xs) => { map(f, xs) }

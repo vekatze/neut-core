@@ -152,7 +152,7 @@ inline add-mat[a](rg: ring(a)): (&matrix(a), &matrix(a)) -> matrix(a) {
 }
 
 inline sub-mat[a](rg: ring(a)): (&matrix(a), &matrix(a)) -> matrix(a) {
-  let Ring of { zero, sub, mul } = rg in
+  let Ring of { zero, add, sub } = rg in
   mu _(mat1: &matrix(a), mat2: &matrix(a)) {
     let vec1 = get-content(mat1) in
     let vec2 = get-content(mat2) in
@@ -170,7 +170,7 @@ inline sub-mat[a](rg: ring(a)): (&matrix(a), &matrix(a)) -> matrix(a) {
     - row-size = row-size
     - col-size = col-size
     - content =
-      vector.zip-with((x, y) => { mul(x, sub(zero, y)) }, vec1, vec2)
+      vector.zip-with((x, y) => { add(x, sub(zero, y)) }, vec1, vec2)
     }
   }
 }

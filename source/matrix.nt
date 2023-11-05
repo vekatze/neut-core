@@ -148,7 +148,7 @@ inline add-mat[a](rg: ring(a)): (&matrix(a), &matrix(a)) -> matrix(a) {
     - row-size = row-size
     - col-size = col-size
     - content =
-      vector.zip-with(add, vec1, vec2)
+      vector.zip-with(vec1, vec2, add)
     }
   }
 }
@@ -172,7 +172,7 @@ inline sub-mat[a](rg: ring(a)): (&matrix(a), &matrix(a)) -> matrix(a) {
     - row-size = row-size
     - col-size = col-size
     - content =
-      vector.zip-with((x, y) => { add(x, sub(zero, y)) }, vec1, vec2)
+      vector.zip-with(vec1, vec2, (x, y) => { add(x, sub(zero, y)) })
     }
   }
 }
@@ -235,7 +235,7 @@ inline mul-mat-pointwise[a](rg: ring(a)): (&matrix(a), &matrix(a)) -> matrix(a) 
     - row-size = row-size
     - col-size = col-size
     - content =
-      vector.zip-with(mul, vec1, vec2)
+      vector.zip-with(vec1, vec2, mul)
     }
   }
 }
@@ -247,5 +247,25 @@ define for[a, b](mat: &matrix(a), f: a -> b): matrix(b) {
   - col-size = get-col-size(mat)
   - content =
     vector.for(vec, f)
+  }
+}
+
+define zip-with[a, b, c](mat1: &matrix(a), mat2: &matrix(b), f: (a, b) -> c): matrix(c) {
+  let r1 = get-row-size(mat1) in
+  assert "row-size(mat1) == row-size(mat2)" {
+    let r2 = get-row-size(mat2) in
+    eq-int(r1, r2)
+  };
+  let c1 = get-row-size(mat1) in
+  assert "col-size(mat1) == col-size(mat2)" {
+    let c2 = get-row-size(mat2) in
+    eq-int(c1, c2)
+  };
+  let vec1 = get-content(mat1) in
+  let vec2 = get-content(mat2) in
+  Matrix of {
+  - row-size = r1
+  - col-size = c1
+  - content = vector.zip-with(vec1, vec2, f)
   }
 }

@@ -164,7 +164,7 @@ inline foldLN[elem-type, result-type] of {
   helper(0, acc, xs)
 }
 
-define zip-with[a](f: (a, a) -> a, xs: &vector(a), ys: &vector(a)): vector(a) {
+define zip-with[a, b, c](xs: &vector(a), ys: &vector(b), f: (a, b) -> c): vector(c) {
   let len1 = size(xs) in
   let len2 = size(ys) in
   let min-func = minimum(int.as-loset) in

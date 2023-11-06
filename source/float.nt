@@ -8,6 +8,25 @@ import {
 - o [GT, LT, EQ]
 }
 
+declare {
+- llvm.sqrt.f64(float): float
+- llvm.exp.f64(float): float
+- llvm.exp2.f64(float): float
+- llvm.exp10.f64(float): float
+- llvm.sin.f64(float): float
+- llvm.cos.f64(float): float
+- llvm.log.f64(float): float
+- llvm.log2.f64(float): float
+- llvm.log10.f64(float): float
+- llvm.fma.f64(float, float, float): float
+- llvm.fabs.f64(float): float
+- llvm.minnum.f64(float, float): float
+- llvm.maxnum.f64(float, float): float
+- llvm.floor.f64(float): float
+- llvm.ceil.f64(float): float
+- llvm.trunc.f64(float): float
+}
+
 constant as-field: field(float) {
   Field of {
   - zero = 0
@@ -17,6 +36,75 @@ constant as-field: field(float) {
   - mul = mul-float
   - div = div-float
   }
+}
+
+define sqrt(x: float): float {
+  magic external(llvm.sqrt.f64, x)
+}
+
+define exp(x: float): float {
+  magic external(llvm.exp.f64, x)
+}
+
+define exp2(x: float): float {
+  magic external(llvm.exp2.f64, x)
+}
+
+define exp10(x: float): float {
+  magic external(llvm.exp10.f64, x)
+}
+
+define sin(x: float): float {
+  magic external(llvm.sin.f64, x)
+}
+
+define cos(x: float): float {
+  magic external(llvm.cos.f64, x)
+}
+
+define log(x: float): float {
+  magic external(llvm.log.f64, x)
+}
+
+define log2(x: float): float {
+  magic external(llvm.log2.f64, x)
+}
+
+define log10(x: float): float {
+  magic external(llvm.log10.f64, x)
+}
+
+define fma(x: float, y: float, z: float): float {
+  magic external(llvm.fma.f64, x, y, z)
+}
+
+define fabs(x: float): float {
+  magic external(llvm.fabs.f64, x)
+}
+
+define minnum(x: float, y: float): float {
+  magic external(llvm.minnum.f64, x, y)
+}
+
+define maxnum(x: float, y: float): float {
+  magic external(llvm.maxnum.f64, x, y)
+}
+
+define floor(x: float): float {
+  magic external(llvm.floor.f64, x)
+}
+
+define ceil(x: float): float {
+  magic external(llvm.ceil.f64, x)
+}
+
+define trunc(x: float): float {
+  magic external(llvm.trunc.f64, x)
+}
+
+
+define sigmoid(x: float): float {
+  div-float(1, add-float(1, exp(mul-float(-1, x))))
 }
 
 constant as-loset: loset(float) {

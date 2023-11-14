@@ -112,6 +112,15 @@ define from-int(x: int): text {
   magic.cast(int, text, ptr)
 }
 
+define unsafe-get-c-string-length(ptr: int, index: int): int {
+  let c = mem.load-int8(add-int(ptr, index)) in
+  if eq-int8(c, 0) {
+    index
+  } else {
+    unsafe-get-c-string-length(ptr, add-int(index, 1))
+  }
+}
+
 define unsafe-from-c-string(old-ptr: int): text {
   let u = word.size in
   let u2 = mul-int(u, 2) in
@@ -121,13 +130,4 @@ define unsafe-from-c-string(old-ptr: int): text {
   mem.store-int(len, add-int(new-ptr, u));
   unsafe-copy-int8-array(old-ptr, add-int(new-ptr, u2), 0, 0, len);
   magic.cast(int, text, new-ptr)
-}
-
-define unsafe-get-c-string-length(ptr: int, index: int): int {
-  let c = mem.load-int8(add-int(ptr, index)) in
-  if eq-int8(c, 0) {
-    index
-  } else {
-    unsafe-get-c-string-length(ptr, add-int(index, 1))
-  }
 }

@@ -4,7 +4,7 @@ import {
 - seek
 }
 
-declare {
+foreign {
 - __error(): int
 - __errno_location(): int
 - exit(int): void

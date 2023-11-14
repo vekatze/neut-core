@@ -15,7 +15,7 @@ import {
 - word
 }
 
-declare {
+foreign {
 - printf(pointer): void
 - fflush(pointer): void
 }
@@ -36,12 +36,15 @@ define write(t: &text, f: FD.descriptor): ?int {
   }
 }
 
-// fixme: prefer the sum type
-define read(f: FD.descriptor): ?text {
-  let buffer-size = shl-int(1, 16) in // for now
-  let size = ext.lseek(f, 0, seek.interpret(seek.END)) in
-  let _ = ext.lseek(f, 0, seek.interpret(seek.SET)) in
-  read-file(f, buffer-size, size)
+define _read-loop(f: FD.descriptor, content-ptr: int, buffer-size: int, max-read-size: int, acc: int): ?int {
+  let bytes = ext.read(f, content-ptr, buffer-size) in
+  if lt-int(bytes, 0) {
+    none()
+  } else-if lt-int(bytes, buffer-size) {
+    Pass(add-int(acc, bytes))
+  } else {
+    _read-loop(f, add-int(content-ptr, bytes), buffer-size, max-read-size, add-int(acc, bytes))
+  }
 }
 
 define read-file(f: FD.descriptor, buffer-size: int, max-read-size: int): ?text {
@@ -49,7 +52,7 @@ define read-file(f: FD.descriptor, buffer-size: int, max-read-size: int): ?text 
   let ptr = ext.malloc(add-int(max-read-size, mul-int(u, 2))) in
   mem.store-int(0, ptr);
   let content-ptr = add-int(ptr, mul-int(u, 2)) in
-  let read-size = read-loop(f, content-ptr, buffer-size, max-read-size, 0) in
+  let read-size = _read-loop(f, content-ptr, buffer-size, max-read-size, 0) in
   match read-size {
   - Pass(size) =>
     mem.store-int(size, add-int(ptr, u));
@@ -60,15 +63,12 @@ define read-file(f: FD.descriptor, buffer-size: int, max-read-size: int): ?text 
   }
 }
 
-define read-loop(f: FD.descriptor, content-ptr: int, buffer-size: int, max-read-size: int, acc: int): ?int {
-  let bytes = ext.read(f, content-ptr, buffer-size) in
-  if lt-int(bytes, 0) {
-    none()
-  } else-if lt-int(bytes, buffer-size) {
-    Pass(add-int(acc, bytes))
-  } else {
-    read-loop(f, add-int(content-ptr, bytes), buffer-size, max-read-size, add-int(acc, bytes))
-  }
+// fixme: prefer the sum type
+define read(f: FD.descriptor): ?text {
+  let buffer-size = shl-int(1, 16) in // for now
+  let size = ext.lseek(f, 0, seek.interpret(seek.END)) in
+  let _ = ext.lseek(f, 0, seek.interpret(seek.SET)) in
+  read-file(f, buffer-size, size)
 }
 
 define print(t: &text): unit {
@@ -78,22 +78,13 @@ define print(t: &text): unit {
   magic external(printf, fmt; len int, val pointer)
 }
 
-define get-line(): ?text {
-  let default-input-size = 1024 in
-  let u = word.size in
-  let ptr-size = add-int(default-input-size, mul-int(u, 2)) in
-  let ptr = ext.malloc(ptr-size) in
-  mem.store-int(0, ptr);
-  get-line-inner(ptr, ptr-size, 0, default-input-size)
-}
-
-define get-line-inner(ptr: int, ptr-size: int, current-index: int, buffer-size: int): ?text {
+define _get-line-inner(ptr: int, ptr-size: int, current-index: int, buffer-size: int): ?text {
   let u = word.size in
   let content-size = sub-int(ptr-size, mul-int(u, 2)) in
   if lt-int(content-size, add-int(current-index, buffer-size)) {
     let new-size = mul-int(ptr-size, 2) in
     let new-ptr = ext.realloc(ptr, new-size) in
-    get-line-inner(new-ptr, new-size, current-index, buffer-size)
+    _get-line-inner(new-ptr, new-size, current-index, buffer-size)
   } else {
     let content-ptr = add-int(ptr, add-int(mul-int(u, 2), current-index)) in
     let bytes = ext.read(FD.stdin, content-ptr, buffer-size) in
@@ -107,9 +98,18 @@ define get-line-inner(ptr: int, ptr-size: int, current-index: int, buffer-size: 
       mem.store-int(next-index, add-int(ptr, u));
       Pass(magic.cast(int, text, ptr))
     } else {
-      get-line-inner(ptr, ptr-size, next-index, buffer-size)
+      _get-line-inner(ptr, ptr-size, next-index, buffer-size)
     }
   }
+}
+
+define get-line(): ?text {
+  let default-input-size = 1024 in
+  let u = word.size in
+  let ptr-size = add-int(default-input-size, mul-int(u, 2)) in
+  let ptr = ext.malloc(ptr-size) in
+  mem.store-int(0, ptr);
+  _get-line-inner(ptr, ptr-size, 0, default-input-size)
 }
 
 define print-line(t: &text): unit {

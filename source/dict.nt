@@ -20,26 +20,6 @@ data dict(k, v) {
   }
 }
 
-data class(k, v) {
-- Dict of {
-  - empty: dict(k, v)
-  - singleton: (k, v) -> dict(k, v)
-  - insert: (k, v, dict(k, v)) -> dict(k, v)
-  - lookup: (&k, &dict(k, v)) -> ?&v
-  - delete: (k, dict(k, v)) -> dict(k, v)
-  }
-}
-
-inline fromLoset[k, v](_loset: loset(k)): class(k, v) {
-  Dict of {
-  - empty = empty()
-  - singleton = (k, v) => { singleton(k, v) }
-  - insert = insert(_loset)
-  - lookup = lookup(_loset)
-  - delete = delete(_loset)
-  }
-}
-
 inline size[k, v](d: &dict(k, v)): int {
   case d {
   - Tip =>
@@ -57,66 +37,6 @@ inline singleton[k, v](key: k, value: v): dict(k, v) {
   Bin of { size = 1, left = Tip, right = Tip, key, value }
 }
 
-inline insert[k, v](_l: loset(k)): (k, v, dict(k, v)) -> dict(k, v) {
-  let Loset of { cmp } = _l in
-  mu self(keyX, valX, d) {
-    match d {
-    - Tip =>
-      singleton(keyX, valX)
-    - Bin(size, keyY, valY, left, right) =>
-      let order on keyX, keyY = cmp(keyX, keyY) in
-      match order {
-      - LT =>
-        _balanceL(keyY, valY, self(keyX, valX, left), right)
-      - GT =>
-        _balanceR(keyY, valY, left, self(keyX, valX, right))
-      - EQ =>
-        Bin(size, keyX, valX, left, right)
-      }
-    }
-  }
-}
-
-inline lookup[k, v](_l: loset(k)): (&k, &dict(k, v)) -> ?&v {
-  let Loset of { cmp } = _l in
-  mu self(needle: &k, d: &dict(k, v)) {
-    case d {
-    - Tip =>
-      none()
-    - Bin(_, k, x, l, r) =>
-      match cmp(needle, k) {
-      - LT =>
-        self(needle, l)
-      - GT =>
-        self(needle, r)
-      - EQ =>
-        Pass(x)
-      }
-    }
-  }
-}
-
-// define delete[k, v](_l: loset(k), needle: k, d: dict(k, v)): dict(k, v) {
-inline delete[k, v](_l: loset(k)): (k, dict(k, v)) -> dict(k, v) {
-  mu self(needle, d) {
-    let Loset of { cmp } = _l in
-    match d {
-    - Tip =>
-      Tip
-    - Bin(_, kx, x, l, r) =>
-      let order on needle, kx = cmp(needle, kx) in
-      match order {
-      - LT =>
-        _balanceR(kx, x, self(needle, l), r)
-      - GT =>
-        _balanceL(kx, x, l, self(needle, r))
-      - EQ =>
-        _glue(l, r)
-      }
-    }
-  }
-}
-
 constant _delta: int {
   3
 }
@@ -125,52 +45,10 @@ constant _ratio: int {
   2
 }
 
-define _glue[k, v](d1: dict(k, v), d2: dict(k, v)): dict(k, v) {
-  match d1, d2 {
-  - Tip, d2 =>
-    d2
-  - d1, Tip =>
-    d1
-  - Bin(ls, lk, lx, ll, lr), Bin(rs, rk, rx, rl, rr) =>
-    if gt-int(ls, rs) {
-      let _View of { key, value, dict } = _maxViewSure(lk, lx, ll, lr) in
-      _balanceR(key, value, dict, Bin(rs, rk, rx, rl, rr))
-    } else {
-      let _View of { key, value, dict } = _minViewSure(rk, rx, rl, rr) in
-      _balanceR(key, value, dict, Bin(ls, lk, lx, ll, lr))
-    }
-  }
-}
-
-data _view(k, a) {
-- _View of {
-  - key: k
-  - value: a
-  - dict: dict(k, a)
-  }
-}
-
-define _minViewSure[a, b](k: a, x: b, l: dict(a, b), r: dict(a, b)): _view(a, b) {
-  match l {
-  - Tip =>
-    _View(k, x, r)
-  - Bin(_, lk, lx, ll, lr) =>
-    let _View of { key, value, dict = l' } = _minViewSure(lk, lx, ll, lr) in
-    _View(key, value, _balanceR(k, x, l', r))
-  }
-}
-
-define _maxViewSure[a, b](k: a, x: b, l: dict(a, b), r: dict(a, b)): _view(a, b) {
-  match r {
-  - Tip =>
-    _View(k, x, l)
-  - Bin(_, rk, rx, rl, rr) =>
-    let _View of { key, value, dict = r' } = _maxViewSure(rk, rx, rl, rr) in
-    _View(key, value, _balanceL(k, x, l, r'))
-  }
-}
-
 inline _balanceL[a, b](k: a, x: b, l: dict(a, b), r: dict(a, b)): dict(a, b) {
+  /// docstring.
+  /// hello. こんにちは。
+  /// というわけでね。
   match r {
   - Tip =>
     match l {
@@ -318,6 +196,122 @@ inline _balanceR[a, b](k: a, x: b, l: dict(a, b), r: dict(a, b)): dict(a, b) {
   }
 }
 
-define _unsafeGetPtr[a](d: &a): int {
-  magic cast(&a, int, d)
+inline insert[k, v](L: loset(k)): (k, v, dict(k, v)) -> dict(k, v) {
+  let Loset of { cmp } = L in
+  mu self(keyX, valX, d) {
+    match d {
+    - Tip =>
+      singleton(keyX, valX)
+    - Bin(size, keyY, valY, left, right) =>
+      let order on keyX, keyY = cmp(keyX, keyY) in
+      match order {
+      - LT =>
+        _balanceL(keyY, valY, self(keyX, valX, left), right)
+      - GT =>
+        _balanceR(keyY, valY, left, self(keyX, valX, right))
+      - EQ =>
+        Bin(size, keyX, valX, left, right)
+      }
+    }
+  }
+}
+
+inline lookup[k, v](L: loset(k)): (&k, &dict(k, v)) -> ?&v {
+  let Loset of { cmp } = L in
+  mu self(needle: &k, d: &dict(k, v)) {
+    case d {
+    - Tip =>
+      none()
+    - Bin(_, k, x, l, r) =>
+      match cmp(needle, k) {
+      - LT =>
+        self(needle, l)
+      - GT =>
+        self(needle, r)
+      - EQ =>
+        Pass(x)
+      }
+    }
+  }
+}
+
+data _view(k, a) {
+- _View of {
+  - key: k
+  - value: a
+  - dict: dict(k, a)
+  }
+}
+
+define _minViewSure[a, b](k: a, x: b, l: dict(a, b), r: dict(a, b)): _view(a, b) {
+  match l {
+  - Tip =>
+    _View(k, x, r)
+  - Bin(_, lk, lx, ll, lr) =>
+    let _View of { key, value, dict = l' } = _minViewSure(lk, lx, ll, lr) in
+    _View(key, value, _balanceR(k, x, l', r))
+  }
+}
+
+define _maxViewSure[a, b](k: a, x: b, l: dict(a, b), r: dict(a, b)): _view(a, b) {
+  match r {
+  - Tip =>
+    _View(k, x, l)
+  - Bin(_, rk, rx, rl, rr) =>
+    let _View of { key, value, dict = r' } = _maxViewSure(rk, rx, rl, rr) in
+    _View(key, value, _balanceL(k, x, l, r'))
+  }
+}
+
+inline _glue[k, v](d1: dict(k, v), d2: dict(k, v)): dict(k, v) {
+  match d1, d2 {
+  - Tip, d2 =>
+    d2
+  - d1, Tip =>
+    d1
+  - Bin(ls, lk, lx, ll, lr), Bin(rs, rk, rx, rl, rr) =>
+    if gt-int(ls, rs) {
+      let _View of { key, value, dict } = _maxViewSure(lk, lx, ll, lr) in
+      _balanceR(key, value, dict, Bin(rs, rk, rx, rl, rr))
+    } else {
+      let _View of { key, value, dict } = _minViewSure(rk, rx, rl, rr) in
+      _balanceR(key, value, dict, Bin(ls, lk, lx, ll, lr))
+    }
+  }
+}
+
+inline delete[k, v](L: loset(k)): (k, dict(k, v)) -> dict(k, v) {
+  mu self(needle, d) {
+    let Loset of { cmp } = L in
+    match d {
+    - Tip =>
+      Tip
+    - Bin(_, kx, x, l, r) =>
+      let order on needle, kx = cmp(needle, kx) in
+      match order {
+      - LT =>
+        _balanceR(kx, x, self(needle, l), r)
+      - GT =>
+        _balanceL(kx, x, l, self(needle, r))
+      - EQ =>
+        _glue(l, r)
+      }
+    }
+  }
+}
+
+data sig(k, v) {
+- DictSig of {
+  - insert: (k, v, dict(k, v)) -> dict(k, v)
+  - lookup: (&k, &dict(k, v)) -> ?&v
+  - delete: (k, dict(k, v)) -> dict(k, v)
+  }
+}
+
+inline fromLoset[k, v](_loset: loset(k)): sig(k, v) {
+  DictSig of {
+  - insert = insert(_loset)
+  - lookup = lookup(_loset)
+  - delete = delete(_loset)
+  }
 }

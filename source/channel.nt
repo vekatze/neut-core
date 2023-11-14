@@ -2,7 +2,7 @@ import {
 - this.except [Pass, Fail]
 - this.int [sum-int]
 - this.pair
-- this.unit [unit]
+- this.unit [unit, Unit]
 - Q
 - ext
 - list
@@ -11,55 +11,57 @@ import {
 - word
 }
 
-resource channel-internal {
-- (ch: int) => {
-    let u = word.size in
-    let mutex-size = ext.thread-mutex-size() in
-    let cond-size = ext.thread-cond-size() in
-    let cond-offset = add-int(u, mutex-size) in
-    let type-offset = add-int(u, add-int(mutex-size, cond-size)) in
-    let a = magic.cast(int, tau, mem.load-int(add-int(ch, type-offset))) in
-    ext.thread-cond-destroy(add-int(ch, cond-offset));
-    ext.thread-mutex-destroy(add-int(ch, u));
-    let _: Q.queue(a) = magic cast(int, Q.queue(a), mem.load-int(ch)) in
-    ext.free(ch);
-    0
-  }
-- (ch: int) => {
-    let u = word.size in
-    let mutex-size = ext.thread-mutex-size() in
-    let cond-size = ext.thread-cond-size() in
-    let type-offset = add-int(u, add-int(mutex-size, cond-size)) in
-    let a = magic.cast(int, tau, mem.load-int(add-int(ch, type-offset))) in
-    let q: &Q.queue(a) = magic.cast(int, &Q.queue(a), mem.load-int(ch)) in
-    let q-clone: Q.queue(a) = get-clone(Q.queue(a), q) in
-    magic.cast(channel(a), int, new-channel-internal(a, q-clone))
-  }
-}
-
-inline get-clone(a: tau, x: &a): a {
+inline -get-clone(a: tau, x: &a): a {
   *x
 }
 
-// (queue, mutex, cond, queue-elem-type)
-define channel(_: tau): tau {
-  channel-internal
+mutual {
+  define channel(_: tau): tau {
+    -channel
+  }
+
+  define -new(a: tau, q: Q.queue(a)): channel(a) {
+    let mutex-size = ext.thread-mutex-size() in
+    let cond-size = ext.thread-cond-size() in
+    let u = word.size in
+    let ptr = ext.malloc(sum-int([u, mutex-size, cond-size, u])) in
+    mem.store-int(magic.cast(Q.queue(a), int, q), ptr);
+    ext.thread-mutex-init(add-int(ptr, u));
+    ext.thread-cond-init(add-int(ptr, add-int(u, mutex-size)));
+    mem.store-int(magic.cast(tau, int, a), add-int(ptr, add-int(u, add-int(mutex-size, cond-size))));
+    magic.cast(int, channel(a), ptr)
+  }
+
+  // (queue, mutex, cond, queue-elem-type)
+  resource -channel {
+  - (ch: int) => {
+      let u = word.size in
+      let mutex-size = ext.thread-mutex-size() in
+      let cond-size = ext.thread-cond-size() in
+      let cond-offset = add-int(u, mutex-size) in
+      let type-offset = add-int(u, add-int(mutex-size, cond-size)) in
+      let a = magic.cast(int, tau, mem.load-int(add-int(ch, type-offset))) in
+      ext.thread-cond-destroy(add-int(ch, cond-offset));
+      ext.thread-mutex-destroy(add-int(ch, u));
+      let _: Q.queue(a) = magic cast(int, Q.queue(a), mem.load-int(ch)) in
+      ext.free(ch);
+      0
+    }
+  - (ch: int) => {
+      let u = word.size in
+      let mutex-size = ext.thread-mutex-size() in
+      let cond-size = ext.thread-cond-size() in
+      let type-offset = add-int(u, add-int(mutex-size, cond-size)) in
+      let a = magic.cast(int, tau, mem.load-int(add-int(ch, type-offset))) in
+      let q: &Q.queue(a) = magic.cast(int, &Q.queue(a), mem.load-int(ch)) in
+      let q-clone: Q.queue(a) = -get-clone(Q.queue(a), q) in
+      magic.cast(channel(a), int, -new(a, q-clone))
+    }
+  }
 }
 
-define new-channel[a](): channel(a) {
-  new-channel-internal(a, Q.empty())
-}
-
-define new-channel-internal(a: tau, q: Q.queue(a)): channel(a) {
-  let mutex-size = ext.thread-mutex-size() in
-  let cond-size = ext.thread-cond-size() in
-  let u = word.size in
-  let ptr = ext.malloc(sum-int([u, mutex-size, cond-size, u])) in
-  mem.store-int(magic.cast(Q.queue(a), int, q), ptr);
-  ext.thread-mutex-init(add-int(ptr, u));
-  ext.thread-cond-init(add-int(ptr, add-int(u, mutex-size)));
-  mem.store-int(magic.cast(tau, int, a), add-int(ptr, add-int(u, add-int(mutex-size, cond-size))));
-  magic.cast(int, channel(a), ptr)
+inline new-channel[a](): channel(a) {
+  -new(a, Q.empty())
 }
 
 define send[a](ch: &channel(a), x: a): unit {
@@ -76,15 +78,7 @@ define send[a](ch: &channel(a), x: a): unit {
   ext.thread-mutex-unlock(mutex-ptr)
 }
 
-define receive[a](ch: &channel(a)): a {
-  let ch = magic.cast(&channel(a), int, ch) in
-  let u = word.size in
-  let mutex-ptr = add-int(ch, u) in
-  ext.thread-mutex-lock(mutex-ptr);
-  receive-from-channel-inner(a, ch, mutex-ptr)
-}
-
-define receive-from-channel-inner(a: tau, ch: int, mutex-ptr: int): a {
+define -receive-from-channel(a: tau, ch: int, mutex-ptr: int): a {
   let q: Q.queue(a) = magic.cast(int, Q.queue(a), mem.load-int(ch)) in
   match Q.dequeue(q) {
   - Pass(Tuple(v, q)) =>
@@ -97,6 +91,14 @@ define receive-from-channel-inner(a: tau, ch: int, mutex-ptr: int): a {
     let mutex-size = ext.thread-mutex-size() in
     let cond-ptr = add-int(ch, add-int(u, mutex-size)) in
     ext.thread-cond-wait(cond-ptr, mutex-ptr);
-    receive-from-channel-inner(a, ch, mutex-ptr)
+    -receive-from-channel(a, ch, mutex-ptr)
   }
+}
+
+define receive[a](ch: &channel(a)): a {
+  let ch = magic.cast(&channel(a), int, ch) in
+  let u = word.size in
+  let mutex-ptr = add-int(ch, u) in
+  ext.thread-mutex-lock(mutex-ptr);
+  -receive-from-channel(a, ch, mutex-ptr)
 }

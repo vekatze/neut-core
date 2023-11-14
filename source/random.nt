@@ -1,0 +1,10 @@
+foreign {
+- arc4random_uniform(int): int
+}
+
+define random(ubound: int): int {
+  introspect os {
+  - darwin =>
+    magic external(arc4random_uniform, ubound)
+  }
+}

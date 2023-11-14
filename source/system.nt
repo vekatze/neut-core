@@ -14,6 +14,15 @@ inline admit(a: tau, t: &text): a {
   exit(1)
 }
 
+define _assert(message: &text, check: () -> bool): unit {
+  if check() {
+    Unit
+  } else {
+    print(message);
+    exit(1)
+  }
+}
+
 inline assert(message: &text, check: () -> bool): unit {
   introspect build-mode {
   - release =>
@@ -21,16 +30,7 @@ inline assert(message: &text, check: () -> bool): unit {
     let _ = message in
     Unit
   - default =>
-    assert-inner(message, check)
-  }
-}
-
-define assert-inner(message: &text, check: () -> bool): unit {
-  if check() {
-    Unit
-  } else {
-    print(message);
-    exit(1)
+    _assert(message, check)
   }
 }
 

@@ -1,0 +1,16 @@
+import {
+- core.bool
+}
+
+inline loop[result](count: int, base: result, f: (result, int) -> result): result {
+  let helper =
+    mu self(cursor, acc) {
+      if ge-int(cursor, count) {
+        acc
+      } else {
+        self(add-int(cursor, 1), f(acc, cursor))
+      }
+    }
+  in
+  helper(0, base)
+}

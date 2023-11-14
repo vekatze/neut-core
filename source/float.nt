@@ -8,7 +8,7 @@ import {
 - o [GT, LT, EQ]
 }
 
-declare {
+foreign {
 - llvm.sqrt.f64(float): float
 - llvm.exp.f64(float): float
 - llvm.exp2.f64(float): float
@@ -28,6 +28,17 @@ declare {
 }
 
 constant as-field: field(float) {
+  Field of {
+  - zero = 0
+  - add = add-float
+  - sub = sub-float
+  - one = 1
+  - mul = mul-float
+  - div = div-float
+  }
+}
+
+define as-field-opaque(): field(float) {
   Field of {
   - zero = 0
   - add = add-float
@@ -124,6 +135,10 @@ constant as-loset: loset(float) {
 
 constant as-ring: ring(float) {
   this.ring.from-field(as-field)
+}
+
+define as-ring-opaque(): ring(float) {
+  this.ring.from-field-opaque(as-field)
 }
 
 constant as-semiring: semiring(float) {

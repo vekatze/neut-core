@@ -25,6 +25,7 @@
     word "this.word"
   }
   target {
+    bench-random-dict "bench/random-dict.nt"
     test "test.nt"
   }
 }

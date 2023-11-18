@@ -1,3 +1,5 @@
+include {}
+
 foreign {
 - arc4random_uniform(int): int
 }

@@ -1,3 +1,5 @@
+include {}
+
 define cast(a: tau, b: tau, x: a): b {
   magic cast(a, b, x)
 }

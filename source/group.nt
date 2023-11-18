@@ -1,3 +1,5 @@
+include {}
+
 data group(a) {
 - Group of {
   - one: a

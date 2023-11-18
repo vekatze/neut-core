@@ -117,7 +117,7 @@ inline access[a](xs: &vector(a), i: int): a {
   *val
 }
 
-inline accessN[a](xs: &vector(a), i: int): &a {
+inline access-N[a](xs: &vector(a), i: int): &a {
   let _VecInfo of { from-ptr, content-ptr, word-size } = _get-vec-info(xs) in
   let from = mem.load-int(from-ptr) in
   let elem-address = add-int(content-ptr, mul-int(word-size, add-int(from, i))) in
@@ -146,7 +146,7 @@ inline for[a, b](xs: &vector(a), f: a -> b): vector(b) {
   }
 }
 
-inline foldLN[elem-type, result-type] of {
+inline fold-LN[elem-type, result-type] of {
 - acc: result-type
 - xs: &vector(elem-type)
 - consumer: (result-type, &elem-type) -> result-type
@@ -157,7 +157,7 @@ inline foldLN[elem-type, result-type] of {
       if eq-int(cursor, sz) {
         acc
       } else {
-        let y = accessN(xs, cursor) in
+        let y = access-N(xs, cursor) in
         loop(add-int(cursor, 1), consumer(acc, y), xs)
       }
     }

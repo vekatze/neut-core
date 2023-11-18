@@ -46,9 +46,6 @@ constant _ratio: int {
 }
 
 inline _balance-L[a, b](k: a, x: b, l: dict(a, b), r: dict(a, b)): dict(a, b) {
-  /// docstring.
-  /// hello. こんにちは。
-  /// というわけでね。
   match r {
   - Tip =>
     match l {

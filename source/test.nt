@@ -27,8 +27,6 @@ constant int-dict-trope: dict-trope(int, int) {
 
 define make-big-dict(): dict(int, int) {
   let dict.Dict-Trope of {insert} = int-dict-trope in
-  // let x = Unit in
-  // let item = x: unit in
   loop(700000, empty(), (acc, _) => {
     let key = random(1000000) in
     let val = random(1000000) in

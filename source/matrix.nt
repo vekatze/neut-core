@@ -4,6 +4,7 @@ import {
 - this.rig [rig, Rig]
 - this.ring [ring, Ring]
 - this.system
+- this.text
 - this.unit [unit]
 - L [list, loop, repeat]
 - int

@@ -24,7 +24,7 @@ define open(path: &text, xs: list(FF.flag), ms: list(FM.mode)): syscall(FD.descr
 }
 
 define close(f: FD.descriptor): syscall(unit) {
-  let result =  ext.close(f) in
+  let result = ext.close(f) in
   if eq-int(result, 0) {
     Pass(Unit)
   } else {

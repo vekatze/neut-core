@@ -24,31 +24,6 @@ data matrix(a) {
   }
 }
 
-// data overRing(a) {
-// - OverRing of {
-//   - mk: list(list(a)) -> matrix(a)
-//   - mkZero: (int, int) -> matrix(a)
-//   - add: (&matrix(a), &matrix(a)) -> matrix(a)
-//   - sub: (&matrix(a), &matrix(a)) -> matrix(a)
-//   - mkOne: int -> matrix(a)
-//   - mul: (&matrix(a), &matrix(a)) -> matrix(a)
-//   - mul-pointwise: (&matrix(a), &matrix(a)) -> matrix(a)
-//   }
-// }
-
-// inline fromRing[a](asRing: ring(a)): overRing(a) {
-//   let asRig = this.rig.from-ring(asRing) in
-//   OverRing of {
-//   - mk = new
-//   - mkZero = zero(asRing)
-//   - add = add-mat(asRing)
-//   - sub = sub-mat(asRing)
-//   - mkOne = one(asRing)
-//   - mul = mul-mat(asRig)
-//   - mul-pointwise = mul-mat-pointwise(asRing)
-//   }
-// }
-
 define new[a](content-list: list(list(a))): matrix(a) {
   let get-len = (xs) => { L.length(xs) } in
   let len-list on content-list = L.map-noetic(get-len, content-list) in
@@ -145,14 +120,13 @@ inline add-mat[a](rg: ring(a)): (&matrix(a), &matrix(a)) -> matrix(a) {
     Matrix of {
     - row-size = row-size
     - col-size = col-size
-    - content =
-      vector.zip-with(vec1, vec2, add)
+    - content = vector.zip-with(vec1, vec2, add)
     }
   }
 }
 
 inline sub-mat[a](rg: ring(a)): (&matrix(a), &matrix(a)) -> matrix(a) {
-  let Ring of { zero, add, sub } = rg in
+  let Ring of { sub } = rg in
   mu _(mat1: &matrix(a), mat2: &matrix(a)) {
     let vec1 = get-content(mat1) in
     let vec2 = get-content(mat2) in
@@ -169,8 +143,7 @@ inline sub-mat[a](rg: ring(a)): (&matrix(a), &matrix(a)) -> matrix(a) {
     Matrix of {
     - row-size = row-size
     - col-size = col-size
-    - content =
-      vector.zip-with(vec1, vec2, (x, y) => { add(x, sub(zero, y)) })
+    - content = vector.zip-with(vec1, vec2, sub)
     }
   }
 }
@@ -243,8 +216,7 @@ define for[a, b](mat: &matrix(a), f: a -> b): matrix(b) {
   Matrix of {
   - row-size = get-row-size(mat)
   - col-size = get-col-size(mat)
-  - content =
-    vector.for(vec, f)
+  - content = vector.for(vec, f)
   }
 }
 

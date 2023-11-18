@@ -1,6 +1,6 @@
 import {
 - this.bool
-- this.errno [errno, Errno, get-errno]
+- this.errno [errno, Errno, get-errno, syscall]
 - this.except [except, none, Pass, Fail]
 - this.list [list]
 - this.memory [load-int32]
@@ -12,7 +12,7 @@ import {
 - ext
 }
 
-define open(path: &text, xs: list(FF.flag), ms: list(FM.mode)): except(errno, FD.descriptor) {
+define open(path: &text, xs: list(FF.flag), ms: list(FM.mode)): syscall(FD.descriptor) {
   let path' = this.text.append(path, "\0") in
   let actual-path-string on path' = unsafe-get-content-pointer(path') in
   let fd = ext.open(actual-path-string, FF.interpret(xs), FM.interpret(ms)) in
@@ -24,7 +24,7 @@ define open(path: &text, xs: list(FF.flag), ms: list(FM.mode)): except(errno, FD
   }
 }
 
-define close(f: FD.descriptor): except(errno, unit) {
+define close(f: FD.descriptor): syscall(unit) {
   let result =  ext.close(f) in
   if eq-int(result, 0) {
     Pass(Unit)

@@ -45,7 +45,7 @@ constant _ratio: int {
   2
 }
 
-inline _balanceL[a, b](k: a, x: b, l: dict(a, b), r: dict(a, b)): dict(a, b) {
+inline _balance-L[a, b](k: a, x: b, l: dict(a, b), r: dict(a, b)): dict(a, b) {
   /// docstring.
   /// hello. こんにちは。
   /// というわけでね。
@@ -109,7 +109,7 @@ inline _balanceL[a, b](k: a, x: b, l: dict(a, b), r: dict(a, b)): dict(a, b) {
             Bin(s', lrk, lrx, Bin(ls', lk, lx, ll, lrl), Bin(rs', k, x, lrr, r)) // +2
           }
         - _, _ =>
-          let tip = core.system.admit(_, "failure in core.dict._balanceL") in
+          let tip = core.system.admit(_, "failure in core.dict._balance-L") in
           Bin(ls, lk, lx, Bin(ls, lk, lx, tip, tip), Bin(ls, lk, lx, tip, tip)) // +1
         }
       } else {
@@ -122,7 +122,7 @@ inline _balanceL[a, b](k: a, x: b, l: dict(a, b), r: dict(a, b)): dict(a, b) {
   }
 }
 
-inline _balanceR[a, b](k: a, x: b, l: dict(a, b), r: dict(a, b)): dict(a, b) {
+inline _balance-R[a, b](k: a, x: b, l: dict(a, b), r: dict(a, b)): dict(a, b) {
   match l {
   - Tip =>
     match r {
@@ -183,7 +183,7 @@ inline _balanceR[a, b](k: a, x: b, l: dict(a, b), r: dict(a, b)): dict(a, b) {
             Bin(s', rlk, rlx, Bin(ls', k, x, l, rll), Bin(rs', rk, rx, rlr, rr)) // +2
           }
         - _, _ =>
-          let tip = core.system.admit(_, "failure in core.dict._balanceL") in
+          let tip = core.system.admit(_, "failure in core.dict._balance-L") in
           Bin(rs, rk, rx, Bin(rs, rk, rx, tip, tip), Bin(rs, rk, rx, tip, tip)) // +1
         }
       } else {
@@ -198,19 +198,19 @@ inline _balanceR[a, b](k: a, x: b, l: dict(a, b), r: dict(a, b)): dict(a, b) {
 
 inline insert[k, v](L: loset(k)): (k, v, dict(k, v)) -> dict(k, v) {
   let Loset of { cmp } = L in
-  mu self(keyX, valX, d) {
+  mu self(key-X, val-X, d) {
     match d {
     - Tip =>
-      singleton(keyX, valX)
-    - Bin(size, keyY, valY, left, right) =>
-      let order on keyX, keyY = cmp(keyX, keyY) in
+      singleton(key-X, val-X)
+    - Bin(size, key-Y, val-Y, left, right) =>
+      let order on key-X, key-Y = cmp(key-X, key-Y) in
       match order {
       - LT =>
-        _balanceL(keyY, valY, self(keyX, valX, left), right)
+        _balance-L(key-Y, val-Y, self(key-X, val-X, left), right)
       - GT =>
-        _balanceR(keyY, valY, left, self(keyX, valX, right))
+        _balance-R(key-Y, val-Y, left, self(key-X, val-X, right))
       - EQ =>
-        Bin(size, keyX, valX, left, right)
+        Bin(size, key-X, val-X, left, right)
       }
     }
   }
@@ -243,23 +243,23 @@ data _view(k, a) {
   }
 }
 
-define _minViewSure[a, b](k: a, x: b, l: dict(a, b), r: dict(a, b)): _view(a, b) {
+define _min-view-sure[a, b](k: a, x: b, l: dict(a, b), r: dict(a, b)): _view(a, b) {
   match l {
   - Tip =>
     _View(k, x, r)
   - Bin(_, lk, lx, ll, lr) =>
-    let _View of { key, value, dict = l' } = _minViewSure(lk, lx, ll, lr) in
-    _View(key, value, _balanceR(k, x, l', r))
+    let _View of { key, value, dict = l' } = _min-view-sure(lk, lx, ll, lr) in
+    _View(key, value, _balance-R(k, x, l', r))
   }
 }
 
-define _maxViewSure[a, b](k: a, x: b, l: dict(a, b), r: dict(a, b)): _view(a, b) {
+define _max-view-sure[a, b](k: a, x: b, l: dict(a, b), r: dict(a, b)): _view(a, b) {
   match r {
   - Tip =>
     _View(k, x, l)
   - Bin(_, rk, rx, rl, rr) =>
-    let _View of { key, value, dict = r' } = _maxViewSure(rk, rx, rl, rr) in
-    _View(key, value, _balanceL(k, x, l, r'))
+    let _View of { key, value, dict = r' } = _max-view-sure(rk, rx, rl, rr) in
+    _View(key, value, _balance-L(k, x, l, r'))
   }
 }
 
@@ -271,11 +271,11 @@ inline _glue[k, v](d1: dict(k, v), d2: dict(k, v)): dict(k, v) {
     d1
   - Bin(ls, lk, lx, ll, lr), Bin(rs, rk, rx, rl, rr) =>
     if gt-int(ls, rs) {
-      let _View of { key, value, dict } = _maxViewSure(lk, lx, ll, lr) in
-      _balanceR(key, value, dict, Bin(rs, rk, rx, rl, rr))
+      let _View of { key, value, dict } = _max-view-sure(lk, lx, ll, lr) in
+      _balance-R(key, value, dict, Bin(rs, rk, rx, rl, rr))
     } else {
-      let _View of { key, value, dict } = _minViewSure(rk, rx, rl, rr) in
-      _balanceR(key, value, dict, Bin(ls, lk, lx, ll, lr))
+      let _View of { key, value, dict } = _min-view-sure(rk, rx, rl, rr) in
+      _balance-R(key, value, dict, Bin(ls, lk, lx, ll, lr))
     }
   }
 }
@@ -290,9 +290,9 @@ inline delete[k, v](L: loset(k)): (k, dict(k, v)) -> dict(k, v) {
       let order on needle, kx = cmp(needle, kx) in
       match order {
       - LT =>
-        _balanceR(kx, x, self(needle, l), r)
+        _balance-R(kx, x, self(needle, l), r)
       - GT =>
-        _balanceL(kx, x, l, self(needle, r))
+        _balance-L(kx, x, l, self(needle, r))
       - EQ =>
         _glue(l, r)
       }
@@ -300,16 +300,16 @@ inline delete[k, v](L: loset(k)): (k, dict(k, v)) -> dict(k, v) {
   }
 }
 
-data sig(k, v) {
-- DictSig of {
+data dict-trope(k, v) {
+- Dict-Trope of {
   - insert: (k, v, dict(k, v)) -> dict(k, v)
   - lookup: (&k, &dict(k, v)) -> ?&v
   - delete: (k, dict(k, v)) -> dict(k, v)
   }
 }
 
-inline fromLoset[k, v](_loset: loset(k)): sig(k, v) {
-  DictSig of {
+inline fromLoset[k, v](_loset: loset(k)): dict-trope(k, v) {
+  Dict-Trope of {
   - insert = insert(_loset)
   - lookup = lookup(_loset)
   - delete = delete(_loset)

@@ -15,16 +15,17 @@ import {
 - this.pair
 - this.ring [Ring]
 - this.random [random]
+- this.thread
 - this.system
 - this.text [text]
 - this.unit [unit, Unit]
 - this.void
-- dict [dict, size, empty, insert, lookup, sig, DictSig, fromLoset]
+- dict [dict, size, empty, insert, lookup, dict-trope, Dict-Trope, fromLoset]
 - FD
 - FF
 - FM
-- Q
 - L
+- Q
 - ext
 - f
 - fa
@@ -45,25 +46,23 @@ constant ins {
   @insert(int, int, L)
 }
 
-constant opaqueIntDictSig: sig(int, int) {
+constant int-dict-trope: dict-trope(int, int) {
   fromLoset(L)
 }
 
 define make-big-dict(): dict(int, int) {
-  let DictSig of { insert } = opaqueIntDictSig in
+  let dict.Dict-Trope of {insert} = int-dict-trope in
+  // let x = Unit in
+  // let item = x: unit in
   loop(700000, empty(), (acc, _) => {
     let key = random(1000000) in
     let val = random(1000000) in
-    // insert(L)(key, val, insert(L)(key, val, acc))
     insert(key, val, acc)
-    // insert(key, val, insert(key, val, acc))
-    // L-insert(key, val, L-insert(key, val, acc))
-    // L-insert(key, val, acc)
   })
 }
 
 define random-lookup-sum(d: &dict(int, int)): unit {
-  let DictSig of { lookup } = opaqueIntDictSig in
+  let Dict-Trope of {lookup} = int-dict-trope in
   let rsum =
     loop(700000, 0, (acc, _) => {
       let key = random(1000000) in
@@ -115,6 +114,11 @@ define main(): unit {
   // let _ on mat3 = m.print-mat(tio.print-int, mat3) in
   // let _ = mat1 in
   // let _ = mat2 in
+  // let item = ?tau in
+  // let k = [tau,       tau] in
+  // let v = "test" in
+  // let w = tau :: k in
+  // let foo = detach { Unit } in
   // let _ = mat3 in
 
   // let OverRing of { mk, mul } = m.fromRing(this.float.as-ring) in
@@ -138,9 +142,12 @@ define main(): unit {
   // let OverRing of { mk, mul } = m.fromRing(this.float.as-ring) in
 
   // let dict.Dict of { empty, insert, lookup, delete } = fromLoset(as-loset) in // hel
-  let bigDict = make-big-dict() in
-  let _ on bigDict = random-lookup-sum(bigDict) in
-  let _ = bigDict in
+  let big-dict = make-big-dict() in
+  idealize big-dict {
+    random-lookup-sum(big-dict)
+  };
+  // let _ on bigDict = random-lookup-sum(bigDict) in
+  // let _ = bigDict in
 
   // let bigDict = random-insert(bigDict) in
   // let bigDict = random-insert(bigDict) in

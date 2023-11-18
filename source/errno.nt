@@ -12,3 +12,7 @@ define get-errno(): int {
   let errno-ptr = errno-location() in
   load-int32(errno-ptr) // POSIX requires errno to be thread-safe
 }
+
+inline syscall(a: tau): tau {
+  except(errno, a)
+}

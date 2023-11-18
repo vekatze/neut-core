@@ -1,5 +1,5 @@
 include {
-- this.except [except]
+- this.except [except, Fail]
 - this.external [errno-location]
 - this.memory [load-int32]
 }
@@ -8,11 +8,15 @@ data errno {
 - Errno(int)
 }
 
-define get-errno(): int {
+define _get-errno(): int {
   let errno-ptr = errno-location() in
   load-int32(errno-ptr) // POSIX requires errno to be thread-safe
 }
 
-inline syscall(a: tau): tau {
+inline system(a: tau): tau {
   except(errno, a)
+}
+
+define report-error[a](): system(a) {
+  Fail(Errno(_get-errno()))
 }

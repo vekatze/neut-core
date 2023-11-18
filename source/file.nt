@@ -1,7 +1,7 @@
 include {
 - this.bool
-- this.errno [Errno, get-errno, syscall]
-- this.except [Pass, Fail]
+- this.errno [report-error, system]
+- this.except [Pass]
 - this.list [list]
 - this.text [text, unsafe-get-content-pointer]
 - this.unit [unit, Unit]
@@ -11,23 +11,23 @@ include {
 - ext
 }
 
-define open(path: &text, xs: list(FF.flag), ms: list(FM.mode)): syscall(FD.descriptor) {
+define open(path: &text, xs: list(FF.flag), ms: list(FM.mode)): system(FD.descriptor) {
   let path' = this.text.append(path, "\0") in
   let actual-path-string on path' = unsafe-get-content-pointer(path') in
   let fd = ext.open(actual-path-string, FF.interpret(xs), FM.interpret(ms)) in
   let _ = path' in
   if lt-int(magic cast(FD.descriptor, int, fd), 0) {
-    Fail(Errno(get-errno()))
+    report-error()
   } else {
     Pass(fd)
   }
 }
 
-define close(f: FD.descriptor): syscall(unit) {
+define close(f: FD.descriptor): system(unit) {
   let result = ext.close(f) in
   if eq-int(result, 0) {
     Pass(Unit)
   } else {
-    Fail(Errno(get-errno()))
+    report-error()
   }
 }

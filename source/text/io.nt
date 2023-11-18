@@ -1,6 +1,6 @@
 include {
 - this.bool [or]
-- this.errno [Errno, get-errno, syscall]
+- this.errno [system, report-error]
 - this.except [none, Pass, Fail]
 - this.text [text, unsafe-get-content-pointer, text-byte-length]
 - this.unit [unit]
@@ -17,7 +17,7 @@ foreign {
 - fflush(pointer): void
 }
 
-define write(t: &text, f: FD.descriptor): syscall(int) {
+define write(t: &text, f: FD.descriptor): system(int) {
   let ptr = magic.cast(&text, int, t) in
   let u = word.size in
   let from = mem.load-int(ptr) in
@@ -26,7 +26,7 @@ define write(t: &text, f: FD.descriptor): syscall(int) {
   let len = sub-int(to, from) in
   let bytes: int = ext.write(f, content-pointer, len) in
   if lt-int(bytes, 0) {
-    Fail(Errno(get-errno()))
+    report-error()
   } else {
     Pass(bytes)
   }
@@ -43,7 +43,7 @@ define _read-loop(f: FD.descriptor, content-ptr: int, buffer-size: int, max-read
   }
 }
 
-define read-file(f: FD.descriptor, buffer-size: int, max-read-size: int): syscall(text) {
+define read-file(f: FD.descriptor, buffer-size: int, max-read-size: int): system(text) {
   let u = word.size in
   let ptr = ext.malloc(add-int(max-read-size, mul-int(u, 2))) in
   mem.store-int(0, ptr);
@@ -55,12 +55,12 @@ define read-file(f: FD.descriptor, buffer-size: int, max-read-size: int): syscal
     Pass(magic.cast(int, text, ptr))
   - Fail(_) =>
     ext.free(ptr);
-    Fail(Errno(get-errno()))
+    report-error()
   }
 }
 
 // fixme: prefer the sum type
-define read(f: FD.descriptor): syscall(text) {
+define read(f: FD.descriptor): system(text) {
   let buffer-size = shl-int(1, 16) in // for now
   let size = ext.lseek(f, 0, seek.interpret(seek.END)) in
   let _ = ext.lseek(f, 0, seek.interpret(seek.SET)) in
@@ -74,7 +74,7 @@ define print(t: &text): unit {
   magic external(printf, fmt; len int, val pointer)
 }
 
-define _get-line-inner(ptr: int, ptr-size: int, current-index: int, buffer-size: int): syscall(text) {
+define _get-line-inner(ptr: int, ptr-size: int, current-index: int, buffer-size: int): system(text) {
   let u = word.size in
   let content-size = sub-int(ptr-size, mul-int(u, 2)) in
   if lt-int(content-size, add-int(current-index, buffer-size)) {
@@ -89,7 +89,7 @@ define _get-line-inner(ptr: int, ptr-size: int, current-index: int, buffer-size:
     let last-char = mem.load-int8(last-char-ptr) in
     if lt-int(bytes, 0) {
       ext.free(ptr);
-      Fail(Errno(get-errno()))
+      report-error()
     } else-if or(lt-int(bytes, buffer-size), eq-int8(last-char, 10)) {
       mem.store-int(next-index, add-int(ptr, u));
       Pass(magic.cast(int, text, ptr))
@@ -99,7 +99,7 @@ define _get-line-inner(ptr: int, ptr-size: int, current-index: int, buffer-size:
   }
 }
 
-define get-line(): syscall(text) {
+define get-line(): system(text) {
   let default-input-size = 1024 in
   let u = word.size in
   let ptr-size = add-int(default-input-size, mul-int(u, 2)) in

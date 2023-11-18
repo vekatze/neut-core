@@ -2,7 +2,7 @@ import {
 - this.except [Pass, Fail]
 - this.int [sum-int]
 - this.pair
-- this.unit [unit, Unit]
+- this.unit [unit]
 - Q
 - ext
 - list

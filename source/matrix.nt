@@ -2,16 +2,11 @@ import {
 - this.bool [and]
 - this.except [from-option]
 - this.rig [rig, Rig]
-- this.monoid [from-ring-additive]
-- this.semigroup [from-monoid]
 - this.ring [ring, Ring]
 - this.system
-- this.text [text]
-- this.unit [unit, Unit]
+- this.unit [unit]
 - L [list, loop, repeat]
-- fa
 - int
-- s
 - tio
 - vector [vector]
 }

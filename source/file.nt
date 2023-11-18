@@ -1,9 +1,8 @@
 import {
 - this.bool
-- this.errno [errno, Errno, get-errno, syscall]
-- this.except [except, none, Pass, Fail]
+- this.errno [Errno, get-errno, syscall]
+- this.except [Pass, Fail]
 - this.list [list]
-- this.memory [load-int32]
 - this.text [text, unsafe-get-content-pointer]
 - this.unit [unit, Unit]
 - FF

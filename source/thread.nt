@@ -1,13 +1,9 @@
 import {
 - this.bool
-- this.system
-- this.text
 - this.unit [unit, Unit]
-- Q
 - ext
 - magic
 - mem
-- tio
 - word
 }
 

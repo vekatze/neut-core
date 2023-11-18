@@ -3,8 +3,7 @@ import {
 - this.external [free, malloc]
 - this.list [list, loop, repeat, minimum]
 - this.unit [unit, Unit]
-- this.pair
-- this.except [Pass, none, from-option]
+- this.except [from-option]
 - int
 - magic
 - mem

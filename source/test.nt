@@ -1,37 +1,12 @@
 import {
-- this.bool
-- this.cell
-- this.channel [channel, new-channel, send, receive]
 - this.control [loop]
 - this.except [Pass, Fail]
-- this.errno [Errno]
-- this.file [open, close]
-- this.function
-- this.float [as-semiring, as-ring, as-ring-opaque]
-- this.int [as-monoid, as-loset]
-- this.int8-array
+- this.int [as-loset]
 - this.loset [loset]
-- this.list [list, map, minimum, maximum, reverse, sum]
-- this.pair
-- this.ring [Ring]
 - this.random [random]
-- this.thread
-- this.system
-- this.text [text]
 - this.unit [unit, Unit]
-- this.void
-- dict [dict, size, empty, insert, lookup, dict-trope, Dict-Trope, fromLoset]
-- FD
-- FF
-- FM
-- L
-- Q
-- ext
-- f
-- fa
-- magic
+- dict [dict, empty, insert, dict-trope, Dict-Trope, fromLoset]
 - tio
-- vector [vector, zip-with]
 }
 
 constant L: loset(int) {

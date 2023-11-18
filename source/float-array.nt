@@ -1,11 +1,9 @@
 import {
 - this.bool
-- this.except [from-option, Pass, Fail, none]
+- this.except [from-option, Pass, none]
 - this.external [free, malloc]
-- this.list [list, length, minimum]
+- this.list [list, minimum]
 - this.pair
-- this.system
-- this.text
 - this.unit [unit, Unit]
 - int
 - magic

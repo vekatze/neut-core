@@ -1,13 +1,9 @@
 import {
 - this.bool [or]
 - this.except [none, Pass, Fail]
-- this.file
-- this.list
-- this.text [text, from-int, unsafe-get-content-pointer, text-byte-length]
-- this.unit [unit, Unit]
+- this.text [text, unsafe-get-content-pointer, text-byte-length]
+- this.unit [unit]
 - FD
-- FF
-- FM
 - ext
 - magic
 - mem

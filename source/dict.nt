@@ -4,7 +4,7 @@ import {
 - core.text
 - core.bool
 - core.unit
-- core.except [none, Fail, Pass]
+- core.except [none, Pass]
 - core.system
 }
 

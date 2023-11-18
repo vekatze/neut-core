@@ -1,7 +1,6 @@
 import {
-- this.unit [unit, Unit]
+- this.unit [unit]
 - FD
-- seek
 }
 
 foreign {

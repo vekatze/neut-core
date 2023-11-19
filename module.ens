@@ -24,6 +24,104 @@
     vector "this.vector"
     word "this.word"
   }
+  preset {
+    bool [
+      "False"
+      "True"
+      "and"
+      "bool"
+      "not"
+      "or"
+    ]
+    cell [
+      "borrow"
+      "cell"
+      "clone"
+      "mutate"
+      "new-cell"
+    ]
+    channel [
+      "channel"
+      "new-channel"
+      "receive"
+      "send"
+    ]
+    except [
+      "Fail"
+      "Pass"
+      "except"
+      "none"
+    ]
+    file [
+      "close"
+      "open"
+    ]
+    file.descriptor [
+      "descriptor"
+      "stderr"
+      "stdin"
+      "stdout"
+    ]
+    function [
+      "compose"
+      "curry"
+      "flip"
+      "uncurry"
+    ]
+    list [
+      "Cons"
+      "Nil"
+      "all"
+      "any"
+      "append"
+      "concat"
+      "filter-some"
+      "fold-left"
+      "fold-right"
+      "for"
+      "length"
+      "list"
+      "map"
+      "range"
+      "reverse"
+      "uncons"
+      "unzip"
+    ]
+    pair [
+      "Pair"
+      "pair"
+    ]
+    system [
+      "admit"
+      "assert"
+      "get-argc"
+      "get-argv"
+    ]
+    text [
+      "text"
+    ]
+    text.io [
+      "get-line"
+      "print"
+      "print-float"
+      "print-int"
+      "print-line"
+      "read"
+      "write"
+    ]
+    thread [
+      "attach"
+      "detach"
+      "flow"
+    ]
+    unit [
+      "Unit"
+      "unit"
+    ]
+    void [
+      "void"
+    ]
+  }
   target {
     bench-random-dict "bench/random-dict.nt"
     test "test.nt"

@@ -1,4 +1,4 @@
-include {
+import {
 - this.list [list, fold-left]
 }
 
@@ -27,7 +27,7 @@ define _interpret-flag(flag: flag): int {
       0x0008
     }
   - linux =>
-    // https://github.com/torvalds/linux/blob/master/include/uapi/asm-generic/fcntl.h
+    // https://github.com/torvalds/linux/blob/master/import/uapi/asm-generic/fcntl.h
     match flag {
     - R =>
       0o00000000

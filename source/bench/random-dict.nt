@@ -1,4 +1,4 @@
-include {
+import {
 - this.control [loop]
 - this.except [Pass, Fail]
 - this.int [as-loset]

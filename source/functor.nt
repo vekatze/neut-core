@@ -1,5 +1,3 @@
-include {}
-
 data functor(f: tau -> tau) {
 - Functor of {
   - map: (a: tau, b: tau, comp: a -> b, xs: f(a)) -> f(b)

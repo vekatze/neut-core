@@ -1,4 +1,4 @@
-include {
+import {
 - this.bool [bool, True, False, and, or]
 - this.except [none, Pass, Fail]
 - this.functor [functor, Functor]

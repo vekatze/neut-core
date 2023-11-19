@@ -1,4 +1,4 @@
-include {
+import {
 - this.channel [channel, new-channel, send, receive]
 - this.unit [unit]
 - magic

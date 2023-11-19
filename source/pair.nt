@@ -1,5 +1,3 @@
-include {}
-
 data pair(a, b) {
 - Pair(left: a, right: b)
 }

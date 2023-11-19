@@ -1,4 +1,4 @@
-include {
+import {
 - this.bool
 - this.errno [report-error, system]
 - this.except [Pass]

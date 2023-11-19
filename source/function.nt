@@ -1,5 +1,3 @@
-include {}
-
 define flip[a, b, c](f: (a, b) -> c): (b, a) -> c {
   (y, x) => {
     f(x, y)

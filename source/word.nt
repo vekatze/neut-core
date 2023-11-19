@@ -1,5 +1,3 @@
-include {}
-
 constant size: int {
   introspect arch {
   - amd64 =>

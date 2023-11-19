@@ -1,5 +1,3 @@
-include {}
-
 data lattice(a) {
 - Lattice of {
   - join: (a, a) -> a

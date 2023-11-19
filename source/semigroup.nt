@@ -1,4 +1,4 @@
-include {
+import {
 - this.monoid [monoid, Monoid]
 }
 

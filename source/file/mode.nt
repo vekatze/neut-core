@@ -1,4 +1,4 @@
-include {
+import {
 - this.list [list, fold-left]
 }
 
@@ -39,7 +39,7 @@ define interpret-mode(flag: mode): int {
       0o1
     }
   - linux =>
-    // https://github.com/torvalds/linux/blob/master/include/uapi/linux/stat.h
+    // https://github.com/torvalds/linux/blob/master/import/uapi/linux/stat.h
     match flag {
     - Owner-R =>
       0o400

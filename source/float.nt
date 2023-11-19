@@ -1,4 +1,4 @@
-include {
+import {
 - this.bool
 - this.field [field, Field]
 - this.ring [ring]

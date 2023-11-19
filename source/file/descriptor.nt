@@ -1,5 +1,3 @@
-include {}
-
 data descriptor {}
 
 constant stdin: descriptor {

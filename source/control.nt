@@ -1,5 +1,6 @@
-include {
+import {
 - core.bool
+- core.unit [unit, Unit]
 }
 
 inline loop[result](count: int, base: result, f: (result, int) -> result): result {
@@ -13,4 +14,8 @@ inline loop[result](count: int, base: result, f: (result, int) -> result): resul
     }
   in
   helper(0, base)
+}
+
+inline discard[a](_: a): unit {
+  Unit
 }

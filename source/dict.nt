@@ -1,4 +1,4 @@
-include {
+import {
 - lo [loset, Loset]
 - core.order [LT, GT, EQ]
 - core.text

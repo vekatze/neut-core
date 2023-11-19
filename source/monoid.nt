@@ -1,4 +1,4 @@
-include {
+import {
 - this.group [group, Group]
 - this.ring [ring, Ring]
 }

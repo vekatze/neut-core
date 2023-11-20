@@ -3,9 +3,9 @@ import {
 - this.field [field, Field]
 - this.ring [ring]
 - this.semiring [semiring]
-- e
-- lo [loset, Loset]
-- o [GT, LT, EQ]
+- E
+- Lo [loset, Loset]
+- O [GT, LT, EQ]
 }
 
 foreign {
@@ -145,6 +145,6 @@ constant as-semiring: semiring(float) {
   this.semiring.from-field(as-field)
 }
 
-constant as-entity: e.entity(float) {
-  e.from-loset(as-loset)
+constant as-entity: E.entity(float) {
+  E.from-loset(as-loset)
 }

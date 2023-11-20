@@ -5,8 +5,8 @@ import {
 - this.loset [loset]
 - this.random [random]
 - this.unit [unit]
-- dict [dict, empty, insert, dict-trope, Dict-Trope, fromLoset]
-- tio
+- Dict [dict, empty, insert, dict-trope, Dict-Trope, fromLoset]
+- TIO
 }
 
 constant L: loset(int) {
@@ -26,7 +26,7 @@ constant int-dict-trope: dict-trope(int, int) {
 }
 
 define make-big-dict(): dict(int, int) {
-  let dict.Dict-Trope of {insert} = int-dict-trope in
+  let Dict.Dict-Trope of {insert} = int-dict-trope in
   loop(700000, empty(), (acc, _) => {
     let key = random(1000000) in
     let val = random(1000000) in
@@ -49,7 +49,7 @@ define random-lookup-sum(d: &dict(int, int)): unit {
       add-int(acc, val)
     })
   in
-  tio.print-int(rsum)
+  TIO.print-int(rsum)
 }
 
 define main(): unit {

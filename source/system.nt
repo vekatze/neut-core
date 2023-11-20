@@ -6,7 +6,7 @@ import {
 - this.text [text, unsafe-from-c-string]
 - this.text.io [print]
 - this.unit [unit, Unit]
-- word
+- Word
 }
 
 inline admit(a: tau, t: &text): a {
@@ -44,7 +44,7 @@ define get-argv(): list(text) {
   let argc = get-argc() in
   let argv-ptr: int = magic global("neut-unsafe-argv", pointer) in
   let argv: int = load-int(argv-ptr) in
-  let u = word.size in
+  let u = Word.size in
   let f =
     mu get-argv-helper(i: int): list(text) {
       if eq-int(i, argc) {

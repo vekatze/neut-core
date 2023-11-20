@@ -5,9 +5,9 @@ import {
 - this.monoid [monoid, from-group]
 - this.group [group, Group]
 - this.semiring [semiring, from-ring]
-- e
-- lo [loset, Loset]
-- o [GT, LT, EQ]
+- E
+- Lo [loset, Loset]
+- O [GT, LT, EQ]
 }
 
 define sum-int(xs: list(int)): int {
@@ -65,6 +65,6 @@ constant as-loset: loset(int) {
   }
 }
 
-constant as-entity: e.entity(int) {
-  e.from-loset(as-loset)
+constant as-entity: E.entity(int) {
+  E.from-loset(as-loset)
 }

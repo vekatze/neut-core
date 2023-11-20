@@ -8,13 +8,13 @@ import {
 - FF
 - FM
 - FD
-- ext
+- Ext
 }
 
 define open(path: &text, xs: list(FF.flag), ms: list(FM.mode)): system(FD.descriptor) {
-  let path' = this.text.append(path, "\0") in
+  let path' = this.tExt.append(path, "\0") in
   let actual-path-string on path' = unsafe-get-content-pointer(path') in
-  let fd = ext.open(actual-path-string, FF.interpret(xs), FM.interpret(ms)) in
+  let fd = Ext.open(actual-path-string, FF.interpret(xs), FM.interpret(ms)) in
   let _ = path' in
   if lt-int(magic cast(FD.descriptor, int, fd), 0) {
     report-error()
@@ -24,7 +24,7 @@ define open(path: &text, xs: list(FF.flag), ms: list(FM.mode)): system(FD.descri
 }
 
 define close(f: FD.descriptor): system(unit) {
-  let result = ext.close(f) in
+  let result = Ext.close(f) in
   if eq-int(result, 0) {
     Pass(Unit)
   } else {

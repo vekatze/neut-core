@@ -7,7 +7,7 @@ import {
 - this.pair
 - this.semigroup [semigroup, from-monoid]
 - this.unit [unit, Unit]
-- lo [loset, Loset]
+- Lo [loset, Loset]
 }
 
 data list(a: tau) {

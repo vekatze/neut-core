@@ -12,7 +12,7 @@ import {
 }
 
 define open(path: &text, xs: list(FF.flag), ms: list(FM.mode)): system(FD.descriptor) {
-  let path' = this.tExt.append(path, "\0") in
+  let path' = this.text.append(path, "\0") in
   let actual-path-string on path' = unsafe-get-content-pointer(path') in
   let fd = Ext.open(actual-path-string, FF.interpret(xs), FM.interpret(ms)) in
   let _ = path' in

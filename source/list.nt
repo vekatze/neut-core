@@ -206,13 +206,13 @@ define filter-some[a](xs: list(?a)): list(a) {
 }
 
 inline sum[a](as-monoid: monoid(a), xs: list(a)): a {
-  let Monoid of { e, op } = as-monoid in
-  fold-left(e, xs, (acc, x) => { op(acc, x) })
+  let Monoid of {e, op} = as-monoid in
+  fold-left(e, xs, (acc, x) => {op(acc, x)})
 }
 
 inline minimum[a](as-ord: loset(a)): list(a) -> ?a {
   (xs) => {
-    let Loset of { cmp } = as-ord in
+    let Loset of {cmp} = as-ord in
     match xs {
     - [] =>
       none()
@@ -232,7 +232,7 @@ inline minimum[a](as-ord: loset(a)): list(a) -> ?a {
 
 inline maximum[a](as-ord: loset(a)): list(a) -> ?a {
   (xs) => {
-    let Loset of { cmp } = as-ord in
+    let Loset of {cmp} = as-ord in
     let helper =
       mu self(cand: a, ys: list(a)): a {
         match ys {
@@ -276,6 +276,6 @@ inline as-semigroup[a](): semigroup(list(a)) {
 constant as-functor: functor(list) {
   Functor of {
   - map =
-    (_, _, f, xs) => { map(f, xs) }
+    (_, _, f, xs) => {map(f, xs)}
   }
 }

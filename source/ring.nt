@@ -13,11 +13,11 @@ data ring(a) {
 }
 
 inline from-field[a](f: field(a)): ring(a) {
-  let Field of { zero, add, sub, one, mul } = f in
-  Ring of { zero, add, sub, one, mul }
+  let Field of {zero, add, sub, one, mul} = f in
+  Ring of {zero, add, sub, one, mul}
 }
 
 define from-field-opaque[a](f: field(a)): ring(a) {
-  let Field of { zero, add, sub, one, mul } = f in
-  Ring of { zero, add, sub, one, mul }
+  let Field of {zero, add, sub, one, mul} = f in
+  Ring of {zero, add, sub, one, mul}
 }

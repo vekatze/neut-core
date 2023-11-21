@@ -1,6 +1,6 @@
 import {
 - this.bool
-- this.errno {report-error, system}
+- this.errno {errno, get-system-error, report-system-error, system}
 - this.except {Pass}
 - this.list {list}
 - this.text {text, unsafe-get-content-pointer}
@@ -17,17 +17,17 @@ define open(path: &text, xs: list(FF.flag), ms: list(FM.mode)): system(FD.descri
   let fd = Ext.open(actual-path-string, FF.interpret(xs), FM.interpret(ms)) in
   let _ = path' in
   if lt-int(magic cast(FD.descriptor, int, fd), 0) {
-    report-error()
+    report-system-error()
   } else {
     Pass(fd)
   }
 }
 
-define close(f: FD.descriptor): system(unit) {
+define close(f: FD.descriptor, on-failure: errno -> unit): unit {
   let result = Ext.close(f) in
   if eq-int(result, 0) {
-    Pass(Unit)
+    Unit
   } else {
-    report-error()
+    on-failure(get-system-error())
   }
 }

@@ -1,6 +1,6 @@
 import {
 - this.bool {or}
-- this.errno {system, report-error}
+- this.errno {system, report-system-error}
 - this.except {none, Pass, Fail}
 - this.text {text, unsafe-get-content-pointer, text-byte-length}
 - this.unit {unit}
@@ -26,7 +26,7 @@ define write(t: &text, f: FD.descriptor): system(int) {
   let len = sub-int(to, from) in
   let bytes: int = Ext.write(f, content-pointer, len) in
   if lt-int(bytes, 0) {
-    report-error()
+    report-system-error()
   } else {
     Pass(bytes)
   }
@@ -55,7 +55,7 @@ define read-file(f: FD.descriptor, buffer-size: int, max-read-size: int): system
     Pass(Magic.cast(int, text, ptr))
   - Fail(_) =>
     Ext.free(ptr);
-    report-error()
+    report-system-error()
   }
 }
 
@@ -89,7 +89,7 @@ define _get-line-inner(ptr: int, ptr-size: int, current-index: int, buffer-size:
     let last-char = Mem.load-int8(last-char-ptr) in
     if lt-int(bytes, 0) {
       Ext.free(ptr);
-      report-error()
+      report-system-error()
     } else-if or(lt-int(bytes, buffer-size), eq-int8(last-char, 10)) {
       Mem.store-int(next-index, add-int(ptr, u));
       Pass(Magic.cast(int, text, ptr))

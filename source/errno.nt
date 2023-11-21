@@ -17,6 +17,10 @@ inline system(a: tau): tau {
   except(errno, a)
 }
 
-define report-error[a](): system(a) {
-  Fail(Errno(_get-errno()))
+define get-system-error(): errno {
+  Errno(_get-errno())
+}
+
+define report-system-error[a](): system(a) {
+  Fail(get-system-error())
 }

@@ -53,13 +53,13 @@ mutual {
     let to-ptr = add-int(from-ptr, word-size) in
     let type-ptr = add-int(from-ptr, mul-int(word-size, 2)) in
     let content-ptr = add-int(from-ptr, mul-int(word-size, 3)) in
-    _VecInfo of { word-size, from-ptr, to-ptr, type-ptr, content-ptr }
+    _VecInfo of {word-size, from-ptr, to-ptr, type-ptr, content-ptr}
   }
 
   resource vector-internal {
   - (ptr: int) => {
       let base-ptr = Magic.cast(int, &vector(int), ptr) in
-      let _VecInfo of { from-ptr, to-ptr, type-ptr, content-ptr } = _get-vec-info(base-ptr) in
+      let _VecInfo of {from-ptr, to-ptr, type-ptr, content-ptr} = _get-vec-info(base-ptr) in
       let from: int = Mem.load-int(from-ptr) in
       let to: int = Mem.load-int(to-ptr) in
       let size = sub-int(to, from) in
@@ -69,7 +69,7 @@ mutual {
     }
   - (ptr: int) => {
       let base-ptr = Magic.cast(int, &vector(int), ptr) in
-      let _VecInfo of { word-size, from-ptr, to-ptr, type-ptr, content-ptr } = _get-vec-info(base-ptr) in
+      let _VecInfo of {word-size, from-ptr, to-ptr, type-ptr, content-ptr} = _get-vec-info(base-ptr) in
       let from: int = Mem.load-int(from-ptr) in
       let to: int = Mem.load-int(to-ptr) in
       let size = sub-int(to, from) in
@@ -110,7 +110,7 @@ define new[a](base-list: list(a)): vector(a) {
 }
 
 inline access[a](xs: &vector(a), i: int): a {
-  let _VecInfo of { from-ptr, content-ptr, word-size } = _get-vec-info(xs) in
+  let _VecInfo of {from-ptr, content-ptr, word-size} = _get-vec-info(xs) in
   let from = Mem.load-int(from-ptr) in
   let elem-address = add-int(content-ptr, mul-int(word-size, add-int(from, i))) in
   let val = Magic.cast(int, &a, Mem.load-int(elem-address)) in
@@ -118,14 +118,14 @@ inline access[a](xs: &vector(a), i: int): a {
 }
 
 inline access-N[a](xs: &vector(a), i: int): &a {
-  let _VecInfo of { from-ptr, content-ptr, word-size } = _get-vec-info(xs) in
+  let _VecInfo of {from-ptr, content-ptr, word-size} = _get-vec-info(xs) in
   let from = Mem.load-int(from-ptr) in
   let elem-address = add-int(content-ptr, mul-int(word-size, add-int(from, i))) in
   Magic.cast(int, &a, Mem.load-int(elem-address))
 }
 
 define size[a](xs: &vector(a)): int {
-  let _VecInfo of { from-ptr, to-ptr } = _get-vec-info(xs) in
+  let _VecInfo of {from-ptr, to-ptr} = _get-vec-info(xs) in
   let from = Mem.load-int(from-ptr) in
   let to = Mem.load-int(to-ptr) in
   sub-int(to, from)

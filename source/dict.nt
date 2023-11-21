@@ -24,7 +24,7 @@ inline size[k, v](d: &dict(k, v)): int {
   case d {
   - Tip =>
     0
-  - Bin of { size } =>
+  - Bin of {size} =>
     *size
   }
 }
@@ -34,7 +34,7 @@ inline empty[k, v](): dict(k, v) {
 }
 
 inline singleton[k, v](key: k, value: v): dict(k, v) {
-  Bin of { size = 1, left = Tip, right = Tip, key, value }
+  Bin of {size = 1, left = Tip, right = Tip, key, value}
 }
 
 constant _delta: int {
@@ -194,7 +194,7 @@ inline _balance-R[a, b](k: a, x: b, l: dict(a, b), r: dict(a, b)): dict(a, b) {
 }
 
 inline insert[k, v](L: loset(k)): (k, v, dict(k, v)) -> dict(k, v) {
-  let Loset of { cmp } = L in
+  let Loset of {cmp} = L in
   mu self(key-X, val-X, d) {
     match d {
     - Tip =>
@@ -214,7 +214,7 @@ inline insert[k, v](L: loset(k)): (k, v, dict(k, v)) -> dict(k, v) {
 }
 
 inline lookup[k, v](L: loset(k)): (&k, &dict(k, v)) -> ?&v {
-  let Loset of { cmp } = L in
+  let Loset of {cmp} = L in
   mu self(needle: &k, d: &dict(k, v)) {
     case d {
     - Tip =>
@@ -245,7 +245,7 @@ define _min-view-sure[a, b](k: a, x: b, l: dict(a, b), r: dict(a, b)): _view(a, 
   - Tip =>
     _View(k, x, r)
   - Bin(_, lk, lx, ll, lr) =>
-    let _View of { key, value, dict = l' } = _min-view-sure(lk, lx, ll, lr) in
+    let _View of {key, value, dict = l'} = _min-view-sure(lk, lx, ll, lr) in
     _View(key, value, _balance-R(k, x, l', r))
   }
 }
@@ -255,7 +255,7 @@ define _max-view-sure[a, b](k: a, x: b, l: dict(a, b), r: dict(a, b)): _view(a, 
   - Tip =>
     _View(k, x, l)
   - Bin(_, rk, rx, rl, rr) =>
-    let _View of { key, value, dict = r' } = _max-view-sure(rk, rx, rl, rr) in
+    let _View of {key, value, dict = r'} = _max-view-sure(rk, rx, rl, rr) in
     _View(key, value, _balance-L(k, x, l, r'))
   }
 }
@@ -268,10 +268,10 @@ inline _glue[k, v](d1: dict(k, v), d2: dict(k, v)): dict(k, v) {
     d1
   - Bin(ls, lk, lx, ll, lr), Bin(rs, rk, rx, rl, rr) =>
     if gt-int(ls, rs) {
-      let _View of { key, value, dict } = _max-view-sure(lk, lx, ll, lr) in
+      let _View of {key, value, dict} = _max-view-sure(lk, lx, ll, lr) in
       _balance-R(key, value, dict, Bin(rs, rk, rx, rl, rr))
     } else {
-      let _View of { key, value, dict } = _min-view-sure(rk, rx, rl, rr) in
+      let _View of {key, value, dict} = _min-view-sure(rk, rx, rl, rr) in
       _balance-R(key, value, dict, Bin(ls, lk, lx, ll, lr))
     }
   }
@@ -279,7 +279,7 @@ inline _glue[k, v](d1: dict(k, v), d2: dict(k, v)): dict(k, v) {
 
 inline delete[k, v](L: loset(k)): (k, dict(k, v)) -> dict(k, v) {
   mu self(needle, d) {
-    let Loset of { cmp } = L in
+    let Loset of {cmp} = L in
     match d {
     - Tip =>
       Tip

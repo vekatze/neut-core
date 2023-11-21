@@ -1,15 +1,15 @@
 import {
-- this.bool [and]
-- this.except [from-opTIOn]
-- this.rig [rig, Rig]
-- this.ring [ring, Ring]
+- this.bool {and}
+- this.except {from-option}
+- this.rig {rig, Rig}
+- this.ring {ring, Ring}
 - this.system
 - this.text
-- this.unit [unit]
-- L [list, loop, repeat]
+- this.unit {unit}
+- L {list, loop, repeat}
 - Int
 - TIO
-- Vector [vector]
+- Vector {vector}
 }
 
 data matrix(a) {
@@ -23,12 +23,12 @@ data matrix(a) {
 define new[a](content-list: list(list(a))): matrix(a) {
   let get-len = (xs) => { L.length(xs) } in
   let len-list on content-list = L.map-noetic(get-len, content-list) in
-  let col-size = L.minimum(int.as-loset)(len-list) in
+  let col-size = L.minimum(Int.as-loset)(len-list) in
   let row-size on content-list = L.length(content-list) in
   Matrix of {
   - row-size = row-size
-  - col-size = from-opTIOn(0, col-size)
-  - content = vector.new(L.concat(content-list))
+  - col-size = from-option(0, col-size)
+  - content = Vector.new(L.concat(content-list))
   }
 }
 
@@ -36,7 +36,7 @@ define zero[a](R: ring(a)): (int, int) -> matrix(a) {
   let Ring of { zero } = R in
   mu _(row-size: int, col-size: int) {
     let vec-size = mul-int(row-size, col-size) in
-    let content = vector.new(L.repeat(vec-size, (_) => { zero })) in
+    let content = Vector.new(L.repeat(vec-size, (_) => { zero })) in
     Matrix of { row-size, col-size, content }
   }
 }
@@ -44,7 +44,7 @@ define zero[a](R: ring(a)): (int, int) -> matrix(a) {
 define one[a](R: ring(a), size: int): matrix(a) {
   let Ring of { zero, one } = R in
   let vec-size = mul-int(size, size) in
-  let content = vector.new(L.repeat(vec-size, (cursor) => {
+  let content = Vector.new(L.repeat(vec-size, (cursor) => {
     let rem = rem-int(cursor, add-int(size, 1)) in
     if eq-int(rem, 0) {
       one
@@ -67,7 +67,7 @@ define access[a](mat: &matrix(a), row: int, col: int): a {
     let b2 = lt-int(col, *col-size) in
     and(b1, b2)
   };
-  vector.access(content, add-int(mul-int(*col-size, row), col))
+  Vector.access(content, add-int(mul-int(*col-size, row), col))
 }
 
 define get-row-size[a](mat: &matrix(a)): int {
@@ -116,7 +116,7 @@ inline add-mat[a](rg: ring(a)): (&matrix(a), &matrix(a)) -> matrix(a) {
     Matrix of {
     - row-size = row-size
     - col-size = col-size
-    - content = vector.zip-with(vec1, vec2, add)
+    - content = Vector.zip-with(vec1, vec2, add)
     }
   }
 }
@@ -139,7 +139,7 @@ inline sub-mat[a](rg: ring(a)): (&matrix(a), &matrix(a)) -> matrix(a) {
     Matrix of {
     - row-size = row-size
     - col-size = col-size
-    - content = vector.zip-with(vec1, vec2, sub)
+    - content = Vector.zip-with(vec1, vec2, sub)
     }
   }
 }
@@ -202,7 +202,7 @@ inline mul-mat-pointwise[a](rg: ring(a)): (&matrix(a), &matrix(a)) -> matrix(a) 
     - row-size = row-size
     - col-size = col-size
     - content =
-      vector.zip-with(vec1, vec2, mul)
+      Vector.zip-with(vec1, vec2, mul)
     }
   }
 }
@@ -212,7 +212,7 @@ define for[a, b](mat: &matrix(a), f: a -> b): matrix(b) {
   Matrix of {
   - row-size = get-row-size(mat)
   - col-size = get-col-size(mat)
-  - content = vector.for(vec, f)
+  - content = Vector.for(vec, f)
   }
 }
 
@@ -232,6 +232,6 @@ define zip-with[a, b, c](mat1: &matrix(a), mat2: &matrix(b), f: (a, b) -> c): ma
   Matrix of {
   - row-size = r1
   - col-size = c1
-  - content = vector.zip-with(vec1, vec2, f)
+  - content = Vector.zip-with(vec1, vec2, f)
   }
 }

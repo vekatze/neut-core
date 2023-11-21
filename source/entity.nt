@@ -1,7 +1,7 @@
 import {
-- this.bool [bool, True, False]
-- O [EQ]
-- Lo [loset, Loset]
+- this.bool {bool, True, False}
+- O {EQ}
+- Lo {loset, Loset}
 }
 
 data entity(a) {

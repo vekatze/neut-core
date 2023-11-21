@@ -1,7 +1,7 @@
 import {
-- this.bool [bool, True, False]
-- this.except [Pass, none]
-- this.list [list, Nil, Cons, length]
+- this.bool {bool, True, False}
+- this.except {Pass, none}
+- this.list {list, Nil, Cons, length}
 - this.pair
 - this.unit
 }

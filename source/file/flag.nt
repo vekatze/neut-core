@@ -1,5 +1,5 @@
 import {
-- this.list [list, fold-left]
+- this.list {list, fold-left}
 }
 
 data flag {

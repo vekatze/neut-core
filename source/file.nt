@@ -1,10 +1,10 @@
 import {
 - this.bool
-- this.errno [report-error, system]
-- this.except [Pass]
-- this.list [list]
-- this.text [text, unsafe-get-content-pointer]
-- this.unit [unit, Unit]
+- this.errno {report-error, system}
+- this.except {Pass}
+- this.list {list}
+- this.text {text, unsafe-get-content-pointer}
+- this.unit {unit, Unit}
 - FF
 - FM
 - FD

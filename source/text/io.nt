@@ -1,9 +1,9 @@
 import {
-- this.bool [or]
-- this.errno [system, report-error]
-- this.except [none, Pass, Fail]
-- this.text [text, unsafe-get-content-pointer, text-byte-length]
-- this.unit [unit]
+- this.bool {or}
+- this.errno {system, report-error}
+- this.except {none, Pass, Fail}
+- this.text {text, unsafe-get-content-pointer, text-byte-length}
+- this.unit {unit}
 - FD
 - Ext
 - Magic

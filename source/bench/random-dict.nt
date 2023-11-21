@@ -1,11 +1,11 @@
 import {
-- this.control [loop]
-- this.except [Pass, Fail]
-- this.int [as-loset]
-- this.loset [loset]
-- this.random [random]
-- this.unit [unit]
-- Dict [dict, empty, insert, dict-trope, Dict-Trope, fromLoset]
+- this.control {loop}
+- this.except {Pass, Fail}
+- this.int {as-loset}
+- this.loset {loset}
+- this.random {random}
+- this.unit {unit}
+- Dict {dict, empty, insert, dict-trope, Dict-Trope, fromLoset}
 - TIO
 }
 

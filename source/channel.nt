@@ -1,8 +1,8 @@
 import {
-- this.except [Pass, Fail]
-- this.int [sum-int]
+- this.except {Pass, Fail}
+- this.int {sum-int}
 - this.pair
-- this.unit [unit]
+- this.unit {unit}
 - Q
 - Ext
 - List

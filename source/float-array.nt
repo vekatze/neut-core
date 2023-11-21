@@ -1,10 +1,10 @@
 import {
 - this.bool
-- this.except [from-option, Pass, none]
-- this.external [free, malloc]
-- this.list [list, minimum]
+- this.except {from-option, Pass, none}
+- this.external {free, malloc}
+- this.list {list, minimum}
 - this.pair
-- this.unit [unit, Unit]
+- this.unit {unit, Unit}
 - Int
 - Magic
 - Mem

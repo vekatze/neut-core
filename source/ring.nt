@@ -1,5 +1,5 @@
 import {
-- this.field [field, Field]
+- this.field {field, Field}
 }
 
 data ring(a) {

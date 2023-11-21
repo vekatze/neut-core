@@ -1,6 +1,6 @@
 import {
-- this.group [group, Group]
-- this.ring [ring, Ring]
+- this.group {group, Group}
+- this.ring {ring, Ring}
 }
 
 data monoid(a) {

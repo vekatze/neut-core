@@ -1,7 +1,7 @@
 import {
-- this.except [except, Fail]
-- this.external [errno-location]
-- this.memory [load-int32]
+- this.except {except, Fail}
+- this.external {errno-location}
+- this.memory {load-int32}
 }
 
 data errno {

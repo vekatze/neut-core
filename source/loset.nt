@@ -1,5 +1,5 @@
 import {
-- this.order [order]
+- this.order {order}
 }
 
 data loset(a) {

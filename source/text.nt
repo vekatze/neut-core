@@ -1,7 +1,7 @@
 import {
 - this.bool
-- this.int8-array [int8-array, int8-array-new, unsafe-copy-int8-array, int8-array-length]
-- this.unit [unit, Unit]
+- this.int8-array {int8-array, int8-array-new, unsafe-copy-int8-array, int8-array-length}
+- this.unit {unit, Unit}
 - L
 - Ext
 - Magic

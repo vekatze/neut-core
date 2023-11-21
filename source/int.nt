@@ -1,13 +1,13 @@
 import {
 - this.bool
-- this.list [list]
-- this.ring [ring, Ring]
-- this.monoid [monoid, from-group]
-- this.group [group, Group]
-- this.semiring [semiring, from-ring]
+- this.list {list}
+- this.ring {ring, Ring}
+- this.monoid {monoid, from-group}
+- this.group {group, Group}
+- this.semiring {semiring, from-ring}
 - E
-- Lo [loset, Loset]
-- O [GT, LT, EQ]
+- Lo {loset, Loset}
+- O {GT, LT, EQ}
 }
 
 define sum-int(xs: list(int)): int {

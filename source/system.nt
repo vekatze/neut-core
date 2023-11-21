@@ -1,11 +1,11 @@
 import {
-- this.bool [bool]
-- this.external [exit]
-- this.list [list]
-- this.memory [load-int]
-- this.text [text, unsafe-from-c-string]
-- this.text.io [print]
-- this.unit [unit, Unit]
+- this.bool {bool}
+- this.external {exit}
+- this.list {list}
+- this.memory {load-int}
+- this.text {text, unsafe-from-c-string}
+- this.text.io {print}
+- this.unit {unit, Unit}
 - Word
 }
 

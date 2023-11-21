@@ -1,9 +1,9 @@
 import {
 - this.bool
-- this.external [free, malloc]
-- this.list [list, loop, repeat, minimum]
-- this.unit [unit, Unit]
-- this.except [from-option]
+- this.external {free, malloc}
+- this.list {list, loop, repeat, minimum}
+- this.unit {unit, Unit}
+- this.except {from-option}
 - Int
 - Magic
 - Mem

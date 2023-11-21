@@ -1,6 +1,6 @@
 import {
 - this.bool
-- this.unit [unit, Unit]
+- this.unit {unit, Unit}
 - Ext
 - Magic
 - Mem

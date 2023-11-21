@@ -1,6 +1,6 @@
 import {
-- this.channel [channel, new-channel, send, receive]
-- this.unit [unit]
+- this.channel {channel, new-channel, send, receive}
+- this.unit {unit}
 - Magic
 }
 

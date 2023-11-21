@@ -1,13 +1,13 @@
 import {
-- this.bool [bool, True, False, and, or]
-- this.except [none, Pass, Fail]
-- this.functor [functor, Functor]
-- this.monoid [monoid, Monoid]
-- this.order [LT, GT]
+- this.bool {bool, True, False, and, or}
+- this.except {none, Pass, Fail}
+- this.functor {functor, Functor}
+- this.monoid {monoid, Monoid}
+- this.order {LT, GT}
 - this.pair
-- this.semigroup [semigroup, from-monoid]
-- this.unit [unit, Unit]
-- Lo [loset, Loset]
+- this.semigroup {semigroup, from-monoid}
+- this.unit {unit, Unit}
+- Lo {loset, Loset}
 }
 
 data list(a: tau) {

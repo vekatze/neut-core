@@ -1,11 +1,11 @@
 import {
 - this.bool
-- this.field [field, Field]
-- this.ring [ring]
-- this.semiring [semiring]
+- this.field {field, Field}
+- this.ring {ring}
+- this.semiring {semiring}
 - E
-- Lo [loset, Loset]
-- O [GT, LT, EQ]
+- Lo {loset, Loset}
+- O {GT, LT, EQ}
 }
 
 foreign {

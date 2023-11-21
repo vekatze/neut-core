@@ -1,8 +1,8 @@
 import {
 - this.bool
-- this.external [free, malloc]
-- this.list [list, length]
-- this.unit [unit, Unit]
+- this.external {free, malloc}
+- this.list {list, length}
+- this.unit {unit, Unit}
 - Mem
 - Word
 - Magic

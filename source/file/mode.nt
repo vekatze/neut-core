@@ -64,9 +64,7 @@ define interpret-mode(flag: mode): int {
 }
 
 define interpret(xs: list(mode)): int {
-  fold-left(0, xs, (acc, x) => {
-    or-int(acc, interpret-mode(x))
-  })
+  fold-left(0, xs, (acc, x) => or-int(acc, interpret-mode(x)))
 }
 
 constant default-file-mode: list(mode) {

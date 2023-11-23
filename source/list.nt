@@ -89,15 +89,11 @@ inline fold-right-noetic[elem-type, result-type] of {
 }
 
 inline map[a, b](f: a -> b, xs: list(a)): list(b) {
-  fold-right(xs, [], (x, acc) => {
-    f(x) :: acc
-  })
+  fold-right(xs, [], (x, acc) => f(x) :: acc)
 }
 
 inline map-noetic[a, b](f: &a -> b, xs: &list(a)): list(b) {
-  fold-right-noetic(xs, [], (x, acc) => {
-    f(x) :: acc
-  })
+  fold-right-noetic(xs, [], (x, acc) => f(x) :: acc)
 }
 
 inline for-each[a, b](xs: list(a), f: a -> b): list(b) {
@@ -137,27 +133,19 @@ inline repeat[a](count: int, f: int -> a): list(a) {
 }
 
 define append[a](xs: list(a), ys: list(a)): list(a) {
-  fold-right(xs, ys, (x, acc) => {
-    Cons(x, acc)
-  })
+  fold-right(xs, ys, Cons)
 }
 
 define concat[a](xss: list(list(a))): list(a) {
-  fold-left([], xss, (acc, xs) => {
-    append(acc, xs)
-  })
+  fold-left([], xss, append)
 }
 
 define reverse[a](xs: list(a)): list(a) {
-  fold-left([], xs, (acc, x) => {
-    x :: acc
-  })
+  fold-left([], xs, (acc, x) => x :: acc)
 }
 
 define length[a](xs: &list(a)): int {
-  fold-left-noetic(0, xs, (acc, _) => {
-    add-int(1, acc)
-  })
+  fold-left-noetic(0, xs, (acc, _) => add-int(1, acc))
 }
 
 define unzip[a, b](xs: list(tuple(a, b))): tuple(list(a), list(b)) {
@@ -207,7 +195,7 @@ define filter-some[a](xs: list(?a)): list(a) {
 
 inline sum[a](as-monoid: monoid(a), xs: list(a)): a {
   let Monoid of {e, op} = as-monoid in
-  fold-left(e, xs, (acc, x) => {op(acc, x)})
+  fold-left(e, xs, (acc, x) => op(acc, x))
 }
 
 inline minimum[a](as-ord: loset(a)): list(a) -> ?a {

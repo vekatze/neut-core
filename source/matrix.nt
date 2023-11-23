@@ -21,8 +21,7 @@ data matrix(a) {
 }
 
 define new[a](content-list: list(list(a))): matrix(a) {
-  let get-len = (xs) => {L.length(xs)} in
-  let len-list on content-list = L.map-noetic(get-len, content-list) in
+  let len-list on content-list = L.map-noetic(L.length, content-list) in
   let col-size = L.minimum(Int.as-loset)(len-list) in
   let row-size on content-list = L.length(content-list) in
   Matrix of {
@@ -36,7 +35,7 @@ define zero[a](R: ring(a)): (int, int) -> matrix(a) {
   let Ring of {zero} = R in
   mu _(row-size: int, col-size: int) {
     let vec-size = mul-int(row-size, col-size) in
-    let content = Vector.new(L.repeat(vec-size, (_) => {zero})) in
+    let content = Vector.new(L.repeat(vec-size, (_) => zero)) in
     Matrix of {row-size, col-size, content}
   }
 }

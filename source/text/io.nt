@@ -59,7 +59,6 @@ define read-file(f: FD.descriptor, buffer-size: int, max-read-size: int): system
   }
 }
 
-// fixme: prefer the sum type
 define read(f: FD.descriptor): system(text) {
   let buffer-size = shl-int(1, 16) in // for now
   let size = Ext.lseek(f, 0, Seek.interpret(Seek.END)) in

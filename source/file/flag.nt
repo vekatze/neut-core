@@ -44,9 +44,7 @@ define _interpret-flag(flag: flag): int {
 }
 
 define interpret(xs: list(flag)): int {
-  fold-left(0, xs, (acc, x) => {
-    or-int(acc, _interpret-flag(x))
-  })
+  fold-left(0, xs, (acc, x) => or-int(acc, _interpret-flag(x)))
 }
 
 constant for-r: list(flag) {

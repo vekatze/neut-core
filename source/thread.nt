@@ -16,63 +16,67 @@ inline _flow-size(): int {
   add-int(mul-int(u, 3), 1)
 }
 
-mutual {
-  define flow(_: tau) {
-    flow-inner
-  }
+declare {
+- flow(_: tau): tau
+- attach(a: tau, e: flow(a)): a
+- -await-and-write-result(addr: int): unit
+}
 
-  resource flow-inner {
-  - (p: int) => {
-      // tio.print("[warning] awaiting a flow to discard it\n")
-      let u = Word.size in
-      let elem-type = Magic.cast(int, tau, Mem.load-int(add-int(p, u))) in
-      let pr: flow(elem-type) = Magic.cast(int, flow(elem-type), p) in
-      let _: elem-type = this.thread.attach(elem-type, pr: flow(elem-type)) in // await * discard
-      0
-    }
-  - (addr: int) => {
-      // tio.print("[warning] awaiting a flow to copy it\n")
-      let u = Word.size in
-      let u2 = mul-int(u, 2) in
-      let u3 = mul-int(u, 3) in
-      await-and-write-result(addr);
-      let thread-id = Mem.load-int(addr) in
-      let elem-type = Magic.cast(int, tau, Mem.load-int(add-int(addr, u))) in
-      let elem-value: &elem-type = Magic.cast(int, &elem-type, Mem.load-int(add-int(addr, u2))) in
-      let new-addr = Ext.malloc(_flow-size()) in
-      Mem.store-int(thread-id, new-addr);
-      Mem.store-int(Magic.cast(tau, int, elem-type), add-int(new-addr, u));
-      let cloned-value: elem-type = _embody(elem-type, elem-value) in
-      Mem.store-int(Magic.cast(elem-type, int, cloned-value), add-int(new-addr, u2));
-      Mem.store-int1(1, add-int(new-addr, u3)); // already finished
-      new-addr
-    }
-  }
-
-  define attach(a: tau, e: flow(a)): a {
-    let addr = Magic.cast(flow(a), int, e) in
-    await-and-write-result(addr);
+resource flow-inner {
+- (p: int) => {
+    // tio.print("[warning] awaiting a flow to discard it\n")
     let u = Word.size in
-    let value-ptr = add-int(addr, mul-int(u, 2)) in
-    let value = Mem.load-int(value-ptr) in
-    Ext.free(addr);
-    Magic.cast(int, a, value)
+    let elem-type = Magic.cast(int, tau, Mem.load-int(add-int(p, u))) in
+    let pr: flow(elem-type) = Magic.cast(int, flow(elem-type), p) in
+    let _: elem-type = this.thread.attach(elem-type, pr: flow(elem-type)) in // await * discard
+    0
   }
-
-  define await-and-write-result(addr: int): unit {
+- (addr: int) => {
+    // tio.print("[warning] awaiting a flow to copy it\n")
     let u = Word.size in
     let u2 = mul-int(u, 2) in
     let u3 = mul-int(u, 3) in
-    let finished-flag-ptr = add-int(addr, u3) in
-    let finished-flag = Mem.load-int1(finished-flag-ptr) in
-    if eq-int1(finished-flag, 0) {
-      let thread-id = Mem.load-int(addr) in
-      let value-ptr = add-int(addr, u2) in
-      Ext.thread-join(thread-id, value-ptr);
-      Mem.store-int1(1, finished-flag-ptr)
-    } else {
-      Unit
-    }
+    -await-and-write-result(addr);
+    let thread-id = Mem.load-int(addr) in
+    let elem-type = Magic.cast(int, tau, Mem.load-int(add-int(addr, u))) in
+    let elem-value: &elem-type = Magic.cast(int, &elem-type, Mem.load-int(add-int(addr, u2))) in
+    let new-addr = Ext.malloc(_flow-size()) in
+    Mem.store-int(thread-id, new-addr);
+    Mem.store-int(Magic.cast(tau, int, elem-type), add-int(new-addr, u));
+    let cloned-value: elem-type = _embody(elem-type, elem-value) in
+    Mem.store-int(Magic.cast(elem-type, int, cloned-value), add-int(new-addr, u2));
+    Mem.store-int1(1, add-int(new-addr, u3)); // already finished
+    new-addr
+  }
+}
+
+define flow(_: tau): tau {
+  flow-inner
+}
+
+define attach(a: tau, e: flow(a)): a {
+  let addr = Magic.cast(flow(a), int, e) in
+  -await-and-write-result(addr);
+  let u = Word.size in
+  let value-ptr = add-int(addr, mul-int(u, 2)) in
+  let value = Mem.load-int(value-ptr) in
+  Ext.free(addr);
+  Magic.cast(int, a, value)
+}
+
+define -await-and-write-result(addr: int): unit {
+  let u = Word.size in
+  let u2 = mul-int(u, 2) in
+  let u3 = mul-int(u, 3) in
+  let finished-flag-ptr = add-int(addr, u3) in
+  let finished-flag = Mem.load-int1(finished-flag-ptr) in
+  if eq-int1(finished-flag, 0) {
+    let thread-id = Mem.load-int(addr) in
+    let value-ptr = add-int(addr, u2) in
+    Ext.thread-join(thread-id, value-ptr);
+    Mem.store-int1(1, finished-flag-ptr)
+  } else {
+    Unit
   }
 }
 

@@ -42,45 +42,47 @@ define _copy-vector-content(source-pointer: int, target-pointer: int, elem-type:
   }
 }
 
-mutual {
-  define vector(_: tau): tau {
-    vector-internal
-  }
+declare {
+- vector-internal: tau
+}
 
-  define _get-vec-info[a](xs: &vector(a)): _vecInfo {
-    let from-ptr = Magic.cast(&vector(a), int, xs) in
-    let word-size = Word.size in
-    let to-ptr = add-int(from-ptr, word-size) in
-    let type-ptr = add-int(from-ptr, mul-int(word-size, 2)) in
-    let content-ptr = add-int(from-ptr, mul-int(word-size, 3)) in
-    _VecInfo of {word-size, from-ptr, to-ptr, type-ptr, content-ptr}
-  }
+define vector(_: tau): tau {
+  vector-internal
+}
 
-  resource vector-internal {
-  - (ptr: int) => {
-      let base-ptr = Magic.cast(int, &vector(int), ptr) in
-      let _VecInfo of {from-ptr, to-ptr, type-ptr, content-ptr} = _get-vec-info(base-ptr) in
-      let from: int = Mem.load-int(from-ptr) in
-      let to: int = Mem.load-int(to-ptr) in
-      let size = sub-int(to, from) in
-      let elem-type = Magic.cast(int, tau, Mem.load-int(type-ptr)) in
-      _discard-vector-content(content-ptr, elem-type, 0, size);
-      Magic.cast(unit, int, free(from-ptr))
-    }
-  - (ptr: int) => {
-      let base-ptr = Magic.cast(int, &vector(int), ptr) in
-      let _VecInfo of {word-size, from-ptr, to-ptr, type-ptr, content-ptr} = _get-vec-info(base-ptr) in
-      let from: int = Mem.load-int(from-ptr) in
-      let to: int = Mem.load-int(to-ptr) in
-      let size = sub-int(to, from) in
-      let elem-type: tau = Magic.cast(int, tau, Mem.load-int(type-ptr)) in
-      let target-ptr = malloc(mul-int(word-size, add-int(size, 3))) in
-      Mem.store-int(0, target-ptr);
-      Mem.store-int(size, add-int(target-ptr, word-size));
-      Mem.store-int(Magic.cast(tau, int, elem-type), add-int(target-ptr, mul-int(word-size, 2)));
-      _copy-vector-content(content-ptr, add-int(target-ptr, mul-int(word-size, 3)), elem-type, 0, size);
-      target-ptr
-    }
+define _get-vec-info[a](xs: &vector(a)): _vecInfo {
+  let from-ptr = Magic.cast(&vector(a), int, xs) in
+  let word-size = Word.size in
+  let to-ptr = add-int(from-ptr, word-size) in
+  let type-ptr = add-int(from-ptr, mul-int(word-size, 2)) in
+  let content-ptr = add-int(from-ptr, mul-int(word-size, 3)) in
+  _VecInfo of {word-size, from-ptr, to-ptr, type-ptr, content-ptr}
+}
+
+resource vector-internal {
+- (ptr: int) => {
+    let base-ptr = Magic.cast(int, &vector(int), ptr) in
+    let _VecInfo of {from-ptr, to-ptr, type-ptr, content-ptr} = _get-vec-info(base-ptr) in
+    let from: int = Mem.load-int(from-ptr) in
+    let to: int = Mem.load-int(to-ptr) in
+    let size = sub-int(to, from) in
+    let elem-type = Magic.cast(int, tau, Mem.load-int(type-ptr)) in
+    _discard-vector-content(content-ptr, elem-type, 0, size);
+    Magic.cast(unit, int, free(from-ptr))
+  }
+- (ptr: int) => {
+    let base-ptr = Magic.cast(int, &vector(int), ptr) in
+    let _VecInfo of {word-size, from-ptr, to-ptr, type-ptr, content-ptr} = _get-vec-info(base-ptr) in
+    let from: int = Mem.load-int(from-ptr) in
+    let to: int = Mem.load-int(to-ptr) in
+    let size = sub-int(to, from) in
+    let elem-type: tau = Magic.cast(int, tau, Mem.load-int(type-ptr)) in
+    let target-ptr = malloc(mul-int(word-size, add-int(size, 3))) in
+    Mem.store-int(0, target-ptr);
+    Mem.store-int(size, add-int(target-ptr, word-size));
+    Mem.store-int(Magic.cast(tau, int, elem-type), add-int(target-ptr, mul-int(word-size, 2)));
+    _copy-vector-content(content-ptr, add-int(target-ptr, mul-int(word-size, 3)), elem-type, 0, size);
+    target-ptr
   }
 }
 

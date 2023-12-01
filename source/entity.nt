@@ -10,7 +10,7 @@ data entity(a) {
   }
 }
 
-inline from-loset[a](x: loset(a)): entity(a) {
+inline from-loset<a>(x: loset(a)): entity(a) {
   let Loset of {cmp} = x in
   Entity of {
   - identity =

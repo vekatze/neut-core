@@ -57,7 +57,7 @@ define new(xs: list(float)): float-array {
   Mem.store-int(len, add-int(base-pointer, u));
   let content-pointer: int = add-int(base-pointer, u2) in
   let store-values =
-    mu self(values: list(float), index: int): unit {
+    define self(values: list(float), index: int): unit {
       match values {
       - [] =>
         Unit
@@ -122,7 +122,7 @@ define for-each(xs: &float-array, f: float -> unit): unit {
   let to = Mem.load-int(add-int(ptr, u)) in
   let len = sub-int(to, from) in
   let for-each-helper =
-    mu self(cursor: int) {
+    define self(cursor: int) {
       if eq-int(cursor, len) {
         Unit
       } else {
@@ -141,7 +141,7 @@ define zip-with(f: (float, float) -> float, xs: &float-array, ys: &float-array):
   let len-or-none = minimum(Int.as-loset)([len1, len2]) in
   let len = from-option(0, len-or-none) in
   let zip-with-helper =
-    mu self(cursor: int) {
+    define self(cursor: int) {
       if eq-int(cursor, len) {
         []
       } else {

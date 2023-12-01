@@ -36,7 +36,7 @@ define errno-location(): int {
   }
 }
 
-define exit[a](status: int): a {
+define exit<a>(status: int): a {
   introspect os {
   - darwin =>
     magic external(exit, status)

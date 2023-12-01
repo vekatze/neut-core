@@ -21,6 +21,6 @@ define get-system-error(): errno {
   Errno(_get-errno())
 }
 
-define report-system-error[a](): system(a) {
+define report-system-error<a>(): system(a) {
   Fail(get-system-error())
 }

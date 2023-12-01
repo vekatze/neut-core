@@ -7,11 +7,11 @@ data except(a: tau, b: tau) {
 - Pass(b)
 }
 
-inline none[a](): ?a {
+inline none<a>(): ?a {
   Fail(Unit)
 }
 
-define from-option[a](x: a, my: ?a): a {
+define from-option<a>(x: a, my: ?a): a {
   match my {
   - Pass(y) =>
     y

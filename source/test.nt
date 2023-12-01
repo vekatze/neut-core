@@ -1,5 +1,23 @@
 import {
 - this.unit {unit, Unit}
+- this.bool {True}
+- this.list {list}
+}
+
+constant my-bool {
+  this.bool.bool
+}
+
+define make-bool(): my-bool {
+  True
+}
+
+constant some-int-list: list(int) {
+  [1, 2, 3]
+}
+
+define increment(x: int): int {
+  add-int(x, 1)
 }
 
 define main(): unit {

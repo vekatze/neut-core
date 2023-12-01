@@ -12,12 +12,12 @@ data rig(a) {
   }
 }
 
-inline from-field[a](f: field(a)): rig(a) {
+inline from-field<a>(f: field(a)): rig(a) {
   let Field of {zero, add, one, mul} = f in
   Rig of {zero, add, one, mul}
 }
 
-inline from-ring[a](f: ring(a)): rig(a) {
+inline from-ring<a>(f: ring(a)): rig(a) {
   let Ring of {zero, add, one, mul} = f in
   Rig of {zero, add, one, mul}
 }

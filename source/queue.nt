@@ -11,11 +11,11 @@ data queue(a: tau) {
 - Queue(list(a), list(a))
 }
 
-define empty[a](): queue(a) {
+define empty<a>(): queue(a) {
   Queue([], [])
 }
 
-define dequeue[a](q: queue(a)): ?tuple(a, queue(a)) {
+define dequeue<a>(q: queue(a)): ?tuple(a, queue(a)) {
   let Queue(ls, rs) = q in
   match ls, rs {
   - Nil, Nil =>
@@ -27,12 +27,12 @@ define dequeue[a](q: queue(a)): ?tuple(a, queue(a)) {
   }
 }
 
-define enqueue[a](x: a, q: queue(a)): queue(a) {
+define enqueue<a>(x: a, q: queue(a)): queue(a) {
   let Queue(ls, rs) = q in
   Queue(ls, x :: rs)
 }
 
-define size[a](q: &queue(a)): int {
+define size<a>(q: &queue(a)): int {
   case q {
   - Queue(ls, rs) =>
     let l1 = length(ls) in
@@ -41,7 +41,7 @@ define size[a](q: &queue(a)): int {
   }
 }
 
-define is-empty[a](q: &queue(a)): bool {
+define is-empty<a>(q: &queue(a)): bool {
   case q {
   - Queue([], []) =>
     True

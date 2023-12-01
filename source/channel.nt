@@ -63,11 +63,11 @@ resource -channel {
 }
 
 
-inline new-channel[a](): channel(a) {
+inline new-channel<a>(): channel(a) {
   -new(a, Q.empty())
 }
 
-define send[a](ch: &channel(a), x: a): unit {
+define send<a>(ch: &channel(a), x: a): unit {
   let ch = Magic.cast(&channel(a), int, ch) in
   let u = Word.size in
   let mutex-ptr = add-int(ch, u) in
@@ -98,7 +98,7 @@ define -receive-from-channel(a: tau, ch: int, mutex-ptr: int): a {
   }
 }
 
-define receive[a](ch: &channel(a)): a {
+define receive<a>(ch: &channel(a)): a {
   let ch = Magic.cast(&channel(a), int, ch) in
   let u = Word.size in
   let mutex-ptr = add-int(ch, u) in

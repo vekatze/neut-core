@@ -17,10 +17,6 @@ define L-insert(k: int, v: int, acc: dict(int, int)): dict(int, int) {
   insert(L)(k, v, acc)
 }
 
-constant ins {
-  @insert(int, int, L)
-}
-
 constant int-dict-trope: dict-trope(int, int) {
   fromLoset(L)
 }

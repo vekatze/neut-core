@@ -10,12 +10,12 @@ data semiring(a) {
   }
 }
 
-inline from-field[a](f: field(a)): semiring(a) {
+inline from-field<a>(f: field(a)): semiring(a) {
   let Field of {add, mul} = f in
   Semiring of {add, mul}
 }
 
-inline from-ring[a](f: ring(a)): semiring(a) {
+inline from-ring<a>(f: ring(a)): semiring(a) {
   let Ring of {add, mul} = f in
   Semiring of {add, mul}
 }

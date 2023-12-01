@@ -50,7 +50,7 @@ define vector(_: tau): tau {
   vector-internal
 }
 
-define _get-vec-info[a](xs: &vector(a)): _vecInfo {
+define _get-vec-info<a>(xs: &vector(a)): _vecInfo {
   let from-ptr = Magic.cast(&vector(a), int, xs) in
   let word-size = Word.size in
   let to-ptr = add-int(from-ptr, word-size) in
@@ -86,7 +86,7 @@ resource vector-internal {
   }
 }
 
-define new[a](base-list: list(a)): vector(a) {
+define new<a>(base-list: list(a)): vector(a) {
   let word-size = Word.size in
   let n on base-list = this.list.length(base-list) in
   let ptr0 = malloc(mul-int(word-size, add-int(3, n))) in
@@ -97,7 +97,7 @@ define new[a](base-list: list(a)): vector(a) {
   Mem.store-int(n, ptr1);
   Mem.store-int(Magic.cast(tau, int, a), ptr2);
   let store-values =
-    mu self(values: list(a), index: int): unit {
+    define self(values: list(a), index: int): unit {
       match values {
       - [] =>
         Unit
@@ -111,7 +111,7 @@ define new[a](base-list: list(a)): vector(a) {
   magic cast(int, _, ptr0)
 }
 
-inline access[a](xs: &vector(a), i: int): a {
+inline access<a>(xs: &vector(a), i: int): a {
   let _VecInfo of {from-ptr, content-ptr, word-size} = _get-vec-info(xs) in
   let from = Mem.load-int(from-ptr) in
   let elem-address = add-int(content-ptr, mul-int(word-size, add-int(from, i))) in
@@ -119,27 +119,27 @@ inline access[a](xs: &vector(a), i: int): a {
   *val
 }
 
-inline access-N[a](xs: &vector(a), i: int): &a {
+inline access-N<a>(xs: &vector(a), i: int): &a {
   let _VecInfo of {from-ptr, content-ptr, word-size} = _get-vec-info(xs) in
   let from = Mem.load-int(from-ptr) in
   let elem-address = add-int(content-ptr, mul-int(word-size, add-int(from, i))) in
   Magic.cast(int, &a, Mem.load-int(elem-address))
 }
 
-define size[a](xs: &vector(a)): int {
+define size<a>(xs: &vector(a)): int {
   let _VecInfo of {from-ptr, to-ptr} = _get-vec-info(xs) in
   let from = Mem.load-int(from-ptr) in
   let to = Mem.load-int(to-ptr) in
   sub-int(to, from)
 }
 
-inline for-each[a](xs: &vector(a), f: a -> unit): unit {
+inline for-each<a>(xs: &vector(a), f: a -> unit): unit {
   loop(size(xs), (i) => {
     f(access(xs, i))
   })
 }
 
-inline for[a, b](xs: &vector(a), f: a -> b): vector(b) {
+inline for<a, b>(xs: &vector(a), f: a -> b): vector(b) {
   new of {
   - base-list =
     repeat(size(xs), (i) => {
@@ -148,14 +148,14 @@ inline for[a, b](xs: &vector(a), f: a -> b): vector(b) {
   }
 }
 
-inline fold-LN[elem-type, result-type] of {
+inline fold-LN<elem-type, result-type> of {
 - acc: result-type
 - xs: &vector(elem-type)
 - consumer: (result-type, &elem-type) -> result-type
 }: result-type {
   let sz = size(xs) in
   let helper =
-    mu loop(cursor: int, acc, xs) {
+    define loop(cursor: int, acc, xs) {
       if eq-int(cursor, sz) {
         acc
       } else {
@@ -167,14 +167,14 @@ inline fold-LN[elem-type, result-type] of {
   helper(0, acc, xs)
 }
 
-define zip-with[a, b, c](xs: &vector(a), ys: &vector(b), f: (a, b) -> c): vector(c) {
+define zip-with<a, b, c>(xs: &vector(a), ys: &vector(b), f: (a, b) -> c): vector(c) {
   let len1 = size(xs) in
   let len2 = size(ys) in
   let min-func = minimum(Int.as-loset) in
   let len-or-none = min-func([len1, len2]) in
   let len = from-option(0, len-or-none) in
   let zip-with-helper =
-    mu self(cursor: int) {
+    define self(cursor: int) {
       if eq-int(cursor, len) {
         []
       } else {

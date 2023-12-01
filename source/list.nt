@@ -16,13 +16,13 @@ data list(a: tau) {
 }
 
 // folds are optimized into loops
-inline fold-left[elem-type, result-type] of {
+inline fold-left<elem-type, result-type> of {
 - acc: result-type
 - xs: list(elem-type)
 - consumer: (result-type, elem-type) -> result-type
 }: result-type {
   let helper =
-    mu loop(acc, xs) {
+    define loop(acc, xs) {
       match xs {
       - [] =>
         acc
@@ -34,13 +34,13 @@ inline fold-left[elem-type, result-type] of {
   helper(acc, xs)
 }
 
-inline fold-left-noetic[elem-type, result-type] of {
+inline fold-left-noetic<elem-type, result-type> of {
 - acc: result-type
 - xs: &list(elem-type)
 - consumer: (result-type, &elem-type) -> result-type
 }: result-type {
   let helper =
-    mu loop(acc, xs) {
+    define loop(acc, xs) {
       case xs {
       - [] =>
         acc
@@ -52,13 +52,13 @@ inline fold-left-noetic[elem-type, result-type] of {
   helper(acc, xs)
 }
 
-inline fold-right[elem-type, result-type] of {
+inline fold-right<elem-type, result-type> of {
 - xs: list(elem-type)
 - acc: result-type
 - consumer: (elem-type, result-type) -> result-type
 }: result-type {
   let helper =
-    mu loop(xs, acc) {
+    define loop(xs, acc) {
       match xs {
       - [] =>
         acc
@@ -70,13 +70,13 @@ inline fold-right[elem-type, result-type] of {
   helper(xs, acc)
 }
 
-inline fold-right-noetic[elem-type, result-type] of {
+inline fold-right-noetic<elem-type, result-type> of {
 - xs: &list(elem-type)
 - acc: result-type
 - consumer: (&elem-type, result-type) -> result-type
 }: result-type {
   let helper =
-    mu loop(xs, acc) {
+    define loop(xs, acc) {
       case xs {
       - [] =>
         acc
@@ -88,26 +88,26 @@ inline fold-right-noetic[elem-type, result-type] of {
   helper(xs, acc)
 }
 
-inline map[a, b](f: a -> b, xs: list(a)): list(b) {
+inline map<a, b>(f: a -> b, xs: list(a)): list(b) {
   fold-right(xs, [], (x, acc) => f(x) :: acc)
 }
 
-inline map-noetic[a, b](f: &a -> b, xs: &list(a)): list(b) {
+inline map-noetic<a, b>(f: &a -> b, xs: &list(a)): list(b) {
   fold-right-noetic(xs, [], (x, acc) => f(x) :: acc)
 }
 
-inline for-each[a, b](xs: list(a), f: a -> b): list(b) {
+inline for-each<a, b>(xs: list(a), f: a -> b): list(b) {
   map(f, xs)
 }
 
-inline for[a](xs: list(a), f: a -> unit): unit {
+inline for<a>(xs: list(a), f: a -> unit): unit {
   let _ = map(f, xs) in
   Unit
 }
 
 define loop(count: int, f: int -> unit): unit {
   let helper =
-    mu self(cursor) {
+    define self(cursor) {
       if ge-int(cursor, count) {
         Unit
       } else {
@@ -119,9 +119,9 @@ define loop(count: int, f: int -> unit): unit {
   helper(0)
 }
 
-inline repeat[a](count: int, f: int -> a): list(a) {
+inline repeat<a>(count: int, f: int -> a): list(a) {
   let helper =
-    mu self(cursor) {
+    define self(cursor) {
       if ge-int(cursor, count) {
         []
       } else {
@@ -132,23 +132,23 @@ inline repeat[a](count: int, f: int -> a): list(a) {
   helper(0)
 }
 
-define append[a](xs: list(a), ys: list(a)): list(a) {
-  fold-right(xs, ys, Cons)
+define append<a>(xs: list(a), ys: list(a)): list(a) {
+  fold-right(xs, ys, exact Cons)
 }
 
-define concat[a](xss: list(list(a))): list(a) {
-  fold-left([], xss, append)
+define concat<a>(xss: list(list(a))): list(a) {
+  fold-left([], xss, exact append)
 }
 
-define reverse[a](xs: list(a)): list(a) {
+define reverse<a>(xs: list(a)): list(a) {
   fold-left([], xs, (acc, x) => x :: acc)
 }
 
-define length[a](xs: &list(a)): int {
+define length<a>(xs: &list(a)): int {
   fold-left-noetic(0, xs, (acc, _) => add-int(1, acc))
 }
 
-define unzip[a, b](xs: list(tuple(a, b))): tuple(list(a), list(b)) {
+define unzip<a, b>(xs: list(tuple(a, b))): tuple(list(a), list(b)) {
   fold-right(xs, Tuple([], []), (x, acc) => {
     let Tuple(l, r) = x in
     let Tuple(rest-l, rest-r) = acc in
@@ -156,7 +156,7 @@ define unzip[a, b](xs: list(tuple(a, b))): tuple(list(a), list(b)) {
   })
 }
 
-define uncons[a](xs: list(a)): ?tuple(a, list(a)) {
+define uncons<a>(xs: list(a)): ?tuple(a, list(a)) {
   match xs {
   - [] =>
     none()
@@ -182,7 +182,7 @@ define range(from: int, to: int): list(int) {
   }
 }
 
-define filter-some[a](xs: list(?a)): list(a) {
+define filter-some<a>(xs: list(?a)): list(a) {
   fold-right(xs, [], (x, acc) => {
     match x {
     - Pass(v) =>
@@ -193,12 +193,12 @@ define filter-some[a](xs: list(?a)): list(a) {
   })
 }
 
-inline sum[a](as-monoid: monoid(a), xs: list(a)): a {
+inline sum<a>(as-monoid: monoid(a), xs: list(a)): a {
   let Monoid of {e, op} = as-monoid in
   fold-left(e, xs, (acc, x) => op(acc, x))
 }
 
-inline minimum[a](as-ord: loset(a)): list(a) -> ?a {
+inline minimum<a>(as-ord: loset(a)): list(a) -> ?a {
   (xs) => {
     let Loset of {cmp} = as-ord in
     match xs {
@@ -218,11 +218,11 @@ inline minimum[a](as-ord: loset(a)): list(a) -> ?a {
   }
 }
 
-inline maximum[a](as-ord: loset(a)): list(a) -> ?a {
+inline maximum<a>(as-ord: loset(a)): list(a) -> ?a {
   (xs) => {
     let Loset of {cmp} = as-ord in
     let helper =
-      mu self(cand: a, ys: list(a)): a {
+      define self(cand: a, ys: list(a)): a {
         match ys {
         - [] =>
           cand
@@ -246,7 +246,7 @@ inline maximum[a](as-ord: loset(a)): list(a) -> ?a {
   }
 }
 
-inline as-monoid[a](): monoid(list(a)) {
+inline as-monoid<a>(): monoid(list(a)) {
   Monoid of {
   - e =
     []
@@ -257,13 +257,10 @@ inline as-monoid[a](): monoid(list(a)) {
   }
 }
 
-inline as-semigroup[a](): semigroup(list(a)) {
+inline as-semigroup<a>(): semigroup(list(a)) {
   from-monoid(as-monoid())
 }
 
 constant as-functor: functor(list) {
-  Functor of {
-  - map =
-    (_, _, f, xs) => {map(f, xs)}
-  }
+  Functor of {map}
 }

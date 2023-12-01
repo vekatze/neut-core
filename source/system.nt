@@ -46,7 +46,7 @@ define get-argv(): list(text) {
   let argv: int = load-int(argv-ptr) in
   let u = Word.size in
   let f =
-    mu get-argv-helper(i: int): list(text) {
+    define get-argv-helper(i: int): list(text) {
       if eq-int(i, argc) {
         []
       } else {

@@ -20,7 +20,7 @@ data dict(k, v) {
   }
 }
 
-inline size[k, v](d: &dict(k, v)): int {
+inline size<k, v>(d: &dict(k, v)): int {
   case d {
   - Tip =>
     0
@@ -29,11 +29,11 @@ inline size[k, v](d: &dict(k, v)): int {
   }
 }
 
-inline empty[k, v](): dict(k, v) {
+inline empty<k, v>(): dict(k, v) {
   Tip
 }
 
-inline singleton[k, v](key: k, value: v): dict(k, v) {
+inline singleton<k, v>(key: k, value: v): dict(k, v) {
   Bin of {size = 1, left = Tip, right = Tip, key, value}
 }
 
@@ -45,7 +45,7 @@ constant _ratio: int {
   2
 }
 
-inline _balance-L[a, b](k: a, x: b, l: dict(a, b), r: dict(a, b)): dict(a, b) {
+inline _balance-L<a, b>(k: a, x: b, l: dict(a, b), r: dict(a, b)): dict(a, b) {
   match r {
   - Tip =>
     match l {
@@ -119,7 +119,7 @@ inline _balance-L[a, b](k: a, x: b, l: dict(a, b), r: dict(a, b)): dict(a, b) {
   }
 }
 
-inline _balance-R[a, b](k: a, x: b, l: dict(a, b), r: dict(a, b)): dict(a, b) {
+inline _balance-R<a, b>(k: a, x: b, l: dict(a, b), r: dict(a, b)): dict(a, b) {
   match l {
   - Tip =>
     match r {
@@ -193,9 +193,9 @@ inline _balance-R[a, b](k: a, x: b, l: dict(a, b), r: dict(a, b)): dict(a, b) {
   }
 }
 
-inline insert[k, v](L: loset(k)): (k, v, dict(k, v)) -> dict(k, v) {
+inline insert<k, v>(L: loset(k)): (k, v, dict(k, v)) -> dict(k, v) {
   let Loset of {cmp} = L in
-  mu self(key-X, val-X, d) {
+  define self(key-X, val-X, d) {
     match d {
     - Tip =>
       singleton(key-X, val-X)
@@ -213,9 +213,9 @@ inline insert[k, v](L: loset(k)): (k, v, dict(k, v)) -> dict(k, v) {
   }
 }
 
-inline lookup[k, v](L: loset(k)): (&k, &dict(k, v)) -> ?&v {
+inline lookup<k, v>(L: loset(k)): (&k, &dict(k, v)) -> ?&v {
   let Loset of {cmp} = L in
-  mu self(needle: &k, d: &dict(k, v)) {
+  define self(needle: &k, d: &dict(k, v)) {
     case d {
     - Tip =>
       none()
@@ -240,7 +240,7 @@ data _view(k, a) {
   }
 }
 
-define _min-view-sure[a, b](k: a, x: b, l: dict(a, b), r: dict(a, b)): _view(a, b) {
+define _min-view-sure<a, b>(k: a, x: b, l: dict(a, b), r: dict(a, b)): _view(a, b) {
   match l {
   - Tip =>
     _View(k, x, r)
@@ -250,7 +250,7 @@ define _min-view-sure[a, b](k: a, x: b, l: dict(a, b), r: dict(a, b)): _view(a, 
   }
 }
 
-define _max-view-sure[a, b](k: a, x: b, l: dict(a, b), r: dict(a, b)): _view(a, b) {
+define _max-view-sure<a, b>(k: a, x: b, l: dict(a, b), r: dict(a, b)): _view(a, b) {
   match r {
   - Tip =>
     _View(k, x, l)
@@ -260,7 +260,7 @@ define _max-view-sure[a, b](k: a, x: b, l: dict(a, b), r: dict(a, b)): _view(a, 
   }
 }
 
-inline _glue[k, v](d1: dict(k, v), d2: dict(k, v)): dict(k, v) {
+inline _glue<k, v>(d1: dict(k, v), d2: dict(k, v)): dict(k, v) {
   match d1, d2 {
   - Tip, d2 =>
     d2
@@ -277,8 +277,8 @@ inline _glue[k, v](d1: dict(k, v), d2: dict(k, v)): dict(k, v) {
   }
 }
 
-inline delete[k, v](L: loset(k)): (k, dict(k, v)) -> dict(k, v) {
-  mu self(needle, d) {
+inline delete<k, v>(L: loset(k)): (k, dict(k, v)) -> dict(k, v) {
+  define self(needle, d) {
     let Loset of {cmp} = L in
     match d {
     - Tip =>
@@ -305,7 +305,7 @@ data dict-trope(k, v) {
   }
 }
 
-inline fromLoset[k, v](_loset: loset(k)): dict-trope(k, v) {
+inline fromLoset<k, v>(_loset: loset(k)): dict-trope(k, v) {
   Dict-Trope of {
   - insert = insert(_loset)
   - lookup = lookup(_loset)

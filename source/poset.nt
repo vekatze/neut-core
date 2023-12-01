@@ -11,7 +11,7 @@ data poset(a) {
   }
 }
 
-inline from-loset[a](_loset: loset(a)): poset(a) {
+inline from-loset<a>(_loset: loset(a)): poset(a) {
   let Loset of {cmp} = _loset in
   Poset of {
   - cmp =

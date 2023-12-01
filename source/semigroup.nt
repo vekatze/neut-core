@@ -8,7 +8,7 @@ data semigroup(a) {
   }
 }
 
-inline from-monoid[a](m: monoid(a)): semigroup(a) {
+inline from-monoid<a>(m: monoid(a)): semigroup(a) {
   let Monoid of {op} = m in
   Semigroup of {op}
 }

@@ -12,7 +12,7 @@ import {
 
 define sum-int(xs: list(int)): int {
   let f =
-    mu loop(ys: list(int), acc: int): int {
+    define loop(ys: list(int), acc: int): int {
       match ys {
       - [] =>
         acc

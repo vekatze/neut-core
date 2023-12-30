@@ -1,7 +1,7 @@
 import {
 - this.bool
 - this.external {free, malloc}
-- this.list {list, length}
+- this.list {list, length, Nil, Cons}
 - this.unit {unit, Unit}
 - Mem
 - Word
@@ -55,9 +55,9 @@ define int8-array-new(xs: list(int8)): int8-array {
   let store-values =
     define self(values: list(int8), index: int): unit {
       match values {
-      - [] =>
+      - Nil =>
         Unit
-      - v :: rest =>
+      - Cons(v, rest) =>
         Mem.store-int8(v, add-int(content-pointer, index));
         self(rest, add-int(index, 1))
       }

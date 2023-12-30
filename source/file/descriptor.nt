@@ -1,4 +1,5 @@
-data descriptor {}
+data descriptor {
+}
 
 constant stdin: descriptor {
   magic cast(int, descriptor, 0)

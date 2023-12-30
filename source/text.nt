@@ -91,7 +91,8 @@ define from-int(x: int): text {
   let store-positive-values =
     define loop(y: int, index: int): unit {
       if lt-int(y, 10) {
-        let digit-char = add-int8(Magic.cast(int, int8, y), 48) in // 48 == "0"
+        // 48 == "0"
+        let digit-char = add-int8(Magic.cast(int, int8, y), 48) in
         Mem.store-int8(digit-char, add-int(content, index))
       } else {
         let q = div-int(y, 10) in
@@ -103,7 +104,8 @@ define from-int(x: int): text {
     }
   in
   if lt-int(x, 0) {
-    Mem.store-int8(45, content); // 45 == "-"
+    // 45 == "-"
+    Mem.store-int8(45, content);
     store-positive-values(mul-int(x, -1), sub-int(len, 1))
   } else {
     store-positive-values(x, sub-int(len, 1))

@@ -5,7 +5,7 @@ import {
 
 inline loop<result>(count: int, base: result, f: (result, int) -> result): result {
   let helper =
-    define self(cursor, acc) {
+    define self(cursor, acc): result {
       if ge-int(cursor, count) {
         acc
       } else {

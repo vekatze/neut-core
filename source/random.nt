@@ -5,6 +5,6 @@ foreign {
 define random(ubound: int): int {
   introspect os {
   - darwin =>
-    magic external(arc4random_uniform, ubound)
+    magic external arc4random_uniform(ubound)
   }
 }

@@ -50,69 +50,68 @@ define as-field-opaque(): field(float) {
 }
 
 define sqrt(x: float): float {
-  magic external(llvm.sqrt.f64, x)
+  magic external llvm.sqrt.f64(x)
 }
 
 define exp(x: float): float {
-  magic external(llvm.exp.f64, x)
+  magic external llvm.exp.f64(x)
 }
 
 define exp2(x: float): float {
-  magic external(llvm.exp2.f64, x)
+  magic external llvm.exp2.f64(x)
 }
 
 define exp10(x: float): float {
-  magic external(llvm.exp10.f64, x)
+  magic external llvm.exp10.f64(x)
 }
 
 define sin(x: float): float {
-  magic external(llvm.sin.f64, x)
+  magic external llvm.sin.f64(x)
 }
 
 define cos(x: float): float {
-  magic external(llvm.cos.f64, x)
+  magic external llvm.cos.f64(x)
 }
 
 define log(x: float): float {
-  magic external(llvm.log.f64, x)
+  magic external llvm.log.f64(x)
 }
 
 define log2(x: float): float {
-  magic external(llvm.log2.f64, x)
+  magic external llvm.log2.f64(x)
 }
 
 define log10(x: float): float {
-  magic external(llvm.log10.f64, x)
+  magic external llvm.log10.f64(x)
 }
 
 define fma(x: float, y: float, z: float): float {
-  magic external(llvm.fma.f64, x, y, z)
+  magic external llvm.fma.f64(x, y, z)
 }
 
 define fabs(x: float): float {
-  magic external(llvm.fabs.f64, x)
+  magic external llvm.fabs.f64(x)
 }
 
 define minnum(x: float, y: float): float {
-  magic external(llvm.minnum.f64, x, y)
+  magic external llvm.minnum.f64(x, y)
 }
 
 define maxnum(x: float, y: float): float {
-  magic external(llvm.maxnum.f64, x, y)
+  magic external llvm.maxnum.f64(x, y)
 }
 
 define floor(x: float): float {
-  magic external(llvm.floor.f64, x)
+  magic external llvm.floor.f64(x)
 }
 
 define ceil(x: float): float {
-  magic external(llvm.ceil.f64, x)
+  magic external llvm.ceil.f64(x)
 }
 
 define trunc(x: float): float {
-  magic external(llvm.trunc.f64, x)
+  magic external llvm.trunc.f64(x)
 }
-
 
 define sigmoid(x: float): float {
   div-float(1, add-float(1, exp(mul-float(-1, x))))

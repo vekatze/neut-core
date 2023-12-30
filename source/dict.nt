@@ -49,47 +49,40 @@ inline _balance-L<a, b>(k: a, x: b, l: dict(a, b), r: dict(a, b)): dict(a, b) {
   match r {
   - Tip =>
     match l {
-    - Tip => singleton(k, x)
+    - Tip =>
+      singleton(k, x)
     - Bin(ls, lk, lx, ll, lr) =>
-      // -1
       match ll, lr {
       - Tip, Tip =>
-        Bin(2, k, x, l, Tip) // 0
+        Bin(2, k, x, l, Tip)
       - Tip, Bin(_, lrk, lrx, _, _) =>
-        // -2
-        Bin(3, lrk, lrx, Bin(1, lk, lx, Tip, Tip), Bin(1, k, x, Tip, Tip)) // +1
+        Bin(3, lrk, lrx, Bin(1, lk, lx, Tip, Tip), Bin(1, k, x, Tip, Tip))
       - Bin(lls, llk, llx, lll, llr), Tip =>
-        // -2
-        Bin(3, lk, lx, Bin(lls, llk, llx, lll, llr), Bin(1, k, x, Tip, Tip)) // +1
+        Bin(3, lk, lx, Bin(lls, llk, llx, lll, llr), Bin(1, k, x, Tip, Tip))
       - Bin(lls, llk, llx, lll, llr), Bin(lrs, lrk, lrx, lrl, lrr) =>
-        // -3
         if lt-int(lrs, mul-int(_ratio, lls)) {
           let ll = Bin(lls, llk, llx, lll, llr) in
           let lr = Bin(lrs, lrk, lrx, lrl, lrr) in
-          Bin(add-int(1, ls), lk, lx, ll, Bin(add-int(1, lrs), k, x, lr, Tip)) // +1
+          Bin(add-int(1, ls), lk, lx, ll, Bin(add-int(1, lrs), k, x, lr, Tip))
         } else {
           let ll = Bin(lls, llk, llx, lll, llr) in
           let lrls on lrl = size(lrl) in
           let lrrs on lrr = size(lrr) in
           let ls' = add-int(1, add-int(lls, lrls)) in
           let rs' = add-int(1, lrrs) in
-          Bin(add-int(1, ls), lrk, lrx, Bin(ls', lk, lx, ll, lrl), Bin(rs', k, x, lrr, Tip)) // +1
+          Bin(add-int(1, ls), lrk, lrx, Bin(ls', lk, lx, ll, lrl), Bin(rs', k, x, lrr, Tip))
         }
       }
     }
   - Bin(rs, rk, rx, rl, rr) =>
-    // -1
     match l {
     - Tip =>
-      // -1
       let r = Bin(rs, rk, rx, rl, rr) in
-      Bin(add-int(1, rs), k, x, Tip, r) // +1
+      Bin(add-int(1, rs), k, x, Tip, r)
     - Bin(ls, lk, lx, ll, lr) =>
-      // -2
       if gt-int(ls, mul-int(_delta, rs)) {
         match ll, lr {
         - Bin(lls, llk, llx, lll, llr), Bin(lrs, lrk, lrx, lrl, lrr) =>
-          // -4
           let lrls on lrl = size(lrl) in
           let lrrs on lrr = size(lrr) in
           let ll = Bin(lls, llk, llx, lll, llr) in
@@ -98,22 +91,22 @@ inline _balance-L<a, b>(k: a, x: b, l: dict(a, b), r: dict(a, b)): dict(a, b) {
           if lt-int(lrs, mul-int(_ratio, lls)) {
             let s' = add-int(1, add-int(ls, rs)) in
             let rs' = add-int(1, add-int(rs, lrs)) in
-            Bin(s', lk, lx, ll, Bin(rs', k, x, lr, r)) // +1
+            Bin(s', lk, lx, ll, Bin(rs', k, x, lr, r))
           } else {
             let s' = add-int(1, add-int(ls, rs)) in
             let ls' = add-int(1, add-int(lls, lrls)) in
             let rs' = add-int(1, add-int(rs, lrrs)) in
-            Bin(s', lrk, lrx, Bin(ls', lk, lx, ll, lrl), Bin(rs', k, x, lrr, r)) // +2
+            Bin(s', lrk, lrx, Bin(ls', lk, lx, ll, lrl), Bin(rs', k, x, lrr, r))
           }
         - _, _ =>
           let tip = core.system.admit(_, "failure in core.dict._balance-L") in
-          Bin(ls, lk, lx, Bin(ls, lk, lx, tip, tip), Bin(ls, lk, lx, tip, tip)) // +1
+          Bin(ls, lk, lx, Bin(ls, lk, lx, tip, tip), Bin(ls, lk, lx, tip, tip))
         }
       } else {
         let s' = add-int(1, add-int(ls, rs)) in
         let l = Bin(ls, lk, lx, ll, lr) in
         let r = Bin(rs, rk, rx, rl, rr) in
-        Bin(s', k, x, l, r) // +1
+        Bin(s', k, x, l, r)
       }
     }
   }
@@ -123,47 +116,40 @@ inline _balance-R<a, b>(k: a, x: b, l: dict(a, b), r: dict(a, b)): dict(a, b) {
   match l {
   - Tip =>
     match r {
-    - Tip => singleton(k, x)
+    - Tip =>
+      singleton(k, x)
     - Bin(rs, rk, rx, rl, rr) =>
-      // -1
       match rl, rr {
       - Tip, Tip =>
         Bin(2, k, x, Tip, r)
       - Tip, Bin(rrs, rrk, rrx, rrl, rrr) =>
-        // -2
-        Bin(3, rk, rx, Bin(1, k, x, Tip, Tip), Bin(rrs, rrk, rrx, rrl, rrr)) // +1
+        Bin(3, rk, rx, Bin(1, k, x, Tip, Tip), Bin(rrs, rrk, rrx, rrl, rrr))
       - Bin(_, rlk, rlx, _, _), Tip =>
-        // -2
-        Bin(3, rlk, rlx, Bin(1, k, x, Tip, Tip), Bin(1, rk, rx, Tip, Tip)) // +1
+        Bin(3, rlk, rlx, Bin(1, k, x, Tip, Tip), Bin(1, rk, rx, Tip, Tip))
       - Bin(rls, rlk, rlx, rll, rlr), Bin(rrs, rrk, rrx, rrl, rrr) =>
-        // -3
         if lt-int(rls, mul-int(_ratio, rrs)) {
           let rl = Bin(rls, rlk, rlx, rll, rlr) in
           let rr = Bin(rrs, rrk, rrx, rrl, rrr) in
-          Bin(add-int(1, rs), rk, rx, Bin(add-int(1, rls), k, x, Tip, rl), rr) // +1
+          Bin(add-int(1, rs), rk, rx, Bin(add-int(1, rls), k, x, Tip, rl), rr)
         } else {
           let rr = Bin(rrs, rrk, rrx, rrl, rrr) in
           let rlrs on rlr = size(rlr) in
           let rlls on rll = size(rll) in
           let rs' = add-int(1, rlls) in
           let ls' = add-int(1, add-int(rrs, rlrs)) in
-          Bin(add-int(1, rs), rlk, rlx, Bin(rs', k, x, Tip, rll), Bin(ls', rk, rx, rlr, rr)) // +1
+          Bin(add-int(1, rs), rlk, rlx, Bin(rs', k, x, Tip, rll), Bin(ls', rk, rx, rlr, rr))
         }
       }
     }
   - Bin(ls, lk, lx, ll, lr) =>
-    // -1
     match r {
     - Tip =>
-      // -1
       let l = Bin(ls, lk, lx, ll, lr) in
-      Bin(add-int(1, ls), k, x, l, Tip) // +1
+      Bin(add-int(1, ls), k, x, l, Tip)
     - Bin(rs, rk, rx, rl, rr) =>
-      // -2
       if gt-int(rs, mul-int(_delta, ls)) {
         match rl, rr {
         - Bin(rls, rlk, rlx, rll, rlr), Bin(rrs, rrk, rrx, rrl, rrr) =>
-          // -4
           let rlls on rll = size(rll) in
           let rlrs on rlr = size(rlr) in
           let rl = Bin(rls, rlk, rlx, rll, rlr) in
@@ -172,30 +158,30 @@ inline _balance-R<a, b>(k: a, x: b, l: dict(a, b), r: dict(a, b)): dict(a, b) {
           if lt-int(rls, mul-int(_ratio, rrs)) {
             let s' = add-int(1, add-int(ls, rs)) in
             let rs' = add-int(1, add-int(rs, rls)) in
-            Bin(s', rk, rx, Bin(rs', k, x, l, rl), rr) // +1
+            Bin(s', rk, rx, Bin(rs', k, x, l, rl), rr)
           } else {
             let s' = add-int(1, add-int(ls, rs)) in
             let ls' = add-int(1, add-int(ls, rlls)) in
             let rs' = add-int(1, add-int(rrs, rlrs)) in
-            Bin(s', rlk, rlx, Bin(ls', k, x, l, rll), Bin(rs', rk, rx, rlr, rr)) // +2
+            Bin(s', rlk, rlx, Bin(ls', k, x, l, rll), Bin(rs', rk, rx, rlr, rr))
           }
         - _, _ =>
           let tip = core.system.admit(_, "failure in core.dict._balance-L") in
-          Bin(rs, rk, rx, Bin(rs, rk, rx, tip, tip), Bin(rs, rk, rx, tip, tip)) // +1
+          Bin(rs, rk, rx, Bin(rs, rk, rx, tip, tip), Bin(rs, rk, rx, tip, tip))
         }
       } else {
         let s' = add-int(1, add-int(ls, rs)) in
         let l = Bin(ls, lk, lx, ll, lr) in
         let r = Bin(rs, rk, rx, rl, rr) in
-        Bin(s', k, x, l, r) // +1
+        Bin(s', k, x, l, r)
       }
     }
   }
 }
 
-inline insert<k, v>(L: loset(k)): (k, v, dict(k, v)) -> dict(k, v) {
+inline insert<k>(L: loset(k)): <v>(k, v, dict(k, v)) -> dict(k, v) {
   let Loset of {cmp} = L in
-  define self(key-X, val-X, d) {
+  define self<v: tau>(key-X, val-X, d: dict(k, v)): dict(k, v) {
     match d {
     - Tip =>
       singleton(key-X, val-X)
@@ -213,9 +199,9 @@ inline insert<k, v>(L: loset(k)): (k, v, dict(k, v)) -> dict(k, v) {
   }
 }
 
-inline lookup<k, v>(L: loset(k)): (&k, &dict(k, v)) -> ?&v {
+inline lookup<k>(L: loset(k)): <v>(&k, &dict(k, v)) -> ?&v {
   let Loset of {cmp} = L in
-  define self(needle: &k, d: &dict(k, v)) {
+  define self<v>(needle: &k, d: &dict(k, v)): ?&v {
     case d {
     - Tip =>
       none()
@@ -277,8 +263,8 @@ inline _glue<k, v>(d1: dict(k, v), d2: dict(k, v)): dict(k, v) {
   }
 }
 
-inline delete<k, v>(L: loset(k)): (k, dict(k, v)) -> dict(k, v) {
-  define self(needle, d) {
+inline delete<k>(L: loset(k)): <v>(k, dict(k, v)) -> dict(k, v) {
+  define self<v>(needle: k, d: dict(k, v)): dict(k, v) {
     let Loset of {cmp} = L in
     match d {
     - Tip =>
@@ -297,15 +283,15 @@ inline delete<k, v>(L: loset(k)): (k, dict(k, v)) -> dict(k, v) {
   }
 }
 
-data dict-trope(k, v) {
+data dict-trope(k) {
 - Dict-Trope of {
-  - insert: (k, v, dict(k, v)) -> dict(k, v)
-  - lookup: (&k, &dict(k, v)) -> ?&v
-  - delete: (k, dict(k, v)) -> dict(k, v)
+  - insert: <v>(k, v, dict(k, v)) -> dict(k, v)
+  - lookup: <v>(&k, &dict(k, v)) -> ?&v
+  - delete: <v>(k, dict(k, v)) -> dict(k, v)
   }
 }
 
-inline fromLoset<k, v>(_loset: loset(k)): dict-trope(k, v) {
+inline from-loset<k>(_loset: loset(k)): dict-trope(k) {
   Dict-Trope of {
   - insert = insert(_loset)
   - lookup = lookup(_loset)

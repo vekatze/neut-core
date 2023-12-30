@@ -16,7 +16,7 @@ inline _flow-size(): int {
   add-int(mul-int(u, 3), 1)
 }
 
-declare {
+nominal {
 - flow(_: tau): tau
 - attach(a: tau, e: flow(a)): a
 - -await-and-write-result(addr: int): unit
@@ -28,7 +28,8 @@ resource flow-inner {
     let u = Word.size in
     let elem-type = Magic.cast(int, tau, Mem.load-int(add-int(p, u))) in
     let pr: flow(elem-type) = Magic.cast(int, flow(elem-type), p) in
-    let _: elem-type = this.thread.attach(elem-type, pr: flow(elem-type)) in // await * discard
+    // await * discard
+    let _: elem-type = this.thread.attach(elem-type, pr) in
     0
   }
 - (addr: int) => {
@@ -45,7 +46,8 @@ resource flow-inner {
     Mem.store-int(Magic.cast(tau, int, elem-type), add-int(new-addr, u));
     let cloned-value: elem-type = _embody(elem-type, elem-value) in
     Mem.store-int(Magic.cast(elem-type, int, cloned-value), add-int(new-addr, u2));
-    Mem.store-int1(1, add-int(new-addr, u3)); // already finished
+    // already finished
+    Mem.store-int1(1, add-int(new-addr, u3));
     new-addr
   }
 }
@@ -96,7 +98,7 @@ define detach(a: tau, f: () -> a): flow(a) {
   Ext.free(closure);
   let thread-id-pointer = Ext.malloc(u) in
   let thread-create =
-    define naive-loop() {
+    define naive-loop(): unit {
       let result = Ext.thread-create(thread-id-pointer, closure-label, closure-env) in
       if eq-int(result, 0) {
         Unit

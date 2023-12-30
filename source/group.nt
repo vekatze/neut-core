@@ -2,6 +2,7 @@ data group(a) {
 - Group of {
   - one: a
   - mul: (a, a) -> a
-  - div: (a, a) -> a // inv(x) == div(one, x)
+    // inv(x) == div(one, x)
+  - div: (a, a) -> a
   }
 }

@@ -1,7 +1,7 @@
 import {
 - this.bool
 - this.external {free, malloc}
-- this.list {list, loop, repeat, minimum}
+- this.list {list, loop, repeat, minimum, Nil, Cons}
 - this.unit {unit, Unit}
 - this.except {from-option}
 - Int
@@ -42,7 +42,7 @@ define _copy-vector-content(source-pointer: int, target-pointer: int, elem-type:
   }
 }
 
-declare {
+nominal {
 - vector-internal: tau
 }
 
@@ -99,9 +99,9 @@ define new<a>(base-list: list(a)): vector(a) {
   let store-values =
     define self(values: list(a), index: int): unit {
       match values {
-      - [] =>
+      - Nil =>
         Unit
-      - v :: rest =>
+      - Cons(v, rest) =>
         Mem.store-int(Magic.cast(a, int, v), add-int(ptr3, mul-int(index, word-size)));
         self(rest, add-int(index, 1))
       }
@@ -133,13 +133,13 @@ define size<a>(xs: &vector(a)): int {
   sub-int(to, from)
 }
 
-inline for-each<a>(xs: &vector(a), f: a -> unit): unit {
+inline for-each<a>(xs: &vector(a), f: (a) -> unit): unit {
   loop(size(xs), (i) => {
     f(access(xs, i))
   })
 }
 
-inline for<a, b>(xs: &vector(a), f: a -> b): vector(b) {
+inline for<a, b>(xs: &vector(a), f: (a) -> b): vector(b) {
   new of {
   - base-list =
     repeat(size(xs), (i) => {
@@ -155,7 +155,7 @@ inline fold-LN<elem-type, result-type> of {
 }: result-type {
   let sz = size(xs) in
   let helper =
-    define loop(cursor: int, acc, xs) {
+    define loop(cursor: int, acc, xs): _ {
       if eq-int(cursor, sz) {
         acc
       } else {
@@ -174,13 +174,13 @@ define zip-with<a, b, c>(xs: &vector(a), ys: &vector(b), f: (a, b) -> c): vector
   let len-or-none = min-func([len1, len2]) in
   let len = from-option(0, len-or-none) in
   let zip-with-helper =
-    define self(cursor: int) {
+    define self(cursor: int): _ {
       if eq-int(cursor, len) {
         []
       } else {
         let val1 = access(xs, cursor) in
         let val2 = access(ys, cursor) in
-        f(val1, val2) :: self(add-int(cursor, 1))
+        Cons(f(val1, val2), self(add-int(cursor, 1)))
       }
     }
   in

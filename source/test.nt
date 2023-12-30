@@ -4,7 +4,7 @@ import {
 - this.list {list}
 }
 
-constant my-bool {
+constant my-bool: tau {
   this.bool.bool
 }
 

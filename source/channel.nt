@@ -1,7 +1,7 @@
 import {
 - this.except {Pass, Fail}
 - this.int {sum-int}
-- this.pair
+- this.pair {Pair}
 - this.unit {unit}
 - Q
 - Ext
@@ -15,7 +15,7 @@ inline -get-clone(a: tau, x: &a): a {
   *x
 }
 
-declare {
+nominal {
 - -channel: tau
 }
 
@@ -62,7 +62,6 @@ resource -channel {
   }
 }
 
-
 inline new-channel<a>(): channel(a) {
   -new(a, Q.empty())
 }
@@ -84,7 +83,7 @@ define send<a>(ch: &channel(a), x: a): unit {
 define -receive-from-channel(a: tau, ch: int, mutex-ptr: int): a {
   let q: Q.queue(a) = Magic.cast(int, Q.queue(a), Mem.load-int(ch)) in
   match Q.dequeue(q) {
-  - Pass(Tuple(v, q)) =>
+  - Pass(Pair(v, q)) =>
     Mem.store-int(Magic.cast(Q.queue(a), int, q), ch);
     Ext.thread-mutex-unlock(mutex-ptr);
     v

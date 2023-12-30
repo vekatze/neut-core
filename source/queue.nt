@@ -2,7 +2,7 @@ import {
 - this.bool {bool, True, False}
 - this.except {Pass, none}
 - this.list {list, Nil, Cons, length}
-- this.pair
+- this.pair {pair, Pair}
 - this.unit
 }
 
@@ -15,13 +15,13 @@ define empty<a>(): queue(a) {
   Queue([], [])
 }
 
-define dequeue<a>(q: queue(a)): ?tuple(a, queue(a)) {
+define dequeue<a>(q: queue(a)): ?pair(a, queue(a)) {
   let Queue(ls, rs) = q in
   match ls, rs {
   - Nil, Nil =>
     none()
   - Cons(l, ls-rest), rs =>
-    Pass(Tuple(l, Queue(ls-rest, rs)))
+    Pass(Pair(l, Queue(ls-rest, rs)))
   - Nil, rs =>
     dequeue(Queue(rs, []))
   }
@@ -29,7 +29,7 @@ define dequeue<a>(q: queue(a)): ?tuple(a, queue(a)) {
 
 define enqueue<a>(x: a, q: queue(a)): queue(a) {
   let Queue(ls, rs) = q in
-  Queue(ls, x :: rs)
+  Queue(ls, Cons(x, rs))
 }
 
 define size<a>(q: &queue(a)): int {

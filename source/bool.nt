@@ -34,3 +34,7 @@ define not(b: bool): bool {
     True
   }
 }
+
+define imply(b1: bool, b2: bool): bool {
+  or(not(b1), b2)
+}

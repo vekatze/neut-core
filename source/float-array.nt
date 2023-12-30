@@ -2,8 +2,8 @@ import {
 - this.bool
 - this.except {from-option, Pass, none}
 - this.external {free, malloc}
-- this.list {list, minimum}
-- this.pair
+- this.list {list, minimum, Nil, Cons}
+- this.pair {pair, Pair}
 - this.unit {unit, Unit}
 - Int
 - Magic
@@ -59,9 +59,9 @@ define new(xs: list(float)): float-array {
   let store-values =
     define self(values: list(float), index: int): unit {
       match values {
-      - [] =>
+      - Nil =>
         Unit
-      - v :: rest =>
+      - Cons(v, rest) =>
         Mem.store-float(v, add-int(content-pointer, mul-int(u, index)));
         self(rest, add-int(index, 1))
       }
@@ -97,13 +97,13 @@ define tail(xs: float-array): float-array {
 }
 
 // O(1)
-define uncons(xs: float-array): ?tuple(float, float-array) {
+define uncons(xs: float-array): ?pair(float, float-array) {
   let len on xs = this.float-array.length(xs) in
   if eq-int(len, 0) {
     none()
   } else {
     let head-content on xs = access(xs, 0) in
-    Pass(Tuple(head-content, tail(xs)))
+    Pass(Pair(head-content, tail(xs)))
   }
 }
 
@@ -115,14 +115,14 @@ define swap(xs: float-array, i: int, j: int): float-array {
   store(xs, j, v1)
 }
 
-define for-each(xs: &float-array, f: float -> unit): unit {
+define for-each(xs: &float-array, f: (float) -> unit): unit {
   let ptr = Magic.cast(&float-array, int, xs) in
   let u = Word.size in
   let from = Mem.load-int(ptr) in
   let to = Mem.load-int(add-int(ptr, u)) in
   let len = sub-int(to, from) in
   let for-each-helper =
-    define self(cursor: int) {
+    define self(cursor: int): unit {
       if eq-int(cursor, len) {
         Unit
       } else {
@@ -141,13 +141,13 @@ define zip-with(f: (float, float) -> float, xs: &float-array, ys: &float-array):
   let len-or-none = minimum(Int.as-loset)([len1, len2]) in
   let len = from-option(0, len-or-none) in
   let zip-with-helper =
-    define self(cursor: int) {
+    define self(cursor: int): list(float) {
       if eq-int(cursor, len) {
         []
       } else {
         let val1 = access(xs, cursor) in
         let val2 = access(ys, cursor) in
-        f(val1, val2) :: self(add-int(cursor, 1))
+        Cons(f(val1, val2), self(add-int(cursor, 1)))
       }
     }
   in

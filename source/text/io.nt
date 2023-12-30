@@ -60,7 +60,8 @@ define read-file(f: FD.descriptor, buffer-size: int, max-read-size: int): system
 }
 
 define read(f: FD.descriptor): system(text) {
-  let buffer-size = shl-int(1, 16) in // for now
+  // for now
+  let buffer-size = shl-int(1, 16) in
   let size = Ext.lseek(f, 0, Seek.interpret(Seek.END)) in
   let _ = Ext.lseek(f, 0, Seek.interpret(Seek.SET)) in
   read-file(f, buffer-size, size)
@@ -70,7 +71,7 @@ define print(t: &text): unit {
   let fmt = unsafe-get-content-pointer("%.*s\0") in
   let len = text-byte-length(t) in
   let val = unsafe-get-content-pointer(t) in
-  magic external(printf, fmt; len int, val pointer)
+  magic external printf(fmt)(len: int, val: pointer)
 }
 
 define _get-line-inner(ptr: int, ptr-size: int, current-index: int, buffer-size: int): system(text) {
@@ -111,24 +112,24 @@ define print-line(t: &text): unit {
   let fmt = unsafe-get-content-pointer("%.*s\n\0") in
   let len = text-byte-length(t) in
   let val = unsafe-get-content-pointer(t) in
-  magic external(printf, fmt; len int, val pointer)
+  magic external printf(fmt)(len: int, val: pointer)
 }
 
 define print-float(x: float): unit {
   let fmt = unsafe-get-content-pointer("%lf\0") in
-  magic external(printf, fmt; x float)
+  magic external printf(fmt)(x: float)
 }
 
 define print-int(x: int): unit {
   let fmt = unsafe-get-content-pointer("%ld\0") in
-  magic external(printf, fmt; x int)
+  magic external printf(fmt)(x: int)
 }
 
 define fflush(ptr: int): unit {
-  magic external(fflush, ptr)
+  magic external fflush(ptr)
 }
 
 define fflush-all(): unit {
   let zero: int = 0 in
-  magic external(fflush, zero)
+  magic external fflush(zero)
 }

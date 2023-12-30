@@ -1,6 +1,6 @@
 import {
 - this.bool
-- this.list {list}
+- this.list {list, Nil, Cons}
 - this.ring {ring, Ring}
 - this.monoid {monoid, from-group}
 - this.group {group, Group}
@@ -14,9 +14,9 @@ define sum-int(xs: list(int)): int {
   let f =
     define loop(ys: list(int), acc: int): int {
       match ys {
-      - [] =>
+      - Nil =>
         acc
-      - z :: zs =>
+      - Cons(z, zs) =>
         loop(zs, add-int(z, acc))
       }
     }

@@ -36,8 +36,8 @@ resource int8-array {
   }
 }
 
-define int8-array-length(xs: int8-array): int {
-  let source-pointer = magic cast(int8-array, int, xs) in
+define int8-array-length(xs: &int8-array): int {
+  let source-pointer = magic cast(&int8-array, int, xs) in
   let u = Word.size in
   let from = Mem.load-int(source-pointer) in
   let to = Mem.load-int(add-int(source-pointer, u)) in

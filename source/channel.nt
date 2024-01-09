@@ -1,26 +1,26 @@
 import {
-- this.except {Pass, Fail}
-- this.int {sum-int}
-- this.pair {Pair}
-- this.unit {unit}
-- Q
 - Ext
 - List
 - Magic
 - Mem
+- Q
 - Word
+- this.except {Fail, Pass}
+- this.int {sum-int}
+- this.pair {Pair}
+- this.unit {unit}
 }
 
-inline -get-clone(a: tau, x: &a): a {
+inline _get-clone(a: tau, x: &a): a {
   *x
 }
 
 nominal {
-- -channel: tau
+- _channel: tau
 }
 
 define channel(_: tau): tau {
-  -channel
+  _channel
 }
 
 define -new(a: tau, q: Q.queue(a)): channel(a) {
@@ -36,7 +36,7 @@ define -new(a: tau, q: Q.queue(a)): channel(a) {
 }
 
 // (queue, mutex, cond, queue-elem-type)
-resource -channel {
+resource _channel {
 - (ch: int) => {
     let u = Word.size in
     let mutex-size = Ext.thread-mutex-size() in
@@ -57,7 +57,7 @@ resource -channel {
     let type-offset = add-int(u, add-int(mutex-size, cond-size)) in
     let a = Magic.cast(int, tau, Mem.load-int(add-int(ch, type-offset))) in
     let q: &Q.queue(a) = Magic.cast(int, &Q.queue(a), Mem.load-int(ch)) in
-    let q-clone: Q.queue(a) = -get-clone(Q.queue(a), q) in
+    let q-clone: Q.queue(a) = _get-clone(Q.queue(a), q) in
     Magic.cast(channel(a), int, -new(a, q-clone))
   }
 }

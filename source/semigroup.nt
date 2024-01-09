@@ -1,5 +1,5 @@
 import {
-- this.monoid {monoid, Monoid}
+- this.monoid {Monoid, monoid}
 }
 
 data semigroup(a) {

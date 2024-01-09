@@ -1,6 +1,6 @@
 import {
 - this.except {Pass}
-- this.loset {loset, Loset}
+- this.loset {Loset, loset}
 - this.order {order}
 - this.unit
 }

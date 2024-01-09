@@ -1,20 +1,15 @@
 import {
-- this.bool {or}
-- this.errno {system, report-system-error}
-- this.except {none, Pass, Fail}
-- this.text {text, unsafe-get-content-pointer, text-byte-length}
-- this.unit {unit}
-- FD
 - Ext
+- FD
 - Magic
 - Mem
 - Seek
 - Word
-}
-
-foreign {
-- printf(pointer): void
-- fflush(pointer): void
+- this.bool {or}
+- this.errno {report-system-error, system}
+- this.except {Fail, Pass, none}
+- this.text {text, text-byte-length, unsafe-get-content-pointer}
+- this.unit {unit}
 }
 
 define write(t: &text, f: FD.descriptor): system(int) {
@@ -41,6 +36,11 @@ define _read-loop(f: FD.descriptor, content-ptr: int, buffer-size: int, max-read
   } else {
     _read-loop(f, add-int(content-ptr, bytes), buffer-size, max-read-size, add-int(acc, bytes))
   }
+}
+
+foreign {
+- printf(pointer): void
+- fflush(pointer): void
 }
 
 define read-file(f: FD.descriptor, buffer-size: int, max-read-size: int): system(text) {

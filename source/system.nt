@@ -1,12 +1,12 @@
 import {
+- Word
 - this.bool {bool}
 - this.external {exit}
-- this.list {list, Cons}
+- this.list {Cons, list}
 - this.memory {load-int}
 - this.text {text, unsafe-from-c-string}
 - this.text.io {print}
-- this.unit {unit, Unit}
-- Word
+- this.unit {Unit, unit}
 }
 
 inline admit(a: tau, t: &text): a {

@@ -1,7 +1,7 @@
 import {
-- this.channel {channel, new-channel, send, receive}
-- this.unit {unit}
 - Magic
+- this.channel {channel, new-channel, receive, send}
+- this.unit {unit}
 }
 
 define cell(a: tau): tau {

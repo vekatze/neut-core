@@ -1,12 +1,12 @@
 import {
-- this.bool
-- this.int8-array {int8-array, int8-array-new, unsafe-copy-int8-array, int8-array-length}
-- this.unit {unit, Unit}
-- L
 - Ext
+- L
 - Magic
 - Mem
 - Word
+- this.bool
+- this.int8-array {int8-array, int8-array-length, int8-array-new, unsafe-copy-int8-array}
+- this.unit {Unit, unit}
 }
 
 data text {

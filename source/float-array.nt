@@ -1,14 +1,14 @@
 import {
-- this.bool
-- this.except {from-option, Pass, none}
-- this.external {free, malloc}
-- this.list {list, minimum, Nil, Cons}
-- this.pair {pair, Pair}
-- this.unit {unit, Unit}
 - Int
 - Magic
 - Mem
 - Word
+- this.bool
+- this.except {Pass, from-option, none}
+- this.external {free, malloc}
+- this.list {Cons, Nil, list, minimum}
+- this.pair {Pair, pair}
+- this.unit {Unit, unit}
 }
 
 define unsafe-copy-float-array(source-pointer: int, target-pointer: int, index: int, from: int, to: int): unit {

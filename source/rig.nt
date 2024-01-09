@@ -1,6 +1,6 @@
 import {
-- this.field {field, Field}
-- this.ring {ring, Ring}
+- this.field {Field, field}
+- this.ring {Ring, ring}
 }
 
 data rig(a) {

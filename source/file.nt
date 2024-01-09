@@ -1,14 +1,14 @@
 import {
+- Ext
+- FD
+- FF
+- FM
 - this.bool
 - this.errno {errno, get-system-error, report-system-error, system}
 - this.except {Pass}
 - this.list {list}
 - this.text {text, unsafe-get-content-pointer}
-- this.unit {unit, Unit}
-- FF
-- FM
-- FD
-- Ext
+- this.unit {Unit, unit}
 }
 
 define open(path: &text, xs: list(FF.flag), ms: list(FM.mode)): system(FD.descriptor) {

@@ -1,11 +1,11 @@
 import {
-- this.bool
-- this.external {free, malloc}
-- this.list {list, length, Nil, Cons}
-- this.unit {unit, Unit}
+- Magic
 - Mem
 - Word
-- Magic
+- this.bool
+- this.external {free, malloc}
+- this.list {Cons, Nil, length, list}
+- this.unit {Unit, unit}
 }
 
 define unsafe-copy-int8-array(source-pointer: int, target-pointer: int, index: int, from: int, to: int): unit {

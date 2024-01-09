@@ -1,5 +1,5 @@
 import {
-- this.except {except, Fail}
+- this.except {Fail, except}
 - this.external {errno-location}
 - this.memory {load-int32}
 }

@@ -1,11 +1,11 @@
 import {
-- core.order {LT, GT, EQ}
-- core.text
+- Lo {Loset, loset}
 - core.bool
-- core.unit
-- core.except {none, Pass}
+- core.except {Pass, none}
+- core.order {EQ, GT, LT}
 - core.system
-- Lo {loset, Loset}
+- core.text
+- core.unit
 }
 
 // size balanced tree

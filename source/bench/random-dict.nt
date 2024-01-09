@@ -1,12 +1,12 @@
 import {
+- Dict {Dict-Trope, dict, dict-trope, empty, from-loset, insert}
+- TIO
 - this.control {loop}
-- this.except {Pass, Fail}
+- this.except {Fail, Pass}
 - this.int {as-loset}
 - this.loset {loset}
 - this.random {random}
-- this.unit {unit, Unit}
-- Dict {dict, empty, insert, dict-trope, from-loset, Dict-Trope}
-- TIO
+- this.unit {Unit, unit}
 }
 
 constant L: loset(int) {

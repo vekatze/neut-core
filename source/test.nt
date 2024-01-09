@@ -1,7 +1,7 @@
 import {
-- this.unit {unit, Unit}
 - this.bool {True}
 - this.list {list}
+- this.unit {Unit, unit}
 }
 
 constant my-bool: tau {

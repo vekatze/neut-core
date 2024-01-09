@@ -87,6 +87,9 @@
       "uncons"
       "unzip"
     ]
+    null [
+      "null"
+    ]
     pair [
       "Pair"
       "pair"
@@ -117,9 +120,6 @@
     unit [
       "Unit"
       "unit"
-    ]
-    void [
-      "void"
     ]
   }
   target {

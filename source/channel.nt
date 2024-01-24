@@ -37,7 +37,7 @@ define -new(a: tau, q: Q.queue(a)): channel(a) {
 
 // (queue, mutex, cond, queue-elem-type)
 resource _channel {
-- (ch: int) -> {
+- (ch: int) => {
     let u = Word.size in
     let mutex-size = Ext.thread-mutex-size() in
     let cond-size = Ext.thread-cond-size() in
@@ -50,7 +50,7 @@ resource _channel {
     Ext.free(ch);
     0
   }
-- (ch: int) -> {
+- (ch: int) => {
     let u = Word.size in
     let mutex-size = Ext.thread-mutex-size() in
     let cond-size = Ext.thread-cond-size() in
@@ -83,11 +83,11 @@ define send<a>(ch: &channel(a), x: a): unit {
 define -receive-from-channel(a: tau, ch: int, mutex-ptr: int): a {
   let q: Q.queue(a) = Magic.cast(int, Q.queue(a), Mem.load-int(ch)) in
   match Q.dequeue(q) {
-  - Pass(Pair(v, q)) ->
+  - Pass(Pair(v, q)) =>
     Mem.store-int(Magic.cast(Q.queue(a), int, q), ch);
     Ext.thread-mutex-unlock(mutex-ptr);
     v
-  - Fail(_) ->
+  - Fail(_) =>
     Mem.store-int(Magic.cast(Q.queue(int), int, Q.empty()), ch);
     let u = Word.size in
     let mutex-size = Ext.thread-mutex-size() in

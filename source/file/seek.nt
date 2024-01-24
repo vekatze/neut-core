@@ -7,11 +7,11 @@ data seek {
 
 define interpret(s: seek): int {
   match s {
-  - SET ->
+  - SET =>
     0
-  - CUR ->
+  - CUR =>
     1
-  - END ->
+  - END =>
     2
   }
 }

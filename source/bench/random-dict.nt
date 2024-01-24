@@ -23,7 +23,7 @@ constant int-dict-trope: dict-trope(int) {
 
 define make-big-dict(): dict(int, int) {
   use int-dict-trope {insert} in
-  loop(700000, empty(), (acc, _) -> {
+  loop(700000, empty(), (acc, _) => {
     let key = random(1000000) in
     let val = random(1000000) in
     insert(key, val, acc)
@@ -33,13 +33,13 @@ define make-big-dict(): dict(int, int) {
 define random-lookup-sum(d: &dict(int, int)): unit {
   use int-dict-trope {lookup} in
   let rsum =
-    loop(700000, 0, (acc, _) -> {
+    loop(700000, 0, (acc, _) => {
       let key = random(1000000) in
       let val on key =
         match lookup(key, d) {
-        - Fail(_) ->
+        - Fail(_) =>
           0
-        - Pass(v) ->
+        - Pass(v) =>
           *v
         }
       in

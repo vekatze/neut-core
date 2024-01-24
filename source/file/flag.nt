@@ -12,39 +12,39 @@ data flag {
 
 define _interpret-flag(flag: flag): int {
   introspect os {
-  - darwin ->
+  - darwin =>
     // https://github.com/apple/darwin-xnu/blob/main/bsd/sys/fcntl.h
     match flag {
-    - R ->
+    - R =>
       0x0000
-    - W ->
+    - W =>
       0x0001
-    - RW ->
+    - RW =>
       0x0002
-    - Create ->
+    - Create =>
       0x0200
-    - Append ->
+    - Append =>
       0x0008
     }
-  - linux ->
+  - linux =>
     // https://github.com/torvalds/linux/blob/master/import/uapi/asm-generic/fcntl.h
     match flag {
-    - R ->
+    - R =>
       0o00000000
-    - W ->
+    - W =>
       0o00000001
-    - RW ->
+    - RW =>
       0o00000002
-    - Create ->
+    - Create =>
       0o00000100
-    - Append ->
+    - Append =>
       0o00002000
     }
   }
 }
 
 define interpret(xs: list(flag)): int {
-  fold-left(0, xs, (acc, x) -> {
+  fold-left(0, xs, (acc, x) => {
     or-int(acc, _interpret-flag(x))
   })
 }

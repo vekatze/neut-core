@@ -23,10 +23,10 @@ define unsafe-copy-float-array(source-pointer: int, target-pointer: int, index: 
 }
 
 resource float-array {
-- (x: int) -> {
+- (x: int) => {
     Magic.cast(unit, int, free(x))
   }
-- (source-pointer: int) -> {
+- (source-pointer: int) => {
     let u = Word.size in
     let u2 = mul-int(u, 2) in
     let from = Mem.load-int(source-pointer) in
@@ -59,9 +59,9 @@ define new(xs: list(float)): float-array {
   let store-values =
     define self(values: list(float), index: int): unit {
       match values {
-      - Nil ->
+      - Nil =>
         Unit
-      - Cons(v, rest) ->
+      - Cons(v, rest) =>
         Mem.store-float(v, add-int(content-pointer, mul-int(u, index)));
         self(rest, add-int(index, 1))
       }
@@ -115,7 +115,7 @@ define swap(xs: float-array, i: int, j: int): float-array {
   store(xs, j, v1)
 }
 
-define for-each(xs: &float-array, f: arrow (float) -> unit): unit {
+define for-each(xs: &float-array, f: arrow (float) => unit): unit {
   let ptr = Magic.cast(&float-array, int, xs) in
   let u = Word.size in
   let from = Mem.load-int(ptr) in
@@ -135,7 +135,7 @@ define for-each(xs: &float-array, f: arrow (float) -> unit): unit {
   for-each-helper(0)
 }
 
-define zip-with(f: arrow (float, float) -> float, xs: &float-array, ys: &float-array): float-array {
+define zip-with(f: arrow (float, float) => float, xs: &float-array, ys: &float-array): float-array {
   let len1 = this.float-array.length(xs) in
   let len2 = this.float-array.length(ys) in
   let len-or-none = minimum(Int.as-loset)([len1, len2]) in

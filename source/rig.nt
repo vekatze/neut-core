@@ -6,9 +6,9 @@ import {
 data rig(a) {
 - Rig of {
   - zero: a
-  - add: arrow (a, a) -> a
+  - add: arrow (a, a) => a
   - one: a
-  - mul: arrow (a, a) -> a
+  - mul: arrow (a, a) => a
   }
 }
 

@@ -120,7 +120,7 @@ define sigmoid(x: float): float {
 constant as-loset: loset(float) {
   Loset of {
   - cmp =
-    (x, y) -> {
+    (x, y) => {
       if gt-float(*x, *y) {
         GT
       } else-if lt-float(*x, *y) {

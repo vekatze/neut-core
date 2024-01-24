@@ -14,9 +14,9 @@ define sum-int(xs: list(int)): int {
   let f =
     define loop(ys: list(int), acc: int): int {
       match ys {
-      - Nil ->
+      - Nil =>
         acc
-      - Cons(z, zs) ->
+      - Cons(z, zs) =>
         loop(zs, add-int(z, acc))
       }
     }
@@ -53,7 +53,7 @@ constant as-monoid: monoid(int) {
 constant as-loset: loset(int) {
   Loset of {
   - cmp =
-    (x, y) -> {
+    (x, y) => {
       if gt-int(*x, *y) {
         GT
       } else-if lt-int(*x, *y) {

@@ -7,7 +7,7 @@ import {
 
 data poset(a) {
 - Poset of {
-  - cmp: arrow (&a, &a) -> ?order
+  - cmp: arrow (&a, &a) => ?order
   }
 }
 
@@ -15,7 +15,7 @@ inline from-loset<a>(_loset: loset(a)): poset(a) {
   let Loset of {cmp} = _loset in
   Poset of {
   - cmp =
-    (x, y) -> {
+    (x, y) => {
       Pass(cmp(x, y))
     }
   }

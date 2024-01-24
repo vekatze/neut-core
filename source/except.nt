@@ -13,9 +13,9 @@ inline none<a>(): ?a {
 
 define from-option<a>(x: a, my: ?a): a {
   match my {
-  - Pass(y) ->
+  - Pass(y) =>
     y
-  - Fail(_) ->
+  - Fail(_) =>
     x
   }
 }

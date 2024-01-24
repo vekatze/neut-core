@@ -23,7 +23,7 @@ nominal {
 }
 
 resource flow-inner {
-- (p: int) => {
+- (p: int) -> {
     // tio.print("[warning] awaiting a flow to discard it\n")
     let u = Word.size in
     let elem-type = Magic.cast(int, tau, Mem.load-int(add-int(p, u))) in
@@ -32,7 +32,7 @@ resource flow-inner {
     let _: elem-type = this.thread.attach(elem-type, pr) in
     0
   }
-- (addr: int) => {
+- (addr: int) -> {
     // tio.print("[warning] awaiting a flow to copy it\n")
     let u = Word.size in
     let u2 = mul-int(u, 2) in
@@ -83,16 +83,16 @@ define _await-and-write-result(addr: int): unit {
 }
 
 // (thread-id, result-type, result-value, finished-flag): flow(result-type)
-define detach(a: tau, f: () -> a): flow(a) {
+define detach(a: tau, f: arrow () -> a): flow(a) {
   let thread-func =
-    () => {
+    () -> {
       Ext.thread-exit(Magic.cast(a, int, f()))
     }
   in
   let u = Word.size in
   let u2 = mul-int(u, 2) in
   let u3 = mul-int(u, 3) in
-  let closure = Magic.cast(() -> unit, int, thread-func) in
+  let closure = Magic.cast(arrow () -> unit, int, thread-func) in
   let closure-env = Mem.load-int(add-int(closure, u)) in
   let closure-label = Mem.load-int(add-int(closure, u2)) in
   Ext.free(closure);

@@ -18,11 +18,11 @@ define empty<a>(): queue(a) {
 define dequeue<a>(q: queue(a)): ?pair(a, queue(a)) {
   let Queue(ls, rs) = q in
   match ls, rs {
-  - Nil, Nil =>
+  - Nil, Nil ->
     none()
-  - Cons(l, ls-rest), rs =>
+  - Cons(l, ls-rest), rs ->
     Pass(Pair(l, Queue(ls-rest, rs)))
-  - Nil, rs =>
+  - Nil, rs ->
     dequeue(Queue(rs, []))
   }
 }
@@ -34,7 +34,7 @@ define enqueue<a>(x: a, q: queue(a)): queue(a) {
 
 define size<a>(q: &queue(a)): int {
   case q {
-  - Queue(ls, rs) =>
+  - Queue(ls, rs) ->
     let l1 = length(ls) in
     let l2 = length(rs) in
     add-int(l1, l2)
@@ -43,9 +43,9 @@ define size<a>(q: &queue(a)): int {
 
 define is-empty<a>(q: &queue(a)): bool {
   case q {
-  - Queue([], []) =>
+  - Queue([], []) ->
     True
-  - _ =>
+  - _ ->
     False
   }
 }

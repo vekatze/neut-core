@@ -23,3 +23,7 @@ define increment(x: int): int {
 define main(): unit {
   Unit
 }
+
+define zen(): unit {
+  Unit
+}

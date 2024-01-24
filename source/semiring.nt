@@ -5,8 +5,8 @@ import {
 
 data semiring(a) {
 - Semiring of {
-  - add: (a, a) -> a
-  - mul: (a, a) -> a
+  - add: arrow (a, a) -> a
+  - mul: arrow (a, a) -> a
   }
 }
 

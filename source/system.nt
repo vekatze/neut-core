@@ -2,10 +2,11 @@ import {
 - Word
 - this.bool {bool}
 - this.external {exit}
-- this.list {Cons, list}
+- this.list {Cons, for, for-each, list}
 - this.memory {load-int}
 - this.text {text, unsafe-from-c-string}
 - this.text.io {print}
+- this.thread {flow}
 - this.unit {Unit, unit}
 }
 
@@ -14,7 +15,7 @@ inline admit(a: tau, t: &text): a {
   exit(1)
 }
 
-define _assert(message: &text, check: () -> bool): unit {
+define _assert(message: &text, check: arrow () -> bool): unit {
   if check() {
     Unit
   } else {
@@ -23,15 +24,27 @@ define _assert(message: &text, check: () -> bool): unit {
   }
 }
 
-inline assert(message: &text, check: () -> bool): unit {
+inline assert(message: &text, check: arrow () -> bool): unit {
   introspect build-mode {
-  - release =>
+  - release ->
     let _ = check in
     let _ = message in
     Unit
-  - default =>
+  - default ->
     _assert(message, check)
   }
+}
+
+inline parallel-test(tests: list(arrow () -> arrow () -> unit)): unit {
+  let flow-list =
+    for-each(tests, (testFunc: arrow () -> arrow () -> unit) -> {
+      detach {testFunc()}
+    })
+  in
+  for(flow-list, (f: flow(arrow () -> unit)) -> {
+    let result = attach {f} in
+    result()
+  })
 }
 
 define get-argc(): int {

@@ -50,10 +50,10 @@ define read-file(f: FD.descriptor, buffer-size: int, max-read-size: int): system
   let content-ptr = add-int(ptr, mul-int(u, 2)) in
   let read-size = _read-loop(f, content-ptr, buffer-size, max-read-size, 0) in
   match read-size {
-  - Pass(size) =>
+  - Pass(size) ->
     Mem.store-int(size, add-int(ptr, u));
     Pass(Magic.cast(int, text, ptr))
-  - Fail(_) =>
+  - Fail(_) ->
     Ext.free(ptr);
     report-system-error()
   }

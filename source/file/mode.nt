@@ -16,55 +16,55 @@ data mode {
 
 define interpret-mode(flag: mode): int {
   introspect os {
-  - darwin =>
+  - darwin ->
     // https://github.com/apple/darwin-xnu/blob/main/bsd/sys/fcntl.h
     match flag {
-    - Owner-R =>
+    - Owner-R ->
       0o400
-    - Owner-W =>
+    - Owner-W ->
       0o200
-    - Owner-X =>
+    - Owner-X ->
       0o100
-    - Group-R =>
+    - Group-R ->
       0o40
-    - Group-W =>
+    - Group-W ->
       0o20
-    - Group-X =>
+    - Group-X ->
       0o10
-    - Other-R =>
+    - Other-R ->
       0o4
-    - Other-W =>
+    - Other-W ->
       0o2
-    - Other-X =>
+    - Other-X ->
       0o1
     }
-  - linux =>
+  - linux ->
     // https://github.com/torvalds/linux/blob/master/import/uapi/linux/stat.h
     match flag {
-    - Owner-R =>
+    - Owner-R ->
       0o400
-    - Owner-W =>
+    - Owner-W ->
       0o200
-    - Owner-X =>
+    - Owner-X ->
       0o100
-    - Group-R =>
+    - Group-R ->
       0o40
-    - Group-W =>
+    - Group-W ->
       0o20
-    - Group-X =>
+    - Group-X ->
       0o10
-    - Other-R =>
+    - Other-R ->
       0o4
-    - Other-W =>
+    - Other-W ->
       0o2
-    - Other-X =>
+    - Other-X ->
       0o1
     }
   }
 }
 
 define interpret(xs: list(mode)): int {
-  fold-left(0, xs, (acc, x) => {
+  fold-left(0, xs, (acc, x) -> {
     or-int(acc, interpret-mode(x))
   })
 }

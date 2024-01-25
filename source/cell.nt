@@ -14,13 +14,13 @@ define new-cell<a>(x: a): cell(a) {
   Magic.cast(channel(a), cell(a), ch)
 }
 
-define mutate<a>(ch: &cell(a), f: arrow (a) => a): unit {
+define mutate<a>(ch: &cell(a), f: arrow (a) -> a): unit {
   let ch = Magic.cast(&cell(a), &channel(a), ch) in
   let v = receive(ch) in
   send(ch, f(v))
 }
 
-define borrow<a>(ch: &cell(a), f: arrow (&a) => unit): unit {
+define borrow<a>(ch: &cell(a), f: arrow (&a) -> unit): unit {
   let ch = Magic.cast(&cell(a), &channel(a), ch) in
   let v = receive(ch) in
   let _ on v = f(v) in

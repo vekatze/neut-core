@@ -179,7 +179,7 @@ inline _balance-R<a, b>(k: a, x: b, l: dict(a, b), r: dict(a, b)): dict(a, b) {
   }
 }
 
-inline insert<k>(L: loset(k)): arrow <v>(k, v, dict(k, v)) => dict(k, v) {
+inline insert<k>(L: loset(k)): arrow <v>(k, v, dict(k, v)) -> dict(k, v) {
   let Loset of {cmp} = L in
   define self<v: tau>(key-X, val-X, d: dict(k, v)): dict(k, v) {
     match d {
@@ -199,7 +199,7 @@ inline insert<k>(L: loset(k)): arrow <v>(k, v, dict(k, v)) => dict(k, v) {
   }
 }
 
-inline lookup<k>(L: loset(k)): arrow <v>(&k, &dict(k, v)) => ?&v {
+inline lookup<k>(L: loset(k)): arrow <v>(&k, &dict(k, v)) -> ?&v {
   let Loset of {cmp} = L in
   define self<v>(needle: &k, d: &dict(k, v)): ?&v {
     case d {
@@ -263,7 +263,7 @@ inline _glue<k, v>(d1: dict(k, v), d2: dict(k, v)): dict(k, v) {
   }
 }
 
-inline delete<k>(L: loset(k)): arrow <v>(k, dict(k, v)) => dict(k, v) {
+inline delete<k>(L: loset(k)): arrow <v>(k, dict(k, v)) -> dict(k, v) {
   define self<v>(needle: k, d: dict(k, v)): dict(k, v) {
     let Loset of {cmp} = L in
     match d {
@@ -285,9 +285,9 @@ inline delete<k>(L: loset(k)): arrow <v>(k, dict(k, v)) => dict(k, v) {
 
 data dict-trope(k) {
 - Dict-Trope of {
-  - insert: arrow <v>(k, v, dict(k, v)) => dict(k, v)
-  - lookup: arrow <v>(&k, &dict(k, v)) => ?&v
-  - delete: arrow <v>(k, dict(k, v)) => dict(k, v)
+  - insert: arrow <v>(k, v, dict(k, v)) -> dict(k, v)
+  - lookup: arrow <v>(&k, &dict(k, v)) -> ?&v
+  - delete: arrow <v>(k, dict(k, v)) -> dict(k, v)
   }
 }
 

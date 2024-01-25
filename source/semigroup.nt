@@ -4,7 +4,7 @@ import {
 
 data semigroup(a) {
 - Semigroup of {
-  - op: arrow (a, a) => a
+  - op: arrow (a, a) -> a
   }
 }
 

@@ -23,7 +23,7 @@ define open(path: &text, xs: list(FF.flag), ms: list(FM.mode)): system(FD.descri
   }
 }
 
-define close(f: FD.descriptor, on-failure: arrow (errno) => unit): unit {
+define close(f: FD.descriptor, on-failure: arrow (errno) -> unit): unit {
   let result = Ext.close(f) in
   if eq-int(result, 0) {
     Unit

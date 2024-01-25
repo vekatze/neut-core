@@ -19,7 +19,7 @@ data list(a: tau) {
 inline fold-left<elem-type, result-type> of {
 - acc: result-type
 - xs: list(elem-type)
-- consumer: arrow (result-type, elem-type) => result-type
+- consumer: arrow (result-type, elem-type) -> result-type
 }: result-type {
   let helper =
     define loop(acc, xs): result-type {
@@ -37,7 +37,7 @@ inline fold-left<elem-type, result-type> of {
 inline fold-left-noetic<elem-type, result-type> of {
 - acc: result-type
 - xs: &list(elem-type)
-- consumer: arrow (result-type, &elem-type) => result-type
+- consumer: arrow (result-type, &elem-type) -> result-type
 }: result-type {
   let helper =
     define loop(acc, xs): result-type {
@@ -55,7 +55,7 @@ inline fold-left-noetic<elem-type, result-type> of {
 inline fold-right<elem-type, result-type> of {
 - xs: list(elem-type)
 - acc: result-type
-- consumer: arrow (elem-type, result-type) => result-type
+- consumer: arrow (elem-type, result-type) -> result-type
 }: result-type {
   let helper =
     define loop(xs, acc): result-type {
@@ -73,7 +73,7 @@ inline fold-right<elem-type, result-type> of {
 inline fold-right-noetic<elem-type, result-type> of {
 - xs: &list(elem-type)
 - acc: result-type
-- consumer: arrow (&elem-type, result-type) => result-type
+- consumer: arrow (&elem-type, result-type) -> result-type
 }: result-type {
   let helper =
     define loop(xs, acc): result-type {
@@ -88,28 +88,28 @@ inline fold-right-noetic<elem-type, result-type> of {
   helper(xs, acc)
 }
 
-inline map<a, b>(f: arrow (a) => b, xs: list(a)): list(b) {
+inline map<a, b>(f: arrow (a) -> b, xs: list(a)): list(b) {
   fold-right(xs, [], (x, acc) => {
     Cons(f(x), acc)
   })
 }
 
-inline map-noetic<a, b>(f: arrow (&a) => b, xs: &list(a)): list(b) {
+inline map-noetic<a, b>(f: arrow (&a) -> b, xs: &list(a)): list(b) {
   fold-right-noetic(xs, [], (x, acc) => {
     Cons(f(x), acc)
   })
 }
 
-inline for-each<a, b>(xs: list(a), f: arrow (a) => b): list(b) {
+inline for-each<a, b>(xs: list(a), f: arrow (a) -> b): list(b) {
   map(f, xs)
 }
 
-inline for<a>(xs: list(a), f: arrow (a) => unit): unit {
+inline for<a>(xs: list(a), f: arrow (a) -> unit): unit {
   let _ = map(f, xs) in
   Unit
 }
 
-define loop(count: int, f: arrow (int) => unit): unit {
+define loop(count: int, f: arrow (int) -> unit): unit {
   let helper =
     define self(cursor): unit {
       match ge-int(cursor, count) {
@@ -124,7 +124,7 @@ define loop(count: int, f: arrow (int) => unit): unit {
   helper(0)
 }
 
-inline repeat<a>(count: int, f: arrow (int) => a): list(a) {
+inline repeat<a>(count: int, f: arrow (int) -> a): list(a) {
   let helper =
     define self(cursor): list(a) {
       if ge-int(cursor, count) {
@@ -209,7 +209,7 @@ inline sum<a>(as-monoid: monoid(a), xs: list(a)): a {
   })
 }
 
-inline minimum<a>(as-ord: loset(a)): arrow (list(a)) => ?a {
+inline minimum<a>(as-ord: loset(a)): arrow (list(a)) -> ?a {
   (xs) => {
     let Loset of {cmp} = as-ord in
     match xs {
@@ -229,7 +229,7 @@ inline minimum<a>(as-ord: loset(a)): arrow (list(a)) => ?a {
   }
 }
 
-inline maximum<a>(as-ord: loset(a)): arrow (list(a)) => ?a {
+inline maximum<a>(as-ord: loset(a)): arrow (list(a)) -> ?a {
   (xs) => {
     let Loset of {cmp} = as-ord in
     let helper =

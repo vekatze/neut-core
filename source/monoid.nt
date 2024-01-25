@@ -6,7 +6,7 @@ import {
 data monoid(a) {
 - Monoid of {
   - e: a
-  - op: arrow (a, a) => a
+  - op: arrow (a, a) -> a
   }
 }
 

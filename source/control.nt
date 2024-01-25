@@ -3,7 +3,7 @@ import {
 - core.unit {Unit, unit}
 }
 
-inline loop<result>(count: int, base: result, f: arrow (result, int) => result): result {
+inline loop<result>(count: int, base: result, f: arrow (result, int) -> result): result {
   let helper =
     define self(cursor, acc): result {
       if ge-int(cursor, count) {

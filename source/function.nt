@@ -1,16 +1,16 @@
-define flip<a, b, c>(f: arrow (a, b) => c): arrow (b, a) => c {
+define flip<a, b, c>(f: arrow (a, b) -> c): arrow (b, a) -> c {
   (y, x) => {
     f(x, y)
   }
 }
 
-define compose<a, b, c>(f: arrow (a) => b, g: arrow (b) => c): arrow (a) => c {
+define compose<a, b, c>(f: arrow (a) -> b, g: arrow (b) -> c): arrow (a) -> c {
   (x) => {
     g(f(x))
   }
 }
 
-define curry<a, b, c>(f: arrow (a, b) => c): arrow (a) => arrow (b) => c {
+define curry<a, b, c>(f: arrow (a, b) -> c): arrow (a) -> arrow (b) -> c {
   (x) => {
     (y) => {
       f(x, y)
@@ -18,7 +18,7 @@ define curry<a, b, c>(f: arrow (a, b) => c): arrow (a) => arrow (b) => c {
   }
 }
 
-define uncurry<a, b, c>(f: arrow (a) => arrow (b) => c): arrow (a, b) => c {
+define uncurry<a, b, c>(f: arrow (a) -> arrow (b) -> c): arrow (a, b) -> c {
   (x, y) => {
     f(x)(y)
   }

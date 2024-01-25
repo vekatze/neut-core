@@ -6,5 +6,8 @@ define random(ubound: int): int {
   introspect os {
   - darwin =>
     magic external arc4random_uniform(ubound)
+  - linux =>
+    // requires glibc >= 2.36
+    magic external arc4random_uniform(ubound)
   }
 }

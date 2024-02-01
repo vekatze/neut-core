@@ -1,5 +1,5 @@
 import {
-- Dict {Dict-Trope, dict, dict-trope, empty, from-loset, insert}
+- Dict {dict, insert}
 - TIO
 - this.control {loop}
 - this.except {Fail, Pass}
@@ -17,13 +17,13 @@ define L-insert(k: int, v: int, acc: dict(int, int)): dict(int, int) {
   insert(L)(k, v, acc)
 }
 
-constant int-dict-trope: dict-trope(int) {
-  from-loset(L)
+constant int-dict-trope: Dict.trope(int) {
+  Dict.fromLoset(L)
 }
 
 define make-big-dict(): dict(int, int) {
   use int-dict-trope {insert} in
-  loop(700000, empty(), (acc, _) => {
+  loop(700000, Dict.empty(), (acc, _) => {
     let key = random(1000000) in
     let val = random(1000000) in
     insert(key, val, acc)

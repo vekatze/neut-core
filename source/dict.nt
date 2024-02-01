@@ -283,16 +283,16 @@ inline delete<k>(L: loset(k)): arrow <v>(k, dict(k, v)) -> dict(k, v) {
   }
 }
 
-data dict-trope(k) {
-- Dict-Trope of {
+data trope(k) {
+- Trope of {
   - insert: arrow <v>(k, v, dict(k, v)) -> dict(k, v)
   - lookup: arrow <v>(&k, &dict(k, v)) -> ?&v
   - delete: arrow <v>(k, dict(k, v)) -> dict(k, v)
   }
 }
 
-inline from-loset<k>(_loset: loset(k)): dict-trope(k) {
-  Dict-Trope of {
+inline fromLoset<k>(_loset: loset(k)): trope(k) {
+  Trope of {
   - insert = insert(_loset)
   - lookup = lookup(_loset)
   - delete = delete(_loset)

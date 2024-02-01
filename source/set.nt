@@ -1,0 +1,52 @@
+import {
+- Lo {Loset, loset}
+- this.bool {False, True, bool}
+- this.dict {dict, empty, singleton}
+- this.except {Fail, Pass}
+- this.unit {Unit, unit}
+}
+
+constant _Size: tau {
+  int
+}
+
+inline set(a): tau {
+  dict(a, unit)
+}
+
+data trope(k) {
+- Trope of {
+  - empty: set(k)
+  - singleton: arrow (k) -> set(k)
+  - insert: arrow (k, set(k)) -> set(k)
+  - lookup: arrow (&k, &set(k)) -> bool
+  - delete: arrow (k, set(k)) -> set(k)
+  }
+}
+
+inline fromLoset<k>(_loset: loset(k)): trope(k) {
+  use this.dict.fromLoset(_loset) {insert, lookup, delete} in
+  Trope of {
+  - empty =
+    empty()
+  - singleton =
+    (k) => {
+      singleton(k, Unit)
+    }
+  - insert =
+    (k, s) => {
+      insert(k, Unit, s)
+    }
+  - lookup =
+    (k, s) => {
+      match lookup(k, s) {
+      - Pass(_) =>
+        True
+      - Fail(_) =>
+        False
+      }
+    }
+  - delete =
+    exact delete
+  }
+}

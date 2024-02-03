@@ -157,6 +157,24 @@ define length<a>(xs: &list(a)): int {
   })
 }
 
+inline fold-left-index<elem-type, result-type> of {
+- acc: result-type
+- xs: list(elem-type)
+- consumer: arrow (result-type, elem-type, int) -> result-type
+}: result-type {
+  let helper =
+    define loop(acc, xs, i): result-type {
+      match xs {
+      - Nil =>
+        acc
+      - Cons(y, ys) =>
+        loop(consumer(acc, y, i), ys, add-int(i, 1))
+      }
+    }
+  in
+  helper(acc, xs, 0)
+}
+
 define unzip<a, b>(xs: list(pair(a, b))): pair(list(a), list(b)) {
   fold-right(xs, Pair([], []), (x, acc) => {
     let Pair(l, r) = x in
@@ -259,7 +277,8 @@ inline maximum<a>(as-ord: loset(a)): arrow (list(a)) -> ?a {
 
 inline as-monoid<a>(): monoid(list(a)) {
   Monoid of {
-  - e = []
+  - e =
+    []
   - op =
     (x, y) => {
       append(x, y)

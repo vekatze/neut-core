@@ -5,9 +5,9 @@ import {
 - Mem
 - Seek
 - Word
-- this.bool {or}
+- this.bool
 - this.errno {report-system-error, system}
-- this.except {Fail, Pass, none}
+- this.except {Pass}
 - this.text {text, text-byte-length, unsafe-get-content-pointer}
 - this.unit {unit}
 }
@@ -27,44 +27,9 @@ define write(t: &text, f: FD.descriptor): system(int) {
   }
 }
 
-define _read-loop(f: FD.descriptor, content-ptr: int, buffer-size: int, max-read-size: int, acc: int): ?int {
-  let bytes = Ext.read(f, content-ptr, buffer-size) in
-  if lt-int(bytes, 0) {
-    none()
-  } else-if lt-int(bytes, buffer-size) {
-    Pass(add-int(acc, bytes))
-  } else {
-    _read-loop(f, add-int(content-ptr, bytes), buffer-size, max-read-size, add-int(acc, bytes))
-  }
-}
-
 foreign {
 - printf(pointer): void
 - fflush(pointer): void
-}
-
-define read-file(f: FD.descriptor, buffer-size: int, max-read-size: int): system(text) {
-  let u = Word.size in
-  let ptr = Ext.malloc(add-int(max-read-size, mul-int(u, 2))) in
-  Mem.store-int(0, ptr);
-  let content-ptr = add-int(ptr, mul-int(u, 2)) in
-  let read-size = _read-loop(f, content-ptr, buffer-size, max-read-size, 0) in
-  match read-size {
-  - Pass(size) =>
-    Mem.store-int(size, add-int(ptr, u));
-    Pass(Magic.cast(int, text, ptr))
-  - Fail(_) =>
-    Ext.free(ptr);
-    report-system-error()
-  }
-}
-
-define read(f: FD.descriptor): system(text) {
-  // for now
-  let buffer-size = shl-int(1, 16) in
-  let size = Ext.lseek(f, 0, Seek.interpret(Seek.END)) in
-  let _ = Ext.lseek(f, 0, Seek.interpret(Seek.SET)) in
-  read-file(f, buffer-size, size)
 }
 
 define print(t: &text): unit {
@@ -74,38 +39,9 @@ define print(t: &text): unit {
   magic external printf(fmt)(len: int, val: pointer)
 }
 
-define _get-line-inner(ptr: int, ptr-size: int, current-index: int, buffer-size: int): system(text) {
-  let u = Word.size in
-  let content-size = sub-int(ptr-size, mul-int(u, 2)) in
-  if lt-int(content-size, add-int(current-index, buffer-size)) {
-    let new-size = mul-int(ptr-size, 2) in
-    let new-ptr = Ext.realloc(ptr, new-size) in
-    _get-line-inner(new-ptr, new-size, current-index, buffer-size)
-  } else {
-    let content-ptr = add-int(ptr, add-int(mul-int(u, 2), current-index)) in
-    let bytes = Ext.read(FD.stdin, content-ptr, buffer-size) in
-    let next-index = add-int(current-index, bytes) in
-    let last-char-ptr = add-int(content-ptr, sub-int(bytes, 1)) in
-    let last-char = Mem.load-int8(last-char-ptr) in
-    if lt-int(bytes, 0) {
-      Ext.free(ptr);
-      report-system-error()
-    } else-if or(lt-int(bytes, buffer-size), eq-int8(last-char, 10)) {
-      Mem.store-int(next-index, add-int(ptr, u));
-      Pass(Magic.cast(int, text, ptr))
-    } else {
-      _get-line-inner(ptr, ptr-size, next-index, buffer-size)
-    }
-  }
-}
-
-define get-line(): system(text) {
-  let default-input-size = 1024 in
-  let u = Word.size in
-  let ptr-size = add-int(default-input-size, mul-int(u, 2)) in
-  let ptr = Ext.malloc(ptr-size) in
-  Mem.store-int(0, ptr);
-  _get-line-inner(ptr, ptr-size, 0, default-input-size)
+define print-int(x: int): unit {
+  let fmt = unsafe-get-content-pointer("%ld\0") in
+  magic external printf(fmt)(x: int)
 }
 
 define print-line(t: &text): unit {
@@ -120,11 +56,6 @@ define print-float(x: float): unit {
   magic external printf(fmt)(x: float)
 }
 
-define print-int(x: int): unit {
-  let fmt = unsafe-get-content-pointer("%ld\0") in
-  magic external printf(fmt)(x: int)
-}
-
 define fflush(ptr: int): unit {
   magic external fflush(ptr)
 }
@@ -132,4 +63,44 @@ define fflush(ptr: int): unit {
 define fflush-all(): unit {
   let zero: int = 0 in
   magic external fflush(zero)
+}
+
+define _read-inner(from: FD.descriptor, ptr: int, ptr-size: int, len-cand: int, buffer-size: int): system(text) {
+  let u = Word.size in
+  let content-size = sub-int(ptr-size, mul-int(u, 2)) in
+  if lt-int(content-size, add-int(len-cand, buffer-size)) {
+    let new-size = mul-int(ptr-size, 2) in
+    let new-ptr = Ext.realloc(ptr, new-size) in
+    if eq-int(new-ptr, 0) {
+      report-system-error()
+    } else {
+      _read-inner(from, new-ptr, new-size, len-cand, buffer-size)
+    }
+  } else {
+    let content-ptr = add-int(ptr, add-int(mul-int(u, 2), len-cand)) in
+    let bytes = Ext.read(from, content-ptr, buffer-size) in
+    let next-len-cand = add-int(len-cand, bytes) in
+    if lt-int(bytes, 0) {
+      Ext.free(ptr);
+      report-system-error()
+    } else-if lt-int(bytes, buffer-size) {
+      Mem.store-int(next-len-cand, add-int(ptr, u));
+      Pass(Magic.cast(int, text, ptr))
+    } else {
+      _read-inner(from, ptr, ptr-size, next-len-cand, buffer-size)
+    }
+  }
+}
+
+define read(from: FD.descriptor): system(text) {
+  let default-input-size = 1024 in
+  let u = Word.size in
+  let ptr-size = add-int(default-input-size, mul-int(u, 2)) in
+  let ptr = Ext.malloc(ptr-size) in
+  Mem.store-int(0, ptr);
+  _read-inner(from, ptr, ptr-size, 0, default-input-size)
+}
+
+define get-line(): system(text) {
+  read(FD.stdin)
 }

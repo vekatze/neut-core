@@ -4,7 +4,7 @@ import {
 - FF
 - FM
 - this.bool
-- this.errno {errno, get-system-error, report-system-error, system}
+- this.errno {report-system-error, system}
 - this.except {Pass}
 - this.list {list}
 - this.text {text, unsafe-get-content-pointer}
@@ -23,11 +23,11 @@ define open(path: &text, xs: list(FF.flag), ms: list(FM.mode)): system(FD.descri
   }
 }
 
-define close(f: FD.descriptor, on-failure: arrow (errno) -> unit): unit {
+define close(f: FD.descriptor): system(unit) {
   let result = Ext.close(f) in
   if eq-int(result, 0) {
-    Unit
+    Pass(Unit)
   } else {
-    on-failure(get-system-error())
+    report-system-error()
   }
 }

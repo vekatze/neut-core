@@ -24,6 +24,9 @@
     Vector "this.vector"
     Word "this.word"
   }
+  foreign [
+    "foreign/"
+  ]
   preset {
     bool [
       "False"

@@ -7,7 +7,7 @@ foreign {
 - __error(): int
 - __errno_location(): int
 - exit(int): void
-- realloc(pointer, int): void
+- realloc(pointer, int): pointer
 - open(pointer, int, int): int
 - close(int): int
 - write(int, pointer, int): int

@@ -175,6 +175,17 @@ inline fold-left-index<elem-type, result-type> of {
   helper(acc, xs, 0)
 }
 
+define zip<a, b>(xs: list(a), ys: list(b)): list(pair(a, b)) {
+  match xs, ys {
+  - Nil, _ =>
+    Nil
+  - _, Nil =>
+    Nil
+  - Cons(x, xs'), Cons(y, ys') =>
+    Cons(Pair(x, y), zip(xs', ys'))
+  }
+}
+
 define unzip<a, b>(xs: list(pair(a, b))): pair(list(a), list(b)) {
   fold-right(xs, Pair([], []), (x, acc) => {
     let Pair(l, r) = x in

@@ -5,9 +5,8 @@ import {
 - Mem
 - Word
 - this.bool {False, True, bool}
-- this.except {Pass, none}
 - this.int8-array {int8-array, int8-array-access, int8-array-access, int8-array-length, int8-array-new, unsafe-copy-int8-array}
-- this.list
+- this.list {Cons, Nil, list}
 - this.pair {Pair, pair}
 - this.unit {Unit, unit}
 }
@@ -85,6 +84,10 @@ define access(haystack: &text, cursor: int): int8 {
 inline text-byte-length(t: &text): int {
   let ptr = magic cast(&text, &int8-array, t) in
   int8-array-length(ptr)
+}
+
+define is-empty(t: &text): bool {
+  eq-int(text-byte-length(t), 0)
 }
 
 define from-int(x: int): text {
@@ -224,22 +227,22 @@ define _match-text-content(ptr1: int, ptr2: int, len: int): bool {
   f(0)
 }
 
-define break-on(needle: &text, haystack: &text): ?pair(text, text) {
+define break-on(needle: &text, haystack: &text): pair(text, text) {
   let ptr = unsafe-get-content-pointer(haystack) in
   let ptr2 = unsafe-get-content-pointer(needle) in
   let len = text-byte-length(haystack) in
   let needle-len = text-byte-length(needle) in
   let f =
-    define loop(cursor: int): ?pair(text, text) {
+    define loop(cursor: int): pair(text, text) {
       let rem-len = sub-int(len, cursor) in
       if lt-int(rem-len, needle-len) {
-        none()
+        Pair(*haystack, empty())
       } else {
         let ptr1 = add-int(ptr, cursor) in
         if _match-text-content(ptr1, ptr2, needle-len) {
           let former = takeN(cursor, haystack) in
           let latter = dropN(add-int(cursor, needle-len), haystack) in
-          Pass(Pair(former, latter))
+          Pair(former, latter)
         } else {
           loop(add-int(cursor, 1))
         }
@@ -247,4 +250,28 @@ define break-on(needle: &text, haystack: &text): ?pair(text, text) {
     }
   in
   f(0)
+}
+
+define _appendR(t1: text, t2: text): text {
+  let t on t1, t2 = append(t1, t2) in
+  let _ = t1 in
+  let _ = t2 in
+  t
+}
+
+define format(fmt: &text, args: list(text)): text {
+  match args {
+  - Nil =>
+    *fmt
+  - Cons(arg, rest) =>
+    let Pair(before, after) = break-on("{}", fmt) in
+    let no-hole on after = this.text.is-empty(after) in
+    if no-hole {
+      before
+    } else {
+      let result on after = _appendR(before, _appendR(arg, format(after, rest))) in
+      let _ = after in
+      result
+    }
+  }
 }

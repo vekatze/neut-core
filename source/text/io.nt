@@ -7,9 +7,10 @@ import {
 - Word
 - this.bool
 - this.errno {report-system-error, system}
-- this.except {Pass}
-- this.text {text, text-byte-length, unsafe-get-content-pointer}
-- this.unit {unit}
+- this.except {Fail, Pass}
+- this.pair {Pair}
+- this.text {break-on, text, text-byte-length, unsafe-get-content-pointer}
+- this.unit {Unit, unit}
 }
 
 define write(t: &text, f: FD.descriptor): system(int) {
@@ -103,4 +104,23 @@ define read(from: FD.descriptor): system(text) {
 
 define get-line(): system(text) {
   read(FD.stdin)
+}
+
+define zen(): unit {
+  let res = break-on("{}", "hello, {}! this is me.") in
+  match res {
+  - Pass(Pair(t1, t2)) =>
+    print("pass\n");
+    let _ on t1, t2 =
+      print(t1);
+      print("\n");
+      print(t2);
+      print("\n")
+    in
+    let _ = t1 in
+    let _ = t2 in
+    Unit
+  - Fail(_) =>
+    print("fail\n")
+  }
 }

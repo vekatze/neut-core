@@ -30,6 +30,22 @@ define sum-int(xs: list(int)): int {
   f(xs, 0)
 }
 
+define min-int(x: int, y: int): int {
+  if lt-int(x, y) {
+    x
+  } else {
+    y
+  }
+}
+
+define max-int(x: int, y: int): int {
+  if lt-int(x, y) {
+    y
+  } else {
+    x
+  }
+}
+
 constant as-ring: ring(int) {
   Ring of {
   - zero = 0

@@ -4,8 +4,11 @@ import {
 - Magic
 - Mem
 - Word
-- this.bool
-- this.int8-array {int8-array, int8-array-length, int8-array-new, unsafe-copy-int8-array}
+- this.bool {False, True, bool}
+- this.except {Pass, none}
+- this.int8-array {int8-array, int8-array-access, int8-array-access, int8-array-length, int8-array-new, unsafe-copy-int8-array}
+- this.list
+- this.pair {Pair, pair}
 - this.unit {Unit, unit}
 }
 
@@ -75,6 +78,10 @@ define get-text-length-of-int(x: int, acc: int): int {
   }
 }
 
+define access(haystack: &text, cursor: int): int8 {
+  int8-array-access(magic cast(&text, &int8-array, haystack), cursor)
+}
+
 inline text-byte-length(t: &text): int {
   let ptr = magic cast(&text, &int8-array, t) in
   int8-array-length(ptr)
@@ -131,4 +138,113 @@ define unsafe-from-c-string(old-ptr: int): text {
   Mem.store-int(len, add-int(new-ptr, u));
   unsafe-copy-int8-array(old-ptr, add-int(new-ptr, u2), 0, 0, len);
   Magic.cast(int, text, new-ptr)
+}
+
+define _min-int(x: int, y: int): int {
+  if lt-int(x, y) {
+    x
+  } else {
+    y
+  }
+}
+
+define drop(offset: int, t: text): text {
+  let _ on t =
+    let ptr = Magic.cast(&text, int, t) in
+    let from = Mem.load-int(ptr) in
+    let to-ptr = add-int(ptr, Word.size) in
+    let to = Mem.load-int(to-ptr) in
+    Mem.store-int(_min-int(to, add-int(from, offset)), ptr)
+  in
+  t
+}
+
+define take(offset: int, t: text): text {
+  let _ on t =
+    let ptr = Magic.cast(&text, int, t) in
+    let from = Mem.load-int(ptr) in
+    let to-ptr = add-int(ptr, Word.size) in
+    let to = Mem.load-int(to-ptr) in
+    Mem.store-int(_min-int(to, add-int(from, offset)), to-ptr)
+  in
+  t
+}
+
+define dropN(offset: int, t: &text): text {
+  // get info from old text
+  let ptr = Magic.cast(&text, int, t) in
+  let content-ptr = add-int(ptr, mul-int(Word.size, 2)) in
+  let from = Mem.load-int(ptr) in
+  let to-ptr = add-int(ptr, Word.size) in
+  let to = Mem.load-int(to-ptr) in
+  let new-from = _min-int(to, add-int(from, offset)) in
+  let new-size = sub-int(to, new-from) in
+  // write info to new ptr
+  let new-ptr = Ext.malloc(add-int(new-size, mul-int(Word.size, 2))) in
+  Mem.store-int(0, new-ptr);
+  Mem.store-int(new-size, add-int(new-ptr, Word.size));
+  let new-content-ptr = add-int(new-ptr, mul-int(Word.size, 2)) in
+  unsafe-copy-int8-array(content-ptr, new-content-ptr, 0, new-from, to);
+  Magic.cast(int, text, new-ptr)
+}
+
+define takeN(offset: int, t: &text): text {
+  // get info from old text
+  let ptr = Magic.cast(&text, int, t) in
+  let content-ptr = add-int(ptr, mul-int(Word.size, 2)) in
+  let from = Mem.load-int(ptr) in
+  let to-ptr = add-int(ptr, Word.size) in
+  let to = Mem.load-int(to-ptr) in
+  let new-size = _min-int(to, offset) in
+  // write info to new ptr
+  let new-ptr = Ext.malloc(add-int(offset, mul-int(Word.size, 2))) in
+  Mem.store-int(0, new-ptr);
+  Mem.store-int(new-size, add-int(new-ptr, Word.size));
+  let new-content-ptr = add-int(new-ptr, mul-int(Word.size, 2)) in
+  unsafe-copy-int8-array(content-ptr, new-content-ptr, 0, from, new-size);
+  Magic.cast(int, text, new-ptr)
+}
+
+define _match-text-content(ptr1: int, ptr2: int, len: int): bool {
+  let f =
+    define helper(cursor: int): bool {
+      if eq-int(cursor, len) {
+        True
+      } else {
+        let c1: int8 = Mem.load-int8(add-int(ptr1, cursor)) in
+        let c2: int8 = Mem.load-int8(add-int(ptr2, cursor)) in
+        if eq-int8(c1, c2) {
+          helper(add-int(cursor, 1))
+        } else {
+          False
+        }
+      }
+    }
+  in
+  f(0)
+}
+
+define break-on(needle: &text, haystack: &text): ?pair(text, text) {
+  let ptr = unsafe-get-content-pointer(haystack) in
+  let ptr2 = unsafe-get-content-pointer(needle) in
+  let len = text-byte-length(haystack) in
+  let needle-len = text-byte-length(needle) in
+  let f =
+    define loop(cursor: int): ?pair(text, text) {
+      let rem-len = sub-int(len, cursor) in
+      if lt-int(rem-len, needle-len) {
+        none()
+      } else {
+        let ptr1 = add-int(ptr, cursor) in
+        if _match-text-content(ptr1, ptr2, needle-len) {
+          let former = takeN(cursor, haystack) in
+          let latter = dropN(add-int(cursor, needle-len), haystack) in
+          Pass(Pair(former, latter))
+        } else {
+          loop(add-int(cursor, 1))
+        }
+      }
+    }
+  in
+  f(0)
 }

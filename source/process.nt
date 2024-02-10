@@ -99,7 +99,7 @@ define _waitpid(pid: int): system(process-result-status) {
 define _make-argv(xs: list(int)): int {
   let len on xs = length(xs) in
   let ptr = Ext.malloc(mul-int(Word.size, len)) in
-  fold-left-index(Unit, xs, (_, x, i) => {
+  fold-left-index(Unit, xs, function (_, x, i) {
     store-int(x, add-int(ptr, mul-int(Word.size, i)))
   });
   ptr

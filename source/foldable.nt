@@ -2,8 +2,8 @@ import {
 - this.monoid {monoid}
 }
 
-data foldable(t: arrow (tau) -> tau) {
+data foldable(t: (tau) -> tau) {
 - Foldable of {
-  - fold-map: arrow (a: tau, b: tau, as-monoid: monoid(a), f: arrow (b) -> a, haystack: t(b)) -> a
+  - fold-map: (a: tau, b: tau, as-monoid: monoid(a), f: (b) -> a, haystack: t(b)) -> a
   }
 }

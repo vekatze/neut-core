@@ -15,7 +15,7 @@ inline admit(a: tau, t: &text): a {
   exit(1)
 }
 
-define _assert(message: &text, check: arrow () -> bool): unit {
+define _assert(message: &text, check: () -> bool): unit {
   if check() {
     Unit
   } else {
@@ -24,7 +24,7 @@ define _assert(message: &text, check: arrow () -> bool): unit {
   }
 }
 
-inline assert(message: &text, check: arrow () -> bool): unit {
+inline assert(message: &text, check: () -> bool): unit {
   introspect build-mode {
   - release =>
     let _ = check in
@@ -35,13 +35,13 @@ inline assert(message: &text, check: arrow () -> bool): unit {
   }
 }
 
-inline parallel-test(tests: list(arrow () -> arrow () -> unit)): unit {
+inline parallel-test(tests: list(() -> () -> unit)): unit {
   let flow-list =
-    for-each(tests, (testFunc: arrow () -> arrow () -> unit) => {
+    for-each(tests, function (testFunc: () -> () -> unit) {
       detach {testFunc()}
     })
   in
-  for(flow-list, (f: flow(arrow () -> unit)) => {
+  for(flow-list, function (f: flow(() -> unit)) {
     let result = attach {f} in
     result()
   })

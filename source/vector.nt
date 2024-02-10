@@ -60,7 +60,7 @@ define _get-vec-info<a>(xs: &vector(a)): _vecInfo {
 }
 
 resource vector-internal {
-- (ptr: int) => {
+- function (ptr: int) {
     let base-ptr = Magic.cast(int, &vector(int), ptr) in
     let _VecInfo of {from-ptr, to-ptr, type-ptr, content-ptr} = _get-vec-info(base-ptr) in
     let from: int = Mem.load-int(from-ptr) in
@@ -70,7 +70,7 @@ resource vector-internal {
     _discard-vector-content(content-ptr, elem-type, 0, size);
     Magic.cast(unit, int, free(from-ptr))
   }
-- (ptr: int) => {
+- function (ptr: int) {
     let base-ptr = Magic.cast(int, &vector(int), ptr) in
     let _VecInfo of {word-size, from-ptr, to-ptr, type-ptr, content-ptr} = _get-vec-info(base-ptr) in
     let from: int = Mem.load-int(from-ptr) in
@@ -133,16 +133,16 @@ define size<a>(xs: &vector(a)): int {
   sub-int(to, from)
 }
 
-inline for-each<a>(xs: &vector(a), f: arrow (a) -> unit): unit {
-  loop(size(xs), (i) => {
+inline for-each<a>(xs: &vector(a), f: (a) -> unit): unit {
+  loop(size(xs), function (i) {
     f(access(xs, i))
   })
 }
 
-inline for<a, b>(xs: &vector(a), f: arrow (a) -> b): vector(b) {
+inline for<a, b>(xs: &vector(a), f: (a) -> b): vector(b) {
   new of {
   - base-list =
-    repeat(size(xs), (i) => {
+    repeat(size(xs), function (i) {
       f(access(xs, i))
     })
   }
@@ -151,7 +151,7 @@ inline for<a, b>(xs: &vector(a), f: arrow (a) -> b): vector(b) {
 inline fold-LN<elem-type, result-type> of {
 - acc: result-type
 - xs: &vector(elem-type)
-- consumer: arrow (result-type, &elem-type) -> result-type
+- consumer: (result-type, &elem-type) -> result-type
 }: result-type {
   let sz = size(xs) in
   let helper =
@@ -167,7 +167,7 @@ inline fold-LN<elem-type, result-type> of {
   helper(0, acc, xs)
 }
 
-define zip-with<a, b, c>(xs: &vector(a), ys: &vector(b), f: arrow (a, b) -> c): vector(c) {
+define zip-with<a, b, c>(xs: &vector(a), ys: &vector(b), f: (a, b) -> c): vector(c) {
   let len1 = size(xs) in
   let len2 = size(ys) in
   let min-func = minimum(Int.as-loset) in

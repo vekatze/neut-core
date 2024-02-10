@@ -17,10 +17,10 @@ inline set(a): tau {
 data trope(k) {
 - Trope of {
   - empty: set(k)
-  - singleton: arrow (k) -> set(k)
-  - insert: arrow (k, set(k)) -> set(k)
-  - lookup: arrow (&k, &set(k)) -> bool
-  - delete: arrow (k, set(k)) -> set(k)
+  - singleton: (k) -> set(k)
+  - insert: (k, set(k)) -> set(k)
+  - lookup: (&k, &set(k)) -> bool
+  - delete: (k, set(k)) -> set(k)
   }
 }
 
@@ -30,15 +30,15 @@ inline from-loset<k>(_loset: loset(k)): trope(k) {
   - empty =
     empty()
   - singleton =
-    (k) => {
+    function (k) {
       singleton(k, Unit)
     }
   - insert =
-    (k, s) => {
+    function (k, s) {
       insert(k, Unit, s)
     }
   - lookup =
-    (k, s) => {
+    function (k, s) {
       match lookup(k, s) {
       - Pass(_) =>
         True

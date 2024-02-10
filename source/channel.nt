@@ -37,7 +37,7 @@ define -new(a: tau, q: Q.queue(a)): channel(a) {
 
 // (queue, mutex, cond, queue-elem-type)
 resource _channel {
-- (ch: int) => {
+- function (ch: int) {
     let u = Word.size in
     let mutex-size = Ext.thread-mutex-size() in
     let cond-size = Ext.thread-cond-size() in
@@ -50,7 +50,7 @@ resource _channel {
     Ext.free(ch);
     0
   }
-- (ch: int) => {
+- function (ch: int) {
     let u = Word.size in
     let mutex-size = Ext.thread-mutex-size() in
     let cond-size = Ext.thread-cond-size() in

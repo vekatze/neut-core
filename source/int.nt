@@ -71,7 +71,7 @@ constant as-monoid: monoid(int) {
 constant as-loset: loset(int) {
   Loset of {
   - cmp =
-    (x, y) => {
+    function (x, y) {
       if gt-int(*x, *y) {
         GT
       } else-if lt-int(*x, *y) {

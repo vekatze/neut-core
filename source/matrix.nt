@@ -61,11 +61,11 @@ define access<a>(mat: &matrix(a), row: int, col: int): a {
   Vector.access(content, add-int(mul-int(*col-size, row), col))
 }
 
-define print-mat<a>(show: arrow (a) -> unit, mat: &matrix(a)): unit {
+define print-mat<a>(show: (a) -> unit, mat: &matrix(a)): unit {
   let row-size = get-row-size(mat) in
   let col-size = get-col-size(mat) in
-  loop(row-size, (row) => {
-    loop(col-size, (col) => {
+  loop(row-size, function (row) {
+    loop(col-size, function (col) {
       let elem = access(mat, row, col) in
       show(elem);
       TIO.print(" ")
@@ -74,12 +74,12 @@ define print-mat<a>(show: arrow (a) -> unit, mat: &matrix(a)): unit {
   })
 }
 
-inline _zero<a>(r: ring(a)): arrow (int, int) -> matrix(a) {
+inline _zero<a>(r: ring(a)): (int, int) -> matrix(a) {
   use r {zero} in
   define _(row-size: int, col-size: int): matrix(a) {
     let vec-size = mul-int(row-size, col-size) in
     let content =
-      Vector.new(L.repeat(vec-size, (_) => {
+      Vector.new(L.repeat(vec-size, function (_) {
         zero
       }))
     in
@@ -87,12 +87,12 @@ inline _zero<a>(r: ring(a)): arrow (int, int) -> matrix(a) {
   }
 }
 
-inline _one<a>(r: ring(a)): arrow (int) -> matrix(a) {
+inline _one<a>(r: ring(a)): (int) -> matrix(a) {
   use r {zero, one} in
   define _(size: int): matrix(a) {
     let vec-size = mul-int(size, size) in
     let content =
-      Vector.new(L.repeat(vec-size, (cursor) => {
+      Vector.new(L.repeat(vec-size, function (cursor) {
         let rem = rem-int(cursor, add-int(size, 1)) in
         if eq-int(rem, 0) {
           one
@@ -105,7 +105,7 @@ inline _one<a>(r: ring(a)): arrow (int) -> matrix(a) {
   }
 }
 
-inline _add<a>(r: ring(a)): arrow (&matrix(a), &matrix(a)) -> matrix(a) {
+inline _add<a>(r: ring(a)): (&matrix(a), &matrix(a)) -> matrix(a) {
   use r {add} in
   define _(mat1: &matrix(a), mat2: &matrix(a)): matrix(a) {
     let vec1 = get-content(mat1) in
@@ -128,7 +128,7 @@ inline _add<a>(r: ring(a)): arrow (&matrix(a), &matrix(a)) -> matrix(a) {
   }
 }
 
-inline _sub<a>(r: ring(a)): arrow (&matrix(a), &matrix(a)) -> matrix(a) {
+inline _sub<a>(r: ring(a)): (&matrix(a), &matrix(a)) -> matrix(a) {
   use r {sub} in
   define _(mat1: &matrix(a), mat2: &matrix(a)): matrix(a) {
     let vec1 = get-content(mat1) in
@@ -151,7 +151,7 @@ inline _sub<a>(r: ring(a)): arrow (&matrix(a), &matrix(a)) -> matrix(a) {
   }
 }
 
-inline _repeat-sum<a>(r: rig(a), count: int, k: arrow (int) -> a): a {
+inline _repeat-sum<a>(r: rig(a), count: int, k: (int) -> a): a {
   use r {zero, add} in
   let helper =
     define self(acc: a, cursor: int): a {
@@ -165,7 +165,7 @@ inline _repeat-sum<a>(r: rig(a), count: int, k: arrow (int) -> a): a {
   helper(zero, 0)
 }
 
-inline _mul<a>(r: rig(a)): arrow (&matrix(a), &matrix(a)) -> matrix(a) {
+inline _mul<a>(r: rig(a)): (&matrix(a), &matrix(a)) -> matrix(a) {
   use r {mul} in
   define _(mat1: &matrix(a), mat2: &matrix(a)): matrix(a) {
     let row-size-1 = get-row-size(mat1) in
@@ -177,9 +177,9 @@ inline _mul<a>(r: rig(a)): arrow (&matrix(a), &matrix(a)) -> matrix(a) {
     };
     new of {
     - content-list =
-      repeat(row-size-1, (i) => {
-        repeat(col-size-2, (j) => {
-          _repeat-sum(r, col-size-1, (k) => {
+      repeat(row-size-1, function (i) {
+        repeat(col-size-2, function (j) {
+          _repeat-sum(r, col-size-1, function (k) {
             let a_i_k = access(mat1, i, k) in
             let b_k_j = access(mat2, k, j) in
             mul(a_i_k, b_k_j)
@@ -190,7 +190,7 @@ inline _mul<a>(r: rig(a)): arrow (&matrix(a), &matrix(a)) -> matrix(a) {
   }
 }
 
-inline _mul-pointwise<a>(r: ring(a)): arrow (&matrix(a), &matrix(a)) -> matrix(a) {
+inline _mul-pointwise<a>(r: ring(a)): (&matrix(a), &matrix(a)) -> matrix(a) {
   use r {mul} in
   define _(mat1: &matrix(a), mat2: &matrix(a)): matrix(a) {
     let vec1 = get-content(mat1) in
@@ -213,7 +213,7 @@ inline _mul-pointwise<a>(r: ring(a)): arrow (&matrix(a), &matrix(a)) -> matrix(a
   }
 }
 
-define for<a, b>(mat: &matrix(a), f: arrow (a) -> b): matrix(b) {
+define for<a, b>(mat: &matrix(a), f: (a) -> b): matrix(b) {
   let vec = get-content(mat) in
   Matrix of {
   - row-size = get-row-size(mat)
@@ -222,7 +222,7 @@ define for<a, b>(mat: &matrix(a), f: arrow (a) -> b): matrix(b) {
   }
 }
 
-define zip-with<a, b, c>(mat1: &matrix(a), mat2: &matrix(b), f: arrow (a, b) -> c): matrix(c) {
+define zip-with<a, b, c>(mat1: &matrix(a), mat2: &matrix(b), f: (a, b) -> c): matrix(c) {
   let r1 = get-row-size(mat1) in
   assert "row-size(mat1) == row-size(mat2)" {
     let r2 = get-row-size(mat2) in
@@ -244,12 +244,12 @@ define zip-with<a, b, c>(mat1: &matrix(a), mat2: &matrix(b), f: arrow (a, b) -> 
 
 data trope(a) {
 - Trope of {
-  - zero: arrow (int, int) -> matrix(a)
-  - one: arrow (int) -> matrix(a)
-  - add: arrow (&matrix(a), &matrix(a)) -> matrix(a)
-  - sub: arrow (&matrix(a), &matrix(a)) -> matrix(a)
-  - mul: arrow (&matrix(a), &matrix(a)) -> matrix(a)
-  - mul-pointwise: arrow (&matrix(a), &matrix(a)) -> matrix(a)
+  - zero: (int, int) -> matrix(a)
+  - one: (int) -> matrix(a)
+  - add: (&matrix(a), &matrix(a)) -> matrix(a)
+  - sub: (&matrix(a), &matrix(a)) -> matrix(a)
+  - mul: (&matrix(a), &matrix(a)) -> matrix(a)
+  - mul-pointwise: (&matrix(a), &matrix(a)) -> matrix(a)
   }
 }
 

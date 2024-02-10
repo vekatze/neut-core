@@ -19,10 +19,10 @@ define unsafe-copy-int8-array(source-pointer: int, target-pointer: int, index: i
 }
 
 resource int8-array {
-- (x: int) => {
+- function (x: int) {
     Magic.cast(unit, int, free(x))
   }
-- (source-pointer: int) => {
+- function (source-pointer: int) {
     let u = Word.size in
     let u2 = mul-int(u, 2) in
     let from = Mem.load-int(source-pointer) in

@@ -7,7 +7,7 @@ import {
 data entity(a) {
 - Entity of {
     // no entity without identity
-  - identity: arrow (&a, &a) -> bool
+  - identity: (&a, &a) -> bool
   }
 }
 
@@ -15,7 +15,7 @@ inline from-loset<a>(x: loset(a)): entity(a) {
   let Loset of {cmp} = x in
   Entity of {
   - identity =
-    (x, y) => {
+    function (x, y) {
       match cmp(x, y) {
       - EQ =>
         True

@@ -24,8 +24,8 @@ data trope(k) {
   }
 }
 
-inline fromLoset<k>(_loset: loset(k)): trope(k) {
-  use this.dict.fromLoset(_loset) {insert, lookup, delete} in
+inline from-loset<k>(_loset: loset(k)): trope(k) {
+  use this.dict.from-loset(_loset) {insert, lookup, delete} in
   Trope of {
   - empty =
     empty()

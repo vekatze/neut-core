@@ -3,40 +3,29 @@ import {
 - TIO
 - this.control {loop}
 - this.except {Fail, Pass}
-- this.int {as-loset}
-- this.loset {loset}
+- this.int
 - this.random {random}
 - this.unit {Unit, unit}
 }
 
-constant L: loset(int) {
-  as-loset
-}
-
-define L-insert(k: int, v: int, acc: dict(int, int)): dict(int, int) {
-  insert(L)(k, v, acc)
-}
-
-constant int-dict-trope: Dict.trope(int) {
-  Dict.fromLoset(L)
+constant intdict: Dict.trope(int) {
+  Dict.from-loset(this.int.as-loset)
 }
 
 define make-big-dict(): dict(int, int) {
-  use int-dict-trope {insert} in
   loop(700000, Dict.empty(), (acc, _) => {
     let key = random(1000000) in
     let val = random(1000000) in
-    insert(key, val, acc)
+    intdict::insert(key, val, acc)
   })
 }
 
 define random-lookup-sum(d: &dict(int, int)): unit {
-  use int-dict-trope {lookup} in
   let rsum =
     loop(700000, 0, (acc, _) => {
       let key = random(1000000) in
       let val on key =
-        match lookup(key, d) {
+        match intdict::lookup(key, d) {
         - Fail(_) =>
           0
         - Pass(v) =>
@@ -55,7 +44,4 @@ define main(): unit {
   let _ on big-dict = random-lookup-sum(big-dict) in
   let _ = big-dict in
   Unit
-  // idealize big-dict {
-  //   random-lookup-sum(big-dict)
-  // }
 }

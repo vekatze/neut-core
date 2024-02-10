@@ -5,8 +5,8 @@ import {
 - Vector {vector}
 - this.bool {and}
 - this.except {from-option}
-- this.rig {Rig, rig}
-- this.ring {Ring, ring}
+- this.rig {rig}
+- this.ring {ring}
 - this.system
 - this.text
 - this.unit {unit}
@@ -31,35 +31,19 @@ define new<a>(content-list: list(list(a))): matrix(a) {
   }
 }
 
-define zero<a>(R: ring(a)): arrow (int, int) -> matrix(a) {
-  let Ring of {zero} = R in
-  define _(row-size: int, col-size: int): matrix(a) {
-    let vec-size = mul-int(row-size, col-size) in
-    let content =
-      Vector.new(L.repeat(vec-size, (_) => {
-        zero
-      }))
-    in
-    Matrix of {row-size, col-size, content}
-  }
+define get-row-size<a>(mat: &matrix(a)): int {
+  tie Matrix of {row-size} = mat in
+  *row-size
 }
 
-define one<a>(R: ring(a)): arrow (int) -> matrix(a) {
-  let Ring of {zero, one} = R in
-  define _(size: int): matrix(a) {
-    let vec-size = mul-int(size, size) in
-    let content =
-      Vector.new(L.repeat(vec-size, (cursor) => {
-        let rem = rem-int(cursor, add-int(size, 1)) in
-        if eq-int(rem, 0) {
-          one
-        } else {
-          zero
-        }
-      }))
-    in
-    Matrix of {row-size = size, col-size = size, content}
-  }
+define get-col-size<a>(mat: &matrix(a)): int {
+  tie Matrix of {col-size} = mat in
+  *col-size
+}
+
+define get-content<a>(mat: &matrix(a)): &vector(a) {
+  tie Matrix of {content} = mat in
+  content
 }
 
 define access<a>(mat: &matrix(a), row: int, col: int): a {
@@ -77,21 +61,6 @@ define access<a>(mat: &matrix(a), row: int, col: int): a {
   Vector.access(content, add-int(mul-int(*col-size, row), col))
 }
 
-define get-row-size<a>(mat: &matrix(a)): int {
-  tie Matrix of {row-size} = mat in
-  *row-size
-}
-
-define get-col-size<a>(mat: &matrix(a)): int {
-  tie Matrix of {col-size} = mat in
-  *col-size
-}
-
-define get-content<a>(mat: &matrix(a)): &vector(a) {
-  tie Matrix of {content} = mat in
-  content
-}
-
 define print-mat<a>(show: arrow (a) -> unit, mat: &matrix(a)): unit {
   let row-size = get-row-size(mat) in
   let col-size = get-col-size(mat) in
@@ -105,8 +74,39 @@ define print-mat<a>(show: arrow (a) -> unit, mat: &matrix(a)): unit {
   })
 }
 
-inline add-mat<a>(rg: ring(a)): arrow (&matrix(a), &matrix(a)) -> matrix(a) {
-  let Ring of {add} = rg in
+inline _zero<a>(r: ring(a)): arrow (int, int) -> matrix(a) {
+  use r {zero} in
+  define _(row-size: int, col-size: int): matrix(a) {
+    let vec-size = mul-int(row-size, col-size) in
+    let content =
+      Vector.new(L.repeat(vec-size, (_) => {
+        zero
+      }))
+    in
+    Matrix of {row-size, col-size, content}
+  }
+}
+
+inline _one<a>(r: ring(a)): arrow (int) -> matrix(a) {
+  use r {zero, one} in
+  define _(size: int): matrix(a) {
+    let vec-size = mul-int(size, size) in
+    let content =
+      Vector.new(L.repeat(vec-size, (cursor) => {
+        let rem = rem-int(cursor, add-int(size, 1)) in
+        if eq-int(rem, 0) {
+          one
+        } else {
+          zero
+        }
+      }))
+    in
+    Matrix of {row-size = size, col-size = size, content}
+  }
+}
+
+inline _add<a>(r: ring(a)): arrow (&matrix(a), &matrix(a)) -> matrix(a) {
+  use r {add} in
   define _(mat1: &matrix(a), mat2: &matrix(a)): matrix(a) {
     let vec1 = get-content(mat1) in
     let vec2 = get-content(mat2) in
@@ -128,8 +128,8 @@ inline add-mat<a>(rg: ring(a)): arrow (&matrix(a), &matrix(a)) -> matrix(a) {
   }
 }
 
-inline sub-mat<a>(rg: ring(a)): arrow (&matrix(a), &matrix(a)) -> matrix(a) {
-  let Ring of {sub} = rg in
+inline _sub<a>(r: ring(a)): arrow (&matrix(a), &matrix(a)) -> matrix(a) {
+  use r {sub} in
   define _(mat1: &matrix(a), mat2: &matrix(a)): matrix(a) {
     let vec1 = get-content(mat1) in
     let vec2 = get-content(mat2) in
@@ -152,7 +152,7 @@ inline sub-mat<a>(rg: ring(a)): arrow (&matrix(a), &matrix(a)) -> matrix(a) {
 }
 
 inline _repeat-sum<a>(r: rig(a), count: int, k: arrow (int) -> a): a {
-  let Rig of {zero, add} = r in
+  use r {zero, add} in
   let helper =
     define self(acc: a, cursor: int): a {
       if ge-int(cursor, count) {
@@ -165,8 +165,8 @@ inline _repeat-sum<a>(r: rig(a), count: int, k: arrow (int) -> a): a {
   helper(zero, 0)
 }
 
-inline mul-mat<a>(r: rig(a)): arrow (&matrix(a), &matrix(a)) -> matrix(a) {
-  let Rig of {mul} = r in
+inline _mul<a>(r: rig(a)): arrow (&matrix(a), &matrix(a)) -> matrix(a) {
+  use r {mul} in
   define _(mat1: &matrix(a), mat2: &matrix(a)): matrix(a) {
     let row-size-1 = get-row-size(mat1) in
     let row-size-2 = get-row-size(mat2) in
@@ -190,8 +190,8 @@ inline mul-mat<a>(r: rig(a)): arrow (&matrix(a), &matrix(a)) -> matrix(a) {
   }
 }
 
-inline mul-mat-pointwise<a>(rg: ring(a)): arrow (&matrix(a), &matrix(a)) -> matrix(a) {
-  let Ring of {mul} = rg in
+inline _mul-pointwise<a>(r: ring(a)): arrow (&matrix(a), &matrix(a)) -> matrix(a) {
+  use r {mul} in
   define _(mat1: &matrix(a), mat2: &matrix(a)): matrix(a) {
     let vec1 = get-content(mat1) in
     let vec2 = get-content(mat2) in
@@ -239,5 +239,27 @@ define zip-with<a, b, c>(mat1: &matrix(a), mat2: &matrix(b), f: arrow (a, b) -> 
   - row-size = r1
   - col-size = c1
   - content = Vector.zip-with(vec1, vec2, f)
+  }
+}
+
+data trope(a) {
+- Trope of {
+  - zero: arrow (int, int) -> matrix(a)
+  - one: arrow (int) -> matrix(a)
+  - add: arrow (&matrix(a), &matrix(a)) -> matrix(a)
+  - sub: arrow (&matrix(a), &matrix(a)) -> matrix(a)
+  - mul: arrow (&matrix(a), &matrix(a)) -> matrix(a)
+  - mul-pointwise: arrow (&matrix(a), &matrix(a)) -> matrix(a)
+  }
+}
+
+inline from-ring<a>(r: ring(a)): trope(a) {
+  Trope of {
+  - zero = _zero(r)
+  - one = _one(r)
+  - add = _add(r)
+  - sub = _sub(r)
+  - mul = _mul(this.rig.from-ring(r))
+  - mul-pointwise = _mul-pointwise(r)
   }
 }

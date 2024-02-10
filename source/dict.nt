@@ -6,6 +6,7 @@ import {
 - core.system
 - core.text
 - core.unit
+- this.loset
 }
 
 // size balanced tree
@@ -291,7 +292,7 @@ data trope(k) {
   }
 }
 
-inline fromLoset<k>(_loset: loset(k)): trope(k) {
+inline from-loset<k>(_loset: loset(k)): trope(k) {
   Trope of {
   - insert = insert(_loset)
   - lookup = lookup(_loset)

@@ -4,14 +4,17 @@ import {
 - Lo {Loset, Loset, loset, loset}
 - O {EQ, EQ, GT, GT, LT, LT}
 - Word
+- this.bool {and, or}
+- this.except {Pass, none}
 - this.memory {store-int}
-- this.text {text, unsafe-get-content-pointer}
+- this.text {text, text-byte-length, unsafe-get-content-pointer}
 - this.unit
 }
 
 foreign {
 - snprintf(pointer, int, pointer): int
 - sprintf(pointer, pointer): int
+- strtol(pointer, pointer, int): int
 }
 
 define show(x: int): text {
@@ -25,4 +28,50 @@ define show(x: int): text {
   let buffer = add-int(ptr, mul-int(Word.size, 2)) in
   let _: int = magic external sprintf(buffer, fmt)(x: int) in
   magic cast(int, text, ptr)
+}
+
+define _parse-nat(content-ptr: int, len: int): ?int {
+  let helper =
+    define self(index, acc): int {
+      if ge-int(index, len) {
+        acc
+      } else {
+        let tmp = mul-int(acc, 10) in
+        let char = magic load(int8, add-int(content-ptr, index)) in
+        // 48 == "0"
+        let num = sub-int(char, 48) in
+        if and(le-int(0, num), le-int(num, 9)) {
+          self(add-int(index, 1), add-int(tmp, num))
+        } else {
+          -1
+        }
+      }
+    }
+  in
+  let result = helper(0, 0) in
+  if or(lt-int(result, 0), le-int(len, 0)) {
+    none()
+  } else {
+    Pass(result)
+  }
+}
+
+define parse-int(t: &text): ?int {
+  let content-ptr = unsafe-get-content-pointer(t) in
+  let len = text-byte-length(t) in
+  if eq-int(len, 0) {
+    none()
+  } else {
+    let char = magic load(int8, content-ptr) in
+    if eq-int(char, 45) {
+      // 45 == "-"
+      try nat = _parse-nat(add-int(content-ptr, 1), sub-int(len, 1)) in
+      Pass(mul-int(-1, nat))
+    } else-if eq-int(char, 43) {
+      // 43 == "+"
+      _parse-nat(add-int(content-ptr, 1), sub-int(len, 1))
+    } else {
+      _parse-nat(content-ptr, len)
+    }
+  }
 }

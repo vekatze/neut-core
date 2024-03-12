@@ -7,8 +7,8 @@ import {
 - Word
 - this.bool
 - this.errno {report-system-error, system}
-- this.except {Pass}
-- this.int.text
+- this.except {Fail, Pass}
+- this.int.text {parse-int}
 - this.list {Cons, Nil, list}
 - this.memory
 - this.pair {Pair}
@@ -132,6 +132,10 @@ define get-line(): system(text) {
 }
 
 define zen(): unit {
-  printf("hello, {}, test! \n", [this.int.text.show(100)]);
-  Unit
+  match parse-int("123123123") {
+  - Pass(v) =>
+    print-int(v)
+  - Fail(_) =>
+    print("failed to parse\n")
+  }
 }

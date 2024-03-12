@@ -112,6 +112,7 @@
       "print-float"
       "print-int"
       "print-line"
+      "printf"
       "read"
       "write"
     ]

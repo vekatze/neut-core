@@ -1,8 +1,10 @@
 constant size: int {
   introspect arch {
-  - amd64 =>
-    8
-  - arm64 =>
-    8
+    amd64 => {
+      8
+    },
+    arm64 => {
+      8
+    },
   }
 }

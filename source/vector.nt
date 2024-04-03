@@ -1,23 +1,23 @@
 import {
-- Int
-- Magic
-- Mem
-- Word
-- this.bool
-- this.except {from-option}
-- this.external {free, malloc}
-- this.list {Cons, Nil, list, loop, minimum, repeat}
-- this.unit {Unit, unit}
+  Int,
+  Magic,
+  Mem,
+  Word,
+  this.bool,
+  this.except {from-option},
+  this.external {free, malloc},
+  this.list {Cons, Nil, list, loop, minimum, repeat},
+  this.unit {Unit, unit},
 }
 
 data _vecInfo {
-- _VecInfo of {
-  - word-size: int
-  - from-ptr: int
-  - to-ptr: int
-  - type-ptr: int
-  - content-ptr: int
-  }
+  _VecInfo of {
+    word-size: int,
+    from-ptr: int,
+    to-ptr: int,
+    type-ptr: int,
+    content-ptr: int,
+  },
 }
 
 define _discard-vector-content(ptr: int, elem-type: tau, counter: int, size: int): unit {
@@ -43,7 +43,7 @@ define _copy-vector-content(source-pointer: int, target-pointer: int, elem-type:
 }
 
 nominal {
-- vector-internal: tau
+  vector-internal: tau,
 }
 
 define vector(_: tau): tau {
@@ -60,7 +60,7 @@ define _get-vec-info<a>(xs: &vector(a)): _vecInfo {
 }
 
 resource vector-internal {
-- function (ptr: int) {
+  function (ptr: int) {
     let base-ptr = Magic.cast(int, &vector(int), ptr) in
     let _VecInfo of {from-ptr, to-ptr, type-ptr, content-ptr} = _get-vec-info(base-ptr) in
     let from: int = Mem.load-int(from-ptr) in
@@ -69,8 +69,8 @@ resource vector-internal {
     let elem-type = Magic.cast(int, tau, Mem.load-int(type-ptr)) in
     _discard-vector-content(content-ptr, elem-type, 0, size);
     Magic.cast(unit, int, free(from-ptr))
-  }
-- function (ptr: int) {
+  },
+  function (ptr: int) {
     let base-ptr = Magic.cast(int, &vector(int), ptr) in
     let _VecInfo of {word-size, from-ptr, to-ptr, type-ptr, content-ptr} = _get-vec-info(base-ptr) in
     let from: int = Mem.load-int(from-ptr) in
@@ -83,7 +83,7 @@ resource vector-internal {
     Mem.store-int(Magic.cast(tau, int, elem-type), add-int(target-ptr, mul-int(word-size, 2)));
     _copy-vector-content(content-ptr, add-int(target-ptr, mul-int(word-size, 3)), elem-type, 0, size);
     target-ptr
-  }
+  },
 }
 
 define new<a>(base-list: list(a)): vector(a) {
@@ -99,11 +99,11 @@ define new<a>(base-list: list(a)): vector(a) {
   let store-values =
     define self(values: list(a), index: int): unit {
       match values {
-      - Nil =>
-        Unit
-      - Cons(v, rest) =>
-        Mem.store-int(Magic.cast(a, int, v), add-int(ptr3, mul-int(index, word-size)));
-        self(rest, add-int(index, 1))
+        Nil => Unit,
+        Cons(v, rest) => {
+          Mem.store-int(Magic.cast(a, int, v), add-int(ptr3, mul-int(index, word-size)));
+          self(rest, add-int(index, 1))
+        },
       }
     }
   in
@@ -141,17 +141,18 @@ inline for-each<a>(xs: &vector(a), f: (a) -> unit): unit {
 
 inline for<a, b>(xs: &vector(a), f: (a) -> b): vector(b) {
   new of {
-  - base-list =
-    repeat(size(xs), function (i) {
-      f(access(xs, i))
-    })
+    base-list = {
+      repeat(size(xs), function (i) {
+        f(access(xs, i))
+      })
+    },
   }
 }
 
 inline fold-LN<elem-type, result-type> of {
-- acc: result-type
-- xs: &vector(elem-type)
-- consumer: (result-type, &elem-type) -> result-type
+  acc: result-type,
+  xs: &vector(elem-type),
+  consumer: (result-type, &elem-type) -> result-type,
 }: result-type {
   let sz = size(xs) in
   let helper =

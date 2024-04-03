@@ -1,15 +1,15 @@
 import {
-- this.field {Field, field}
+  this.field {Field, field},
 }
 
 data ring(a) {
-- Ring of {
-  - zero: a
-  - add: (a, a) -> a
-  - sub: (a, a) -> a
-  - one: a
-  - mul: (a, a) -> a
-  }
+  Ring of {
+    zero: a,
+    add: (a, a) -> a,
+    sub: (a, a) -> a,
+    one: a,
+    mul: (a, a) -> a,
+  },
 }
 
 inline from-field<a>(f: field(a)): ring(a) {

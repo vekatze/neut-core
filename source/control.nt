@@ -1,6 +1,6 @@
 import {
-- core.bool
-- core.unit {Unit, unit}
+  core.bool,
+  core.unit {Unit, unit},
 }
 
 inline loop<result>(count: int, base: result, f: (result, int) -> result): result {

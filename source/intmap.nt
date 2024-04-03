@@ -1,23 +1,23 @@
 import {
-- this.bool {bool}
-- this.except {Pass, none}
-- this.unit
+  this.bool {bool},
+  this.except {Pass, none},
+  this.unit,
 }
 
 foreign {
-- llvm.ctlz.i64(int64): int64
+  llvm.ctlz.i64(int64): int64,
 }
 
 // Data.IntMap.Strict in Haskell
 data intmap(a) {
-- Nil
-- Tip(int, a)
-- Bin of {
-  - prefix: int
-  - mask: int
-  - left: intmap(a)
-  - right: intmap(a)
-  }
+  Nil,
+  Tip(int, a),
+  Bin of {
+    prefix: int,
+    mask: int,
+    left: intmap(a),
+    right: intmap(a),
+  },
 }
 
 constant _Key: tau {
@@ -70,10 +70,8 @@ inline _linkWithMask<a>(m: _Mask, p1: _Prefix, t1: intmap(a), t2: intmap(a)): in
 // Return a word where only the highest bit is set.
 inline _highestBitMask(w: int): int {
   introspect arch {
-  - amd64 =>
-    shl-int(1, sub-int(63, magic external llvm.ctlz.i64(w)))
-  - arm64 =>
-    shl-int(1, sub-int(63, magic external llvm.ctlz.i64(w)))
+    amd64 => shl-int(1, sub-int(63, magic external llvm.ctlz.i64(w))),
+    arm64 => shl-int(1, sub-int(63, magic external llvm.ctlz.i64(w))),
   }
 }
 
@@ -87,79 +85,92 @@ inline _link<a>(p1: _Prefix, t1: intmap(a), p2: _Prefix, t2: intmap(a)): intmap(
 
 define insert<a>(k: _Key, x: a, t: intmap(a)): intmap(a) {
   match t {
-  - Nil =>
-    Tip(k, x)
-  - Tip(ky, v) =>
-    if eq-int(k, ky) {
-      Tip(ky, x)
-    } else {
-      _link(k, Tip(k, x), ky, Tip(ky, v))
-    }
-  - Bin(p, m, l, r) =>
-    if _nomatch(k, p, m) {
-      _link(k, Tip(k, x), p, Bin(p, m, l, r))
-    } else-if _zero(k, m) {
-      Bin(p, m, insert(k, x, l), r)
-    } else {
-      Bin(p, m, l, insert(k, x, r))
-    }
+    Nil => {
+      Tip(k, x)
+    },
+    Tip(ky, v) => {
+      if eq-int(k, ky) {
+        Tip(ky, x)
+      } else {
+        _link(k, Tip(k, x), ky, Tip(ky, v))
+      }
+    },
+    Bin(p, m, l, r) => {
+      if _nomatch(k, p, m) {
+        _link(k, Tip(k, x), p, Bin(p, m, l, r))
+      } else-if _zero(k, m) {
+        Bin(p, m, insert(k, x, l), r)
+      } else {
+        Bin(p, m, l, insert(k, x, r))
+      }
+    },
   }
 }
 
 define lookup<a>(k: _Key, t: &intmap(a)): ?&a {
   case t {
-  - Nil =>
-    none()
-  - Tip(kx, x) =>
-    if eq-int(k, *kx) {
-      Pass(x)
-    } else {
+    Nil => {
       none()
-    }
-  - Bin(_, m, l, r) =>
-    if _zero(k, *m) {
-      lookup(k, l)
-    } else {
-      lookup(k, r)
-    }
+    },
+    Tip(kx, x) => {
+      if eq-int(k, *kx) {
+        Pass(x)
+      } else {
+        none()
+      }
+    },
+    Bin(_, m, l, r) => {
+      if _zero(k, *m) {
+        lookup(k, l)
+      } else {
+        lookup(k, r)
+      }
+    },
   }
 }
 
 inline _binCheckLeft<a>(p: _Prefix, m: _Mask, l: intmap(a), r: intmap(a)): intmap(a) {
   match l {
-  - Nil =>
-    r
-  - l =>
-    Bin(p, m, l, r)
+    Nil => {
+      r
+    },
+    l => {
+      Bin(p, m, l, r)
+    },
   }
 }
 
 inline _binCheckRight<a>(p: _Prefix, m: _Mask, l: intmap(a), r: intmap(a)): intmap(a) {
   match r {
-  - Nil =>
-    l
-  - r =>
-    Bin(p, m, l, r)
+    Nil => {
+      l
+    },
+    r => {
+      Bin(p, m, l, r)
+    },
   }
 }
 
 define delete<a>(k: _Key, t: intmap(a)): intmap(a) {
   match t {
-  - Nil =>
-    Nil
-  - Tip(ky, y) =>
-    if eq-int(k, ky) {
+    Nil => {
       Nil
-    } else {
-      Tip(ky, y)
-    }
-  - Bin(p, m, l, r) =>
-    if _nomatch(k, p, m) {
-      Bin(p, m, l, r)
-    } else-if _zero(k, m) {
-      _binCheckLeft(p, m, delete(k, l), r)
-    } else {
-      _binCheckRight(p, m, l, delete(k, r))
-    }
+    },
+    Tip(ky, y) => {
+      if eq-int(k, ky) {
+        Nil
+      } else {
+        Tip(ky, y)
+      }
+    },
+    Bin(p, m, l, r) => {
+      if _nomatch(k, p, m) {
+        Bin(p, m, l, r)
+      } else-if _zero(k, m) {
+        _binCheckLeft(p, m, delete(k, l), r)
+      } else {
+        _binCheckRight(p, m, l, delete(k, r))
+      }
+    },
   }
 }

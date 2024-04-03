@@ -1,33 +1,35 @@
 import {
-- Lo {Loset, loset}
-- this.bool {False, True, and, bool, or}
-- this.except {Fail, Pass, none}
-- this.functor {Functor, functor}
-- this.monoid {Monoid, monoid}
-- this.order {GT, LT}
-- this.pair {Pair, pair}
-- this.semigroup {from-monoid, semigroup}
-- this.unit {Unit, unit}
+  Lo {Loset, loset},
+  this.bool {False, True, and, bool, or},
+  this.except {Fail, Pass, none},
+  this.functor {Functor, functor},
+  this.monoid {Monoid, monoid},
+  this.order {GT, LT},
+  this.pair {Pair, pair},
+  this.semigroup {from-monoid, semigroup},
+  this.unit {Unit, unit},
 }
 
 data list(a: tau) {
-- Nil
-- Cons(a, list(a))
+  Nil,
+  Cons(a, list(a)),
 }
 
 // folds are optimized into loops
 inline fold-left<elem-type, result-type> of {
-- acc: result-type
-- xs: list(elem-type)
-- consumer: (result-type, elem-type) -> result-type
+  acc: result-type,
+  xs: list(elem-type),
+  consumer: (result-type, elem-type) -> result-type,
 }: result-type {
   let helper =
     define loop(acc, xs): result-type {
       match xs {
-      - Nil =>
-        acc
-      - Cons(y, ys) =>
-        loop(consumer(acc, y), ys)
+        Nil => {
+          acc
+        },
+        Cons(y, ys) => {
+          loop(consumer(acc, y), ys)
+        },
       }
     }
   in
@@ -35,17 +37,19 @@ inline fold-left<elem-type, result-type> of {
 }
 
 inline fold-left-noetic<elem-type, result-type> of {
-- acc: result-type
-- xs: &list(elem-type)
-- consumer: (result-type, &elem-type) -> result-type
+  acc: result-type,
+  xs: &list(elem-type),
+  consumer: (result-type, &elem-type) -> result-type,
 }: result-type {
   let helper =
     define loop(acc, xs): result-type {
       case xs {
-      - Nil =>
-        acc
-      - Cons(y, ys) =>
-        loop(consumer(acc, y), ys)
+        Nil => {
+          acc
+        },
+        Cons(y, ys) => {
+          loop(consumer(acc, y), ys)
+        },
       }
     }
   in
@@ -53,17 +57,15 @@ inline fold-left-noetic<elem-type, result-type> of {
 }
 
 inline fold-right<elem-type, result-type> of {
-- xs: list(elem-type)
-- acc: result-type
-- consumer: (elem-type, result-type) -> result-type
+  xs: list(elem-type),
+  acc: result-type,
+  consumer: (elem-type, result-type) -> result-type,
 }: result-type {
   let helper =
     define loop(xs, acc): result-type {
       match xs {
-      - Nil =>
-        acc
-      - Cons(y, ys) =>
-        consumer(y, loop(ys, acc))
+        Nil => acc,
+        Cons(y, ys) => consumer(y, loop(ys, acc)),
       }
     }
   in
@@ -71,17 +73,19 @@ inline fold-right<elem-type, result-type> of {
 }
 
 inline fold-right-noetic<elem-type, result-type> of {
-- xs: &list(elem-type)
-- acc: result-type
-- consumer: (&elem-type, result-type) -> result-type
+  xs: &list(elem-type),
+  acc: result-type,
+  consumer: (&elem-type, result-type) -> result-type,
 }: result-type {
   let helper =
     define loop(xs, acc): result-type {
       case xs {
-      - Nil =>
-        acc
-      - Cons(y, ys) =>
-        consumer(y, loop(ys, acc))
+        Nil => {
+          acc
+        },
+        Cons(y, ys) => {
+          consumer(y, loop(ys, acc))
+        },
       }
     }
   in
@@ -113,11 +117,13 @@ define loop(count: int, f: (int) -> unit): unit {
   let helper =
     define self(cursor): unit {
       match ge-int(cursor, count) {
-      - True =>
-        Unit
-      - False =>
-        f(cursor);
-        self(add-int(cursor, 1))
+        True => {
+          Unit
+        },
+        False => {
+          f(cursor);
+          self(add-int(cursor, 1))
+        },
       }
     }
   in
@@ -158,17 +164,19 @@ define length<a>(xs: &list(a)): int {
 }
 
 inline fold-left-index<elem-type, result-type> of {
-- acc: result-type
-- xs: list(elem-type)
-- consumer: (result-type, elem-type, int) -> result-type
+  acc: result-type,
+  xs: list(elem-type),
+  consumer: (result-type, elem-type, int) -> result-type,
 }: result-type {
   let helper =
     define loop(acc, xs, i): result-type {
       match xs {
-      - Nil =>
-        acc
-      - Cons(y, ys) =>
-        loop(consumer(acc, y, i), ys, add-int(i, 1))
+        Nil => {
+          acc
+        },
+        Cons(y, ys) => {
+          loop(consumer(acc, y, i), ys, add-int(i, 1))
+        },
       }
     }
   in
@@ -177,12 +185,15 @@ inline fold-left-index<elem-type, result-type> of {
 
 define zip<a, b>(xs: list(a), ys: list(b)): list(pair(a, b)) {
   match xs, ys {
-  - Nil, _ =>
-    Nil
-  - _, Nil =>
-    Nil
-  - Cons(x, xs'), Cons(y, ys') =>
-    Cons(Pair(x, y), zip(xs', ys'))
+    Nil, _ => {
+      Nil
+    },
+    _, Nil => {
+      Nil
+    },
+    Cons(x, xs'), Cons(y, ys') => {
+      Cons(Pair(x, y), zip(xs', ys'))
+    },
   }
 }
 
@@ -196,10 +207,8 @@ define unzip<a, b>(xs: list(pair(a, b))): pair(list(a), list(b)) {
 
 define uncons<a>(xs: list(a)): ?pair(a, list(a)) {
   match xs {
-  - Nil =>
-    none()
-  - Cons(y, ys) =>
-    Pass(Pair(y, ys))
+    Nil => none(),
+    Cons(y, ys) => Pass(Pair(y, ys)),
   }
 }
 
@@ -223,10 +232,8 @@ define range(from: int, to: int): list(int) {
 define filter-some<a>(xs: list(?a)): list(a) {
   fold-right(xs, [], function (x, acc) {
     match x {
-    - Pass(v) =>
-      Cons(v, acc)
-    - Fail(_) =>
-      acc
+      Pass(v) => Cons(v, acc),
+      Fail(_) => acc,
     }
   })
 }
@@ -242,18 +249,18 @@ inline minimum<a>(as-ord: loset(a)): (list(a)) -> ?a {
   function (xs) {
     let Loset of {cmp} = as-ord in
     match xs {
-    - Nil =>
-      none()
-    - Cons(y, ys) =>
-      Pass(fold-left(y, ys, function (acc, y) {
-        let order on acc, y = cmp(acc, y) in
-        match order {
-        - LT =>
-          acc
-        - _ =>
-          y
-        }
-      }))
+      Nil => {
+        none()
+      },
+      Cons(y, ys) => {
+        Pass(fold-left(y, ys, function (acc, y) {
+          let order on acc, y = cmp(acc, y) in
+          match order {
+            LT => acc,
+            _ => y,
+          }
+        }))
+      },
     }
   }
 }
@@ -264,36 +271,32 @@ inline maximum<a>(as-ord: loset(a)): (list(a)) -> ?a {
     let helper =
       define self(cand: a, ys: list(a)): a {
         match ys {
-        - Nil =>
-          cand
-        - Cons(z, zs) =>
-          let order on cand, z = cmp(cand, z) in
-          match order {
-          - GT =>
-            self(cand, zs)
-          - _ =>
-            self(z, zs)
-          }
+          Nil => cand,
+          Cons(z, zs) => {
+            let order on cand, z = cmp(cand, z) in
+            match order {
+              GT => self(cand, zs),
+              _ => self(z, zs),
+            }
+          },
         }
       }
     in
     match xs {
-    - Nil =>
-      none()
-    - Cons(y, ys) =>
-      Pass(helper(y, ys))
+      Nil => none(),
+      Cons(y, ys) => Pass(helper(y, ys)),
     }
   }
 }
 
 inline as-monoid<a>(): monoid(list(a)) {
   Monoid of {
-  - e =
-    []
-  - op =
-    function (x, y) {
-      append(x, y)
-    }
+    e = [],
+    op = {
+      function (x, y) {
+        append(x, y)
+      }
+    },
   }
 }
 

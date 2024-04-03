@@ -1,19 +1,19 @@
 import {
-- Ext
-- FD
-- Magic
-- Mem
-- Seek
-- Word
-- this.bool
-- this.errno {report-system-error, system}
-- this.except {Fail, Pass}
-- this.int.text {parse-int}
-- this.list {Cons, Nil, list}
-- this.memory
-- this.pair {Pair}
-- this.text {break-on, text, text-byte-length, unsafe-get-content-pointer}
-- this.unit {Unit, unit}
+  Ext,
+  FD,
+  Magic,
+  Mem,
+  Seek,
+  Word,
+  this.bool,
+  this.errno {report-system-error, system},
+  this.except {Fail, Pass},
+  this.int.text {parse-int},
+  this.list {Cons, Nil, list},
+  this.memory,
+  this.pair {Pair},
+  this.text {break-on, text, text-byte-length, unsafe-get-content-pointer},
+  this.unit {Unit, unit},
 }
 
 define write(t: &text, f: FD.descriptor): system(int) {
@@ -32,8 +32,8 @@ define write(t: &text, f: FD.descriptor): system(int) {
 }
 
 foreign {
-- printf(pointer): void
-- fflush(pointer): void
+  printf(pointer): void,
+  fflush(pointer): void,
 }
 
 define print(t: &text): unit {
@@ -46,22 +46,22 @@ define print(t: &text): unit {
 // for now
 define printf(fmt: &text, args: list(text)): unit {
   match args {
-  - Nil =>
-    print(fmt)
-  - Cons(arg, rest) =>
-    let Pair(before, after) = break-on("{}", fmt) in
-    let _ on before = print(before) in
-    let _ = before in
-    let no-hole on after = this.text.is-empty(after) in
-    if no-hole {
-      Unit
-    } else {
-      let _ on arg = print(arg) in
-      let _ = arg in
-      let _ on after = printf(after, rest) in
-      let _ = after in
-      Unit
-    }
+    Nil => print(fmt),
+    Cons(arg, rest) => {
+      let Pair(before, after) = break-on("{}", fmt) in
+      let _ on before = print(before) in
+      let _ = before in
+      let no-hole on after = this.text.is-empty(after) in
+      if no-hole {
+        Unit
+      } else {
+        let _ on arg = print(arg) in
+        let _ = arg in
+        let _ on after = printf(after, rest) in
+        let _ = after in
+        Unit
+      }
+    },
   }
 }
 
@@ -133,9 +133,7 @@ define get-line(): system(text) {
 
 define zen(): unit {
   match parse-int("123123123") {
-  - Pass(v) =>
-    print-int(v)
-  - Fail(_) =>
-    print("failed to parse\n")
+    Pass(v) => print-int(v),
+    Fail(_) => print("failed to parse\n"),
   }
 }

@@ -1,6 +1,6 @@
 data lattice(a) {
-- Lattice of {
-  - join: (a, a) -> a
-  - meet: (a, a) -> a
-  }
+  Lattice of {
+    join: (a, a) -> a,
+    meet: (a, a) -> a,
+  },
 }

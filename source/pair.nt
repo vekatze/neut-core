@@ -1,3 +1,3 @@
 data pair(a, b) {
-- Pair(left: a, right: b)
+  Pair(left: a, right: b),
 }

@@ -1,45 +1,37 @@
 import {
-- this.list {fold-left, list}
+  this.list {fold-left, list},
 }
 
 data flag {
-- R
-- W
-- RW
-- Append
-- Create
+  R,
+  W,
+  RW,
+  Append,
+  Create,
 }
 
 define _interpret-flag(flag: flag): int {
   introspect os {
-  - darwin =>
-    // https://github.com/apple/darwin-xnu/blob/main/bsd/sys/fcntl.h
-    match flag {
-    - R =>
-      0x0000
-    - W =>
-      0x0001
-    - RW =>
-      0x0002
-    - Create =>
-      0x0200
-    - Append =>
-      0x0008
-    }
-  - linux =>
-    // https://github.com/torvalds/linux/blob/master/import/uapi/asm-generic/fcntl.h
-    match flag {
-    - R =>
-      0o00000000
-    - W =>
-      0o00000001
-    - RW =>
-      0o00000002
-    - Create =>
-      0o00000100
-    - Append =>
-      0o00002000
-    }
+    darwin => {
+      // https://github.com/apple/darwin-xnu/blob/main/bsd/sys/fcntl.h
+      match flag {
+        R => 0x0000,
+        W => 0x0001,
+        RW => 0x0002,
+        Create => 0x0200,
+        Append => 0x0008,
+      }
+    },
+    linux => {
+      // https://github.com/torvalds/linux/blob/master/import/uapi/asm-generic/fcntl.h
+      match flag {
+        R => 0o00000000,
+        W => 0o00000001,
+        RW => 0o00000002,
+        Create => 0o00000100,
+        Append => 0o00002000,
+      }
+    },
   }
 }
 

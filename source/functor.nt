@@ -1,5 +1,5 @@
 data functor(f: (tau) -> tau) {
-- Functor of {
-  - map: <a, b>(comp: (a) -> b, xs: f(a)) -> f(b)
-  }
+  Functor of {
+    map: <a, b>(comp: (a) -> b, xs: f(a)) -> f(b),
+  },
 }

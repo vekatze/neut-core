@@ -1,17 +1,20 @@
 // https://opensource.apple.com/source/xnu/xnu-3248.30.4/bsd/sys/_types/_seek_set.h.auto.html
 data seek {
-- SET
-- CUR
-- END
+  SET,
+  CUR,
+  END,
 }
 
 define interpret(s: seek): int {
   match s {
-  - SET =>
-    0
-  - CUR =>
-    1
-  - END =>
-    2
+    SET => {
+      0
+    },
+    CUR => {
+      1
+    },
+    END => {
+      2
+    },
   }
 }

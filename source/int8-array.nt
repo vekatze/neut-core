@@ -1,11 +1,11 @@
 import {
-- Magic
-- Mem
-- Word
-- this.bool
-- this.external {free, malloc}
-- this.list {Cons, Nil, length, list}
-- this.unit {Unit, unit}
+  Magic,
+  Mem,
+  Word,
+  this.bool,
+  this.external {free, malloc},
+  this.list {Cons, Nil, length, list},
+  this.unit {Unit, unit},
 }
 
 define unsafe-copy-int8-array(source-pointer: int, target-pointer: int, index: int, from: int, to: int): unit {
@@ -19,10 +19,10 @@ define unsafe-copy-int8-array(source-pointer: int, target-pointer: int, index: i
 }
 
 resource int8-array {
-- function (x: int) {
+  function (x: int) {
     Magic.cast(unit, int, free(x))
-  }
-- function (source-pointer: int) {
+  },
+  function (source-pointer: int) {
     let u = Word.size in
     let u2 = mul-int(u, 2) in
     let from = Mem.load-int(source-pointer) in
@@ -33,7 +33,7 @@ resource int8-array {
     Mem.store-int(length, add-int(target-pointer, u));
     unsafe-copy-int8-array(add-int(source-pointer, u2), add-int(target-pointer, u2), 0, from, to);
     target-pointer
-  }
+  },
 }
 
 define int8-array-length(xs: &int8-array): int {
@@ -55,9 +55,9 @@ define int8-array-new(xs: list(int8)): int8-array {
   let store-values =
     define self(values: list(int8), index: int): unit {
       match values {
-      - Nil =>
+      | Nil =>
         Unit
-      - Cons(v, rest) =>
+      | Cons(v, rest) =>
         Mem.store-int8(v, add-int(content-pointer, index));
         self(rest, add-int(index, 1))
       }

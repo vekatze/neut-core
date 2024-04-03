@@ -1,12 +1,12 @@
 foreign {
-- arc4random_uniform(int): int
+  arc4random_uniform(int): int,
 }
 
 define random(ubound: int): int {
   introspect os {
-  - darwin =>
+  | darwin =>
     magic external arc4random_uniform(ubound)
-  - linux =>
+  | linux =>
     // requires glibc >= 2.36
     magic external arc4random_uniform(ubound)
   }

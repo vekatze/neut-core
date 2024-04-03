@@ -1,10 +1,10 @@
 data field(a) {
-- Field of {
-  - zero: a
-  - add: (a, a) -> a
-  - sub: (a, a) -> a
-  - one: a
-  - mul: (a, a) -> a
-  - div: (a, a) -> a
-  }
+| Field(
+    zero: a,
+    add: (a, a) -> a,
+    sub: (a, a) -> a,
+    one: a,
+    mul: (a, a) -> a,
+    div: (a, a) -> a,
+  )
 }

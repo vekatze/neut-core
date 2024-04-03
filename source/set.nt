@@ -1,9 +1,9 @@
 import {
-- Lo {Loset, loset}
-- this.bool {False, True, bool}
-- this.dict {dict, empty, singleton}
-- this.except {Fail, Pass}
-- this.unit {Unit, unit}
+  Lo {Loset, loset},
+  this.bool {False, True, bool},
+  this.dict {dict, empty, singleton},
+  this.except {Fail, Pass},
+  this.unit {Unit, unit},
 }
 
 constant _Size: tau {
@@ -15,38 +15,39 @@ inline set(a): tau {
 }
 
 data trope(k) {
-- Trope of {
-  - empty: set(k)
-  - singleton: (k) -> set(k)
-  - insert: (k, set(k)) -> set(k)
-  - lookup: (&k, &set(k)) -> bool
-  - delete: (k, set(k)) -> set(k)
-  }
+| Trope(
+    empty: set(k),
+    singleton: (k) -> set(k),
+    insert: (k, set(k)) -> set(k),
+    lookup: (&k, &set(k)) -> bool,
+    delete: (k, set(k)) -> set(k),
+  )
 }
 
 inline from-loset<k>(_loset: loset(k)): trope(k) {
   use this.dict.from-loset(_loset) {insert, lookup, delete} in
   Trope of {
-  - empty =
-    empty()
-  - singleton =
-    function (k) {
-      singleton(k, Unit)
-    }
-  - insert =
-    function (k, s) {
-      insert(k, Unit, s)
-    }
-  - lookup =
-    function (k, s) {
-      match lookup(k, s) {
-      - Pass(_) =>
-        True
-      - Fail(_) =>
-        False
+    empty = empty(),
+    singleton = {
+      function (k) {
+        singleton(k, Unit)
       }
-    }
-  - delete =
-    exact delete
+    },
+    insert = {
+      function (k, s) {
+        insert(k, Unit, s)
+      }
+    },
+    lookup = {
+      function (k, s) {
+        match lookup(k, s) {
+        | Pass(_) =>
+          True
+        | Fail(_) =>
+          False
+        }
+      }
+    },
+    delete = exact delete,
   }
 }

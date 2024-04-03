@@ -1,23 +1,23 @@
 import {
-- Int
-- L {list, loop, repeat}
-- TIO
-- Vector {vector}
-- this.bool {and}
-- this.except {from-option}
-- this.rig {rig}
-- this.ring {ring}
-- this.system
-- this.text
-- this.unit {unit}
+  Int,
+  L {list, loop, repeat},
+  TIO,
+  Vector {vector},
+  this.bool {and},
+  this.except {from-option},
+  this.rig {rig},
+  this.ring {ring},
+  this.system,
+  this.text,
+  this.unit {unit},
 }
 
 data matrix(a) {
-- Matrix of {
-  - row-size: int
-  - col-size: int
-  - content: vector(a)
-  }
+| Matrix(
+    row-size: int,
+    col-size: int,
+    content: vector(a),
+  )
 }
 
 define new<a>(content-list: list(list(a))): matrix(a) {
@@ -25,9 +25,9 @@ define new<a>(content-list: list(list(a))): matrix(a) {
   let col-size = L.minimum(Int.as-loset)(len-list) in
   let row-size on content-list = L.length(content-list) in
   Matrix of {
-  - row-size
-  - col-size = from-option(0, col-size)
-  - content = Vector.new(L.concat(content-list))
+    row-size,
+    col-size = from-option(0, col-size),
+    content = Vector.new(L.concat(content-list)),
   }
 }
 
@@ -121,9 +121,9 @@ inline _add<a>(r: ring(a)): (&matrix(a), &matrix(a)) -> matrix(a) {
       eq-int(col-size, col-size-2)
     };
     Matrix of {
-    - row-size
-    - col-size
-    - content = Vector.zip-with(vec1, vec2, add)
+      row-size,
+      col-size,
+      content = Vector.zip-with(vec1, vec2, add),
     }
   }
 }
@@ -144,9 +144,9 @@ inline _sub<a>(r: ring(a)): (&matrix(a), &matrix(a)) -> matrix(a) {
       eq-int(col-size, col-size-2)
     };
     Matrix of {
-    - row-size
-    - col-size
-    - content = Vector.zip-with(vec1, vec2, sub)
+      row-size,
+      col-size,
+      content = Vector.zip-with(vec1, vec2, sub),
     }
   }
 }
@@ -176,16 +176,17 @@ inline _mul<a>(r: rig(a)): (&matrix(a), &matrix(a)) -> matrix(a) {
       eq-int(col-size-1, row-size-2)
     };
     new of {
-    - content-list =
-      repeat(row-size-1, function (i) {
-        repeat(col-size-2, function (j) {
-          _repeat-sum(r, col-size-1, function (k) {
-            let a_i_k = access(mat1, i, k) in
-            let b_k_j = access(mat2, k, j) in
-            mul(a_i_k, b_k_j)
+      content-list = {
+        repeat(row-size-1, function (i) {
+          repeat(col-size-2, function (j) {
+            _repeat-sum(r, col-size-1, function (k) {
+              let a_i_k = access(mat1, i, k) in
+              let b_k_j = access(mat2, k, j) in
+              mul(a_i_k, b_k_j)
+            })
           })
         })
-      })
+      },
     }
   }
 }
@@ -206,9 +207,9 @@ inline _mul-pointwise<a>(r: ring(a)): (&matrix(a), &matrix(a)) -> matrix(a) {
       eq-int(col-size, col-size-2)
     };
     Matrix of {
-    - row-size
-    - col-size
-    - content = Vector.zip-with(vec1, vec2, mul)
+      row-size,
+      col-size,
+      content = Vector.zip-with(vec1, vec2, mul),
     }
   }
 }
@@ -216,9 +217,9 @@ inline _mul-pointwise<a>(r: ring(a)): (&matrix(a), &matrix(a)) -> matrix(a) {
 define for<a, b>(mat: &matrix(a), f: (a) -> b): matrix(b) {
   let vec = get-content(mat) in
   Matrix of {
-  - row-size = get-row-size(mat)
-  - col-size = get-col-size(mat)
-  - content = Vector.for(vec, f)
+    row-size = get-row-size(mat),
+    col-size = get-col-size(mat),
+    content = Vector.for(vec, f),
   }
 }
 
@@ -236,30 +237,30 @@ define zip-with<a, b, c>(mat1: &matrix(a), mat2: &matrix(b), f: (a, b) -> c): ma
   let vec1 = get-content(mat1) in
   let vec2 = get-content(mat2) in
   Matrix of {
-  - row-size = r1
-  - col-size = c1
-  - content = Vector.zip-with(vec1, vec2, f)
+    row-size = r1,
+    col-size = c1,
+    content = Vector.zip-with(vec1, vec2, f),
   }
 }
 
 data trope(a) {
-- Trope of {
-  - zero: (int, int) -> matrix(a)
-  - one: (int) -> matrix(a)
-  - add: (&matrix(a), &matrix(a)) -> matrix(a)
-  - sub: (&matrix(a), &matrix(a)) -> matrix(a)
-  - mul: (&matrix(a), &matrix(a)) -> matrix(a)
-  - mul-pointwise: (&matrix(a), &matrix(a)) -> matrix(a)
-  }
+| Trope(
+    zero: (int, int) -> matrix(a),
+    one: (int) -> matrix(a),
+    add: (&matrix(a), &matrix(a)) -> matrix(a),
+    sub: (&matrix(a), &matrix(a)) -> matrix(a),
+    mul: (&matrix(a), &matrix(a)) -> matrix(a),
+    mul-pointwise: (&matrix(a), &matrix(a)) -> matrix(a),
+  )
 }
 
 inline from-ring<a>(r: ring(a)): trope(a) {
   Trope of {
-  - zero = _zero(r)
-  - one = _one(r)
-  - add = _add(r)
-  - sub = _sub(r)
-  - mul = _mul(this.rig.from-ring(r))
-  - mul-pointwise = _mul-pointwise(r)
+    zero = _zero(r),
+    one = _one(r),
+    add = _add(r),
+    sub = _sub(r),
+    mul = _mul(this.rig.from-ring(r)),
+    mul-pointwise = _mul-pointwise(r),
   }
 }

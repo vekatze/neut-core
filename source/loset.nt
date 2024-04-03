@@ -1,9 +1,9 @@
 import {
-- this.order {order}
+  this.order {order},
 }
 
 data loset(a) {
-- Loset of {
-  - cmp: (&a, &a) -> order
-  }
+| Loset(
+    cmp: (&a, &a) -> order,
+  )
 }

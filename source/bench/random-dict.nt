@@ -1,11 +1,11 @@
 import {
-- Dict {dict, insert}
-- TIO
-- this.control {loop}
-- this.except {Fail, Pass}
-- this.int
-- this.random {random}
-- this.unit {Unit, unit}
+  Dict {dict, insert},
+  TIO,
+  this.control {loop},
+  this.except {Fail, Pass},
+  this.int,
+  this.random {random},
+  this.unit {Unit, unit},
 }
 
 constant intdict: Dict.trope(int) {
@@ -26,9 +26,9 @@ define random-lookup-sum(d: &dict(int, int)): unit {
       let key = random(1000000) in
       let val on key =
         match intdict::lookup(key, d) {
-        - Fail(_) =>
+        | Fail(_) =>
           0
-        - Pass(v) =>
+        | Pass(v) =>
           *v
         }
       in

@@ -1,18 +1,18 @@
 import {
-  Ext,
-  L,
-  Magic,
-  Mem,
-  Word,
-  this.bool {False, True, bool},
-  this.int8-array {int8-array, int8-array-access, int8-array-access, int8-array-length, int8-array-new, unsafe-copy-int8-array},
-  this.list {Cons, Nil, list},
-  this.pair {Pair, pair},
-  this.unit {Unit, unit},
+- Ext
+- L
+- Magic
+- Mem
+- Word
+- this.bool {False, True, bool}
+- this.int8-array {int8-array, int8-array-access, int8-array-access, int8-array-length, int8-array-new, unsafe-copy-int8-array}
+- this.list {Cons, Nil, list}
+- this.pair {Pair, pair}
+- this.unit {Unit, unit}
 }
 
 data text {
-  Text(content: int8-array),
+- Text(content: int8-array)
 }
 
 define create(xs: L.list(int8)): text {
@@ -261,17 +261,17 @@ define _appendR(t1: text, t2: text): text {
 
 define format(fmt: &text, args: list(text)): text {
   match args {
-    Nil => *fmt,
-    Cons(arg, rest) => {
-      let Pair(before, after) = break-on("{}", fmt) in
-      let no-hole on after = this.text.is-empty(after) in
-      if no-hole {
-        before
-      } else {
-        let result on after = _appendR(before, _appendR(arg, format(after, rest))) in
-        let _ = after in
-        result
-      }
-    },
+  - Nil =>
+    *fmt
+  - Cons(arg, rest) =>
+    let Pair(before, after) = break-on("{}", fmt) in
+    let no-hole on after = this.text.is-empty(after) in
+    if no-hole {
+      before
+    } else {
+      let result on after = _appendR(before, _appendR(arg, format(after, rest))) in
+      let _ = after in
+      result
+    }
   }
 }

@@ -1,13 +1,13 @@
 import {
-  Word,
-  this.bool {bool},
-  this.external {exit},
-  this.list {Cons, for, for-each, list},
-  this.memory {load-int},
-  this.text {text, unsafe-from-c-string},
-  this.text.io {print},
-  this.thread {flow},
-  this.unit {Unit, unit},
+- Word
+- this.bool {bool}
+- this.external {exit}
+- this.list {Cons, for, for-each, list}
+- this.memory {load-int}
+- this.text {text, unsafe-from-c-string}
+- this.text.io {print}
+- this.thread {flow}
+- this.unit {Unit, unit}
 }
 
 inline admit(a: tau, t: &text): a {
@@ -26,12 +26,12 @@ define _assert(message: &text, check: () -> bool): unit {
 
 inline assert(message: &text, check: () -> bool): unit {
   introspect build-mode {
-    release => {
-      let _ = check in
-      let _ = message in
-      Unit
-    },
-    default => _assert(message, check),
+  - release =>
+    let _ = check in
+    let _ = message in
+    Unit
+  - default =>
+    _assert(message, check)
   }
 }
 

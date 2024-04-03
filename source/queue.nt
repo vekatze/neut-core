@@ -1,14 +1,14 @@
 import {
-  this.bool {False, True, bool},
-  this.except {Pass, none},
-  this.list {Cons, Nil, length, list},
-  this.pair {Pair, pair},
-  this.unit,
+- this.bool {False, True, bool}
+- this.except {Pass, none}
+- this.list {Cons, Nil, length, list}
+- this.pair {Pair, pair}
+- this.unit
 }
 
 // naive queue
 data queue(a: tau) {
-  Queue(list(a), list(a)),
+- Queue(list(a), list(a))
 }
 
 define empty<a>(): queue(a) {
@@ -18,9 +18,12 @@ define empty<a>(): queue(a) {
 define dequeue<a>(q: queue(a)): ?pair(a, queue(a)) {
   let Queue(ls, rs) = q in
   match ls, rs {
-    Nil, Nil => none(),
-    Cons(l, ls-rest), rs => Pass(Pair(l, Queue(ls-rest, rs))),
-    Nil, rs => dequeue(Queue(rs, [])),
+  - Nil, Nil =>
+    none()
+  - Cons(l, ls-rest), rs =>
+    Pass(Pair(l, Queue(ls-rest, rs)))
+  - Nil, rs =>
+    dequeue(Queue(rs, []))
   }
 }
 
@@ -31,17 +34,18 @@ define enqueue<a>(x: a, q: queue(a)): queue(a) {
 
 define size<a>(q: &queue(a)): int {
   case q {
-    Queue(ls, rs) => {
-      let l1 = length(ls) in
-      let l2 = length(rs) in
-      add-int(l1, l2)
-    },
+  - Queue(ls, rs) =>
+    let l1 = length(ls) in
+    let l2 = length(rs) in
+    add-int(l1, l2)
   }
 }
 
 define is-empty<a>(q: &queue(a)): bool {
   case q {
-    Queue([], []) => True,
-    _ => False,
+  - Queue([], []) =>
+    True
+  - _ =>
+    False
   }
 }

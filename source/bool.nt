@@ -1,6 +1,6 @@
 data bool {
-  False,
-  True,
+- False
+- True
 }
 
 define and(b1: bool, b2: bool): bool {

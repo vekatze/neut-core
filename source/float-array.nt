@@ -1,14 +1,14 @@
 import {
-  Int,
-  Magic,
-  Mem,
-  Word,
-  this.bool,
-  this.except {Pass, from-option, none},
-  this.external {free, malloc},
-  this.list {Cons, Nil, list, minimum},
-  this.pair {Pair, pair},
-  this.unit {Unit, unit},
+- Int
+- Magic
+- Mem
+- Word
+- this.bool
+- this.except {Pass, from-option, none}
+- this.external {free, malloc}
+- this.list {Cons, Nil, list, minimum}
+- this.pair {Pair, pair}
+- this.unit {Unit, unit}
 }
 
 define unsafe-copy-float-array(source-pointer: int, target-pointer: int, index: int, from: int, to: int): unit {
@@ -23,10 +23,10 @@ define unsafe-copy-float-array(source-pointer: int, target-pointer: int, index: 
 }
 
 resource float-array {
-  function (x: int) {
+- function (x: int) {
     Magic.cast(unit, int, free(x))
-  },
-  function (source-pointer: int) {
+  }
+- function (source-pointer: int) {
     let u = Word.size in
     let u2 = mul-int(u, 2) in
     let from = Mem.load-int(source-pointer) in
@@ -37,7 +37,7 @@ resource float-array {
     Mem.store-int(length, add-int(target-pointer, u));
     unsafe-copy-float-array(add-int(source-pointer, u2), add-int(target-pointer, u2), 0, from, to);
     target-pointer
-  },
+  }
 }
 
 define length(xs: &float-array): int {
@@ -59,11 +59,11 @@ define new(xs: list(float)): float-array {
   let store-values =
     define self(values: list(float), index: int): unit {
       match values {
-        Nil => Unit,
-        Cons(v, rest) => {
-          Mem.store-float(v, add-int(content-pointer, mul-int(u, index)));
-          self(rest, add-int(index, 1))
-        },
+      - Nil =>
+        Unit
+      - Cons(v, rest) =>
+        Mem.store-float(v, add-int(content-pointer, mul-int(u, index)));
+        self(rest, add-int(index, 1))
       }
     }
   in

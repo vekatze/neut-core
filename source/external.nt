@@ -1,203 +1,255 @@
 import {
-  FD,
-  this.unit {unit},
+- FD
+- this.unit {unit}
 }
 
 foreign {
-  __error(): int,
-  __errno_location(): int,
-  exit(int): void,
-  realloc(pointer, int): pointer,
-  open(pointer, int, int): int,
-  close(int): int,
-  write(int, pointer, int): int,
-  read(int, pointer, int): int,
-  lseek(int, int, int): int,
-  sleep(int): int,
-  pthread_create(pointer, pointer, pointer, pointer): int,
-  pthread_exit(pointer): void,
-  pthread_join(pointer, pointer): int,
-  pthread_mutex_init(pointer, pointer): int,
-  pthread_mutex_destroy(pointer): int,
-  pthread_mutex_lock(pointer): int,
-  pthread_mutex_unlock(pointer): int,
-  pthread_cond_init(pointer, pointer): int,
-  pthread_cond_destroy(pointer): int,
-  pthread_cond_signal(pointer): int,
-  pthread_cond_wait(pointer, pointer): int,
+- __error(): int
+- __errno_location(): int
+- exit(int): void
+- realloc(pointer, int): pointer
+- open(pointer, int, int): int
+- close(int): int
+- write(int, pointer, int): int
+- read(int, pointer, int): int
+- lseek(int, int, int): int
+- sleep(int): int
+- pthread_create(pointer, pointer, pointer, pointer): int
+- pthread_exit(pointer): void
+- pthread_join(pointer, pointer): int
+- pthread_mutex_init(pointer, pointer): int
+- pthread_mutex_destroy(pointer): int
+- pthread_mutex_lock(pointer): int
+- pthread_mutex_unlock(pointer): int
+- pthread_cond_init(pointer, pointer): int
+- pthread_cond_destroy(pointer): int
+- pthread_cond_signal(pointer): int
+- pthread_cond_wait(pointer, pointer): int
 }
 
 define errno-location(): int {
   introspect os {
-    darwin => magic external __error(),
-    linux => magic external __errno_location(),
+  - darwin =>
+    magic external __error()
+  - linux =>
+    magic external __errno_location()
   }
 }
 
 define exit<a>(status: int): a {
   introspect os {
-    darwin => magic external exit(status),
-    linux => magic external exit(status),
+  - darwin =>
+    magic external exit(status)
+  - linux =>
+    magic external exit(status)
   }
 }
 
 define malloc(size: int): int {
   introspect os {
-    darwin => magic external malloc(size),
-    linux => magic external malloc(size),
+  - darwin =>
+    magic external malloc(size)
+  - linux =>
+    magic external malloc(size)
   }
 }
 
 define free(ptr: int): unit {
   introspect os {
-    darwin => magic external free(ptr),
-    linux => magic external free(ptr),
+  - darwin =>
+    magic external free(ptr)
+  - linux =>
+    magic external free(ptr)
   }
 }
 
 define realloc(ptr: int, size: int): int {
   introspect os {
-    darwin => magic external realloc(ptr, size),
-    linux => magic external realloc(ptr, size),
+  - darwin =>
+    magic external realloc(ptr, size)
+  - linux =>
+    magic external realloc(ptr, size)
   }
 }
 
 define open(path-address: int, oflag: int, mode: int): FD.descriptor {
   introspect os {
-    darwin => magic external open(path-address, oflag, mode),
-    linux => magic external open(path-address, oflag, mode),
+  - darwin =>
+    magic external open(path-address, oflag, mode)
+  - linux =>
+    magic external open(path-address, oflag, mode)
   }
 }
 
 define close(f: FD.descriptor): int {
   introspect os {
-    darwin => magic external close(f),
-    linux => magic external close(f),
+  - darwin =>
+    magic external close(f)
+  - linux =>
+    magic external close(f)
   }
 }
 
 define write(f: FD.descriptor, content-pointer: int, len: int): int {
   introspect os {
-    darwin => magic external write(f, content-pointer, len),
-    linux => magic external write(f, content-pointer, len),
+  - darwin =>
+    magic external write(f, content-pointer, len)
+  - linux =>
+    magic external write(f, content-pointer, len)
   }
 }
 
 define read(f: FD.descriptor, content-pointer: int, max-read-size: int): int {
   introspect os {
-    darwin => magic external read(f, content-pointer, max-read-size),
-    linux => magic external read(f, content-pointer, max-read-size),
+  - darwin =>
+    magic external read(f, content-pointer, max-read-size)
+  - linux =>
+    magic external read(f, content-pointer, max-read-size)
   }
 }
 
 define lseek(f: FD.descriptor, offset: int, seek-mode: int): int {
   introspect os {
-    darwin => magic external lseek(f, offset, seek-mode),
-    linux => magic external lseek(f, offset, seek-mode),
+  - darwin =>
+    magic external lseek(f, offset, seek-mode)
+  - linux =>
+    magic external lseek(f, offset, seek-mode)
   }
 }
 
 define sleep(seconds: int): unit {
   introspect os {
-    darwin => magic external sleep(seconds),
-    linux => magic external sleep(seconds),
+  - darwin =>
+    magic external sleep(seconds)
+  - linux =>
+    magic external sleep(seconds)
   }
 }
 
 define thread-create(id-ptr: int, thread-func-addr: int, thread-env-addr: int): int {
   let zero: int = 0 in
   introspect os {
-    darwin => magic external pthread_create(id-ptr, zero, thread-func-addr, thread-env-addr),
-    linux => magic external pthread_create(id-ptr, zero, thread-func-addr, thread-env-addr),
+  - darwin =>
+    magic external pthread_create(id-ptr, zero, thread-func-addr, thread-env-addr)
+  - linux =>
+    magic external pthread_create(id-ptr, zero, thread-func-addr, thread-env-addr)
   }
 }
 
 define thread-exit(result-addr: int): unit {
   introspect os {
-    darwin => magic external pthread_exit(result-addr),
-    linux => magic external pthread_exit(result-addr),
+  - darwin =>
+    magic external pthread_exit(result-addr)
+  - linux =>
+    magic external pthread_exit(result-addr)
   }
 }
 
 define thread-join(id: int, result-addr: int): unit {
   introspect os {
-    darwin => magic external pthread_join(id, result-addr),
-    linux => magic external pthread_join(id, result-addr),
+  - darwin =>
+    magic external pthread_join(id, result-addr)
+  - linux =>
+    magic external pthread_join(id, result-addr)
   }
 }
 
 define thread-mutex-size(): int {
   introspect platform {
-    amd64-darwin => 64,
-    arm64-darwin => 64,
-    amd64-linux => 40,
-    arm64-linux => 48,
+  - amd64-darwin =>
+    64
+  - arm64-darwin =>
+    64
+  - amd64-linux =>
+    40
+  - arm64-linux =>
+    48
   }
 }
 
 define thread-mutex-init(mutex-ptr: int): unit {
   let zero: int = 0 in
   introspect os {
-    darwin => magic external pthread_mutex_init(mutex-ptr, zero),
-    linux => magic external pthread_mutex_init(mutex-ptr, zero),
+  - darwin =>
+    magic external pthread_mutex_init(mutex-ptr, zero)
+  - linux =>
+    magic external pthread_mutex_init(mutex-ptr, zero)
   }
 }
 
 define thread-mutex-destroy(mutex-ptr: int): unit {
   introspect os {
-    darwin => magic external pthread_mutex_destroy(mutex-ptr),
-    linux => magic external pthread_mutex_destroy(mutex-ptr),
+  - darwin =>
+    magic external pthread_mutex_destroy(mutex-ptr)
+  - linux =>
+    magic external pthread_mutex_destroy(mutex-ptr)
   }
 }
 
 define thread-mutex-lock(mutex-ptr: int): unit {
   introspect os {
-    darwin => magic external pthread_mutex_lock(mutex-ptr),
-    linux => magic external pthread_mutex_lock(mutex-ptr),
+  - darwin =>
+    magic external pthread_mutex_lock(mutex-ptr)
+  - linux =>
+    magic external pthread_mutex_lock(mutex-ptr)
   }
 }
 
 define thread-mutex-unlock(mutex-ptr: int): unit {
   introspect os {
-    darwin => magic external pthread_mutex_unlock(mutex-ptr),
-    linux => magic external pthread_mutex_unlock(mutex-ptr),
+  - darwin =>
+    magic external pthread_mutex_unlock(mutex-ptr)
+  - linux =>
+    magic external pthread_mutex_unlock(mutex-ptr)
   }
 }
 
 define thread-cond-size(): int {
   introspect platform {
-    amd64-darwin => 48,
-    arm64-darwin => 48,
-    amd64-linux => 48,
-    arm64-linux => 48,
+  - amd64-darwin =>
+    48
+  - arm64-darwin =>
+    48
+  - amd64-linux =>
+    48
+  - arm64-linux =>
+    48
   }
 }
 
 define thread-cond-init(cond-ptr: int): unit {
   let zero: int = 0 in
   introspect os {
-    darwin => magic external pthread_cond_init(cond-ptr, zero),
-    linux => magic external pthread_cond_init(cond-ptr, zero),
+  - darwin =>
+    magic external pthread_cond_init(cond-ptr, zero)
+  - linux =>
+    magic external pthread_cond_init(cond-ptr, zero)
   }
 }
 
 define thread-cond-destroy(cond-ptr: int): unit {
   introspect os {
-    darwin => magic external pthread_cond_destroy(cond-ptr),
-    linux => magic external pthread_cond_destroy(cond-ptr),
+  - darwin =>
+    magic external pthread_cond_destroy(cond-ptr)
+  - linux =>
+    magic external pthread_cond_destroy(cond-ptr)
   }
 }
 
 define thread-cond-signal(cond-ptr: int): unit {
   introspect os {
-    darwin => magic external pthread_cond_signal(cond-ptr),
-    linux => magic external pthread_cond_signal(cond-ptr),
+  - darwin =>
+    magic external pthread_cond_signal(cond-ptr)
+  - linux =>
+    magic external pthread_cond_signal(cond-ptr)
   }
 }
 
 define thread-cond-wait(cond-ptr: int, mutex-ptr: int): unit {
   introspect os {
-    darwin => magic external pthread_cond_wait(cond-ptr, mutex-ptr),
-    linux => magic external pthread_cond_wait(cond-ptr, mutex-ptr),
+  - darwin =>
+    magic external pthread_cond_wait(cond-ptr, mutex-ptr)
+  - linux =>
+    magic external pthread_cond_wait(cond-ptr, mutex-ptr)
   }
 }

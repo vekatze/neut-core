@@ -1,11 +1,11 @@
 import {
-  this.except {Fail, except},
-  this.external {errno-location},
-  this.memory {load-int32},
+- this.except {Fail, except}
+- this.external {errno-location}
+- this.memory {load-int32}
 }
 
 data errno {
-  Errno(int),
+- Errno(int)
 }
 
 define _get-errno(): int {

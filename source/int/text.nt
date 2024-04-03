@@ -1,20 +1,20 @@
 import {
-  E,
-  Ext,
-  Lo {Loset, Loset, loset, loset},
-  O {EQ, EQ, GT, GT, LT, LT},
-  Word,
-  this.bool {and, or},
-  this.except {Pass, none},
-  this.memory {store-int},
-  this.text {text, text-byte-length, unsafe-get-content-pointer},
-  this.unit,
+- E
+- Ext
+- Lo {Loset, Loset, loset, loset}
+- O {EQ, EQ, GT, GT, LT, LT}
+- Word
+- this.bool {and, or}
+- this.except {Pass, none}
+- this.memory {store-int}
+- this.text {text, text-byte-length, unsafe-get-content-pointer}
+- this.unit
 }
 
 foreign {
-  snprintf(pointer, int, pointer): int,
-  sprintf(pointer, pointer): int,
-  strtol(pointer, pointer, int): int,
+- snprintf(pointer, int, pointer): int
+- sprintf(pointer, pointer): int
+- strtol(pointer, pointer, int): int
 }
 
 define show(x: int): text {

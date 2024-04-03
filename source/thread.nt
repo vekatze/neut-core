@@ -1,10 +1,10 @@
 import {
-  Ext,
-  Magic,
-  Mem,
-  Word,
-  this.bool,
-  this.unit {Unit, unit},
+- Ext
+- Magic
+- Mem
+- Word
+- this.bool
+- this.unit {Unit, unit}
 }
 
 inline -embody(a: tau, x: &a): a {
@@ -17,13 +17,13 @@ inline _flow-size(): int {
 }
 
 nominal {
-  _await-and-write-result(addr: int): unit,
-  flow(_: tau): tau,
-  attach(a: tau, e: flow(a)): a,
+- _await-and-write-result(addr: int): unit
+- flow(_: tau): tau
+- attach(a: tau, e: flow(a)): a
 }
 
 resource flow-inner {
-  function (p: int) {
+- function (p: int) {
     // tio.print("[warning] awaiting a flow to discard it\n")
     let u = Word.size in
     let elem-type = Magic.cast(int, tau, Mem.load-int(add-int(p, u))) in
@@ -31,8 +31,8 @@ resource flow-inner {
     // await * discard
     let _: elem-type = this.thread.attach(elem-type, pr) in
     0
-  },
-  function (addr: int) {
+  }
+- function (addr: int) {
     // tio.print("[warning] awaiting a flow to copy it\n")
     let u = Word.size in
     let u2 = mul-int(u, 2) in
@@ -49,7 +49,7 @@ resource flow-inner {
     // already finished
     Mem.store-int1(1, add-int(new-addr, u3));
     new-addr
-  },
+  }
 }
 
 define flow(_: tau): tau {

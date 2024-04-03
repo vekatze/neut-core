@@ -1,14 +1,14 @@
 import {
-  Ext,
-  List,
-  Magic,
-  Mem,
-  Q,
-  Word,
-  this.except {Fail, Pass},
-  this.int {sum-int},
-  this.pair {Pair},
-  this.unit {unit},
+- Ext
+- List
+- Magic
+- Mem
+- Q
+- Word
+- this.except {Fail, Pass}
+- this.int {sum-int}
+- this.pair {Pair}
+- this.unit {unit}
 }
 
 inline _get-clone(a: tau, x: &a): a {
@@ -16,7 +16,7 @@ inline _get-clone(a: tau, x: &a): a {
 }
 
 nominal {
-  _channel: tau,
+- _channel: tau
 }
 
 define channel(_: tau): tau {
@@ -37,7 +37,7 @@ define -new(a: tau, q: Q.queue(a)): channel(a) {
 
 // (queue, mutex, cond, queue-elem-type)
 resource _channel {
-  function (ch: int) {
+- function (ch: int) {
     let u = Word.size in
     let mutex-size = Ext.thread-mutex-size() in
     let cond-size = Ext.thread-cond-size() in
@@ -49,8 +49,8 @@ resource _channel {
     let _: Q.queue(a) = magic cast(int, Q.queue(a), Mem.load-int(ch)) in
     Ext.free(ch);
     0
-  },
-  function (ch: int) {
+  }
+- function (ch: int) {
     let u = Word.size in
     let mutex-size = Ext.thread-mutex-size() in
     let cond-size = Ext.thread-cond-size() in
@@ -59,7 +59,7 @@ resource _channel {
     let q: &Q.queue(a) = Magic.cast(int, &Q.queue(a), Mem.load-int(ch)) in
     let q-clone: Q.queue(a) = _get-clone(Q.queue(a), q) in
     Magic.cast(channel(a), int, -new(a, q-clone))
-  },
+  }
 }
 
 inline new-channel<a>(): channel(a) {
@@ -83,19 +83,17 @@ define send<a>(ch: &channel(a), x: a): unit {
 define -receive-from-channel(a: tau, ch: int, mutex-ptr: int): a {
   let q: Q.queue(a) = Magic.cast(int, Q.queue(a), Mem.load-int(ch)) in
   match Q.dequeue(q) {
-    Pass(Pair(v, q)) => {
-      Mem.store-int(Magic.cast(Q.queue(a), int, q), ch);
-      Ext.thread-mutex-unlock(mutex-ptr);
-      v
-    },
-    Fail(_) => {
-      Mem.store-int(Magic.cast(Q.queue(int), int, Q.empty()), ch);
-      let u = Word.size in
-      let mutex-size = Ext.thread-mutex-size() in
-      let cond-ptr = add-int(ch, add-int(u, mutex-size)) in
-      Ext.thread-cond-wait(cond-ptr, mutex-ptr);
-      -receive-from-channel(a, ch, mutex-ptr)
-    },
+  - Pass(Pair(v, q)) =>
+    Mem.store-int(Magic.cast(Q.queue(a), int, q), ch);
+    Ext.thread-mutex-unlock(mutex-ptr);
+    v
+  - Fail(_) =>
+    Mem.store-int(Magic.cast(Q.queue(int), int, Q.empty()), ch);
+    let u = Word.size in
+    let mutex-size = Ext.thread-mutex-size() in
+    let cond-ptr = add-int(ch, add-int(u, mutex-size)) in
+    Ext.thread-cond-wait(cond-ptr, mutex-ptr);
+    -receive-from-channel(a, ch, mutex-ptr)
   }
 }
 

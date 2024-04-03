@@ -1,10 +1,10 @@
 import {
-  this.unit {Unit},
+- this.unit {Unit}
 }
 
 data except(a: tau, b: tau) {
-  Fail(a),
-  Pass(b),
+- Fail(a)
+- Pass(b)
 }
 
 inline none<a>(): ?a {
@@ -13,7 +13,9 @@ inline none<a>(): ?a {
 
 define from-option<a>(x: a, my: ?a): a {
   match my {
-    Pass(y) => {y},
-    Fail(_) => {x},
+  - Pass(y) =>
+    y
+  - Fail(_) =>
+    x
   }
 }

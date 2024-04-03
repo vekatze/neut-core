@@ -1,35 +1,35 @@
 import {
-  Ext,
-  FD,
-  Word,
-  this.bool {bool},
-  this.errno {Errno, report-system-error, system},
-  this.except {Fail, Pass},
-  this.external {free},
-  this.file {close},
-  this.file.descriptor {stderr, stdin, stdout},
-  this.list {Cons, fold-left-index, length, list},
-  this.memory {store-int},
-  this.pair {Pair, pair},
-  this.text {text, unsafe-get-content-pointer},
-  this.text.io {print, print-int, read, write},
-  this.unit {Unit, unit},
+- Ext
+- FD
+- Word
+- this.bool {bool}
+- this.errno {Errno, report-system-error, system}
+- this.except {Fail, Pass}
+- this.external {free}
+- this.file {close}
+- this.file.descriptor {stderr, stdin, stdout}
+- this.list {Cons, fold-left-index, length, list}
+- this.memory {store-int}
+- this.pair {Pair, pair}
+- this.text {text, unsafe-get-content-pointer}
+- this.text.io {print, print-int, read, write}
+- this.unit {Unit, unit}
 }
 
 foreign {
-  __error(): int,
-  execvp(pointer, pointer): int,
-  fork(): int,
-  waitpid(int, pointer, int): int,
-  pipe(pointer): int,
-  dup2(int, int): int,
-  __neut__unsafe__wifexited(pointer): int,
-  __neut__unsafe__wifsignaled(pointer): int,
-  __neut__unsafe__wifstopped(pointer): int,
-  __neut__unsafe__wexitstatus(pointer): int,
-  __neut__unsafe__wtermsig(pointer): int,
-  __neut__unsafe__wcoredump(pointer): int,
-  __neut__unsafe__wstopsig(pointer): int,
+- __error(): int
+- execvp(pointer, pointer): int
+- fork(): int
+- waitpid(int, pointer, int): int
+- pipe(pointer): int
+- dup2(int, int): int
+- __neut__unsafe__wifexited(pointer): int
+- __neut__unsafe__wifsignaled(pointer): int
+- __neut__unsafe__wifstopped(pointer): int
+- __neut__unsafe__wexitstatus(pointer): int
+- __neut__unsafe__wtermsig(pointer): int
+- __neut__unsafe__wcoredump(pointer): int
+- __neut__unsafe__wstopsig(pointer): int
 }
 
 define _wifexited(ptr: int): bool {
@@ -65,9 +65,9 @@ define __waitpid(pid: int, status-ptr: int, option: int): int {
 }
 
 data process-result-status {
-  Exited(status: int),
-  Signaled(termsig: int, coredump: bool),
-  Stopped(stopsig: int),
+- Exited(status: int)
+- Signaled(termsig: int, coredump: bool)
+- Stopped(stopsig: int)
 }
 
 define _waitpid(pid: int): system(process-result-status) {
@@ -138,19 +138,19 @@ define _fork(): system(int) {
 }
 
 data process-spec {
-  Process-Spec of {
-    process: &text,
-    args: list(&text),
-    input: &text,
-  },
+- Process-Spec of {
+  - process: &text
+  - args: list(&text)
+  - input: &text
+  }
 }
 
 data process-result {
-  Process-Result of {
-    status: process-result-status,
-    stdout-text: text,
-    stderr-text: text,
-  },
+- Process-Result of {
+  - status: process-result-status
+  - stdout-text: text
+  - stderr-text: text
+  }
 }
 
 define spawn(ps: process-spec): system(process-result) {
@@ -184,44 +184,45 @@ define spawn(ps: process-spec): system(process-result) {
     try stderr-text = read(error-reader) in
     try status = _waitpid(pid) in
     Pass(Process-Result of {
-      status,
-      stdout-text,
-      stderr-text,
+    - status
+    - stdout-text
+    - stderr-text
     })
   }
 }
 
 define _print-process-result-status(st: process-result-status): unit {
   match st {
-    Exited(status) => print-int(status),
-    Signaled(_, _) => Unit,
-    Stopped(_) => Unit,
+  - Exited(status) =>
+    print-int(status)
+  - Signaled(_, _) =>
+    Unit
+  - Stopped(_) =>
+    Unit
   }
 }
 
 define zen(): unit {
   let cmd =
     Process-Spec of {
-      process = "ls",
-      args = ["-a", "-l"],
-      input = "",
+    - process = "ls"
+    - args = ["-a", "-l"]
+    - input = ""
     }
   in
   match spawn(cmd) {
-    Pass(result) => {
-      use result {stdout-text, stderr-text, status} in
-      let _ on stdout-text = print(stdout-text) in
-      let _ on stderr-text = print(stderr-text) in
-      let _ = stdout-text in
-      let _ = stderr-text in
-      print("exit-code: ");
-      _print-process-result-status(status);
-      print("\n");
-      print("success\n")
-    },
-    Fail(Errno(num)) => {
-      print("fail: ");
-      print-int(num)
-    },
+  - Pass(result) =>
+    use result {stdout-text, stderr-text, status} in
+    let _ on stdout-text = print(stdout-text) in
+    let _ on stderr-text = print(stderr-text) in
+    let _ = stdout-text in
+    let _ = stderr-text in
+    print("exit-code: ");
+    _print-process-result-status(status);
+    print("\n");
+    print("success\n")
+  - Fail(Errno(num)) =>
+    print("fail: ");
+    print-int(num)
   }
 }

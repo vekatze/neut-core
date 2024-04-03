@@ -1,23 +1,25 @@
 import {
-  E,
-  Ext,
-  Lo {Loset, Loset, loset, loset},
-  O {EQ, EQ, GT, GT, LT, LT},
-  Word,
-  this.bool,
-  this.group {Group, group},
-  this.list {Cons, Nil, list},
-  this.monoid {from-group, monoid},
-  this.ring {Ring, ring, ring},
-  this.semiring {from-ring, semiring, semiring},
+- E
+- Ext
+- Lo {Loset, Loset, loset, loset}
+- O {EQ, EQ, GT, GT, LT, LT}
+- Word
+- this.bool
+- this.group {Group, group}
+- this.list {Cons, Nil, list}
+- this.monoid {from-group, monoid}
+- this.ring {Ring, ring, ring}
+- this.semiring {from-ring, semiring, semiring}
 }
 
 define sum-int(xs: list(int)): int {
   let f =
     define loop(ys: list(int), acc: int): int {
       match ys {
-        Nil => acc,
-        Cons(z, zs) => loop(zs, add-int(z, acc)),
+      - Nil =>
+        acc
+      - Cons(z, zs) =>
+        loop(zs, add-int(z, acc))
       }
     }
   in
@@ -42,11 +44,11 @@ define max-int(x: int, y: int): int {
 
 constant as-ring: ring(int) {
   Ring of {
-    zero = 0,
-    add = add-int,
-    sub = sub-int,
-    one = 1,
-    mul = mul-int,
+  - zero = 0
+  - add = add-int
+  - sub = sub-int
+  - one = 1
+  - mul = mul-int
   }
 }
 
@@ -56,9 +58,9 @@ constant as-semiring: semiring(int) {
 
 constant as-group: group(int) {
   Group of {
-    one = 0,
-    mul = add-int,
-    div = sub-int,
+  - one = 0
+  - mul = add-int
+  - div = sub-int
   }
 }
 
@@ -68,7 +70,8 @@ constant as-monoid: monoid(int) {
 
 constant as-loset: loset(int) {
   Loset of {
-    cmp = function (x, y) {
+  - cmp =
+    function (x, y) {
       if gt-int(*x, *y) {
         GT
       } else-if lt-int(*x, *y) {
@@ -76,7 +79,7 @@ constant as-loset: loset(int) {
       } else {
         EQ
       }
-    },
+    }
   }
 }
 

@@ -1,24 +1,27 @@
 import {
-  Lo {Loset, loset},
-  O {EQ},
-  this.bool {False, True, bool},
+- Lo {Loset, loset}
+- O {EQ}
+- this.bool {False, True, bool}
 }
 
 data entity(a) {
-  Entity of {
+- Entity of {
     // no entity without identity
-    identity: (&a, &a) -> bool,
-  },
+  - identity: (&a, &a) -> bool
+  }
 }
 
 inline from-loset<a>(x: loset(a)): entity(a) {
   let Loset of {cmp} = x in
   Entity of {
-    identity = function (x, y) {
+  - identity =
+    function (x, y) {
       match cmp(x, y) {
-        EQ => True,
-        _ => False,
+      - EQ =>
+        True
+      - _ =>
+        False
       }
-    },
+    }
   }
 }

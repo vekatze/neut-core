@@ -67,7 +67,6 @@ inline _linkWithMask<a>(m: _Mask, p1: _Prefix, t1: intmap(a), t2: intmap(a)): in
 }
 
 // from `Utils.Containers.Internal.BitUtil`
-// Return a word where only the highest bit is set.
 inline _highestBitMask(w: int): int {
   introspect arch {
     amd64 => shl-int(1, sub-int(63, magic external llvm.ctlz.i64(w))),

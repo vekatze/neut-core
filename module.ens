@@ -1,133 +1,69 @@
 {
-  prefix {
-    Dict "this.dict"
-    E "this.entity"
-    Ext "this.external"
-    FD "this.file.descriptor"
-    FF "this.file.flag"
-    FM "this.file.mode"
-    Fa "this.float-array"
-    Float "this.float"
-    Int "this.int"
-    L "this.list"
-    List "this.list"
-    Lo "this.loset"
-    M "this.matrix"
-    Magic "this.magic"
-    Mem "this.memory"
-    O "this.order"
-    Po "this.poset"
-    Q "this.queue"
-    S "this.semigroup"
-    Seek "this.file.seek"
-    TIO "this.text.io"
-    Vector "this.vector"
-    Word "this.word"
-  }
-  foreign [
-    "foreign/"
-  ]
-  preset {
-    bool [
-      "False"
-      "True"
-      "and"
-      "bool"
-      "not"
-      "or"
-    ]
-    cell [
-      "borrow"
-      "cell"
-      "clone"
-      "mutate"
-      "new-cell"
-    ]
-    channel [
-      "channel"
-      "new-channel"
-      "receive"
-      "send"
-    ]
-    except [
-      "Fail"
-      "Pass"
-      "except"
-      "none"
-    ]
-    file [
-      "close"
-      "open"
-    ]
-    file.descriptor [
-      "descriptor"
-      "stderr"
-      "stdin"
-      "stdout"
-    ]
-    function [
-      "compose"
-      "curry"
-      "flip"
-      "uncurry"
-    ]
-    list [
-      "Cons"
-      "Nil"
-      "all"
-      "any"
-      "append"
-      "concat"
-      "filter-some"
-      "fold-left"
-      "fold-right"
-      "for"
-      "length"
-      "list"
-      "map"
-      "range"
-      "reverse"
-      "uncons"
-      "unzip"
-    ]
-    null [
-      "null"
-    ]
-    pair [
-      "Pair"
-      "pair"
-    ]
-    system [
-      "admit"
-      "assert"
-      "get-argc"
-      "get-argv"
-    ]
-    text [
-      "text"
-    ]
-    text.io [
-      "get-line"
-      "print"
-      "print-float"
-      "print-int"
-      "print-line"
-      "printf"
-      "read"
-      "write"
-    ]
-    thread [
-      "attach"
-      "detach"
-      "flow"
-    ]
-    unit [
-      "Unit"
-      "unit"
-    ]
-  }
   target {
-    bench-random-dict "bench/random-dict.nt"
-    test "test.nt"
-  }
+    bench-random-dict "bench/random-dict.nt",
+    test "test.nt",
+  },
+  foreign [
+    "foreign/",
+  ],
+  prefix {
+    Dict "this.dict",
+    E "this.entity",
+    Ext "this.external",
+    FD "this.file.descriptor",
+    FF "this.file.flag",
+    FM "this.file.mode",
+    Fa "this.float-array",
+    Float "this.float",
+    Int "this.int",
+    L "this.list",
+    List "this.list",
+    Lo "this.loset",
+    M "this.matrix",
+    Magic "this.magic",
+    Mem "this.memory",
+    O "this.order",
+    Po "this.poset",
+    Q "this.queue",
+    S "this.semigroup",
+    Seek "this.file.seek",
+    TIO "this.text.io",
+    Vector "this.vector",
+    Word "this.word",
+  },
+  preset {
+    bool ["False", "True", "and", "bool", "not", "or"],
+    cell ["borrow", "cell", "clone", "mutate", "new-cell"],
+    channel ["channel", "new-channel", "receive", "send"],
+    except ["Fail", "Pass", "except", "none"],
+    file ["close", "open"],
+    file.descriptor ["descriptor", "stderr", "stdin", "stdout"],
+    function ["compose", "curry", "flip", "uncurry"],
+    list [
+      "Cons",
+      "Nil",
+      "all",
+      "any",
+      "append",
+      "concat",
+      "filter-some",
+      "fold-left",
+      "fold-right",
+      "for",
+      "length",
+      "list",
+      "map",
+      "range",
+      "reverse",
+      "uncons",
+      "unzip",
+    ],
+    null ["null"],
+    pair ["Pair", "pair"],
+    system ["admit", "assert", "get-argc", "get-argv"],
+    text ["text"],
+    text.io ["get-line", "print", "print-float", "print-int", "print-line", "printf", "read", "write"],
+    thread ["attach", "detach", "flow"],
+    unit ["Unit", "unit"],
+  },
 }

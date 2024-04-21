@@ -52,7 +52,7 @@ define append(t1: &text, t2: &text): text {
     }
   in
   let str-pointer = add-int(new-text, u2) in
-  store-values(str-pointer, add-int(content1, from2), 0, len1);
+  store-values(str-pointer, add-int(content1, from1), 0, len1);
   store-values(add-int(str-pointer, len1), add-int(content2, from2), 0, len2);
   Magic.cast(int, text, new-text)
 }

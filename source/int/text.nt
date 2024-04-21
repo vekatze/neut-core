@@ -1,8 +1,8 @@
 import {
   E,
   Ext,
-  Lo {Loset, Loset, loset, loset},
-  O {EQ, EQ, GT, GT, LT, LT},
+  Lo {Loset, loset},
+  O {EQ, GT, LT},
   Word,
   this.bool {and, or},
   this.except {Pass, none},

@@ -5,7 +5,7 @@ import {
   Mem,
   Word,
   this.bool {False, True, bool},
-  this.int8-array {int8-array, int8-array-access, int8-array-access, int8-array-length, int8-array-new, unsafe-copy-int8-array},
+  this.int8-array {int8-array, int8-array-access, int8-array-length, int8-array-new, unsafe-copy-int8-array},
   this.list {Cons, Nil, list},
   this.pair {Pair, pair},
   this.unit {Unit, unit},

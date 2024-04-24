@@ -4,7 +4,7 @@ import {
   Magic,
   Mem,
   Word,
-  this.bool {False, True, bool},
+  this.bool {False, True, and, bool},
   this.int8-array {int8-array, int8-array-access, int8-array-length, int8-array-new, unsafe-copy-int8-array},
   this.list {Cons, Nil, list},
   this.pair {Pair, pair},
@@ -208,6 +208,18 @@ define takeN(offset: int, t: &text): text {
   Magic.cast(int, text, new-ptr)
 }
 
+define tail(offset: int, t: text): text {
+  let ptr = Magic.cast(text, int, t) in
+  let from = Mem.load-int(ptr) in
+  let to = Mem.load-int(add-int(ptr, Word.size)) in
+  if and(lt-int(from, to), lt-int(0, offset)) {
+    Mem.store-int(add-int(from, offset), ptr);
+    Magic.cast(int, text, ptr)
+  } else {
+    Magic.cast(int, text, ptr)
+  }
+}
+
 define _match-text-content(ptr1: int, ptr2: int, len: int): bool {
   let f =
     define helper(cursor: int): bool {
@@ -241,7 +253,7 @@ define break-on(needle: &text, haystack: &text): pair(text, text) {
         let ptr1 = add-int(ptr, cursor) in
         if _match-text-content(ptr1, ptr2, needle-len) {
           let former = takeN(cursor, haystack) in
-          let latter = dropN(add-int(cursor, needle-len), haystack) in
+          let latter = dropN(cursor, haystack) in
           Pair(former, latter)
         } else {
           loop(add-int(cursor, 1))
@@ -269,8 +281,9 @@ define format(fmt: &text, args: list(text)): text {
     if no-hole {
       before
     } else {
-      let result on after = _appendR(before, _appendR(arg, format(after, rest))) in
-      let _ = after in
+      let after' = tail(2, after) in
+      let result on after' = _appendR(before, _appendR(arg, format(after', rest))) in
+      let _ = after' in
       result
     }
   }

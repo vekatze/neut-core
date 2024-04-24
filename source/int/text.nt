@@ -30,6 +30,10 @@ define show(x: int): text {
   magic cast(int, text, ptr)
 }
 
+define %ld(x: int64): text {
+  show(x)
+}
+
 define _parse-nat(content-ptr: int, len: int): ?int {
   let helper =
     define self(index, acc): int {

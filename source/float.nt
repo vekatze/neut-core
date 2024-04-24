@@ -169,6 +169,10 @@ define show(x: float): text {
   magic cast(int, text, ptr)
 }
 
+define %lf(x: float64): text {
+  show(x)
+}
+
 define zen(): unit {
   let txt = show(132342128431.32741825) in
   let _ on txt =

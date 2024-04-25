@@ -41,12 +41,12 @@ inline singleton<a>(k: int, x: a): intmap(a) {
   Tip(k, x)
 }
 
-inline _maskW(i: int, m: int): int {
+inline _mask-w(i: int, m: int): int {
   and-int(i, xor-int(mul-int(-1, m), m))
 }
 
 inline _mask(key: _Key, mask: _Mask): int {
-  _maskW(key, mask)
+  _mask-w(key, mask)
 }
 
 inline _zero(i: _Key, m: _Mask): bool {
@@ -57,7 +57,7 @@ inline _nomatch(i: _Key, p: _Prefix, m: _Mask): bool {
   ne-int(_mask(i, m), p)
 }
 
-inline _linkWithMask<a>(m: _Mask, p1: _Prefix, t1: intmap(a), t2: intmap(a)): intmap(a) {
+inline _link-with-mask<a>(m: _Mask, p1: _Prefix, t1: intmap(a), t2: intmap(a)): intmap(a) {
   let p = _mask(p1, m) in
   if _zero(p1, m) {
     Bin(p, m, t1, t2)
@@ -67,7 +67,7 @@ inline _linkWithMask<a>(m: _Mask, p1: _Prefix, t1: intmap(a), t2: intmap(a)): in
 }
 
 // from `Utils.Containers.Internal.BitUtil`
-inline _highestBitMask(w: int): int {
+inline _highest-bit-mask(w: int): int {
   introspect arch {
   | amd64 =>
     shl-int(1, sub-int(63, magic external llvm.ctlz.i64(w)))
@@ -76,12 +76,12 @@ inline _highestBitMask(w: int): int {
   }
 }
 
-inline _branchMask(p1: _Prefix, p2: _Prefix): _Mask {
-  _highestBitMask(xor-int(p1, p2))
+inline _branch-mask(p1: _Prefix, p2: _Prefix): _Mask {
+  _highest-bit-mask(xor-int(p1, p2))
 }
 
 inline _link<a>(p1: _Prefix, t1: intmap(a), p2: _Prefix, t2: intmap(a)): intmap(a) {
-  _linkWithMask(_branchMask(p1, p2), p1, t1, t2)
+  _link-with-mask(_branch-mask(p1, p2), p1, t1, t2)
 }
 
 define insert<a>(k: _Key, x: a, t: intmap(a)): intmap(a) {
@@ -124,7 +124,7 @@ define lookup<a>(k: _Key, t: &intmap(a)): ?&a {
   }
 }
 
-inline _binCheckLeft<a>(p: _Prefix, m: _Mask, l: intmap(a), r: intmap(a)): intmap(a) {
+inline _bin-check-left<a>(p: _Prefix, m: _Mask, l: intmap(a), r: intmap(a)): intmap(a) {
   match l {
   | Nil =>
     r
@@ -133,7 +133,7 @@ inline _binCheckLeft<a>(p: _Prefix, m: _Mask, l: intmap(a), r: intmap(a)): intma
   }
 }
 
-inline _binCheckRight<a>(p: _Prefix, m: _Mask, l: intmap(a), r: intmap(a)): intmap(a) {
+inline _bin-check-right<a>(p: _Prefix, m: _Mask, l: intmap(a), r: intmap(a)): intmap(a) {
   match r {
   | Nil =>
     l
@@ -156,9 +156,9 @@ define delete<a>(k: _Key, t: intmap(a)): intmap(a) {
     if _nomatch(k, p, m) {
       Bin(p, m, l, r)
     } else-if _zero(k, m) {
-      _binCheckLeft(p, m, delete(k, l), r)
+      _bin-check-left(p, m, delete(k, l), r)
     } else {
-      _binCheckRight(p, m, l, delete(k, r))
+      _bin-check-right(p, m, l, delete(k, r))
     }
   }
 }

@@ -2,6 +2,7 @@ import {
   Ext,
   Word,
   this.memory {store-int},
+  this.show {Show, show},
   this.text {text, unsafe-get-content-pointer},
   this.unit,
 }
@@ -23,10 +24,16 @@ define _show(c-fmt: &text, x: float64): text {
   magic cast(int, text, ptr)
 }
 
+constant as-show: show(float64) {
+  Show(function (x) {
+    _show("%lf\0", x)
+  })
+}
+
 define show(x: float64): text {
   _show("%lf\0", x)
 }
 
 define %lf(x: float64): text {
-  show(x)
+  as-show::show(x)
 }

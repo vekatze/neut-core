@@ -1,16 +1,23 @@
 import {
   this.bool {bool},
+  this.show {Show, show},
   this.text {text},
 }
 
+constant as-show: show(bool) {
+  Show(function (b) {
+    if b {
+      *"True"
+    } else {
+      *"False"
+    }
+  })
+}
+
 define show(b: bool): text {
-  if b {
-    *"True"
-  } else {
-    *"False"
-  }
+  as-show::show(b)
 }
 
 define %t(b: bool): text {
-  show(b)
+  as-show::show(b)
 }

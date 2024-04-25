@@ -6,10 +6,6 @@ import {
   this.unit {Unit, unit},
 }
 
-constant _Size: tau {
-  int
-}
-
 inline set(a): tau {
   dict(a, unit)
 }

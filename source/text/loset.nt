@@ -1,0 +1,47 @@
+import {
+  O {EQ, GT, LT},
+  this.bool {bool},
+  this.int8-array.loset {ge-int8-array, gt-int8-array, le-int8-array, lt-int8-array},
+  this.loset {Loset, loset},
+  this.text {Text, text},
+}
+
+define lt-text(t1: &text, t2: &text): bool {
+  tie Text(xs1) = t1 in
+  tie Text(xs2) = t2 in
+  lt-int8-array(xs1, xs2)
+}
+
+define le-text(t1: &text, t2: &text): bool {
+  tie Text(xs1) = t1 in
+  tie Text(xs2) = t2 in
+  le-int8-array(xs1, xs2)
+}
+
+define gt-text(t1: &text, t2: &text): bool {
+  tie Text(xs1) = t1 in
+  tie Text(xs2) = t2 in
+  gt-int8-array(xs1, xs2)
+}
+
+define ge-text(t1: &text, t2: &text): bool {
+  tie Text(xs1) = t1 in
+  tie Text(xs2) = t2 in
+  ge-int8-array(xs1, xs2)
+}
+
+constant as-loset: loset(&text) {
+  Loset of {
+    cmp = {
+      function (x, y) {
+        if gt-text(x, y) {
+          GT
+        } else-if lt-text(x, y) {
+          LT
+        } else {
+          EQ
+        }
+      }
+    },
+  }
+}

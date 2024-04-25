@@ -1,0 +1,32 @@
+import {
+  Ext,
+  Word,
+  this.memory {store-int},
+  this.text {text, unsafe-get-content-pointer},
+  this.unit,
+}
+
+foreign {
+  snprintf(pointer, int, pointer): int,
+  sprintf(pointer, pointer): int,
+}
+
+define _show(c-fmt: &text, x: float64): text {
+  let fmt = unsafe-get-content-pointer(c-fmt) in
+  let zero: int = 0 in
+  let size: int = magic external snprintf(zero, zero, fmt)(x: int) in
+  let ptr = Ext.malloc(add-int(size, add-int(1, mul-int(Word.size, 2)))) in
+  store-int(0, ptr);
+  store-int(add-int(size, 1), add-int(ptr, Word.size));
+  let buffer = add-int(ptr, mul-int(Word.size, 2)) in
+  let _: int = magic external sprintf(buffer, fmt)(x: int) in
+  magic cast(int, text, ptr)
+}
+
+define show(x: float64): text {
+  _show("%lf\0", x)
+}
+
+define %lf(x: float64): text {
+  show(x)
+}

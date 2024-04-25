@@ -6,12 +6,8 @@ import {
   Word,
   this.bool,
   this.field {Field, field},
-  this.memory {store-int},
   this.ring {ring},
   this.semiring {semiring},
-  this.text {text, text-byte-length, unsafe-get-content-pointer},
-  this.text.io {print, print-int},
-  this.unit {Unit, unit},
 }
 
 foreign {
@@ -155,32 +151,4 @@ constant as-semiring: semiring(float) {
 
 constant as-entity: E.entity(float) {
   E.from-loset(as-loset)
-}
-
-define show(x: float): text {
-  let fmt = unsafe-get-content-pointer("%lf\0") in
-  let zero: int = 0 in
-  let size: int = magic external snprintf(zero, zero, fmt)(x: int) in
-  let ptr = Ext.malloc(add-int(size, add-int(1, mul-int(Word.size, 2)))) in
-  store-int(0, ptr);
-  store-int(add-int(size, 1), add-int(ptr, Word.size));
-  let buffer = add-int(ptr, mul-int(Word.size, 2)) in
-  let _: int = magic external sprintf(buffer, fmt)(x: int) in
-  magic cast(int, text, ptr)
-}
-
-define %lf(x: float64): text {
-  show(x)
-}
-
-define zen(): unit {
-  let txt = show(132342128431.32741825) in
-  let _ on txt =
-    print(txt);
-    print("\n");
-    let byte-len = text-byte-length(txt) in
-    print-int(byte-len)
-  in
-  let _ = txt in
-  Unit
 }

@@ -1,15 +1,15 @@
 import {
   E,
   Ext,
-  Lo {Loset, Loset, loset, loset},
-  O {EQ, EQ, GT, GT, LT, LT},
+  Lo {Loset, loset},
+  O {EQ, GT, LT},
   Word,
   this.bool,
   this.group {Group, group},
   this.list {Cons, Nil, list},
   this.monoid {from-group, monoid},
-  this.ring {Ring, ring, ring},
-  this.semiring {from-ring, semiring, semiring},
+  this.ring {Ring, ring},
+  this.semiring {from-ring, semiring},
 }
 
 define sum-int(xs: list(int)): int {

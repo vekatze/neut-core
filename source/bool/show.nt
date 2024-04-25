@@ -1,0 +1,16 @@
+import {
+  this.bool {bool},
+  this.text {text},
+}
+
+define show(b: bool): text {
+  if b {
+    *"True"
+  } else {
+    *"False"
+  }
+}
+
+define %t(b: bool): text {
+  show(b)
+}

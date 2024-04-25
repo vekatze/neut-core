@@ -1,0 +1,50 @@
+import {
+  E,
+  Ext,
+  Lo {Loset, loset},
+  O {EQ, GT, LT},
+  Word,
+  this.memory {store-int},
+  this.text {text, unsafe-get-content-pointer},
+  this.unit,
+}
+
+foreign {
+  snprintf(pointer, int, pointer): int,
+  sprintf(pointer, pointer): int,
+}
+
+define _show(c-fmt: &text, x: int): text {
+  let fmt = unsafe-get-content-pointer(c-fmt) in
+  let zero: int = 0 in
+  let size: int = magic external snprintf(zero, zero, fmt)(x: int) in
+  let ptr = Ext.malloc(add-int(size, add-int(1, mul-int(Word.size, 2)))) in
+  store-int(0, ptr);
+  // ignore the trailing null character
+  store-int(size, add-int(ptr, Word.size));
+  let buffer = add-int(ptr, mul-int(Word.size, 2)) in
+  let _: int = magic external sprintf(buffer, fmt)(x: int) in
+  magic cast(int, text, ptr)
+}
+
+define show(x: int): text {
+  _show("%ld", x)
+  // let fmt = unsafe-get-content-pointer("%ld") in
+  // let zero: int = 0 in
+  // let size: int = magic external snprintf(zero, zero, fmt)(x: int) in
+  // let ptr = Ext.malloc(add-int(size, add-int(1, mul-int(Word.size, 2)))) in
+  // store-int(0, ptr);
+  // // ignore the trailing null character
+  // store-int(size, add-int(ptr, Word.size));
+  // let buffer = add-int(ptr, mul-int(Word.size, 2)) in
+  // let _: int = magic external sprintf(buffer, fmt)(x: int) in
+  // magic cast(int, text, ptr)
+}
+
+define %ld(x: int64): text {
+  show(x)
+}
+
+define %lu(x: int64): text {
+  _show("%lu", x)
+}

@@ -39,6 +39,9 @@
     file ["close", "open"],
     file.descriptor ["descriptor", "stderr", "stdin", "stdout"],
     function ["compose", "curry", "flip", "uncurry"],
+    int.show ["%ld", "%lu"],
+    float.show ["%lf"],
+    bool.show ["%t"],
     list [
       "Cons",
       "Nil",

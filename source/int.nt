@@ -5,11 +5,7 @@ import {
   O {EQ, GT, LT},
   Word,
   this.bool,
-  this.group {Group, group},
   this.list {Cons, Nil, list},
-  this.monoid {from-group, monoid},
-  this.ring {Ring, ring},
-  this.semiring {from-ring, semiring},
 }
 
 define sum-int(xs: list(int)): int {
@@ -48,50 +44,4 @@ define abs-int(x: int): int {
   } else {
     x
   }
-}
-
-constant as-ring: ring(int) {
-  Ring of {
-    zero = 0,
-    add = add-int,
-    sub = sub-int,
-    one = 1,
-    mul = mul-int,
-  }
-}
-
-constant as-semiring: semiring(int) {
-  from-ring(as-ring)
-}
-
-constant as-group: group(int) {
-  Group of {
-    one = 0,
-    mul = add-int,
-    div = sub-int,
-  }
-}
-
-constant as-monoid: monoid(int) {
-  from-group(as-group)
-}
-
-constant as-loset: loset(int) {
-  Loset of {
-    cmp = {
-      function (x, y) {
-        if gt-int(*x, *y) {
-          GT
-        } else-if lt-int(*x, *y) {
-          LT
-        } else {
-          EQ
-        }
-      }
-    },
-  }
-}
-
-constant as-entity: E.entity(int) {
-  E.from-loset(as-loset)
 }

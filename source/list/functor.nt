@@ -1,0 +1,8 @@
+import {
+  this.functor {Functor, functor},
+  this.list {list, map},
+}
+
+constant as-functor: functor(list) {
+  Functor of {map}
+}

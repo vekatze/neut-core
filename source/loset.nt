@@ -4,6 +4,6 @@ import {
 
 data loset(a) {
 | Loset(
-    cmp: (&a, &a) -> order,
+    cmp: (a, a) -> order,
   )
 }

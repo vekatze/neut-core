@@ -3,13 +3,13 @@ import {
   TIO,
   this.control {loop},
   this.except {Fail, Pass},
-  this.int,
+  this.int.loset {as-loset-N},
   this.random {random},
   this.unit {Unit, unit},
 }
 
 constant intdict: Dict.trope(int) {
-  Dict.from-loset(this.int.as-loset)
+  Dict.from-loset(as-loset-N)
 }
 
 define make-big-dict(): dict(int, int) {

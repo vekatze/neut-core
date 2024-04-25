@@ -1,0 +1,8 @@
+import {
+  this.int.group {as-group},
+  this.monoid {from-group, monoid},
+}
+
+constant as-monoid: monoid(int) {
+  from-group(as-group)
+}

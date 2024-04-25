@@ -7,7 +7,7 @@ import {
 data entity(a) {
 | Entity(
     // no entity without identity
-    identity: (&a, &a) -> bool,
+    identity: (a, a) -> bool,
   )
 }
 

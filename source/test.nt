@@ -25,5 +25,12 @@ define main(): unit {
 }
 
 define zen(): unit {
+  // let t1 = *"test" in
+  // let tmp = drop(1, *"ate") in
+  // let t2 on tmp = append(tmp, "st") in
+  // let b on t1, t2 = eq-text(t1, t2) in
+  // use this.bool.show.as-show {show} in
+  // // let Show(f) = as-show in
+  // printf("{}\n", [show(b)]);
   Unit
 }

@@ -1,12 +1,16 @@
 import {
   this.bool {bool},
+  this.entity {Entity, entity},
   this.int8-array.entity {eq-int8-array},
   this.text {Text, text},
-  this.entity {entity},
 }
 
 define eq-text(t1: &text, t2: &text): bool {
   tie Text(xs1) = t1 in
   tie Text(xs2) = t2 in
   eq-int8-array(xs1, xs2)
+}
+
+constant as-entity: entity(&text) {
+  Entity of {identity = eq-text}
 }

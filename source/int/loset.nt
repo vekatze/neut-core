@@ -4,13 +4,13 @@ import {
   this.loset {Loset, loset},
 }
 
-constant as-loset: loset(float) {
+constant as-loset: loset(int) {
   Loset of {
     cmp = {
       function (x, y) {
-        if gt-float(x, y) {
+        if gt-int(x, y) {
           GT
-        } else-if lt-float(x, y) {
+        } else-if lt-int(x, y) {
           LT
         } else {
           EQ
@@ -20,13 +20,13 @@ constant as-loset: loset(float) {
   }
 }
 
-constant as-loset-N: loset(&float) {
+constant as-loset-N: loset(&int) {
   Loset of {
     cmp = {
       function (x, y) {
-        if gt-float(*x, *y) {
+        if gt-int(*x, *y) {
           GT
-        } else-if lt-float(*x, *y) {
+        } else-if lt-int(*x, *y) {
           LT
         } else {
           EQ

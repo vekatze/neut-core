@@ -6,6 +6,7 @@ import {
   this.bool,
   this.except {from-option},
   this.external {free, malloc},
+  this.int.loset {as-loset-N},
   this.list {Cons, Nil, list, loop, minimum, repeat},
   this.unit {Unit, unit},
 }
@@ -156,7 +157,7 @@ inline fold-LN<elem-type, result-type>(
 ): result-type {
   let sz = size(xs) in
   let helper =
-    define loop(cursor: int, acc, xs): _ {
+    define loop(cursor: int, acc, xs) {
       if eq-int(cursor, sz) {
         acc
       } else {
@@ -171,11 +172,11 @@ inline fold-LN<elem-type, result-type>(
 define zip-with<a, b, c>(xs: &vector(a), ys: &vector(b), f: (a, b) -> c): vector(c) {
   let len1 = size(xs) in
   let len2 = size(ys) in
-  let min-func = minimum(Int.as-loset) in
+  let min-func = minimum(as-loset-N) in
   let len-or-none = min-func([len1, len2]) in
   let len = from-option(0, len-or-none) in
   let zip-with-helper =
-    define self(cursor: int): _ {
+    define self(cursor: int) {
       if eq-int(cursor, len) {
         []
       } else {

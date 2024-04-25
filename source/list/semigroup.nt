@@ -1,0 +1,9 @@
+import {
+  this.list {list},
+  this.list.monoid {as-monoid},
+  this.semigroup {from-monoid, semigroup},
+}
+
+inline as-semigroup<a>(): semigroup(list(a)) {
+  from-monoid(as-monoid())
+}

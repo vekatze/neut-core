@@ -2,11 +2,9 @@ import {
   Lo {Loset, loset},
   this.bool {False, True, and, bool, or},
   this.except {Fail, Pass, none},
-  this.functor {Functor, functor},
   this.monoid {Monoid, monoid},
   this.order {GT, LT},
   this.pair {Pair, pair},
-  this.semigroup {from-monoid, semigroup},
   this.unit {Unit, unit},
 }
 
@@ -249,7 +247,7 @@ inline sum<a>(as-monoid: monoid(a), xs: list(a)): a {
   })
 }
 
-inline minimum<a>(as-ord: loset(a)): (list(a)) -> ?a {
+inline minimum<a>(as-ord: loset(&a)): (list(a)) -> ?a {
   function (xs) {
     let Loset of {cmp} = as-ord in
     match xs {
@@ -269,7 +267,7 @@ inline minimum<a>(as-ord: loset(a)): (list(a)) -> ?a {
   }
 }
 
-inline maximum<a>(as-ord: loset(a)): (list(a)) -> ?a {
+inline maximum<a>(as-ord: loset(&a)): (list(a)) -> ?a {
   function (xs) {
     let Loset of {cmp} = as-ord in
     let helper =
@@ -295,23 +293,4 @@ inline maximum<a>(as-ord: loset(a)): (list(a)) -> ?a {
       Pass(helper(y, ys))
     }
   }
-}
-
-inline as-monoid<a>(): monoid(list(a)) {
-  Monoid of {
-    e = [],
-    op = {
-      function (x, y) {
-        append(x, y)
-      }
-    },
-  }
-}
-
-inline as-semigroup<a>(): semigroup(list(a)) {
-  from-monoid(as-monoid())
-}
-
-constant as-functor: functor(list) {
-  Functor of {map}
 }

@@ -8,7 +8,7 @@ import {
   this.bool,
   this.errno {report-system-error, system},
   this.except {Fail, Pass},
-  this.int.text {parse-int},
+  this.int.parse {parse},
   this.list {Cons, Nil, list},
   this.memory,
   this.pair {Pair},
@@ -133,7 +133,7 @@ define get-line(): system(text) {
 }
 
 define zen(): unit {
-  match parse-int("123123123") {
+  match parse("123123123") {
   | Pass(v) =>
     print-int(v)
   | Fail(_) =>

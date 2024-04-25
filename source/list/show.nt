@@ -1,0 +1,13 @@
+import {
+  this.list {Cons, append, intercalate, list, map},
+  this.show {Show, show},
+  this.text {join},
+}
+
+inline as-show<a>(s: show(a)): show(list(a)) {
+  Show(function (xs) {
+    let Show(f) = s in
+    let ys = map(f, xs) in
+    join(Cons(*"[", append(intercalate(*", ", ys), [*"]"])))
+  })
+}

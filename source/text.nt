@@ -8,6 +8,7 @@ import {
   this.control {discard},
   this.int8-array {int8-array, int8-array-access, int8-array-length, int8-array-new, unsafe-copy-int8-array},
   this.list {Cons, Nil, fold-left-noetic, list},
+  this.memory {load-int, load-int8},
   this.pair {Pair, pair},
   this.unit {Unit, unit},
 }
@@ -308,4 +309,72 @@ define format(fmt: &text, args: list(text)): text {
 
 define intercalate(sep: text, xs: list(text)): text {
   join(this.list.intercalate(sep, xs))
+}
+
+data _char {
+| _Char1
+| _Char2
+| _Char3
+| _Char4
+| _Invalid
+}
+
+define _char-as-int(c: _char): int {
+  match c {
+  | _Char1 =>
+    1
+  | _Char2 =>
+    2
+  | _Char3 =>
+    3
+  | _Char4 =>
+    4
+  | _Invalid =>
+    // for now
+    0
+  }
+}
+
+define _get-head-char(t: &text, index: int): int8 {
+  let ptr = magic cast(&text, int, t) in
+  let from = load-int(ptr) in
+  load-int8(add-int(add-int(ptr, mul-int(Word.size, 2)), add-int(from, index)))
+}
+
+define _categorize-char(char: int8): _char {
+  if eq-int8(and-int8(char, 0x80), 0x00) {
+    // 0x00 = 0000 0000
+    // 0x80 = 1000 0000
+    _Char1
+  } else-if eq-int8(and-int8(char, 0xE0), 0xC0) {
+    // 0xC0 = 1100 0000
+    // 0xE0 = 1110 0000
+    _Char2
+  } else-if eq-int8(and-int8(char, 0xF0), 0xE0) {
+    // 0xE0 = 1110 0000
+    // 0xF0 = 1111 0000
+    _Char3
+  } else-if eq-int8(and-int8(char, 0xF8), 0xF0) {
+    // 0xF0 = 1111 0000
+    // 0xF8 = 1111 1000
+    _Char4
+  } else {
+    _Invalid
+  }
+}
+
+define _length(t: &text, len: int, index: int, acc: int): int {
+  if ge-int(index, len) {
+    acc
+  } else {
+    let head-char = _get-head-char(t, index) in
+    let category = _categorize-char(head-char) in
+    let char-len = _char-as-int(category) in
+    _length(t, len, add-int(index, char-len), add-int(acc, 1))
+  }
+}
+
+define length(t: &text): int {
+  let len = text-byte-length(t) in
+  _length(t, len, 0, 0)
 }

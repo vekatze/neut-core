@@ -4,9 +4,10 @@ import {
   Magic,
   Mem,
   Word,
-  this.bool {False, True, and, bool},
+  this.bool {False, True, bool},
+  this.control {discard},
   this.int8-array {int8-array, int8-array-access, int8-array-length, int8-array-new, unsafe-copy-int8-array},
-  this.list {Cons, Nil, list},
+  this.list {Cons, Nil, fold-left-noetic, list},
   this.pair {Pair, pair},
   this.unit {Unit, unit},
 }
@@ -21,6 +22,49 @@ define create(xs: L.list(int8)): text {
 
 define empty(): text {
   create([])
+}
+
+inline text-byte-length(t: &text): int {
+  let ptr = magic cast(&text, &int8-array, t) in
+  int8-array-length(ptr)
+}
+
+define unsafe-get-content-pointer(t: &text): int {
+  let ptr = Magic.cast(&text, int, t) in
+  let from = Mem.load-int(ptr) in
+  let u = Word.size in
+  add-int(add-int(ptr, mul-int(u, 2)), from)
+}
+
+define join(xs: list(text)): text {
+  let len on xs =
+    fold-left-noetic(0, xs, function (acc, x) {
+      add-int(acc, text-byte-length(x))
+    })
+  in
+  let u = Word.size in
+  let u2 = mul-int(u, 2) in
+  let new-text = Ext.malloc(add-int(len, u2)) in
+  Mem.store-int(0, new-text);
+  Mem.store-int(len, add-int(new-text, u));
+  let content-ptr = add-int(new-text, u2) in
+  let loop =
+    define self(offset: int, xs: list(text)): unit {
+      match xs {
+      | Nil =>
+        Unit
+      | Cons(x, rest) =>
+        let current-content-ptr = add-int(content-ptr, offset) in
+        let x-ptr on x = unsafe-get-content-pointer(x) in
+        let x-len on x = text-byte-length(x) in
+        unsafe-copy-int8-array(x-ptr, current-content-ptr, 0, 0, x-len);
+        discard(x);
+        self(add-int(offset, x-len), rest)
+      }
+    }
+  in
+  loop(0, xs);
+  magic cast(int, text, new-text)
 }
 
 define append(t1: &text, t2: &text): text {
@@ -57,13 +101,6 @@ define append(t1: &text, t2: &text): text {
   Magic.cast(int, text, new-text)
 }
 
-define unsafe-get-content-pointer(t: &text): int {
-  let ptr = Magic.cast(&text, int, t) in
-  let from = Mem.load-int(ptr) in
-  let u = Word.size in
-  add-int(add-int(ptr, mul-int(u, 2)), from)
-}
-
 define get-text-length-of-int(x: int, acc: int): int {
   if lt-int(x, 0) {
     get-text-length-of-int(mul-int(x, -1), add-int(acc, 1))
@@ -79,11 +116,6 @@ define get-text-length-of-int(x: int, acc: int): int {
 
 define access(haystack: &text, cursor: int): int8 {
   int8-array-access(magic cast(&text, &int8-array, haystack), cursor)
-}
-
-inline text-byte-length(t: &text): int {
-  let ptr = magic cast(&text, &int8-array, t) in
-  int8-array-length(ptr)
 }
 
 define is-empty(t: &text): bool {
@@ -205,18 +237,6 @@ define takeN(offset: int, t: &text): text {
   core.magic.cast(int, text, new-ptr)
 }
 
-define tail(offset: int, t: text): text {
-  let ptr = Magic.cast(text, int, t) in
-  let from = Mem.load-int(ptr) in
-  let to = Mem.load-int(add-int(ptr, Word.size)) in
-  if and(lt-int(from, to), lt-int(0, offset)) {
-    Mem.store-int(add-int(from, offset), ptr);
-    Magic.cast(int, text, ptr)
-  } else {
-    Magic.cast(int, text, ptr)
-  }
-}
-
 define _match-text-content(ptr1: int, ptr2: int, len: int): bool {
   let f =
     define helper(cursor: int): bool {
@@ -278,10 +298,14 @@ define format(fmt: &text, args: list(text)): text {
     if no-hole {
       before
     } else {
-      let after' = tail(2, after) in
+      let after' = drop(2, after) in
       let result on after' = _appendR(before, _appendR(arg, format(after', rest))) in
       let _ = after' in
       result
     }
   }
+}
+
+define intercalate(sep: text, xs: list(text)): text {
+  join(this.list.intercalate(sep, xs))
 }

@@ -100,6 +100,17 @@ inline map-noetic<a, b>(f: (&a) -> b, xs: &list(a)): list(b) {
   })
 }
 
+define intercalate<a>(sep: a, xs: list(a)): list(a) {
+  match xs {
+  | Nil =>
+    []
+  | Cons(y, Nil) =>
+    [y]
+  | Cons(y, Cons(z, ys)) =>
+    Cons(y, Cons(sep, intercalate(sep, Cons(z, ys))))
+  }
+}
+
 inline for-each<a, b>(xs: list(a), f: (a) -> b): list(b) {
   map(f, xs)
 }

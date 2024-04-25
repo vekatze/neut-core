@@ -16,6 +16,6 @@ inline loop<result>(count: int, base: result, f: (result, int) -> result): resul
   helper(0, base)
 }
 
-inline discard<a>(_: a): unit {
+define discard<a>(_: a): unit {
   Unit
 }

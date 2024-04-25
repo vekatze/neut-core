@@ -1,0 +1,53 @@
+import {
+  this.bool {False, True},
+  this.entity {Entity, entity},
+  this.list {Cons, Nil, list},
+}
+
+inline as-entity<a>(f: entity(a)): entity(list(a)) {
+  let Entity(eq) = f in
+  Entity of {
+    identity = {
+      define self(xs, ys) {
+        match xs, ys {
+        | Nil, Nil =>
+          True
+        | Nil, Cons(_, _) =>
+          False
+        | Cons(_, _), Nil =>
+          False
+        | Cons(x, xs), Cons(y, ys) =>
+          if eq(x, y) {
+            self(xs, ys)
+          } else {
+            False
+          }
+        }
+      }
+    },
+  }
+}
+
+inline as-entity-N<a>(f: entity(&a)): entity(&list(a)) {
+  let Entity(eq) = f in
+  Entity of {
+    identity = {
+      define self(xs, ys) {
+        case xs, ys {
+        | Nil, Nil =>
+          True
+        | Nil, Cons(_, _) =>
+          False
+        | Cons(_, _), Nil =>
+          False
+        | Cons(x, xs), Cons(y, ys) =>
+          if eq(x, y) {
+            self(xs, ys)
+          } else {
+            False
+          }
+        }
+      }
+    },
+  }
+}

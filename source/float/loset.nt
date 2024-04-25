@@ -1,0 +1,21 @@
+import {
+  O {EQ, GT, LT},
+  this.bool,
+  this.loset {Loset, loset},
+}
+
+constant as-loset: loset(float) {
+  Loset of {
+    cmp = {
+      function (x, y) {
+        if gt-float(*x, *y) {
+          GT
+        } else-if lt-float(*x, *y) {
+          LT
+        } else {
+          EQ
+        }
+      }
+    },
+  }
+}

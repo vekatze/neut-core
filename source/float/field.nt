@@ -1,0 +1,25 @@
+import {
+  this.field {Field, field},
+}
+
+constant as-field: field(float) {
+  Field of {
+    zero = 0,
+    add = add-float,
+    sub = sub-float,
+    one = 1,
+    mul = mul-float,
+    div = div-float,
+  }
+}
+
+define as-field-opaque(): field(float) {
+  Field of {
+    zero = 0,
+    add = add-float,
+    sub = sub-float,
+    one = 1,
+    mul = mul-float,
+    div = div-float,
+  }
+}

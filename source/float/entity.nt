@@ -1,0 +1,8 @@
+import {
+  E,
+  this.float.loset {as-loset},
+}
+
+constant as-entity: E.entity(float) {
+  E.from-loset(as-loset)
+}

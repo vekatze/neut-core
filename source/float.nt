@@ -4,10 +4,6 @@ import {
   Lo {Loset, loset},
   O {EQ, GT, LT},
   Word,
-  this.bool,
-  this.field {Field, field},
-  this.ring {ring},
-  this.semiring {semiring},
 }
 
 foreign {
@@ -29,28 +25,6 @@ foreign {
   llvm.trunc.f64(float): float,
   snprintf(pointer, int, pointer): int,
   sprintf(pointer, pointer): int,
-}
-
-constant as-field: field(float) {
-  Field of {
-    zero = 0,
-    add = add-float,
-    sub = sub-float,
-    one = 1,
-    mul = mul-float,
-    div = div-float,
-  }
-}
-
-define as-field-opaque(): field(float) {
-  Field of {
-    zero = 0,
-    add = add-float,
-    sub = sub-float,
-    one = 1,
-    mul = mul-float,
-    div = div-float,
-  }
 }
 
 define sqrt(x: float): float {
@@ -119,36 +93,4 @@ define trunc(x: float): float {
 
 define sigmoid(x: float): float {
   div-float(1, add-float(1, exp(mul-float(-1, x))))
-}
-
-constant as-loset: loset(float) {
-  Loset of {
-    cmp = {
-      function (x, y) {
-        if gt-float(*x, *y) {
-          GT
-        } else-if lt-float(*x, *y) {
-          LT
-        } else {
-          EQ
-        }
-      }
-    },
-  }
-}
-
-constant as-ring: ring(float) {
-  this.ring.from-field(as-field)
-}
-
-define as-ring-opaque(): ring(float) {
-  this.ring.from-field-opaque(as-field)
-}
-
-constant as-semiring: semiring(float) {
-  this.semiring.from-field(as-field)
-}
-
-constant as-entity: E.entity(float) {
-  E.from-loset(as-loset)
 }

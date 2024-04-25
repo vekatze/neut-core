@@ -1,0 +1,31 @@
+import {
+  this.bool {False, True, bool},
+  this.int8-array {int8-array, int8-array-length, unsafe-get-content-pointer},
+  this.memory {load-int8},
+}
+
+define _eq-int8-array(ptr1: int, ptr2: int, index: int, to: int): bool {
+  if eq-int(index, to) {
+    True
+  } else {
+    let v1 = load-int8(add-int(ptr1, index)) in
+    let v2 = load-int8(add-int(ptr2, index)) in
+    if eq-int8(v1, v2) {
+      _eq-int8-array(ptr1, ptr2, add-int(index, 1), to)
+    } else {
+      False
+    }
+  }
+}
+
+define eq-int8-array(t1: &int8-array, t2: &int8-array): bool {
+  let len1 = int8-array-length(t1) in
+  let len2 = int8-array-length(t2) in
+  if ne-int(len1, len2) {
+    False
+  } else {
+    let ptr1 = unsafe-get-content-pointer(t1) in
+    let ptr2 = unsafe-get-content-pointer(t2) in
+    _eq-int8-array(ptr1, ptr2, 0, len1)
+  }
+}

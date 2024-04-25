@@ -73,3 +73,10 @@ define int8-array-access(xs: &int8-array, i: int): int8 {
   let u2 = mul-int(u, 2) in
   Mem.load-int8(add-int(add-int(ptr, u2), i))
 }
+
+define unsafe-get-content-pointer(t: &int8-array): int {
+  let ptr = Magic.cast(&int8-array, int, t) in
+  let from = Mem.load-int(ptr) in
+  let u = Word.size in
+  add-int(add-int(ptr, mul-int(u, 2)), from)
+}

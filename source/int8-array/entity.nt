@@ -54,3 +54,49 @@ define eq-int8-array(t1: &int8-array, t2: &int8-array): bool {
 constant as-entity: entity(&int8-array) {
   Entity of {identity = eq-int8-array}
 }
+
+define eq-prefix(needle: &int8-array, haystack: &int8-array): bool {
+  let len1 = int8-array-length(needle) in
+  let len2 = int8-array-length(haystack) in
+  if lt-int(len2, len1) {
+    False
+  } else {
+    let ptr1 = unsafe-get-content-pointer(needle) in
+    let ptr2 = unsafe-get-content-pointer(haystack) in
+    _eq-int8-array(ptr1, ptr2, 0, len1)
+  }
+}
+
+define eq-suffix(needle: &int8-array, haystack: &int8-array): bool {
+  let len1 = int8-array-length(needle) in
+  let len2 = int8-array-length(haystack) in
+  if lt-int(len2, len1) {
+    False
+  } else {
+    let ptr1 = unsafe-get-content-pointer(needle) in
+    let ptr2 = unsafe-get-content-pointer(haystack) in
+    let ptr2' = add-int(ptr2, sub-int(len2, len1)) in
+    _eq-int8-array(ptr1, ptr2', 0, len1)
+  }
+}
+
+define _eq-infix(index: int, len1: int, len2: int, needle: &int8-array, haystack: &int8-array): bool {
+  if lt-int(len2, add-int(index, len1)) {
+    False
+  } else {
+    let ptr1 = unsafe-get-content-pointer(needle) in
+    let ptr2 = unsafe-get-content-pointer(haystack) in
+    let ptr2' = add-int(ptr2, index) in
+    if _eq-int8-array(ptr1, ptr2', 0, len1) {
+      True
+    } else {
+      _eq-infix(add-int(index, 1), len1, len2, needle, haystack)
+    }
+  }
+}
+
+define eq-infix(needle: &int8-array, haystack: &int8-array): bool {
+  let len1 = int8-array-length(needle) in
+  let len2 = int8-array-length(haystack) in
+  _eq-infix(0, len1, len2, needle, haystack)
+}

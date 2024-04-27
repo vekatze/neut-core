@@ -14,3 +14,21 @@ define eq-text(t1: &text, t2: &text): bool {
 constant as-entity: entity(&text) {
   Entity of {identity = eq-text}
 }
+
+define eq-prefix(needle: &text, haystack: &text): bool {
+  tie Text(xs1) = needle in
+  tie Text(xs2) = haystack in
+  this.int8-array.entity.eq-prefix(xs1, xs2)
+}
+
+define eq-suffix(needle: &text, haystack: &text): bool {
+  tie Text(xs1) = needle in
+  tie Text(xs2) = haystack in
+  this.int8-array.entity.eq-suffix(xs1, xs2)
+}
+
+define eq-infix(needle: &text, haystack: &text): bool {
+  tie Text(xs1) = needle in
+  tie Text(xs2) = haystack in
+  this.int8-array.entity.eq-infix(xs1, xs2)
+}

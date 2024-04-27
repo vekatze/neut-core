@@ -87,15 +87,33 @@ inline fold-right-noetic<elem-type, result-type>(
 }
 
 inline map<a, b>(f: (a) -> b, xs: list(a)): list(b) {
-  fold-right(xs, [], function (x, acc) {
-    Cons(f(x), acc)
-  })
+  // avoid using `fold-right` here to trigger side effects from the beginning of `xs`
+  let helper =
+    define loop(xs: list(a), acc: list(b)): list(b) {
+      match xs {
+      | Nil =>
+        acc
+      | Cons(y, ys) =>
+        Cons(f(y), loop(ys, acc))
+      }
+    }
+  in
+  helper(xs, [])
 }
 
 inline map-noetic<a, b>(f: (&a) -> b, xs: &list(a)): list(b) {
-  fold-right-noetic(xs, [], function (x, acc) {
-    Cons(f(x), acc)
-  })
+  // avoid using `fold-right-noetic` here to trigger side effects from the beginning of `xs`
+  let helper =
+    define loop(xs: &list(a), acc: list(b)): list(b) {
+      case xs {
+      | Nil =>
+        acc
+      | Cons(y, ys) =>
+        Cons(f(y), loop(ys, acc))
+      }
+    }
+  in
+  helper(xs, [])
 }
 
 define intercalate<a>(sep: a, xs: list(a)): list(a) {
@@ -106,6 +124,21 @@ define intercalate<a>(sep: a, xs: list(a)): list(a) {
     [y]
   | Cons(y, Cons(z, ys)) =>
     Cons(y, Cons(sep, intercalate(sep, Cons(z, ys))))
+  }
+}
+
+// [x1, x2, x3], [y1, y2, y3]
+// => [x1, y1, x2, y2, x3, y3]
+define alternate<a>(xs: list(a), ys: list(a)): list(a) {
+  match xs, ys {
+  | Nil, Nil =>
+    Nil
+  | xs, Nil =>
+    xs
+  | Nil, ys =>
+    ys
+  | Cons(x', xs'), Cons(y', ys') =>
+    Cons(x', Cons(y', alternate(xs', ys')))
   }
 }
 

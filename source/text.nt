@@ -6,8 +6,9 @@ import {
   Word,
   this.bool {False, True, bool},
   this.control {discard},
+  this.int {max-int},
   this.int8-array {int8-array, int8-array-access, int8-array-length, int8-array-new, unsafe-copy-int8-array},
-  this.list {Cons, Nil, fold-left-noetic, list},
+  this.list {Cons, Nil, alternate, fold-left-noetic, list},
   this.memory {load-int, load-int8},
   this.pair {Pair, pair},
   this.unit {Unit, unit},
@@ -238,6 +239,22 @@ define takeN(offset: int, t: &text): text {
   core.magic.cast(int, text, new-ptr)
 }
 
+define slice-N(start: int, size: int, t: &text): text {
+  let start = max-int(start, 0) in
+  let size = max-int(size, 0) in
+  let ptr = Magic.cast(&text, int, t) in
+  let content-ptr = unsafe-get-content-pointer(t) in
+  let to-ptr = add-int(ptr, Word.size) in
+  let to = Mem.load-int(to-ptr) in
+  let new-size = _min-int(size, to) in
+  let new-ptr = Ext.malloc(add-int(new-size, mul-int(Word.size, 2))) in
+  Mem.store-int(0, new-ptr);
+  Mem.store-int(new-size, add-int(new-ptr, Word.size));
+  let new-content-ptr = add-int(new-ptr, mul-int(Word.size, 2)) in
+  unsafe-copy-int8-array(add-int(content-ptr, start), new-content-ptr, 0, 0, new-size);
+  Magic.cast(int, text, new-ptr)
+}
+
 define _match-text-content(ptr1: int, ptr2: int, len: int): bool {
   let f =
     define helper(cursor: int): bool {
@@ -287,24 +304,6 @@ define _appendR(t1: text, t2: text): text {
   let _ = t1 in
   let _ = t2 in
   t
-}
-
-define format(fmt: &text, args: list(text)): text {
-  match args {
-  | Nil =>
-    *fmt
-  | Cons(arg, rest) =>
-    let Pair(before, after) = break-on("{}", fmt) in
-    let no-hole on after = this.text.is-empty(after) in
-    if no-hole {
-      before
-    } else {
-      let after' = drop(2, after) in
-      let result on after' = _appendR(before, _appendR(arg, format(after', rest))) in
-      let _ = after' in
-      result
-    }
-  }
 }
 
 define intercalate(sep: text, xs: list(text)): text {
@@ -377,4 +376,46 @@ define _length(t: &text, len: int, index: int, acc: int): int {
 define length(t: &text): int {
   let len = text-byte-length(t) in
   _length(t, len, 0, 0)
+}
+
+define split-on(needle: &text, haystack: &text): list(text) {
+  let haystack-ptr = unsafe-get-content-pointer(haystack) in
+  let needle-ptr = unsafe-get-content-pointer(needle) in
+  let len = text-byte-length(haystack) in
+  let needle-len = text-byte-length(needle) in
+  let f =
+    define loop(pivot: int, cursor: int): list(text) {
+      let rem-len = sub-int(len, add-int(pivot, cursor)) in
+      if lt-int(rem-len, needle-len) {
+        [dropN(pivot, haystack)]
+      } else {
+        let current-ptr = add-int(haystack-ptr, add-int(pivot, cursor)) in
+        if _match-text-content(current-ptr, needle-ptr, needle-len) {
+          let piece = slice-N(pivot, cursor, haystack) in
+          let next-pivot = add-int(pivot, add-int(cursor, needle-len)) in
+          let rest = loop(next-pivot, 0) in
+          Cons(piece, rest)
+        } else {
+          loop(pivot, add-int(cursor, 1))
+        }
+      }
+    }
+  in
+  if eq-int(needle-len, 0) {
+    []
+  } else {
+    f(0, 0)
+  }
+}
+
+define replace(from: &text, to: text, haystack: &text): text {
+  this.text.intercalate(to, split-on(from, haystack))
+}
+
+define _format(fmt: &text, args: list(text)): list(text) {
+  alternate(split-on("{}", fmt), args)
+}
+
+define format(fmt: &text, args: list(text)): text {
+  join(_format(fmt, args))
 }

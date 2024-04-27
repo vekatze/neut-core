@@ -9,10 +9,9 @@ import {
   this.errno {report-system-error, system},
   this.except {Fail, Pass},
   this.int.parse {parse},
-  this.list {Cons, Nil, list},
+  this.list {for, list},
   this.memory,
-  this.pair {Pair},
-  this.text {break-on, drop, text, text-byte-length, unsafe-get-content-pointer},
+  this.text {_format, text, text-byte-length, unsafe-get-content-pointer},
   this.unit {Unit, unit},
 }
 
@@ -43,27 +42,12 @@ define print(t: &text): unit {
   magic external printf(fmt)(len: int, val: pointer)
 }
 
-// for now
 define printf(fmt: &text, args: list(text)): unit {
-  match args {
-  | Nil =>
-    print(fmt)
-  | Cons(arg, rest) =>
-    let Pair(before, after) = break-on("{}", fmt) in
-    let _ on before = print(before) in
-    let _ = before in
-    let no-hole on after = this.text.is-empty(after) in
-    if no-hole {
-      Unit
-    } else {
-      let _ on arg = print(arg) in
-      let _ = arg in
-      let after' = drop(2, after) in
-      let _ on after' = printf(after', rest) in
-      let _ = after' in
-      Unit
-    }
-  }
+  for(_format(fmt, args), function (p) {
+    let _ on p = print(p) in
+    let _ = p in
+    Unit
+  })
 }
 
 define print-int(x: int): unit {

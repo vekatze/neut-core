@@ -22,7 +22,7 @@ data matrix(a) {
 }
 
 define new<a>(content-list: list(list(a))): matrix(a) {
-  let len-list on content-list = L.map-noetic(exact L.length, content-list) in
+  let len-list on content-list = L.map-N(exact L.length, content-list) in
   let col-size = L.minimum(as-loset-N)(len-list) in
   let row-size on content-list = L.length(content-list) in
   Matrix of {

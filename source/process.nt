@@ -11,7 +11,7 @@ import {
   this.list {Cons, fold-left-index, length, list},
   this.memory {store-int},
   this.pair {Pair, pair},
-  this.text {text, unsafe-get-content-pointer},
+  this.text {_get-content-pointer, text},
   this.text.io {print, print-int, read, write},
   this.unit {Unit, unit},
 }
@@ -168,9 +168,9 @@ define spawn(ps: process-spec): system(process-result) {
     try _ = _dup2(out-writer, stdout) in
     try _ = _dup2(error-writer, stderr) in
     use ps {process, args} in
-    let foo = this.list.map(unsafe-get-content-pointer, Cons(process, args)) in
+    let foo = this.list.map(_get-content-pointer, Cons(process, args)) in
     let buz = _make-argv(this.list.append(foo, [0])) in
-    let cmd = unsafe-get-content-pointer(process) in
+    let cmd = _get-content-pointer(process) in
     magic external execvp(cmd, buz);
     report-system-error()
   } else {

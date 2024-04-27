@@ -1,7 +1,7 @@
 import {
   O {EQ, GT, LT},
   this.bool {False, True, bool},
-  this.int8-array {int8-array, int8-array-length, unsafe-get-content-pointer},
+  this.int8-array {_get-content-pointer, int8-array, int8-array-length},
   this.loset {Loset, loset},
   this.memory {load-int8},
 }
@@ -53,8 +53,8 @@ inline cmp-int8-array(cmp: _cmp-ptr-t): _cmp-array-t {
     if ne-int(len1, len2) {
       False
     } else {
-      let ptr1 = unsafe-get-content-pointer(t1) in
-      let ptr2 = unsafe-get-content-pointer(t2) in
+      let ptr1 = _get-content-pointer(t1) in
+      let ptr2 = _get-content-pointer(t2) in
       cmp(ptr1, ptr2, 0, len1)
     }
   }

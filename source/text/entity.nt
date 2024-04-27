@@ -3,7 +3,7 @@ import {
   this.entity {Entity, entity},
   this.except {Pass, none},
   this.int8-array.entity {eq-int8-array},
-  this.text {Text, dropN, takeN, text, text-byte-length},
+  this.text {Text, drop-N, take-N, text, text-byte-length},
   this.unit,
 }
 
@@ -38,7 +38,7 @@ define eq-infix(needle: &text, haystack: &text): bool {
 define strip-prefix(needle: &text, haystack: &text): ?text {
   if eq-prefix(needle, haystack) {
     let needle-len = text-byte-length(needle) in
-    Pass(dropN(needle-len, haystack))
+    Pass(drop-N(needle-len, haystack))
   } else {
     none()
   }
@@ -47,7 +47,7 @@ define strip-prefix(needle: &text, haystack: &text): ?text {
 define strip-suffix(needle: &text, haystack: &text): ?text {
   if eq-suffix(needle, haystack) {
     let new-haystack-len = sub-int(text-byte-length(haystack), text-byte-length(needle)) in
-    Pass(takeN(new-haystack-len, haystack))
+    Pass(take-N(new-haystack-len, haystack))
   } else {
     none()
   }

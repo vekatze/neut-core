@@ -4,7 +4,7 @@ import {
   this.external {exit},
   this.list {Cons, for, for-each, list},
   this.memory {load-int},
-  this.text {text, unsafe-from-c-string},
+  this.text {_from-c-string, text},
   this.text.io {print},
   this.thread {flow},
   this.unit {Unit, unit},
@@ -66,7 +66,7 @@ define get-argv(): list(text) {
         let rest = get-argv-helper(add-int(i, 1)) in
         let str-ptr-ptr = add-int(argv, mul-int(i, u)) in
         let str-ptr = load-int(str-ptr-ptr) in
-        let t = unsafe-from-c-string(str-ptr) in
+        let t = _from-c-string(str-ptr) in
         Cons(t, rest)
       }
     }

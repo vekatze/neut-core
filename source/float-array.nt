@@ -6,20 +6,20 @@ import {
   this.bool,
   this.except {Pass, from-option, none},
   this.external {free, malloc},
+  this.int.loset {as-loset-N},
   this.list {Cons, Nil, list, minimum},
   this.pair {Pair, pair},
   this.unit {Unit, unit},
-  this.int.loset {as-loset-N},
 }
 
-define unsafe-copy-float-array(source-pointer: int, target-pointer: int, index: int, from: int, to: int): unit {
+define _copy-float-array(source-pointer: int, target-pointer: int, index: int, from: int, to: int): unit {
   if eq-int(from, to) {
     Unit
   } else {
     let u = Word.size in
     let value = Mem.load-float(add-int(source-pointer, mul-int(u, from))) in
     Mem.store-float(value, add-int(target-pointer, mul-int(u, index)));
-    unsafe-copy-float-array(source-pointer, target-pointer, add-int(index, 1), add-int(from, 1), to)
+    _copy-float-array(source-pointer, target-pointer, add-int(index, 1), add-int(from, 1), to)
   }
 }
 
@@ -36,7 +36,7 @@ resource float-array {
     let target-pointer = malloc(add-int(mul-int(u, length), u2)) in
     Mem.store-int(0, target-pointer);
     Mem.store-int(length, add-int(target-pointer, u));
-    unsafe-copy-float-array(add-int(source-pointer, u2), add-int(target-pointer, u2), 0, from, to);
+    _copy-float-array(add-int(source-pointer, u2), add-int(target-pointer, u2), 0, from, to);
     target-pointer
   },
 }

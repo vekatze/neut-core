@@ -1,7 +1,7 @@
 import {
   this.bool {False, True, bool},
   this.entity {Entity, entity},
-  this.int8-array {int8-array, int8-array-length, unsafe-get-content-pointer},
+  this.int8-array {_get-content-pointer, int8-array, int8-array-length},
   this.memory {load-int8},
 }
 
@@ -40,8 +40,8 @@ inline cmp-int8-array(cmp: _cmp-ptr-t): _cmp-array-t {
     if ne-int(len1, len2) {
       False
     } else {
-      let ptr1 = unsafe-get-content-pointer(t1) in
-      let ptr2 = unsafe-get-content-pointer(t2) in
+      let ptr1 = _get-content-pointer(t1) in
+      let ptr2 = _get-content-pointer(t2) in
       cmp(ptr1, ptr2, 0, len1)
     }
   }
@@ -61,8 +61,8 @@ define eq-prefix(needle: &int8-array, haystack: &int8-array): bool {
   if lt-int(len2, len1) {
     False
   } else {
-    let ptr1 = unsafe-get-content-pointer(needle) in
-    let ptr2 = unsafe-get-content-pointer(haystack) in
+    let ptr1 = _get-content-pointer(needle) in
+    let ptr2 = _get-content-pointer(haystack) in
     _eq-int8-array(ptr1, ptr2, 0, len1)
   }
 }
@@ -73,8 +73,8 @@ define eq-suffix(needle: &int8-array, haystack: &int8-array): bool {
   if lt-int(len2, len1) {
     False
   } else {
-    let ptr1 = unsafe-get-content-pointer(needle) in
-    let ptr2 = unsafe-get-content-pointer(haystack) in
+    let ptr1 = _get-content-pointer(needle) in
+    let ptr2 = _get-content-pointer(haystack) in
     let ptr2' = add-int(ptr2, sub-int(len2, len1)) in
     _eq-int8-array(ptr1, ptr2', 0, len1)
   }
@@ -84,8 +84,8 @@ define _eq-infix(index: int, len1: int, len2: int, needle: &int8-array, haystack
   if lt-int(len2, add-int(index, len1)) {
     False
   } else {
-    let ptr1 = unsafe-get-content-pointer(needle) in
-    let ptr2 = unsafe-get-content-pointer(haystack) in
+    let ptr1 = _get-content-pointer(needle) in
+    let ptr2 = _get-content-pointer(haystack) in
     let ptr2' = add-int(ptr2, index) in
     if _eq-int8-array(ptr1, ptr2', 0, len1) {
       True

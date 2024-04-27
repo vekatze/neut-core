@@ -32,7 +32,7 @@ inline fold-left<elem-type, result-type>(
   helper(acc, xs)
 }
 
-inline fold-left-noetic<elem-type, result-type>(
+inline fold-left-N<elem-type, result-type>(
   acc: result-type,
   xs: &list(elem-type),
   consumer: (result-type, &elem-type) -> result-type,
@@ -68,7 +68,7 @@ inline fold-right<elem-type, result-type>(
   helper(xs, acc)
 }
 
-inline fold-right-noetic<elem-type, result-type>(
+inline fold-right-N<elem-type, result-type>(
   xs: &list(elem-type),
   acc: result-type,
   consumer: (&elem-type, result-type) -> result-type,
@@ -101,8 +101,8 @@ inline map<a, b>(f: (a) -> b, xs: list(a)): list(b) {
   helper(xs, [])
 }
 
-inline map-noetic<a, b>(f: (&a) -> b, xs: &list(a)): list(b) {
-  // avoid using `fold-right-noetic` here to trigger side effects from the beginning of `xs`
+inline map-N<a, b>(f: (&a) -> b, xs: &list(a)): list(b) {
+  // avoid using `fold-right-N` here to trigger side effects from the beginning of `xs`
   let helper =
     define loop(xs: &list(a), acc: list(b)): list(b) {
       case xs {
@@ -194,7 +194,7 @@ define reverse<a>(xs: list(a)): list(a) {
 }
 
 define length<a>(xs: &list(a)): int {
-  fold-left-noetic(0, xs, function (acc, _) {
+  fold-left-N(0, xs, function (acc, _) {
     add-int(1, acc)
   })
 }

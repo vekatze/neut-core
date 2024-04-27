@@ -7,8 +7,8 @@ import {
   this.bool {False, True, bool},
   this.control {discard},
   this.int {max-int},
-  this.int8-array {int8-array, int8-array-access, int8-array-length, int8-array-new, unsafe-copy-int8-array},
-  this.list {Cons, Nil, alternate, fold-left-noetic, list},
+  this.int8-array {_copy-int8-array, int8-array, int8-array-access, int8-array-length, int8-array-new},
+  this.list {Cons, Nil, alternate, fold-left-N, list},
   this.memory {load-int, load-int8},
   this.pair {Pair, pair},
   this.unit {Unit, unit},
@@ -31,7 +31,7 @@ inline text-byte-length(t: &text): int {
   int8-array-length(ptr)
 }
 
-define unsafe-get-content-pointer(t: &text): int {
+define _get-content-pointer(t: &text): int {
   let ptr = Magic.cast(&text, int, t) in
   let from = Mem.load-int(ptr) in
   let u = Word.size in
@@ -40,7 +40,7 @@ define unsafe-get-content-pointer(t: &text): int {
 
 define join(xs: list(text)): text {
   let len on xs =
-    fold-left-noetic(0, xs, function (acc, x) {
+    fold-left-N(0, xs, function (acc, x) {
       add-int(acc, text-byte-length(x))
     })
   in
@@ -57,9 +57,9 @@ define join(xs: list(text)): text {
         Unit
       | Cons(x, rest) =>
         let current-content-ptr = add-int(content-ptr, offset) in
-        let x-ptr on x = unsafe-get-content-pointer(x) in
+        let x-ptr on x = _get-content-pointer(x) in
         let x-len on x = text-byte-length(x) in
-        unsafe-copy-int8-array(x-ptr, current-content-ptr, 0, 0, x-len);
+        _copy-int8-array(x-ptr, current-content-ptr, 0, x-len);
         discard(x);
         self(add-int(offset, x-len), rest)
       }
@@ -157,23 +157,23 @@ define from-int(x: int): text {
   Magic.cast(int, text, ptr)
 }
 
-define unsafe-get-c-string-length(ptr: int, index: int): int {
+define _get-c-string-length(ptr: int, index: int): int {
   let c = Mem.load-int8(add-int(ptr, index)) in
   if eq-int8(c, 0) {
     index
   } else {
-    unsafe-get-c-string-length(ptr, add-int(index, 1))
+    _get-c-string-length(ptr, add-int(index, 1))
   }
 }
 
-define unsafe-from-c-string(old-ptr: int): text {
+define _from-c-string(old-ptr: int): text {
   let u = Word.size in
   let u2 = mul-int(u, 2) in
-  let len = unsafe-get-c-string-length(old-ptr, 0) in
+  let len = _get-c-string-length(old-ptr, 0) in
   let new-ptr = Ext.malloc(add-int(len, u2)) in
   Mem.store-int(0, new-ptr);
   Mem.store-int(len, add-int(new-ptr, u));
-  unsafe-copy-int8-array(old-ptr, add-int(new-ptr, u2), 0, 0, len);
+  _copy-int8-array(old-ptr, add-int(new-ptr, u2), 0, len);
   Magic.cast(int, text, new-ptr)
 }
 
@@ -207,25 +207,21 @@ define take(offset: int, t: text): text {
   t
 }
 
-define dropN(offset: int, t: &text): text {
-  // get info from old text
-  let ptr = Magic.cast(&text, int, t) in
-  let content-ptr = add-int(ptr, mul-int(Word.size, 2)) in
-  let from = Mem.load-int(ptr) in
-  let to-ptr = add-int(ptr, Word.size) in
-  let to = Mem.load-int(to-ptr) in
-  let new-from = _min-int(to, add-int(from, offset)) in
-  let new-size = sub-int(to, new-from) in
-  // write info to new ptr
+define drop-N(offset: int, t: &text): text {
+  let content-ptr = _get-content-pointer(t) in
+  let orig-size = text-byte-length(t) in
+  let new-size = max-int(0, sub-int(orig-size, offset)) in
   let new-ptr = Ext.malloc(add-int(new-size, mul-int(Word.size, 2))) in
   Mem.store-int(0, new-ptr);
   Mem.store-int(new-size, add-int(new-ptr, Word.size));
   let new-content-ptr = add-int(new-ptr, mul-int(Word.size, 2)) in
-  unsafe-copy-int8-array(content-ptr, new-content-ptr, 0, new-from, to);
+  let adjusted-offset = _min-int(offset, orig-size) in
+  let content-ptr' = add-int(content-ptr, adjusted-offset) in
+  _copy-int8-array(content-ptr', new-content-ptr, 0, new-size);
   Magic.cast(int, text, new-ptr)
 }
 
-define takeN(offset: int, t: &text): text {
+define take-N(offset: int, t: &text): text {
   // get info from old text
   let ptr = core.magic.cast(&text, int, t) in
   let to = Mem.load-int(add-int(ptr, core.word.size)) in
@@ -233,9 +229,9 @@ define takeN(offset: int, t: &text): text {
   let new-ptr = Ext.malloc(add-int(offset, mul-int(core.word.size, 2))) in
   Mem.store-int(0, new-ptr);
   Mem.store-int(new-size, add-int(new-ptr, core.word.size));
-  let content-ptr = unsafe-get-content-pointer(t) in
+  let content-ptr = _get-content-pointer(t) in
   let new-content-ptr = add-int(new-ptr, mul-int(core.word.size, 2)) in
-  unsafe-copy-int8-array(content-ptr, new-content-ptr, 0, 0, new-size);
+  _copy-int8-array(content-ptr, new-content-ptr, 0, new-size);
   core.magic.cast(int, text, new-ptr)
 }
 
@@ -243,7 +239,7 @@ define slice-N(start: int, size: int, t: &text): text {
   let start = max-int(start, 0) in
   let size = max-int(size, 0) in
   let ptr = Magic.cast(&text, int, t) in
-  let content-ptr = unsafe-get-content-pointer(t) in
+  let content-ptr = _get-content-pointer(t) in
   let to-ptr = add-int(ptr, Word.size) in
   let to = Mem.load-int(to-ptr) in
   let new-size = _min-int(size, to) in
@@ -251,7 +247,7 @@ define slice-N(start: int, size: int, t: &text): text {
   Mem.store-int(0, new-ptr);
   Mem.store-int(new-size, add-int(new-ptr, Word.size));
   let new-content-ptr = add-int(new-ptr, mul-int(Word.size, 2)) in
-  unsafe-copy-int8-array(add-int(content-ptr, start), new-content-ptr, 0, 0, new-size);
+  _copy-int8-array(add-int(content-ptr, start), new-content-ptr, 0, new-size);
   Magic.cast(int, text, new-ptr)
 }
 
@@ -275,8 +271,8 @@ define _match-text-content(ptr1: int, ptr2: int, len: int): bool {
 }
 
 define break-on(needle: &text, haystack: &text): pair(text, text) {
-  let ptr = unsafe-get-content-pointer(haystack) in
-  let ptr2 = unsafe-get-content-pointer(needle) in
+  let ptr = _get-content-pointer(haystack) in
+  let ptr2 = _get-content-pointer(needle) in
   let len = text-byte-length(haystack) in
   let needle-len = text-byte-length(needle) in
   let f =
@@ -287,8 +283,8 @@ define break-on(needle: &text, haystack: &text): pair(text, text) {
       } else {
         let ptr1 = add-int(ptr, cursor) in
         if _match-text-content(ptr1, ptr2, needle-len) {
-          let former = takeN(cursor, haystack) in
-          let latter = dropN(cursor, haystack) in
+          let former = take-N(cursor, haystack) in
+          let latter = drop-N(cursor, haystack) in
           Pair(former, latter)
         } else {
           loop(add-int(cursor, 1))
@@ -379,15 +375,15 @@ define length(t: &text): int {
 }
 
 define split-on(needle: &text, haystack: &text): list(text) {
-  let haystack-ptr = unsafe-get-content-pointer(haystack) in
-  let needle-ptr = unsafe-get-content-pointer(needle) in
+  let haystack-ptr = _get-content-pointer(haystack) in
+  let needle-ptr = _get-content-pointer(needle) in
   let len = text-byte-length(haystack) in
   let needle-len = text-byte-length(needle) in
   let f =
     define loop(pivot: int, cursor: int): list(text) {
       let rem-len = sub-int(len, add-int(pivot, cursor)) in
       if lt-int(rem-len, needle-len) {
-        [dropN(pivot, haystack)]
+        [drop-N(pivot, haystack)]
       } else {
         let current-ptr = add-int(haystack-ptr, add-int(pivot, cursor)) in
         if _match-text-content(current-ptr, needle-ptr, needle-len) {

@@ -6,7 +6,7 @@ import {
   Word,
   this.memory {store-int},
   this.show {Show, show},
-  this.text {text, unsafe-get-content-pointer},
+  this.text {_get-content-pointer, text},
   this.unit,
 }
 
@@ -16,7 +16,7 @@ foreign {
 }
 
 define _show(c-fmt: &text, x: int): text {
-  let fmt = unsafe-get-content-pointer(c-fmt) in
+  let fmt = _get-content-pointer(c-fmt) in
   let zero: int = 0 in
   let size: int = magic external snprintf(zero, zero, fmt)(x: int) in
   let ptr = Ext.malloc(add-int(size, add-int(1, mul-int(Word.size, 2)))) in

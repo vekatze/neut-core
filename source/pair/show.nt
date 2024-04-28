@@ -1,0 +1,17 @@
+import {
+  this.list,
+  this.pair {Pair, pair},
+  this.show {Show, show},
+  this.text {intercalate, join},
+}
+
+inline as-show<a, b>(s1: show(a), s2: show(b)): show(pair(a, b)) {
+  Show of {
+    show = {
+      function (p) {
+        let Pair(x, y) = p in
+        join([*"(", intercalate(*", ", [s1::show(x), s2::show(y)]), *")"])
+      }
+    },
+  }
+}

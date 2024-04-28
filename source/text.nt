@@ -9,7 +9,7 @@ import {
   this.int {max-int},
   this.int8-array {_copy-int8-array, int8-array, int8-array-access, int8-array-length, int8-array-new},
   this.list {Cons, Nil, alternate, fold-left-N, list},
-  this.memory {load-int, load-int8},
+  this.memory {load-int8},
   this.pair {Pair, pair},
   this.unit {Unit, unit},
 }
@@ -331,9 +331,8 @@ define _char-as-int(c: _char): int {
 }
 
 define _get-head-char(t: &text, index: int): int8 {
-  let ptr = magic cast(&text, int, t) in
-  let from = load-int(ptr) in
-  load-int8(add-int(add-int(ptr, mul-int(Word.size, 2)), add-int(from, index)))
+  let ptr = _get-content-pointer(t) in
+  load-int8(add-int(ptr, index))
 }
 
 define _categorize-char(char: int8): _char {

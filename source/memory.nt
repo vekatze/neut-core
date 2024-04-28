@@ -35,6 +35,10 @@ inline load-int8(address: int): int8 {
   magic load(int8, address)
 }
 
+inline load-int16(address: int): int16 {
+  magic load(int16, address)
+}
+
 inline load-int1(address: int): int1 {
   magic load(int1, address)
 }

@@ -271,6 +271,25 @@ define range(from: int, to: int): list(int) {
   }
 }
 
+inline _filter<a>(pred: (a) -> bool): (xs: list(a)) -> list(a) {
+  define self(xs: list(a)): list(a) {
+    match xs {
+    | Nil =>
+      Nil
+    | Cons(y, ys) =>
+      if pred(y) {
+        Cons(y, self(ys))
+      } else {
+        self(ys)
+      }
+    }
+  }
+}
+
+inline filter<a>(pred: (a) -> bool, xs: list(a)): list(a) {
+  _filter(pred)(xs)
+}
+
 define filter-some<a>(xs: list(?a)): list(a) {
   fold-right(xs, [], function (x, acc) {
     match x {

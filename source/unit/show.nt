@@ -1,0 +1,14 @@
+import {
+  this.show {Show, show},
+  this.text,
+  this.unit {Unit, unit},
+}
+
+constant as-show: show(unit) {
+  Show(function (u) {
+    match u {
+    | Unit =>
+      *"Unit"
+    }
+  })
+}

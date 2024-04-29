@@ -23,7 +23,7 @@ inline store-int1(value: int1, address: int): unit {
   magic store(int1, value, address)
 }
 
-inline load-int32(address: int): int {
+inline load-int32(address: int): int32 {
   magic load(int32, address)
 }
 
@@ -37,6 +37,10 @@ inline load-int8(address: int): int8 {
 
 inline load-int16(address: int): int16 {
   magic load(int16, address)
+}
+
+inline load-int24(address: int): int24 {
+  magic load(int24, address)
 }
 
 inline load-int1(address: int): int1 {

@@ -11,7 +11,7 @@ data errno {
 define _get-errno(): int {
   let errno-ptr = errno-location() in
   // POSIX requires errno to be thread-safe
-  load-int32(errno-ptr)
+  magic cast(int32, int, load-int32(errno-ptr))
 }
 
 inline system(a: tau): tau {

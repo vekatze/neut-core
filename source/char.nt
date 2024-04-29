@@ -1,0 +1,19 @@
+data char {
+| Char1(int8)
+| Char2(int8, int8)
+| Char3(int8, int8, int8)
+| Char4(int8, int8, int8, int8)
+}
+
+define size(c: &char): int {
+  case c {
+  | Char1(_) =>
+    1
+  | Char2(_, _) =>
+    2
+  | Char3(_, _, _) =>
+    3
+  | Char4(_, _, _, _) =>
+    4
+  }
+}

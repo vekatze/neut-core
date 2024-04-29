@@ -146,8 +146,17 @@ inline for-each<a, b>(xs: list(a), f: (a) -> b): list(b) {
   map(f, xs)
 }
 
+inline for-each-N<a, b>(xs: &list(a), f: (&a) -> b): list(b) {
+  map-N(f, xs)
+}
+
 inline for<a>(xs: list(a), f: (a) -> unit): unit {
   let _ = map(f, xs) in
+  Unit
+}
+
+inline for-N<a>(xs: &list(a), f: (&a) -> unit): unit {
+  let _ = map-N(f, xs) in
   Unit
 }
 
@@ -325,5 +334,68 @@ inline maximum<a>(as-ord: loset(&a)): (list(a)) -> ?a {
     | Cons(y, ys) =>
       Pass(helper(y, ys))
     }
+  }
+}
+
+define take-N<a>(n: int, xs: &list(a)): list(a) {
+  if le-int(n, 0) {
+    []
+  } else {
+    case xs {
+    | Nil =>
+      Nil
+    | Cons(y, ys) =>
+      Cons(*y, take-N(sub-int(n, 1), ys))
+    }
+  }
+}
+
+define drop-N<a>(n: int, xs: &list(a)): list(a) {
+  if le-int(n, 0) {
+    *xs
+  } else {
+    case xs {
+    | Nil =>
+      Nil
+    | Cons(_, ys) =>
+      drop-N(sub-int(n, 1), ys)
+    }
+  }
+}
+
+define _split-N<a>(n: int, xs: &list(a), head-acc: list(a)): pair(list(a), list(a)) {
+  if le-int(n, 0) {
+    Pair(reverse(head-acc), *xs)
+  } else {
+    case xs {
+    | Nil =>
+      Pair(head-acc, Nil)
+    | Cons(y, ys) =>
+      _split-N(sub-int(n, 1), ys, Cons(*y, head-acc))
+    }
+  }
+}
+
+define split-N<a>(n: int, xs: &list(a)): pair(list(a), list(a)) {
+  _split-N(n, xs, [])
+}
+
+define product<a, b>(xs: list(a), ys: list(b)): list(pair(a, b)) {
+  let xyss =
+    for-each(xs, function (x) {
+      for-each(ys, function (y) {
+        Pair(x, y)
+      })
+    })
+  in
+  concat(xyss)
+}
+
+define is-empty<a>(xs: &list(a)): bool {
+  case xs {
+  | Nil =>
+    True
+  | _ =>
+    False
   }
 }

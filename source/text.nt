@@ -498,10 +498,6 @@ define _char-list-length(xs: &list(char), acc: int): int {
   }
 }
 
-// define pack(xs: list(char)): text {
-//   let k = _map(as-show::show, xs) in
-//   *"test"
-// }
 define pack(xs: &list(char)): text {
   let len = _char-list-length(xs, 0) in
   let u = Word.size in

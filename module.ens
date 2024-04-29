@@ -63,7 +63,7 @@
     ],
     null ["null"],
     pair ["Pair", "pair"],
-    system ["admit", "assert", "get-argc", "get-argv"],
+    system ["admit", "assert", "get-argc", "get-argv", "panic"],
     text ["text"],
     text.io ["get-line", "print", "print-float", "print-int", "print-line", "printf", "read", "write"],
     thread ["attach", "detach", "flow"],

@@ -399,3 +399,16 @@ define is-empty<a>(xs: &list(a)): bool {
     False
   }
 }
+
+define nth<a>(n: int, xs: &list(a)): ?a {
+  case xs {
+  | Nil =>
+    none()
+  | Cons(y, ys) =>
+    if le-int(n, 0) {
+      Pass(*y)
+    } else {
+      nth(sub-int(n, 1), ys)
+    }
+  }
+}

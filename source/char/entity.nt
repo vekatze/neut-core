@@ -1,0 +1,39 @@
+import {
+  this.bool {False},
+  this.char {Char1, Char2, Char3, Char4, char},
+  this.entity {Entity, entity},
+  this.list {all},
+}
+
+constant as-entity: entity(char) {
+  Entity of {
+    identity = {
+      function (x1, x2) {
+        match x1, x2 {
+        | Char1(c111), Char1(c211) =>
+          eq-int8(c111, c211)
+        | Char2(c121, c122), Char2(c221, c222) =>
+          all([
+            eq-int8(c121, c221),
+            eq-int8(c122, c222),
+          ])
+        | Char3(c131, c132, c133), Char3(c231, c232, c233) =>
+          all([
+            eq-int8(c131, c231),
+            eq-int8(c132, c232),
+            eq-int8(c133, c233),
+          ])
+        | Char4(c141, c142, c143, c144), Char4(c241, c242, c243, c244) =>
+          all([
+            eq-int8(c141, c241),
+            eq-int8(c142, c242),
+            eq-int8(c143, c243),
+            eq-int8(c144, c244),
+          ])
+        | _, _ =>
+          False
+        }
+      }
+    },
+  }
+}

@@ -35,3 +35,35 @@ constant as-loset-N: loset(&int) {
     },
   }
 }
+
+constant as-loset-int8: loset(int8) {
+  Loset of {
+    cmp = {
+      function (x, y) {
+        if gt-int8(x, y) {
+          GT
+        } else-if lt-int8(x, y) {
+          LT
+        } else {
+          EQ
+        }
+      }
+    },
+  }
+}
+
+constant as-loset-int8-N: loset(&int8) {
+  Loset of {
+    cmp = {
+      function (x, y) {
+        if gt-int8(*x, *y) {
+          GT
+        } else-if lt-int8(*x, *y) {
+          LT
+        } else {
+          EQ
+        }
+      }
+    },
+  }
+}

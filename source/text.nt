@@ -523,7 +523,7 @@ define pack(xs: &list(char)): text {
           self(add-int(offset, 1), rest)
         | Char2(c0, c1) =>
           store-int8(*c0, current-content-ptr);
-          store-int8(*c1, current-content-ptr);
+          store-int8(*c1, add-int(current-content-ptr, 1));
           self(add-int(offset, 2), rest)
         | Char3(c0, c1, c2) =>
           store-int8(*c0, current-content-ptr);

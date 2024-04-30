@@ -15,6 +15,5 @@ define random(ubound: int): int {
 define random-in-range(lower-bound: int, upper-bound: int): int {
   let range-size = sub-int(upper-bound, lower-bound) in
   let value = random(add-int(range-size, 1)) in
-  let offset = div-int(range-size, 2) in
-  sub-int(value, offset)
+  add-int(value, lower-bound)
 }

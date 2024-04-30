@@ -35,7 +35,7 @@ define _new(a: tau, q: Q.queue(a)): channel(a) {
   Magic.cast(int, channel(a), ptr)
 }
 
-// (queue, mutex, cond, queue-elem-type)
+// (queue, thread-mutex, thread-cond)
 resource _channel {
   function (ch: int) {
     let u = Word.size in

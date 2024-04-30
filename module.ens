@@ -63,6 +63,7 @@
       "unzip",
     ],
     null ["null"],
+    order ["EQ", "GT", "LT", "order"],
     pair ["Pair", "pair"],
     system ["admit", "assert", "get-argc", "get-argv", "panic"],
     text ["text"],

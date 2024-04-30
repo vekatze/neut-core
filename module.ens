@@ -33,8 +33,8 @@
   },
   preset {
     bool ["False", "True", "and", "bool", "not", "or"],
-    cell ["borrow", "cell", "clone", "mutate", "new-cell"],
-    channel ["channel", "new-channel", "receive", "send"],
+    cell ["borrow", "cell", "clone", "mutate"],
+    channel ["channel", "receive", "send"],
     char ["char"],
     except ["Fail", "Pass", "except", "none"],
     file ["close", "open"],

@@ -23,7 +23,7 @@ define channel(_: tau): tau {
   _channel
 }
 
-define -new(a: tau, q: Q.queue(a)): channel(a) {
+define _new(a: tau, q: Q.queue(a)): channel(a) {
   let mutex-size = Ext.thread-mutex-size() in
   let cond-size = Ext.thread-cond-size() in
   let u = Word.size in
@@ -58,12 +58,12 @@ resource _channel {
     let a = Magic.cast(int, tau, Mem.load-int(add-int(ch, type-offset))) in
     let q: &Q.queue(a) = Magic.cast(int, &Q.queue(a), Mem.load-int(ch)) in
     let q-clone: Q.queue(a) = _get-clone(Q.queue(a), q) in
-    Magic.cast(channel(a), int, -new(a, q-clone))
+    Magic.cast(channel(a), int, _new(a, q-clone))
   },
 }
 
-inline new-channel<a>(): channel(a) {
-  -new(a, Q.empty())
+inline _new-channel<a>(): channel(a) {
+  _new(a, Q.empty())
 }
 
 define send<a>(ch: &channel(a), x: a): unit {
@@ -80,7 +80,7 @@ define send<a>(ch: &channel(a), x: a): unit {
   Ext.thread-mutex-unlock(mutex-ptr)
 }
 
-define -receive-from-channel(a: tau, ch: int, mutex-ptr: int): a {
+define _receive-from-channel(a: tau, ch: int, mutex-ptr: int): a {
   let q: Q.queue(a) = Magic.cast(int, Q.queue(a), Mem.load-int(ch)) in
   match Q.dequeue(q) {
   | Pass(Pair(v, q)) =>
@@ -93,7 +93,7 @@ define -receive-from-channel(a: tau, ch: int, mutex-ptr: int): a {
     let mutex-size = Ext.thread-mutex-size() in
     let cond-ptr = add-int(ch, add-int(u, mutex-size)) in
     Ext.thread-cond-wait(cond-ptr, mutex-ptr);
-    -receive-from-channel(a, ch, mutex-ptr)
+    _receive-from-channel(a, ch, mutex-ptr)
   }
 }
 
@@ -102,5 +102,5 @@ define receive<a>(ch: &channel(a)): a {
   let u = Word.size in
   let mutex-ptr = add-int(ch, u) in
   Ext.thread-mutex-lock(mutex-ptr);
-  -receive-from-channel(a, ch, mutex-ptr)
+  _receive-from-channel(a, ch, mutex-ptr)
 }

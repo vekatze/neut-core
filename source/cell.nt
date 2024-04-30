@@ -1,6 +1,6 @@
 import {
   Magic,
-  this.channel {channel, new-channel, receive, send},
+  this.channel {channel, receive, send},
   this.unit {unit},
 }
 
@@ -8,8 +8,9 @@ define cell(a: tau): tau {
   channel(a)
 }
 
-define new-cell<a>(x: a): cell(a) {
-  let ch = new-channel() in
+define _new-cell<a>(x: a): cell(a) {
+  let ch: channel(int) = new-channel() in
+  let ch = magic cast(channel(int), channel(a), ch) in
   let _ on ch = send(ch, x) in
   Magic.cast(channel(a), cell(a), ch)
 }

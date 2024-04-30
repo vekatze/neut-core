@@ -37,3 +37,13 @@ constant as-entity: entity(char) {
     },
   }
 }
+
+constant as-entity-N: entity(&char) {
+  Entity of {
+    identity = {
+      function (x, y) {
+        as-entity::identity(*x, *y)
+      }
+    },
+  }
+}

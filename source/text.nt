@@ -7,6 +7,7 @@ import {
   this.bool {False, True, bool},
   this.char {Char1, Char2, Char3, Char4, char, size},
   this.control {discard},
+  this.except {Pass, none},
   this.int {max-int},
   this.int8-array {_copy-int8-array, int8-array, int8-array-access, int8-array-length, int8-array-new},
   this.list {Cons, Nil, alternate, fold-left-N, list, reverse},
@@ -538,4 +539,41 @@ define pack(xs: &list(char)): text {
   in
   loop(0, xs);
   magic cast(int, text, new-text)
+}
+
+define reverse(t: &text): text {
+  // for now
+  let xs = this.list.reverse(unpack(t)) in
+  let result on xs = pack(xs) in
+  let _ = xs in
+  result
+}
+
+// O(1)
+define uncons(t: text): ?pair(char, text) {
+  let len on t = text-byte-length(t) in
+  if eq-int(len, 0) {
+    none()
+  } else {
+    let head-char on t = _get-head-char(t, 0) in
+    let category = _categorize-char(head-char) in
+    let ch on t =
+      match category {
+      | _Char1 =>
+        Char1(head-char)
+      | _Char2 =>
+        _get-head-char-2(t, 0)
+      | _Char3 =>
+        _get-head-char-3(t, 0)
+      | _Char4 =>
+        _get-head-char-4(t, 0)
+      | _Invalid =>
+        // unicode invalid char
+        Char3(0xEF, 0xBF, 0xBE)
+      }
+    in
+    let char-len = _char-as-int(category) in
+    let t = drop(char-len, t) in
+    Pass(Pair(ch, t))
+  }
 }

@@ -8,7 +8,7 @@ import {
   this.char {Char1, Char2, Char3, Char4, char, size},
   this.control {discard},
   this.except {Pass, none},
-  this.int {max-int},
+  this.int {max-int, min-int},
   this.int8-array {_copy-int8-array, int8-array, int8-array-access, int8-array-length, int8-array-new},
   this.list {Cons, Nil, alternate, fold-left-N, list, reverse},
   this.memory {load-int8, store-int8},
@@ -105,58 +105,12 @@ define append(t1: &text, t2: &text): text {
   Magic.cast(int, text, new-text)
 }
 
-define get-text-length-of-int(x: int, acc: int): int {
-  if lt-int(x, 0) {
-    get-text-length-of-int(mul-int(x, -1), add-int(acc, 1))
-  } else {
-    let q = div-int(x, 10) in
-    if eq-int(q, 0) {
-      add-int(acc, 1)
-    } else {
-      get-text-length-of-int(q, add-int(acc, 1))
-    }
-  }
-}
-
-define access(haystack: &text, cursor: int): int8 {
+define _access(haystack: &text, cursor: int): int8 {
   int8-array-access(magic cast(&text, &int8-array, haystack), cursor)
 }
 
 define is-empty(t: &text): bool {
   eq-int(text-byte-length(t), 0)
-}
-
-define from-int(x: int): text {
-  let u = Word.size in
-  let u2 = mul-int(u, 2) in
-  let len = get-text-length-of-int(x, 0) in
-  let ptr = Ext.malloc(add-int(len, u2)) in
-  Mem.store-int(0, ptr);
-  Mem.store-int(len, add-int(ptr, u));
-  let content = add-int(ptr, u2) in
-  let store-positive-values =
-    define loop(y: int, index: int): unit {
-      if lt-int(y, 10) {
-        // 48 == "0"
-        let digit-char = add-int8(Magic.cast(int, int8, y), 48) in
-        Mem.store-int8(digit-char, add-int(content, index))
-      } else {
-        let q = div-int(y, 10) in
-        let r = rem-int(y, 10) in
-        let digit-char = add-int8(Magic.cast(int, int8, r), 48) in
-        Mem.store-int8(digit-char, add-int(content, index));
-        loop(q, sub-int(index, 1))
-      }
-    }
-  in
-  if lt-int(x, 0) {
-    // 45 == "-"
-    Mem.store-int8(45, content);
-    store-positive-values(mul-int(x, -1), sub-int(len, 1))
-  } else {
-    store-positive-values(x, sub-int(len, 1))
-  };
-  Magic.cast(int, text, ptr)
 }
 
 define _get-c-string-length(ptr: int, index: int): int {
@@ -179,37 +133,29 @@ define _from-c-string(old-ptr: int): text {
   Magic.cast(int, text, new-ptr)
 }
 
-define _min-int(x: int, y: int): int {
-  if lt-int(x, y) {
-    x
-  } else {
-    y
-  }
-}
-
-define drop(offset: int, t: text): text {
+define _drop(offset: int, t: text): text {
   let _ on t =
     let ptr = Magic.cast(&text, int, t) in
     let from = Mem.load-int(ptr) in
     let to-ptr = add-int(ptr, Word.size) in
     let to = Mem.load-int(to-ptr) in
-    Mem.store-int(_min-int(to, add-int(from, offset)), ptr)
+    Mem.store-int(min-int(to, add-int(from, offset)), ptr)
   in
   t
 }
 
-define take(offset: int, t: text): text {
+define _take(offset: int, t: text): text {
   let _ on t =
     let ptr = Magic.cast(&text, int, t) in
     let from = Mem.load-int(ptr) in
     let to-ptr = add-int(ptr, Word.size) in
     let to = Mem.load-int(to-ptr) in
-    Mem.store-int(_min-int(to, add-int(from, offset)), to-ptr)
+    Mem.store-int(min-int(to, add-int(from, offset)), to-ptr)
   in
   t
 }
 
-define drop-N(offset: int, t: &text): text {
+define _drop-N(offset: int, t: &text): text {
   let content-ptr = _get-content-pointer(t) in
   let orig-size = text-byte-length(t) in
   let new-size = max-int(0, sub-int(orig-size, offset)) in
@@ -217,17 +163,17 @@ define drop-N(offset: int, t: &text): text {
   Mem.store-int(0, new-ptr);
   Mem.store-int(new-size, add-int(new-ptr, Word.size));
   let new-content-ptr = add-int(new-ptr, mul-int(Word.size, 2)) in
-  let adjusted-offset = _min-int(offset, orig-size) in
+  let adjusted-offset = min-int(offset, orig-size) in
   let content-ptr' = add-int(content-ptr, adjusted-offset) in
   _copy-int8-array(content-ptr', new-content-ptr, 0, new-size);
   Magic.cast(int, text, new-ptr)
 }
 
-define take-N(offset: int, t: &text): text {
+define _take-N(offset: int, t: &text): text {
   // get info from old text
   let ptr = core.magic.cast(&text, int, t) in
   let to = Mem.load-int(add-int(ptr, core.word.size)) in
-  let new-size = _min-int(to, offset) in
+  let new-size = min-int(to, offset) in
   let new-ptr = Ext.malloc(add-int(offset, mul-int(core.word.size, 2))) in
   Mem.store-int(0, new-ptr);
   Mem.store-int(new-size, add-int(new-ptr, core.word.size));
@@ -237,14 +183,14 @@ define take-N(offset: int, t: &text): text {
   core.magic.cast(int, text, new-ptr)
 }
 
-define slice-N(start: int, size: int, t: &text): text {
+define _slice-N(start: int, size: int, t: &text): text {
   let start = max-int(start, 0) in
   let size = max-int(size, 0) in
   let ptr = Magic.cast(&text, int, t) in
   let content-ptr = _get-content-pointer(t) in
   let to-ptr = add-int(ptr, Word.size) in
   let to = Mem.load-int(to-ptr) in
-  let new-size = _min-int(size, to) in
+  let new-size = min-int(size, to) in
   let new-ptr = Ext.malloc(add-int(new-size, mul-int(Word.size, 2))) in
   Mem.store-int(0, new-ptr);
   Mem.store-int(new-size, add-int(new-ptr, Word.size));
@@ -285,8 +231,8 @@ define break-on(needle: &text, haystack: &text): pair(text, text) {
       } else {
         let ptr1 = add-int(ptr, cursor) in
         if _match-text-content(ptr1, ptr2, needle-len) {
-          let former = take-N(cursor, haystack) in
-          let latter = drop-N(cursor, haystack) in
+          let former = _take-N(cursor, haystack) in
+          let latter = _drop-N(cursor, haystack) in
           Pair(former, latter)
         } else {
           loop(add-int(cursor, 1))
@@ -295,13 +241,6 @@ define break-on(needle: &text, haystack: &text): pair(text, text) {
     }
   in
   f(0)
-}
-
-define _appendR(t1: text, t2: text): text {
-  let t on t1, t2 = append(t1, t2) in
-  let _ = t1 in
-  let _ = t2 in
-  t
 }
 
 define intercalate(sep: text, xs: list(text)): text {
@@ -332,9 +271,8 @@ define _char-as-int(c: _char): int {
   }
 }
 
-define _get-head-char(t: &text, index: int): int8 {
-  let ptr = _get-content-pointer(t) in
-  load-int8(add-int(ptr, index))
+define char-to-bitseq-1(raw-char: int8): char {
+  Char1(raw-char)
 }
 
 define char-to-bitseq-2(raw-char: int16): char {
@@ -356,6 +294,16 @@ define char-to-bitseq-4(raw-char: int32): char {
   let piece-2 = trunc-int32-int8(lshr-int32(and-int32(0b_0000_0000_0000_0000_1111_1111_0000_0000, raw-char), 8)) in
   let piece-3 = trunc-int32-int8(and-int32(0b_0000_0000_0000_0000_0000_0000_1111_1111, raw-char)) in
   Char4(piece-0, piece-1, piece-2, piece-3)
+}
+
+define _get-head-char(t: &text, index: int): int8 {
+  let ptr = _get-content-pointer(t) in
+  load-int8(add-int(ptr, index))
+}
+
+define _get-head-char-1(t: &text, index: int): char {
+  let ch-0 = _get-head-char(t, index) in
+  Char1(ch-0)
 }
 
 define _get-head-char-2(t: &text, index: int): char {
@@ -426,11 +374,11 @@ define split-on(needle: &text, haystack: &text): list(text) {
     define loop(pivot: int, cursor: int): list(text) {
       let rem-len = sub-int(len, add-int(pivot, cursor)) in
       if lt-int(rem-len, needle-len) {
-        [drop-N(pivot, haystack)]
+        [_drop-N(pivot, haystack)]
       } else {
         let current-ptr = add-int(haystack-ptr, add-int(pivot, cursor)) in
         if _match-text-content(current-ptr, needle-ptr, needle-len) {
-          let piece = slice-N(pivot, cursor, haystack) in
+          let piece = _slice-N(pivot, cursor, haystack) in
           let next-pivot = add-int(pivot, add-int(cursor, needle-len)) in
           let rest = loop(next-pivot, 0) in
           Cons(piece, rest)
@@ -549,31 +497,79 @@ define reverse(t: &text): text {
   result
 }
 
+define _get-char(t: &text, index: int): char {
+  let head-char = _get-head-char(t, index) in
+  let category = _categorize-char(head-char) in
+  match category {
+  | _Char1 =>
+    Char1(head-char)
+  | _Char2 =>
+    _get-head-char-2(t, index)
+  | _Char3 =>
+    _get-head-char-3(t, index)
+  | _Char4 =>
+    _get-head-char-4(t, index)
+  | _Invalid =>
+    // unicode invalid char
+    Char3(0xEF, 0xBF, 0xBE)
+  }
+}
+
 // O(1)
 define uncons(t: text): ?pair(char, text) {
   let len on t = text-byte-length(t) in
   if eq-int(len, 0) {
     none()
   } else {
-    let head-char on t = _get-head-char(t, 0) in
-    let category = _categorize-char(head-char) in
-    let ch on t =
-      match category {
-      | _Char1 =>
-        Char1(head-char)
-      | _Char2 =>
-        _get-head-char-2(t, 0)
-      | _Char3 =>
-        _get-head-char-3(t, 0)
-      | _Char4 =>
-        _get-head-char-4(t, 0)
-      | _Invalid =>
-        // unicode invalid char
-        Char3(0xEF, 0xBF, 0xBE)
-      }
-    in
-    let char-len = _char-as-int(category) in
-    let t = drop(char-len, t) in
+    let ch on t = _get-char(t, 0) in
+    let char-len on ch = this.char.size(ch) in
+    let t = _drop(char-len, t) in
     Pass(Pair(ch, t))
   }
+}
+
+define take-while-N(pred: (&char) -> bool, t: &text): text {
+  let len = text-byte-length(t) in
+  let f =
+    define self(index: int, acc: list(char)): list(char) {
+      if ge-int(index, len) {
+        core.list.reverse(acc)
+      } else {
+        let ch = _get-char(t, index) in
+        let cond on ch = pred(ch) in
+        if cond {
+          let char-len on ch = this.char.size(ch) in
+          self(add-int(index, char-len), Cons(ch, acc))
+        } else {
+          core.list.reverse(acc)
+        }
+      }
+    }
+  in
+  let cs = f(0, []) in
+  let result on cs = pack(cs) in
+  let _ = cs in
+  result
+}
+
+define drop-while-N(pred: (&char) -> bool, t: &text): text {
+  let len = text-byte-length(t) in
+  let f =
+    define self(index: int): text {
+      if ge-int(index, len) {
+        empty()
+      } else {
+        let ch = _get-char(t, index) in
+        let cond on ch = pred(ch) in
+        if cond {
+          let char-len on ch = this.char.size(ch) in
+          let _ = ch in
+          self(add-int(index, char-len))
+        } else {
+          _slice-N(index, len, t)
+        }
+      }
+    }
+  in
+  f(0)
 }

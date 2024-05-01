@@ -6,10 +6,10 @@ import {
     _Char2,
     _categorize-char,
     _char-as-int,
+    _drop-N,
     _get-head-char,
-    drop-N,
+    _slice-N,
     join,
-    slice-N,
     text,
     text-byte-length,
   },
@@ -190,13 +190,13 @@ define _quote(t: &text, len: int, pivot: int, cursor: int): list(text) {
   in
   let index = add-int(pivot, cursor) in
   if ge-int(index, len) {
-    [drop-N(pivot, t)]
+    [_drop-N(pivot, t)]
   } else {
     let head-char = _get-head-char(t, index) in
     let category = _categorize-char(head-char) in
     let char-len = _char-as-int(category) in
     if _is-1-byte-quoted-character(head-char) {
-      let piece = slice-N(pivot, cursor, t) in
+      let piece = _slice-N(pivot, cursor, t) in
       let quoted-control-char = _get-quoted-character-1(head-char) in
       let rest = _quote(t, len, add-int(add-int(pivot, cursor), char-len), 0) in
       Cons(piece, Cons(*quoted-control-char, rest))
@@ -206,7 +206,7 @@ define _quote(t: &text, len: int, pivot: int, cursor: int): list(text) {
         if eq-int8(head-char, 0xc2) {
           let head-char-2 = _get-head-char(t, add-int(index, 1)) in
           if _is-2-byte-quoted-character(head-char-2) {
-            let piece = slice-N(pivot, cursor, t) in
+            let piece = _slice-N(pivot, cursor, t) in
             let quoted-control-char = _get-quoted-character-2(head-char-2) in
             let rest = _quote(t, len, add-int(add-int(pivot, cursor), char-len), 0) in
             Cons(piece, Cons(*quoted-control-char, rest))

@@ -431,3 +431,116 @@ define nth<a>(n: int, xs: &list(a)): ?a {
     }
   }
 }
+
+inline span<a>(pred: (&a) -> bool, xs: list(a)): pair(list(a), list(a)) {
+  let f =
+    define self(xs: list(a)): pair(list(a), list(a)) {
+      match xs {
+      | [] =>
+        Pair([], [])
+      | Cons(y, ys) =>
+        let cond on y = pred(y) in
+        if cond {
+          let Pair(former, latter) = self(ys) in
+          Pair(Cons(y, former), latter)
+        } else {
+          Pair([], Cons(y, ys))
+        }
+      }
+    }
+  in
+  f(xs)
+}
+
+inline span-N<a>(pred: (&a) -> bool, xs: &list(a)): pair(list(a), list(a)) {
+  let f =
+    define self(xs: &list(a)): pair(list(a), list(a)) {
+      case xs {
+      | [] =>
+        Pair([], [])
+      | Cons(y, ys) =>
+        if pred(y) {
+          let Pair(former, latter) = self(ys) in
+          Pair(Cons(*y, former), latter)
+        } else {
+          Pair([], Cons(*y, *ys))
+        }
+      }
+    }
+  in
+  f(xs)
+}
+
+inline take-while<a>(pred: (&a) -> bool, xs: list(a)): list(a) {
+  let f =
+    define self(xs: list(a)): list(a) {
+      match xs {
+      | [] =>
+        []
+      | Cons(y, ys) =>
+        let cond on y = pred(y) in
+        if cond {
+          Cons(y, self(ys))
+        } else {
+          []
+        }
+      }
+    }
+  in
+  f(xs)
+}
+
+inline take-while-N<a>(pred: (&a) -> bool, xs: &list(a)): list(a) {
+  let f =
+    define self(xs: &list(a)): list(a) {
+      case xs {
+      | [] =>
+        []
+      | Cons(y, ys) =>
+        if pred(y) {
+          Cons(*y, self(ys))
+        } else {
+          []
+        }
+      }
+    }
+  in
+  f(xs)
+}
+
+inline drop-while<a>(pred: (&a) -> bool, xs: list(a)): list(a) {
+  let f =
+    define self(xs: list(a)): list(a) {
+      match xs {
+      | [] =>
+        []
+      | Cons(y, ys) =>
+        let cond on y = pred(y) in
+        if cond {
+          self(ys)
+        } else {
+          Cons(y, ys)
+        }
+      }
+    }
+  in
+  f(xs)
+}
+
+inline drop-while-N<a>(pred: (&a) -> bool, xs: &list(a)): list(a) {
+  let f =
+    define self(xs: &list(a)): list(a) {
+      case xs {
+      | [] =>
+        []
+      | Cons(y, ys) =>
+        if pred(y) {
+          self(ys)
+        } else {
+          Cons(*y, *ys)
+        }
+      }
+    }
+  in
+  f(xs)
+}

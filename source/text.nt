@@ -133,7 +133,9 @@ define _from-c-string(old-ptr: int): text {
   Magic.cast(int, text, new-ptr)
 }
 
+// O(1)
 define _drop(offset: int, t: text): text {
+  let offset = max-int(0, offset) in
   let _ on t =
     let ptr = Magic.cast(&text, int, t) in
     let from = Mem.load-int(ptr) in
@@ -144,7 +146,9 @@ define _drop(offset: int, t: text): text {
   t
 }
 
+// O(1)
 define _take(offset: int, t: text): text {
+  let offset = max-int(0, offset) in
   let _ on t =
     let ptr = Magic.cast(&text, int, t) in
     let from = Mem.load-int(ptr) in
@@ -153,6 +157,11 @@ define _take(offset: int, t: text): text {
     Mem.store-int(min-int(to, add-int(from, offset)), to-ptr)
   in
   t
+}
+
+// O(1)
+define _slice(start: int, size: int, t: text): text {
+  _take(size, _drop(start, t))
 }
 
 define _drop-N(offset: int, t: &text): text {
@@ -515,6 +524,24 @@ define _get-char(t: &text, index: int): char {
   }
 }
 
+define _get-char-size-at(t: &text, index: int): int {
+  let head-char = _get-head-char(t, index) in
+  let category = _categorize-char(head-char) in
+  match category {
+  | _Char1 =>
+    1
+  | _Char2 =>
+    2
+  | _Char3 =>
+    3
+  | _Char4 =>
+    4
+  | _Invalid =>
+    // unicode invalid char
+    3
+  }
+}
+
 // O(1)
 define uncons(t: text): ?pair(char, text) {
   let len on t = text-byte-length(t) in
@@ -526,6 +553,55 @@ define uncons(t: text): ?pair(char, text) {
     let t = _drop(char-len, t) in
     Pass(Pair(ch, t))
   }
+}
+
+define _find-pivot(char-len: int, len: int, t: &text, index: int, char-count: int): int {
+  if ge-int(index, len) {
+    index
+  } else-if ge-int(char-count, char-len) {
+    index
+  } else {
+    let char-size = _get-char-size-at(t, index) in
+    _find-pivot(char-len, len, t, add-int(index, char-size), add-int(char-count, 1))
+  }
+}
+
+define take(n: int, t: text): text {
+  let len on t = text-byte-length(t) in
+  let pivot on t = _find-pivot(n, len, t, 0, 0) in
+  _slice(0, pivot, t)
+}
+
+define take-N(n: int, t: &text): text {
+  let len = text-byte-length(t) in
+  let pivot = _find-pivot(n, len, t, 0, 0) in
+  _slice-N(0, pivot, t)
+}
+
+define drop(n: int, t: text): text {
+  let len on t = text-byte-length(t) in
+  let pivot on t = _find-pivot(n, len, t, 0, 0) in
+  _slice(pivot, len, t)
+}
+
+define drop-N(n: int, t: &text): text {
+  let len = text-byte-length(t) in
+  let pivot = _find-pivot(n, len, t, 0, 0) in
+  _slice-N(pivot, len, t)
+}
+
+define slice(start: int, size: int, t: text): text {
+  let len on t = text-byte-length(t) in
+  let start-byte-index on t = _find-pivot(start, len, t, 0, 0) in
+  let end-byte-index on t = _find-pivot(size, len, t, start-byte-index, 0) in
+  _slice(start-byte-index, sub-int(end-byte-index, start-byte-index), t)
+}
+
+define slice-N(start: int, size: int, t: &text): text {
+  let len = text-byte-length(t) in
+  let start-byte-index = _find-pivot(start, len, t, 0, 0) in
+  let end-byte-index = _find-pivot(size, len, t, start-byte-index, 0) in
+  _slice-N(start-byte-index, sub-int(end-byte-index, start-byte-index), t)
 }
 
 define take-while-N(pred: (&char) -> bool, t: &text): text {

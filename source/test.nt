@@ -1,6 +1,11 @@
 import {
   this.bool {True},
-  this.list {list},
+  this.int.show {%ld},
+  this.list {for, list},
+  this.rune.show {as-show},
+  this.text {drop, pack, reverse, unpack},
+  this.text.io {printf},
+  this.text.show,
   this.unit {Unit, unit},
 }
 
@@ -25,16 +30,19 @@ define main(): unit {
 }
 
 define zen(): unit {
-  // let my-text = "あいうえお。hello, world!" in
-  // let char-seq = unpack(my-text) in
-  // for(char-seq, function (ch) {
-  //   printf("{}", [as-show::show(ch)])
-  // });
-  // let char-seq-2 on char-seq = pack(char-seq) in
-  // print("\n");
-  // printf("{}\n", [char-seq-2]);
-  // let t1 = *"test" in
-  // let tmp = drop(1, *"ate") in
+  let my-text = reverse("あいうえお。hello, world!") in
+  let len on my-text = this.text.length(my-text) in
+  let char-seq on my-text = unpack(my-text) in
+  let _ = my-text in
+  for(char-seq, function (ch) {
+    printf("{}", [as-show::show(ch)])
+  });
+  printf("len: {}\n", [%ld(len)]);
+  let char-seq-2 on char-seq = pack(char-seq) in
+  let _ = char-seq in
+  printf("{}\n", [char-seq-2]);
+  let tmp = drop(10, *"あいうえ💌おかきくけこ⭐さしすせ\n\\aoeuそたちつてと") in
+  printf("{}\n", [this.text.show.as-show::show(tmp)]);
   // let t2 on tmp = append(tmp, "st") in
   // let b on t1, t2 = eq-text(t1, t2) in
   // use this.bool.show.as-show {show} in

@@ -51,13 +51,13 @@ define store-rune(value: rune, address: int): int {
   match s {
   | 1 =>
     let piece-0 = trunc-int32-int8(value) in
-    store-int8(piece-0, address);
+    store-int8(piece-0, add-int(address, 0));
     1
   | 2 =>
     let value = trunc-int32-int16(value) in
     let piece-0 = trunc-int16-int8(lshr-int16(and-int16(0b_1111_1111_0000_0000, value), 8)) in
     let piece-1 = trunc-int16-int8(lshr-int16(and-int16(0b_0000_0000_1111_1111, value), 0)) in
-    store-int8(piece-0, address);
+    store-int8(piece-0, add-int(address, 0));
     store-int8(piece-1, add-int(address, 1));
     2
   | 3 =>
@@ -65,7 +65,7 @@ define store-rune(value: rune, address: int): int {
     let piece-0 = trunc-int24-int8(lshr-int24(and-int24(0b_1111_1111_0000_0000_0000_0000, value), 16)) in
     let piece-1 = trunc-int24-int8(lshr-int24(and-int24(0b_0000_0000_1111_1111_0000_0000, value), 8)) in
     let piece-2 = trunc-int24-int8(lshr-int24(and-int24(0b_0000_0000_0000_0000_1111_1111, value), 0)) in
-    store-int8(piece-0, address);
+    store-int8(piece-0, add-int(address, 0));
     store-int8(piece-1, add-int(address, 1));
     store-int8(piece-2, add-int(address, 2));
     3
@@ -74,7 +74,7 @@ define store-rune(value: rune, address: int): int {
     let piece-1 = trunc-int32-int8(lshr-int32(and-int32(0b_0000_0000_1111_1111_0000_0000_0000_0000, value), 16)) in
     let piece-2 = trunc-int32-int8(lshr-int32(and-int32(0b_0000_0000_0000_0000_1111_1111_0000_0000, value), 8)) in
     let piece-3 = trunc-int32-int8(lshr-int32(and-int32(0b_0000_0000_0000_0000_0000_0000_1111_1111, value), 0)) in
-    store-int8(piece-0, address);
+    store-int8(piece-0, add-int(address, 0));
     store-int8(piece-1, add-int(address, 1));
     store-int8(piece-2, add-int(address, 2));
     store-int8(piece-3, add-int(address, 3));

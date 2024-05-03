@@ -15,6 +15,14 @@ inline store-int32(value: int32, address: int): unit {
   magic store(int32, value, address)
 }
 
+inline store-int24(value: int24, address: int): unit {
+  magic store(int24, value, address)
+}
+
+inline store-int16(value: int16, address: int): unit {
+  magic store(int16, value, address)
+}
+
 inline store-int8(value: int8, address: int): unit {
   magic store(int8, value, address)
 }

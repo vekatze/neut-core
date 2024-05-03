@@ -1,0 +1,21 @@
+import {
+  this.bool,
+  this.entity {Entity, entity},
+  this.rune {rune},
+}
+
+constant as-entity: entity(rune) {
+  Entity of {
+    identity = eq-int32,
+  }
+}
+
+constant as-entity-N: entity(&rune) {
+  Entity of {
+    identity = {
+      function (x, y) {
+        as-entity::identity(*x, *y)
+      }
+    },
+  }
+}

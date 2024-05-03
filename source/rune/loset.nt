@@ -1,0 +1,38 @@
+import {
+  O {EQ, GT, LT},
+  this.bool,
+  this.loset {Loset, loset},
+  this.rune {rune},
+}
+
+constant as-loset: loset(rune) {
+  Loset of {
+    cmp = {
+      function (x, y) {
+        if gt-int32(x, y) {
+          GT
+        } else-if lt-int32(x, y) {
+          LT
+        } else {
+          EQ
+        }
+      }
+    },
+  }
+}
+
+constant as-loset-N: loset(&rune) {
+  Loset of {
+    cmp = {
+      function (x, y) {
+        if gt-int32(*x, *y) {
+          GT
+        } else-if lt-int32(*x, *y) {
+          LT
+        } else {
+          EQ
+        }
+      }
+    },
+  }
+}

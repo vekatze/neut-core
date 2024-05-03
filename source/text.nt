@@ -5,14 +5,14 @@ import {
   Mem,
   Word,
   this.bool {False, True, bool},
-  this.char {Char1, Char2, Char3, Char4, char, size},
   this.control {discard},
   this.except {Pass, none},
   this.int {max-int, min-int},
   this.int8-array {_copy-int8-array, int8-array, int8-array-access, int8-array-length, int8-array-new},
   this.list {Cons, Nil, alternate, fold-left-N, list, reverse},
-  this.memory {load-int8, store-int8},
+  this.memory {load-int8},
   this.pair {Pair, pair},
+  this.rune {load-rune, rune, size-by-head-byte, store-rune},
   this.unit {Unit, unit},
 }
 
@@ -256,105 +256,42 @@ define intercalate(sep: text, xs: list(text)): text {
   join(this.list.intercalate(sep, xs))
 }
 
-data _char {
-| _Char1
-| _Char2
-| _Char3
-| _Char4
-| _Invalid
-}
-
-define _char-as-int(c: _char): int {
-  match c {
-  | _Char1 =>
-    1
-  | _Char2 =>
-    2
-  | _Char3 =>
-    3
-  | _Char4 =>
-    4
-  | _Invalid =>
-    // for now
-    0
-  }
-}
-
-define char-to-bitseq-1(raw-char: int8): char {
-  Char1(raw-char)
-}
-
-define char-to-bitseq-2(raw-char: int16): char {
-  let piece-0 = trunc-int16-int8(lshr-int16(and-int16(0b_1111_1111_0000_0000, raw-char), 8)) in
-  let piece-1 = trunc-int16-int8(and-int16(0b_0000_0000_1111_1111, raw-char)) in
-  Char2(piece-0, piece-1)
-}
-
-define char-to-bitseq-3(raw-char: int24): char {
-  let piece-0 = trunc-int24-int8(lshr-int24(and-int24(0b_1111_1111_0000_0000_0000_0000, raw-char), 16)) in
-  let piece-1 = trunc-int24-int8(lshr-int24(and-int24(0b_0000_0000_1111_1111_0000_0000, raw-char), 8)) in
-  let piece-2 = trunc-int24-int8(and-int24(0b_0000_0000_0000_0000_1111_1111, raw-char)) in
-  Char3(piece-0, piece-1, piece-2)
-}
-
-define char-to-bitseq-4(raw-char: int32): char {
-  let piece-0 = trunc-int32-int8(lshr-int32(and-int32(0b_1111_1111_0000_0000_0000_0000_0000_0000, raw-char), 24)) in
-  let piece-1 = trunc-int32-int8(lshr-int32(and-int32(0b_0000_0000_1111_1111_0000_0000_0000_0000, raw-char), 16)) in
-  let piece-2 = trunc-int32-int8(lshr-int32(and-int32(0b_0000_0000_0000_0000_1111_1111_0000_0000, raw-char), 8)) in
-  let piece-3 = trunc-int32-int8(and-int32(0b_0000_0000_0000_0000_0000_0000_1111_1111, raw-char)) in
-  Char4(piece-0, piece-1, piece-2, piece-3)
-}
-
-define _get-head-char(t: &text, index: int): int8 {
+define _get-head-byte(t: &text, index: int): int8 {
   let ptr = _get-content-pointer(t) in
   load-int8(add-int(ptr, index))
 }
 
-define _get-head-char-1(t: &text, index: int): char {
-  let ch-0 = _get-head-char(t, index) in
-  Char1(ch-0)
+define _get-rune-size-at(t: &text, index: int): int {
+  let head-byte = _get-head-byte(t, index) in
+  size-by-head-byte(head-byte)
 }
 
-define _get-head-char-2(t: &text, index: int): char {
-  let ch-0 = _get-head-char(t, index) in
-  let ch-1 = _get-head-char(t, add-int(index, 1)) in
-  Char2(ch-0, ch-1)
-}
-
-define _get-head-char-3(t: &text, index: int): char {
-  let ch-0 = _get-head-char(t, index) in
-  let ch-1 = _get-head-char(t, add-int(index, 1)) in
-  let ch-2 = _get-head-char(t, add-int(index, 2)) in
-  Char3(ch-0, ch-1, ch-2)
-}
-
-define _get-head-char-4(t: &text, index: int): char {
-  let ch-0 = _get-head-char(t, index) in
-  let ch-1 = _get-head-char(t, add-int(index, 1)) in
-  let ch-2 = _get-head-char(t, add-int(index, 2)) in
-  let ch-3 = _get-head-char(t, add-int(index, 3)) in
-  Char4(ch-0, ch-1, ch-2, ch-3)
-}
-
-define _categorize-char(char: int8): _char {
-  if eq-int8(and-int8(char, 0x80), 0x00) {
-    // 0x00 = 0000 0000
-    // 0x80 = 1000 0000
-    _Char1
-  } else-if eq-int8(and-int8(char, 0xE0), 0xC0) {
-    // 0xC0 = 1100 0000
-    // 0xE0 = 1110 0000
-    _Char2
-  } else-if eq-int8(and-int8(char, 0xF0), 0xE0) {
-    // 0xE0 = 1110 0000
-    // 0xF0 = 1111 0000
-    _Char3
-  } else-if eq-int8(and-int8(char, 0xF8), 0xF0) {
-    // 0xF0 = 1111 0000
-    // 0xF8 = 1111 1000
-    _Char4
-  } else {
-    _Invalid
+define singleton(value: rune): text {
+  let s = this.rune.size(value) in
+  match s {
+  | 1 =>
+    let piece-0 = trunc-int32-int8(value) in
+    create([piece-0])
+  | 2 =>
+    let value = trunc-int32-int16(value) in
+    let piece-0 = trunc-int16-int8(lshr-int16(and-int16(0b_1111_1111_0000_0000, value), 8)) in
+    let piece-1 = trunc-int16-int8(lshr-int16(and-int16(0b_0000_0000_1111_1111, value), 0)) in
+    create([piece-0, piece-1])
+  | 3 =>
+    let value = trunc-int32-int24(value) in
+    let piece-0 = trunc-int24-int8(lshr-int24(and-int24(0b_1111_1111_0000_0000_0000_0000, value), 16)) in
+    let piece-1 = trunc-int24-int8(lshr-int24(and-int24(0b_0000_0000_1111_1111_0000_0000, value), 8)) in
+    let piece-2 = trunc-int24-int8(lshr-int24(and-int24(0b_0000_0000_0000_0000_1111_1111, value), 0)) in
+    create([piece-0, piece-1, piece-2])
+  | 4 =>
+    let piece-0 = trunc-int32-int8(lshr-int32(and-int32(0b_1111_1111_0000_0000_0000_0000_0000_0000, value), 24)) in
+    let piece-1 = trunc-int32-int8(lshr-int32(and-int32(0b_0000_0000_1111_1111_0000_0000_0000_0000, value), 16)) in
+    let piece-2 = trunc-int32-int8(lshr-int32(and-int32(0b_0000_0000_0000_0000_1111_1111_0000_0000, value), 8)) in
+    let piece-3 = trunc-int32-int8(lshr-int32(and-int32(0b_0000_0000_0000_0000_0000_0000_1111_1111, value), 0)) in
+    create([piece-0, piece-1, piece-2, piece-3])
+  | _ =>
+    // U+FFFE Noncharacter
+    create([0xef, 0xbf, 0xbe])
   }
 }
 
@@ -362,10 +299,8 @@ define _length(t: &text, len: int, index: int, acc: int): int {
   if ge-int(index, len) {
     acc
   } else {
-    let head-char = _get-head-char(t, index) in
-    let category = _categorize-char(head-char) in
-    let char-len = _char-as-int(category) in
-    _length(t, len, add-int(index, char-len), add-int(acc, 1))
+    let rune-size = _get-rune-size-at(t, index) in
+    _length(t, len, add-int(index, rune-size), add-int(acc, 1))
   }
 }
 
@@ -416,47 +351,32 @@ define format(fmt: &text, args: list(text)): text {
   join(_format(fmt, args))
 }
 
-define _unpack(t: &text, len: int, index: int, acc: list(char)): list(char) {
+define _unpack(ptr: int, len: int, index: int, acc: list(rune)): list(rune) {
   if ge-int(index, len) {
     reverse(acc)
   } else {
-    let head-char = _get-head-char(t, index) in
-    let category = _categorize-char(head-char) in
-    let char-len = _char-as-int(category) in
-    match category {
-    | _Char1 =>
-      let ch = Char1(head-char) in
-      _unpack(t, len, add-int(index, char-len), Cons(ch, acc))
-    | _Char2 =>
-      let ch = _get-head-char-2(t, index) in
-      _unpack(t, len, add-int(index, char-len), Cons(ch, acc))
-    | _Char3 =>
-      let ch = _get-head-char-3(t, index) in
-      _unpack(t, len, add-int(index, char-len), Cons(ch, acc))
-    | _Char4 =>
-      let ch = _get-head-char-4(t, index) in
-      _unpack(t, len, add-int(index, char-len), Cons(ch, acc))
-    | _Invalid =>
-      _unpack(t, len, add-int(index, char-len), acc)
-    }
+    let r = load-rune(add-int(ptr, index)) in
+    let s = this.rune.size(r) in
+    _unpack(ptr, len, add-int(index, s), Cons(r, acc))
   }
 }
 
-define unpack(t: &text): list(char) {
+define unpack(t: &text): list(rune) {
+  let ptr = _get-content-pointer(t) in
   let len = text-byte-length(t) in
-  _unpack(t, len, 0, [])
+  _unpack(ptr, len, 0, [])
 }
 
-define _char-list-length(xs: &list(char), acc: int): int {
+define _char-list-length(xs: &list(rune), acc: int): int {
   case xs {
   | Nil =>
     acc
   | Cons(x, rest) =>
-    _char-list-length(rest, add-int(acc, size(x)))
+    _char-list-length(rest, add-int(acc, this.rune.size(*x)))
   }
 }
 
-define pack(xs: &list(char)): text {
+define pack(xs: &list(rune)): text {
   let len = _char-list-length(xs, 0) in
   let u = Word.size in
   let u2 = mul-int(u, 2) in
@@ -465,32 +385,14 @@ define pack(xs: &list(char)): text {
   Mem.store-int(len, add-int(new-text, u));
   let content-ptr = add-int(new-text, u2) in
   let loop =
-    define self(offset: int, xs: &list(char)): unit {
+    define self(offset: int, xs: &list(rune)): unit {
       case xs {
       | Nil =>
         Unit
       | Cons(x, rest) =>
         let current-content-ptr = add-int(content-ptr, offset) in
-        case x {
-        | Char1(c0) =>
-          store-int8(*c0, current-content-ptr);
-          self(add-int(offset, 1), rest)
-        | Char2(c0, c1) =>
-          store-int8(*c0, current-content-ptr);
-          store-int8(*c1, add-int(current-content-ptr, 1));
-          self(add-int(offset, 2), rest)
-        | Char3(c0, c1, c2) =>
-          store-int8(*c0, current-content-ptr);
-          store-int8(*c1, add-int(current-content-ptr, 1));
-          store-int8(*c2, add-int(current-content-ptr, 2));
-          self(add-int(offset, 3), rest)
-        | Char4(c0, c1, c2, c3) =>
-          store-int8(*c0, current-content-ptr);
-          store-int8(*c1, add-int(current-content-ptr, 1));
-          store-int8(*c2, add-int(current-content-ptr, 2));
-          store-int8(*c3, add-int(current-content-ptr, 3));
-          self(add-int(offset, 4), rest)
-        }
+        let stored-bytes = store-rune(*x, current-content-ptr) in
+        self(add-int(offset, stored-bytes), rest)
       }
     }
   in
@@ -506,50 +408,19 @@ define reverse(t: &text): text {
   result
 }
 
-define _get-char(t: &text, index: int): char {
-  let head-char = _get-head-char(t, index) in
-  let category = _categorize-char(head-char) in
-  match category {
-  | _Char1 =>
-    Char1(head-char)
-  | _Char2 =>
-    _get-head-char-2(t, index)
-  | _Char3 =>
-    _get-head-char-3(t, index)
-  | _Char4 =>
-    _get-head-char-4(t, index)
-  | _Invalid =>
-    // unicode invalid char
-    Char3(0xEF, 0xBF, 0xBE)
-  }
+define _get-rune(t: &text, index: int): rune {
+  let ptr = add-int(_get-content-pointer(t), index) in
+  load-rune(ptr)
 }
 
-define _get-char-size-at(t: &text, index: int): int {
-  let head-char = _get-head-char(t, index) in
-  let category = _categorize-char(head-char) in
-  match category {
-  | _Char1 =>
-    1
-  | _Char2 =>
-    2
-  | _Char3 =>
-    3
-  | _Char4 =>
-    4
-  | _Invalid =>
-    // unicode invalid char
-    3
-  }
-}
-
-// O(1)
-define uncons(t: text): ?pair(char, text) {
+// // O(1)
+define uncons(t: text): ?pair(rune, text) {
   let len on t = text-byte-length(t) in
   if eq-int(len, 0) {
     none()
   } else {
-    let ch on t = _get-char(t, 0) in
-    let char-len on ch = this.char.size(ch) in
+    let ch on t = _get-rune(t, 0) in
+    let char-len = this.rune.size(ch) in
     let t = _drop(char-len, t) in
     Pass(Pair(ch, t))
   }
@@ -561,7 +432,7 @@ define _find-pivot(char-len: int, len: int, t: &text, index: int, char-count: in
   } else-if ge-int(char-count, char-len) {
     index
   } else {
-    let char-size = _get-char-size-at(t, index) in
+    let char-size = _get-rune-size-at(t, index) in
     _find-pivot(char-len, len, t, add-int(index, char-size), add-int(char-count, 1))
   }
 }
@@ -604,17 +475,17 @@ define slice-N(start: int, size: int, t: &text): text {
   _slice-N(start-byte-index, sub-int(end-byte-index, start-byte-index), t)
 }
 
-define take-while-N(pred: (&char) -> bool, t: &text): text {
+define take-while-N(pred: (&rune) -> bool, t: &text): text {
   let len = text-byte-length(t) in
   let f =
-    define self(index: int, acc: list(char)): list(char) {
+    define self(index: int, acc: list(rune)): list(rune) {
       if ge-int(index, len) {
         core.list.reverse(acc)
       } else {
-        let ch = _get-char(t, index) in
+        let ch = _get-rune(t, index) in
         let cond on ch = pred(ch) in
         if cond {
-          let char-len on ch = this.char.size(ch) in
+          let char-len = this.rune.size(ch) in
           self(add-int(index, char-len), Cons(ch, acc))
         } else {
           core.list.reverse(acc)
@@ -628,17 +499,17 @@ define take-while-N(pred: (&char) -> bool, t: &text): text {
   result
 }
 
-define drop-while-N(pred: (&char) -> bool, t: &text): text {
+define drop-while-N(pred: (&rune) -> bool, t: &text): text {
   let len = text-byte-length(t) in
   let f =
     define self(index: int): text {
       if ge-int(index, len) {
         empty()
       } else {
-        let ch = _get-char(t, index) in
+        let ch = _get-rune(t, index) in
         let cond on ch = pred(ch) in
         if cond {
-          let char-len on ch = this.char.size(ch) in
+          let char-len = this.rune.size(ch) in
           let _ = ch in
           self(add-int(index, char-len))
         } else {

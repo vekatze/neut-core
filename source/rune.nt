@@ -10,13 +10,13 @@ constant rune: tau {
 }
 
 define size(c: rune): int {
-  if and(le-int32(0x00, c), le-int32(c, 0x7F)) {
+  if and(ule-int32(0x00, c), ule-int32(c, 0x7F)) {
     1
-  } else-if and(le-int32(0xC280, c), le-int32(c, 0xDFBF)) {
+  } else-if and(ule-int32(0xC280, c), ule-int32(c, 0xDFBF)) {
     2
-  } else-if and(le-int32(0xE08080, c), le-int32(c, 0xEFBFBF)) {
+  } else-if and(ule-int32(0xE08080, c), ule-int32(c, 0xEFBFBF)) {
     3
-  } else-if and(le-int32(0xF0808080, c), le-int32(c, 0xF4BFBFBF)) {
+  } else-if and(ule-int32(0xF0808080, c), ule-int32(c, 0xF4BFBFBF)) {
     4
   } else {
     3

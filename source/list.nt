@@ -356,6 +356,19 @@ inline maximum<a>(as-ord: loset(&a)): (list(a)) -> ?a {
   }
 }
 
+define take<a>(n: int, xs: list(a)): list(a) {
+  if le-int(n, 0) {
+    []
+  } else {
+    match xs {
+    | Nil =>
+      Nil
+    | Cons(y, ys) =>
+      Cons(y, take(sub-int(n, 1), ys))
+    }
+  }
+}
+
 define take-N<a>(n: int, xs: &list(a)): list(a) {
   if le-int(n, 0) {
     []
@@ -365,6 +378,19 @@ define take-N<a>(n: int, xs: &list(a)): list(a) {
       Nil
     | Cons(y, ys) =>
       Cons(*y, take-N(sub-int(n, 1), ys))
+    }
+  }
+}
+
+define drop<a>(n: int, xs: list(a)): list(a) {
+  if le-int(n, 0) {
+    xs
+  } else {
+    match xs {
+    | Nil =>
+      Nil
+    | Cons(_, ys) =>
+      drop(sub-int(n, 1), ys)
     }
   }
 }
@@ -382,6 +408,19 @@ define drop-N<a>(n: int, xs: &list(a)): list(a) {
   }
 }
 
+define _split<a>(n: int, xs: list(a), head-acc: list(a)): pair(list(a), list(a)) {
+  if le-int(n, 0) {
+    Pair(reverse(head-acc), xs)
+  } else {
+    match xs {
+    | Nil =>
+      Pair(head-acc, Nil)
+    | Cons(y, ys) =>
+      _split(sub-int(n, 1), ys, Cons(y, head-acc))
+    }
+  }
+}
+
 define _split-N<a>(n: int, xs: &list(a), head-acc: list(a)): pair(list(a), list(a)) {
   if le-int(n, 0) {
     Pair(reverse(head-acc), *xs)
@@ -393,6 +432,10 @@ define _split-N<a>(n: int, xs: &list(a), head-acc: list(a)): pair(list(a), list(
       _split-N(sub-int(n, 1), ys, Cons(*y, head-acc))
     }
   }
+}
+
+define split<a>(n: int, xs: list(a)): pair(list(a), list(a)) {
+  _split(n, xs, [])
 }
 
 define split-N<a>(n: int, xs: &list(a)): pair(list(a), list(a)) {

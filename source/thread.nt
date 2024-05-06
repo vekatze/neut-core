@@ -7,7 +7,7 @@ import {
   this.unit {Unit, unit},
 }
 
-inline -embody(a: tau, x: &a): a {
+inline _embody(a: tau, x: &a): a {
   *x
 }
 
@@ -23,11 +23,11 @@ nominal {
 }
 
 resource flow-inner {
-  function (p: int) {
+  function (addr: int) {
     // tio.print("[warning] awaiting a flow to discard it\n")
     let u = Word.size in
-    let elem-type = Magic.cast(int, tau, Mem.load-int(add-int(p, u))) in
-    let pr: flow(elem-type) = Magic.cast(int, flow(elem-type), p) in
+    let elem-type = Magic.cast(int, tau, Mem.load-int(add-int(addr, u))) in
+    let pr: flow(elem-type) = Magic.cast(int, flow(elem-type), addr) in
     // await * discard
     let _: elem-type = this.thread.attach(elem-type, pr) in
     0
@@ -44,7 +44,7 @@ resource flow-inner {
     let new-addr = Ext.malloc(_flow-size()) in
     Mem.store-int(thread-id, new-addr);
     Mem.store-int(Magic.cast(tau, int, elem-type), add-int(new-addr, u));
-    let cloned-value: elem-type = -embody(elem-type, elem-value) in
+    let cloned-value: elem-type = _embody(elem-type, elem-value) in
     Mem.store-int(Magic.cast(elem-type, int, cloned-value), add-int(new-addr, u2));
     // already finished
     Mem.store-int1(1, add-int(new-addr, u3));

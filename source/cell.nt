@@ -91,6 +91,12 @@ define borrow<a>(ch: &cell(a), f: (&a) -> unit): unit {
   Ext.thread-mutex-unlock(mutex-ptr)
 }
 
+define read<a>(ch: &cell(a)): &a {
+  let ch = Magic.cast(&cell(a), int, ch) in
+  let val-base = Mem.load-int(ch) in
+  Magic.cast(int, &a, val-base)
+}
+
 define clone<a>(ch: &cell(a)): a {
   let ch = Magic.cast(&cell(a), int, ch) in
   let u = Word.size in

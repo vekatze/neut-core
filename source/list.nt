@@ -286,6 +286,24 @@ inline _filter<a>(pred: (a) -> bool): (xs: list(a)) -> list(a) {
   }
 }
 
+inline find<a>(pred: (&a) -> bool, xs: &list(a)): ?&a {
+  let f =
+    define self(ys: &list(a)): ?&a {
+      case ys {
+      | Nil =>
+        none()
+      | Cons(z, zs) =>
+        if pred(z) {
+          Pass(z)
+        } else {
+          self(zs)
+        }
+      }
+    }
+  in
+  f(xs)
+}
+
 inline filter<a>(pred: (a) -> bool, xs: list(a)): list(a) {
   _filter(pred)(xs)
 }

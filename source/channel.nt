@@ -19,8 +19,8 @@ nominal {
   _channel: tau,
 }
 
-define channel(_: tau): tau {
-  _channel
+data channel(_: tau) {
+| _Channel(_channel)
 }
 
 define _new(a: tau, q: Q.queue(a)): channel(a) {

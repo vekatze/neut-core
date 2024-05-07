@@ -52,6 +52,8 @@ resource flow-inner {
   },
 }
 
+// `flow` must be defined by `define` (and not by `data`) so that
+// `flow(a)` is consider to be possibly noetic
 define flow(_: tau): tau {
   flow-inner
 }

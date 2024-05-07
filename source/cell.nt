@@ -17,8 +17,8 @@ nominal {
   _cell: tau,
 }
 
-define cell(_: tau): tau {
-  _cell
+data cell(_: tau) {
+| _Cell(_cell)
 }
 
 define _new(a: tau, val: a): cell(a) {

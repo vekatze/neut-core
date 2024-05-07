@@ -3,7 +3,7 @@ import {
   Magic,
   Mem,
   Word,
-  this.bool {bool},
+  this.bool,
   this.unit {Unit, unit},
 }
 
@@ -13,7 +13,7 @@ inline _embody(a: tau, x: &a): a {
 
 inline _flow-size(): int {
   let u = Word.size in
-  add-int(mul-int(u, 3), 2)
+  add-int(mul-int(u, 3), 1)
 }
 
 nominal {
@@ -24,14 +24,16 @@ nominal {
 
 resource flow-inner {
   function (addr: int) {
+    // tio.print("[warning] awaiting a flow to discard it\n")
     let u = Word.size in
     let elem-type = Magic.cast(int, tau, Mem.load-int(add-int(addr, u))) in
     let pr: flow(elem-type) = Magic.cast(int, flow(elem-type), addr) in
-    // await & discard
+    // await * discard
     let _: elem-type = this.thread.attach(elem-type, pr) in
     0
   },
   function (addr: int) {
+    // tio.print("[warning] awaiting a flow to copy it\n")
     let u = Word.size in
     let u2 = mul-int(u, 2) in
     let u3 = mul-int(u, 3) in
@@ -46,8 +48,6 @@ resource flow-inner {
     Mem.store-int(Magic.cast(elem-type, int, cloned-value), add-int(new-addr, u2));
     // already finished
     Mem.store-int1(1, add-int(new-addr, u3));
-    // already joined
-    Mem.store-int1(1, add-int(new-addr, add-int(u3, 1)));
     new-addr
   },
 }
@@ -70,36 +70,28 @@ define _await-and-write-result(addr: int): unit {
   let u = Word.size in
   let u2 = mul-int(u, 2) in
   let u3 = mul-int(u, 3) in
-  let joined-flag-ptr = add-int(addr, add-int(u3, 1)) in
-  let joined-flag = Mem.load-int1(joined-flag-ptr) in
-  if eq-int1(joined-flag, 0) {
+  let finished-flag-ptr = add-int(addr, u3) in
+  let finished-flag = Mem.load-int1(finished-flag-ptr) in
+  if eq-int1(finished-flag, 0) {
     let thread-id = Mem.load-int(addr) in
     let value-ptr = add-int(addr, u2) in
     Ext.thread-join(thread-id, value-ptr);
-    Mem.store-int1(1, joined-flag-ptr)
+    Mem.store-int1(1, finished-flag-ptr)
   } else {
     Unit
   }
 }
 
-// (thread-id, result-type, result-value, finished-flag, joined-flag): flow(result-type)
+// (thread-id, result-type, result-value, finished-flag): flow(result-type)
 define detach(a: tau, f: () -> a): flow(a) {
+  let thread-func =
+    function () {
+      Ext.thread-exit(Magic.cast(a, int, f()))
+    }
+  in
   let u = Word.size in
   let u2 = mul-int(u, 2) in
   let u3 = mul-int(u, 3) in
-  let thread-ptr = Ext.malloc(_flow-size()) in
-  Mem.store-int(Magic.cast(tau, int, a), add-int(thread-ptr, u));
-  Mem.store-int(0, add-int(thread-ptr, u2));
-  Mem.store-int1(0, add-int(thread-ptr, u3));
-  Mem.store-int1(0, add-int(thread-ptr, add-int(u3, 1)));
-  let finished-flag-ptr = add-int(thread-ptr, u3) in
-  let thread-func =
-    function () {
-      let result = f() in
-      Mem.store-int1(1, finished-flag-ptr);
-      Ext.thread-exit(Magic.cast(a, int, result))
-    }
-  in
   let closure = Magic.cast(() -> unit, int, thread-func) in
   let closure-env = Mem.load-int(add-int(closure, u)) in
   let closure-label = Mem.load-int(add-int(closure, u2)) in
@@ -118,15 +110,10 @@ define detach(a: tau, f: () -> a): flow(a) {
   let _ = thread-create() in
   let thread-id = Mem.load-int(thread-id-pointer) in
   Ext.free(thread-id-pointer);
-  Mem.store-int(thread-id, thread-ptr);
-  Magic.cast(int, flow(a), thread-ptr)
-}
-
-define is-finished<a>(t: &flow(a)): bool {
-  let u = Word.size in
-  let u3 = mul-int(u, 3) in
-  let addr = Magic.cast(&flow(a), int, t) in
-  let finished-flag-ptr = add-int(addr, u3) in
-  let finished-flag = Mem.load-int1(finished-flag-ptr) in
-  eq-int1(finished-flag, 1)
+  let ptr = Ext.malloc(_flow-size()) in
+  Mem.store-int(thread-id, ptr);
+  Mem.store-int(Magic.cast(tau, int, a), add-int(ptr, u));
+  Mem.store-int(0, add-int(ptr, u2));
+  Mem.store-int1(0, add-int(ptr, u3));
+  Magic.cast(int, flow(a), ptr)
 }

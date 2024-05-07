@@ -1,12 +1,11 @@
 import {
   this.bool {True},
-  this.bool.show,
-  this.external {sleep},
   this.int.show {%ld},
-  this.list {list},
-  this.text,
-  this.text.io {print, printf},
-  this.thread,
+  this.list {for, list},
+  this.rune.show {as-show},
+  this.text {drop, pack, reverse, unpack},
+  this.text.io {printf},
+  this.text.show,
   this.unit {Unit, unit},
 }
 
@@ -31,19 +30,23 @@ define main(): unit {
 }
 
 define zen(): unit {
-  let fl =
-    detach {
-      print("hello\n");
-      3
-    }
-  in
-  let b1 on fl = this.thread.is-finished(fl) in
-  sleep(1);
-  let b2 on fl = this.thread.is-finished(fl) in
-  print("hey\n");
-  let x = attach {fl} in
-  printf("result-int: {}\n", [%ld(x)]);
-  printf("b1: {}\n", [this.bool.show.show(b1)]);
-  printf("b2: {}\n", [this.bool.show.show(b2)]);
+  let my-text = reverse("あいうえお。hello, world!") in
+  let len on my-text = this.text.length(my-text) in
+  let char-seq on my-text = unpack(my-text) in
+  let _ = my-text in
+  for(char-seq, function (ch) {
+    printf("{}", [as-show::show(ch)])
+  });
+  printf("len: {}\n", [%ld(len)]);
+  let char-seq-2 on char-seq = pack(char-seq) in
+  let _ = char-seq in
+  printf("{}\n", [char-seq-2]);
+  let tmp = drop(10, *"あいうえ💌おかきくけこ⭐さしすせ\n\\aoeuそたちつてと") in
+  printf("{}\n", [this.text.show.as-show::show(tmp)]);
+  // let t2 on tmp = append(tmp, "st") in
+  // let b on t1, t2 = eq-text(t1, t2) in
+  // use this.bool.show.as-show {show} in
+  // // let Show(f) = as-show in
+  // printf("{}\n", [show(b)]);
   Unit
 }

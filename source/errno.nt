@@ -2,6 +2,7 @@ import {
   this.except {Fail, except},
   this.external {errno-location},
   this.memory {load-int32},
+  this.text {_from-c-string, text},
 }
 
 data errno {
@@ -24,4 +25,14 @@ define get-system-error(): errno {
 
 define report-system-error<a>(): system(a) {
   Fail(get-system-error())
+}
+
+foreign {
+  strerror(int): pointer,
+}
+
+define get-error-message(e: errno): text {
+  let Errno(i) = e in
+  let c-str = magic external strerror(i) in
+  _from-c-string(c-str)
 }

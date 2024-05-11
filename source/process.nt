@@ -23,41 +23,41 @@ foreign {
   waitpid(int, pointer, int): int,
   pipe(pointer): int,
   dup2(int, int): int,
-  __neut__unsafe__wifexited(pointer): int,
-  __neut__unsafe__wifsignaled(pointer): int,
-  __neut__unsafe__wifstopped(pointer): int,
-  __neut__unsafe__wexitstatus(pointer): int,
-  __neut__unsafe__wtermsig(pointer): int,
-  __neut__unsafe__wcoredump(pointer): int,
-  __neut__unsafe__wstopsig(pointer): int,
+  neut_core_v0_48_wifexited(pointer): int,
+  neut_core_v0_48_wifsignaled(pointer): int,
+  neut_core_v0_48_wifstopped(pointer): int,
+  neut_core_v0_48_wexitstatus(pointer): int,
+  neut_core_v0_48_wtermsig(pointer): int,
+  neut_core_v0_48_wcoredump(pointer): int,
+  neut_core_v0_48_wstopsig(pointer): int,
 }
 
 define _wifexited(ptr: int): bool {
-  magic external __neut__unsafe__wifexited(ptr)
+  magic external neut_core_v0_48_wifexited(ptr)
 }
 
 define _wifsignaled(ptr: int): bool {
-  magic external __neut__unsafe__wifsignaled(ptr)
+  magic external neut_core_v0_48_wifsignaled(ptr)
 }
 
 define _wifstopped(ptr: int): bool {
-  magic external __neut__unsafe__wifstopped(ptr)
+  magic external neut_core_v0_48_wifstopped(ptr)
 }
 
 define _wexitstatus(ptr: int): int {
-  magic external __neut__unsafe__wexitstatus(ptr)
+  magic external neut_core_v0_48_wexitstatus(ptr)
 }
 
 define _wtermsig(ptr: int): int {
-  magic external __neut__unsafe__wtermsig(ptr)
+  magic external neut_core_v0_48_wtermsig(ptr)
 }
 
 define _wcoredump(ptr: int): bool {
-  magic external __neut__unsafe__wcoredump(ptr)
+  magic external neut_core_v0_48_wcoredump(ptr)
 }
 
 define _wstopsig(ptr: int): int {
-  magic external __neut__unsafe__wstopsig(ptr)
+  magic external neut_core_v0_48_wstopsig(ptr)
 }
 
 define __waitpid(pid: int, status-ptr: int, option: int): int {
@@ -205,8 +205,8 @@ define _print-process-result-status(st: process-result-status): unit {
 define zen(): unit {
   let cmd =
     Process-Spec of {
-      process = "ls",
-      args = ["-a", "-l"],
+      process = "sh",
+      args = ["-c", "\"ls /\""],
       input = "",
     }
   in

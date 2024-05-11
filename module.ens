@@ -3,9 +3,20 @@
     bench-random-dict "bench/random-dict.nt",
     test "test.nt",
   },
-  foreign [
-    "foreign/",
-  ],
+  foreign {
+    input [
+      "foreign/wait.c",
+      "foreign/constant.c",
+    ],
+    output [
+      "wait.o",
+      "constant.o",
+    ],
+    script [
+      "{{clang}} -c -flto=thin -O2 foreign/wait.c -o {{foreign}}/wait.o",
+      "{{clang}} -c -flto=thin -O2 foreign/constant.c -o {{foreign}}/constant.o",
+    ],
+  },
   prefix {
     Dict "this.dict",
     E "this.entity",

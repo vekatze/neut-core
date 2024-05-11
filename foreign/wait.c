@@ -1,29 +1,41 @@
 #include <sys/wait.h>
 
-int __neut__unsafe__wifexited(int stat) {
+__attribute__((always_inline))
+int neut_core_v0_48_wifexited(int stat) {
   return WIFEXITED(stat);
 }
 
-int __neut__unsafe__wifsignaled(int stat) {
+__attribute__((always_inline))
+int neut_core_v0_48_wifsignaled(int stat) {
   return WIFSIGNALED(stat);
 }
 
-int __neut__unsafe__wifstopped(int stat) {
+__attribute__((always_inline))
+int neut_core_v0_48_wifstopped(int stat) {
   return WIFSTOPPED(stat);
 }
 
-int __neut__unsafe__wexitstatus(int stat) {
+__attribute__((always_inline))
+int neut_core_v0_48_wexitstatus(int stat) {
   return WEXITSTATUS(stat);
 }
 
-int __neut__unsafe__wtermsig(int stat) {
+__attribute__((always_inline))
+int neut_core_v0_48_wtermsig(int stat) {
   return WTERMSIG(stat);
 }
 
-int __neut__unsafe__wcoredump(int stat) {
+__attribute__((always_inline))
+int neut_core_v0_48_wcoredump(int stat) {
   return WCOREDUMP(stat);
 }
 
-int __neut__unsafe__wstopsig(int stat) {
+__attribute__((always_inline))
+int neut_core_v0_48_wstopsig(int stat) {
   return WSTOPSIG(stat);
+}
+
+__attribute__((always_inline))
+int neut_core_v0_48_word_size() {
+  return sizeof(void*);
 }

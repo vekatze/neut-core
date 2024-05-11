@@ -1,11 +1,13 @@
 import {
-  this.bool {True},
+  this.bool {True, and, bool},
   this.int.show {%ld},
   this.list {for, list},
+  this.process,
   this.rune.show {as-show},
   this.text {drop, pack, reverse, unpack},
   this.text.io {printf},
   this.text.show,
+  this.thread,
   this.unit {Unit, unit},
 }
 
@@ -26,10 +28,15 @@ define increment(x: int): int {
 }
 
 define main(): unit {
-  Unit
+  // print-int(this.word.size)
+  this.process.zen()
 }
 
 define zen(): unit {
+  let ゼロ = 0 in
+  let 加法 = add-int(ゼロ, 1) in
+  let _ = this.process.zen() in
+  let foo = detach {tau} in
   let my-text = reverse("あいうえお。hello, world!") in
   let len on my-text = this.text.length(my-text) in
   let char-seq on my-text = unpack(my-text) in
@@ -49,4 +56,22 @@ define zen(): unit {
   // // let Show(f) = as-show in
   // printf("{}\n", [show(b)]);
   Unit
+}
+
+define wifexited(x: int): bool {
+  introspect os {
+  | darwin =>
+    let foo = and-int(x, 0b_0111_1111) in
+    eq-int(foo, 0)
+  }
+}
+
+define wifsignaled(x: int): bool {
+  introspect os {
+  | darwin =>
+    let foo = and-int(x, 0b_0111_1111) in
+    let b1 = ne-int(foo, 0b_0111_1111) in
+    let b2 = ne-int(foo, 0) in
+    and(b1, b2)
+  }
 }

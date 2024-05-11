@@ -1,8 +1,7 @@
+foreign {
+  neut_core_v0_48_word_size(): int32,
+}
+
 constant size: int {
-  introspect arch {
-  | amd64 =>
-    8
-  | arm64 =>
-    8
-  }
+  magic external neut_core_v0_48_word_size()
 }

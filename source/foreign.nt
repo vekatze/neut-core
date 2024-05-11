@@ -1,0 +1,41 @@
+import {
+  this.bool {bool},
+}
+
+foreign {
+  neut_core_v0_48_wifexited(pointer): int,
+  neut_core_v0_48_wifsignaled(pointer): int,
+  neut_core_v0_48_wifstopped(pointer): int,
+  neut_core_v0_48_wexitstatus(pointer): int,
+  neut_core_v0_48_wtermsig(pointer): int,
+  neut_core_v0_48_wcoredump(pointer): int,
+  neut_core_v0_48_wstopsig(pointer): int,
+}
+
+define _wifexited(ptr: int): bool {
+  magic external neut_core_v0_48_wifexited(ptr)
+}
+
+define _wifsignaled(ptr: int): bool {
+  magic external neut_core_v0_48_wifsignaled(ptr)
+}
+
+define _wifstopped(ptr: int): bool {
+  magic external neut_core_v0_48_wifstopped(ptr)
+}
+
+define _wexitstatus(ptr: int): int {
+  magic external neut_core_v0_48_wexitstatus(ptr)
+}
+
+define _wtermsig(ptr: int): int {
+  magic external neut_core_v0_48_wtermsig(ptr)
+}
+
+define _wcoredump(ptr: int): bool {
+  magic external neut_core_v0_48_wcoredump(ptr)
+}
+
+define _wstopsig(ptr: int): int {
+  magic external neut_core_v0_48_wstopsig(ptr)
+}

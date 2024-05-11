@@ -1,16 +1,16 @@
-define flip<a, b, c>(f: (a, b) -> c): (b, a) -> c {
+inline flip<a, b, c>(f: (a, b) -> c): (b, a) -> c {
   function (y, x) {
     f(x, y)
   }
 }
 
-define compose<a, b, c>(f: (a) -> b, g: (b) -> c): (a) -> c {
+inline compose<a, b, c>(f: (a) -> b, g: (b) -> c): (a) -> c {
   function (x) {
     g(f(x))
   }
 }
 
-define curry<a, b, c>(f: (a, b) -> c): (a) -> (b) -> c {
+inline curry<a, b, c>(f: (a, b) -> c): (a) -> (b) -> c {
   function (x) {
     function (y) {
       f(x, y)
@@ -18,7 +18,7 @@ define curry<a, b, c>(f: (a, b) -> c): (a) -> (b) -> c {
   }
 }
 
-define uncurry<a, b, c>(f: (a) -> (b) -> c): (a, b) -> c {
+inline uncurry<a, b, c>(f: (a) -> (b) -> c): (a, b) -> c {
   function (x, y) {
     f(x)(y)
   }

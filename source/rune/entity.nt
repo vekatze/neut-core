@@ -1,5 +1,5 @@
 import {
-  this.bool,
+  this.bool {bool},
   this.entity {Entity, entity},
   this.rune {rune},
 }
@@ -18,4 +18,8 @@ constant as-entity-N: entity(&rune) {
       }
     },
   }
+}
+
+define eq-rune(r1: rune, r2: rune): bool {
+  eq-int32(r1, r2)
 }

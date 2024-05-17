@@ -10,6 +10,7 @@ foreign {
   neut_core_v0_48_wtermsig(pointer): int,
   neut_core_v0_48_wcoredump(pointer): int,
   neut_core_v0_48_wstopsig(pointer): int,
+  neut_core_v0_48_word_size(): int,
 }
 
 define _wifexited(ptr: int): bool {
@@ -38,4 +39,8 @@ define _wcoredump(ptr: int): bool {
 
 define _wstopsig(ptr: int): int {
   magic external neut_core_v0_48_wstopsig(ptr)
+}
+
+constant _size: int {
+  magic external neut_core_v0_48_word_size()
 }

@@ -1,7 +1,7 @@
-foreign {
-  neut_core_v0_48_word_size(): int32,
+import {
+  this.foreign,
 }
 
 constant size: int {
-  magic external neut_core_v0_48_word_size()
+  this.foreign._size
 }

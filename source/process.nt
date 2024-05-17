@@ -8,6 +8,7 @@ import {
   this.external {free},
   this.file {close},
   this.file.descriptor {stderr, stdin, stdout},
+  this.foreign {_wcoredump, _wexitstatus, _wifexited, _wifsignaled, _wifstopped, _wstopsig, _wtermsig},
   this.list {Cons, fold-left-index, length, list},
   this.memory {store-int},
   this.pair {Pair, pair},
@@ -23,41 +24,6 @@ foreign {
   waitpid(int, pointer, int): int,
   pipe(pointer): int,
   dup2(int, int): int,
-  neut_core_v0_48_wifexited(pointer): int,
-  neut_core_v0_48_wifsignaled(pointer): int,
-  neut_core_v0_48_wifstopped(pointer): int,
-  neut_core_v0_48_wexitstatus(pointer): int,
-  neut_core_v0_48_wtermsig(pointer): int,
-  neut_core_v0_48_wcoredump(pointer): int,
-  neut_core_v0_48_wstopsig(pointer): int,
-}
-
-define _wifexited(ptr: int): bool {
-  magic external neut_core_v0_48_wifexited(ptr)
-}
-
-define _wifsignaled(ptr: int): bool {
-  magic external neut_core_v0_48_wifsignaled(ptr)
-}
-
-define _wifstopped(ptr: int): bool {
-  magic external neut_core_v0_48_wifstopped(ptr)
-}
-
-define _wexitstatus(ptr: int): int {
-  magic external neut_core_v0_48_wexitstatus(ptr)
-}
-
-define _wtermsig(ptr: int): int {
-  magic external neut_core_v0_48_wtermsig(ptr)
-}
-
-define _wcoredump(ptr: int): bool {
-  magic external neut_core_v0_48_wcoredump(ptr)
-}
-
-define _wstopsig(ptr: int): int {
-  magic external neut_core_v0_48_wstopsig(ptr)
 }
 
 define __waitpid(pid: int, status-ptr: int, option: int): int {

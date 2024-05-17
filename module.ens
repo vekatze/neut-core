@@ -5,16 +5,13 @@
   },
   foreign {
     input [
-      "foreign/wait.c",
-      "foreign/constant.c",
+      "foreign/foreign.c",
     ],
     output [
-      "wait.o",
-      "constant.o",
+      "foreign.o",
     ],
     script [
-      "{{clang}} -c -flto=thin -O2 foreign/wait.c -o {{foreign}}/wait.o",
-      "{{clang}} -c -flto=thin -O2 foreign/constant.c -o {{foreign}}/constant.o",
+      "{{clang}} -c -flto=thin -O2 foreign/foreign.c -o {{foreign}}/foreign.o",
     ],
   },
   prefix {

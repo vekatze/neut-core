@@ -5,13 +5,13 @@
   },
   foreign {
     input [
-      "foreign/foreign.c",
+      "source/foreign.c",
     ],
     output [
       "foreign.o",
     ],
     script [
-      "{{clang}} -c -flto=thin -O2 foreign/foreign.c -o {{foreign}}/foreign.o",
+      "{{clang}} -c -flto=thin -O2 source/foreign.c -o {{foreign}}/foreign.o",
     ],
   },
   prefix {

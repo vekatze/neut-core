@@ -15,51 +15,25 @@ data mode {
 }
 
 define interpret-mode(flag: mode): int {
-  introspect os {
-  | darwin =>
-    // https://github.com/apple/darwin-xnu/blob/main/bsd/sys/fcntl.h
-    match flag {
-    | Owner-R =>
-      0o400
-    | Owner-W =>
-      0o200
-    | Owner-X =>
-      0o100
-    | Group-R =>
-      0o40
-    | Group-W =>
-      0o20
-    | Group-X =>
-      0o10
-    | Other-R =>
-      0o4
-    | Other-W =>
-      0o2
-    | Other-X =>
-      0o1
-    }
-  | linux =>
-    // https://github.com/torvalds/linux/blob/master/import/uapi/linux/stat.h
-    match flag {
-    | Owner-R =>
-      0o400
-    | Owner-W =>
-      0o200
-    | Owner-X =>
-      0o100
-    | Group-R =>
-      0o40
-    | Group-W =>
-      0o20
-    | Group-X =>
-      0o10
-    | Other-R =>
-      0o4
-    | Other-W =>
-      0o2
-    | Other-X =>
-      0o1
-    }
+  match flag {
+  | Owner-R =>
+    0o400
+  | Owner-W =>
+    0o200
+  | Owner-X =>
+    0o100
+  | Group-R =>
+    0o40
+  | Group-W =>
+    0o20
+  | Group-X =>
+    0o10
+  | Other-R =>
+    0o4
+  | Other-W =>
+    0o2
+  | Other-X =>
+    0o1
   }
 }
 

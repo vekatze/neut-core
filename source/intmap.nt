@@ -2,6 +2,7 @@ import {
   this.bool {bool},
   this.except {Pass, none},
   this.unit,
+  this.word,
 }
 
 foreign {
@@ -68,12 +69,8 @@ inline _link-with-mask<a>(m: _Mask, p1: _Prefix, t1: intmap(a), t2: intmap(a)): 
 
 // from `Utils.Containers.Internal.BitUtil`
 inline _highest-bit-mask(w: int): int {
-  introspect arch {
-  | amd64 =>
-    shl-int(1, sub-int(63, magic external llvm.ctlz.i64(w)))
-  | arm64 =>
-    shl-int(1, sub-int(63, magic external llvm.ctlz.i64(w)))
-  }
+  let size-in-bits = mul-int(this.word.size, 8) in
+  shl-int(1, sub-int(sub-int(size-in-bits, 1), magic external llvm.ctlz.i64(w)))
 }
 
 inline _branch-mask(p1: _Prefix, p2: _Prefix): _Mask {

@@ -3,12 +3,7 @@ import {
 }
 
 inline store-int(value: int, address: int): unit {
-  introspect arch {
-  | amd64 =>
-    magic store(int64, value, address)
-  | arm64 =>
-    magic store(int64, value, address)
-  }
+  magic store(int, value, address)
 }
 
 inline store-int32(value: int32, address: int): unit {
@@ -36,7 +31,7 @@ inline load-int32(address: int): int32 {
 }
 
 inline load-int(address: int): int {
-  magic load(int64, address)
+  magic load(int, address)
 }
 
 inline load-int8(address: int): int8 {

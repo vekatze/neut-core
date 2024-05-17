@@ -11,6 +11,16 @@ foreign {
   neut_core_v0_48_wcoredump(pointer): int,
   neut_core_v0_48_wstopsig(pointer): int,
   neut_core_v0_48_word_size(): int,
+  neut_core_v0_48_O_RDONLY(): int,
+  neut_core_v0_48_O_WRONLY(): int,
+  neut_core_v0_48_O_RDWR(): int,
+  neut_core_v0_48_O_CREAT(): int,
+  neut_core_v0_48_O_APPEND(): int,
+  neut_core_v0_48_SEEK_SET(): int,
+  neut_core_v0_48_SEEK_CUR(): int,
+  neut_core_v0_48_SEEK_END(): int,
+  neut_core_v0_48_thread_mutex_size(): int,
+  neut_core_v0_48_thread_cond_size(): int,
 }
 
 define _wifexited(ptr: int): bool {
@@ -43,4 +53,44 @@ define _wstopsig(ptr: int): int {
 
 constant _size: int {
   magic external neut_core_v0_48_word_size()
+}
+
+constant O_RDONLY: int {
+  magic external neut_core_v0_48_O_RDONLY()
+}
+
+constant O_WRONLY: int {
+  magic external neut_core_v0_48_O_WRONLY()
+}
+
+constant O_RDWR: int {
+  magic external neut_core_v0_48_O_RDWR()
+}
+
+constant O_CREAT: int {
+  magic external neut_core_v0_48_O_CREAT()
+}
+
+constant O_APPEND: int {
+  magic external neut_core_v0_48_O_APPEND()
+}
+
+constant SEEK_SET: int {
+  magic external neut_core_v0_48_SEEK_SET()
+}
+
+constant SEEK_CUR: int {
+  magic external neut_core_v0_48_SEEK_CUR()
+}
+
+constant SEEK_END: int {
+  magic external neut_core_v0_48_SEEK_END()
+}
+
+constant THREAD_MUTEX_SIZE: int {
+  magic external neut_core_v0_48_thread_mutex_size()
+}
+
+constant THREAD_COND_SIZE: int {
+  magic external neut_core_v0_48_thread_cond_size()
 }

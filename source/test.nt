@@ -1,5 +1,6 @@
 import {
   this.bool {True, and, bool},
+  this.foreign {THREAD_COND_SIZE, THREAD_MUTEX_SIZE},
   this.int.show {%ld},
   this.list {for, list},
   this.process,
@@ -9,6 +10,7 @@ import {
   this.text.show,
   this.thread,
   this.unit {Unit, unit},
+  this.word,
 }
 
 constant my-bool: tau {
@@ -33,9 +35,12 @@ define main(): unit {
 }
 
 define zen(): unit {
+  // printf("SEEK_END: {}\n", [%ld(SEEK_END)]);
+  printf("thread mutex size: {}\n", [%ld(THREAD_MUTEX_SIZE)]);
+  printf("thread cond size: {}\n", [%ld(THREAD_COND_SIZE)]);
+  printf("word size: {}\n", [%ld(this.word.size)]);
   let ゼロ = 0 in
   let 加法 = add-int(ゼロ, 1) in
-  let _ = this.process.zen() in
   let foo = detach {tau} in
   let my-text = reverse("あいうえお。hello, world!") in
   let len on my-text = this.text.length(my-text) in

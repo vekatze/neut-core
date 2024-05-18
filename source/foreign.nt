@@ -3,6 +3,7 @@ import {
 }
 
 foreign {
+  neut_core_v0_48_errno(): int,
   neut_core_v0_48_wifexited(pointer): int,
   neut_core_v0_48_wifsignaled(pointer): int,
   neut_core_v0_48_wifstopped(pointer): int,
@@ -21,6 +22,10 @@ foreign {
   neut_core_v0_48_SEEK_END(): int,
   neut_core_v0_48_thread_mutex_size(): int,
   neut_core_v0_48_thread_cond_size(): int,
+}
+
+define get-errno(): int {
+  magic external neut_core_v0_48_errno()
 }
 
 define _wifexited(ptr: int): bool {

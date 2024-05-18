@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <pthread.h>
+#include <sys/errno.h>
 #include <sys/fcntl.h>
 #include <sys/wait.h>
 
@@ -91,4 +92,9 @@ int neut_core_v0_48_thread_mutex_size() {
 __attribute__((always_inline))
 int neut_core_v0_48_thread_cond_size() {
   return sizeof(pthread_cond_t);
+}
+
+__attribute__((always_inline))
+int neut_core_v0_48_errno() {
+  return errno;
 }

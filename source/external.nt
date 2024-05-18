@@ -5,8 +5,6 @@ import {
 }
 
 foreign {
-  __error(): int,
-  __errno_location(): int,
   exit(int): void,
   realloc(pointer, int): pointer,
   open(pointer, int, int): int,
@@ -26,15 +24,6 @@ foreign {
   pthread_cond_destroy(pointer): int,
   pthread_cond_signal(pointer): int,
   pthread_cond_wait(pointer, pointer): int,
-}
-
-define errno-location(): int {
-  introspect os {
-  | darwin =>
-    magic external __error()
-  | linux =>
-    magic external __errno_location()
-  }
 }
 
 define exit<a>(status: int): a {

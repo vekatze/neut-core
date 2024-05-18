@@ -1,6 +1,6 @@
 import {
   this.except {Fail, except},
-  this.external {errno-location},
+  this.foreign {get-errno},
   this.memory {load-int32},
   this.text {_from-c-string, text},
 }
@@ -10,7 +10,7 @@ data errno {
 }
 
 define _get-errno(): int {
-  let errno-ptr = errno-location() in
+  let errno-ptr = get-errno() in
   // POSIX requires errno to be thread-safe
   magic cast(int32, int, load-int32(errno-ptr))
 }

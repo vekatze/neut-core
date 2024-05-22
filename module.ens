@@ -1,7 +1,11 @@
 {
   target {
-    bench-random-dict "bench/random-dict.nt",
-    test "test.nt",
+    test {
+      main "test.nt",
+    },
+    bench-random-dict {
+      main "bench/random-dict.nt",
+    },
   },
   foreign {
     input [

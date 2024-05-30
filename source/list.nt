@@ -1,7 +1,7 @@
 import {
   Lo {Loset, loset},
   this.bool {False, True, and, bool, or},
-  this.except {Fail, Pass, none},
+  this.except {Fail, Pass, except, none},
   this.monoid {Monoid, monoid},
   this.order {GT, LT},
   this.pair {Pair, pair},
@@ -160,34 +160,6 @@ inline for-N<a>(xs: &list(a), f: (&a) -> unit): unit {
   Unit
 }
 
-define loop(count: int, f: (int) -> unit): unit {
-  let helper =
-    define self(cursor): unit {
-      match ge-int(cursor, count) {
-      | True =>
-        Unit
-      | False =>
-        f(cursor);
-        self(add-int(cursor, 1))
-      }
-    }
-  in
-  helper(0)
-}
-
-inline repeat<a>(count: int, f: (int) -> a): list(a) {
-  let helper =
-    define self(cursor): list(a) {
-      if ge-int(cursor, count) {
-        Nil
-      } else {
-        Cons(f(cursor), self(add-int(cursor, 1)))
-      }
-    }
-  in
-  helper(0)
-}
-
 define append<a>(xs: list(a), ys: list(a)): list(a) {
   fold-right(xs, ys, exact Cons)
 }
@@ -200,6 +172,34 @@ define reverse<a>(xs: list(a)): list(a) {
   fold-left([], xs, function (acc, x) {
     Cons(x, acc)
   })
+}
+
+inline iterate<a>(count: int, f: (int) -> a): list(a) {
+  let helper =
+    define self(cursor): list(a) {
+      if ge-int(cursor, count) {
+        Nil
+      } else {
+        Cons(f(cursor), self(add-int(cursor, 1)))
+      }
+    }
+  in
+  helper(0)
+}
+
+inline try-iterate<e, a>(count: int, f: (int) -> except(e, a)): except(e, list(a)) {
+  let helper =
+    define self(acc: list(a), cursor: int): except(e, list(a)) {
+      match ge-int(cursor, count) {
+      | True =>
+        Pass(reverse(acc))
+      | False =>
+        try v = f(cursor) in
+        self(Cons(v, acc), add-int(cursor, 1))
+      }
+    }
+  in
+  helper([], 0)
 }
 
 define length<a>(xs: &list(a)): int {

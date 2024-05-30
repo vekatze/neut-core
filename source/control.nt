@@ -1,19 +1,50 @@
 import {
-  core.bool,
+  core.bool {False, True},
+  core.except {Pass, except},
   core.unit {Unit, unit},
 }
 
-inline loop<result>(count: int, base: result, f: (result, int) -> result): result {
+define loop(count: int, f: (int) -> unit): unit {
   let helper =
-    define self(cursor, acc): result {
-      if ge-int(cursor, count) {
-        acc
-      } else {
-        self(add-int(cursor, 1), f(acc, cursor))
+    define self(cursor): unit {
+      match ge-int(cursor, count) {
+      | True =>
+        Unit
+      | False =>
+        f(cursor);
+        self(add-int(cursor, 1))
       }
     }
   in
-  helper(0, base)
+  helper(0)
+}
+
+inline try-loop<e>(count: int, f: (int) -> except(e, unit)): except(e, unit) {
+  let helper =
+    define self(cursor): except(e, unit) {
+      match ge-int(cursor, count) {
+      | True =>
+        Pass(Unit)
+      | False =>
+        try _ = f(cursor) in
+        self(add-int(cursor, 1))
+      }
+    }
+  in
+  helper(0)
+}
+
+inline grow<a>(seed: a, iteration: int, step: (a, int) -> a): a {
+  let helper =
+    define self(current: int, acc: a): a {
+      if ge-int(current, iteration) {
+        acc
+      } else {
+        self(add-int(current, 1), step(acc, current))
+      }
+    }
+  in
+  helper(0, seed)
 }
 
 define discard<a>(_: a): unit {

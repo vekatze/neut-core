@@ -4,10 +4,11 @@ import {
   Mem,
   Word,
   this.bool,
+  this.control {loop},
   this.except {from-option},
   this.external {free, malloc},
   this.int.loset {as-loset-N},
-  this.list {Cons, Nil, list, loop, minimum, repeat},
+  this.list {Cons, Nil, iterate, list, minimum},
   this.unit {Unit, unit},
 }
 
@@ -143,7 +144,7 @@ inline for-each<a>(xs: &vector(a), f: (a) -> unit): unit {
 inline for<a, b>(xs: &vector(a), f: (a) -> b): vector(b) {
   new of {
     base-list = {
-      repeat(size(xs), function (i) {
+      iterate(size(xs), function (i) {
         f(access(xs, i))
       })
     },

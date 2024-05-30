@@ -2,11 +2,10 @@ import {
   Word,
   this.bool {bool},
   this.external {exit},
-  this.list {Cons, for, for-each, list},
+  this.list {Cons, list},
   this.memory {load-int},
   this.text {_from-c-string, text},
   this.text.io {print},
-  this.thread {flow},
   this.unit {Unit, unit},
 }
 
@@ -38,18 +37,6 @@ inline assert(message: &text, check: () -> bool): unit {
 define panic<a>(t: &text): a {
   print(t);
   exit(1)
-}
-
-inline parallel-test(tests: list(() -> () -> unit)): unit {
-  let flow-list =
-    for-each(tests, function (testFunc: () -> () -> unit) {
-      detach {testFunc()}
-    })
-  in
-  for(flow-list, function (f: flow(() -> unit)) {
-    let result = attach {f} in
-    result()
-  })
 }
 
 define get-argc(): int {

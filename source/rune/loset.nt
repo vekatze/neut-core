@@ -1,17 +1,41 @@
 import {
   O {EQ, GT, LT},
-  this.bool,
+  this.bool {bool},
   this.loset {Loset, loset},
-  this.rune {rune},
+  this.rune {_Rune, rune},
+}
+
+define lt-rune(r1: rune, r2: rune): bool {
+  let _Rune(r1) = r1 in
+  let _Rune(r2) = r2 in
+  lt-int32(r1, r2)
+}
+
+define le-rune(r1: rune, r2: rune): bool {
+  let _Rune(r1) = r1 in
+  let _Rune(r2) = r2 in
+  le-int32(r1, r2)
+}
+
+define gt-rune(r1: rune, r2: rune): bool {
+  let _Rune(r1) = r1 in
+  let _Rune(r2) = r2 in
+  gt-int32(r1, r2)
+}
+
+define ge-rune(r1: rune, r2: rune): bool {
+  let _Rune(r1) = r1 in
+  let _Rune(r2) = r2 in
+  ge-int32(r1, r2)
 }
 
 constant as-loset: loset(rune) {
   Loset of {
     cmp = {
       function (x, y) {
-        if gt-int32(x, y) {
+        if gt-rune(x, y) {
           GT
-        } else-if lt-int32(x, y) {
+        } else-if lt-rune(x, y) {
           LT
         } else {
           EQ
@@ -25,9 +49,9 @@ constant as-loset-N: loset(&rune) {
   Loset of {
     cmp = {
       function (x, y) {
-        if gt-int32(*x, *y) {
+        if gt-rune(*x, *y) {
           GT
-        } else-if lt-int32(*x, *y) {
+        } else-if lt-rune(*x, *y) {
           LT
         } else {
           EQ

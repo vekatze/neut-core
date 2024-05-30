@@ -3,7 +3,6 @@ import {
   this.foreign {THREAD_COND_SIZE, THREAD_MUTEX_SIZE},
   this.int.show {%ld},
   this.list {for, list},
-  this.process,
   this.rune.show {as-show},
   this.text {drop, pack, reverse, unpack},
   this.text.io {printf},
@@ -26,11 +25,6 @@ constant some-int-list: list(int) {
 
 define increment(x: int): int {
   add-int(x, 1)
-}
-
-define main(): unit {
-  // print-int(this.word.size)
-  this.process.zen()
 }
 
 define zen(): unit {
@@ -57,4 +51,8 @@ define zen(): unit {
   // // let Show(f) = as-show in
   // printf("{}\n", [show(b)]);
   Unit
+}
+
+define main(): unit {
+  zen()
 }

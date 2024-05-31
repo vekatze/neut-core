@@ -47,7 +47,7 @@
     bool ["False", "True", "and", "bool", "not", "or"],
     cell ["borrow", "cell", "clone", "mutate"],
     channel ["channel", "receive", "send"],
-    except ["Fail", "Pass", "except", "none"],
+    either ["Left", "Right", "either", "none"],
     file ["close", "open"],
     file.descriptor ["descriptor", "stderr", "stdin", "stdout"],
     function ["compose", "curry", "flip", "uncurry"],

@@ -6,8 +6,8 @@ import {
   Seek,
   Word,
   this.bool,
+  this.either {Left, Right},
   this.errno {report-system-error, system},
-  this.except {Fail, Pass},
   this.int.parse {parse},
   this.list {for, list},
   this.memory,
@@ -26,7 +26,7 @@ define write(t: &text, f: FD.descriptor): system(int) {
   if lt-int(bytes, 0) {
     report-system-error()
   } else {
-    Pass(bytes)
+    Right(bytes)
   }
 }
 
@@ -96,7 +96,7 @@ define _read-inner(from: FD.descriptor, ptr: int, ptr-size: int, len-cand: int, 
       report-system-error()
     } else-if lt-int(bytes, buffer-size) {
       Mem.store-int(next-len-cand, add-int(ptr, u));
-      Pass(Magic.cast(int, text, ptr))
+      Right(Magic.cast(int, text, ptr))
     } else {
       _read-inner(from, ptr, ptr-size, next-len-cand, buffer-size)
     }
@@ -118,9 +118,9 @@ define get-line(): system(text) {
 
 define zen(): unit {
   match parse("123123123") {
-  | Pass(v) =>
+  | Right(v) =>
     print-int(v)
-  | Fail(_) =>
+  | Left(_) =>
     print("failed to parse\n")
   }
 }

@@ -5,7 +5,7 @@ import {
   O {EQ, GT, LT},
   Word,
   this.bool {and, or},
-  this.except {Pass, none},
+  this.either {Right, none},
   this.text {_get-content-pointer, text, text-byte-length},
   this.unit,
 }
@@ -32,7 +32,7 @@ define _parse-nat(content-ptr: int, len: int): ?int {
   if or(lt-int(result, 0), le-int(len, 0)) {
     none()
   } else {
-    Pass(result)
+    Right(result)
   }
 }
 
@@ -46,7 +46,7 @@ define parse(t: &text): ?int {
     if eq-int(char, 45) {
       // 45 == "-"
       try nat = _parse-nat(add-int(content-ptr, 1), sub-int(len, 1)) in
-      Pass(mul-int(-1, nat))
+      Right(mul-int(-1, nat))
     } else-if eq-int(char, 43) {
       // 43 == "+"
       _parse-nat(add-int(content-ptr, 1), sub-int(len, 1))

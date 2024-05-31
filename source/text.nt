@@ -6,7 +6,7 @@ import {
   Word,
   this.bool {False, True, bool},
   this.control {discard},
-  this.except {Pass, none},
+  this.either {Right, none},
   this.int {max-int, min-int},
   this.int8-array {_copy-int8-array, int8-array, int8-array-access, int8-array-length, int8-array-new},
   this.list {Cons, Nil, alternate, fold-left-N, list, reverse},
@@ -423,7 +423,7 @@ define uncons(t: text): ?pair(rune, text) {
     let ch on t = _get-rune(t, 0) in
     let char-len = this.rune.size(ch) in
     let t = _drop(char-len, t) in
-    Pass(Pair(ch, t))
+    Right(Pair(ch, t))
   }
 }
 

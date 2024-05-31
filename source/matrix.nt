@@ -5,7 +5,7 @@ import {
   Vector {vector},
   this.bool {and},
   this.control {loop},
-  this.except {from-option},
+  this.either {from-option},
   this.int.loset {as-loset-N},
   this.rig {rig},
   this.ring {ring},

@@ -5,7 +5,7 @@ import {
   Word,
   this.bool,
   this.control {loop},
-  this.except {from-option},
+  this.either {from-option},
   this.external {free, malloc},
   this.int.loset {as-loset-N},
   this.list {Cons, Nil, iterate, list, minimum},

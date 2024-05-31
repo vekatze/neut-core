@@ -2,7 +2,7 @@ import {
   Dict {dict, insert},
   TIO,
   this.control {grow},
-  this.except {Fail, Pass},
+  this.either {Left, Right},
   this.int.loset {as-loset-N},
   this.random {random},
   this.unit {Unit, unit},
@@ -26,9 +26,9 @@ define random-lookup-sum(d: &dict(int, int)): unit {
       let key = random(1000000) in
       let val on key =
         match intdict::lookup(key, d) {
-        | Fail(_) =>
+        | Left(_) =>
           0
-        | Pass(v) =>
+        | Right(v) =>
           *v
         }
       in

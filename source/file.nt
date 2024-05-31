@@ -4,8 +4,8 @@ import {
   FF,
   FM,
   this.bool,
+  this.either {Right},
   this.errno {report-system-error, system},
-  this.except {Pass},
   this.list {list},
   this.text {_get-content-pointer, text},
   this.unit {Unit, unit},
@@ -19,14 +19,14 @@ define open(path: &text, xs: list(FF.flag), ms: list(FM.mode)): system(FD.descri
   if lt-int(magic cast(FD.descriptor, int, fd), 0) {
     report-system-error()
   } else {
-    Pass(fd)
+    Right(fd)
   }
 }
 
 define close(f: FD.descriptor): system(unit) {
   let result = Ext.close(f) in
   if eq-int(result, 0) {
-    Pass(Unit)
+    Right(Unit)
   } else {
     report-system-error()
   }

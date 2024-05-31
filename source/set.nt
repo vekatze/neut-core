@@ -2,7 +2,7 @@ import {
   Lo {Loset, loset},
   this.bool {False, True, bool},
   this.dict {dict, empty, singleton},
-  this.except {Fail, Pass},
+  this.either {Left, Right},
   this.unit {Unit, unit},
 }
 
@@ -37,9 +37,9 @@ inline from-loset<k>(_loset: loset(&k)): trope(k) {
     lookup = {
       function (k, s) {
         match lookup(k, s) {
-        | Pass(_) =>
+        | Right(_) =>
           True
-        | Fail(_) =>
+        | Left(_) =>
           False
         }
       }

@@ -1,5 +1,5 @@
 import {
-  this.except {Fail, except},
+  this.either {Left, either},
   this.foreign {get-errno},
   this.memory {load-int32},
   this.text {_from-c-string, text},
@@ -16,7 +16,7 @@ define _get-errno(): int {
 }
 
 inline system(a: tau): tau {
-  except(errno, a)
+  either(errno, a)
 }
 
 define get-system-error(): errno {
@@ -24,7 +24,7 @@ define get-system-error(): errno {
 }
 
 define report-system-error<a>(): system(a) {
-  Fail(get-system-error())
+  Left(get-system-error())
 }
 
 foreign {

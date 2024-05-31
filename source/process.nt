@@ -3,8 +3,8 @@ import {
   FD,
   Word,
   this.bool {bool},
+  this.either {Left, Right},
   this.errno {Errno, report-system-error, system},
-  this.except {Fail, Pass},
   this.external {free},
   this.file {close},
   this.file.descriptor {stderr, stdin, stdout},
@@ -47,14 +47,14 @@ define _waitpid(pid: int): system(process-result-status) {
     free(status-ptr);
     if _wifexited(stat-loc) {
       let exit-status = _wexitstatus(stat-loc) in
-      Pass(Exited(exit-status))
+      Right(Exited(exit-status))
     } else-if _wifsignaled(stat-loc) {
       let termsig = _wtermsig(stat-loc) in
       let coredump = _wcoredump(stat-loc) in
-      Pass(Signaled(termsig, coredump))
+      Right(Signaled(termsig, coredump))
     } else-if _wifstopped(stat-loc) {
       let stopsig = _wstopsig(stat-loc) in
-      Pass(Stopped(stopsig))
+      Right(Stopped(stopsig))
     } else {
       // unreachable
       report-system-error()
@@ -81,7 +81,7 @@ define _create-pipe(): system(pair(FD.descriptor, FD.descriptor)) {
     let reader = magic load(int32, ptr) in
     let writer = magic load(int32, add-int(ptr, 4)) in
     free(ptr);
-    Pass(Pair(reader, writer))
+    Right(Pair(reader, writer))
   }
 }
 
@@ -90,7 +90,7 @@ define _dup2(fd1: FD.descriptor, fd2: FD.descriptor): system(unit) {
   if eq-int(result, -1) {
     report-system-error()
   } else {
-    Pass(Unit)
+    Right(Unit)
   }
 }
 
@@ -99,7 +99,7 @@ define _fork(): system(int) {
   if eq-int(result, -1) {
     report-system-error()
   } else {
-    Pass(result)
+    Right(result)
   }
 }
 
@@ -149,7 +149,7 @@ define spawn(ps: process-spec): system(process-result) {
     try stdout-text = read(out-reader) in
     try stderr-text = read(error-reader) in
     try status = _waitpid(pid) in
-    Pass(Process-Result of {
+    Right(Process-Result of {
       status,
       stdout-text,
       stderr-text,
@@ -177,7 +177,7 @@ define zen(): unit {
     }
   in
   match spawn(cmd) {
-  | Pass(result) =>
+  | Right(result) =>
     use result {stdout-text, stderr-text, status} in
     let _ on stdout-text = print(stdout-text) in
     let _ on stderr-text = print(stderr-text) in
@@ -187,7 +187,7 @@ define zen(): unit {
     _print-process-result-status(status);
     print("\n");
     print("success\n")
-  | Fail(Errno(num)) =>
+  | Left(Errno(num)) =>
     print("fail: ");
     print-int(num)
   }

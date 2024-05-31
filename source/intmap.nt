@@ -1,6 +1,6 @@
 import {
   this.bool {bool},
-  this.except {Pass, none},
+  this.either {Right, none},
   this.unit,
   this.word,
 }
@@ -108,7 +108,7 @@ define lookup<a>(k: _Key, t: &intmap(a)): ?&a {
     none()
   | Tip(kx, x) =>
     if eq-int(k, *kx) {
-      Pass(x)
+      Right(x)
     } else {
       none()
     }

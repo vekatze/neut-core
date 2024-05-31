@@ -5,7 +5,7 @@ import {
   Mem,
   Q,
   Word,
-  this.except {Fail, Pass},
+  this.either {Left, Right},
   this.int {sum-int},
   this.pair {Pair},
   this.unit {unit},
@@ -83,11 +83,11 @@ define send<a>(ch: &channel(a), x: a): unit {
 define _receive-from-channel(a: tau, ch: int, mutex-ptr: int): a {
   let q: Q.queue(a) = Magic.cast(int, Q.queue(a), Mem.load-int(ch)) in
   match Q.dequeue(q) {
-  | Pass(Pair(v, q)) =>
+  | Right(Pair(v, q)) =>
     Mem.store-int(Magic.cast(Q.queue(a), int, q), ch);
     Ext.thread-mutex-unlock(mutex-ptr);
     v
-  | Fail(_) =>
+  | Left(_) =>
     Mem.store-int(Magic.cast(Q.queue(int), int, Q.empty()), ch);
     let u = Word.size in
     let mutex-size = Ext.thread-mutex-size() in

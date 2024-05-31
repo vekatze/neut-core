@@ -1,5 +1,5 @@
 import {
-  this.except {Pass},
+  this.either {Right},
   this.loset {Loset, loset},
   this.order {order},
   this.unit,
@@ -16,7 +16,7 @@ inline from-loset<a>(_loset: loset(a)): poset(a) {
   Poset of {
     cmp = {
       function (x, y) {
-        Pass(cmp(x, y))
+        Right(cmp(x, y))
       }
     },
   }

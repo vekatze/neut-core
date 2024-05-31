@@ -4,7 +4,7 @@ import {
   Mem,
   Word,
   this.bool,
-  this.except {Pass, from-option, none},
+  this.either {Right, from-option, none},
   this.external {free, malloc},
   this.int.loset {as-loset-N},
   this.list {Cons, Nil, list, minimum},
@@ -104,7 +104,7 @@ define uncons(xs: float-array): ?pair(float, float-array) {
     none()
   } else {
     let head-content on xs = access(xs, 0) in
-    Pass(Pair(head-content, tail(xs)))
+    Right(Pair(head-content, tail(xs)))
   }
 }
 

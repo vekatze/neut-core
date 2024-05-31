@@ -1,7 +1,7 @@
 import {
   Lo {Loset, loset},
   core.bool,
-  core.except {Pass, none},
+  core.either {Right, none},
   core.order {EQ, GT, LT},
   core.system,
   core.text,
@@ -213,7 +213,7 @@ inline lookup<k>(L: loset(&k)): <v>(&k, &dict(k, v)) -> ?&v {
       | GT =>
         self(needle, r)
       | EQ =>
-        Pass(x)
+        Right(x)
       }
     }
   }

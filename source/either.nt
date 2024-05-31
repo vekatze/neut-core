@@ -2,20 +2,20 @@ import {
   this.unit {Unit},
 }
 
-data except(a: tau, b: tau) {
-| Fail(a)
-| Pass(b)
+data either(e, a) {
+| Left(e)
+| Right(a)
 }
 
 inline none<a>(): ?a {
-  Fail(Unit)
+  Left(Unit)
 }
 
 define from-option<a>(x: a, my: ?a): a {
   match my {
-  | Pass(y) =>
+  | Right(y) =>
     y
-  | Fail(_) =>
+  | Left(_) =>
     x
   }
 }

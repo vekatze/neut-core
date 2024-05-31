@@ -1,16 +1,16 @@
 import {
-  this.except {Fail, Pass, except},
+  this.either {Left, Right, either},
   this.list,
   this.show {Show, show},
   this.text {format},
 }
 
-inline as-show<a, b>(s1: show(a), s2: show(b)): show(except(a, b)) {
+inline as-show<a, b>(s1: show(a), s2: show(b)): show(either(a, b)) {
   Show(function (val) {
     match val {
-    | Fail(x) =>
-      format("Fail({})", [s1::show(x)])
-    | Pass(y) =>
+    | Left(x) =>
+      format("Left({})", [s1::show(x)])
+    | Right(y) =>
       format("Right({})", [s2::show(y)])
     }
   })

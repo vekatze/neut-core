@@ -33,7 +33,6 @@ constant _Prefix: tau {
   int
 }
 
-// empty
 inline empty<a>(): intmap(a) {
   Nil
 }

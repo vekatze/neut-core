@@ -521,3 +521,28 @@ define drop-while-N(pred: (&rune) -> bool, t: &text): text {
   in
   f(0)
 }
+
+define replicate(n: int, t: &text): text {
+  let base-len = text-byte-length(t) in
+  let len = mul-int(n, base-len) in
+  let u = Word.size in
+  let u2 = mul-int(u, 2) in
+  let new-text = Ext.malloc(add-int(len, u2)) in
+  Mem.store-int(0, new-text);
+  Mem.store-int(len, add-int(new-text, u));
+  let content-ptr = add-int(new-text, u2) in
+  let loop =
+    define self(count: int, t: &text): unit {
+      if ge-int(count, n) {
+        Unit
+      } else {
+        let current-content-ptr = add-int(content-ptr, mul-int(count, base-len)) in
+        let x-ptr = _get-content-pointer(t) in
+        _copy-int8-array(x-ptr, current-content-ptr, 0, base-len);
+        self(add-int(count, 1), t)
+      }
+    }
+  in
+  loop(0, t);
+  magic cast(int, text, new-text)
+}

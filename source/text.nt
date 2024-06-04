@@ -71,6 +71,37 @@ define join(xs: list(text)): text {
   magic cast(int, text, new-text)
 }
 
+define join-N(xs: list(&text)): text {
+  let len on xs =
+    fold-left-N(0, xs, function (acc, x) {
+      add-int(acc, text-byte-length(*x))
+    })
+  in
+  let u = Word.size in
+  let u2 = mul-int(u, 2) in
+  let new-text = Ext.malloc(add-int(len, u2)) in
+  Mem.store-int(0, new-text);
+  Mem.store-int(len, add-int(new-text, u));
+  let content-ptr = add-int(new-text, u2) in
+  let loop =
+    define self(offset: int, xs: list(&text)): unit {
+      match xs {
+      | Nil =>
+        Unit
+      | Cons(x, rest) =>
+        let current-content-ptr = add-int(content-ptr, offset) in
+        let x-ptr = _get-content-pointer(x) in
+        let x-len = text-byte-length(x) in
+        _copy-int8-array(x-ptr, current-content-ptr, 0, x-len);
+        discard(x);
+        self(add-int(offset, x-len), rest)
+      }
+    }
+  in
+  loop(0, xs);
+  magic cast(int, text, new-text)
+}
+
 define append(t1: &text, t2: &text): text {
   let p1 = Magic.cast(&text, int, t1) in
   let p2 = Magic.cast(&text, int, t2) in
@@ -254,6 +285,10 @@ define break-on(needle: &text, haystack: &text): pair(text, text) {
 
 define intercalate(sep: text, xs: list(text)): text {
   join(this.list.intercalate(sep, xs))
+}
+
+define intercalate-N(sep: &text, xs: list(&text)): text {
+  join-N(this.list.intercalate(sep, xs))
 }
 
 define _get-head-byte(t: &text, index: int): int8 {

@@ -1,5 +1,4 @@
 import {
-  Int,
   L {iterate, list},
   TIO,
   Vector {vector},

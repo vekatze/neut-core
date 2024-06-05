@@ -1,9 +1,4 @@
 import {
-  E,
-  Ext,
-  Lo {Loset, loset},
-  O {EQ, GT, LT},
-  Word,
   this.bool {and, or},
   this.either {Right, none},
   this.text {_get-content-pointer, text, text-byte-length},

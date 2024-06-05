@@ -1,8 +1,5 @@
 import {
-  E,
   Ext,
-  Lo {Loset, loset},
-  O {EQ, GT, LT},
   Word,
   this.memory {store-int},
   this.show {Show, show},

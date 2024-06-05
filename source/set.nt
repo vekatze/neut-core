@@ -1,5 +1,5 @@
 import {
-  Lo {Loset, loset},
+  Lo {loset},
   this.bool {False, True, bool},
   this.dict {dict, empty, singleton},
   this.either {Left, Right},

@@ -1,5 +1,5 @@
 import {
-  Dict {dict, insert},
+  Dict {dict},
   TIO,
   this.control {grow},
   this.either {Left, Right},

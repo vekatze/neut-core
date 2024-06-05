@@ -3,7 +3,6 @@ import {
   FD,
   Magic,
   Mem,
-  Seek,
   Word,
   this.bool,
   this.either {Left, Right},

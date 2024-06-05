@@ -1,11 +1,3 @@
-import {
-  E,
-  Ext,
-  Lo {Loset, loset},
-  O {EQ, GT, LT},
-  Word,
-}
-
 foreign {
   llvm.ceil.f64(float): float,
   llvm.cos.f64(float): float,

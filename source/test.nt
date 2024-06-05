@@ -3,7 +3,7 @@ import {
   this.foreign {THREAD_COND_SIZE, THREAD_MUTEX_SIZE},
   this.int.entity {as-entity-N},
   this.int.show {%ld},
-  this.list {for, length, list},
+  this.list {for, list},
   this.list.entity,
   this.rune.show {as-show},
   this.text {drop, intercalate-N, pack, reverse, unpack},
@@ -35,10 +35,10 @@ define increment(x: int): int {
 
 define zen(): unit {
   // printf("SEEK_END: {}\n", [%ld(SEEK_END)]);
-  let xs: list(int) = [1, 2, 3, 4, 3, 2, 1, 2] in
-  let xs' on xs = list-int-eq-ops::nub(xs) in
-  let len on xs' = length(xs') in
-  printf("nub len: {}\n", [%ld(len)]);
+  // let xs: list(int) = [1, 2, 3, 4, 3, 2, 1, 2] in
+  // let xs' on xs = list-int-eq-ops::nub(xs) in
+  // let len on xs' = length(xs') in
+  // printf("nub len: {}\n", [%ld(len)]);
   printf("{}\n", [intercalate-N("/", ["foo", "bar", "buzubaoeuあえおうte"])]);
   printf("thread mutex size: {}\n", [%ld(THREAD_MUTEX_SIZE)]);
   printf("thread cond size: {}\n", [%ld(THREAD_COND_SIZE)]);

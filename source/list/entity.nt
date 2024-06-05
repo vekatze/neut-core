@@ -1,5 +1,6 @@
 import {
-  this.bool {False, True},
+  E,
+  this.bool {False, True, bool},
   this.entity {Entity, entity},
   this.list {Cons, Nil, list},
 }
@@ -49,5 +50,59 @@ inline as-entity-N<a>(f: entity(&a)): entity(&list(a)) {
         }
       }
     },
+  }
+}
+
+define _nop-copy<a>(x: &&a): &a {
+  *x
+}
+
+inline member<a>(e: entity(&a)): (value: &a, xs: &list(a)) -> bool {
+  define member(value: &a, xs: &list(a)): bool {
+    case xs {
+    | Nil =>
+      False
+    | Cons(y, ys) =>
+      if e::identity(value, y) {
+        True
+      } else {
+        member(value, ys)
+      }
+    }
+  }
+}
+
+inline nub<a>(e: entity(&a)): (xs: &list(a)) -> list(a) {
+  function (xs) {
+    let f =
+      define nub(xs: &list(a), acc: list(&a)): list(a) {
+        case xs {
+        | Nil =>
+          Nil
+        | Cons(y, ys) =>
+          let already-found-p on y, acc = member(E.comap(exact _nop-copy, e))(y, acc) in
+          if already-found-p {
+            nub(ys, acc)
+          } else {
+            Cons(*y, nub(ys, Cons(y, acc)))
+          }
+        }
+      }
+    in
+    f(xs, [])
+  }
+}
+
+data trope(a) {
+| Trope(
+    member: (value: &a, xs: &list(a)) -> bool,
+    nub: (xs: &list(a)) -> list(a),
+  )
+}
+
+define from-entity<a>(e: entity(&a)): trope(a) {
+  Trope of {
+    nub = nub(e),
+    member = member(e),
   }
 }

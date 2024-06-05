@@ -26,3 +26,13 @@ inline from-loset<a>(x: loset(a)): entity(a) {
     },
   }
 }
+
+inline comap<a, b>(f: (a) -> b, e: entity(b)): entity(a) {
+  Entity of {
+    identity = {
+      function (x, y) {
+        e::identity(f(x), f(y))
+      }
+    },
+  }
+}

@@ -9,7 +9,7 @@ import {
   this.either {Right, none},
   this.int {max-int, min-int},
   this.int8-array {_copy-int8-array, int8-array, int8-array-access, int8-array-length, int8-array-new},
-  this.list {Cons, Nil, alternate, fold-left-N, list, reverse},
+  this.list {Cons, Nil, fold-left-N, list, reverse},
   this.memory {load-int8},
   this.pair {Pair, pair},
   this.rune {_Rune, load-rune, rune, size-by-head-byte, store-rune},
@@ -379,8 +379,24 @@ define replace(from: &text, to: text, haystack: &text): text {
   this.text.intercalate(to, split-on(from, haystack))
 }
 
+// [x1], [y1, y2] => [x1]
+// [x1, x2], [y1, y2, y3] => [x1, y1, x2]
+// [x1, x2, x3], [y1, y2] => [x1, y1, x2, y2, x3]
+define _alternate<a>(xs: list(a), ys: list(a)): list(a) {
+  match xs, ys {
+  | Nil, _ =>
+    Nil
+  | Cons(x', Nil), _ =>
+    Cons(x', Nil)
+  | Cons(x1, Cons(x2, xs')), Nil =>
+    Cons(x1, Cons(x2, xs'))
+  | Cons(x1, Cons(x2, xs')), Cons(y', ys') =>
+    Cons(x1, Cons(y', _alternate(Cons(x2, xs'), ys')))
+  }
+}
+
 define _format(fmt: &text, args: list(text)): list(text) {
-  alternate(split-on("{}", fmt), args)
+  _alternate(split-on("{}", fmt), args)
 }
 
 define format(fmt: &text, args: list(text)): text {

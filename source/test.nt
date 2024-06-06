@@ -39,7 +39,7 @@ define zen(): unit {
   // let xs' on xs = list-int-eq-ops::nub(xs) in
   // let len on xs' = length(xs') in
   // printf("nub len: {}\n", [%ld(len)]);
-  printf("{}\n", [intercalate-N("/", ["foo", "bar", "buzubaoeuあえおうte"])]);
+  printf("sample{}{}\n", [*"test", intercalate-N("/", ["foo", "bar", "buzubaoeuあえおうte"])]);
   printf("thread mutex size: {}\n", [%ld(THREAD_MUTEX_SIZE)]);
   printf("thread cond size: {}\n", [%ld(THREAD_COND_SIZE)]);
   printf("word size: {}\n", [%ld(this.word.size)]);

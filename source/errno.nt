@@ -15,7 +15,7 @@ define _get-errno(): int {
   magic cast(int32, int, load-int32(errno-ptr))
 }
 
-inline system(a: tau): tau {
+inline system(a: type): type {
   either(errno, a)
 }
 

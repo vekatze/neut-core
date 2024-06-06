@@ -6,11 +6,11 @@ import {
   this.memory {load-int8},
 }
 
-constant _cmp-ptr-t: tau {
+constant _cmp-ptr-t: type {
   (ptr1: int, ptr2: int, index: int, to: int) -> bool
 }
 
-constant _cmp-array-t: tau {
+constant _cmp-array-t: type {
   (t1: &int8-array, t2: &int8-array) -> bool
 }
 

@@ -6,7 +6,7 @@ import {
   this.unit {Unit, unit},
 }
 
-inline set(a): tau {
+inline set(a): type {
   dict(a, unit)
 }
 

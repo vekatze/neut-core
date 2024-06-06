@@ -7,7 +7,7 @@ import {
 }
 
 // naive queue
-data queue(a: tau) {
+data queue(a: type) {
 | Queue(list(a), list(a))
 }
 

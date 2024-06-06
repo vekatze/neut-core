@@ -17,7 +17,7 @@ constant list-int-eq-ops: this.list.entity.trope(int) {
   this.list.entity.from-entity(as-entity-N)
 }
 
-constant my-bool: tau {
+constant my-bool: type {
   this.bool.bool
 }
 

@@ -9,7 +9,7 @@ import {
   this.unit {Unit, unit},
 }
 
-inline admit(a: tau, t: &text): a {
+inline admit(a: type, t: &text): a {
   print(t);
   exit(1)
 }

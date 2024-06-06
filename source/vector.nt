@@ -21,7 +21,7 @@ data _vecInfo {
   )
 }
 
-define _discard-vector-content(ptr: int, elem-type: tau, counter: int, size: int): unit {
+define _discard-vector-content(ptr: int, elem-type: type, counter: int, size: int): unit {
   if eq-int(counter, size) {
     Unit
   } else {
@@ -31,7 +31,7 @@ define _discard-vector-content(ptr: int, elem-type: tau, counter: int, size: int
   }
 }
 
-define _copy-vector-content(source-pointer: int, target-pointer: int, elem-type: tau, counter: int, size: int): unit {
+define _copy-vector-content(source-pointer: int, target-pointer: int, elem-type: type, counter: int, size: int): unit {
   if eq-int(counter, size) {
     Unit
   } else {
@@ -44,10 +44,10 @@ define _copy-vector-content(source-pointer: int, target-pointer: int, elem-type:
 }
 
 nominal {
-  vector-internal: tau,
+  vector-internal: type,
 }
 
-define vector(_: tau): tau {
+define vector(_: type): type {
   vector-internal
 }
 
@@ -67,7 +67,7 @@ resource vector-internal {
     let from: int = Mem.load-int(from-ptr) in
     let to: int = Mem.load-int(to-ptr) in
     let size = sub-int(to, from) in
-    let elem-type = Magic.cast(int, tau, Mem.load-int(type-ptr)) in
+    let elem-type = Magic.cast(int, type, Mem.load-int(type-ptr)) in
     _discard-vector-content(content-ptr, elem-type, 0, size);
     Magic.cast(unit, int, free(from-ptr))
   },
@@ -77,11 +77,11 @@ resource vector-internal {
     let from: int = Mem.load-int(from-ptr) in
     let to: int = Mem.load-int(to-ptr) in
     let size = sub-int(to, from) in
-    let elem-type: tau = Magic.cast(int, tau, Mem.load-int(type-ptr)) in
+    let elem-type: type = Magic.cast(int, type, Mem.load-int(type-ptr)) in
     let target-ptr = malloc(mul-int(word-size, add-int(size, 3))) in
     Mem.store-int(0, target-ptr);
     Mem.store-int(size, add-int(target-ptr, word-size));
-    Mem.store-int(Magic.cast(tau, int, elem-type), add-int(target-ptr, mul-int(word-size, 2)));
+    Mem.store-int(Magic.cast(type, int, elem-type), add-int(target-ptr, mul-int(word-size, 2)));
     _copy-vector-content(content-ptr, add-int(target-ptr, mul-int(word-size, 3)), elem-type, 0, size);
     target-ptr
   },
@@ -96,7 +96,7 @@ define new<a>(base-list: list(a)): vector(a) {
   let ptr3 = add-int(ptr0, mul-int(word-size, 3)) in
   Mem.store-int(0, ptr0);
   Mem.store-int(n, ptr1);
-  Mem.store-int(Magic.cast(tau, int, a), ptr2);
+  Mem.store-int(Magic.cast(type, int, a), ptr2);
   let store-values =
     define self(values: list(a), index: int): unit {
       match values {

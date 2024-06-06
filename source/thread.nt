@@ -7,7 +7,7 @@ import {
   this.unit {Unit, unit},
 }
 
-inline _embody(a: tau, x: &a): a {
+inline _embody(a: type, x: &a): a {
   *x
 }
 
@@ -18,14 +18,14 @@ inline _thread-size(): int {
 
 nominal {
   _await-and-write-result(addr: int): unit,
-  thread(_: tau): tau,
-  attach(a: tau, e: thread(a)): a,
+  thread(_: type): type,
+  attach(a: type, e: thread(a)): a,
 }
 
 resource _thread-inner {
   function (addr: int) {
     let u = Word.size in
-    let elem-type = Magic.cast(int, tau, Mem.load-int(add-int(addr, u))) in
+    let elem-type = Magic.cast(int, type, Mem.load-int(add-int(addr, u))) in
     let pr: thread(elem-type) = Magic.cast(int, thread(elem-type), addr) in
     let _: elem-type = this.thread.attach(elem-type, pr) in
     0
@@ -36,11 +36,11 @@ resource _thread-inner {
     let u3 = mul-int(u, 3) in
     _await-and-write-result(addr);
     let thread-id = Mem.load-int(addr) in
-    let elem-type = Magic.cast(int, tau, Mem.load-int(add-int(addr, u))) in
+    let elem-type = Magic.cast(int, type, Mem.load-int(add-int(addr, u))) in
     let elem-value: &elem-type = Magic.cast(int, &elem-type, Mem.load-int(add-int(addr, u2))) in
     let new-addr = Ext.malloc(_thread-size()) in
     Mem.store-int(thread-id, new-addr);
-    Mem.store-int(Magic.cast(tau, int, elem-type), add-int(new-addr, u));
+    Mem.store-int(Magic.cast(type, int, elem-type), add-int(new-addr, u));
     let cloned-value: elem-type = _embody(elem-type, elem-value) in
     Mem.store-int(Magic.cast(elem-type, int, cloned-value), add-int(new-addr, u2));
     Mem.store-int1(1, add-int(new-addr, u3));
@@ -50,11 +50,11 @@ resource _thread-inner {
 
 // `thread` must be defined by `define` (and not by `data`) so that
 // `thread(a)` is consider to be possibly noetic
-define thread(_: tau): tau {
+define thread(_: type): type {
   _thread-inner
 }
 
-define attach(a: tau, e: thread(a)): a {
+define attach(a: type, e: thread(a)): a {
   let addr = Magic.cast(thread(a), int, e) in
   _await-and-write-result(addr);
   let u = Word.size in
@@ -81,7 +81,7 @@ define _await-and-write-result(addr: int): unit {
 }
 
 // (thread-id, result-type, result-value, finished-flag): thread(result-type)
-define detach(a: tau, f: () -> a): thread(a) {
+define detach(a: type, f: () -> a): thread(a) {
   let thread-func =
     function () {
       Ext.thread-exit(Magic.cast(a, int, f()))
@@ -110,7 +110,7 @@ define detach(a: tau, f: () -> a): thread(a) {
   Ext.free(thread-id-pointer);
   let ptr = Ext.malloc(_thread-size()) in
   Mem.store-int(thread-id, ptr);
-  Mem.store-int(Magic.cast(tau, int, a), add-int(ptr, u));
+  Mem.store-int(Magic.cast(type, int, a), add-int(ptr, u));
   Mem.store-int(0, add-int(ptr, u2));
   Mem.store-int1(0, add-int(ptr, u3));
   Magic.cast(int, thread(a), ptr)

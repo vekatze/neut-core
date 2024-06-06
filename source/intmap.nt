@@ -21,15 +21,15 @@ data intmap(a) {
   )
 }
 
-constant _Key: tau {
+constant _Key: type {
   int
 }
 
-constant _Mask: tau {
+constant _Mask: type {
   int
 }
 
-constant _Prefix: tau {
+constant _Prefix: type {
   int
 }
 

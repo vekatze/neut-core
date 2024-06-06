@@ -8,19 +8,19 @@ import {
   this.unit {unit},
 }
 
-inline _get-clone(a: tau, x: &a): a {
+inline _get-clone(a: type, x: &a): a {
   *x
 }
 
 nominal {
-  _cell: tau,
+  _cell: type,
 }
 
-data cell(_: tau) {
+data cell(_: type) {
 | _Cell(_cell)
 }
 
-define _new(a: tau, val: a): cell(a) {
+define _new(a: type, val: a): cell(a) {
   let mutex-size = Ext.thread-mutex-size() in
   let cond-size = Ext.thread-cond-size() in
   let u = Word.size in
@@ -28,7 +28,7 @@ define _new(a: tau, val: a): cell(a) {
   Mem.store-int(Magic.cast(a, int, val), ptr);
   Ext.thread-mutex-init(add-int(ptr, u));
   Ext.thread-cond-init(add-int(ptr, add-int(u, mutex-size)));
-  Mem.store-int(Magic.cast(tau, int, a), add-int(ptr, add-int(u, add-int(mutex-size, cond-size))));
+  Mem.store-int(Magic.cast(type, int, a), add-int(ptr, add-int(u, add-int(mutex-size, cond-size))));
   Magic.cast(int, cell(a), ptr)
 }
 
@@ -40,7 +40,7 @@ resource _cell {
     let cond-size = Ext.thread-cond-size() in
     let cond-offset = add-int(u, mutex-size) in
     let type-offset = add-int(u, add-int(mutex-size, cond-size)) in
-    let a = Magic.cast(int, tau, Mem.load-int(add-int(ch, type-offset))) in
+    let a = Magic.cast(int, type, Mem.load-int(add-int(ch, type-offset))) in
     Ext.thread-cond-destroy(add-int(ch, cond-offset));
     Ext.thread-mutex-destroy(add-int(ch, u));
     let _: a = magic cast(int, a, Mem.load-int(ch)) in
@@ -52,7 +52,7 @@ resource _cell {
     let mutex-size = Ext.thread-mutex-size() in
     let cond-size = Ext.thread-cond-size() in
     let type-offset = add-int(u, add-int(mutex-size, cond-size)) in
-    let a = Magic.cast(int, tau, Mem.load-int(add-int(ch, type-offset))) in
+    let a = Magic.cast(int, type, Mem.load-int(add-int(ch, type-offset))) in
     let val: &a = Magic.cast(int, &a, Mem.load-int(ch)) in
     let val-clone: a = _get-clone(a, val) in
     Magic.cast(cell(a), int, _new(a, val-clone))

@@ -182,7 +182,7 @@ inline _balance-R<a, b>(k: a, x: b, l: dict(a, b), r: dict(a, b)): dict(a, b) {
 
 inline insert<k>(L: loset(&k)): <v>(k, v, dict(k, v)) -> dict(k, v) {
   let Loset of {cmp} = L in
-  define self<v: tau>(key-X, val-X, d: dict(k, v)): dict(k, v) {
+  define self<v: type>(key-X, val-X, d: dict(k, v)): dict(k, v) {
     match d {
     | Tip =>
       singleton(key-X, val-X)

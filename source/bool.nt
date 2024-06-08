@@ -3,7 +3,7 @@ data bool {
 | True
 }
 
-define and(b1: bool, b2: bool): bool {
+inline and(b1: bool, b2: bool): bool {
   if b1 {
     if b2 {
       True
@@ -15,7 +15,7 @@ define and(b1: bool, b2: bool): bool {
   }
 }
 
-define or(b1: bool, b2: bool): bool {
+inline or(b1: bool, b2: bool): bool {
   if b1 {
     True
   } else {
@@ -27,7 +27,7 @@ define or(b1: bool, b2: bool): bool {
   }
 }
 
-define not(b: bool): bool {
+inline not(b: bool): bool {
   if b {
     False
   } else {

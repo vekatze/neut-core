@@ -98,3 +98,8 @@ __attribute__((always_inline))
 int neut_core_v0_48_errno() {
   return errno;
 }
+
+__attribute__((always_inline))
+int neut_core_v0_48_UINT32_MAX() {
+  return UINT32_MAX;
+}

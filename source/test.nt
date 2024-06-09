@@ -3,12 +3,13 @@ import {
   this.either {Left, Right},
   this.float.parse {parse-float},
   this.float.show {%lf, show-float},
-  this.foreign {THREAD_COND_SIZE, THREAD_MUTEX_SIZE},
+  this.foreign {THREAD_COND_SIZE, THREAD_MUTEX_SIZE, UINT32_MAX},
   this.int.entity {as-entity-N},
   this.int.show {%ld},
   this.list {for, list},
   this.list.entity,
   this.order {EQ, GT, LT},
+  this.random {random-float},
   this.rune {rune},
   this.rune.loset {le-rune},
   this.rune.show {as-show},
@@ -46,6 +47,9 @@ define _is-number(r: rune): bool {
 
 define zen(): unit {
   // printf("SEEK_END: {}\n", [%ld(SEEK_END)]);
+  printf("max: {}\n", [%ld(UINT32_MAX)]);
+  let f = random-float(-10, 20) in
+  printf("random-float: {}\n", [%lf(f)]);
   let c = this.text.loset.as-loset::cmp("ghfooza", "ghfooza") in
   match c {
   | LT =>

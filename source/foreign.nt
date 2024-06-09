@@ -22,6 +22,7 @@ foreign {
   neut_core_v0_48_SEEK_END(): int,
   neut_core_v0_48_thread_mutex_size(): int,
   neut_core_v0_48_thread_cond_size(): int,
+  neut_core_v0_48_UINT32_MAX(): int,
 }
 
 define get-errno(): int {
@@ -98,4 +99,8 @@ constant THREAD_MUTEX_SIZE: int {
 
 constant THREAD_COND_SIZE: int {
   magic external neut_core_v0_48_thread_cond_size()
+}
+
+constant UINT32_MAX: int {
+  magic external neut_core_v0_48_UINT32_MAX()
 }

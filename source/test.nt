@@ -8,11 +8,13 @@ import {
   this.int.show {%ld},
   this.list {for, list},
   this.list.entity,
+  this.order {EQ, GT, LT},
   this.rune {rune},
   this.rune.loset {le-rune},
   this.rune.show {as-show},
   this.text {any, drop, intercalate-N, join, pack, reverse, unpack},
   this.text.io {print, printf},
+  this.text.loset,
   this.text.show,
   this.unit {Unit, unit},
   this.word,
@@ -44,6 +46,15 @@ define _is-number(r: rune): bool {
 
 define zen(): unit {
   // printf("SEEK_END: {}\n", [%ld(SEEK_END)]);
+  let c = this.text.loset.as-loset::cmp("ghfooza", "ghfooza") in
+  match c {
+  | LT =>
+    print("LT\n")
+  | GT =>
+    print("GT\n")
+  | EQ =>
+    print("EQ\n")
+  };
   let k1 = show-float(1.23) in
   let k2 = *"test" in
   let k1-len on k1 = core.text.length(k1) in

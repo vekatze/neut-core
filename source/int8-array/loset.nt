@@ -1,92 +1,91 @@
 import {
   O {EQ, GT, LT},
   this.bool {False, True, bool},
+  this.int {min-int},
+  this.int.loset,
   this.int8-array {_get-content-pointer, int8-array, int8-array-length},
   this.loset {Loset, loset},
   this.memory {load-int8},
+  this.order {order},
 }
 
-constant _cmp-ptr-t: type {
-  (ptr1: int, ptr2: int, index: int, to: int) -> bool
+define _cmp-int8(x: int8, y: int8): order {
+  if gt-int8(x, y) {
+    GT
+  } else-if lt-int8(x, y) {
+    LT
+  } else {
+    EQ
+  }
 }
 
-constant _cmp-array-t: type {
-  (t1: &int8-array, t2: &int8-array) -> bool
-}
-
-inline _cmp-int8-array(cmp: (int8, int8) -> bool): _cmp-ptr-t {
-  define self(ptr1: int, ptr2: int, index: int, to: int): bool {
-    if eq-int(index, to) {
-      True
-    } else {
-      let v1 = load-int8(add-int(ptr1, index)) in
-      let v2 = load-int8(add-int(ptr2, index)) in
-      if cmp(v1, v2) {
-        self(ptr1, ptr2, add-int(index, 1), to)
+inline cmp-int8-array(xs1: &int8-array, xs2: &int8-array): order {
+  let f =
+    define self(ptr1: int, ptr2: int, index: int, len: int, fallback: order): order {
+      if eq-int(index, len) {
+        fallback
       } else {
-        False
+        let v1 = load-int8(add-int(ptr1, index)) in
+        let v2 = load-int8(add-int(ptr2, index)) in
+        match _cmp-int8(v1, v2) {
+        | EQ =>
+          self(ptr1, ptr2, add-int(index, 1), len, fallback)
+        | o =>
+          o
+        }
       }
     }
-  }
-}
-
-define _lt-int8-array(ptr1: int, ptr2: int, index: int, to: int): bool {
-  _cmp-int8-array(lt-int8)(ptr1, ptr2, index, to)
-}
-
-define _le-int8-array(ptr1: int, ptr2: int, index: int, to: int): bool {
-  _cmp-int8-array(le-int8)(ptr1, ptr2, index, to)
-}
-
-define _gt-int8-array(ptr1: int, ptr2: int, index: int, to: int): bool {
-  _cmp-int8-array(gt-int8)(ptr1, ptr2, index, to)
-}
-
-define _ge-int8-array(ptr1: int, ptr2: int, index: int, to: int): bool {
-  _cmp-int8-array(ge-int8)(ptr1, ptr2, index, to)
-}
-
-inline cmp-int8-array(cmp: _cmp-ptr-t): _cmp-array-t {
-  function (t1: &int8-array, t2: &int8-array): bool {
-    let len1 = int8-array-length(t1) in
-    let len2 = int8-array-length(t2) in
-    if ne-int(len1, len2) {
-      False
-    } else {
-      let ptr1 = _get-content-pointer(t1) in
-      let ptr2 = _get-content-pointer(t2) in
-      cmp(ptr1, ptr2, 0, len1)
-    }
-  }
+  in
+  let len1 = int8-array-length(xs1) in
+  let len2 = int8-array-length(xs2) in
+  let min-len = min-int(len1, len2) in
+  let fallback-value = this.int.loset.as-loset::cmp(len1, len2) in
+  let ptr1 = _get-content-pointer(xs1) in
+  let ptr2 = _get-content-pointer(xs2) in
+  f(ptr1, ptr2, 0, min-len, fallback-value)
 }
 
 define lt-int8-array(t1: &int8-array, t2: &int8-array): bool {
-  cmp-int8-array(_lt-int8-array)(t1, t2)
+  match cmp-int8-array(t1, t2) {
+  | LT =>
+    True
+  | _ =>
+    False
+  }
 }
 
 define le-int8-array(t1: &int8-array, t2: &int8-array): bool {
-  cmp-int8-array(_le-int8-array)(t1, t2)
+  match cmp-int8-array(t1, t2) {
+  | GT =>
+    False
+  | _ =>
+    True
+  }
 }
 
 define gt-int8-array(t1: &int8-array, t2: &int8-array): bool {
-  cmp-int8-array(_gt-int8-array)(t1, t2)
+  match cmp-int8-array(t1, t2) {
+  | GT =>
+    True
+  | _ =>
+    False
+  }
 }
 
 define ge-int8-array(t1: &int8-array, t2: &int8-array): bool {
-  cmp-int8-array(_ge-int8-array)(t1, t2)
+  match cmp-int8-array(t1, t2) {
+  | LT =>
+    False
+  | _ =>
+    True
+  }
 }
 
 constant as-loset: loset(&int8-array) {
   Loset of {
     cmp = {
       function (x, y) {
-        if gt-int8-array(x, y) {
-          GT
-        } else-if lt-int8-array(x, y) {
-          LT
-        } else {
-          EQ
-        }
+        cmp-int8-array(x, y)
       }
     },
   }

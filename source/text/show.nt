@@ -13,8 +13,8 @@ import {
   },
 }
 
-// returns true iff `ch` is a C0 control character, a delete, a backslash, or a double quote
-define _is-1-byte-quoted-character(ch: int8): bool {
+// returns true iff `ch` is a C0 control character, a delete, a backslash, or a double escape
+define _is-1-byte-escaped-character(ch: int8): bool {
   any([
     and(ule-int8(0, ch), ule-int8(ch, 0x1f)),
     eq-int8(ch, 0x22),
@@ -24,11 +24,11 @@ define _is-1-byte-quoted-character(ch: int8): bool {
 }
 
 // returns true iff `ch` is the lower 8 bits of a C1 control character
-define _is-2-byte-quoted-character(ch: int8): bool {
+define _is-2-byte-escaped-character(ch: int8): bool {
   and(ule-int8(0x80, ch), ule-int8(ch, 0x9f))
 }
 
-define _get-quoted-character-1(ch: int8): &text {
+define _get-escaped-character-1(ch: int8): &text {
   match ch {
   | 0x00 =>
     "\\0"
@@ -107,7 +107,7 @@ define _get-quoted-character-1(ch: int8): &text {
   }
 }
 
-define _get-quoted-character-2(ch: int8): &text {
+define _get-escaped-character-2(ch: int8): &text {
   match ch {
   | 0x7f =>
     "\\x7f"
@@ -180,10 +180,10 @@ define _get-quoted-character-2(ch: int8): &text {
   }
 }
 
-define _quote(t: &text, len: int, pivot: int, cursor: int): list(text) {
+define _escape(t: &text, len: int, pivot: int, cursor: int): list(text) {
   let _next =
     function () {
-      _quote(t, len, pivot, add-int(cursor, 1))
+      _escape(t, len, pivot, add-int(cursor, 1))
     }
   in
   let index = add-int(pivot, cursor) in
@@ -192,20 +192,20 @@ define _quote(t: &text, len: int, pivot: int, cursor: int): list(text) {
   } else {
     let head-char = _get-head-byte(t, index) in
     let char-len = size-by-head-byte(head-char) in
-    if _is-1-byte-quoted-character(head-char) {
+    if _is-1-byte-escaped-character(head-char) {
       let piece = _slice-N(pivot, cursor, t) in
-      let quoted-control-char = _get-quoted-character-1(head-char) in
-      let rest = _quote(t, len, add-int(add-int(pivot, cursor), char-len), 0) in
-      Cons(piece, Cons(*quoted-control-char, rest))
+      let escaped-control-char = _get-escaped-character-1(head-char) in
+      let rest = _escape(t, len, add-int(add-int(pivot, cursor), char-len), 0) in
+      Cons(piece, Cons(*escaped-control-char, rest))
     } else {
       if eq-int(char-len, 2) {
         if eq-int8(head-char, 0xc2) {
           let head-char-2 = _get-head-byte(t, add-int(index, 1)) in
-          if _is-2-byte-quoted-character(head-char-2) {
+          if _is-2-byte-escaped-character(head-char-2) {
             let piece = _slice-N(pivot, cursor, t) in
-            let quoted-control-char = _get-quoted-character-2(head-char-2) in
-            let rest = _quote(t, len, add-int(add-int(pivot, cursor), char-len), 0) in
-            Cons(piece, Cons(*quoted-control-char, rest))
+            let escaped-control-char = _get-escaped-character-2(head-char-2) in
+            let rest = _escape(t, len, add-int(add-int(pivot, cursor), char-len), 0) in
+            Cons(piece, Cons(*escaped-control-char, rest))
           } else {
             _next()
           }
@@ -221,14 +221,14 @@ define _quote(t: &text, len: int, pivot: int, cursor: int): list(text) {
 
 define show-text(t: text): text {
   let len on t = text-byte-length(t) in
-  let result on t = join(concat([[*"\""], _quote(t, len, 0, 0), [*"\""]])) in
+  let result on t = join(concat([[*"\""], _escape(t, len, 0, 0), [*"\""]])) in
   let _ = t in
   result
 }
 
 define show-text-N(t: &text): text {
   let len = text-byte-length(t) in
-  join(concat([[*"\""], _quote(t, len, 0, 0), [*"\""]]))
+  join(concat([[*"\""], _escape(t, len, 0, 0), [*"\""]]))
 }
 
 constant as-show: show(text) {

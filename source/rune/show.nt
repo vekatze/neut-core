@@ -2,13 +2,13 @@ import {
   this.rune {rune},
   this.show {Show, show},
   this.text {join, text, text-byte-length},
-  this.text.show {_quote},
+  this.text.show {_escape},
 }
 
 define show-rune(ch: rune): text {
   let base = this.text.singleton(ch) in
   let len on base = text-byte-length(base) in
-  let result on base = join(_quote(base, len, 0, 0)) in
+  let result on base = join(_escape(base, len, 0, 0)) in
   let _ = base in
   result
 }

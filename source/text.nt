@@ -527,7 +527,7 @@ define slice-N(start: int, size: int, t: &text): text {
   _slice-N(start-byte-index, sub-int(end-byte-index, start-byte-index), t)
 }
 
-define take-while-N(pred: (&rune) -> bool, t: &text): text {
+inline take-while-N(pred: (&rune) -> bool, t: &text): text {
   let len = text-byte-length(t) in
   let f =
     define self(index: int, acc: list(rune)): list(rune) {
@@ -551,7 +551,7 @@ define take-while-N(pred: (&rune) -> bool, t: &text): text {
   result
 }
 
-define drop-while-N(pred: (&rune) -> bool, t: &text): text {
+inline drop-while-N(pred: (&rune) -> bool, t: &text): text {
   let len = text-byte-length(t) in
   let f =
     define self(index: int): text {

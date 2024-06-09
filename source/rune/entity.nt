@@ -10,6 +10,12 @@ define eq-rune(r1: rune, r2: rune): bool {
   eq-int32(r1, r2)
 }
 
+define ne-rune(r1: rune, r2: rune): bool {
+  let _Rune(r1) = r1 in
+  let _Rune(r2) = r2 in
+  ne-int32(r1, r2)
+}
+
 constant as-entity: entity(rune) {
   Entity of {
     identity = eq-rune,

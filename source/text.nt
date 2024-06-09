@@ -597,3 +597,63 @@ define replicate(n: int, t: &text): text {
   loop(0, t);
   magic cast(int, text, new-text)
 }
+
+inline fold<a>(acc: a, t: &text, f: (a, rune) -> a): a {
+  let len = text-byte-length(t) in
+  let f =
+    define self(index: int, acc: a): a {
+      if ge-int(index, len) {
+        acc
+      } else {
+        let ch = _get-rune(t, index) in
+        let char-len = this.rune.size(ch) in
+        self(add-int(index, char-len), f(acc, ch))
+      }
+    }
+  in
+  f(0, acc)
+}
+
+inline all(pred: (rune) -> bool, t: &text): bool {
+  let len = text-byte-length(t) in
+  let f =
+    define self(index: int): bool {
+      if ge-int(index, len) {
+        True
+      } else {
+        let ch = _get-rune(t, index) in
+        let cond = pred(ch) in
+        if cond {
+          let char-len = this.rune.size(ch) in
+          let _ = ch in
+          self(add-int(index, char-len))
+        } else {
+          False
+        }
+      }
+    }
+  in
+  f(0)
+}
+
+inline any(pred: (rune) -> bool, t: &text): bool {
+  let len = text-byte-length(t) in
+  let f =
+    define self(index: int): bool {
+      if ge-int(index, len) {
+        False
+      } else {
+        let ch = _get-rune(t, index) in
+        let cond = pred(ch) in
+        if cond {
+          True
+        } else {
+          let char-len = this.rune.size(ch) in
+          let _ = ch in
+          self(add-int(index, char-len))
+        }
+      }
+    }
+  in
+  f(0)
+}

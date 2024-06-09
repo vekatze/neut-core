@@ -1,5 +1,5 @@
 import {
-  this.bool {True},
+  this.bool {True, and, bool},
   this.either {Left, Right},
   this.float.parse {parse-float},
   this.float.show {%lf},
@@ -8,8 +8,10 @@ import {
   this.int.show {%ld},
   this.list {for, list},
   this.list.entity,
+  this.rune {rune},
+  this.rune.loset {le-rune},
   this.rune.show {as-show},
-  this.text {drop, intercalate-N, pack, reverse, unpack},
+  this.text {any, drop, intercalate-N, pack, reverse, unpack},
   this.text.io {print, printf},
   this.text.show,
   this.unit {Unit, unit},
@@ -36,12 +38,21 @@ define increment(x: int): int {
   add-int(x, 1)
 }
 
+define _is-number(r: rune): bool {
+  and(le-rune(`0`, r), le-rune(r, `9`))
+}
+
 define zen(): unit {
   // printf("SEEK_END: {}\n", [%ld(SEEK_END)]);
-  let float-val = parse-float("6.62607e-34") in
+  if any(_is-number, "abcd1bc") {
+    print("some-number\n")
+  } else {
+    print("not some-number\n")
+  };
+  let float-val = parse-float("1499816949527975237") in
   match float-val {
   | Right(v) =>
-    printf("parsed float: {}\n", [%lf(mul-float(v, 1.0E+32))])
+    printf("parsed float: {}\n", [%lf(v)])
   | Left(_) =>
     print("failed to parse a float\n")
   };

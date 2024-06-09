@@ -1,6 +1,8 @@
 import {
   this.bool {bool},
   this.either {Right, none},
+  this.list {Cons, append, list},
+  this.pair {Pair, pair},
   this.unit,
   this.word,
 }
@@ -156,5 +158,32 @@ define delete<a>(k: _Key, t: intmap(a)): intmap(a) {
     } else {
       _bin-check-right(p, m, l, delete(k, r))
     }
+  }
+}
+
+inline from-list<v>(kvs: list(pair(int, v))): intmap(v) {
+  let f =
+    define self(kvs: list(pair(int, v)), acc: intmap(v)): intmap(v) {
+      match kvs {
+      | core.list.Nil =>
+        acc
+      | Cons(Pair(k, v), rest) =>
+        self(rest, insert(k, v, acc))
+      }
+    }
+  in
+  f(kvs, Nil)
+}
+
+define to-list<v>(kvs: intmap(v)): list(pair(int, v)) {
+  match kvs {
+  | Nil =>
+    []
+  | Tip(k, v) =>
+    [Pair(k, v)]
+  | Bin(_, _, d1, d2) =>
+    let xs = to-list(d1) in
+    let ys = to-list(d2) in
+    append(xs, ys)
   }
 }

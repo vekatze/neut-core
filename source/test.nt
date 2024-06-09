@@ -1,5 +1,8 @@
 import {
   this.bool {True},
+  this.either {Left, Right},
+  this.float.parse {parse-float},
+  this.float.show {%lf},
   this.foreign {THREAD_COND_SIZE, THREAD_MUTEX_SIZE},
   this.int.entity {as-entity-N},
   this.int.show {%ld},
@@ -7,7 +10,7 @@ import {
   this.list.entity,
   this.rune.show {as-show},
   this.text {drop, intercalate-N, pack, reverse, unpack},
-  this.text.io {printf},
+  this.text.io {print, printf},
   this.text.show,
   this.unit {Unit, unit},
   this.word,
@@ -35,6 +38,13 @@ define increment(x: int): int {
 
 define zen(): unit {
   // printf("SEEK_END: {}\n", [%ld(SEEK_END)]);
+  let float-val = parse-float("6.62607e-34") in
+  match float-val {
+  | Right(v) =>
+    printf("parsed float: {}\n", [%lf(mul-float(v, 1.0E+32))])
+  | Left(_) =>
+    print("failed to parse a float\n")
+  };
   // let xs: list(int) = [1, 2, 3, 4, 3, 2, 1, 2] in
   // let xs' on xs = list-int-eq-ops::nub(xs) in
   // let len on xs' = length(xs') in
@@ -43,10 +53,9 @@ define zen(): unit {
   printf("thread mutex size: {}\n", [%ld(THREAD_MUTEX_SIZE)]);
   printf("thread cond size: {}\n", [%ld(THREAD_COND_SIZE)]);
   printf("word size: {}\n", [%ld(this.word.size)]);
-  let my-text = reverse("あいうえお。hello, world!") in
-  let len on my-text = this.text.length(my-text) in
-  let char-seq on my-text = unpack(my-text) in
-  let _ = my-text in
+  pin my-text = reverse("あいうえお。hello, world!") in
+  let len = this.text.length(my-text) in
+  let char-seq = unpack(my-text) in
   for(char-seq, function (ch) {
     printf("{}", [as-show::show(ch)])
   });

@@ -6,7 +6,9 @@ import {
   core.system,
   core.text,
   core.unit,
+  this.list {Cons, Nil, append, list},
   this.loset,
+  this.pair {Pair, pair},
 }
 
 // size balanced tree
@@ -297,5 +299,30 @@ inline from-loset<k>(_loset: loset(&k)): trope(k) {
     insert = insert(_loset),
     lookup = lookup(_loset),
     delete = delete(_loset),
+  }
+}
+
+inline from-list<k, v>(_loset: loset(&k), kvs: list(pair(k, v))): dict(k, v) {
+  let f =
+    define self(kvs: list(pair(k, v)), acc: dict(k, v)): dict(k, v) {
+      match kvs {
+      | Nil =>
+        acc
+      | Cons(Pair(k, v), rest) =>
+        self(rest, insert(_loset)(k, v, acc))
+      }
+    }
+  in
+  f(kvs, Tip)
+}
+
+define to-list<k, v>(d: dict(k, v)): list(pair(k, v)) {
+  match d {
+  | Tip =>
+    []
+  | Bin(_, k, v, d1, d2) =>
+    let xs = to-list(d1) in
+    let ys = to-list(d2) in
+    Cons(Pair(k, v), append(xs, ys))
   }
 }

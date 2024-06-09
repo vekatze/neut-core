@@ -454,10 +454,8 @@ define pack(xs: &list(rune)): text {
 
 define reverse(t: &text): text {
   // for now
-  let xs = this.list.reverse(unpack(t)) in
-  let result on xs = pack(xs) in
-  let _ = xs in
-  result
+  pin xs = this.list.reverse(unpack(t)) in
+  pack(xs)
 }
 
 define _get-rune(t: &text, index: int): rune {
@@ -527,7 +525,27 @@ define slice-N(start: int, size: int, t: &text): text {
   _slice-N(start-byte-index, sub-int(end-byte-index, start-byte-index), t)
 }
 
-inline take-while-N(pred: (&rune) -> bool, t: &text): text {
+inline take-while(pred: (rune) -> bool, t: text): text {
+  let f =
+    define self(t: text, index: int): text {
+      let len on t = text-byte-length(t) in
+      if ge-int(index, len) {
+        take(index, t)
+      } else {
+        let ch on t = _get-rune(t, index) in
+        if pred(ch) {
+          let char-len = this.rune.size(ch) in
+          self(t, add-int(index, char-len))
+        } else {
+          take(index, t)
+        }
+      }
+    }
+  in
+  f(t, 0)
+}
+
+inline take-while-N(pred: (rune) -> bool, t: &text): text {
   let len = text-byte-length(t) in
   let f =
     define self(index: int, acc: list(rune)): list(rune) {
@@ -535,8 +553,7 @@ inline take-while-N(pred: (&rune) -> bool, t: &text): text {
         core.list.reverse(acc)
       } else {
         let ch = _get-rune(t, index) in
-        let cond on ch = pred(ch) in
-        if cond {
+        if pred(ch) {
           let char-len = this.rune.size(ch) in
           self(add-int(index, char-len), Cons(ch, acc))
         } else {
@@ -545,13 +562,31 @@ inline take-while-N(pred: (&rune) -> bool, t: &text): text {
       }
     }
   in
-  let cs = f(0, []) in
-  let result on cs = pack(cs) in
-  let _ = cs in
-  result
+  pin cs = f(0, []) in
+  pack(cs)
 }
 
-inline drop-while-N(pred: (&rune) -> bool, t: &text): text {
+inline drop-while(pred: (rune) -> bool, t: text): text {
+  let f =
+    define self(t: text): text {
+      let b on t = this.text.is-empty(t) in
+      if b {
+        empty()
+      } else {
+        let ch on t = _get-rune(t, 0) in
+        let cond = pred(ch) in
+        if cond {
+          self(drop(1, t))
+        } else {
+          t
+        }
+      }
+    }
+  in
+  f(t)
+}
+
+inline drop-while-N(pred: (rune) -> bool, t: &text): text {
   let len = text-byte-length(t) in
   let f =
     define self(index: int): text {
@@ -559,10 +594,8 @@ inline drop-while-N(pred: (&rune) -> bool, t: &text): text {
         empty()
       } else {
         let ch = _get-rune(t, index) in
-        let cond on ch = pred(ch) in
-        if cond {
+        if pred(ch) {
           let char-len = this.rune.size(ch) in
-          let _ = ch in
           self(add-int(index, char-len))
         } else {
           _slice-N(index, len, t)
@@ -625,7 +658,6 @@ inline all(pred: (rune) -> bool, t: &text): bool {
         let cond = pred(ch) in
         if cond {
           let char-len = this.rune.size(ch) in
-          let _ = ch in
           self(add-int(index, char-len))
         } else {
           False
@@ -649,7 +681,6 @@ inline any(pred: (rune) -> bool, t: &text): bool {
           True
         } else {
           let char-len = this.rune.size(ch) in
-          let _ = ch in
           self(add-int(index, char-len))
         }
       }

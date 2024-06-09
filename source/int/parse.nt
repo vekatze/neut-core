@@ -3,6 +3,7 @@ import {
   this.either {Left, Right},
   this.memory {load-int, load-int8},
   this.text {_get-content-pointer, text},
+  this.text.entity {eq-text},
   this.unit {Unit},
 }
 
@@ -11,14 +12,18 @@ foreign {
 }
 
 inline parse-int(t: &text, base: int): ?int {
-  let c-int-str: int = _get-content-pointer(t) in
-  let end-ptr = magic alloca(int, 1) in
-  let int-val: int = magic external strtol(c-int-str, end-ptr, base) in
-  let end-char-ptr = load-int(end-ptr) in
-  let end-char = load-int8(end-char-ptr) in
-  if eq-int8(end-char, 0) {
-    Right(int-val)
-  } else {
+  if eq-text(t, "") {
     Left(Unit)
+  } else {
+    let c-int-str: int = _get-content-pointer(t) in
+    let end-ptr = magic alloca(int, 1) in
+    let int-val: int = magic external strtol(c-int-str, end-ptr, base) in
+    let end-char-ptr = load-int(end-ptr) in
+    let end-char = load-int8(end-char-ptr) in
+    if eq-int8(end-char, 0) {
+      Right(int-val)
+    } else {
+      Left(Unit)
+    }
   }
 }

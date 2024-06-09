@@ -7,7 +7,7 @@ import {
   this.bool,
   this.either {Left, Right},
   this.errno {report-system-error, system},
-  this.int.parse {parse},
+  this.int.parse {parse-int},
   this.list {for, list},
   this.memory,
   this.text {_format, _get-content-pointer, text, text-byte-length},
@@ -116,7 +116,7 @@ define get-line(): system(text) {
 }
 
 define zen(): unit {
-  match parse("123123123") {
+  match parse-int("123123123", 10) {
   | Right(v) =>
     print-int(v)
   | Left(_) =>

@@ -2,7 +2,7 @@ import {
   this.bool {True, and, bool},
   this.either {Left, Right},
   this.float.parse {parse-float},
-  this.float.show {%lf},
+  this.float.show {%lf, show-float},
   this.foreign {THREAD_COND_SIZE, THREAD_MUTEX_SIZE},
   this.int.entity {as-entity-N},
   this.int.show {%ld},
@@ -11,7 +11,7 @@ import {
   this.rune {rune},
   this.rune.loset {le-rune},
   this.rune.show {as-show},
-  this.text {any, drop, intercalate-N, pack, reverse, unpack},
+  this.text {any, drop, intercalate-N, join, pack, reverse, unpack},
   this.text.io {print, printf},
   this.text.show,
   this.unit {Unit, unit},
@@ -44,6 +44,11 @@ define _is-number(r: rune): bool {
 
 define zen(): unit {
   // printf("SEEK_END: {}\n", [%ld(SEEK_END)]);
+  let k1 = show-float(1.23) in
+  let k2 = *"test" in
+  let k1-len on k1 = core.text.length(k1) in
+  printf("k1-len: {}\n", [%ld(k1-len)]);
+  printf("joined: {}\n", [join([k1, k2])]);
   if any(_is-number, "abcd1bc") {
     print("some-number\n")
   } else {

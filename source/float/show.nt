@@ -12,7 +12,7 @@ foreign {
   sprintf(pointer, pointer): int,
 }
 
-define _show(c-fmt: &text, x: float64): text {
+define _show(c-fmt: &text, x: float): text {
   let fmt = _get-content-pointer(c-fmt) in
   let zero: int = 0 in
   let size: int = magic external snprintf(zero, zero, fmt)(x: int) in
@@ -24,16 +24,14 @@ define _show(c-fmt: &text, x: float64): text {
   magic cast(int, text, ptr)
 }
 
-constant as-show: show(float64) {
-  Show(function (x) {
-    _show("%lf\0", x)
-  })
-}
-
-define show(x: float64): text {
+define show-float(x: float): text {
   _show("%lf\0", x)
 }
 
-define %lf(x: float64): text {
-  as-show::show(x)
+constant as-show: show(float) {
+  Show(show-float)
+}
+
+define %lf(x: float): text {
+  show-float(x)
 }

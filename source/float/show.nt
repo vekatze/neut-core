@@ -20,7 +20,7 @@ define _show(c-fmt: &text, x: float): text {
   store-int(0, ptr);
   store-int(size, add-int(ptr, Word.size));
   let buffer = add-int(ptr, mul-int(Word.size, 2)) in
-  let _: int = magic external sprintf(buffer, fmt)(x: int) in
+  let _: int = magic external sprintf(buffer, fmt)(x: float) in
   magic cast(int, text, ptr)
 }
 

@@ -1,0 +1,110 @@
+import {
+  this.bool {and, bool},
+  this.either {Left, Right, either},
+  this.int.parse {parse-int},
+  this.list {Cons, Nil, any, concat, intercalate, list, try-for-each, try-for-each-N},
+  this.pair {Pair},
+  this.rune {rune},
+  this.rune.entity {eq-rune},
+  this.rune.loset {le-rune},
+  this.text {
+    drop,
+    format,
+    length,
+    singleton,
+    split-on,
+    take-while-N,
+    text,
+  },
+}
+
+define _is-lower-hex-digit(r: rune): bool {
+  any(
+    [
+      and(le-rune(`0`, r), le-rune(r, `9`)),
+      and(le-rune(`a`, r), le-rune(r, `f`)),
+    ],
+  )
+}
+
+data error {
+| Error(text)
+}
+
+define _read-char(r: rune, t: text): either(error, text) {
+  match core.text.uncons(t) {
+  | Right(Pair(r', rest)) =>
+    if eq-rune(r, r') {
+      Right(rest)
+    } else {
+      Left(Error(format("Expected `{}`, but got: `{}`", [singleton(r), singleton(r')])))
+    }
+  | Left(_) =>
+    Left(Error(format("Expected `{}`, but got: end of text", [singleton(r)])))
+  }
+}
+
+define _read-unicode-scalar-value(t: &text): either(error, rune) {
+  match parse-int(t, 16) {
+  | Left(_) =>
+    Left(Error(format("Could not parse `{}` as a hexadecimal integer", [*t])))
+  | Right(v) =>
+    match this.rune.from-int(v) {
+    | Right(r) =>
+      Right(r)
+    | Left(_) =>
+      Left(Error(format("The value `{}` is outside the Unicode codespace", [*t])))
+    }
+  }
+}
+
+define _unquote-text(t: text): either(error, list(text)) {
+  match core.text.uncons(t) {
+  | Left(_) =>
+    Right([*"\\"])
+  | Right(Pair(c, rest)) =>
+    if eq-rune(c, `0`) {
+      Right([*"\u{0}", rest])
+    } else-if eq-rune(c, `t`) {
+      Right([*"\u{9}", rest])
+    } else-if eq-rune(c, `n`) {
+      Right([*"\u{a}", rest])
+    } else-if eq-rune(c, `r`) {
+      Right([*"\u{d}", rest])
+    } else-if eq-rune(c, `"`) {
+      Right([*"\u{22}", rest])
+    } else-if eq-rune(c, `\\`) {
+      Right([*"\u{5c}", rest])
+    } else-if eq-rune(c, `\``) {
+      Right([*"\u{60}", rest])
+    } else-if eq-rune(c, `u`) {
+      try rest' = _read-char(`{`, rest) in
+      let hex-text on rest' = take-while-N(_is-lower-hex-digit, rest') in
+      pin hex-text = hex-text in
+      let scalar-value-text-len = length(hex-text) in
+      let rest'' = drop(scalar-value-text-len, rest') in
+      try rest''' = _read-char(`}`, rest'') in
+      try r = _read-unicode-scalar-value(hex-text) in
+      Right([singleton(r), rest'''])
+    } else {
+      Left(Error(format("Unknown escape sequence: \\{}", [singleton(c)])))
+    }
+  }
+}
+
+define _parse-text-fragment(t: &text): either(error, list(text)) {
+  match split-on("\\", t) {
+  | Nil =>
+    // unreachable
+    Left(Error(*"core.text.parse._parse-text-fragment"))
+  | Cons(t', ts') =>
+    try fragment-lists = try-for-each(ts', _unquote-text) in
+    Right(Cons(t', concat(fragment-lists)))
+  }
+}
+
+define parse-text(t: &text): either(error, text) {
+  pin ts = split-on("\\\\", t) in
+  try tss = try-for-each-N(ts, _parse-text-fragment) in
+  Right(core.text.join(core.list.concat(intercalate([*"\\"], tss))))
+}

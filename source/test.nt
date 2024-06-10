@@ -6,17 +6,19 @@ import {
   this.foreign {THREAD_COND_SIZE, THREAD_MUTEX_SIZE, UINT32_MAX},
   this.int.entity {as-entity-N},
   this.int.show {%ld},
-  this.list {for, list},
+  this.list {any, for, list},
   this.list.entity,
   this.order {EQ, GT, LT},
   this.random {random-float},
   this.rune {rune},
+  this.rune.entity {eq-rune},
   this.rune.loset {le-rune},
   this.rune.show {as-show},
-  this.text {any, drop, intercalate-N, join, pack, reverse, unpack},
+  this.text {drop, drop-while, intercalate-N, join, pack, reverse, unpack},
   this.text.io {print, printf},
   this.text.loset,
-  this.text.show,
+  this.text.parse {parse-text},
+  this.text.show {show-text},
   this.unit {Unit, unit},
   this.word,
 }
@@ -46,7 +48,25 @@ define _is-number(r: rune): bool {
 }
 
 define zen(): unit {
+  let test =
+    drop-while(
+      function (r) {
+        any([eq-rune(r, ` `), eq-rune(r, `\n`), eq-rune(r, `\t`)])
+      },
+      *"   \n\t hello, world!\n",
+    )
+  in
+  printf("drop-while: {}\n", [test]);
+  let foo = show-text(*"hello, \0wo\u{a}rld") in
+  printf("quoted: {}\n", [foo]);
   // printf("SEEK_END: {}\n", [%ld(SEEK_END)]);
+  match parse-text("\\u{1f338} ho\`\\t\\n\\rge\\\\hoge\\txt") {
+  | Left(_) =>
+    print("failed to parse\n")
+  | Right(t) =>
+    printf("unescape: {}\n", [t]);
+  };
+  // let _ = run-unescape() in
   printf("max: {}\n", [%ld(UINT32_MAX)]);
   let f = random-float(-10, 20) in
   printf("random-float: {}\n", [%lf(f)]);
@@ -64,7 +84,7 @@ define zen(): unit {
   let k1-len on k1 = core.text.length(k1) in
   printf("k1-len: {}\n", [%ld(k1-len)]);
   printf("joined: {}\n", [join([k1, k2])]);
-  if any(_is-number, "abcd1bc") {
+  if this.text.any(_is-number, "abcd1bc") {
     print("some-number\n")
   } else {
     print("not some-number\n")

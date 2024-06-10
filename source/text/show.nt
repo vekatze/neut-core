@@ -13,7 +13,7 @@ import {
   },
 }
 
-// returns true iff `ch` is a C0 control character, a delete, a backslash, or a double escape
+// returns true iff `ch` is a C0 control character, a delete, a backslash, or a double quote
 define _is-1-byte-escaped-character(ch: int8): bool {
   any([
     and(ule-int8(0, ch), ule-int8(ch, 0x1f)),
@@ -23,159 +23,157 @@ define _is-1-byte-escaped-character(ch: int8): bool {
   ])
 }
 
-// returns true iff `ch` is the lower 8 bits of a C1 control character
-define _is-2-byte-escaped-character(ch: int8): bool {
-  and(ule-int8(0x80, ch), ule-int8(ch, 0x9f))
-}
-
 define _get-escaped-character-1(ch: int8): &text {
   match ch {
   | 0x00 =>
     "\\0"
   | 0x01 =>
-    "\\SOH"
+    "\\u{1}"
   | 0x02 =>
-    "\\STX"
+    "\\u{2}"
   | 0x03 =>
-    "\\ETX"
+    "\\u{3}"
   | 0x04 =>
-    "\\EOT"
+    "\\u{4}"
   | 0x05 =>
-    "\\ENQ"
+    "\\u{5}"
   | 0x06 =>
-    "\\ACK"
+    "\\u{6}"
   | 0x07 =>
-    "\\a"
+    "\\u{7}"
   | 0x08 =>
-    "\\b"
+    "\\u{8}"
   | 0x09 =>
     "\\t"
-  | 0x0A =>
+  | 0x0a =>
     "\\n"
-  | 0x0B =>
-    "\\v"
-  | 0x0C =>
-    "\\f"
-  | 0x0D =>
+  | 0x0b =>
+    "\\u{b}"
+  | 0x0c =>
+    "\\u{c}"
+  | 0x0d =>
     "\\r"
-  | 0x0E =>
-    "\\SO"
-  | 0x0F =>
-    "\\SI"
+  | 0x0e =>
+    "\\u{e}"
+  | 0x0f =>
+    "\\u{f}"
   | 0x10 =>
-    "\\DLE"
+    "\\u{10}"
   | 0x11 =>
-    "\\DC1"
+    "\\u{11}"
   | 0x12 =>
-    "\\DC2"
+    "\\u{12}"
   | 0x13 =>
-    "\\DC3"
+    "\\u{13}"
   | 0x14 =>
-    "\\DC4"
+    "\\u{14}"
   | 0x15 =>
-    "\\NAK"
+    "\\u{15}"
   | 0x16 =>
-    "\\SYN"
+    "\\u{16}"
   | 0x17 =>
-    "\\ETB"
+    "\\u{17}"
   | 0x18 =>
-    "\\CAN"
+    "\\u{18}"
   | 0x19 =>
-    "\\EM"
-  | 0x1A =>
-    "\\SUB"
-  | 0x1B =>
-    "\\ESC"
-  | 0x1C =>
-    "\\FS"
-  | 0x1D =>
-    "\\GS"
-  | 0x1E =>
-    "\\RS"
-  | 0x1F =>
-    "\\US"
-  | 0x20 =>
-    "\\SP"
+    "\\u{19}"
+  | 0x1a =>
+    "\\u{1a}"
+  | 0x1b =>
+    "\\u{1b}"
+  | 0x1c =>
+    "\\u{1c}"
+  | 0x1d =>
+    "\\u{1d}"
+  | 0x1e =>
+    "\\u{1e}"
+  | 0x1f =>
+    "\\u{1f}"
   | 0x22 =>
     "\\\""
   | 0x5c =>
     "\\\\"
-  | 0x7F =>
-    "\\DEL"
+  | 0x7f =>
+    "\\u{7f}"
   | _ =>
+    // unreachable
     ""
   }
 }
 
+// returns true iff `ch` is the lower 8 bits of a C1 control character
+define _is-2-byte-escaped-character(ch: int8): bool {
+  and(ule-int8(0x80, ch), ule-int8(ch, 0x9f))
+}
+
 define _get-escaped-character-2(ch: int8): &text {
   match ch {
-  | 0x7f =>
-    "\\x7f"
   | 0x80 =>
-    "\\x80"
+    "\\u{80}"
   | 0x81 =>
-    "\\x81"
+    "\\u{81}"
   | 0x82 =>
-    "\\x82"
+    "\\u{82}"
   | 0x83 =>
-    "\\x83"
+    "\\u{83}"
   | 0x84 =>
-    "\\x84"
+    "\\u{84}"
   | 0x85 =>
-    "\\x85"
+    "\\u{85}"
   | 0x86 =>
-    "\\x86"
+    "\\u{86}"
   | 0x87 =>
-    "\\x87"
+    "\\u{87}"
   | 0x88 =>
-    "\\x88"
+    "\\u{88}"
   | 0x89 =>
-    "\\x89"
+    "\\u{89}"
   | 0x8a =>
-    "\\x8a"
+    "\\u{8a}"
   | 0x8b =>
-    "\\x8b"
+    "\\u{8b}"
   | 0x8c =>
-    "\\x8c"
+    "\\u{8c}"
   | 0x8d =>
-    "\\x8d"
+    "\\u{8d}"
   | 0x8e =>
-    "\\x8e"
+    "\\u{8e}"
   | 0x8f =>
-    "\\x8f"
+    "\\u{8f}"
   | 0x90 =>
-    "\\x90"
+    "\\u{90}"
   | 0x91 =>
-    "\\x91"
+    "\\u{91}"
   | 0x92 =>
-    "\\x92"
+    "\\u{92}"
   | 0x93 =>
-    "\\x93"
+    "\\u{93}"
   | 0x94 =>
-    "\\x94"
+    "\\u{94}"
   | 0x95 =>
-    "\\x95"
+    "\\u{95}"
   | 0x96 =>
-    "\\x96"
+    "\\u{96}"
   | 0x97 =>
-    "\\x97"
+    "\\u{97}"
   | 0x98 =>
-    "\\x98"
+    "\\u{98}"
   | 0x99 =>
-    "\\x99"
+    "\\u{99}"
   | 0x9a =>
-    "\\x9a"
+    "\\u{9a}"
   | 0x9b =>
-    "\\x9b"
+    "\\u{9b}"
   | 0x9c =>
-    "\\x9c"
+    "\\u{9c}"
   | 0x9d =>
-    "\\x9d"
+    "\\u{9d}"
   | 0x9e =>
-    "\\x9e"
+    "\\u{9e}"
   | 0x9f =>
-    "\\x9f"
+    "\\u{9f}"
   | _ =>
+    // unreachable
     ""
   }
 }
@@ -219,11 +217,14 @@ define _escape(t: &text, len: int, pivot: int, cursor: int): list(text) {
   }
 }
 
+define quote-text(t: text): text {
+  pin t = t in
+  let len = text-byte-length(t) in
+  join(concat([[*"\""], _escape(t, len, 0, 0), [*"\""]]))
+}
+
 define show-text(t: text): text {
-  let len on t = text-byte-length(t) in
-  let result on t = join(concat([[*"\""], _escape(t, len, 0, 0), [*"\""]])) in
-  let _ = t in
-  result
+  quote-text(t)
 }
 
 define show-text-N(t: &text): text {

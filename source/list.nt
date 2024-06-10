@@ -150,6 +150,38 @@ inline for-each-N<a, b>(xs: &list(a), f: (&a) -> b): list(b) {
   map-N(f, xs)
 }
 
+inline try-for-each<a, e, b>(xs: list(a), f: (a) -> either(e, b)): either(e, list(b)) {
+  let f =
+    define self(xs: list(a)): either(e, list(b)) {
+      match xs {
+      | Nil =>
+        Right(Nil)
+      | Cons(y, ys) =>
+        try z = f(y) in
+        try zs = self(ys) in
+        Right(Cons(z, zs))
+      }
+    }
+  in
+  f(xs)
+}
+
+inline try-for-each-N<a, e, b>(xs: &list(a), f: (&a) -> either(e, b)): either(e, list(b)) {
+  let f =
+    define self(xs: &list(a)): either(e, list(b)) {
+      case xs {
+      | Nil =>
+        Right(Nil)
+      | Cons(y, ys) =>
+        try z = f(y) in
+        try zs = self(ys) in
+        Right(Cons(z, zs))
+      }
+    }
+  in
+  f(xs)
+}
+
 inline for<a>(xs: list(a), f: (a) -> unit): unit {
   let _ = map(f, xs) in
   Unit

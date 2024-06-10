@@ -323,6 +323,6 @@ define to-list<k, v>(d: dict(k, v)): list(pair(k, v)) {
   | Bin(_, k, v, d1, d2) =>
     let xs = to-list(d1) in
     let ys = to-list(d2) in
-    Cons(Pair(k, v), append(xs, ys))
+    append(xs, Cons(Pair(k, v), ys))
   }
 }

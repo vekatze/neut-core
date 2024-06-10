@@ -20,12 +20,12 @@ define _show(c-fmt: &text, x: float): text {
   store-int(0, ptr);
   store-int(size, add-int(ptr, Word.size));
   let buffer = add-int(ptr, mul-int(Word.size, 2)) in
-  let _: int = magic external sprintf(buffer, fmt)(x: float) in
+  let _: int = magic external snprintf(buffer, size, fmt)(x: float) in
   magic cast(int, text, ptr)
 }
 
 define show-float(x: float): text {
-  _show("%lf\0", x)
+  _show("%lf", x)
 }
 
 constant as-show: show(float) {

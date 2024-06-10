@@ -3,6 +3,7 @@
 #include <sys/errno.h>
 #include <sys/fcntl.h>
 #include <sys/wait.h>
+#include <stdint.h>
 
 __attribute__((always_inline))
 int neut_core_v0_48_wifexited(int stat) {

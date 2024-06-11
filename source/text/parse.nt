@@ -45,7 +45,7 @@ define _read-char(r: rune, t: text): either(error, text) {
 }
 
 define _read-unicode-scalar-value(t: &text): either(error, rune) {
-  match parse-int(t, 16) {
+  match parse-int(t) {
   | Left(_) =>
     Left(Error(format("Could not parse `{}` as a hexadecimal integer", [*t])))
   | Right(v) =>

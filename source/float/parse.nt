@@ -1,29 +1,21 @@
 import {
   this.bool,
   this.either {Left, Right},
-  this.memory {load-int, load-int8},
+  this.foreign {_parse_double},
+  this.memory {load-float},
   this.text {_get-content-pointer, text},
-  this.text.entity {eq-text},
   this.unit {Unit},
 }
 
-foreign {
-  strtod(pointer, pointer): float,
-}
-
 inline parse-float(t: &text): ?float {
-  if eq-text(t, "") {
+  let c-float-str: int = _get-content-pointer(t) in
+  let len = core.text.length(t) in
+  let result-ptr = magic alloca(float, 1) in
+  let result-status = _parse_double(c-float-str, len, result-ptr) in
+  if lt-int(result-status, 0) {
     Left(Unit)
   } else {
-    let c-int-str: int = _get-content-pointer(t) in
-    let end-ptr = magic alloca(int, 1) in
-    let float-val: float = magic external strtod(c-int-str, end-ptr) in
-    let end-char-ptr = load-int(end-ptr) in
-    let end-char = load-int8(end-char-ptr) in
-    if eq-int8(end-char, 0) {
-      Right(float-val)
-    } else {
-      Left(Unit)
-    }
+    let result = load-float(result-ptr) in
+    Right(result)
   }
 }

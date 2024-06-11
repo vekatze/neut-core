@@ -116,7 +116,7 @@ define get-line(): system(text) {
 }
 
 define zen(): unit {
-  match parse-int("123123123", 10) {
+  match parse-int("123123123") {
   | Right(v) =>
     print-int(v)
   | Left(_) =>

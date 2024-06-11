@@ -124,8 +124,6 @@ int neut_core_v0_48_parse_binary(const char *str, size_t length, long *out_value
   }
   if (length - i >= 2 && str[i] == '0' && str[i + 1] == 'b') {
     i += 2;
-  } else {
-    return -1;
   }
   int has_digits = 0;
   while (i < length) {
@@ -203,8 +201,6 @@ int neut_core_v0_48_parse_hex(const char *str, size_t length, long *out_value) {
   }
   if (length - i >= 2 && str[i] == '0' && str[i + 1] == 'x') {
     i += 2;
-  } else {
-    return -1;
   }
   int has_digits = 0;
   while (i < length) {

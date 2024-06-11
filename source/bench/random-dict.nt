@@ -1,5 +1,5 @@
 import {
-  Dict {dict},
+  Dict {dictionary},
   TIO,
   this.control {grow},
   this.either {Left, Right},
@@ -8,24 +8,24 @@ import {
   this.unit {Unit, unit},
 }
 
-constant intdict: Dict.trope(int) {
+constant intdictionary: Dict.trope(int) {
   Dict.from-loset(as-loset-N)
 }
 
-define make-big-dict(): dict(int, int) {
+define make-big-dictionary(): dictionary(int, int) {
   grow(Dict.empty(), 700000, function (acc, _) {
     let key = random(1000000) in
     let val = random(1000000) in
-    intdict::insert(key, val, acc)
+    intdictionary::insert(key, val, acc)
   })
 }
 
-define random-lookup-sum(d: &dict(int, int)): unit {
+define random-lookup-sum(d: &dictionary(int, int)): unit {
   let rsum =
     grow(0, 700000, function (acc, _) {
       let key = random(1000000) in
       let val on key =
-        match intdict::lookup(key, d) {
+        match intdictionary::lookup(key, d) {
         | Left(_) =>
           0
         | Right(v) =>
@@ -40,8 +40,8 @@ define random-lookup-sum(d: &dict(int, int)): unit {
 }
 
 define main(): unit {
-  let big-dict = make-big-dict() in
-  let _ on big-dict = random-lookup-sum(big-dict) in
-  let _ = big-dict in
+  let big-dictionary = make-big-dictionary() in
+  let _ on big-dictionary = random-lookup-sum(big-dictionary) in
+  let _ = big-dictionary in
   Unit
 }

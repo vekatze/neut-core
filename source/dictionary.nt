@@ -12,18 +12,18 @@ import {
 }
 
 // size balanced tree
-data dict(k, v) {
+data dictionary(k, v) {
 | Tip
 | Bin(
     size: int,
     key: k,
     value: v,
-    left: dict(k, v),
-    right: dict(k, v),
+    left: dictionary(k, v),
+    right: dictionary(k, v),
   )
 }
 
-inline size<k, v>(d: &dict(k, v)): int {
+inline size<k, v>(d: &dictionary(k, v)): int {
   case d {
   | Tip =>
     0
@@ -32,11 +32,11 @@ inline size<k, v>(d: &dict(k, v)): int {
   }
 }
 
-inline empty<k, v>(): dict(k, v) {
+inline empty<k, v>(): dictionary(k, v) {
   Tip
 }
 
-inline singleton<k, v>(key: k, value: v): dict(k, v) {
+inline singleton<k, v>(key: k, value: v): dictionary(k, v) {
   Bin of {size = 1, left = Tip, right = Tip, key, value}
 }
 
@@ -48,7 +48,7 @@ constant _ratio: int {
   2
 }
 
-inline _balance-L<a, b>(k: a, x: b, l: dict(a, b), r: dict(a, b)): dict(a, b) {
+inline _balance-L<a, b>(k: a, x: b, l: dictionary(a, b), r: dictionary(a, b)): dictionary(a, b) {
   match r {
   | Tip =>
     match l {
@@ -102,7 +102,7 @@ inline _balance-L<a, b>(k: a, x: b, l: dict(a, b), r: dict(a, b)): dict(a, b) {
             Bin(s', lrk, lrx, Bin(ls', lk, lx, ll, lrl), Bin(rs', k, x, lrr, r))
           }
         | _, _ =>
-          let tip = core.system.admit(_, "failure in core.dict._balance-L") in
+          let tip = core.system.admit(_, "failure in core.dictionary._balance-L") in
           Bin(ls, lk, lx, Bin(ls, lk, lx, tip, tip), Bin(ls, lk, lx, tip, tip))
         }
       } else {
@@ -115,7 +115,7 @@ inline _balance-L<a, b>(k: a, x: b, l: dict(a, b), r: dict(a, b)): dict(a, b) {
   }
 }
 
-inline _balance-R<a, b>(k: a, x: b, l: dict(a, b), r: dict(a, b)): dict(a, b) {
+inline _balance-R<a, b>(k: a, x: b, l: dictionary(a, b), r: dictionary(a, b)): dictionary(a, b) {
   match l {
   | Tip =>
     match r {
@@ -169,7 +169,7 @@ inline _balance-R<a, b>(k: a, x: b, l: dict(a, b), r: dict(a, b)): dict(a, b) {
             Bin(s', rlk, rlx, Bin(ls', k, x, l, rll), Bin(rs', rk, rx, rlr, rr))
           }
         | _, _ =>
-          let tip = core.system.admit(_, "failure in core.dict._balance-L") in
+          let tip = core.system.admit(_, "failure in core.dictionary._balance-L") in
           Bin(rs, rk, rx, Bin(rs, rk, rx, tip, tip), Bin(rs, rk, rx, tip, tip))
         }
       } else {
@@ -182,9 +182,9 @@ inline _balance-R<a, b>(k: a, x: b, l: dict(a, b), r: dict(a, b)): dict(a, b) {
   }
 }
 
-inline insert<k>(L: loset(&k)): <v>(k, v, dict(k, v)) -> dict(k, v) {
+inline insert<k>(L: loset(&k)): <v>(k, v, dictionary(k, v)) -> dictionary(k, v) {
   let Loset of {cmp} = L in
-  define self<v: type>(key-X, val-X, d: dict(k, v)): dict(k, v) {
+  define self<v: type>(key-X, val-X, d: dictionary(k, v)): dictionary(k, v) {
     match d {
     | Tip =>
       singleton(key-X, val-X)
@@ -202,9 +202,9 @@ inline insert<k>(L: loset(&k)): <v>(k, v, dict(k, v)) -> dict(k, v) {
   }
 }
 
-inline lookup<k>(L: loset(&k)): <v>(&k, &dict(k, v)) -> ?&v {
+inline lookup<k>(L: loset(&k)): <v>(&k, &dictionary(k, v)) -> ?&v {
   let Loset of {cmp} = L in
-  define self<v>(needle: &k, d: &dict(k, v)): ?&v {
+  define self<v>(needle: &k, d: &dictionary(k, v)): ?&v {
     case d {
     | Tip =>
       none()
@@ -225,31 +225,31 @@ data _view(k, a) {
 | _View(
     key: k,
     value: a,
-    dict: dict(k, a),
+    dictionary: dictionary(k, a),
   )
 }
 
-define _min-view-sure<a, b>(k: a, x: b, l: dict(a, b), r: dict(a, b)): _view(a, b) {
+define _min-view-sure<a, b>(k: a, x: b, l: dictionary(a, b), r: dictionary(a, b)): _view(a, b) {
   match l {
   | Tip =>
     _View(k, x, r)
   | Bin(_, lk, lx, ll, lr) =>
-    let _View of {key, value, dict = l'} = _min-view-sure(lk, lx, ll, lr) in
+    let _View of {key, value, dictionary = l'} = _min-view-sure(lk, lx, ll, lr) in
     _View(key, value, _balance-R(k, x, l', r))
   }
 }
 
-define _max-view-sure<a, b>(k: a, x: b, l: dict(a, b), r: dict(a, b)): _view(a, b) {
+define _max-view-sure<a, b>(k: a, x: b, l: dictionary(a, b), r: dictionary(a, b)): _view(a, b) {
   match r {
   | Tip =>
     _View(k, x, l)
   | Bin(_, rk, rx, rl, rr) =>
-    let _View of {key, value, dict = r'} = _max-view-sure(rk, rx, rl, rr) in
+    let _View of {key, value, dictionary = r'} = _max-view-sure(rk, rx, rl, rr) in
     _View(key, value, _balance-L(k, x, l, r'))
   }
 }
 
-inline _glue<k, v>(d1: dict(k, v), d2: dict(k, v)): dict(k, v) {
+inline _glue<k, v>(d1: dictionary(k, v), d2: dictionary(k, v)): dictionary(k, v) {
   match d1, d2 {
   | Tip, d2 =>
     d2
@@ -257,17 +257,17 @@ inline _glue<k, v>(d1: dict(k, v), d2: dict(k, v)): dict(k, v) {
     d1
   | Bin(ls, lk, lx, ll, lr), Bin(rs, rk, rx, rl, rr) =>
     if gt-int(ls, rs) {
-      let _View of {key, value, dict} = _max-view-sure(lk, lx, ll, lr) in
-      _balance-R(key, value, dict, Bin(rs, rk, rx, rl, rr))
+      let _View of {key, value, dictionary} = _max-view-sure(lk, lx, ll, lr) in
+      _balance-R(key, value, dictionary, Bin(rs, rk, rx, rl, rr))
     } else {
-      let _View of {key, value, dict} = _min-view-sure(rk, rx, rl, rr) in
-      _balance-R(key, value, dict, Bin(ls, lk, lx, ll, lr))
+      let _View of {key, value, dictionary} = _min-view-sure(rk, rx, rl, rr) in
+      _balance-R(key, value, dictionary, Bin(ls, lk, lx, ll, lr))
     }
   }
 }
 
-inline delete<k>(L: loset(&k)): <v>(k, dict(k, v)) -> dict(k, v) {
-  define self<v>(needle: k, d: dict(k, v)): dict(k, v) {
+inline delete<k>(L: loset(&k)): <v>(k, dictionary(k, v)) -> dictionary(k, v) {
+  define self<v>(needle: k, d: dictionary(k, v)): dictionary(k, v) {
     let Loset of {cmp} = L in
     match d {
     | Tip =>
@@ -288,9 +288,9 @@ inline delete<k>(L: loset(&k)): <v>(k, dict(k, v)) -> dict(k, v) {
 
 data trope(k) {
 | Trope(
-    insert: <v>(k, v, dict(k, v)) -> dict(k, v),
-    lookup: <v>(&k, &dict(k, v)) -> ?&v,
-    delete: <v>(k, dict(k, v)) -> dict(k, v),
+    insert: <v>(k, v, dictionary(k, v)) -> dictionary(k, v),
+    lookup: <v>(&k, &dictionary(k, v)) -> ?&v,
+    delete: <v>(k, dictionary(k, v)) -> dictionary(k, v),
   )
 }
 
@@ -302,9 +302,9 @@ inline from-loset<k>(_loset: loset(&k)): trope(k) {
   }
 }
 
-inline from-list<k, v>(_loset: loset(&k), kvs: list(pair(k, v))): dict(k, v) {
+inline from-list<k, v>(_loset: loset(&k), kvs: list(pair(k, v))): dictionary(k, v) {
   let f =
-    define self(kvs: list(pair(k, v)), acc: dict(k, v)): dict(k, v) {
+    define self(kvs: list(pair(k, v)), acc: dictionary(k, v)): dictionary(k, v) {
       match kvs {
       | Nil =>
         acc
@@ -316,7 +316,7 @@ inline from-list<k, v>(_loset: loset(&k), kvs: list(pair(k, v))): dict(k, v) {
   f(kvs, Tip)
 }
 
-define to-list<k, v>(d: dict(k, v)): list(pair(k, v)) {
+define to-list<k, v>(d: dictionary(k, v)): list(pair(k, v)) {
   match d {
   | Tip =>
     []

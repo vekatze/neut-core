@@ -19,7 +19,7 @@
     ],
   },
   prefix {
-    Dict "this.dict",
+    Dict "this.dictionary",
     E "this.entity",
     Ext "this.external",
     FD "this.file.descriptor",

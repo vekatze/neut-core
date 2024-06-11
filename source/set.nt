@@ -1,13 +1,13 @@
 import {
   Lo {loset},
   this.bool {False, True, bool},
-  this.dict {dict, empty, singleton},
+  this.dictionary {dictionary, empty, singleton},
   this.either {Left, Right},
   this.unit {Unit, unit},
 }
 
 inline set(a): type {
-  dict(a, unit)
+  dictionary(a, unit)
 }
 
 data trope(k) {
@@ -21,7 +21,7 @@ data trope(k) {
 }
 
 inline from-loset<k>(_loset: loset(&k)): trope(k) {
-  use this.dict.from-loset(_loset) {insert, lookup, delete} in
+  use this.dictionary.from-loset(_loset) {insert, lookup, delete} in
   Trope of {
     empty = empty(),
     singleton = {

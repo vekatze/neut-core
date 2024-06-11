@@ -12,7 +12,7 @@ inline parse-binary(t: &text): ?int {
   let len = core.text.length(t) in
   let result-ptr = magic alloca(int, 1) in
   let result-status = _parse_binary(c-int-str, len, result-ptr) in
-  if lt-int(result-status, 0) {
+  if lt-int32(result-status, 0) {
     Left(Unit)
   } else {
     let result = load-int(result-ptr) in
@@ -25,7 +25,7 @@ inline parse-int(t: &text): ?int {
   let len = core.text.length(t) in
   let result-ptr = magic alloca(int, 1) in
   let result-status = _parse_decimal(c-int-str, len, result-ptr) in
-  if lt-int(result-status, 0) {
+  if lt-int32(result-status, 0) {
     Left(Unit)
   } else {
     let result = load-int(result-ptr) in
@@ -38,7 +38,7 @@ inline parse-hex(t: &text): ?int {
   let len = core.text.length(t) in
   let result-ptr = magic alloca(int, 1) in
   let result-status = _parse_hex(c-int-str, len, result-ptr) in
-  if lt-int(result-status, 0) {
+  if lt-int32(result-status, 0) {
     Left(Unit)
   } else {
     let result = load-int(result-ptr) in

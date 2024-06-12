@@ -3,124 +3,124 @@ import {
 }
 
 foreign {
-  neut_core_v0_48_errno(): int,
-  neut_core_v0_48_wifexited(pointer): int,
-  neut_core_v0_48_wifsignaled(pointer): int,
-  neut_core_v0_48_wifstopped(pointer): int,
-  neut_core_v0_48_wexitstatus(pointer): int,
-  neut_core_v0_48_wtermsig(pointer): int,
-  neut_core_v0_48_wcoredump(pointer): int,
-  neut_core_v0_48_wstopsig(pointer): int,
-  neut_core_v0_48_word_size(): int,
-  neut_core_v0_48_O_RDONLY(): int,
-  neut_core_v0_48_O_WRONLY(): int,
-  neut_core_v0_48_O_RDWR(): int,
-  neut_core_v0_48_O_CREAT(): int,
-  neut_core_v0_48_O_APPEND(): int,
-  neut_core_v0_48_SEEK_SET(): int,
-  neut_core_v0_48_SEEK_CUR(): int,
-  neut_core_v0_48_SEEK_END(): int,
-  neut_core_v0_48_thread_mutex_size(): int,
-  neut_core_v0_48_thread_cond_size(): int,
-  neut_core_v0_48_UINT32_MAX(): int,
-  neut_core_v0_48_parse_binary(pointer, int, pointer): int32,
-  neut_core_v0_48_parse_decimal(pointer, int, pointer): int32,
-  neut_core_v0_48_parse_hex(pointer, int, pointer): int32,
-  neut_core_v0_48_parse_double(pointer, int, pointer): int32,
+  neut_core_v0_50_errno(): int,
+  neut_core_v0_50_wifexited(pointer): int,
+  neut_core_v0_50_wifsignaled(pointer): int,
+  neut_core_v0_50_wifstopped(pointer): int,
+  neut_core_v0_50_wexitstatus(pointer): int,
+  neut_core_v0_50_wtermsig(pointer): int,
+  neut_core_v0_50_wcoredump(pointer): int,
+  neut_core_v0_50_wstopsig(pointer): int,
+  neut_core_v0_50_word_size(): int,
+  neut_core_v0_50_O_RDONLY(): int,
+  neut_core_v0_50_O_WRONLY(): int,
+  neut_core_v0_50_O_RDWR(): int,
+  neut_core_v0_50_O_CREAT(): int,
+  neut_core_v0_50_O_APPEND(): int,
+  neut_core_v0_50_SEEK_SET(): int,
+  neut_core_v0_50_SEEK_CUR(): int,
+  neut_core_v0_50_SEEK_END(): int,
+  neut_core_v0_50_thread_mutex_size(): int,
+  neut_core_v0_50_thread_cond_size(): int,
+  neut_core_v0_50_UINT32_MAX(): int,
+  neut_core_v0_50_parse_binary(pointer, int, pointer): int32,
+  neut_core_v0_50_parse_decimal(pointer, int, pointer): int32,
+  neut_core_v0_50_parse_hex(pointer, int, pointer): int32,
+  neut_core_v0_50_parse_double(pointer, int, pointer): int32,
 }
 
 define get-errno(): int {
-  magic external neut_core_v0_48_errno()
+  magic external neut_core_v0_50_errno()
 }
 
 define _wifexited(ptr: int): bool {
-  magic external neut_core_v0_48_wifexited(ptr)
+  magic external neut_core_v0_50_wifexited(ptr)
 }
 
 define _wifsignaled(ptr: int): bool {
-  magic external neut_core_v0_48_wifsignaled(ptr)
+  magic external neut_core_v0_50_wifsignaled(ptr)
 }
 
 define _wifstopped(ptr: int): bool {
-  magic external neut_core_v0_48_wifstopped(ptr)
+  magic external neut_core_v0_50_wifstopped(ptr)
 }
 
 define _wexitstatus(ptr: int): int {
-  magic external neut_core_v0_48_wexitstatus(ptr)
+  magic external neut_core_v0_50_wexitstatus(ptr)
 }
 
 define _wtermsig(ptr: int): int {
-  magic external neut_core_v0_48_wtermsig(ptr)
+  magic external neut_core_v0_50_wtermsig(ptr)
 }
 
 define _wcoredump(ptr: int): bool {
-  magic external neut_core_v0_48_wcoredump(ptr)
+  magic external neut_core_v0_50_wcoredump(ptr)
 }
 
 define _wstopsig(ptr: int): int {
-  magic external neut_core_v0_48_wstopsig(ptr)
+  magic external neut_core_v0_50_wstopsig(ptr)
 }
 
 constant _size: int {
-  magic external neut_core_v0_48_word_size()
+  magic external neut_core_v0_50_word_size()
 }
 
 constant O_RDONLY: int {
-  magic external neut_core_v0_48_O_RDONLY()
+  magic external neut_core_v0_50_O_RDONLY()
 }
 
 constant O_WRONLY: int {
-  magic external neut_core_v0_48_O_WRONLY()
+  magic external neut_core_v0_50_O_WRONLY()
 }
 
 constant O_RDWR: int {
-  magic external neut_core_v0_48_O_RDWR()
+  magic external neut_core_v0_50_O_RDWR()
 }
 
 constant O_CREAT: int {
-  magic external neut_core_v0_48_O_CREAT()
+  magic external neut_core_v0_50_O_CREAT()
 }
 
 constant O_APPEND: int {
-  magic external neut_core_v0_48_O_APPEND()
+  magic external neut_core_v0_50_O_APPEND()
 }
 
 constant SEEK_SET: int {
-  magic external neut_core_v0_48_SEEK_SET()
+  magic external neut_core_v0_50_SEEK_SET()
 }
 
 constant SEEK_CUR: int {
-  magic external neut_core_v0_48_SEEK_CUR()
+  magic external neut_core_v0_50_SEEK_CUR()
 }
 
 constant SEEK_END: int {
-  magic external neut_core_v0_48_SEEK_END()
+  magic external neut_core_v0_50_SEEK_END()
 }
 
 constant THREAD_MUTEX_SIZE: int {
-  magic external neut_core_v0_48_thread_mutex_size()
+  magic external neut_core_v0_50_thread_mutex_size()
 }
 
 constant THREAD_COND_SIZE: int {
-  magic external neut_core_v0_48_thread_cond_size()
+  magic external neut_core_v0_50_thread_cond_size()
 }
 
 constant UINT32_MAX: int {
-  magic external neut_core_v0_48_UINT32_MAX()
+  magic external neut_core_v0_50_UINT32_MAX()
 }
 
 inline _parse_binary(num-text-ptr: int, len: int, result-ptr: int): int32 {
-  magic external neut_core_v0_48_parse_binary(num-text-ptr, len, result-ptr)
+  magic external neut_core_v0_50_parse_binary(num-text-ptr, len, result-ptr)
 }
 
 inline _parse_decimal(num-text-ptr: int, len: int, result-ptr: int): int32 {
-  magic external neut_core_v0_48_parse_decimal(num-text-ptr, len, result-ptr)
+  magic external neut_core_v0_50_parse_decimal(num-text-ptr, len, result-ptr)
 }
 
 inline _parse_hex(num-text-ptr: int, len: int, result-ptr: int): int32 {
-  magic external neut_core_v0_48_parse_hex(num-text-ptr, len, result-ptr)
+  magic external neut_core_v0_50_parse_hex(num-text-ptr, len, result-ptr)
 }
 
 inline _parse_double(num-text-ptr: int, len: int, result-ptr: int): int32 {
-  magic external neut_core_v0_48_parse_double(num-text-ptr, len, result-ptr)
+  magic external neut_core_v0_50_parse_double(num-text-ptr, len, result-ptr)
 }

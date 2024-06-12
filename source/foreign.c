@@ -10,106 +10,106 @@
 
 
 __attribute__((always_inline))
-int neut_core_v0_48_wifexited(int stat) {
+int neut_core_v0_50_wifexited(int stat) {
   return WIFEXITED(stat);
 }
 
 __attribute__((always_inline))
-int neut_core_v0_48_wifsignaled(int stat) {
+int neut_core_v0_50_wifsignaled(int stat) {
   return WIFSIGNALED(stat);
 }
 
 __attribute__((always_inline))
-int neut_core_v0_48_wifstopped(int stat) {
+int neut_core_v0_50_wifstopped(int stat) {
   return WIFSTOPPED(stat);
 }
 
 __attribute__((always_inline))
-int neut_core_v0_48_wexitstatus(int stat) {
+int neut_core_v0_50_wexitstatus(int stat) {
   return WEXITSTATUS(stat);
 }
 
 __attribute__((always_inline))
-int neut_core_v0_48_wtermsig(int stat) {
+int neut_core_v0_50_wtermsig(int stat) {
   return WTERMSIG(stat);
 }
 
 __attribute__((always_inline))
-int neut_core_v0_48_wcoredump(int stat) {
+int neut_core_v0_50_wcoredump(int stat) {
   return WCOREDUMP(stat);
 }
 
 __attribute__((always_inline))
-int neut_core_v0_48_wstopsig(int stat) {
+int neut_core_v0_50_wstopsig(int stat) {
   return WSTOPSIG(stat);
 }
 
 __attribute__((always_inline))
-int neut_core_v0_48_word_size() {
+int neut_core_v0_50_word_size() {
   return sizeof(void*);
 }
 
 __attribute__((always_inline))
-int neut_core_v0_48_O_RDONLY() {
+int neut_core_v0_50_O_RDONLY() {
   return O_RDONLY;
 }
 
 __attribute__((always_inline))
-int neut_core_v0_48_O_WRONLY() {
+int neut_core_v0_50_O_WRONLY() {
   return O_WRONLY;
 }
 
 __attribute__((always_inline))
-int neut_core_v0_48_O_RDWR() {
+int neut_core_v0_50_O_RDWR() {
   return O_RDWR;
 }
 
 __attribute__((always_inline))
-int neut_core_v0_48_O_CREAT() {
+int neut_core_v0_50_O_CREAT() {
   return O_CREAT;
 }
 
 __attribute__((always_inline))
-int neut_core_v0_48_O_APPEND() {
+int neut_core_v0_50_O_APPEND() {
   return O_APPEND;
 }
 
 __attribute__((always_inline))
-int neut_core_v0_48_SEEK_SET() {
+int neut_core_v0_50_SEEK_SET() {
   return SEEK_SET;
 }
 
 __attribute__((always_inline))
-int neut_core_v0_48_SEEK_CUR() {
+int neut_core_v0_50_SEEK_CUR() {
   return SEEK_CUR;
 }
 
 __attribute__((always_inline))
-int neut_core_v0_48_SEEK_END() {
+int neut_core_v0_50_SEEK_END() {
   return SEEK_END;
 }
 
 __attribute__((always_inline))
-int neut_core_v0_48_thread_mutex_size() {
+int neut_core_v0_50_thread_mutex_size() {
   return sizeof(pthread_mutex_t);
 }
 
 __attribute__((always_inline))
-int neut_core_v0_48_thread_cond_size() {
+int neut_core_v0_50_thread_cond_size() {
   return sizeof(pthread_cond_t);
 }
 
 __attribute__((always_inline))
-int neut_core_v0_48_errno() {
+int neut_core_v0_50_errno() {
   return errno;
 }
 
 __attribute__((always_inline))
-int neut_core_v0_48_UINT32_MAX() {
+int neut_core_v0_50_UINT32_MAX() {
   return UINT32_MAX;
 }
 
-int neut_core_v0_48_parse_binary(const char *str, size_t length, long *out_value) {
+int neut_core_v0_50_parse_binary(const char *str, size_t length, long *out_value) {
   long result = 0;
   size_t i = 0;
   long sign = 1;
@@ -149,7 +149,7 @@ int neut_core_v0_48_parse_binary(const char *str, size_t length, long *out_value
   }
 }
 
-int neut_core_v0_48_parse_decimal(const char *str, size_t length, long *out_value) {
+int neut_core_v0_50_parse_decimal(const char *str, size_t length, long *out_value) {
   long result = 0;
   size_t i = 0;
   long sign = 1;
@@ -186,7 +186,7 @@ int neut_core_v0_48_parse_decimal(const char *str, size_t length, long *out_valu
   }
 }
 
-int neut_core_v0_48_parse_hex(const char *str, size_t length, long *out_value) {
+int neut_core_v0_50_parse_hex(const char *str, size_t length, long *out_value) {
   long result = 0;
   size_t i = 0;
   long sign = 1;
@@ -234,7 +234,7 @@ int neut_core_v0_48_parse_hex(const char *str, size_t length, long *out_value) {
   }
 }
 
-int neut_core_v0_48_parse_double(const char *str, size_t length, double *out_value) {
+int neut_core_v0_50_parse_double(const char *str, size_t length, double *out_value) {
   double result = 0.0;
   size_t i = 0;
   double sign = 1.0;

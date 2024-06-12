@@ -1,13 +1,13 @@
 import {
-  Lo {Loset, loset},
+  Ord {Ord, ord},
   core.bool,
   core.either {Right, none},
-  core.order {EQ, GT, LT},
+  core.ordering {EQ, GT, LT},
   core.system,
   core.text,
   core.unit,
   this.list {Cons, Nil, append, list},
-  this.loset,
+  this.ord,
   this.pair {Pair, pair},
 }
 
@@ -182,14 +182,14 @@ inline _balance-R<a, b>(k: a, x: b, l: dictionary(a, b), r: dictionary(a, b)): d
   }
 }
 
-inline insert<k>(L: loset(&k)): <v>(k, v, dictionary(k, v)) -> dictionary(k, v) {
-  let Loset of {cmp} = L in
+inline insert<k>(L: ord(&k)): <v>(k, v, dictionary(k, v)) -> dictionary(k, v) {
+  let Ord of {compare} = L in
   define self<v: type>(key-X, val-X, d: dictionary(k, v)): dictionary(k, v) {
     match d {
     | Tip =>
       singleton(key-X, val-X)
     | Bin(size, key-Y, val-Y, left, right) =>
-      let order on key-X, key-Y = cmp(key-X, key-Y) in
+      let order on key-X, key-Y = compare(key-X, key-Y) in
       match order {
       | LT =>
         _balance-L(key-Y, val-Y, self(key-X, val-X, left), right)
@@ -202,14 +202,14 @@ inline insert<k>(L: loset(&k)): <v>(k, v, dictionary(k, v)) -> dictionary(k, v) 
   }
 }
 
-inline lookup<k>(L: loset(&k)): <v>(&k, &dictionary(k, v)) -> ?&v {
-  let Loset of {cmp} = L in
+inline lookup<k>(L: ord(&k)): <v>(&k, &dictionary(k, v)) -> ?&v {
+  let Ord of {compare} = L in
   define self<v>(needle: &k, d: &dictionary(k, v)): ?&v {
     case d {
     | Tip =>
       none()
     | Bin(_, k, x, l, r) =>
-      match cmp(needle, k) {
+      match compare(needle, k) {
       | LT =>
         self(needle, l)
       | GT =>
@@ -266,14 +266,14 @@ inline _glue<k, v>(d1: dictionary(k, v), d2: dictionary(k, v)): dictionary(k, v)
   }
 }
 
-inline delete<k>(L: loset(&k)): <v>(k, dictionary(k, v)) -> dictionary(k, v) {
+inline delete<k>(L: ord(&k)): <v>(k, dictionary(k, v)) -> dictionary(k, v) {
   define self<v>(needle: k, d: dictionary(k, v)): dictionary(k, v) {
-    let Loset of {cmp} = L in
+    let Ord of {compare} = L in
     match d {
     | Tip =>
       Tip
     | Bin(_, kx, x, l, r) =>
-      let order on needle, kx = cmp(needle, kx) in
+      let order on needle, kx = compare(needle, kx) in
       match order {
       | LT =>
         _balance-R(kx, x, self(needle, l), r)
@@ -294,22 +294,22 @@ data trope(k) {
   )
 }
 
-inline from-loset<k>(_loset: loset(&k)): trope(k) {
+inline from-ord<k>(_ord: ord(&k)): trope(k) {
   Trope of {
-    insert = insert(_loset),
-    lookup = lookup(_loset),
-    delete = delete(_loset),
+    insert = insert(_ord),
+    lookup = lookup(_ord),
+    delete = delete(_ord),
   }
 }
 
-inline from-list<k, v>(_loset: loset(&k), kvs: list(pair(k, v))): dictionary(k, v) {
+inline from-list<k, v>(_ord: ord(&k), kvs: list(pair(k, v))): dictionary(k, v) {
   let f =
     define self(kvs: list(pair(k, v)), acc: dictionary(k, v)): dictionary(k, v) {
       match kvs {
       | Nil =>
         acc
       | Cons(Pair(k, v), rest) =>
-        self(rest, insert(_loset)(k, v, acc))
+        self(rest, insert(_ord)(k, v, acc))
       }
     }
   in

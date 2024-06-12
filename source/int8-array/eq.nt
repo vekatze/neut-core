@@ -1,6 +1,6 @@
 import {
   this.bool {False, True, bool},
-  this.entity {Entity, entity},
+  this.eq {Eq, eq},
   this.int8-array {_get-content-pointer, int8-array, int8-array-length},
   this.memory {load-int8},
 }
@@ -51,8 +51,8 @@ define eq-int8-array(t1: &int8-array, t2: &int8-array): bool {
   cmp-int8-array(_eq-int8-array)(t1, t2)
 }
 
-constant as-entity: entity(&int8-array) {
-  Entity of {identity = eq-int8-array}
+constant as-eq: eq(&int8-array) {
+  Eq of {equal = eq-int8-array}
 }
 
 define eq-prefix(needle: &int8-array, haystack: &int8-array): bool {

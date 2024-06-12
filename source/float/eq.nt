@@ -1,0 +1,8 @@
+import {
+  E,
+  this.float.ord {as-ord},
+}
+
+constant as-eq: E.eq(float) {
+  E.from-ord(as-ord)
+}

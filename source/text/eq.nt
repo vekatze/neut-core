@@ -1,8 +1,8 @@
 import {
   this.bool {bool},
   this.either {Right, none},
-  this.entity {Entity, entity},
-  this.int8-array.entity {eq-int8-array},
+  this.eq {Eq, eq},
+  this.int8-array.eq {eq-int8-array},
   this.text {Text, _drop-N, _take-N, text, text-byte-length},
   this.unit,
 }
@@ -13,26 +13,26 @@ define eq-text(t1: &text, t2: &text): bool {
   eq-int8-array(xs1, xs2)
 }
 
-constant as-entity: entity(&text) {
-  Entity of {identity = eq-text}
+constant as-eq: eq(&text) {
+  Eq of {equal = eq-text}
 }
 
 define eq-prefix(needle: &text, haystack: &text): bool {
   tie Text(xs1) = needle in
   tie Text(xs2) = haystack in
-  this.int8-array.entity.eq-prefix(xs1, xs2)
+  this.int8-array.eq.eq-prefix(xs1, xs2)
 }
 
 define eq-suffix(needle: &text, haystack: &text): bool {
   tie Text(xs1) = needle in
   tie Text(xs2) = haystack in
-  this.int8-array.entity.eq-suffix(xs1, xs2)
+  this.int8-array.eq.eq-suffix(xs1, xs2)
 }
 
 define eq-infix(needle: &text, haystack: &text): bool {
   tie Text(xs1) = needle in
   tie Text(xs2) = haystack in
-  this.int8-array.entity.eq-infix(xs1, xs2)
+  this.int8-array.eq.eq-infix(xs1, xs2)
 }
 
 define strip-prefix(needle: &text, haystack: &text): ?text {

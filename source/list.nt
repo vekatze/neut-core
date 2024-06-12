@@ -1,9 +1,9 @@
 import {
-  Lo {Loset, loset},
+  Ord {Ord, ord},
   this.bool {False, True, and, bool, or},
   this.either {Left, Right, either, none},
   this.monoid {Monoid, monoid},
-  this.order {GT, LT},
+  this.ordering {GT, LT},
   this.pair {Pair, pair},
   this.unit {Unit, unit},
 }
@@ -358,15 +358,15 @@ inline sum<a>(as-monoid: monoid(a), xs: list(a)): a {
   })
 }
 
-inline minimum<a>(as-ord: loset(&a)): (list(a)) -> ?a {
+inline minimum<a>(as-ord: ord(&a)): (list(a)) -> ?a {
   function (xs) {
-    let Loset of {cmp} = as-ord in
+    let Ord of {compare} = as-ord in
     match xs {
     | Nil =>
       none()
     | Cons(y, ys) =>
       Right(fold-left(y, ys, function (acc, y) {
-        let order on acc, y = cmp(acc, y) in
+        let order on acc, y = compare(acc, y) in
         match order {
         | LT =>
           acc
@@ -378,16 +378,16 @@ inline minimum<a>(as-ord: loset(&a)): (list(a)) -> ?a {
   }
 }
 
-inline maximum<a>(as-ord: loset(&a)): (list(a)) -> ?a {
+inline maximum<a>(as-ord: ord(&a)): (list(a)) -> ?a {
   function (xs) {
-    let Loset of {cmp} = as-ord in
+    let Ord of {compare} = as-ord in
     let helper =
       define self(cand: a, ys: list(a)): a {
         match ys {
         | Nil =>
           cand
         | Cons(z, zs) =>
-          let order on cand, z = cmp(cand, z) in
+          let order on cand, z = compare(cand, z) in
           match order {
           | GT =>
             self(cand, zs)

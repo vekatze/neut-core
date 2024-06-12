@@ -2,14 +2,14 @@ import {
   O {EQ, GT, LT},
   this.bool {False, True, bool},
   this.int {min-int},
-  this.int.loset,
+  this.int.ord,
   this.int8-array {_get-content-pointer, int8-array, int8-array-length},
-  this.loset {Loset, loset},
   this.memory {load-int8},
-  this.order {order},
+  this.ord {Ord, ord},
+  this.ordering {ordering},
 }
 
-define _cmp-int8(x: int8, y: int8): order {
+define _cmp-int8(x: int8, y: int8): ordering {
   if gt-int8(x, y) {
     GT
   } else-if lt-int8(x, y) {
@@ -19,9 +19,9 @@ define _cmp-int8(x: int8, y: int8): order {
   }
 }
 
-inline cmp-int8-array(xs1: &int8-array, xs2: &int8-array): order {
+inline cmp-int8-array(xs1: &int8-array, xs2: &int8-array): ordering {
   let f =
-    define self(ptr1: int, ptr2: int, index: int, len: int, fallback: order): order {
+    define self(ptr1: int, ptr2: int, index: int, len: int, fallback: ordering): ordering {
       if eq-int(index, len) {
         fallback
       } else {
@@ -39,7 +39,7 @@ inline cmp-int8-array(xs1: &int8-array, xs2: &int8-array): order {
   let len1 = int8-array-length(xs1) in
   let len2 = int8-array-length(xs2) in
   let min-len = min-int(len1, len2) in
-  let fallback-value = this.int.loset.as-loset::cmp(len1, len2) in
+  let fallback-value = this.int.ord.as-ord::compare(len1, len2) in
   let ptr1 = _get-content-pointer(xs1) in
   let ptr2 = _get-content-pointer(xs2) in
   f(ptr1, ptr2, 0, min-len, fallback-value)
@@ -81,9 +81,9 @@ define ge-int8-array(t1: &int8-array, t2: &int8-array): bool {
   }
 }
 
-constant as-loset: loset(&int8-array) {
-  Loset of {
-    cmp = {
+constant as-ord: ord(&int8-array) {
+  Ord of {
+    compare = {
       function (x, y) {
         cmp-int8-array(x, y)
       }

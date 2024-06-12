@@ -1,12 +1,12 @@
 import {
   O {EQ, GT, LT},
   this.bool,
-  this.loset {Loset, loset},
+  this.ord {Ord, ord},
 }
 
-constant as-loset: loset(float) {
-  Loset of {
-    cmp = {
+constant as-ord: ord(float) {
+  Ord of {
+    compare = {
       function (x, y) {
         if gt-float(x, y) {
           GT
@@ -20,9 +20,9 @@ constant as-loset: loset(float) {
   }
 }
 
-constant as-loset-N: loset(&float) {
-  Loset of {
-    cmp = {
+constant as-ord-N: ord(&float) {
+  Ord of {
+    compare = {
       function (x, y) {
         if gt-float(*x, *y) {
           GT

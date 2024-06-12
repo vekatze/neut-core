@@ -3,13 +3,13 @@ import {
   TIO,
   this.control {grow},
   this.either {Left, Right},
-  this.int.loset {as-loset-N},
+  this.int.ord {as-ord-N},
   this.random {random},
   this.unit {Unit, unit},
 }
 
 constant intdictionary: Dict.trope(int) {
-  Dict.from-loset(as-loset-N)
+  Dict.from-ord(as-ord-N)
 }
 
 define make-big-dictionary(): dictionary(int, int) {

@@ -1,16 +1,16 @@
 import {
   this.bool {False, True, bool},
-  this.entity {entity},
+  this.eq {eq},
   this.list {Cons, Nil, list},
 }
 
-inline _elem<a>(e: entity(&a)): (x: &a, xs: &list(a)) -> bool {
+inline _elem<a>(e: eq(&a)): (x: &a, xs: &list(a)) -> bool {
   define self(x: &a, xs: &list(a)): bool {
     case xs {
     | Nil =>
       False
     | Cons(y, ys) =>
-      if e::identity(x, y) {
+      if e::equal(x, y) {
         True
       } else {
         self(x, ys)
@@ -25,7 +25,7 @@ data trope(a) {
   )
 }
 
-inline from-entity<a>(e: entity(&a)): trope(a) {
+inline from-eq<a>(e: eq(&a)): trope(a) {
   Trope of {
     elem = _elem(e),
   }

@@ -1,0 +1,9 @@
+import {
+  this.ordering {ordering},
+}
+
+data ord(a) {
+| Ord(
+    compare: (a, a) -> ordering,
+  )
+}

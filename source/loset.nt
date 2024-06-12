@@ -1,9 +1,0 @@
-import {
-  this.order {order},
-}
-
-data loset(a) {
-| Loset(
-    cmp: (a, a) -> order,
-  )
-}

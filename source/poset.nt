@@ -1,22 +1,22 @@
 import {
   this.either {Right},
-  this.loset {Loset, loset},
-  this.order {order},
+  this.ord {Ord, ord},
+  this.ordering {ordering},
   this.unit,
 }
 
 data poset(a) {
 | Poset(
-    cmp: (a, a) -> ?order,
+    compare: (a, a) -> ?ordering,
   )
 }
 
-inline from-loset<a>(_loset: loset(a)): poset(a) {
-  let Loset of {cmp} = _loset in
+inline from-ord<a>(_ord: ord(a)): poset(a) {
+  let Ord of {compare} = _ord in
   Poset of {
-    cmp = {
+    compare = {
       function (x, y) {
-        Right(cmp(x, y))
+        Right(compare(x, y))
       }
     },
   }

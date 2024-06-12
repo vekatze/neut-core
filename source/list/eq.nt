@@ -1,14 +1,14 @@
 import {
   E,
   this.bool {False, True, bool},
-  this.entity {Entity, entity},
+  this.eq {Eq, eq},
   this.list {Cons, Nil, list},
 }
 
-inline as-entity<a>(f: entity(a)): entity(list(a)) {
-  let Entity(eq) = f in
-  Entity of {
-    identity = {
+inline as-eq<a>(f: eq(a)): eq(list(a)) {
+  let Eq(eq) = f in
+  Eq of {
+    equal = {
       define self(xs, ys) {
         match xs, ys {
         | Nil, Nil =>
@@ -29,10 +29,10 @@ inline as-entity<a>(f: entity(a)): entity(list(a)) {
   }
 }
 
-inline as-entity-N<a>(f: entity(&a)): entity(&list(a)) {
-  let Entity(eq) = f in
-  Entity of {
-    identity = {
+inline as-eq-N<a>(f: eq(&a)): eq(&list(a)) {
+  let Eq(eq) = f in
+  Eq of {
+    equal = {
       define self(xs, ys) {
         case xs, ys {
         | Nil, Nil =>
@@ -57,13 +57,13 @@ define _nop-copy<a>(x: &&a): &a {
   *x
 }
 
-inline member<a>(e: entity(&a)): (value: &a, xs: &list(a)) -> bool {
+inline member<a>(e: eq(&a)): (value: &a, xs: &list(a)) -> bool {
   define member(value: &a, xs: &list(a)): bool {
     case xs {
     | Nil =>
       False
     | Cons(y, ys) =>
-      if e::identity(value, y) {
+      if e::equal(value, y) {
         True
       } else {
         member(value, ys)
@@ -72,7 +72,7 @@ inline member<a>(e: entity(&a)): (value: &a, xs: &list(a)) -> bool {
   }
 }
 
-inline nub<a>(e: entity(&a)): (xs: &list(a)) -> list(a) {
+inline nub<a>(e: eq(&a)): (xs: &list(a)) -> list(a) {
   function (xs) {
     let f =
       define nub(xs: &list(a), acc: list(&a)): list(a) {
@@ -100,7 +100,7 @@ data trope(a) {
   )
 }
 
-define from-entity<a>(e: entity(&a)): trope(a) {
+define from-eq<a>(e: eq(&a)): trope(a) {
   Trope of {
     nub = nub(e),
     member = member(e),

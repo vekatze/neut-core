@@ -1,0 +1,12 @@
+import {
+  E,
+  this.int.ord {as-ord, as-ord-N},
+}
+
+constant as-eq: E.eq(int) {
+  E.from-ord(as-ord)
+}
+
+constant as-eq-N: E.eq(&int) {
+  E.from-ord(as-ord-N)
+}

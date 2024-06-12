@@ -6,7 +6,7 @@ import {
   this.control {loop},
   this.either {from-option},
   this.external {free, malloc},
-  this.int.loset {as-loset-N},
+  this.int.ord {as-ord-N},
   this.list {Cons, Nil, iterate, list, minimum},
   this.unit {Unit, unit},
 }
@@ -172,7 +172,7 @@ inline fold-LN<elem-type, result-type>(
 define zip-with<a, b, c>(xs: &vector(a), ys: &vector(b), f: (a, b) -> c): vector(c) {
   let len1 = size(xs) in
   let len2 = size(ys) in
-  let min-func = minimum(as-loset-N) in
+  let min-func = minimum(as-ord-N) in
   let len-or-none = min-func([len1, len2]) in
   let len = from-option(0, len-or-none) in
   let zip-with-helper =

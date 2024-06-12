@@ -1,8 +1,8 @@
 import {
   O {EQ, GT, LT},
   this.bool {bool},
-  this.int8-array.loset {ge-int8-array, gt-int8-array, le-int8-array, lt-int8-array},
-  this.loset {Loset, loset},
+  this.int8-array.ord {ge-int8-array, gt-int8-array, le-int8-array, lt-int8-array},
+  this.ord {Ord, ord},
   this.text {Text, text},
 }
 
@@ -30,9 +30,9 @@ define ge-text(t1: &text, t2: &text): bool {
   ge-int8-array(xs1, xs2)
 }
 
-constant as-loset: loset(&text) {
-  Loset of {
-    cmp = {
+constant as-ord: ord(&text) {
+  Ord of {
+    compare = {
       function (x, y) {
         if gt-text(x, y) {
           GT

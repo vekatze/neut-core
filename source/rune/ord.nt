@@ -1,7 +1,7 @@
 import {
   O {EQ, GT, LT},
   this.bool {bool},
-  this.loset {Loset, loset},
+  this.ord {Ord, ord},
   this.rune {_Rune, rune},
 }
 
@@ -29,9 +29,9 @@ define ge-rune(r1: rune, r2: rune): bool {
   ge-int32(r1, r2)
 }
 
-constant as-loset: loset(rune) {
-  Loset of {
-    cmp = {
+constant as-ord: ord(rune) {
+  Ord of {
+    compare = {
       function (x, y) {
         if gt-rune(x, y) {
           GT
@@ -45,9 +45,9 @@ constant as-loset: loset(rune) {
   }
 }
 
-constant as-loset-N: loset(&rune) {
-  Loset of {
-    cmp = {
+constant as-ord-N: ord(&rune) {
+  Ord of {
+    compare = {
       function (x, y) {
         if gt-rune(*x, *y) {
           GT

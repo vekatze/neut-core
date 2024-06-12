@@ -1,6 +1,6 @@
 import {
   this.bool {bool},
-  this.entity {Entity, entity},
+  this.eq {Eq, eq},
   this.rune {_Rune, rune},
 }
 
@@ -16,17 +16,17 @@ define ne-rune(r1: rune, r2: rune): bool {
   ne-int32(r1, r2)
 }
 
-constant as-entity: entity(rune) {
-  Entity of {
-    identity = eq-rune,
+constant as-eq: eq(rune) {
+  Eq of {
+    equal = eq-rune,
   }
 }
 
-constant as-entity-N: entity(&rune) {
-  Entity of {
-    identity = {
+constant as-eq-N: eq(&rune) {
+  Eq of {
+    equal = {
       function (x, y) {
-        as-entity::identity(*x, *y)
+        as-eq::equal(*x, *y)
       }
     },
   }

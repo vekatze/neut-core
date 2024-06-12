@@ -4,27 +4,27 @@ import {
   this.float.parse {parse-float},
   this.float.show {%lf, show-float},
   this.foreign {THREAD_COND_SIZE, THREAD_MUTEX_SIZE, UINT32_MAX},
-  this.int.entity {as-entity-N},
+  this.int.eq {as-eq-N},
   this.int.show {%ld},
   this.list {any, for, list},
-  this.list.entity,
-  this.order {EQ, GT, LT},
+  this.list.eq,
+  this.ordering {EQ, GT, LT},
   this.random {random-float},
   this.rune {rune},
-  this.rune.entity {eq-rune},
-  this.rune.loset {le-rune},
+  this.rune.eq {eq-rune},
+  this.rune.ord {le-rune},
   this.rune.show {as-show},
   this.text {drop, drop-while, intercalate-N, join, pack, reverse, unpack},
   this.text.io {print, printf},
-  this.text.loset,
+  this.text.ord,
   this.text.parse {parse-text},
   this.text.show {show-text},
   this.unit {Unit, unit},
   this.word,
 }
 
-constant list-int-eq-ops: this.list.entity.trope(int) {
-  this.list.entity.from-entity(as-entity-N)
+constant list-int-eq-ops: this.list.eq.trope(int) {
+  this.list.eq.from-eq(as-eq-N)
 }
 
 constant my-bool: type {
@@ -70,7 +70,7 @@ define zen(): unit {
   printf("max: {}\n", [%ld(UINT32_MAX)]);
   let f = random-float(-10, 20) in
   printf("random-float: {}\n", [%lf(f)]);
-  let c = this.text.loset.as-loset::cmp("ghfooza", "ghfooza") in
+  let c = this.text.ord.as-ord::compare("ghfooza", "ghfooza") in
   match c {
   | LT =>
     print("LT\n")

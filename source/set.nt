@@ -1,5 +1,5 @@
 import {
-  Lo {loset},
+  Ord {ord},
   this.bool {False, True, bool},
   this.dictionary {dictionary, empty, singleton},
   this.either {Left, Right},
@@ -20,8 +20,8 @@ data trope(k) {
   )
 }
 
-inline from-loset<k>(_loset: loset(&k)): trope(k) {
-  use this.dictionary.from-loset(_loset) {insert, lookup, delete} in
+inline from-ord<k>(_ord: ord(&k)): trope(k) {
+  use this.dictionary.from-ord(_ord) {insert, lookup, delete} in
   Trope of {
     empty = empty(),
     singleton = {

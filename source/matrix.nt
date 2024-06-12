@@ -5,7 +5,7 @@ import {
   this.bool {and},
   this.control {loop},
   this.either {from-option},
-  this.int.loset {as-loset-N},
+  this.int.ord {as-ord-N},
   this.rig {rig},
   this.ring {ring},
   this.system,
@@ -23,7 +23,7 @@ data matrix(a) {
 
 define new<a>(content-list: list(list(a))): matrix(a) {
   let len-list on content-list = L.map-N(exact L.length, content-list) in
-  let col-size = L.minimum(as-loset-N)(len-list) in
+  let col-size = L.minimum(as-ord-N)(len-list) in
   let row-size on content-list = L.length(content-list) in
   Matrix of {
     row-size,

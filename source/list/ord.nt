@@ -1,0 +1,57 @@
+import {
+  this.list {Cons, Nil, list},
+  this.ord {Ord, ord},
+  this.ordering {EQ, GT, LT},
+}
+
+inline as-ord<a>(o: ord(a)): ord(list(a)) {
+  Ord of {
+    compare = {
+      define self(xs, ys) {
+        match xs, ys {
+        | Nil, Nil =>
+          EQ
+        | Nil, Cons(_, _) =>
+          LT
+        | Cons(_, _), Nil =>
+          GT
+        | Cons(x, xs), Cons(y, ys) =>
+          match o::compare(x, y) {
+          | LT =>
+            LT
+          | GT =>
+            GT
+          | EQ =>
+            self(xs, ys)
+          }
+        }
+      }
+    },
+  }
+}
+
+inline as-ord-N<a>(o: ord(&a)): ord(&list(a)) {
+  Ord of {
+    compare = {
+      define self(xs, ys) {
+        case xs, ys {
+        | Nil, Nil =>
+          EQ
+        | Nil, Cons(_, _) =>
+          LT
+        | Cons(_, _), Nil =>
+          GT
+        | Cons(x, xs), Cons(y, ys) =>
+          match o::compare(x, y) {
+          | LT =>
+            LT
+          | GT =>
+            GT
+          | EQ =>
+            self(xs, ys)
+          }
+        }
+      }
+    },
+  }
+}

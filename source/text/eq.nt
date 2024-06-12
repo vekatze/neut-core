@@ -1,8 +1,8 @@
 import {
+  this.binary.eq {eq-binary},
   this.bool {bool},
   this.either {Right, none},
   this.eq {Eq, eq},
-  this.int8-array.eq {eq-int8-array},
   this.text {Text, _drop-N, _take-N, text, text-byte-length},
   this.unit,
 }
@@ -10,7 +10,7 @@ import {
 define eq-text(t1: &text, t2: &text): bool {
   tie Text(xs1) = t1 in
   tie Text(xs2) = t2 in
-  eq-int8-array(xs1, xs2)
+  eq-binary(xs1, xs2)
 }
 
 constant as-eq: eq(&text) {
@@ -20,19 +20,19 @@ constant as-eq: eq(&text) {
 define eq-prefix(needle: &text, haystack: &text): bool {
   tie Text(xs1) = needle in
   tie Text(xs2) = haystack in
-  this.int8-array.eq.eq-prefix(xs1, xs2)
+  this.binary.eq.eq-prefix(xs1, xs2)
 }
 
 define eq-suffix(needle: &text, haystack: &text): bool {
   tie Text(xs1) = needle in
   tie Text(xs2) = haystack in
-  this.int8-array.eq.eq-suffix(xs1, xs2)
+  this.binary.eq.eq-suffix(xs1, xs2)
 }
 
 define eq-infix(needle: &text, haystack: &text): bool {
   tie Text(xs1) = needle in
   tie Text(xs2) = haystack in
-  this.int8-array.eq.eq-infix(xs1, xs2)
+  this.binary.eq.eq-infix(xs1, xs2)
 }
 
 define strip-prefix(needle: &text, haystack: &text): ?text {

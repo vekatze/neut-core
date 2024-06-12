@@ -3,7 +3,7 @@ import {
   this.bool {False, True, bool},
   this.int {min-int},
   this.int.ord,
-  this.int8-array {_get-content-pointer, int8-array, int8-array-length},
+  this.binary {_get-content-pointer, binary, binary-length},
   this.memory {load-int8},
   this.ord {Ord, ord},
   this.ordering {ordering},
@@ -19,7 +19,7 @@ define _cmp-int8(x: int8, y: int8): ordering {
   }
 }
 
-inline cmp-int8-array(xs1: &int8-array, xs2: &int8-array): ordering {
+inline cmp-binary(xs1: &binary, xs2: &binary): ordering {
   let f =
     define self(ptr1: int, ptr2: int, index: int, len: int, fallback: ordering): ordering {
       if eq-int(index, len) {
@@ -36,8 +36,8 @@ inline cmp-int8-array(xs1: &int8-array, xs2: &int8-array): ordering {
       }
     }
   in
-  let len1 = int8-array-length(xs1) in
-  let len2 = int8-array-length(xs2) in
+  let len1 = binary-length(xs1) in
+  let len2 = binary-length(xs2) in
   let min-len = min-int(len1, len2) in
   let fallback-value = this.int.ord.as-ord::compare(len1, len2) in
   let ptr1 = _get-content-pointer(xs1) in
@@ -45,8 +45,8 @@ inline cmp-int8-array(xs1: &int8-array, xs2: &int8-array): ordering {
   f(ptr1, ptr2, 0, min-len, fallback-value)
 }
 
-define lt-int8-array(t1: &int8-array, t2: &int8-array): bool {
-  match cmp-int8-array(t1, t2) {
+define lt-binary(t1: &binary, t2: &binary): bool {
+  match cmp-binary(t1, t2) {
   | LT =>
     True
   | _ =>
@@ -54,8 +54,8 @@ define lt-int8-array(t1: &int8-array, t2: &int8-array): bool {
   }
 }
 
-define le-int8-array(t1: &int8-array, t2: &int8-array): bool {
-  match cmp-int8-array(t1, t2) {
+define le-binary(t1: &binary, t2: &binary): bool {
+  match cmp-binary(t1, t2) {
   | GT =>
     False
   | _ =>
@@ -63,8 +63,8 @@ define le-int8-array(t1: &int8-array, t2: &int8-array): bool {
   }
 }
 
-define gt-int8-array(t1: &int8-array, t2: &int8-array): bool {
-  match cmp-int8-array(t1, t2) {
+define gt-binary(t1: &binary, t2: &binary): bool {
+  match cmp-binary(t1, t2) {
   | GT =>
     True
   | _ =>
@@ -72,8 +72,8 @@ define gt-int8-array(t1: &int8-array, t2: &int8-array): bool {
   }
 }
 
-define ge-int8-array(t1: &int8-array, t2: &int8-array): bool {
-  match cmp-int8-array(t1, t2) {
+define ge-binary(t1: &binary, t2: &binary): bool {
+  match cmp-binary(t1, t2) {
   | LT =>
     False
   | _ =>
@@ -81,11 +81,11 @@ define ge-int8-array(t1: &int8-array, t2: &int8-array): bool {
   }
 }
 
-constant as-ord: ord(&int8-array) {
+constant as-ord: ord(&binary) {
   Ord of {
     compare = {
       function (x, y) {
-        cmp-int8-array(x, y)
+        cmp-binary(x, y)
       }
     },
   }

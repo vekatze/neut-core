@@ -4,11 +4,11 @@ import {
   Magic,
   Mem,
   Word,
+  this.binary {_copy-binary, binary, binary-access, binary-length, binary-new},
   this.bool {False, True, bool},
   this.control {discard},
   this.either {Right, none},
   this.int {max-int, min-int},
-  this.int8-array {_copy-int8-array, int8-array, int8-array-access, int8-array-length, int8-array-new},
   this.list {Cons, Nil, fold-left-N, list, reverse},
   this.memory {load-int8},
   this.pair {Pair, pair},
@@ -17,11 +17,11 @@ import {
 }
 
 data text {
-| Text(content: int8-array)
+| Text(content: binary)
 }
 
 define create(xs: L.list(int8)): text {
-  magic cast(int8-array, text, int8-array-new(xs))
+  magic cast(binary, text, binary-new(xs))
 }
 
 define empty(): text {
@@ -29,8 +29,8 @@ define empty(): text {
 }
 
 inline text-byte-length(t: &text): int {
-  let ptr = magic cast(&text, &int8-array, t) in
-  int8-array-length(ptr)
+  let ptr = magic cast(&text, &binary, t) in
+  binary-length(ptr)
 }
 
 define _get-content-pointer(t: &text): int {
@@ -61,7 +61,7 @@ define join(xs: list(text)): text {
         let current-content-ptr = add-int(content-ptr, offset) in
         let x-ptr on x = _get-content-pointer(x) in
         let x-len on x = text-byte-length(x) in
-        _copy-int8-array(x-ptr, current-content-ptr, 0, x-len);
+        _copy-binary(x-ptr, current-content-ptr, 0, x-len);
         discard(x);
         self(add-int(offset, x-len), rest)
       }
@@ -92,7 +92,7 @@ define join-N(xs: list(&text)): text {
         let current-content-ptr = add-int(content-ptr, offset) in
         let x-ptr = _get-content-pointer(x) in
         let x-len = text-byte-length(x) in
-        _copy-int8-array(x-ptr, current-content-ptr, 0, x-len);
+        _copy-binary(x-ptr, current-content-ptr, 0, x-len);
         discard(x);
         self(add-int(offset, x-len), rest)
       }
@@ -137,7 +137,7 @@ define append(t1: &text, t2: &text): text {
 }
 
 define _access(haystack: &text, cursor: int): int8 {
-  int8-array-access(magic cast(&text, &int8-array, haystack), cursor)
+  binary-access(magic cast(&text, &binary, haystack), cursor)
 }
 
 define is-empty(t: &text): bool {
@@ -160,7 +160,7 @@ define _from-c-string(old-ptr: int): text {
   let new-ptr = Ext.malloc(add-int(len, u2)) in
   Mem.store-int(0, new-ptr);
   Mem.store-int(len, add-int(new-ptr, u));
-  _copy-int8-array(old-ptr, add-int(new-ptr, u2), 0, len);
+  _copy-binary(old-ptr, add-int(new-ptr, u2), 0, len);
   Magic.cast(int, text, new-ptr)
 }
 
@@ -205,7 +205,7 @@ define _drop-N(offset: int, t: &text): text {
   let new-content-ptr = add-int(new-ptr, mul-int(Word.size, 2)) in
   let adjusted-offset = min-int(offset, orig-size) in
   let content-ptr' = add-int(content-ptr, adjusted-offset) in
-  _copy-int8-array(content-ptr', new-content-ptr, 0, new-size);
+  _copy-binary(content-ptr', new-content-ptr, 0, new-size);
   Magic.cast(int, text, new-ptr)
 }
 
@@ -219,7 +219,7 @@ define _take-N(offset: int, t: &text): text {
   Mem.store-int(new-size, add-int(new-ptr, core.word.size));
   let content-ptr = _get-content-pointer(t) in
   let new-content-ptr = add-int(new-ptr, mul-int(core.word.size, 2)) in
-  _copy-int8-array(content-ptr, new-content-ptr, 0, new-size);
+  _copy-binary(content-ptr, new-content-ptr, 0, new-size);
   core.magic.cast(int, text, new-ptr)
 }
 
@@ -235,7 +235,7 @@ define _slice-N(start: int, size: int, t: &text): text {
   Mem.store-int(0, new-ptr);
   Mem.store-int(new-size, add-int(new-ptr, Word.size));
   let new-content-ptr = add-int(new-ptr, mul-int(Word.size, 2)) in
-  _copy-int8-array(add-int(content-ptr, start), new-content-ptr, 0, new-size);
+  _copy-binary(add-int(content-ptr, start), new-content-ptr, 0, new-size);
   Magic.cast(int, text, new-ptr)
 }
 
@@ -622,7 +622,7 @@ define replicate(n: int, t: &text): text {
       } else {
         let current-content-ptr = add-int(content-ptr, mul-int(count, base-len)) in
         let x-ptr = _get-content-pointer(t) in
-        _copy-int8-array(x-ptr, current-content-ptr, 0, base-len);
+        _copy-binary(x-ptr, current-content-ptr, 0, base-len);
         self(add-int(count, 1), t)
       }
     }

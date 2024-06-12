@@ -1,7 +1,7 @@
 import {
   O {EQ, GT, LT},
   this.bool {bool},
-  this.int8-array.ord {ge-int8-array, gt-int8-array, le-int8-array, lt-int8-array},
+  this.binary.ord {ge-binary, gt-binary, le-binary, lt-binary},
   this.ord {Ord, ord},
   this.text {Text, text},
 }
@@ -9,25 +9,25 @@ import {
 define lt-text(t1: &text, t2: &text): bool {
   tie Text(xs1) = t1 in
   tie Text(xs2) = t2 in
-  lt-int8-array(xs1, xs2)
+  lt-binary(xs1, xs2)
 }
 
 define le-text(t1: &text, t2: &text): bool {
   tie Text(xs1) = t1 in
   tie Text(xs2) = t2 in
-  le-int8-array(xs1, xs2)
+  le-binary(xs1, xs2)
 }
 
 define gt-text(t1: &text, t2: &text): bool {
   tie Text(xs1) = t1 in
   tie Text(xs2) = t2 in
-  gt-int8-array(xs1, xs2)
+  gt-binary(xs1, xs2)
 }
 
 define ge-text(t1: &text, t2: &text): bool {
   tie Text(xs1) = t1 in
   tie Text(xs2) = t2 in
-  ge-int8-array(xs1, xs2)
+  ge-binary(xs1, xs2)
 }
 
 constant as-ord: ord(&text) {

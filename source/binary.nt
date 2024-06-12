@@ -8,17 +8,19 @@ import {
   this.unit {Unit, unit},
 }
 
-define _copy-int8-array(source-pointer: int, target-pointer: int, index: int, to: int): unit {
+define _copy-binary(source-pointer: int, target-pointer: int, index: int, to: int): unit {
   if eq-int(index, to) {
     Unit
   } else {
     let value = Mem.load-int8(add-int(source-pointer, index)) in
     Mem.store-int8(value, add-int(target-pointer, index));
-    _copy-int8-array(source-pointer, target-pointer, add-int(index, 1), to)
+    _copy-binary(source-pointer, target-pointer, add-int(index, 1), to)
   }
 }
 
-resource int8-array {
+// int8-array
+// internal representation: (head-index, last-index, byte-0, byte-1, ..., byte-n)
+resource binary {
   function (x: int) {
     Magic.cast(unit, int, free(x))
   },
@@ -32,20 +34,20 @@ resource int8-array {
     Mem.store-int(0, target-pointer);
     Mem.store-int(length, add-int(target-pointer, u));
     let source-pointer' = add-int(add-int(source-pointer, u2), from) in
-    _copy-int8-array(source-pointer', add-int(target-pointer, u2), 0, to);
+    _copy-binary(source-pointer', add-int(target-pointer, u2), 0, to);
     target-pointer
   },
 }
 
-define int8-array-length(xs: &int8-array): int {
-  let source-pointer = magic cast(&int8-array, int, xs) in
+define binary-length(xs: &binary): int {
+  let source-pointer = magic cast(&binary, int, xs) in
   let u = Word.size in
   let from = Mem.load-int(source-pointer) in
   let to = Mem.load-int(add-int(source-pointer, u)) in
   sub-int(to, from)
 }
 
-define int8-array-new(xs: list(int8)): int8-array {
+define binary-new(xs: list(int8)): binary {
   let len on xs = length(xs) in
   let u = Word.size in
   let u2 = mul-int(u, 2) in
@@ -65,18 +67,18 @@ define int8-array-new(xs: list(int8)): int8-array {
     }
   in
   let _ = store-values(xs, 0) in
-  Magic.cast(int, int8-array, base-pointer)
+  Magic.cast(int, binary, base-pointer)
 }
 
-define int8-array-access(xs: &int8-array, i: int): int8 {
-  let ptr = Magic.cast(&int8-array, int, xs) in
+define binary-access(xs: &binary, i: int): int8 {
+  let ptr = Magic.cast(&binary, int, xs) in
   let u = Word.size in
   let u2 = mul-int(u, 2) in
   Mem.load-int8(add-int(add-int(ptr, u2), i))
 }
 
-define _get-content-pointer(t: &int8-array): int {
-  let ptr = Magic.cast(&int8-array, int, t) in
+define _get-content-pointer(t: &binary): int {
+  let ptr = Magic.cast(&binary, int, t) in
   let from = Mem.load-int(ptr) in
   let u = Word.size in
   add-int(add-int(ptr, mul-int(u, 2)), from)

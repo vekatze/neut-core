@@ -150,7 +150,7 @@ inline for<a, b>(xs: &vector(a), f: (a) -> b): vector(b) {
   }
 }
 
-inline fold-LN<elem-type, result-type>(
+inline fold-left-N<elem-type, result-type>(
   acc: result-type,
   xs: &vector(elem-type),
   consumer: (result-type, &elem-type) -> result-type,

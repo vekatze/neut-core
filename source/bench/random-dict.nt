@@ -8,7 +8,7 @@ import {
   this.unit {Unit, unit},
 }
 
-constant intdictionary: Dict.trope(int) {
+constant intdict: Dict.trope(int) {
   Dict.from-ord(as-ord-N)
 }
 
@@ -16,7 +16,7 @@ define make-big-dictionary(): dictionary(int, int) {
   grow(Dict.empty(), 700000, function (acc, _) {
     let key = random(1000000) in
     let val = random(1000000) in
-    intdictionary::insert(key, val, acc)
+    intdict::insert(key, val, acc)
   })
 }
 
@@ -25,7 +25,7 @@ define random-lookup-sum(d: &dictionary(int, int)): unit {
     grow(0, 700000, function (acc, _) {
       let key = random(1000000) in
       let val on key =
-        match intdictionary::lookup(key, d) {
+        match intdict::lookup(key, d) {
         | Left(_) =>
           0
         | Right(v) =>

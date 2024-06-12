@@ -75,7 +75,7 @@
       "unzip",
     ],
     null ["null"],
-    order ["EQ", "GT", "LT", "order"],
+    ordering ["EQ", "GT", "LT", "ordering"],
     pair ["Pair", "pair"],
     rune ["rune"],
     rune.eq ["eq-rune", "ne-rune"],

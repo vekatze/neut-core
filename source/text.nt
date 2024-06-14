@@ -119,7 +119,7 @@ define append(t1: &text, t2: &text): text {
   let new-text = Ext.malloc(add-int(new-len, u2)) in
   Mem.store-int(0, new-text);
   Mem.store-int(new-len, add-int(new-text, u));
-  let store-values =
+  let !store-values =
     define store-values(target-pointer: int, content-array: int, current-index: int, array-length: int): unit {
       if eq-int(current-index, array-length) {
         Unit
@@ -131,8 +131,8 @@ define append(t1: &text, t2: &text): text {
     }
   in
   let str-pointer = add-int(new-text, u2) in
-  store-values(str-pointer, add-int(content1, from1), 0, len1);
-  store-values(add-int(str-pointer, len1), add-int(content2, from2), 0, len2);
+  !store-values(str-pointer, add-int(content1, from1), 0, len1);
+  !store-values(add-int(str-pointer, len1), add-int(content2, from2), 0, len2);
   Magic.cast(int, text, new-text)
 }
 

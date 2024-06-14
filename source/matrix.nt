@@ -166,8 +166,8 @@ inline _iterate-sum<a>(r: rig(a), count: int, k: (int) -> a): a {
   helper(zero, 0)
 }
 
-inline _mul<a>(r: rig(a)): (&matrix(a), &matrix(a)) -> matrix(a) {
-  use r {mul} in
+inline _mul<a>(!r: rig(a)): (&matrix(a), &matrix(a)) -> matrix(a) {
+  use !r {mul} in
   define _(mat1: &matrix(a), mat2: &matrix(a)): matrix(a) {
     let row-size-1 = get-row-size(mat1) in
     let row-size-2 = get-row-size(mat2) in
@@ -180,7 +180,7 @@ inline _mul<a>(r: rig(a)): (&matrix(a), &matrix(a)) -> matrix(a) {
       content-list = {
         iterate(row-size-1, function (i) {
           iterate(col-size-2, function (j) {
-            _iterate-sum(r, col-size-1, function (k) {
+            _iterate-sum(!r, col-size-1, function (k) {
               let a_i_k = access(mat1, i, k) in
               let b_k_j = access(mat2, k, j) in
               mul(a_i_k, b_k_j)
@@ -255,13 +255,13 @@ data trope(a) {
   )
 }
 
-inline from-ring<a>(r: ring(a)): trope(a) {
+inline from-ring<a>(!r: ring(a)): trope(a) {
   Trope of {
-    zero = _zero(r),
-    one = _one(r),
-    add = _add(r),
-    sub = _sub(r),
-    mul = _mul(this.rig.from-ring(r)),
-    mul-pointwise = _mul-pointwise(r),
+    zero = _zero(!r),
+    one = _one(!r),
+    add = _add(!r),
+    sub = _sub(!r),
+    mul = _mul(this.rig.from-ring(!r)),
+    mul-pointwise = _mul-pointwise(!r),
   }
 }

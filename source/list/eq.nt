@@ -100,9 +100,9 @@ data trope(a) {
   )
 }
 
-define from-eq<a>(e: eq(&a)): trope(a) {
+inline from-eq<a>(!e: eq(&a)): trope(a) {
   Trope of {
-    nub = nub(e),
-    member = member(e),
+    nub = nub(!e),
+    member = member(!e),
   }
 }

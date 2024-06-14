@@ -1,6 +1,6 @@
 import {
   this.binary.eq {eq-binary},
-  this.bool {bool},
+  this.bool {True, bool},
   this.either {Right, none},
   this.eq {Eq, eq},
   this.text {Text, _drop-N, _take-N, text, text-byte-length},
@@ -50,5 +50,13 @@ define strip-suffix(needle: &text, haystack: &text): ?text {
     Right(_take-N(new-haystack-len, haystack))
   } else {
     none()
+  }
+}
+
+define check-false-positive(n: type): type {
+  if True {
+    n
+  } else {
+    n
   }
 }

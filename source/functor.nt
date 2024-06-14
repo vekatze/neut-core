@@ -1,5 +1,5 @@
-data functor(f: (type) -> type) {
+data functor(!f: (type) -> type) {
 | Functor(
-    map: <a, b>(comp: (a) -> b, xs: f(a)) -> f(b),
+    map: <a, b>(comp: (a) -> b, xs: !f(a)) -> !f(b),
   )
 }

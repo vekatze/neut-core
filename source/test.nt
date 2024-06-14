@@ -106,13 +106,13 @@ define zen(): unit {
   printf("word size: {}\n", [%ld(this.word.size)]);
   pin my-text = reverse("あいうえお。hello, world!") in
   let len = this.text.length(my-text) in
-  let char-seq = unpack(my-text) in
-  for(char-seq, function (ch) {
+  let !char-seq = unpack(my-text) in
+  for(!char-seq, function (ch) {
     printf("{}", [as-show::show(ch)])
   });
   printf("len: {}\n", [%ld(len)]);
-  let char-seq-2 on char-seq = pack(char-seq) in
-  let _ = char-seq in
+  let char-seq-2 on !char-seq = pack(!char-seq) in
+  let _ = !char-seq in
   printf("{}\n", [char-seq-2]);
   let tmp = drop(10, *"あいうえ💌おかきくけこ⭐さしすせ\n\\aoeuそたちつてと") in
   printf("{}\n", [this.text.show.as-show::show(tmp)]);

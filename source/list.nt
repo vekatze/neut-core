@@ -116,14 +116,14 @@ inline map-N<a, b>(f: (&a) -> b, xs: &list(a)): list(b) {
   helper(xs, [])
 }
 
-define intercalate<a>(sep: a, xs: list(a)): list(a) {
+define intercalate<a>(!sep: a, xs: list(a)): list(a) {
   match xs {
   | Nil =>
     []
   | Cons(y, Nil) =>
     [y]
   | Cons(y, Cons(z, ys)) =>
-    Cons(y, Cons(sep, intercalate(sep, Cons(z, ys))))
+    Cons(y, Cons(!sep, intercalate(!sep, Cons(z, ys))))
   }
 }
 
@@ -308,9 +308,9 @@ inline _filter<a>(pred: (a) -> bool): (xs: list(a)) -> list(a) {
     match xs {
     | Nil =>
       Nil
-    | Cons(y, ys) =>
-      if pred(y) {
-        Cons(y, self(ys))
+    | Cons(!y, ys) =>
+      if pred(!y) {
+        Cons(!y, self(ys))
       } else {
         self(ys)
       }

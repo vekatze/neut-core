@@ -9,6 +9,7 @@ import {
   this.list {Cons, Nil, append, list},
   this.ord,
   this.pair {Pair, pair},
+  this.system {panic},
 }
 
 // size balanced tree
@@ -57,7 +58,7 @@ inline _balance-L<a, b>(k: a, x: b, l: dictionary(a, b), r: dictionary(a, b)): d
     | Bin(ls, lk, lx, ll, lr) =>
       match ll, lr {
       | Tip, Tip =>
-        Bin(2, k, x, l, Tip)
+        Bin(2, k, x, Bin(ls, lk, lx, Tip, Tip), Tip)
       | Tip, Bin(_, lrk, lrx, _, _) =>
         Bin(3, lrk, lrx, Bin(1, lk, lx, Tip, Tip), Bin(1, k, x, Tip, Tip))
       | Bin(lls, llk, llx, lll, llr), Tip =>
@@ -89,12 +90,11 @@ inline _balance-L<a, b>(k: a, x: b, l: dictionary(a, b), r: dictionary(a, b)): d
           let lrls on lrl = size(lrl) in
           let lrrs on lrr = size(lrr) in
           let ll = Bin(lls, llk, llx, lll, llr) in
-          let lr = Bin(lrs, lrk, lrx, lrl, lrr) in
           let r = Bin(rs, rk, rx, rl, rr) in
           if lt-int(lrs, mul-int(_ratio, lls)) {
             let s' = add-int(1, add-int(ls, rs)) in
             let rs' = add-int(1, add-int(rs, lrs)) in
-            Bin(s', lk, lx, ll, Bin(rs', k, x, lr, r))
+            Bin(s', lk, lx, ll, Bin(rs', k, x, Bin(lrs, lrk, lrx, lrl, lrr), r))
           } else {
             let s' = add-int(1, add-int(ls, rs)) in
             let ls' = add-int(1, add-int(lls, lrls)) in
@@ -102,8 +102,7 @@ inline _balance-L<a, b>(k: a, x: b, l: dictionary(a, b), r: dictionary(a, b)): d
             Bin(s', lrk, lrx, Bin(ls', lk, lx, ll, lrl), Bin(rs', k, x, lrr, r))
           }
         | _, _ =>
-          let tip = core.system.admit(_, "failure in core.dictionary._balance-L") in
-          Bin(ls, lk, lx, Bin(ls, lk, lx, tip, tip), Bin(ls, lk, lx, tip, tip))
+          panic("failure in core.dictionary._balance-L")
         }
       } else {
         let s' = add-int(1, add-int(ls, rs)) in
@@ -124,7 +123,7 @@ inline _balance-R<a, b>(k: a, x: b, l: dictionary(a, b), r: dictionary(a, b)): d
     | Bin(rs, rk, rx, rl, rr) =>
       match rl, rr {
       | Tip, Tip =>
-        Bin(2, k, x, Tip, r)
+        Bin(2, k, x, Tip, Bin(rs, rk, rx, Tip, Tip))
       | Tip, Bin(rrs, rrk, rrx, rrl, rrr) =>
         Bin(3, rk, rx, Bin(1, k, x, Tip, Tip), Bin(rrs, rrk, rrx, rrl, rrr))
       | Bin(_, rlk, rlx, _, _), Tip =>
@@ -155,13 +154,12 @@ inline _balance-R<a, b>(k: a, x: b, l: dictionary(a, b), r: dictionary(a, b)): d
         | Bin(rls, rlk, rlx, rll, rlr), Bin(rrs, rrk, rrx, rrl, rrr) =>
           let rlls on rll = size(rll) in
           let rlrs on rlr = size(rlr) in
-          let rl = Bin(rls, rlk, rlx, rll, rlr) in
           let rr = Bin(rrs, rrk, rrx, rrl, rrr) in
           let l = Bin(ls, lk, lx, ll, lr) in
           if lt-int(rls, mul-int(_ratio, rrs)) {
             let s' = add-int(1, add-int(ls, rs)) in
             let rs' = add-int(1, add-int(rs, rls)) in
-            Bin(s', rk, rx, Bin(rs', k, x, l, rl), rr)
+            Bin(s', rk, rx, Bin(rs', k, x, l, Bin(rls, rlk, rlx, rll, rlr)), rr)
           } else {
             let s' = add-int(1, add-int(ls, rs)) in
             let ls' = add-int(1, add-int(ls, rlls)) in
@@ -169,8 +167,7 @@ inline _balance-R<a, b>(k: a, x: b, l: dictionary(a, b), r: dictionary(a, b)): d
             Bin(s', rlk, rlx, Bin(ls', k, x, l, rll), Bin(rs', rk, rx, rlr, rr))
           }
         | _, _ =>
-          let tip = core.system.admit(_, "failure in core.dictionary._balance-L") in
-          Bin(rs, rk, rx, Bin(rs, rk, rx, tip, tip), Bin(rs, rk, rx, tip, tip))
+          panic("failure in core.dictionary._balance-L")
         }
       } else {
         let s' = add-int(1, add-int(ls, rs)) in
@@ -294,11 +291,11 @@ data trope(k) {
   )
 }
 
-inline from-ord<k>(_ord: ord(&k)): trope(k) {
+inline from-ord<k>(!_ord: ord(&k)): trope(k) {
   Trope of {
-    insert = insert(_ord),
-    lookup = lookup(_ord),
-    delete = delete(_ord),
+    insert = insert(!_ord),
+    lookup = lookup(!_ord),
+    delete = delete(!_ord),
   }
 }
 

@@ -9,7 +9,7 @@ import {
   this.list {Cons, Nil, append, list},
   this.ord,
   this.pair {Pair, pair},
-  this.system {panic},
+  this.system,
 }
 
 // size balanced tree
@@ -102,7 +102,11 @@ inline _balance-L<a, b>(k: a, x: b, l: dictionary(a, b), r: dictionary(a, b)): d
             Bin(s', lrk, lrx, Bin(ls', lk, lx, ll, lrl), Bin(rs', k, x, lrr, r))
           }
         | _, _ =>
-          panic("failure in core.dictionary._balance-L")
+          // unreachable
+          let !lk = lk in
+          let !lx = lx in
+          let !tip = core.system.admit(_, "failure in core.dictionary._balance-L") in
+          Bin(ls, !lk, !lx, Bin(ls, !lk, !lx, !tip, !tip), Bin(ls, !lk, !lx, !tip, !tip))
         }
       } else {
         let s' = add-int(1, add-int(ls, rs)) in
@@ -167,7 +171,11 @@ inline _balance-R<a, b>(k: a, x: b, l: dictionary(a, b), r: dictionary(a, b)): d
             Bin(s', rlk, rlx, Bin(ls', k, x, l, rll), Bin(rs', rk, rx, rlr, rr))
           }
         | _, _ =>
-          panic("failure in core.dictionary._balance-L")
+          // unreachable
+          let !rk = rk in
+          let !rx = rx in
+          let !tip = core.system.admit(_, "failure in core.dictionary._balance-L") in
+          Bin(rs, !rk, !rx, Bin(rs, !rk, !rx, !tip, !tip), Bin(rs, !rk, !rx, !tip, !tip))
         }
       } else {
         let s' = add-int(1, add-int(ls, rs)) in

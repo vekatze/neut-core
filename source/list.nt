@@ -286,6 +286,22 @@ define uncons<a>(xs: list(a)): ?pair(a, list(a)) {
   }
 }
 
+define unsnoc<a>(xs: list(a)): ?pair(list(a), a) {
+  let f =
+    define _unsnoc(xs: list(a), acc: list(a)): ?pair(list(a), a) {
+      match xs {
+      | Nil =>
+        Left(Unit)
+      | Cons(y, Nil) =>
+        Right(Pair(reverse(acc), y))
+      | Cons(y, ys) =>
+        _unsnoc(ys, Cons(y, acc))
+      }
+    }
+  in
+  f(xs, [])
+}
+
 define all(xs: list(bool)): bool {
   fold-left(True, xs, and)
 }

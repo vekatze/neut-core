@@ -6,9 +6,10 @@ import {
   this.foreign {THREAD_COND_SIZE, THREAD_MUTEX_SIZE, UINT32_MAX},
   this.int.eq {as-eq-N},
   this.int.show {%ld},
-  this.list {any, for, list},
+  this.list {any, for, list, unsnoc},
   this.list.eq,
   this.ordering {EQ, GT, LT},
+  this.pair {Pair},
   this.random {random-float},
   this.rune {rune},
   this.rune.eq {eq-rune},
@@ -48,6 +49,16 @@ define _is-number(r: rune): bool {
 }
 
 define zen(): unit {
+  match unsnoc(["a", "b", "c", "d"]) {
+  | Right(Pair(init, last)) =>
+    print("right\n");
+    for(init, function (x) {
+      printf("{}\n", [*x])
+    });
+    printf("{}\n", [*last]);
+  | Left(_) =>
+    print("left\n");
+  };
   let test =
     drop-while(
       function (r) {

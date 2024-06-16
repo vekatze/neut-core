@@ -4,8 +4,8 @@ import {
   this.list {Cons, Nil, list},
 }
 
-inline _elem<a>(e: eq(&a)): (x: &a, xs: &list(a)) -> bool {
-  define self(x: &a, xs: &list(a)): bool {
+inline _elem<a>(e: eq(&a)): (xs: &list(a), x: &a) -> bool {
+  define self(xs: &list(a), x: &a): bool {
     case xs {
     | Nil =>
       False
@@ -13,7 +13,7 @@ inline _elem<a>(e: eq(&a)): (x: &a, xs: &list(a)) -> bool {
       if e::equal(x, y) {
         True
       } else {
-        self(x, ys)
+        self(ys, x)
       }
     }
   }
@@ -21,7 +21,7 @@ inline _elem<a>(e: eq(&a)): (x: &a, xs: &list(a)) -> bool {
 
 data trope(a) {
 | Trope(
-    elem: (x: &a, xs: &list(a)) -> bool,
+    elem: (xs: &list(a), x: &a) -> bool,
   )
 }
 

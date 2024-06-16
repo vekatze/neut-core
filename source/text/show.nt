@@ -186,12 +186,12 @@ define _escape(t: &text, len: int, pivot: int, cursor: int): list(text) {
   in
   let index = add-int(pivot, cursor) in
   if ge-int(index, len) {
-    [_drop-N(pivot, t)]
+    [_drop-N(t, pivot)]
   } else {
     let head-char = _get-head-byte(t, index) in
     let char-len = size-by-head-byte(head-char) in
     if _is-1-byte-escaped-character(head-char) {
-      let piece = _slice-N(pivot, cursor, t) in
+      let piece = _slice-N(t, pivot, cursor) in
       let escaped-control-char = _get-escaped-character-1(head-char) in
       let rest = _escape(t, len, add-int(add-int(pivot, cursor), char-len), 0) in
       Cons(piece, Cons(*escaped-control-char, rest))
@@ -200,7 +200,7 @@ define _escape(t: &text, len: int, pivot: int, cursor: int): list(text) {
         if eq-int8(head-char, 0xc2) {
           let head-char-2 = _get-head-byte(t, add-int(index, 1)) in
           if _is-2-byte-escaped-character(head-char-2) {
-            let piece = _slice-N(pivot, cursor, t) in
+            let piece = _slice-N(t, pivot, cursor) in
             let escaped-control-char = _get-escaped-character-2(head-char-2) in
             let rest = _escape(t, len, add-int(add-int(pivot, cursor), char-len), 0) in
             Cons(piece, Cons(*escaped-control-char, rest))

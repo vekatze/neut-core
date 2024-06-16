@@ -25,7 +25,7 @@ inline from-ord<a>(o: ord(a)): eq(a) {
   }
 }
 
-inline comap<a, b>(!f: (a) -> b, e: eq(b)): eq(a) {
+inline comap<a, b>(e: eq(b), !f: (a) -> b): eq(a) {
   Eq of {
     equal = {
       function (x, y) {

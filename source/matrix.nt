@@ -22,12 +22,12 @@ data matrix(a) {
 }
 
 define new<a>(content-list: list(list(a))): matrix(a) {
-  let len-list on content-list = L.map-N(exact L.length, content-list) in
+  let len-list on content-list = L.for-each-N(content-list, exact L.length) in
   let col-size = L.minimum(as-ord-N)(len-list) in
   let row-size on content-list = L.length(content-list) in
   Matrix of {
     row-size,
-    col-size = from-option(0, col-size),
+    col-size = from-option(col-size, 0),
     content = Vector.new(L.concat(content-list)),
   }
 }
@@ -62,7 +62,7 @@ define access<a>(mat: &matrix(a), row: int, col: int): a {
   Vector.access(content, add-int(mul-int(*col-size, row), col))
 }
 
-define print-mat<a>(show: (a) -> unit, mat: &matrix(a)): unit {
+define print-mat<a>(mat: &matrix(a), show: (a) -> unit): unit {
   let row-size = get-row-size(mat) in
   let col-size = get-col-size(mat) in
   loop(row-size, function (row) {

@@ -11,11 +11,11 @@ inline none<a>(): ?a {
   Left(Unit)
 }
 
-define from-option<a>(x: a, my: ?a): a {
-  match my {
-  | Right(y) =>
-    y
+define from-option<a>(none-or-value: ?a, fallback: a): a {
+  match none-or-value {
+  | Right(value) =>
+    value
   | Left(_) =>
-    x
+    fallback
   }
 }

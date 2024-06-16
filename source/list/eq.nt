@@ -57,8 +57,8 @@ define _nop-copy<a>(x: &&a): &a {
   *x
 }
 
-inline member<a>(e: eq(&a)): (value: &a, xs: &list(a)) -> bool {
-  define member(value: &a, xs: &list(a)): bool {
+inline member<a>(e: eq(&a)): (xs: &list(a), value: &a) -> bool {
+  define member(xs: &list(a), value: &a): bool {
     case xs {
     | Nil =>
       False
@@ -66,7 +66,7 @@ inline member<a>(e: eq(&a)): (value: &a, xs: &list(a)) -> bool {
       if e::equal(value, y) {
         True
       } else {
-        member(value, ys)
+        member(ys, value)
       }
     }
   }
@@ -80,7 +80,7 @@ inline nub<a>(e: eq(&a)): (xs: &list(a)) -> list(a) {
         | Nil =>
           Nil
         | Cons(y, ys) =>
-          let already-found-p on y, acc = member(E.comap(exact _nop-copy, e))(y, acc) in
+          let already-found-p on y, acc = member(E.comap(e, exact _nop-copy))(acc, y) in
           if already-found-p {
             nub(ys, acc)
           } else {
@@ -95,7 +95,7 @@ inline nub<a>(e: eq(&a)): (xs: &list(a)) -> list(a) {
 
 data trope(a) {
 | Trope(
-    member: (value: &a, xs: &list(a)) -> bool,
+    member: (xs: &list(a), value: &a) -> bool,
     nub: (xs: &list(a)) -> list(a),
   )
 }

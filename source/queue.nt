@@ -27,7 +27,7 @@ define dequeue<a>(q: queue(a)): ?pair(a, queue(a)) {
   }
 }
 
-define enqueue<a>(x: a, q: queue(a)): queue(a) {
+define enqueue<a>(q: queue(a), x: a): queue(a) {
   let Queue(ls, rs) = q in
   Queue(ls, Cons(x, rs))
 }

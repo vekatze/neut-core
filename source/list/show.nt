@@ -1,5 +1,5 @@
 import {
-  this.list {Cons, append, intercalate, list, map},
+  this.list {Cons, append, for-each, intercalate, list},
   this.show {Show, show},
   this.text {join},
 }
@@ -7,7 +7,7 @@ import {
 inline as-show<a>(s: show(a)): show(list(a)) {
   Show(function (xs) {
     let Show(f) = s in
-    let ys = map(f, xs) in
-    join(Cons(*"[", append(intercalate(*", ", ys), [*"]"])))
+    let ys = for-each(xs, f) in
+    join(Cons(*"[", append(intercalate(ys, *", "), [*"]"])))
   })
 }

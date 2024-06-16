@@ -73,7 +73,7 @@ define send<a>(ch: &channel(a), x: a): unit {
   Ext.thread-mutex-lock(mutex-ptr);
   let q-base: int = Mem.load-int(ch) in
   let q: Q.queue(a) = Magic.cast(int, Q.queue(a), q-base) in
-  let q = Q.enqueue(x, q) in
+  let q = Q.enqueue(q, x) in
   Mem.store-int(Magic.cast(Q.queue(a), int, q), ch);
   let mutex-size = Ext.thread-mutex-size() in
   Ext.thread-cond-signal(add-int(ch, add-int(u, mutex-size)));

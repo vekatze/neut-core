@@ -82,7 +82,7 @@ inline _link<a>(p1: _Prefix, t1: intmap(a), p2: _Prefix, t2: intmap(a)): intmap(
   _link-with-mask(_branch-mask(p1, p2), p1, t1, t2)
 }
 
-define insert<a>(k: _Key, x: a, t: intmap(a)): intmap(a) {
+define insert<a>(t: intmap(a), k: _Key, x: a): intmap(a) {
   match t {
   | Nil =>
     Tip(k, x)
@@ -96,14 +96,14 @@ define insert<a>(k: _Key, x: a, t: intmap(a)): intmap(a) {
     if _nomatch(k, p, m) {
       _link(k, Tip(k, x), p, Bin(p, m, l, r))
     } else-if _zero(k, m) {
-      Bin(p, m, insert(k, x, l), r)
+      Bin(p, m, insert(l, k, x), r)
     } else {
-      Bin(p, m, l, insert(k, x, r))
+      Bin(p, m, l, insert(r, k, x))
     }
   }
 }
 
-define lookup<a>(k: _Key, t: &intmap(a)): ?&a {
+define lookup<a>(t: &intmap(a), k: _Key): ?&a {
   case t {
   | Nil =>
     none()
@@ -115,9 +115,9 @@ define lookup<a>(k: _Key, t: &intmap(a)): ?&a {
     }
   | Bin(_, m, l, r) =>
     if _zero(k, *m) {
-      lookup(k, l)
+      lookup(l, k)
     } else {
-      lookup(k, r)
+      lookup(r, k)
     }
   }
 }
@@ -140,7 +140,7 @@ inline _bin-check-right<a>(p: _Prefix, m: _Mask, l: intmap(a), r: intmap(a)): in
   }
 }
 
-define delete<a>(k: _Key, t: intmap(a)): intmap(a) {
+define delete<a>(t: intmap(a), k: _Key): intmap(a) {
   match t {
   | Nil =>
     Nil
@@ -154,9 +154,9 @@ define delete<a>(k: _Key, t: intmap(a)): intmap(a) {
     if _nomatch(k, p, m) {
       Bin(p, m, l, r)
     } else-if _zero(k, m) {
-      _bin-check-left(p, m, delete(k, l), r)
+      _bin-check-left(p, m, delete(l, k), r)
     } else {
-      _bin-check-right(p, m, l, delete(k, r))
+      _bin-check-right(p, m, l, delete(r, k))
     }
   }
 }
@@ -168,7 +168,7 @@ inline from-list<v>(kvs: list(pair(int, v))): intmap(v) {
       | core.list.Nil =>
         acc
       | Cons(Pair(k, v), rest) =>
-        self(rest, insert(k, v, acc))
+        self(rest, insert(acc, k, v))
       }
     }
   in

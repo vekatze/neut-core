@@ -165,7 +165,7 @@ define _from-c-string(old-ptr: int): text {
 }
 
 // O(1)
-define _drop(offset: int, t: text): text {
+define _drop(t: text, offset: int): text {
   let offset = max-int(0, offset) in
   let _ on t =
     let ptr = Magic.cast(&text, int, t) in
@@ -178,7 +178,7 @@ define _drop(offset: int, t: text): text {
 }
 
 // O(1)
-define _take(offset: int, t: text): text {
+define _take(t: text, offset: int): text {
   let offset = max-int(0, offset) in
   let _ on t =
     let ptr = Magic.cast(&text, int, t) in
@@ -191,11 +191,11 @@ define _take(offset: int, t: text): text {
 }
 
 // O(1)
-define _slice(start: int, size: int, t: text): text {
-  _take(size, _drop(start, t))
+define _slice(t: text, start: int, size: int): text {
+  _take(_drop(t, start), size)
 }
 
-define _drop-N(offset: int, t: &text): text {
+define _drop-N(t: &text, offset: int): text {
   let content-ptr = _get-content-pointer(t) in
   let orig-size = text-byte-length(t) in
   let new-size = max-int(0, sub-int(orig-size, offset)) in
@@ -209,7 +209,7 @@ define _drop-N(offset: int, t: &text): text {
   Magic.cast(int, text, new-ptr)
 }
 
-define _take-N(offset: int, t: &text): text {
+define _take-N(t: &text, offset: int): text {
   // get info from old text
   let ptr = core.magic.cast(&text, int, t) in
   let to = Mem.load-int(add-int(ptr, core.word.size)) in
@@ -223,7 +223,7 @@ define _take-N(offset: int, t: &text): text {
   core.magic.cast(int, text, new-ptr)
 }
 
-define _slice-N(start: int, size: int, t: &text): text {
+define _slice-N(t: &text, start: int, size: int): text {
   let start = max-int(start, 0) in
   let size = max-int(size, 0) in
   let ptr = Magic.cast(&text, int, t) in
@@ -258,7 +258,7 @@ define _match-text-content(ptr1: int, ptr2: int, len: int): bool {
   f(0)
 }
 
-define break-on(needle: &text, haystack: &text): pair(text, text) {
+define break-on(haystack: &text, needle: &text): pair(text, text) {
   let ptr = _get-content-pointer(haystack) in
   let ptr2 = _get-content-pointer(needle) in
   let len = text-byte-length(haystack) in
@@ -271,8 +271,8 @@ define break-on(needle: &text, haystack: &text): pair(text, text) {
       } else {
         let ptr1 = add-int(ptr, cursor) in
         if _match-text-content(ptr1, ptr2, needle-len) {
-          let former = _take-N(cursor, haystack) in
-          let latter = _drop-N(cursor, haystack) in
+          let former = _take-N(haystack, cursor) in
+          let latter = _drop-N(haystack, cursor) in
           Pair(former, latter)
         } else {
           loop(add-int(cursor, 1))
@@ -283,12 +283,12 @@ define break-on(needle: &text, haystack: &text): pair(text, text) {
   f(0)
 }
 
-define intercalate(sep: text, xs: list(text)): text {
-  join(this.list.intercalate(sep, xs))
+define intercalate(xs: list(text), sep: text): text {
+  join(this.list.intercalate(xs, sep))
 }
 
-define intercalate-N(sep: &text, xs: list(&text)): text {
-  join-N(this.list.intercalate(sep, xs))
+define intercalate-N(xs: list(&text), sep: &text): text {
+  join-N(this.list.intercalate(xs, sep))
 }
 
 define _get-head-byte(t: &text, index: int): int8 {
@@ -296,7 +296,7 @@ define _get-head-byte(t: &text, index: int): int8 {
   load-int8(add-int(ptr, index))
 }
 
-define _get-rune-size-at(t: &text, index: int): int {
+define _get-rune-size(t: &text, index: int): int {
   let head-byte = _get-head-byte(t, index) in
   size-by-head-byte(head-byte)
 }
@@ -335,7 +335,7 @@ define _length(t: &text, len: int, index: int, acc: int): int {
   if ge-int(index, len) {
     acc
   } else {
-    let rune-size = _get-rune-size-at(t, index) in
+    let rune-size = _get-rune-size(t, index) in
     _length(t, len, add-int(index, rune-size), add-int(acc, 1))
   }
 }
@@ -345,7 +345,7 @@ define length(t: &text): int {
   _length(t, len, 0, 0)
 }
 
-define split-on(needle: &text, haystack: &text): list(text) {
+define split-on(haystack: &text, needle: &text): list(text) {
   let haystack-ptr = _get-content-pointer(haystack) in
   let needle-ptr = _get-content-pointer(needle) in
   let len = text-byte-length(haystack) in
@@ -354,11 +354,11 @@ define split-on(needle: &text, haystack: &text): list(text) {
     define loop(pivot: int, cursor: int): list(text) {
       let rem-len = sub-int(len, add-int(pivot, cursor)) in
       if lt-int(rem-len, needle-len) {
-        [_drop-N(pivot, haystack)]
+        [_drop-N(haystack, pivot)]
       } else {
         let current-ptr = add-int(haystack-ptr, add-int(pivot, cursor)) in
         if _match-text-content(current-ptr, needle-ptr, needle-len) {
-          let piece = _slice-N(pivot, cursor, haystack) in
+          let piece = _slice-N(haystack, pivot, cursor) in
           let next-pivot = add-int(pivot, add-int(cursor, needle-len)) in
           let rest = loop(next-pivot, 0) in
           Cons(piece, rest)
@@ -375,8 +375,8 @@ define split-on(needle: &text, haystack: &text): list(text) {
   }
 }
 
-define replace(from: &text, to: text, haystack: &text): text {
-  this.text.intercalate(to, split-on(from, haystack))
+define replace(haystack: &text, from: &text, to: text): text {
+  this.text.intercalate(split-on(haystack, from), to)
 }
 
 // [x1], [y1, y2] => [x1]
@@ -396,7 +396,7 @@ define _alternate<a>(xs: list(a), ys: list(a)): list(a) {
 }
 
 define _format(fmt: &text, args: list(text)): list(text) {
-  _alternate(split-on("{}", fmt), args)
+  _alternate(split-on(fmt, "{}"), args)
 }
 
 define format(fmt: &text, args: list(text)): text {
@@ -471,7 +471,7 @@ define uncons(t: text): ?pair(rune, text) {
   } else {
     let ch on t = _get-rune(t, 0) in
     let char-len = this.rune.size(ch) in
-    let t = _drop(char-len, t) in
+    let t = _drop(t, char-len) in
     Right(Pair(ch, t))
   }
 }
@@ -482,62 +482,62 @@ define _find-pivot(char-len: int, len: int, t: &text, index: int, char-count: in
   } else-if ge-int(char-count, char-len) {
     index
   } else {
-    let char-size = _get-rune-size-at(t, index) in
+    let char-size = _get-rune-size(t, index) in
     _find-pivot(char-len, len, t, add-int(index, char-size), add-int(char-count, 1))
   }
 }
 
-define take(n: int, t: text): text {
+define take(t: text, n: int): text {
   let len on t = text-byte-length(t) in
   let pivot on t = _find-pivot(n, len, t, 0, 0) in
-  _slice(0, pivot, t)
+  _slice(t, 0, pivot)
 }
 
-define take-N(n: int, t: &text): text {
+define take-N(t: &text, n: int): text {
   let len = text-byte-length(t) in
   let pivot = _find-pivot(n, len, t, 0, 0) in
-  _slice-N(0, pivot, t)
+  _slice-N(t, 0, pivot)
 }
 
-define drop(n: int, t: text): text {
+define drop(t: text, n: int): text {
   let len on t = text-byte-length(t) in
   let pivot on t = _find-pivot(n, len, t, 0, 0) in
-  _slice(pivot, len, t)
+  _slice(t, pivot, len)
 }
 
-define drop-N(n: int, t: &text): text {
+define drop-N(t: &text, n: int): text {
   let len = text-byte-length(t) in
   let pivot = _find-pivot(n, len, t, 0, 0) in
-  _slice-N(pivot, len, t)
+  _slice-N(t, pivot, len)
 }
 
-define slice(start: int, size: int, t: text): text {
+define slice(t: text, start: int, size: int): text {
   let len on t = text-byte-length(t) in
   let start-byte-index on t = _find-pivot(start, len, t, 0, 0) in
   let end-byte-index on t = _find-pivot(size, len, t, start-byte-index, 0) in
-  _slice(start-byte-index, sub-int(end-byte-index, start-byte-index), t)
+  _slice(t, start-byte-index, sub-int(end-byte-index, start-byte-index))
 }
 
-define slice-N(start: int, size: int, t: &text): text {
+define slice-N(t: &text, start: int, size: int): text {
   let len = text-byte-length(t) in
   let start-byte-index = _find-pivot(start, len, t, 0, 0) in
   let end-byte-index = _find-pivot(size, len, t, start-byte-index, 0) in
-  _slice-N(start-byte-index, sub-int(end-byte-index, start-byte-index), t)
+  _slice-N(t, start-byte-index, sub-int(end-byte-index, start-byte-index))
 }
 
-inline take-while(pred: (rune) -> bool, t: text): text {
+inline take-while(t: text, pred: (rune) -> bool): text {
   let f =
     define self(t: text, index: int): text {
       let len on t = text-byte-length(t) in
       if ge-int(index, len) {
-        take(index, t)
+        take(t, index)
       } else {
         let ch on t = _get-rune(t, index) in
         if pred(ch) {
           let char-len = this.rune.size(ch) in
           self(t, add-int(index, char-len))
         } else {
-          take(index, t)
+          take(t, index)
         }
       }
     }
@@ -545,7 +545,7 @@ inline take-while(pred: (rune) -> bool, t: text): text {
   f(t, 0)
 }
 
-inline take-while-N(pred: (rune) -> bool, t: &text): text {
+inline take-while-N(t: &text, pred: (rune) -> bool): text {
   let len = text-byte-length(t) in
   let f =
     define self(index: int, acc: list(rune)): list(rune) {
@@ -566,7 +566,7 @@ inline take-while-N(pred: (rune) -> bool, t: &text): text {
   pack(cs)
 }
 
-inline drop-while(pred: (rune) -> bool, t: text): text {
+inline drop-while(t: text, pred: (rune) -> bool): text {
   let f =
     define self(t: text): text {
       let b on t = this.text.is-empty(t) in
@@ -576,7 +576,7 @@ inline drop-while(pred: (rune) -> bool, t: text): text {
         let ch on t = _get-rune(t, 0) in
         let cond = pred(ch) in
         if cond {
-          self(drop(1, t))
+          self(drop(t, 1))
         } else {
           t
         }
@@ -586,7 +586,7 @@ inline drop-while(pred: (rune) -> bool, t: text): text {
   f(t)
 }
 
-inline drop-while-N(pred: (rune) -> bool, t: &text): text {
+inline drop-while-N(t: &text, pred: (rune) -> bool): text {
   let len = text-byte-length(t) in
   let f =
     define self(index: int): text {
@@ -598,7 +598,7 @@ inline drop-while-N(pred: (rune) -> bool, t: &text): text {
           let char-len = this.rune.size(ch) in
           self(add-int(index, char-len))
         } else {
-          _slice-N(index, len, t)
+          _slice-N(t, index, len)
         }
       }
     }
@@ -606,7 +606,7 @@ inline drop-while-N(pred: (rune) -> bool, t: &text): text {
   f(0)
 }
 
-define replicate(n: int, t: &text): text {
+define replicate(t: &text, n: int): text {
   let base-len = text-byte-length(t) in
   let len = mul-int(n, base-len) in
   let u = Word.size in
@@ -647,7 +647,7 @@ inline fold<a>(acc: a, t: &text, f: (a, rune) -> a): a {
   f(0, acc)
 }
 
-inline all(pred: (rune) -> bool, t: &text): bool {
+inline all(t: &text, pred: (rune) -> bool): bool {
   let len = text-byte-length(t) in
   let f =
     define self(index: int): bool {
@@ -668,7 +668,7 @@ inline all(pred: (rune) -> bool, t: &text): bool {
   f(0)
 }
 
-inline any(pred: (rune) -> bool, t: &text): bool {
+inline any(t: &text, pred: (rune) -> bool): bool {
   let len = text-byte-length(t) in
   let f =
     define self(index: int): bool {

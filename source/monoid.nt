@@ -10,17 +10,17 @@ data monoid(a) {
   )
 }
 
-inline from-group<a>(f: group(a)): monoid(a) {
-  let Group of {one, mul} = f in
+inline from-group<a>(G: group(a)): monoid(a) {
+  let Group of {one, mul} = G in
   Monoid of {e = one, op = mul}
 }
 
-inline from-ring-multiplicative<a>(asRing: ring(a)): monoid(a) {
-  let Ring of {one, mul} = asRing in
+inline from-ring-multiplicative<a>(R: ring(a)): monoid(a) {
+  let Ring of {one, mul} = R in
   Monoid of {e = one, op = mul}
 }
 
-inline from-ring-additive<a>(asRing: ring(a)): monoid(a) {
-  let Ring of {zero, add} = asRing in
+inline from-ring-additive<a>(R: ring(a)): monoid(a) {
+  let Ring of {zero, add} = R in
   Monoid of {e = zero, op = add}
 }

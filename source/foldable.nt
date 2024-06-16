@@ -1,9 +1,0 @@
-import {
-  this.monoid {monoid},
-}
-
-data foldable(t: (type) -> type) {
-| Foldable(
-    fold-map: <a, b>(as-monoid: monoid(a), f: (b) -> a, haystack: t(b)) -> a,
-  )
-}

@@ -14,9 +14,9 @@ data trope(k) {
 | Trope(
     empty: set(k),
     singleton: (k) -> set(k),
-    insert: (k, set(k)) -> set(k),
-    lookup: (&k, &set(k)) -> bool,
-    delete: (k, set(k)) -> set(k),
+    insert: (set(k), k) -> set(k),
+    delete: (set(k), k) -> set(k),
+    lookup: (&set(k), &k) -> bool,
   )
 }
 
@@ -30,13 +30,14 @@ inline from-ord<k>(_ord: ord(&k)): trope(k) {
       }
     },
     insert = {
-      function (k, s) {
-        insert(k, Unit, s)
+      function (s, k) {
+        insert(s, k, Unit)
       }
     },
+    delete = exact delete,
     lookup = {
-      function (k, s) {
-        match lookup(k, s) {
+      function (s, k) {
+        match lookup(s, k) {
         | Right(_) =>
           True
         | Left(_) =>
@@ -44,6 +45,5 @@ inline from-ord<k>(_ord: ord(&k)): trope(k) {
         }
       }
     },
-    delete = exact delete,
   }
 }

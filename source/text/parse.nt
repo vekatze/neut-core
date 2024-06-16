@@ -79,10 +79,10 @@ define _unquote-text(t: text): either(error, list(text)) {
       Right([*"\u{60}", rest])
     } else-if eq-rune(c, `u`) {
       try rest' = _read-char(`{`, rest) in
-      let hex-text on rest' = take-while-N(_is-lower-hex-digit, rest') in
+      let hex-text on rest' = take-while-N(rest', _is-lower-hex-digit) in
       pin hex-text = hex-text in
       let scalar-value-text-len = length(hex-text) in
-      let rest'' = drop(scalar-value-text-len, rest') in
+      let rest'' = drop(rest', scalar-value-text-len) in
       try rest''' = _read-char(`}`, rest'') in
       try r = _read-unicode-scalar-value(hex-text) in
       Right([singleton(r), rest'''])
@@ -93,7 +93,7 @@ define _unquote-text(t: text): either(error, list(text)) {
 }
 
 define _parse-text-fragment(t: &text): either(error, list(text)) {
-  match split-on("\\", t) {
+  match split-on(t, "\\") {
   | Nil =>
     // unreachable
     Left(Error(*"core.text.parse._parse-text-fragment"))
@@ -104,7 +104,7 @@ define _parse-text-fragment(t: &text): either(error, list(text)) {
 }
 
 define parse-text(t: &text): either(error, text) {
-  pin ts = split-on("\\\\", t) in
+  pin ts = split-on(t, "\\\\") in
   try tss = try-for-each-N(ts, _parse-text-fragment) in
-  Right(core.text.join(core.list.concat(intercalate([*"\\"], tss))))
+  Right(core.text.join(core.list.concat(intercalate(tss, [*"\\"]))))
 }

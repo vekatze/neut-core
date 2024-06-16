@@ -1,8 +1,8 @@
 import {
   this.functor {Functor, functor},
-  this.list {list, map},
+  this.list {for-each, list},
 }
 
 constant as-functor: functor(list) {
-  Functor of {map}
+  Functor of {for-each}
 }

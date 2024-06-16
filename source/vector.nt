@@ -174,7 +174,7 @@ define zip-with<a, b, c>(xs: &vector(a), ys: &vector(b), f: (a, b) -> c): vector
   let len2 = size(ys) in
   let min-func = minimum(as-ord-N) in
   let len-or-none = min-func([len1, len2]) in
-  let len = from-option(0, len-or-none) in
+  let len = from-option(len-or-none, 0) in
   let zip-with-helper =
     define self(cursor: int) {
       if eq-int(cursor, len) {

@@ -15,7 +15,7 @@ import {
   this.rune.eq {eq-rune},
   this.rune.ord {le-rune},
   this.rune.show {as-show},
-  this.text {drop, drop-while, intercalate-N, join, pack, reverse, unpack},
+  this.text {drop, drop-while, intercalate-N, join, pack, reverse, split-on, unpack},
   this.text.io {print, printf},
   this.text.ord,
   this.text.parse {parse-text},
@@ -59,12 +59,16 @@ define zen(): unit {
   | Left(_) =>
     print("left\n");
   };
+  let foo = split-on("/foo/bar//", "/") in
+  for(foo, function (x) {
+    printf("{}\n", [x])
+  });
   let test =
     drop-while(
+      *"   \n\t hello, world!\n",
       function (r) {
         any([eq-rune(r, ` `), eq-rune(r, `\n`), eq-rune(r, `\t`)])
       },
-      *"   \n\t hello, world!\n",
     )
   in
   printf("drop-while: {}\n", [test]);
@@ -95,7 +99,7 @@ define zen(): unit {
   let k1-len on k1 = core.text.length(k1) in
   printf("k1-len: {}\n", [%ld(k1-len)]);
   printf("joined: {}\n", [join([k1, k2])]);
-  if this.text.any(_is-number, "abcd1bc") {
+  if this.text.any("abcd1bc", _is-number) {
     print("some-number\n")
   } else {
     print("not some-number\n")
@@ -111,7 +115,7 @@ define zen(): unit {
   // let xs' on xs = list-int-eq-ops::nub(xs) in
   // let len on xs' = length(xs') in
   // printf("nub len: {}\n", [%ld(len)]);
-  printf("sample{}{}\n", [*"test", intercalate-N("/", ["foo", "bar", "buzubaoeuあえおうte"])]);
+  printf("sample{}{}\n", [*"test", intercalate-N(["foo", "bar", "buzubaoeuあえおうte"], "/")]);
   printf("thread mutex size: {}\n", [%ld(THREAD_MUTEX_SIZE)]);
   printf("thread cond size: {}\n", [%ld(THREAD_COND_SIZE)]);
   printf("word size: {}\n", [%ld(this.word.size)]);
@@ -125,7 +129,7 @@ define zen(): unit {
   let char-seq-2 on !char-seq = pack(!char-seq) in
   let _ = !char-seq in
   printf("{}\n", [char-seq-2]);
-  let tmp = drop(10, *"あいうえ💌おかきくけこ⭐さしすせ\n\\aoeuそたちつてと") in
+  let tmp = drop(*"あいうえ💌おかきくけこ⭐さしすせ\n\\aoeuそたちつてと",  10) in
   printf("{}\n", [this.text.show.as-show::show(tmp)]);
   // let t2 on tmp = append(tmp, "st") in
   // let b on t1, t2 = eq-text(t1, t2) in

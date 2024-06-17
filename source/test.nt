@@ -1,142 +1,27 @@
 import {
-  this.bool {True, and, bool},
-  this.either {Left, Right},
-  this.float.parse {parse-float},
-  this.float.show {%lf, show-float},
-  this.foreign {THREAD_COND_SIZE, THREAD_MUTEX_SIZE, UINT32_MAX},
-  this.int.eq {as-eq-N},
   this.int.show {%ld},
-  this.list {any, for, list, unsnoc},
-  this.list.eq,
-  this.ordering {EQ, GT, LT},
-  this.pair {Pair},
-  this.random {random-float},
-  this.rune {rune},
-  this.rune.eq {eq-rune},
-  this.rune.ord {le-rune},
-  this.rune.show {as-show},
-  this.text {drop, drop-while, intercalate-N, join, pack, reverse, split, unpack},
-  this.text.io {print, printf},
-  this.text.ord,
-  this.text.parse {Error, parse-text},
-  this.text.show {show-text},
+  this.list,
+  this.rune,
+  this.rune.eq {ne-rune},
+  this.text {_get-rune-size, _get-rune-size-end, drop-while-end},
+  this.text.io {printf},
   this.unit {Unit, unit},
-  this.word,
-}
-
-constant list-int-eq-ops: this.list.eq.trope(int) {
-  this.list.eq.from-eq(as-eq-N)
-}
-
-constant my-bool: type {
-  this.bool.bool
-}
-
-define make-bool(): my-bool {
-  True
-}
-
-constant some-int-list: list(int) {
-  [1, 2, 3]
-}
-
-define increment(x: int): int {
-  add-int(x, 1)
-}
-
-define _is-number(r: rune): bool {
-  and(le-rune(`0`, r), le-rune(r, `9`))
 }
 
 define zen(): unit {
-  match unsnoc(["a", "b", "c", "d"]) {
-  | Right(Pair(init, last)) =>
-    print("right\n");
-    for(init, function (x) {
-      printf("{}\n", [*x])
-    });
-    printf("{}\n", [*last]);
-  | Left(_) =>
-    print("left\n");
-  };
-  let foo = split("/foo/bar//", "/") in
-  for(foo, function (x) {
-    printf("{}\n", [x])
-  });
-  let test =
-    drop-while(
-      *"   \n\t hello, world!\n",
-      function (r) {
-        any([eq-rune(r, ` `), eq-rune(r, `\n`), eq-rune(r, `\t`)])
-      },
-    )
+  let result =
+    drop-while-end(*"/Users/foo/Downloads/some-file.txt", function (r) {
+      ne-rune(r, `/`)
+    })
   in
-  printf("drop-while: {}\n", [test]);
-  let foo = show-text(*"hello, \0wo\u{a}rld") in
-  printf("quoted: {}\n", [foo]);
-  // printf("SEEK_END: {}\n", [%ld(SEEK_END)]);
-  match parse-text("\\u{1f338} ho\`\\t\\n\\rge\\\\hoge\\txt") {
-  | Left(Error(e)) =>
-    printf("{}\n", [e]);
-    print("failed to parse\n")
-  | Right(t) =>
-    printf("unescape: {}\n", [t]);
-  };
-  // let _ = run-unescape() in
-  printf("max: {}\n", [%ld(UINT32_MAX)]);
-  let f = random-float(-10, 20) in
-  printf("random-float: {}\n", [%lf(f)]);
-  let c = this.text.ord.as-ord::compare("ghfooza", "ghfooza") in
-  match c {
-  | LT =>
-    print("LT\n")
-  | GT =>
-    print("GT\n")
-  | EQ =>
-    print("EQ\n")
-  };
-  let k1 = show-float(1.23) in
-  let k2 = *"test" in
-  let k1-len on k1 = core.text.length(k1) in
-  printf("k1-len: {}\n", [%ld(k1-len)]);
-  printf("joined: {}\n", [join([k1, k2])]);
-  if this.text.any("abcd1bc", _is-number) {
-    print("some-number\n")
-  } else {
-    print("not some-number\n")
-  };
-  let float-val = parse-float("1499816949527975237") in
-  match float-val {
-  | Right(v) =>
-    printf("parsed float: {}\n", [%lf(v)])
-  | Left(_) =>
-    print("failed to parse a float\n")
-  };
-  // let xs: list(int) = [1, 2, 3, 4, 3, 2, 1, 2] in
-  // let xs' on xs = list-int-eq-ops::nub(xs) in
-  // let len on xs' = length(xs') in
-  // printf("nub len: {}\n", [%ld(len)]);
-  printf("sample{}{}\n", [*"test", intercalate-N(["foo", "bar", "buzubaoeuあえおうte"], "/")]);
-  printf("thread mutex size: {}\n", [%ld(THREAD_MUTEX_SIZE)]);
-  printf("thread cond size: {}\n", [%ld(THREAD_COND_SIZE)]);
-  printf("word size: {}\n", [%ld(this.word.size)]);
-  pin my-text = reverse("あいうえお。hello, world!") in
-  let len = this.text.length(my-text) in
-  let !char-seq = unpack(my-text) in
-  for(!char-seq, function (ch) {
-    printf("{}", [as-show::show(ch)])
-  });
-  printf("len: {}\n", [%ld(len)]);
-  let char-seq-2 on !char-seq = pack(!char-seq) in
-  let _ = !char-seq in
-  printf("{}\n", [char-seq-2]);
-  let tmp = drop(*"あいうえ💌おかきくけこ⭐さしすせ\n\\aoeuそたちつてと", 10) in
-  printf("{}\n", [this.text.show.as-show::show(tmp)]);
-  // let t2 on tmp = append(tmp, "st") in
-  // let b on t1, t2 = eq-text(t1, t2) in
-  // use this.bool.show.as-show {show} in
-  // // let Show(f) = as-show in
-  // printf("{}\n", [show(b)]);
+  printf("parent: {}\n", [result]);
+  let t = "Ô" in
+  let len = this.text.text-byte-length(t) in
+  let s1 = _get-rune-size-end(t, sub-int(len, 1)) in
+  let s2 = _get-rune-size(t, 0) in
+  printf("byte-length: {}\n", [%ld(len)]);
+  printf("s1: {}\n", [%ld(s1)]);
+  printf("s2: {}\n", [%ld(s2)]);
   Unit
 }
 

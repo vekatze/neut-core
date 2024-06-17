@@ -5,7 +5,7 @@ import {
   this.show {Show, show},
   this.text {
     _drop-N,
-    _get-head-byte,
+    _get-byte,
     _slice-N,
     join,
     text,
@@ -188,7 +188,7 @@ define _escape(t: &text, len: int, pivot: int, cursor: int): list(text) {
   if ge-int(index, len) {
     [_drop-N(t, pivot)]
   } else {
-    let head-char = _get-head-byte(t, index) in
+    let head-char = _get-byte(t, index) in
     let char-len = size-by-head-byte(head-char) in
     if _is-1-byte-escaped-character(head-char) {
       let piece = _slice-N(t, pivot, cursor) in
@@ -198,7 +198,7 @@ define _escape(t: &text, len: int, pivot: int, cursor: int): list(text) {
     } else {
       if eq-int(char-len, 2) {
         if eq-int8(head-char, 0xc2) {
-          let head-char-2 = _get-head-byte(t, add-int(index, 1)) in
+          let head-char-2 = _get-byte(t, add-int(index, 1)) in
           if _is-2-byte-escaped-character(head-char-2) {
             let piece = _slice-N(t, pivot, cursor) in
             let escaped-control-char = _get-escaped-character-2(head-char-2) in

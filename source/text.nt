@@ -291,14 +291,33 @@ define intercalate-N(xs: list(&text), sep: &text): text {
   join-N(this.list.intercalate(xs, sep))
 }
 
-define _get-head-byte(t: &text, index: int): int8 {
+define _get-byte(t: &text, index: int): int8 {
   let ptr = _get-content-pointer(t) in
   load-int8(add-int(ptr, index))
 }
 
 define _get-rune-size(t: &text, index: int): int {
-  let head-byte = _get-head-byte(t, index) in
+  let head-byte = _get-byte(t, index) in
   size-by-head-byte(head-byte)
+}
+
+define _get-rune-size-end(t: &text, index: int): int {
+  let b0 = _get-byte(t, index) in
+  if ult-int8(b0, 0x80) {
+    1
+  } else {
+    let b1 = _get-byte(t, sub-int(index, 1)) in
+    if uge-int8(b1, 0xc0) {
+      2
+    } else {
+      let b2 = _get-byte(t, sub-int(index, 2)) in
+      if uge-int8(b2, 0xc0) {
+        3
+      } else {
+        4
+      }
+    }
+  }
 }
 
 define singleton(value: rune): text {
@@ -487,6 +506,17 @@ define _find-pivot(char-len: int, len: int, t: &text, index: int, char-count: in
   }
 }
 
+define _find-pivot-end(char-len: int, len: int, t: &text, index: int, char-count: int): int {
+  if lt-int(index, 0) {
+    0
+  } else-if ge-int(char-count, char-len) {
+    add-int(index, 1)
+  } else {
+    let rune-size = _get-rune-size-end(t, index) in
+    _find-pivot-end(char-len, len, t, sub-int(index, rune-size), add-int(char-count, 1))
+  }
+}
+
 define take(t: text, n: int): text {
   let len on t = text-byte-length(t) in
   let pivot on t = _find-pivot(n, len, t, 0, 0) in
@@ -509,6 +539,30 @@ define drop-N(t: &text, n: int): text {
   let len = text-byte-length(t) in
   let pivot = _find-pivot(n, len, t, 0, 0) in
   _slice-N(t, pivot, len)
+}
+
+define take-end(t: text, n: int): text {
+  let len on t = text-byte-length(t) in
+  let pivot on t = _find-pivot-end(n, len, t, sub-int(len, 1), 0) in
+  _slice(t, pivot, sub-int(len, 1))
+}
+
+define take-end-N(t: &text, n: int): text {
+  let len = text-byte-length(t) in
+  let pivot = _find-pivot-end(n, len, t, sub-int(len, 1), 0) in
+  _slice-N(t, pivot, sub-int(len, 1))
+}
+
+define drop-end(t: text, n: int): text {
+  let len on t = text-byte-length(t) in
+  let pivot on t = _find-pivot-end(n, len, t, sub-int(len, 1), 0) in
+  _slice(t, 0, pivot)
+}
+
+define drop-end-N(t: &text, n: int): text {
+  let len = text-byte-length(t) in
+  let pivot = _find-pivot-end(n, len, t, sub-int(len, 1), 0) in
+  _slice-N(t, 0, pivot)
 }
 
 define slice(t: text, start: int, size: int): text {
@@ -566,6 +620,48 @@ inline take-while-N(t: &text, pred: (rune) -> bool): text {
   pack(cs)
 }
 
+inline take-while-end(t: text, pred: (rune) -> bool): text {
+  let len on t = text-byte-length(t) in
+  let f =
+    define self(t: text, index: int): text {
+      if lt-int(index, 0) {
+        _drop(t, index)
+      } else {
+        let rune-size on t = _get-rune-size-end(t, index) in
+        let rune-head-index = sub-int(index, sub-int(rune-size, 1)) in
+        let ch on t = _get-rune(t, rune-head-index) in
+        if pred(ch) {
+          self(t, sub-int(index, rune-size))
+        } else {
+          _drop(t, add-int(index, 1))
+        }
+      }
+    }
+  in
+  f(t, sub-int(len, 1))
+}
+
+inline take-while-end-N(t: &text, pred: (rune) -> bool): text {
+  let len = text-byte-length(t) in
+  let f =
+    define self(t: &text, index: int): text {
+      if lt-int(index, 0) {
+        _drop-N(t, index)
+      } else {
+        let rune-size = _get-rune-size-end(t, index) in
+        let rune-head-index = sub-int(index, sub-int(rune-size, 1)) in
+        let ch = _get-rune(t, rune-head-index) in
+        if pred(ch) {
+          self(t, sub-int(index, rune-size))
+        } else {
+          _drop-N(t, add-int(index, 1))
+        }
+      }
+    }
+  in
+  f(t, sub-int(len, 1))
+}
+
 inline drop-while(t: text, pred: (rune) -> bool): text {
   let f =
     define self(t: text): text {
@@ -604,6 +700,48 @@ inline drop-while-N(t: &text, pred: (rune) -> bool): text {
     }
   in
   f(0)
+}
+
+inline drop-while-end(t: text, pred: (rune) -> bool): text {
+  let len on t = text-byte-length(t) in
+  let f =
+    define self(t: text, index: int): text {
+      if lt-int(index, 0) {
+        _take(t, index)
+      } else {
+        let rune-size on t = _get-rune-size-end(t, index) in
+        let rune-head-index = sub-int(index, sub-int(rune-size, 1)) in
+        let ch on t = _get-rune(t, rune-head-index) in
+        if pred(ch) {
+          self(t, sub-int(index, rune-size))
+        } else {
+          _take(t, add-int(index, 1))
+        }
+      }
+    }
+  in
+  f(t, sub-int(len, 1))
+}
+
+inline drop-while-end-N(t: &text, pred: (rune) -> bool): text {
+  let len = text-byte-length(t) in
+  let f =
+    define self(t: &text, index: int): text {
+      if lt-int(index, 0) {
+        _take-N(t, index)
+      } else {
+        let rune-size = _get-rune-size-end(t, index) in
+        let rune-head-index = sub-int(index, sub-int(rune-size, 1)) in
+        let ch = _get-rune(t, rune-head-index) in
+        if pred(ch) {
+          self(t, sub-int(index, rune-size))
+        } else {
+          _take-N(t, add-int(index, 1))
+        }
+      }
+    }
+  in
+  f(t, sub-int(len, 1))
 }
 
 define replicate(t: &text, n: int): text {

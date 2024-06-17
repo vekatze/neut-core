@@ -12,7 +12,7 @@ import {
     format,
     length,
     singleton,
-    split-on,
+    split,
     take-while-N,
     text,
   },
@@ -93,7 +93,7 @@ define _unquote-text(t: text): either(error, list(text)) {
 }
 
 define _parse-text-fragment(t: &text): either(error, list(text)) {
-  match split-on(t, "\\") {
+  match split(t, "\\") {
   | Nil =>
     // unreachable
     Left(Error(*"core.text.parse._parse-text-fragment"))
@@ -104,7 +104,7 @@ define _parse-text-fragment(t: &text): either(error, list(text)) {
 }
 
 define parse-text(t: &text): either(error, text) {
-  pin ts = split-on(t, "\\\\") in
+  pin ts = split(t, "\\\\") in
   try tss = try-for-each-N(ts, _parse-text-fragment) in
   Right(core.text.join(core.list.concat(intercalate(tss, [*"\\"]))))
 }

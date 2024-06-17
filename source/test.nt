@@ -15,7 +15,7 @@ import {
   this.rune.eq {eq-rune},
   this.rune.ord {le-rune},
   this.rune.show {as-show},
-  this.text {drop, drop-while, intercalate-N, join, pack, reverse, split-on, unpack},
+  this.text {drop, drop-while, intercalate-N, join, pack, reverse, split, unpack},
   this.text.io {print, printf},
   this.text.ord,
   this.text.parse {parse-text},
@@ -59,7 +59,7 @@ define zen(): unit {
   | Left(_) =>
     print("left\n");
   };
-  let foo = split-on("/foo/bar//", "/") in
+  let foo = split("/foo/bar//", "/") in
   for(foo, function (x) {
     printf("{}\n", [x])
   });

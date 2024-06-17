@@ -345,7 +345,7 @@ define length(t: &text): int {
   _length(t, len, 0, 0)
 }
 
-define split-on(haystack: &text, needle: &text): list(text) {
+define split(haystack: &text, needle: &text): list(text) {
   let haystack-ptr = _get-content-pointer(haystack) in
   let needle-ptr = _get-content-pointer(needle) in
   let len = text-byte-length(haystack) in
@@ -376,7 +376,7 @@ define split-on(haystack: &text, needle: &text): list(text) {
 }
 
 define replace(haystack: &text, from: &text, to: text): text {
-  this.text.intercalate(split-on(haystack, from), to)
+  this.text.intercalate(split(haystack, from), to)
 }
 
 // [x1], [y1, y2] => [x1]
@@ -396,7 +396,7 @@ define _alternate<a>(xs: list(a), ys: list(a)): list(a) {
 }
 
 define _format(fmt: &text, args: list(text)): list(text) {
-  _alternate(split-on(fmt, "{}"), args)
+  _alternate(split(fmt, "{}"), args)
 }
 
 define format(fmt: &text, args: list(text)): text {

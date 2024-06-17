@@ -33,6 +33,10 @@ define _eq-binary(ptr1: int, ptr2: int, index: int, to: int): bool {
   _cmp-binary(eq-int8)(ptr1, ptr2, index, to)
 }
 
+define _ne-binary(ptr1: int, ptr2: int, index: int, to: int): bool {
+  _cmp-binary(ne-int8)(ptr1, ptr2, index, to)
+}
+
 inline cmp-binary(cmp: _cmp-ptr-t): _cmp-array-t {
   function (t1: &binary, t2: &binary): bool {
     let len1 = binary-length(t1) in
@@ -49,6 +53,10 @@ inline cmp-binary(cmp: _cmp-ptr-t): _cmp-array-t {
 
 define eq-binary(t1: &binary, t2: &binary): bool {
   cmp-binary(_eq-binary)(t1, t2)
+}
+
+define ne-binary(t1: &binary, t2: &binary): bool {
+  cmp-binary(_ne-binary)(t1, t2)
 }
 
 constant as-eq: eq(&binary) {

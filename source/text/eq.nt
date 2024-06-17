@@ -1,5 +1,5 @@
 import {
-  this.binary.eq {eq-binary},
+  this.binary.eq {eq-binary, ne-binary},
   this.bool {bool},
   this.either {Right, none},
   this.eq {Eq, eq},
@@ -11,6 +11,12 @@ define eq-text(t1: &text, t2: &text): bool {
   tie Text(xs1) = t1 in
   tie Text(xs2) = t2 in
   eq-binary(xs1, xs2)
+}
+
+define ne-text(t1: &text, t2: &text): bool {
+  tie Text(xs1) = t1 in
+  tie Text(xs2) = t2 in
+  ne-binary(xs1, xs2)
 }
 
 constant as-eq: eq(&text) {

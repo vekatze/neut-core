@@ -258,7 +258,7 @@ define _match-text-content(ptr1: int, ptr2: int, len: int): bool {
   f(0)
 }
 
-define break-on(haystack: &text, needle: &text): pair(text, text) {
+define break(haystack: &text, needle: &text): pair(text, text) {
   let ptr = _get-content-pointer(haystack) in
   let ptr2 = _get-content-pointer(needle) in
   let len = text-byte-length(haystack) in

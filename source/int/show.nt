@@ -38,3 +38,7 @@ define %ld(x: int64): text {
 define %lu(x: int64): text {
   _show("%lu", x)
 }
+
+define show-int(x: int): text {
+  as-show::show(x)
+}

@@ -210,7 +210,6 @@ define _drop-N(t: &text, offset: int): text {
 }
 
 define _take-N(t: &text, offset: int): text {
-  // get info from old text
   let ptr = core.magic.cast(&text, int, t) in
   let to = Mem.load-int(add-int(ptr, core.word.size)) in
   let new-size = min-int(to, offset) in
@@ -520,49 +519,49 @@ define _find-pivot-end(char-len: int, len: int, t: &text, index: int, char-count
 define take(t: text, n: int): text {
   let len on t = text-byte-length(t) in
   let pivot on t = _find-pivot(n, len, t, 0, 0) in
-  _slice(t, 0, pivot)
+  _take(t, pivot)
 }
 
 define take-N(t: &text, n: int): text {
   let len = text-byte-length(t) in
   let pivot = _find-pivot(n, len, t, 0, 0) in
-  _slice-N(t, 0, pivot)
+  _take-N(t, pivot)
 }
 
 define drop(t: text, n: int): text {
   let len on t = text-byte-length(t) in
   let pivot on t = _find-pivot(n, len, t, 0, 0) in
-  _slice(t, pivot, len)
+  _drop(t, pivot)
 }
 
 define drop-N(t: &text, n: int): text {
   let len = text-byte-length(t) in
   let pivot = _find-pivot(n, len, t, 0, 0) in
-  _slice-N(t, pivot, len)
+  _drop-N(t, pivot)
 }
 
 define take-end(t: text, n: int): text {
   let len on t = text-byte-length(t) in
   let pivot on t = _find-pivot-end(n, len, t, sub-int(len, 1), 0) in
-  _slice(t, pivot, sub-int(len, 1))
+  _drop(t, pivot)
 }
 
 define take-end-N(t: &text, n: int): text {
   let len = text-byte-length(t) in
   let pivot = _find-pivot-end(n, len, t, sub-int(len, 1), 0) in
-  _slice-N(t, pivot, sub-int(len, 1))
+  _drop-N(t, pivot)
 }
 
 define drop-end(t: text, n: int): text {
   let len on t = text-byte-length(t) in
   let pivot on t = _find-pivot-end(n, len, t, sub-int(len, 1), 0) in
-  _slice(t, 0, pivot)
+  _take(t, pivot)
 }
 
 define drop-end-N(t: &text, n: int): text {
   let len = text-byte-length(t) in
   let pivot = _find-pivot-end(n, len, t, sub-int(len, 1), 0) in
-  _slice-N(t, 0, pivot)
+  _take-N(t, pivot)
 }
 
 define slice(t: text, start: int, size: int): text {
@@ -694,7 +693,7 @@ inline drop-while-N(t: &text, pred: (rune) -> bool): text {
           let char-len = this.rune.size(ch) in
           self(add-int(index, char-len))
         } else {
-          _slice-N(t, index, len)
+          _drop-N(t, index)
         }
       }
     }
@@ -825,4 +824,45 @@ inline any(t: &text, pred: (rune) -> bool): bool {
     }
   in
   f(0)
+}
+
+define find(t: &text, pred: (rune) -> bool): ?int {
+  let len = text-byte-length(t) in
+  let f =
+    define self(byte-index: int, index: int): ?int {
+      if ge-int(byte-index, len) {
+        none()
+      } else {
+        let ch = _get-rune(t, byte-index) in
+        if pred(ch) {
+          Right(index)
+        } else {
+          let char-len = this.rune.size(ch) in
+          self(add-int(byte-index, char-len), add-int(index, 1))
+        }
+      }
+    }
+  in
+  f(0, 0)
+}
+
+define find-end(t: &text, pred: (rune) -> bool): ?int {
+  let len = text-byte-length(t) in
+  let f =
+    define self(t: &text, byte-index: int, index: int): ?int {
+      if lt-int(byte-index, 0) {
+        none()
+      } else {
+        let rune-size = _get-rune-size-end(t, byte-index) in
+        let rune-head-byte-index = sub-int(byte-index, sub-int(rune-size, 1)) in
+        let ch = _get-rune(t, rune-head-byte-index) in
+        if pred(ch) {
+          Right(index)
+        } else {
+          self(t, sub-int(byte-index, rune-size), add-int(index, 1))
+        }
+      }
+    }
+  in
+  f(t, sub-int(len, 1), 0)
 }

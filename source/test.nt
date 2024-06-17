@@ -1,20 +1,29 @@
 import {
+  this.either {Left, Right},
   this.int.show {%ld},
   this.list,
   this.rune,
-  this.rune.eq {ne-rune},
-  this.text {_get-rune-size, _get-rune-size-end, drop-while-end},
-  this.text.io {printf},
+  this.rune.eq {eq-rune},
+  this.text {_get-rune-size, _get-rune-size-end, drop-N, find-end, take-end-N},
+  this.text.io {print, printf},
   this.unit {Unit, unit},
 }
 
 define zen(): unit {
+  let p = "/あUsers/some-file.txt." in
+  printf("drop: {}\n", [drop-N(p, 3)]);
   let result =
-    drop-while-end(*"/Users/foo/Downloads/some-file.txt", function (r) {
-      ne-rune(r, `/`)
+    find-end(p, function (r) {
+      eq-rune(r, `.`)
     })
   in
-  printf("parent: {}\n", [result]);
+  match result {
+  | Right(v) =>
+    printf("find-index: {}\n", [%ld(v)]);
+    printf("ext: {}\n", [take-end-N(p, add-int(v, 1))]);
+  | Left(_) =>
+    print("not found\n");
+  };
   let t = "Ô" in
   let len = this.text.text-byte-length(t) in
   let s1 = _get-rune-size-end(t, sub-int(len, 1)) in

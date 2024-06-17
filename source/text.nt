@@ -619,7 +619,7 @@ inline take-while-N(t: &text, pred: (rune) -> bool): text {
   pack(cs)
 }
 
-inline take-while-end(t: text, pred: (rune) -> bool): text {
+inline take-end-while(t: text, pred: (rune) -> bool): text {
   let len on t = text-byte-length(t) in
   let f =
     define self(t: text, index: int): text {
@@ -640,7 +640,7 @@ inline take-while-end(t: text, pred: (rune) -> bool): text {
   f(t, sub-int(len, 1))
 }
 
-inline take-while-end-N(t: &text, pred: (rune) -> bool): text {
+inline take-end-while-N(t: &text, pred: (rune) -> bool): text {
   let len = text-byte-length(t) in
   let f =
     define self(t: &text, index: int): text {
@@ -701,7 +701,7 @@ inline drop-while-N(t: &text, pred: (rune) -> bool): text {
   f(0)
 }
 
-inline drop-while-end(t: text, pred: (rune) -> bool): text {
+inline drop-end-while(t: text, pred: (rune) -> bool): text {
   let len on t = text-byte-length(t) in
   let f =
     define self(t: text, index: int): text {
@@ -722,7 +722,7 @@ inline drop-while-end(t: text, pred: (rune) -> bool): text {
   f(t, sub-int(len, 1))
 }
 
-inline drop-while-end-N(t: &text, pred: (rune) -> bool): text {
+inline drop-end-while-N(t: &text, pred: (rune) -> bool): text {
   let len = text-byte-length(t) in
   let f =
     define self(t: &text, index: int): text {

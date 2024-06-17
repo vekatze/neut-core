@@ -10,7 +10,7 @@ import {
 }
 
 define zen(): unit {
-  let p = "/あUsers/some-file.txt." in
+  let p = "/Users/foo/some-file.txt" in
   printf("drop: {}\n", [drop-N(p, 3)]);
   let result =
     find-end(p, function (r) {

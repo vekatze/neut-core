@@ -1,7 +1,7 @@
 import {
   this.bool {and, bool},
   this.either {Left, Right, either},
-  this.int.parse {parse-int},
+  this.int.parse {parse-hex},
   this.list {Cons, Nil, any, concat, intercalate, list, try-for-each, try-for-each-N},
   this.pair {Pair},
   this.rune {rune},
@@ -45,7 +45,7 @@ define _read-char(r: rune, t: text): either(error, text) {
 }
 
 define _read-unicode-scalar-value(t: &text): either(error, rune) {
-  match parse-int(t) {
+  match parse-hex(t) {
   | Left(_) =>
     Left(Error(format("Could not parse `{}` as a hexadecimal integer", [*t])))
   | Right(v) =>

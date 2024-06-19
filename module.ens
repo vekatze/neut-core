@@ -84,7 +84,7 @@
     rune.ord ["lt-rune", "le-rune", "gt-rune", "ge-rune"],
     system ["admit", "assert", "get-argc", "get-argv", "panic"],
     text ["text"],
-    text.eq ["eq-text"],
+    text.eq ["eq-text", "ne-text"],
     text.io ["get-line", "print", "print-float", "print-int", "print-line", "printf", "read", "write"],
     text.ord ["lt-text", "le-text", "gt-text", "ge-text"],
     thread ["attach", "detach", "thread"],

@@ -624,7 +624,7 @@ inline take-end-while(t: text, pred: (rune) -> bool): text {
   let f =
     define self(t: text, index: int): text {
       if lt-int(index, 0) {
-        _drop(t, index)
+        t
       } else {
         let rune-size on t = _get-rune-size-end(t, index) in
         let rune-head-index = sub-int(index, sub-int(rune-size, 1)) in
@@ -645,7 +645,7 @@ inline take-end-while-N(t: &text, pred: (rune) -> bool): text {
   let f =
     define self(t: &text, index: int): text {
       if lt-int(index, 0) {
-        _drop-N(t, index)
+        *t
       } else {
         let rune-size = _get-rune-size-end(t, index) in
         let rune-head-index = sub-int(index, sub-int(rune-size, 1)) in

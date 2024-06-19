@@ -4,7 +4,7 @@ import {
   this.list,
   this.rune,
   this.rune.eq {eq-rune, ne-rune},
-  this.text {_get-rune-size, _get-rune-size-end, drop-N, drop-end-while-N, find-end, take-end-N},
+  this.text {_get-rune-size, _get-rune-size-end, drop-N, find-end, take-end-N, take-end-while-N},
   this.text.io {print, printf},
   this.unit {Unit, unit},
 }
@@ -12,8 +12,8 @@ import {
 define zen(): unit {
   let p = "/Users/foo/some-file.txt" in
   let q =
-    drop-end-while-N(p, function (r) {
-      ne-rune(r, `U`)
+    take-end-while-N(p, function (r) {
+      ne-rune(r, `A`)
     })
   in
   printf("q: {}\n", [q]);

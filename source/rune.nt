@@ -165,11 +165,25 @@ define from-int(value: int): ?rune {
       let value-0' = shl-int32(value-0, 6) in
       let value-1' = shl-int32(value-1, 4) in
       let value-2' = shl-int32(value-2, 2) in
-      Right(magic cast(int32, rune, or-int32(or-int32(or-int32(or-int32(mask-X, value-0'), value-1'), value-2'), value-3)))
+      Right(
+        magic cast(
+          int32,
+          rune,
+          or-int32(
+            or-int32(or-int32(or-int32(mask-X, value-0'), value-1'), value-2'),
+            value-3,
+          ),
+        ),
+      )
     } else {
       Left(Unit)
     }
   } else {
     Left(Unit)
   }
+}
+
+define to-int(r: rune): int {
+  let _Rune(value) = r in
+  zext-int32-int(value)
 }

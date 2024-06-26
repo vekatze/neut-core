@@ -1,32 +1,32 @@
 import {
   O {EQ, GT, LT},
-  this.bool {bool},
   this.binary.ord {ge-binary, gt-binary, le-binary, lt-binary},
+  this.bool {bool},
   this.ord {Ord, ord},
-  this.text {Text, text},
+  this.text {_Text, text},
 }
 
 define lt-text(t1: &text, t2: &text): bool {
-  tie Text(xs1) = t1 in
-  tie Text(xs2) = t2 in
+  tie _Text(xs1) = t1 in
+  tie _Text(xs2) = t2 in
   lt-binary(xs1, xs2)
 }
 
 define le-text(t1: &text, t2: &text): bool {
-  tie Text(xs1) = t1 in
-  tie Text(xs2) = t2 in
+  tie _Text(xs1) = t1 in
+  tie _Text(xs2) = t2 in
   le-binary(xs1, xs2)
 }
 
 define gt-text(t1: &text, t2: &text): bool {
-  tie Text(xs1) = t1 in
-  tie Text(xs2) = t2 in
+  tie _Text(xs1) = t1 in
+  tie _Text(xs2) = t2 in
   gt-binary(xs1, xs2)
 }
 
 define ge-text(t1: &text, t2: &text): bool {
-  tie Text(xs1) = t1 in
-  tie Text(xs2) = t2 in
+  tie _Text(xs1) = t1 in
+  tie _Text(xs2) = t2 in
   ge-binary(xs1, xs2)
 }
 

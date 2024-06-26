@@ -6,10 +6,8 @@ import {
   Word,
   this.binary {_copy-binary, binary, binary-access, binary-length, binary-new},
   this.bool {False, True, bool},
-  this.control {discard},
   this.either {Right, none},
-  this.int {max-int, min-int},
-  this.list {Cons, Nil, fold-left-N, list, reverse},
+  this.list {Cons, Nil, list, reverse},
   this.memory {load-int8},
   this.pair {Pair, pair},
   this.rune {_Rune, load-rune, rune, size-by-head-byte, store-rune},
@@ -17,7 +15,7 @@ import {
 }
 
 data text {
-| Text(content: binary)
+| _Text(content: binary)
 }
 
 define create(xs: L.list(int8)): text {
@@ -41,99 +39,19 @@ define _get-content-pointer(t: &text): int {
 }
 
 define join(xs: list(text)): text {
-  let len on xs =
-    fold-left-N(0, xs, function (acc, x) {
-      add-int(acc, text-byte-length(x))
-    })
-  in
-  let u = Word.size in
-  let u2 = mul-int(u, 2) in
-  let new-text = Ext.malloc(add-int(len, u2)) in
-  Mem.store-int(0, new-text);
-  Mem.store-int(len, add-int(new-text, u));
-  let content-ptr = add-int(new-text, u2) in
-  let loop =
-    define self(offset: int, xs: list(text)): unit {
-      match xs {
-      | Nil =>
-        Unit
-      | Cons(x, rest) =>
-        let current-content-ptr = add-int(content-ptr, offset) in
-        let x-ptr on x = _get-content-pointer(x) in
-        let x-len on x = text-byte-length(x) in
-        _copy-binary(x-ptr, current-content-ptr, 0, x-len);
-        discard(x);
-        self(add-int(offset, x-len), rest)
-      }
-    }
-  in
-  loop(0, xs);
-  magic cast(int, text, new-text)
+  let xs' = magic cast(list(text), list(binary), xs) in
+  _Text(this.binary.join(xs'))
 }
 
 define join-N(xs: list(&text)): text {
-  let len on xs =
-    fold-left-N(0, xs, function (acc, x) {
-      add-int(acc, text-byte-length(*x))
-    })
-  in
-  let u = Word.size in
-  let u2 = mul-int(u, 2) in
-  let new-text = Ext.malloc(add-int(len, u2)) in
-  Mem.store-int(0, new-text);
-  Mem.store-int(len, add-int(new-text, u));
-  let content-ptr = add-int(new-text, u2) in
-  let loop =
-    define self(offset: int, xs: list(&text)): unit {
-      match xs {
-      | Nil =>
-        Unit
-      | Cons(x, rest) =>
-        let current-content-ptr = add-int(content-ptr, offset) in
-        let x-ptr = _get-content-pointer(x) in
-        let x-len = text-byte-length(x) in
-        _copy-binary(x-ptr, current-content-ptr, 0, x-len);
-        discard(x);
-        self(add-int(offset, x-len), rest)
-      }
-    }
-  in
-  loop(0, xs);
-  magic cast(int, text, new-text)
+  let xs' = magic cast(list(&text), list(&binary), xs) in
+  _Text(this.binary.join-N(xs'))
 }
 
 define append(t1: &text, t2: &text): text {
-  let p1 = Magic.cast(&text, int, t1) in
-  let p2 = Magic.cast(&text, int, t2) in
-  let from1 = Mem.load-int(p1) in
-  let from2 = Mem.load-int(p2) in
-  let u = Word.size in
-  let u2 = mul-int(u, 2) in
-  let to1 = Mem.load-int(add-int(p1, u)) in
-  let to2 = Mem.load-int(add-int(p2, u)) in
-  let len1 = sub-int(to1, from1) in
-  let len2 = sub-int(to2, from2) in
-  let new-len = add-int(len1, len2) in
-  let content1 = add-int(p1, u2) in
-  let content2 = add-int(p2, u2) in
-  let new-text = Ext.malloc(add-int(new-len, u2)) in
-  Mem.store-int(0, new-text);
-  Mem.store-int(new-len, add-int(new-text, u));
-  let !store-values =
-    define store-values(target-pointer: int, content-array: int, current-index: int, array-length: int): unit {
-      if eq-int(current-index, array-length) {
-        Unit
-      } else {
-        let char = Mem.load-int8(add-int(content-array, current-index)) in
-        Mem.store-int8(char, add-int(target-pointer, current-index));
-        store-values(target-pointer, content-array, add-int(current-index, 1), array-length)
-      }
-    }
-  in
-  let str-pointer = add-int(new-text, u2) in
-  !store-values(str-pointer, add-int(content1, from1), 0, len1);
-  !store-values(add-int(str-pointer, len1), add-int(content2, from2), 0, len2);
-  Magic.cast(int, text, new-text)
+  tie _Text(t1) = t1 in
+  tie _Text(t2) = t2 in
+  _Text(this.binary.append(t1, t2))
 }
 
 define _access(haystack: &text, cursor: int): int8 {
@@ -166,76 +84,35 @@ define _from-c-string(old-ptr: int): text {
 
 // O(1)
 define _drop(t: text, offset: int): text {
-  let offset = max-int(0, offset) in
-  let _ on t =
-    let ptr = Magic.cast(&text, int, t) in
-    let from = Mem.load-int(ptr) in
-    let to-ptr = add-int(ptr, Word.size) in
-    let to = Mem.load-int(to-ptr) in
-    Mem.store-int(min-int(to, add-int(from, offset)), ptr)
-  in
-  t
+  let t = magic cast(text, binary, t) in
+  magic cast(binary, text, this.binary.drop(t, offset))
 }
 
 // O(1)
 define _take(t: text, offset: int): text {
-  let offset = max-int(0, offset) in
-  let _ on t =
-    let ptr = Magic.cast(&text, int, t) in
-    let from = Mem.load-int(ptr) in
-    let to-ptr = add-int(ptr, Word.size) in
-    let to = Mem.load-int(to-ptr) in
-    Mem.store-int(min-int(to, add-int(from, offset)), to-ptr)
-  in
-  t
+  let t = magic cast(text, binary, t) in
+  magic cast(binary, text, this.binary.take(t, offset))
 }
 
 // O(1)
 define _slice(t: text, start: int, size: int): text {
-  _take(_drop(t, start), size)
+  let t = magic cast(text, binary, t) in
+  magic cast(binary, text, this.binary.slice(t, start, size))
 }
 
 define _drop-N(t: &text, offset: int): text {
-  let content-ptr = _get-content-pointer(t) in
-  let orig-size = text-byte-length(t) in
-  let new-size = max-int(0, sub-int(orig-size, offset)) in
-  let new-ptr = Ext.malloc(add-int(new-size, mul-int(Word.size, 2))) in
-  Mem.store-int(0, new-ptr);
-  Mem.store-int(new-size, add-int(new-ptr, Word.size));
-  let new-content-ptr = add-int(new-ptr, mul-int(Word.size, 2)) in
-  let adjusted-offset = min-int(offset, orig-size) in
-  let content-ptr' = add-int(content-ptr, adjusted-offset) in
-  _copy-binary(content-ptr', new-content-ptr, 0, new-size);
-  Magic.cast(int, text, new-ptr)
+  let t = magic cast(&text, &binary, t) in
+  magic cast(binary, text, this.binary.drop-N(t, offset))
 }
 
 define _take-N(t: &text, offset: int): text {
-  let ptr = core.magic.cast(&text, int, t) in
-  let to = Mem.load-int(add-int(ptr, core.word.size)) in
-  let new-size = min-int(to, offset) in
-  let new-ptr = Ext.malloc(add-int(offset, mul-int(core.word.size, 2))) in
-  Mem.store-int(0, new-ptr);
-  Mem.store-int(new-size, add-int(new-ptr, core.word.size));
-  let content-ptr = _get-content-pointer(t) in
-  let new-content-ptr = add-int(new-ptr, mul-int(core.word.size, 2)) in
-  _copy-binary(content-ptr, new-content-ptr, 0, new-size);
-  core.magic.cast(int, text, new-ptr)
+  let t = magic cast(&text, &binary, t) in
+  magic cast(binary, text, this.binary.take-N(t, offset))
 }
 
 define _slice-N(t: &text, start: int, size: int): text {
-  let start = max-int(start, 0) in
-  let size = max-int(size, 0) in
-  let ptr = Magic.cast(&text, int, t) in
-  let content-ptr = _get-content-pointer(t) in
-  let to-ptr = add-int(ptr, Word.size) in
-  let to = Mem.load-int(to-ptr) in
-  let new-size = min-int(size, to) in
-  let new-ptr = Ext.malloc(add-int(new-size, mul-int(Word.size, 2))) in
-  Mem.store-int(0, new-ptr);
-  Mem.store-int(new-size, add-int(new-ptr, Word.size));
-  let new-content-ptr = add-int(new-ptr, mul-int(Word.size, 2)) in
-  _copy-binary(add-int(content-ptr, start), new-content-ptr, 0, new-size);
-  Magic.cast(int, text, new-ptr)
+  let t = magic cast(&text, &binary, t) in
+  magic cast(binary, text, this.binary.slice-N(t, start, size))
 }
 
 define _match-text-content(ptr1: int, ptr2: int, len: int): bool {

@@ -3,19 +3,19 @@ import {
   this.bool {bool},
   this.either {Right, none},
   this.eq {Eq, eq},
-  this.text {Text, _drop-N, _take-N, text, text-byte-length},
+  this.text {_Text, _drop-N, _take-N, text, text-byte-length},
   this.unit,
 }
 
 define eq-text(t1: &text, t2: &text): bool {
-  tie Text(xs1) = t1 in
-  tie Text(xs2) = t2 in
+  tie _Text(xs1) = t1 in
+  tie _Text(xs2) = t2 in
   eq-binary(xs1, xs2)
 }
 
 define ne-text(t1: &text, t2: &text): bool {
-  tie Text(xs1) = t1 in
-  tie Text(xs2) = t2 in
+  tie _Text(xs1) = t1 in
+  tie _Text(xs2) = t2 in
   ne-binary(xs1, xs2)
 }
 
@@ -24,20 +24,20 @@ constant as-eq: eq(&text) {
 }
 
 define eq-prefix(haystack: &text, needle: &text): bool {
-  tie Text(haystack') = haystack in
-  tie Text(needle') = needle in
+  tie _Text(haystack') = haystack in
+  tie _Text(needle') = needle in
   this.binary.eq.eq-prefix(haystack', needle')
 }
 
 define eq-suffix(haystack: &text, needle: &text): bool {
-  tie Text(haystack') = haystack in
-  tie Text(needle') = needle in
+  tie _Text(haystack') = haystack in
+  tie _Text(needle') = needle in
   this.binary.eq.eq-suffix(haystack', needle')
 }
 
 define eq-infix(haystack: &text, needle: &text): bool {
-  tie Text(haystack') = haystack in
-  tie Text(needle') = needle in
+  tie _Text(haystack') = haystack in
+  tie _Text(needle') = needle in
   this.binary.eq.eq-infix(haystack', needle')
 }
 

@@ -1,6 +1,7 @@
 import {
+  this.cell {mutate},
   this.either {Left, Right},
-  this.int.show {%ld},
+  this.int.show {%ld, show-int},
   this.list,
   this.rune,
   this.rune.eq {eq-rune, ne-rune},
@@ -9,7 +10,30 @@ import {
   this.unit {Unit, unit},
 }
 
+define with-cell(i: int): int {
+  let c = new-cell(i) in
+  let _ on c =
+    mutate(c, function (x) {
+      add-int(x, 1)
+    })
+  in
+  let _ on c =
+    mutate(c, function (x) {
+      add-int(x, 1)
+    })
+  in
+  let _ on c =
+    mutate(c, function (x) {
+      add-int(x, 21)
+    })
+  in
+  this.cell.extract(c)
+}
+
 define zen(): unit {
+  let x = 0 in
+  let x = with-cell(with-cell(with-cell(x))) in
+  printf("val: {}\n", [show-int(x)]);
   let p = "/Users/foo/some-file.txt" in
   let q =
     take-end-while-N(p, function (r) {

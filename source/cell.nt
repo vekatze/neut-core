@@ -109,3 +109,13 @@ define clone<a>(ch: &cell(a)): a {
   Ext.thread-mutex-unlock(mutex-ptr);
   result
 }
+
+define extract<a>(c: cell(a)): a {
+  let u = Word.size in
+  let ch = magic cast(cell(a), int, c) in
+  let result = magic cast(int, a, Mem.load-int(ch)) in
+  Ext.thread-mutex-destroy(add-int(ch, u));
+  Ext.thread-cond-destroy(add-int(ch, add-int(u, Ext.thread-mutex-size())));
+  Ext.free(ch);
+  result
+}

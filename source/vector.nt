@@ -110,7 +110,7 @@ inline create<a>(len: int, gen: (int) -> a): vector(a) {
     }
   in
   let _ = store-values(0) in
-  magic cast(int, _, ptr0)
+  magic cast(int, vector(a), ptr0)
 }
 
 inline create-maybe<a>(len: int, gen: (int) -> ?a): ?vector(a) {
@@ -143,7 +143,7 @@ inline create-maybe<a>(len: int, gen: (int) -> ?a): ?vector(a) {
     free(ptr0);
     none()
   | Right(_) =>
-    magic cast(int, _, ptr0)
+    Right(magic cast(int, vector(a), ptr0))
   }
 }
 

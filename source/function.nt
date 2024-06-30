@@ -23,3 +23,9 @@ inline uncurry<a, b, c>(f: (a) -> (b) -> c): (a, b) -> c {
     f(x)(y)
   }
 }
+
+inline lift-N2<a, b, c>(f: (a, b) -> c): (&a, &b) -> c {
+  function (x, y) {
+    f(*x, *y)
+  }
+}

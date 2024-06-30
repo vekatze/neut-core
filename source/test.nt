@@ -2,12 +2,13 @@ import {
   this.cell {mutate},
   this.either {Left, Right},
   this.int.show {%ld, show-int},
-  this.list,
+  this.list {for},
   this.rune,
   this.rune.eq {eq-rune, ne-rune},
   this.text {_get-rune-size, _get-rune-size-end, drop-N, find-end, take-end-N, take-end-while-N},
   this.text.io {print, printf},
   this.unit {Unit, unit},
+  this.vector,
 }
 
 define with-cell(i: int): int {
@@ -31,6 +32,38 @@ define with-cell(i: int): int {
 }
 
 define zen(): unit {
+  let !xs =
+    this.vector.create(10, function (x) {
+      x
+    })
+  in
+  let !ys =
+    this.vector.create(10, function (x) {
+      add-int(100, x)
+    })
+  in
+  let zs on !xs, !ys =
+    this.vector.zip-with-N(!xs, !ys, function (x, y) {
+      add-int(*x, *y)
+    })
+  in
+  let _ = !ys in
+  this.vector.for(zs, function (x) {
+    printf("value: {}\n", [show-int(x)])
+  });
+  print("-----------\n");
+  this.vector.for(!xs, function (x) {
+    printf("value: {}\n", [show-int(x)])
+  });
+  let _ on !xs =
+    this.vector.for-N(!xs, function (x) {
+      printf("value: {}\n", [show-int(*x)])
+    })
+  in
+  let xs = this.vector.to-list(!xs) in
+  for(xs, function (x) {
+    printf("value: {}\n", [show-int(x)])
+  });
   let x = 0 in
   let x = with-cell(with-cell(with-cell(x))) in
   printf("val: {}\n", [show-int(x)]);

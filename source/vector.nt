@@ -7,12 +7,12 @@ import {
   this.either {from-option},
   this.external {free, malloc},
   this.int.ord {as-ord-N},
-  this.list {Cons, Nil, iterate, list, minimum},
+  this.list {Cons, Nil, list, minimum},
   this.unit {Unit, unit},
 }
 
-data _vecInfo {
-| _VecInfo(
+data _vector-info {
+| _Vector-Info(
     word-size: int,
     from-ptr: int,
     to-ptr: int,
@@ -44,26 +44,28 @@ define _copy-vector-content(source-pointer: int, target-pointer: int, elem-type:
 }
 
 nominal {
-  vector-internal: type,
+  _vector-internal: type,
 }
 
-define vector(_: type): type {
-  vector-internal
+data vector(_: type) {
+| _Vector(_vector-internal)
 }
 
-define _get-vec-info<a>(xs: &vector(a)): _vecInfo {
+define _get-vector-info<a>(xs: &vector(a)): _vector-info {
   let from-ptr = Magic.cast(&vector(a), int, xs) in
   let word-size = Word.size in
   let to-ptr = add-int(from-ptr, word-size) in
   let type-ptr = add-int(from-ptr, mul-int(word-size, 2)) in
-  let content-ptr = add-int(from-ptr, mul-int(word-size, 3)) in
-  _VecInfo of {word-size, from-ptr, to-ptr, type-ptr, content-ptr}
+  let base-content-ptr = add-int(from-ptr, mul-int(word-size, 3)) in
+  let from = Mem.load-int(from-ptr) in
+  let content-ptr = add-int(base-content-ptr, mul-int(word-size, from)) in
+  _Vector-Info of {word-size, from-ptr, to-ptr, type-ptr, content-ptr}
 }
 
-resource vector-internal {
+resource _vector-internal {
   function (ptr: int) {
     let base-ptr = Magic.cast(int, &vector(int), ptr) in
-    let _VecInfo of {from-ptr, to-ptr, type-ptr, content-ptr} = _get-vec-info(base-ptr) in
+    let _Vector-Info of {from-ptr, to-ptr, type-ptr, content-ptr} = _get-vector-info(base-ptr) in
     let from: int = Mem.load-int(from-ptr) in
     let to: int = Mem.load-int(to-ptr) in
     let size = sub-int(to, from) in
@@ -73,7 +75,7 @@ resource vector-internal {
   },
   function (ptr: int) {
     let base-ptr = Magic.cast(int, &vector(int), ptr) in
-    let _VecInfo of {word-size, from-ptr, to-ptr, type-ptr, content-ptr} = _get-vec-info(base-ptr) in
+    let _Vector-Info of {word-size, from-ptr, to-ptr, type-ptr, content-ptr} = _get-vector-info(base-ptr) in
     let from: int = Mem.load-int(from-ptr) in
     let to: int = Mem.load-int(to-ptr) in
     let size = sub-int(to, from) in
@@ -87,7 +89,138 @@ resource vector-internal {
   },
 }
 
-define new<a>(base-list: list(a)): vector(a) {
+inline create<a>(len: int, gen: (int) -> a): vector(a) {
+  let word-size = Word.size in
+  let ptr0 = malloc(mul-int(word-size, add-int(3, len))) in
+  let ptr1 = add-int(ptr0, word-size) in
+  let ptr2 = add-int(ptr0, mul-int(word-size, 2)) in
+  let ptr3 = add-int(ptr0, mul-int(word-size, 3)) in
+  Mem.store-int(0, ptr0);
+  Mem.store-int(len, ptr1);
+  Mem.store-int(Magic.cast(type, int, a), ptr2);
+  let store-values =
+    define self(index: int): unit {
+      if ge-int(index, len) {
+        Unit
+      } else {
+        let v = gen(index) in
+        Mem.store-int(Magic.cast(a, int, v), add-int(ptr3, mul-int(index, word-size)));
+        self(add-int(index, 1))
+      }
+    }
+  in
+  let _ = store-values(0) in
+  magic cast(int, _, ptr0)
+}
+
+inline _access<a>(xs: &vector(a), i: int): &a {
+  let _Vector-Info of {content-ptr, word-size} = _get-vector-info(xs) in
+  let elem-address = add-int(content-ptr, mul-int(word-size, i)) in
+  Magic.cast(int, &a, Mem.load-int(elem-address))
+}
+
+define length<a>(xs: &vector(a)): int {
+  let _Vector-Info of {from-ptr, to-ptr} = _get-vector-info(xs) in
+  let from = Mem.load-int(from-ptr) in
+  let to = Mem.load-int(to-ptr) in
+  sub-int(to, from)
+}
+
+inline for-each<a, b>(xs: vector(a), f: (a) -> b): vector(b) {
+  let word-size = Word.size in
+  let ptr0 = magic cast(vector(a), int, xs) in
+  let ptr1 = add-int(ptr0, word-size) in
+  let ptr2 = add-int(ptr0, mul-int(word-size, 2)) in
+  let ptr3 = add-int(ptr0, mul-int(word-size, 3)) in
+  let from = Mem.load-int(ptr0) in
+  let to = Mem.load-int(ptr1) in
+  Mem.store-int(Magic.cast(type, int, b), ptr2);
+  let store-values =
+    define self(index: int): unit {
+      if ge-int(index, to) {
+        Unit
+      } else {
+        let value-ptr = add-int(ptr3, mul-int(index, word-size)) in
+        let old-value = Mem.load-int(value-ptr) in
+        let new-value = f(Magic.cast(int, a, old-value)) in
+        Mem.store-int(Magic.cast(b, int, new-value), value-ptr);
+        self(add-int(index, 1))
+      }
+    }
+  in
+  store-values(from);
+  magic cast(int, vector(b), ptr0)
+}
+
+inline for-each-N<a, b>(xs: &vector(a), f: (&a) -> b): vector(b) {
+  let len = length(xs) in
+  create(len, function (i) {
+    f(_access(xs, i))
+  })
+}
+
+inline for<a>(xs: vector(a), f: (a) -> unit): unit {
+  let word-size = Word.size in
+  let ptr0 = magic cast(vector(a), int, xs) in
+  let ptr1 = add-int(ptr0, word-size) in
+  let ptr3 = add-int(ptr0, mul-int(word-size, 3)) in
+  let from = Mem.load-int(ptr0) in
+  let to = Mem.load-int(ptr1) in
+  let loop =
+    define self(index: int): unit {
+      if ge-int(index, to) {
+        Unit
+      } else {
+        let value-ptr = add-int(ptr3, mul-int(index, word-size)) in
+        let old-value = Mem.load-int(value-ptr) in
+        f(Magic.cast(int, a, old-value));
+        self(add-int(index, 1))
+      }
+    }
+  in
+  loop(from)
+}
+
+inline for-N<a>(xs: &vector(a), f: (&a) -> unit): unit {
+  let len = length(xs) in
+  loop(len, function (i) {
+    f(_access(xs, i))
+  })
+}
+
+inline fold-left-N<elem-type, result-type>(
+  acc: result-type,
+  xs: &vector(elem-type),
+  consumer: (result-type, &elem-type) -> result-type,
+): result-type {
+  let sz = length(xs) in
+  let helper =
+    define loop(cursor: int, acc, xs) {
+      if eq-int(cursor, sz) {
+        acc
+      } else {
+        let y = _access(xs, cursor) in
+        loop(add-int(cursor, 1), consumer(acc, y), xs)
+      }
+    }
+  in
+  helper(0, acc, xs)
+}
+
+inline zip-with-N<a, b, c>(xs: &vector(a), ys: &vector(b), f: (&a, &b) -> c): vector(c) {
+  let len1 = length(xs) in
+  let len2 = length(ys) in
+  let min-func = minimum(as-ord-N) in
+  let len-or-none = min-func([len1, len2]) in
+  let len = from-option(len-or-none, 0) in
+  create(len, function (i) {
+    let val1 = _access(xs, i) in
+    let val2 = _access(ys, i) in
+    f(val1, val2)
+  })
+}
+
+define from-list<a>(base-list: list(a)): vector(a) {
   let word-size = Word.size in
   let n on base-list = this.list.length(base-list) in
   let ptr0 = malloc(mul-int(word-size, add-int(3, n))) in
@@ -112,79 +245,23 @@ define new<a>(base-list: list(a)): vector(a) {
   magic cast(int, _, ptr0)
 }
 
-inline access<a>(xs: &vector(a), i: int): a {
-  let _VecInfo of {from-ptr, content-ptr, word-size} = _get-vec-info(xs) in
-  let from = Mem.load-int(from-ptr) in
-  let elem-address = add-int(content-ptr, mul-int(word-size, add-int(from, i))) in
-  let val = Magic.cast(int, &a, Mem.load-int(elem-address)) in
-  *val
-}
-
-inline access-N<a>(xs: &vector(a), i: int): &a {
-  let _VecInfo of {from-ptr, content-ptr, word-size} = _get-vec-info(xs) in
-  let from = Mem.load-int(from-ptr) in
-  let elem-address = add-int(content-ptr, mul-int(word-size, add-int(from, i))) in
-  Magic.cast(int, &a, Mem.load-int(elem-address))
-}
-
-define size<a>(xs: &vector(a)): int {
-  let _VecInfo of {from-ptr, to-ptr} = _get-vec-info(xs) in
-  let from = Mem.load-int(from-ptr) in
-  let to = Mem.load-int(to-ptr) in
-  sub-int(to, from)
-}
-
-inline for-each<a>(xs: &vector(a), f: (a) -> unit): unit {
-  loop(size(xs), function (i) {
-    f(access(xs, i))
-  })
-}
-
-inline for<a, b>(xs: &vector(a), f: (a) -> b): vector(b) {
-  new of {
-    base-list = {
-      iterate(size(xs), function (i) {
-        f(access(xs, i))
-      })
-    },
-  }
-}
-
-inline fold-left-N<elem-type, result-type>(
-  acc: result-type,
-  xs: &vector(elem-type),
-  consumer: (result-type, &elem-type) -> result-type,
-): result-type {
-  let sz = size(xs) in
-  let helper =
-    define loop(cursor: int, acc, xs) {
-      if eq-int(cursor, sz) {
-        acc
+define to-list<a>(xs: vector(a)): list(a) {
+  let len on xs = length(xs) in
+  let word-size = Word.size in
+  let _Vector-Info of {content-ptr} on xs = _get-vector-info(xs) in
+  let ptr0 = magic cast(vector(a), int, xs) in
+  let loop =
+    define self(index: int): list(a) {
+      if ge-int(index, len) {
+        Nil
       } else {
-        let y = access-N(xs, cursor) in
-        loop(add-int(cursor, 1), consumer(acc, y), xs)
+        let value-ptr = add-int(content-ptr, mul-int(index, word-size)) in
+        let value = Magic.cast(int, a, Mem.load-int(value-ptr)) in
+        Cons(value, self(add-int(index, 1)))
       }
     }
   in
-  helper(0, acc, xs)
-}
-
-define zip-with<a, b, c>(xs: &vector(a), ys: &vector(b), f: (a, b) -> c): vector(c) {
-  let len1 = size(xs) in
-  let len2 = size(ys) in
-  let min-func = minimum(as-ord-N) in
-  let len-or-none = min-func([len1, len2]) in
-  let len = from-option(len-or-none, 0) in
-  let zip-with-helper =
-    define self(cursor: int) {
-      if eq-int(cursor, len) {
-        []
-      } else {
-        let val1 = access(xs, cursor) in
-        let val2 = access(ys, cursor) in
-        Cons(f(val1, val2), self(add-int(cursor, 1)))
-      }
-    }
-  in
-  new(zip-with-helper(0))
+  let result = loop(0) in
+  free(ptr0);
+  result
 }

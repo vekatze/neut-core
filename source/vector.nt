@@ -4,7 +4,7 @@ import {
   Word,
   this.bool,
   this.control {loop},
-  this.either {from-option},
+  this.either {Left, Right, either, from-option, none},
   this.external {free, malloc},
   this.int.ord {as-ord-N},
   this.list {Cons, Nil, list, minimum},
@@ -111,6 +111,40 @@ inline create<a>(len: int, gen: (int) -> a): vector(a) {
   in
   let _ = store-values(0) in
   magic cast(int, _, ptr0)
+}
+
+inline create-maybe<a>(len: int, gen: (int) -> ?a): ?vector(a) {
+  let word-size = Word.size in
+  let ptr0 = malloc(mul-int(word-size, add-int(3, len))) in
+  let ptr1 = add-int(ptr0, word-size) in
+  let ptr2 = add-int(ptr0, mul-int(word-size, 2)) in
+  let ptr3 = add-int(ptr0, mul-int(word-size, 3)) in
+  Mem.store-int(0, ptr0);
+  Mem.store-int(len, ptr1);
+  Mem.store-int(Magic.cast(type, int, a), ptr2);
+  let store-values =
+    define self(index: int): either(int, unit) {
+      if ge-int(index, len) {
+        Right(Unit)
+      } else {
+        match gen(index) {
+        | Left(_) =>
+          Left(index)
+        | Right(v) =>
+          Mem.store-int(Magic.cast(a, int, v), add-int(ptr3, mul-int(index, word-size)));
+          self(add-int(index, 1))
+        }
+      }
+    }
+  in
+  match store-values(0) {
+  | Left(index) =>
+    _discard-vector-content(ptr3, a, 0, index);
+    free(ptr0);
+    none()
+  | Right(_) =>
+    magic cast(int, _, ptr0)
+  }
 }
 
 inline _access<a>(xs: &vector(a), i: int): &a {

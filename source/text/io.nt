@@ -102,17 +102,16 @@ define _read-inner(from: FD.descriptor, ptr: int, ptr-size: int, len-cand: int, 
   }
 }
 
-define read(from: FD.descriptor): system(text) {
-  let default-input-size = 1024 in
+define read(from: FD.descriptor, initial-buffer-size: int): system(text) {
   let u = Word.size in
-  let ptr-size = add-int(default-input-size, mul-int(u, 2)) in
+  let ptr-size = add-int(initial-buffer-size, mul-int(u, 2)) in
   let ptr = Ext.malloc(ptr-size) in
   Mem.store-int(0, ptr);
-  _read-inner(from, ptr, ptr-size, 0, default-input-size)
+  _read-inner(from, ptr, ptr-size, 0, initial-buffer-size)
 }
 
-define get-line(): system(text) {
-  read(FD.stdin)
+define get-line(initial-buffer-size: int): system(text) {
+  read(FD.stdin, initial-buffer-size)
 }
 
 define zen(): unit {

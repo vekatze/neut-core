@@ -119,7 +119,11 @@ data process-result {
   )
 }
 
-define spawn(ps: process-spec): system(process-result) {
+define spawn(
+  ps: process-spec,
+  stdout-initial-buffer-size: int,
+  stderr-initial-buffer-size: int,
+): system(process-result) {
   try Pair(in-reader, in-writer) = _create-pipe() in
   try Pair(out-reader, out-writer) = _create-pipe() in
   try Pair(error-reader, error-writer) = _create-pipe() in
@@ -146,8 +150,8 @@ define spawn(ps: process-spec): system(process-result) {
     use ps {input} in
     try _ = write(input, in-writer) in
     try _ = close(in-writer) in
-    try stdout-text = read(out-reader) in
-    try stderr-text = read(error-reader) in
+    try stdout-text = read(out-reader, stdout-initial-buffer-size) in
+    try stderr-text = read(error-reader, stderr-initial-buffer-size) in
     try status = _waitpid(pid) in
     Right(Process-Result of {
       status,
@@ -176,7 +180,7 @@ define zen(): unit {
       input = "",
     }
   in
-  match spawn(cmd) {
+  match spawn(cmd, 1024, 1024) {
   | Right(result) =>
     use result {stdout-text, stderr-text, status} in
     let _ on stdout-text = print(stdout-text) in

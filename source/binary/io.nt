@@ -1,0 +1,72 @@
+import {
+  Ext,
+  FD,
+  Magic,
+  Mem,
+  Word,
+  this.binary {_get-content-pointer, binary, binary-length},
+  this.bool,
+  this.either {Right},
+  this.errno {report-system-error, system},
+  this.file.descriptor {descriptor},
+  this.unit {Unit, unit},
+  this.word,
+}
+
+define write(b: &binary, f: descriptor): system(unit) {
+  let content-pointer: int = _get-content-pointer(b) in
+  let len = binary-length(b) in
+  let loop =
+    define write-loop(acc: int): system(unit) {
+      let rest = sub-int(len, acc) in
+      let head-ptr = add-int(content-pointer, acc) in
+      let bytes: int = core.external.write(f, head-ptr, rest) in
+      if lt-int(bytes, 0) {
+        report-system-error()
+      } else {
+        let acc = add-int(acc, bytes) in
+        if eq-int(acc, len) {
+          Right(Unit)
+        } else {
+          write-loop(acc)
+        }
+      }
+    }
+  in
+  loop(0)
+}
+
+define _read-inner(from: FD.descriptor, ptr: int, ptr-size: int, len-cand: int, buffer-size: int): system(binary) {
+  let u = this.word.size in
+  let content-size = sub-int(ptr-size, mul-int(u, 2)) in
+  if lt-int(content-size, add-int(len-cand, buffer-size)) {
+    let new-size = mul-int(ptr-size, 2) in
+    let new-ptr = Ext.realloc(ptr, new-size) in
+    if eq-int(new-ptr, 0) {
+      report-system-error()
+    } else {
+      _read-inner(from, new-ptr, new-size, len-cand, buffer-size)
+    }
+  } else {
+    let content-ptr = add-int(ptr, add-int(mul-int(u, 2), len-cand)) in
+    let bytes = Ext.read(from, content-ptr, buffer-size) in
+    let next-len-cand = add-int(len-cand, bytes) in
+    if lt-int(bytes, 0) {
+      Ext.free(ptr);
+      report-system-error()
+    } else-if lt-int(bytes, buffer-size) {
+      Mem.store-int(next-len-cand, add-int(ptr, u));
+      Right(Magic.cast(int, binary, ptr))
+    } else {
+      _read-inner(from, ptr, ptr-size, next-len-cand, buffer-size)
+    }
+  }
+}
+
+define read(from: FD.descriptor, initial-buffer-size: int): system(binary) {
+  let u = Word.size in
+  let ptr-size = add-int(initial-buffer-size, mul-int(u, 2)) in
+  let ptr = Ext.malloc(ptr-size) in
+  Mem.store-int(0, ptr);
+  _read-inner(from, ptr, ptr-size, 0, initial-buffer-size)
+}

@@ -12,10 +12,9 @@ import {
 }
 
 define open(path: &text, xs: list(FF.flag), ms: list(FM.mode)): system(FD.descriptor) {
-  let path' = this.text.append(path, "\0") in
-  let actual-path-string on path' = _get-content-pointer(path') in
+  pin path' = this.text.append(path, "\0") in
+  let actual-path-string = _get-content-pointer(path') in
   let fd = Ext.open(actual-path-string, FF.interpret(xs), FM.interpret(ms)) in
-  let _ = path' in
   if lt-int(magic cast(FD.descriptor, int, fd), 0) {
     report-system-error()
   } else {

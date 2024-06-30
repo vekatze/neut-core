@@ -183,6 +183,11 @@ define from-int(value: int): ?rune {
   }
 }
 
+define to-int32(r: rune): int32 {
+  let _Rune(value) = r in
+  value
+}
+
 define to-int(r: rune): int {
   let _Rune(value) = r in
   zext-int32-int(value)

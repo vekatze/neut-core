@@ -1,4 +1,5 @@
 import {
+  this.box,
   this.list {Cons, append, for-each, intercalate, list},
   this.show {Show, show},
   this.text {join},

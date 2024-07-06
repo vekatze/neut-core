@@ -6,6 +6,7 @@ import {
   this.ordering {GT, LT},
   this.pair {Pair, pair},
   this.unit {Unit, unit},
+  this.box,
 }
 
 data list(a: type) {

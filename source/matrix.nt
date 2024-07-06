@@ -3,6 +3,7 @@ import {
   TIO,
   Vector {vector},
   this.bool {and},
+  this.box,
   this.control {loop},
   this.either {from-option},
   this.function {lift-N2},

@@ -6,6 +6,7 @@ import {
   core.system,
   core.text,
   core.unit,
+  this.box,
   this.list {Cons, Nil, append, list},
   this.ord,
   this.pair {Pair, pair},

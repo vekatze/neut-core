@@ -1,5 +1,6 @@
 import {
   this.bool {and, bool},
+  this.box,
   this.list {Cons, any, concat, list},
   this.rune {size-by-head-byte},
   this.show {Show, show},

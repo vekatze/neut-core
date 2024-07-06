@@ -3,6 +3,7 @@ import {
   Mem,
   Word,
   this.bool,
+  this.box,
   this.control {loop},
   this.either {Left, Right, either, from-option, none},
   this.external {free, malloc},

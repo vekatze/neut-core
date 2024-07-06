@@ -1,5 +1,6 @@
 import {
   this.bool {and, bool},
+  this.box,
   this.either {Left, Right, either},
   this.int.parse {parse-hex},
   this.list {Cons, Nil, any, concat, intercalate, list, try-for-each, try-for-each-N},

@@ -2,6 +2,7 @@ import {
   O {EQ, GT, LT},
   this.bool,
   this.ord {Ord, ord},
+  this.box,
 }
 
 constant as-ord: ord(int) {

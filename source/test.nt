@@ -1,4 +1,5 @@
 import {
+  this.box,
   this.cell {mutate},
   this.control {discard},
   this.int.show {show-int},
@@ -39,7 +40,10 @@ define box-int(i: int): meta int {
 
 define zen(): unit {
   let !xs: list(int) = [1, 2, 3] in
-  letbox len on !xs = box-int(length(!xs)) in
+  letbox len on !xs =
+    discard(*!xs);
+    box-int(length(!xs))
+  in
   let _ = discard(!xs) in
   let _ = discard(!xs) in
   let _ = discard(!xs) in

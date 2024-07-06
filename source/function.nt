@@ -1,3 +1,7 @@
+import {
+  this.box,
+}
+
 inline flip<a, b, c>(f: (a, b) -> c): (b, a) -> c {
   function (y, x) {
     f(x, y)

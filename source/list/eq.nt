@@ -1,6 +1,7 @@
 import {
   E,
   this.bool {False, True, bool},
+  this.box,
   this.eq {Eq, eq},
   this.list {Cons, Nil, list},
 }

@@ -6,6 +6,7 @@ import {
   Word,
   this.binary {_copy-binary, binary, binary-access, binary-length, binary-new},
   this.bool {False, True, bool},
+  this.box,
   this.either {Right, none},
   this.list {Cons, Nil, list, reverse},
   this.memory {load-int8},

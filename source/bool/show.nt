@@ -1,5 +1,6 @@
 import {
   this.bool {bool},
+  this.box,
   this.show {Show, show},
   this.text {text},
 }

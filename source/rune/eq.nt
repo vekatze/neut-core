@@ -1,6 +1,7 @@
 import {
   this.bool {bool},
   this.eq {Eq, eq},
+  this.box,
   this.rune {_Rune, rune},
 }
 

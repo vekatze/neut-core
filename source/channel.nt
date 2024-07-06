@@ -5,6 +5,7 @@ import {
   Mem,
   Q,
   Word,
+  this.box,
   this.either {Left, Right},
   this.int {sum-int},
   this.pair {Pair},

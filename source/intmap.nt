@@ -1,5 +1,6 @@
 import {
   this.bool {bool},
+  this.box,
   this.either {Right, none},
   this.list {Cons, append, list},
   this.pair {Pair, pair},

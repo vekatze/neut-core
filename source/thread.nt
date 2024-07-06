@@ -5,6 +5,7 @@ import {
   Word,
   this.bool,
   this.unit {Unit, unit},
+  this.box,
 }
 
 inline _embody(a: type, x: &a): a {

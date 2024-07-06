@@ -45,6 +45,7 @@
   },
   preset {
     bool ["False", "True", "and", "bool", "not", "or"],
+    box ["axiom-K", "axiom-T", "embody"],
     cell ["borrow", "cell", "clone", "mutate"],
     channel ["channel", "receive", "send"],
     either ["Left", "Right", "either", "none"],

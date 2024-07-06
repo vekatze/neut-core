@@ -5,6 +5,7 @@ import {
   Mem,
   Word,
   this.bool {bool},
+  this.box,
   this.control {discard},
   this.either {Right, none},
   this.external {free, malloc},

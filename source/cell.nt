@@ -4,6 +4,7 @@ import {
   Magic,
   Mem,
   Word,
+  this.box,
   this.int {sum-int},
   this.unit {unit},
 }

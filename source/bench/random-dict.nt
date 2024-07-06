@@ -1,6 +1,7 @@
 import {
   Dict {dictionary},
   TIO,
+  this.box,
   this.control {grow},
   this.either {Left, Right},
   this.int.ord {as-ord-N},

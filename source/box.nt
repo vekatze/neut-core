@@ -1,0 +1,16 @@
+inline axiom-K<a, b>(f: meta (a) -> b, x: meta a): meta b {
+  box {
+    letbox f' = f in
+    letbox x' = x in
+    f'(x')
+  }
+}
+
+inline axiom-T<a>(x: meta a): a {
+  letbox x' = x in
+  x'
+}
+
+inline embody<a>(x: &a): a {
+  axiom-T(box x {x})
+}

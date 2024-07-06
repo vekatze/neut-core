@@ -282,7 +282,8 @@ define from-list<a>(base-list: list(a)): vector(a) {
 define to-list<a>(xs: vector(a)): list(a) {
   let len on xs = length(xs) in
   let word-size = Word.size in
-  let _Vector-Info of {content-ptr} on xs = _get-vector-info(xs) in
+  let vecinfo on xs = _get-vector-info(xs) in
+  let _Vector-Info of {content-ptr} = vecinfo in
   let ptr0 = magic cast(vector(a), int, xs) in
   let loop =
     define self(index: int): list(a) {

@@ -1,18 +1,20 @@
 import {
   this.cell {mutate},
-  this.either {Left, Right},
-  this.int.show {%ld, show-int},
-  this.list {for},
-  this.rune,
-  this.rune.eq {eq-rune, ne-rune},
-  this.text {_get-rune-size, _get-rune-size-end, drop-N, find-end, take-end-N, take-end-while-N},
+  this.control {discard},
+  this.int.show {show-int},
+  this.list {length, list},
+  this.text,
   this.text.io {print, printf},
   this.unit {Unit, unit},
-  this.vector,
 }
 
 define with-cell(i: int): int {
   let c = new-cell(i) in
+  let _ on c =
+    mutate(c, function (x) {
+      add-int(x, 1)
+    })
+  in
   let _ on c =
     mutate(c, function (x) {
       add-int(x, 1)
@@ -31,69 +33,18 @@ define with-cell(i: int): int {
   this.cell.extract(c)
 }
 
+define box-int(i: int): meta int {
+  magic cast(int, meta int, i)
+}
+
 define zen(): unit {
-  let !xs =
-    this.vector.create(10, function (x) {
-      x
-    })
-  in
-  let !ys =
-    this.vector.create(10, function (x) {
-      add-int(100, x)
-    })
-  in
-  let zs on !xs, !ys =
-    this.vector.zip-with-N(!xs, !ys, function (x, y) {
-      add-int(*x, *y)
-    })
-  in
-  let _ = !ys in
-  this.vector.for(zs, function (x) {
-    printf("value: {}\n", [show-int(x)])
-  });
-  print("-----------\n");
-  this.vector.for(!xs, function (x) {
-    printf("value: {}\n", [show-int(x)])
-  });
-  let _ on !xs =
-    this.vector.for-N(!xs, function (x) {
-      printf("value: {}\n", [show-int(*x)])
-    })
-  in
-  let xs = this.vector.to-list(!xs) in
-  for(xs, function (x) {
-    printf("value: {}\n", [show-int(x)])
-  });
-  let x = 0 in
-  let x = with-cell(with-cell(with-cell(x))) in
-  printf("val: {}\n", [show-int(x)]);
-  let p = "/Users/foo/some-file.txt" in
-  let q =
-    take-end-while-N(p, function (r) {
-      ne-rune(r, `A`)
-    })
-  in
-  printf("q: {}\n", [q]);
-  printf("drop: {}\n", [drop-N(p, 3)]);
-  let result =
-    find-end(p, function (r) {
-      eq-rune(r, `.`)
-    })
-  in
-  match result {
-  | Right(v) =>
-    printf("find-index: {}\n", [%ld(v)]);
-    printf("ext: {}\n", [take-end-N(p, add-int(v, 1))]);
-  | Left(_) =>
-    print("not found\n");
-  };
-  let t = "Ô" in
-  let len = this.text.text-byte-length(t) in
-  let s1 = _get-rune-size-end(t, sub-int(len, 1)) in
-  let s2 = _get-rune-size(t, 0) in
-  printf("byte-length: {}\n", [%ld(len)]);
-  printf("s1: {}\n", [%ld(s1)]);
-  printf("s2: {}\n", [%ld(s2)]);
+  let !xs: list(int) = [1, 2, 3] in
+  letbox len on !xs = box-int(length(!xs)) in
+  let _ = discard(!xs) in
+  let _ = discard(!xs) in
+  let _ = discard(!xs) in
+  printf("len: {}\n", [show-int(len)]);
+  print("hello, world\n");
   Unit
 }
 

@@ -7,7 +7,7 @@ inline axiom-K<a, b>(f: meta (a) -> b, x: meta a): meta b {
 }
 
 inline axiom-T<a>(x: meta a): a {
-  letbox x' = x in
+  letbox-T x' = x in
   x'
 }
 

@@ -1,5 +1,4 @@
 import {
-  this.rune {rune},
   this.show {Show, show},
   this.text {join, text, text-byte-length},
   this.text.show {_escape},

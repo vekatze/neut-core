@@ -5,7 +5,7 @@ import {
   this.int.parse {parse-hex},
   this.list {Cons, Nil, any, concat, intercalate, list, try-for-each, try-for-each-N},
   this.pair {Pair},
-  this.rune {rune},
+  this.rune,
   this.rune.eq {eq-rune},
   this.rune.ord {le-rune},
   this.text {

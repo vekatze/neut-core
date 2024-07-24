@@ -44,6 +44,7 @@
     Word "this.word",
   },
   preset {
+    binary ["binary"],
     bool ["False", "True", "and", "bool", "not", "or"],
     box ["axiom-K", "axiom-T", "embody"],
     cell ["borrow", "cell", "clone", "mutate"],
@@ -80,7 +81,6 @@
     null ["null"],
     ordering ["EQ", "GT", "LT", "ordering"],
     pair ["Pair", "pair"],
-    rune ["rune"],
     rune.eq ["eq-rune", "ne-rune"],
     rune.ord ["lt-rune", "le-rune", "gt-rune", "ge-rune"],
     system ["admit", "assert", "get-argc", "get-argv", "panic"],

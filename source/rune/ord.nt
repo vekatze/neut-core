@@ -1,32 +1,32 @@
 import {
   O {EQ, GT, LT},
-  this.box,
   this.bool {bool},
+  this.box,
   this.ord {Ord, ord},
-  this.rune {_Rune, rune},
+  this.rune {to-int32},
 }
 
 define lt-rune(r1: rune, r2: rune): bool {
-  let _Rune(r1) = r1 in
-  let _Rune(r2) = r2 in
+  let r1 = to-int32(r1) in
+  let r2 = to-int32(r2) in
   lt-int32(r1, r2)
 }
 
 define le-rune(r1: rune, r2: rune): bool {
-  let _Rune(r1) = r1 in
-  let _Rune(r2) = r2 in
+  let r1 = to-int32(r1) in
+  let r2 = to-int32(r2) in
   le-int32(r1, r2)
 }
 
 define gt-rune(r1: rune, r2: rune): bool {
-  let _Rune(r1) = r1 in
-  let _Rune(r2) = r2 in
+  let r1 = to-int32(r1) in
+  let r2 = to-int32(r2) in
   gt-int32(r1, r2)
 }
 
 define ge-rune(r1: rune, r2: rune): bool {
-  let _Rune(r1) = r1 in
-  let _Rune(r2) = r2 in
+  let r1 = to-int32(r1) in
+  let r2 = to-int32(r2) in
   ge-int32(r1, r2)
 }
 

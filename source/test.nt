@@ -4,6 +4,7 @@ import {
   this.control {discard},
   this.int.show {show-int},
   this.list {length, list},
+  this.rune {to-int},
   this.text,
   this.text.io {print, printf},
   this.unit {Unit, unit},
@@ -39,6 +40,7 @@ define box-int(i: int): meta int {
 }
 
 define zen(): unit {
+  let foo = `b` in
   let !xs: list(int) = [1, 2, 3] in
   letbox len on !xs =
     discard(*!xs);
@@ -48,6 +50,7 @@ define zen(): unit {
   let _ = discard(!xs) in
   let _ = discard(!xs) in
   printf("len: {}\n", [show-int(len)]);
+  printf("rune-as-int: {}\n", [show-int(to-int(foo))]);
   print("hello, world\n");
   Unit
 }

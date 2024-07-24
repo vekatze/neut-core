@@ -11,7 +11,7 @@ import {
   this.list {Cons, Nil, list, reverse},
   this.memory {load-int8},
   this.pair {Pair, pair},
-  this.rune {_Rune, load-rune, rune, size-by-head-byte, store-rune},
+  this.rune {load-rune, size-by-head-byte, store-rune, to-int32},
   this.unit {Unit, unit},
 }
 
@@ -199,7 +199,7 @@ define _get-rune-size-end(t: &text, index: int): int {
 
 define singleton(value: rune): text {
   let s = this.rune.size(value) in
-  let _Rune(value) = value in
+  let value = to-int32(value) in
   match s {
   | 1 =>
     let piece-0 = trunc-int32-int8(value) in

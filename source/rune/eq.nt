@@ -1,19 +1,19 @@
 import {
   this.bool {bool},
-  this.eq {Eq, eq},
   this.box,
-  this.rune {_Rune, rune},
+  this.eq {Eq, eq},
+  this.rune {to-int32},
 }
 
 define eq-rune(r1: rune, r2: rune): bool {
-  let _Rune(r1) = r1 in
-  let _Rune(r2) = r2 in
+  let r1 = to-int32(r1) in
+  let r2 = to-int32(r2) in
   eq-int32(r1, r2)
 }
 
 define ne-rune(r1: rune, r2: rune): bool {
-  let _Rune(r1) = r1 in
-  let _Rune(r2) = r2 in
+  let r1 = to-int32(r1) in
+  let r2 = to-int32(r2) in
   ne-int32(r1, r2)
 }
 

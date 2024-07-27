@@ -9,25 +9,25 @@ import {
 define lt-rune(r1: rune, r2: rune): bool {
   let r1 = to-int32(r1) in
   let r2 = to-int32(r2) in
-  lt-int32(r1, r2)
+  ult-int32(r1, r2)
 }
 
 define le-rune(r1: rune, r2: rune): bool {
   let r1 = to-int32(r1) in
   let r2 = to-int32(r2) in
-  le-int32(r1, r2)
+  ule-int32(r1, r2)
 }
 
 define gt-rune(r1: rune, r2: rune): bool {
   let r1 = to-int32(r1) in
   let r2 = to-int32(r2) in
-  gt-int32(r1, r2)
+  ugt-int32(r1, r2)
 }
 
 define ge-rune(r1: rune, r2: rune): bool {
   let r1 = to-int32(r1) in
   let r2 = to-int32(r2) in
-  ge-int32(r1, r2)
+  uge-int32(r1, r2)
 }
 
 constant as-ord: ord(rune) {

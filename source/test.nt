@@ -2,8 +2,10 @@ import {
   this.box,
   this.cell {mutate},
   this.control {discard},
+  this.either {Left, Right, either},
   this.int.show {show-int},
   this.list {length, list},
+  this.pair {Pair, pair},
   this.rune {to-int},
   this.text,
   this.text.io {print, printf},
@@ -39,8 +41,48 @@ define box-int(i: int): meta int {
   magic cast(int, meta int, i)
 }
 
+define use-rune(r: rune): unit {
+  match r {
+  | `a` =>
+    print("found a\n")
+  | `あ` =>
+    print("found あ\n")
+  | _ =>
+    print("found other\n")
+  }
+}
+
 define zen(): unit {
-  let foo = `b` in
+  let foo = `x` in
+  use-rune(foo);
+  match foo {
+  | `a` =>
+    print("a\n")
+  | `b` =>
+    print("b\n")
+  | `あ` =>
+    print("lorem ipsum\n")
+  | _ =>
+    print("other\n")
+  };
+  let k: rune = `x` in
+  match k {
+  | `x` =>
+    print("test")
+  | _ =>
+    Unit
+  };
+  let p: either(pair(rune, type), type) = Left(Pair(`x`, type)) in
+  match p {
+  | Right(_) =>
+    print("right\n")
+  | Left(Pair(`a`, _)) =>
+    print("pair-a\n")
+  | Left(Pair(`x`, _)) =>
+    print("pair-x\n")
+  | Left(Pair(_, _)) =>
+    print("pair-x\n")
+  };
   let !xs: list(int) = [1, 2, 3] in
   letbox len on !xs =
     discard(*!xs);

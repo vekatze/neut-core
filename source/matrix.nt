@@ -231,9 +231,9 @@ define zip-with<a, b, c>(mat1: &matrix(a), mat2: &matrix(b), f: (&a, &b) -> c): 
     let r2 = get-row-size(mat2) in
     eq-int(r1, r2)
   };
-  let c1 = get-row-size(mat1) in
+  let c1 = get-col-size(mat1) in
   assert "col-size(mat1) == col-size(mat2)" {
-    let c2 = get-row-size(mat2) in
+    let c2 = get-col-size(mat2) in
     eq-int(c1, c2)
   };
   let vec1 = get-content(mat1) in

@@ -163,7 +163,7 @@ define length<a>(xs: &vector(a)): int {
 
 inline for-each<a, b>(xs: vector(a), f: (a) -> b): vector(b) {
   let word-size = Word.size in
-  let ptr0 = magic cast(vector(a), int, xs) in
+  let ptr0 = Magic.cast(vector(a), int, xs) in
   let ptr1 = add-int(ptr0, word-size) in
   let ptr2 = add-int(ptr0, mul-int(word-size, 2)) in
   let ptr3 = add-int(ptr0, mul-int(word-size, 3)) in
@@ -176,15 +176,15 @@ inline for-each<a, b>(xs: vector(a), f: (a) -> b): vector(b) {
         Unit
       } else {
         let value-ptr = add-int(ptr3, mul-int(index, word-size)) in
-        let old-value = Mem.load-int(value-ptr) in
-        let new-value = f(Magic.cast(int, a, old-value)) in
-        Mem.store-int(Magic.cast(b, int, new-value), value-ptr);
+        let old-value = Magic.cast(int, a, Mem.load-int(value-ptr)) in
+        let new-value-ptr = Magic.cast(b, int, f(old-value)) in
+        Mem.store-int(new-value-ptr, value-ptr);
         self(add-int(index, 1))
       }
     }
   in
   store-values(from);
-  magic cast(int, vector(b), ptr0)
+  Magic.cast(int, vector(b), ptr0)
 }
 
 inline for-each-N<a, b>(xs: &vector(a), f: (&a) -> b): vector(b) {

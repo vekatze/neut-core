@@ -19,6 +19,10 @@ define show(b: bool): text {
   as-show::show(b)
 }
 
+define show-bool(b: bool): text {
+  this.bool.show.show(b)
+}
+
 define %t(b: bool): text {
   as-show::show(b)
 }

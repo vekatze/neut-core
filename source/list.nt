@@ -249,25 +249,6 @@ define length<a>(xs: &list(a)): int {
   })
 }
 
-define zip<a, b>(xs: list(a), ys: list(b)): list(pair(a, b)) {
-  match xs, ys {
-  | Nil, _ =>
-    Nil
-  | _, Nil =>
-    Nil
-  | Cons(x, xs'), Cons(y, ys') =>
-    Cons(Pair(x, y), zip(xs', ys'))
-  }
-}
-
-define unzip<a, b>(xs: list(pair(a, b))): pair(list(a), list(b)) {
-  fold-right(xs, Pair([], []), function (x, acc) {
-    let Pair(l, r) = x in
-    let Pair(rest-l, rest-r) = acc in
-    Pair(Cons(l, rest-l), Cons(r, rest-r))
-  })
-}
-
 inline zip-with<a, b, c>(xs: list(a), ys: list(b), f: (a, b) -> c): list(c) {
   let k =
     define loop(xs: list(a), ys: list(b)): list(c) {
@@ -298,6 +279,24 @@ inline zip-with-N<a, b, c>(xs: &list(a), ys: &list(b), f: (&a, &b) -> c): list(c
     }
   in
   k(xs, ys)
+}
+
+define zip<a, b>(xs: list(a), ys: list(b)): list(pair(a, b)) {
+  zip-with(xs, ys, exact Pair)
+}
+
+define zip-N<a, b>(xs: &list(a), ys: &list(b)): list(pair(&a, &b)) {
+  zip-with-N(xs, ys, function (x, y) {
+    Pair(x, y)
+  })
+}
+
+define unzip<a, b>(xs: list(pair(a, b))): pair(list(a), list(b)) {
+  fold-right(xs, Pair([], []), function (x, acc) {
+    let Pair(l, r) = x in
+    let Pair(rest-l, rest-r) = acc in
+    Pair(Cons(l, rest-l), Cons(r, rest-r))
+  })
 }
 
 define uncons<a>(xs: list(a)): ?pair(a, list(a)) {

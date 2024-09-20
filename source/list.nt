@@ -18,7 +18,7 @@ data list(a: type) {
 inline fold-left<elem-type, result-type>(
   acc: result-type,
   xs: list(elem-type),
-  consumer: (result-type, elem-type) -> result-type,
+  !consumer: (result-type, elem-type) -> result-type,
 ): result-type {
   let helper =
     define loop(acc, xs): result-type {
@@ -26,7 +26,7 @@ inline fold-left<elem-type, result-type>(
       | Nil =>
         acc
       | Cons(y, ys) =>
-        loop(consumer(acc, y), ys)
+        loop(!consumer(acc, y), ys)
       }
     }
   in
@@ -36,7 +36,7 @@ inline fold-left<elem-type, result-type>(
 inline fold-left-N<elem-type, result-type>(
   acc: result-type,
   xs: &list(elem-type),
-  consumer: (result-type, &elem-type) -> result-type,
+  !consumer: (result-type, &elem-type) -> result-type,
 ): result-type {
   let helper =
     define loop(acc, xs): result-type {
@@ -44,7 +44,7 @@ inline fold-left-N<elem-type, result-type>(
       | Nil =>
         acc
       | Cons(y, ys) =>
-        loop(consumer(acc, y), ys)
+        loop(!consumer(acc, y), ys)
       }
     }
   in
@@ -54,7 +54,7 @@ inline fold-left-N<elem-type, result-type>(
 inline fold-left-with-index<elem-type, result-type>(
   acc: result-type,
   xs: list(elem-type),
-  consumer: (result-type, elem-type, int) -> result-type,
+  !consumer: (result-type, elem-type, int) -> result-type,
 ): result-type {
   let helper =
     define loop(acc, xs, i): result-type {
@@ -62,7 +62,7 @@ inline fold-left-with-index<elem-type, result-type>(
       | Nil =>
         acc
       | Cons(y, ys) =>
-        loop(consumer(acc, y, i), ys, add-int(i, 1))
+        loop(!consumer(acc, y, i), ys, add-int(i, 1))
       }
     }
   in
@@ -72,7 +72,7 @@ inline fold-left-with-index<elem-type, result-type>(
 inline fold-right<elem-type, result-type>(
   xs: list(elem-type),
   acc: result-type,
-  consumer: (elem-type, result-type) -> result-type,
+  !consumer: (elem-type, result-type) -> result-type,
 ): result-type {
   let helper =
     define loop(xs, acc): result-type {
@@ -80,7 +80,7 @@ inline fold-right<elem-type, result-type>(
       | Nil =>
         acc
       | Cons(y, ys) =>
-        consumer(y, loop(ys, acc))
+        !consumer(y, loop(ys, acc))
       }
     }
   in
@@ -90,7 +90,7 @@ inline fold-right<elem-type, result-type>(
 inline fold-right-N<elem-type, result-type>(
   xs: &list(elem-type),
   acc: result-type,
-  consumer: (&elem-type, result-type) -> result-type,
+  !consumer: (&elem-type, result-type) -> result-type,
 ): result-type {
   let helper =
     define loop(xs, acc): result-type {
@@ -98,7 +98,7 @@ inline fold-right-N<elem-type, result-type>(
       | Nil =>
         acc
       | Cons(y, ys) =>
-        consumer(y, loop(ys, acc))
+        !consumer(y, loop(ys, acc))
       }
     }
   in
@@ -131,42 +131,42 @@ define alternate<a>(xs: list(a), ys: list(a)): list(a) {
   }
 }
 
-inline for-each<a, b>(xs: list(a), f: (a) -> b): list(b) {
+inline for-each<a, b>(xs: list(a), !f: (a) -> b): list(b) {
   let helper =
     define loop(xs: list(a), acc: list(b)): list(b) {
       match xs {
       | Nil =>
         acc
       | Cons(y, ys) =>
-        Cons(f(y), loop(ys, acc))
+        Cons(!f(y), loop(ys, acc))
       }
     }
   in
   helper(xs, [])
 }
 
-inline for-each-N<a, b>(xs: &list(a), f: (&a) -> b): list(b) {
+inline for-each-N<a, b>(xs: &list(a), !f: (&a) -> b): list(b) {
   let helper =
     define loop(xs: &list(a), acc: list(b)): list(b) {
       case xs {
       | Nil =>
         acc
       | Cons(y, ys) =>
-        Cons(f(y), loop(ys, acc))
+        Cons(!f(y), loop(ys, acc))
       }
     }
   in
   helper(xs, [])
 }
 
-inline try-for-each<a, e, b>(xs: list(a), f: (a) -> either(e, b)): either(e, list(b)) {
+inline try-for-each<a, e, b>(xs: list(a), !f: (a) -> either(e, b)): either(e, list(b)) {
   let f =
     define self(xs: list(a)): either(e, list(b)) {
       match xs {
       | Nil =>
         Right(Nil)
       | Cons(y, ys) =>
-        try z = f(y) in
+        try z = !f(y) in
         try zs = self(ys) in
         Right(Cons(z, zs))
       }
@@ -175,14 +175,14 @@ inline try-for-each<a, e, b>(xs: list(a), f: (a) -> either(e, b)): either(e, lis
   f(xs)
 }
 
-inline try-for-each-N<a, e, b>(xs: &list(a), f: (&a) -> either(e, b)): either(e, list(b)) {
+inline try-for-each-N<a, e, b>(xs: &list(a), !f: (&a) -> either(e, b)): either(e, list(b)) {
   let f =
     define self(xs: &list(a)): either(e, list(b)) {
       case xs {
       | Nil =>
         Right(Nil)
       | Cons(y, ys) =>
-        try z = f(y) in
+        try z = !f(y) in
         try zs = self(ys) in
         Right(Cons(z, zs))
       }
@@ -215,27 +215,27 @@ define reverse<a>(xs: list(a)): list(a) {
   })
 }
 
-inline iterate<a>(count: int, f: (int) -> a): list(a) {
+inline iterate<a>(count: int, !f: (int) -> a): list(a) {
   let helper =
     define self(cursor): list(a) {
       if ge-int(cursor, count) {
         Nil
       } else {
-        Cons(f(cursor), self(add-int(cursor, 1)))
+        Cons(!f(cursor), self(add-int(cursor, 1)))
       }
     }
   in
   helper(0)
 }
 
-inline try-iterate<e, a>(count: int, f: (int) -> either(e, a)): either(e, list(a)) {
+inline try-iterate<e, a>(count: int, !f: (int) -> either(e, a)): either(e, list(a)) {
   let helper =
     define self(acc: list(a), cursor: int): either(e, list(a)) {
       match ge-int(cursor, count) {
       | True =>
         Right(reverse(acc))
       | False =>
-        try v = f(cursor) in
+        try v = !f(cursor) in
         self(Cons(v, acc), add-int(cursor, 1))
       }
     }
@@ -249,7 +249,7 @@ define length<a>(xs: &list(a)): int {
   })
 }
 
-inline zip-with<a, b, c>(xs: list(a), ys: list(b), f: (a, b) -> c): list(c) {
+inline zip-with<a, b, c>(xs: list(a), ys: list(b), !f: (a, b) -> c): list(c) {
   let k =
     define loop(xs: list(a), ys: list(b)): list(c) {
       match xs, ys {
@@ -258,14 +258,14 @@ inline zip-with<a, b, c>(xs: list(a), ys: list(b), f: (a, b) -> c): list(c) {
       | _, Nil =>
         Nil
       | Cons(x, xs'), Cons(y, ys') =>
-        Cons(f(x, y), loop(xs', ys'))
+        Cons(!f(x, y), loop(xs', ys'))
       }
     }
   in
   k(xs, ys)
 }
 
-inline zip-with-N<a, b, c>(xs: &list(a), ys: &list(b), f: (&a, &b) -> c): list(c) {
+inline zip-with-N<a, b, c>(xs: &list(a), ys: &list(b), !f: (&a, &b) -> c): list(c) {
   let k =
     define loop(xs: &list(a), ys: &list(b)): list(c) {
       case xs, ys {
@@ -274,7 +274,7 @@ inline zip-with-N<a, b, c>(xs: &list(a), ys: &list(b), f: (&a, &b) -> c): list(c
       | _, Nil =>
         Nil
       | Cons(x, xs'), Cons(y, ys') =>
-        Cons(f(x, y), loop(xs', ys'))
+        Cons(!f(x, y), loop(xs', ys'))
       }
     }
   in
@@ -341,14 +341,14 @@ define range(from: int, to: int): list(int) {
   }
 }
 
-inline find<a>(xs: &list(a), pred: (&a) -> bool): ?&a {
+inline find<a>(xs: &list(a), !pred: (&a) -> bool): ?&a {
   let f =
     define self(ys: &list(a)): ?&a {
       case ys {
       | Nil =>
         none()
       | Cons(z, zs) =>
-        if pred(z) {
+        if !pred(z) {
           Right(z)
         } else {
           self(zs)
@@ -359,14 +359,14 @@ inline find<a>(xs: &list(a), pred: (&a) -> bool): ?&a {
   f(xs)
 }
 
-inline filter<a>(xs: list(a), pred: (&a) -> bool): list(a) {
+inline filter<a>(xs: list(a), !pred: (&a) -> bool): list(a) {
   let f =
     define self(xs: list(a)): list(a) {
       match xs {
       | Nil =>
         Nil
       | Cons(y, ys) =>
-        let b on y = pred(y) in
+        let b on y = !pred(y) in
         if b {
           Cons(y, self(ys))
         } else {
@@ -418,14 +418,14 @@ inline minimum<a>(as-ord: ord(&a)): (list(a)) -> ?a {
 
 inline maximum<a>(as-ord: ord(&a)): (list(a)) -> ?a {
   function (xs) {
-    let Ord of {compare} = as-ord in
+    let Ord of {compare = !compare} = as-ord in
     let helper =
       define self(cand: a, ys: list(a)): a {
         match ys {
         | Nil =>
           cand
         | Cons(z, zs) =>
-          let order on cand, z = compare(cand, z) in
+          let order on cand, z = !compare(cand, z) in
           match order {
           | GT =>
             self(cand, zs)
@@ -563,14 +563,14 @@ define nth<a>(xs: &list(a), n: int): ?a {
   }
 }
 
-inline span<a>(xs: list(a), pred: (&a) -> bool): pair(list(a), list(a)) {
+inline span<a>(xs: list(a), !pred: (&a) -> bool): pair(list(a), list(a)) {
   let f =
     define self(xs: list(a)): pair(list(a), list(a)) {
       match xs {
       | [] =>
         Pair([], [])
       | Cons(y, ys) =>
-        let cond on y = pred(y) in
+        let cond on y = !pred(y) in
         if cond {
           let Pair(former, latter) = self(ys) in
           Pair(Cons(y, former), latter)
@@ -583,14 +583,14 @@ inline span<a>(xs: list(a), pred: (&a) -> bool): pair(list(a), list(a)) {
   f(xs)
 }
 
-inline span-N<a>(xs: &list(a), pred: (&a) -> bool): pair(list(a), list(a)) {
+inline span-N<a>(xs: &list(a), !pred: (&a) -> bool): pair(list(a), list(a)) {
   let f =
     define self(xs: &list(a)): pair(list(a), list(a)) {
       case xs {
       | [] =>
         Pair([], [])
       | Cons(y, ys) =>
-        if pred(y) {
+        if !pred(y) {
           let Pair(former, latter) = self(ys) in
           Pair(Cons(*y, former), latter)
         } else {
@@ -602,14 +602,14 @@ inline span-N<a>(xs: &list(a), pred: (&a) -> bool): pair(list(a), list(a)) {
   f(xs)
 }
 
-inline take-while<a>(xs: list(a), pred: (&a) -> bool): list(a) {
+inline take-while<a>(xs: list(a), !pred: (&a) -> bool): list(a) {
   let f =
     define self(xs: list(a)): list(a) {
       match xs {
       | [] =>
         []
       | Cons(y, ys) =>
-        let cond on y = pred(y) in
+        let cond on y = !pred(y) in
         if cond {
           Cons(y, self(ys))
         } else {
@@ -621,14 +621,14 @@ inline take-while<a>(xs: list(a), pred: (&a) -> bool): list(a) {
   f(xs)
 }
 
-inline take-while-N<a>(xs: &list(a), pred: (&a) -> bool): list(a) {
+inline take-while-N<a>(xs: &list(a), !pred: (&a) -> bool): list(a) {
   let f =
     define self(xs: &list(a)): list(a) {
       case xs {
       | [] =>
         []
       | Cons(y, ys) =>
-        if pred(y) {
+        if !pred(y) {
           Cons(*y, self(ys))
         } else {
           []
@@ -639,14 +639,14 @@ inline take-while-N<a>(xs: &list(a), pred: (&a) -> bool): list(a) {
   f(xs)
 }
 
-inline drop-while<a>(xs: list(a), pred: (&a) -> bool): list(a) {
+inline drop-while<a>(xs: list(a), !pred: (&a) -> bool): list(a) {
   let f =
     define self(xs: list(a)): list(a) {
       match xs {
       | [] =>
         []
       | Cons(y, ys) =>
-        let cond on y = pred(y) in
+        let cond on y = !pred(y) in
         if cond {
           self(ys)
         } else {
@@ -658,14 +658,14 @@ inline drop-while<a>(xs: list(a), pred: (&a) -> bool): list(a) {
   f(xs)
 }
 
-inline drop-while-N<a>(xs: &list(a), pred: (&a) -> bool): list(a) {
+inline drop-while-N<a>(xs: &list(a), !pred: (&a) -> bool): list(a) {
   let f =
     define self(xs: &list(a)): list(a) {
       case xs {
       | [] =>
         []
       | Cons(y, ys) =>
-        if pred(y) {
+        if !pred(y) {
           self(ys)
         } else {
           Cons(*y, *ys)

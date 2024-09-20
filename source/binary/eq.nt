@@ -13,14 +13,14 @@ constant _cmp-array-t: type {
   (t1: &binary, t2: &binary) -> bool
 }
 
-inline _cmp-binary(cmp: (int8, int8) -> bool): _cmp-ptr-t {
+inline _cmp-binary(!cmp: (int8, int8) -> bool): _cmp-ptr-t {
   define self(ptr1: int, ptr2: int, index: int, to: int): bool {
     if eq-int(index, to) {
       True
     } else {
       let v1 = load-int8(add-int(ptr1, index)) in
       let v2 = load-int8(add-int(ptr2, index)) in
-      if cmp(v1, v2) {
+      if !cmp(v1, v2) {
         self(ptr1, ptr2, add-int(index, 1), to)
       } else {
         False

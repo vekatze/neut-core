@@ -4,14 +4,14 @@ import {
   core.unit {Unit, unit},
 }
 
-define loop(count: int, f: (int) -> unit): unit {
+inline loop(count: int, !f: (int) -> unit): unit {
   let helper =
     define self(cursor): unit {
       match ge-int(cursor, count) {
       | True =>
         Unit
       | False =>
-        f(cursor);
+        !f(cursor);
         self(add-int(cursor, 1))
       }
     }
@@ -19,14 +19,14 @@ define loop(count: int, f: (int) -> unit): unit {
   helper(0)
 }
 
-inline try-loop<e>(count: int, f: (int) -> either(e, unit)): either(e, unit) {
+inline try-loop<e>(count: int, !f: (int) -> either(e, unit)): either(e, unit) {
   let helper =
     define self(cursor): either(e, unit) {
       match ge-int(cursor, count) {
       | True =>
         Right(Unit)
       | False =>
-        try _ = f(cursor) in
+        try _ = !f(cursor) in
         self(add-int(cursor, 1))
       }
     }
@@ -34,13 +34,13 @@ inline try-loop<e>(count: int, f: (int) -> either(e, unit)): either(e, unit) {
   helper(0)
 }
 
-inline grow<a>(seed: a, iteration: int, step: (a, int) -> a): a {
+inline grow<a>(seed: a, iteration: int, !step: (a, int) -> a): a {
   let helper =
     define self(current: int, acc: a): a {
       if ge-int(current, iteration) {
         acc
       } else {
-        self(add-int(current, 1), step(acc, current))
+        self(add-int(current, 1), !step(acc, current))
       }
     }
   in

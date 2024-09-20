@@ -313,7 +313,7 @@ define intercalate-N(xs: list(&binary), sep: &binary): binary {
   join-N(this.list.intercalate(xs, sep))
 }
 
-define find(xs: &binary, pred: (int8) -> bool): ?int {
+define find(xs: &binary, !pred: (int8) -> bool): ?int {
   let len = binary-length(xs) in
   let f =
     define self(index: int): ?int {
@@ -321,7 +321,7 @@ define find(xs: &binary, pred: (int8) -> bool): ?int {
         none()
       } else {
         let ch = binary-access(xs, index) in
-        if pred(ch) {
+        if !pred(ch) {
           Right(index)
         } else {
           self(add-int(index, 1))
@@ -332,7 +332,7 @@ define find(xs: &binary, pred: (int8) -> bool): ?int {
   f(0)
 }
 
-define find-end(xs: &binary, pred: (int8) -> bool): ?int {
+define find-end(xs: &binary, !pred: (int8) -> bool): ?int {
   let len = binary-length(xs) in
   let f =
     define self(xs: &binary, index: int): ?int {
@@ -340,7 +340,7 @@ define find-end(xs: &binary, pred: (int8) -> bool): ?int {
         none()
       } else {
         let ch = binary-access(xs, index) in
-        if pred(ch) {
+        if !pred(ch) {
           Right(sub-int(len, add-int(index, 1)))
         } else {
           self(xs, sub-int(index, 1))

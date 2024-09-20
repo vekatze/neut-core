@@ -4,13 +4,13 @@ import {
   this.list {Cons, Nil, list},
 }
 
-inline _elem<a>(e: eq(&a)): (xs: &list(a), x: &a) -> bool {
+inline _elem<a>(!e: eq(&a)): (xs: &list(a), x: &a) -> bool {
   define self(xs: &list(a), x: &a): bool {
     case xs {
     | Nil =>
       False
     | Cons(y, ys) =>
-      if e::equal(x, y) {
+      if !e::equal(x, y) {
         True
       } else {
         self(ys, x)

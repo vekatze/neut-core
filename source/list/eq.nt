@@ -7,7 +7,7 @@ import {
 }
 
 inline as-eq<a>(f: eq(a)): eq(list(a)) {
-  let Eq(eq) = f in
+  let Eq of {equal = !eq} = f in
   Eq of {
     equal = {
       define self(xs, ys) {
@@ -19,7 +19,7 @@ inline as-eq<a>(f: eq(a)): eq(list(a)) {
         | Cons(_, _), Nil =>
           False
         | Cons(x, xs), Cons(y, ys) =>
-          if eq(x, y) {
+          if !eq(x, y) {
             self(xs, ys)
           } else {
             False
@@ -31,7 +31,7 @@ inline as-eq<a>(f: eq(a)): eq(list(a)) {
 }
 
 inline as-eq-N<a>(f: eq(&a)): eq(&list(a)) {
-  let Eq(eq) = f in
+  let Eq of {equal = !eq} = f in
   Eq of {
     equal = {
       define self(xs, ys) {
@@ -43,7 +43,7 @@ inline as-eq-N<a>(f: eq(&a)): eq(&list(a)) {
         | Cons(_, _), Nil =>
           False
         | Cons(x, xs), Cons(y, ys) =>
-          if eq(x, y) {
+          if !eq(x, y) {
             self(xs, ys)
           } else {
             False
@@ -58,13 +58,13 @@ define _nop-copy<a>(x: &&a): &a {
   *x
 }
 
-inline member<a>(e: eq(&a)): (xs: &list(a), value: &a) -> bool {
+inline member<a>(!e: eq(&a)): (xs: &list(a), value: &a) -> bool {
   define member(xs: &list(a), value: &a): bool {
     case xs {
     | Nil =>
       False
     | Cons(y, ys) =>
-      if e::equal(value, y) {
+      if !e::equal(value, y) {
         True
       } else {
         member(ys, value)
@@ -73,7 +73,7 @@ inline member<a>(e: eq(&a)): (xs: &list(a), value: &a) -> bool {
   }
 }
 
-inline nub<a>(e: eq(&a)): (xs: &list(a)) -> list(a) {
+inline nub<a>(!e: eq(&a)): (xs: &list(a)) -> list(a) {
   function (xs) {
     let f =
       define nub(xs: &list(a), acc: list(&a)): list(a) {
@@ -81,7 +81,7 @@ inline nub<a>(e: eq(&a)): (xs: &list(a)) -> list(a) {
         | Nil =>
           Nil
         | Cons(y, ys) =>
-          let already-found-p on y, acc = member(E.comap(e, exact _nop-copy))(acc, y) in
+          let already-found-p on y, acc = member(E.comap(!e, exact _nop-copy))(acc, y) in
           if already-found-p {
             nub(ys, acc)
           } else {

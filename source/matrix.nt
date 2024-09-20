@@ -8,7 +8,7 @@ import {
   this.either {from-option},
   this.function {lift-N2},
   this.int.ord {as-ord-N},
-  this.ring {ring},
+  this.ring {Ring, ring},
   this.system,
   this.text,
   this.unit {unit},
@@ -77,12 +77,12 @@ define print-mat<a>(mat: &matrix(a), show: (&a) -> unit): unit {
 }
 
 inline _zero<a>(r: ring(a)): (int, int) -> matrix(a) {
-  use r {zero} in
+  let Ring of {zero = !zero} = r in
   define _(row-size: int, col-size: int): matrix(a) {
     let vec-size = mul-int(row-size, col-size) in
     let content =
       Vector.from-list(L.iterate(vec-size, function (_) {
-        zero
+        !zero
       }))
     in
     Matrix of {row-size, col-size, content}
@@ -90,16 +90,16 @@ inline _zero<a>(r: ring(a)): (int, int) -> matrix(a) {
 }
 
 inline _one<a>(r: ring(a)): (int) -> matrix(a) {
-  use r {zero, one} in
+  let Ring of {zero = !zero, one = !one} = r in
   define _(size: int): matrix(a) {
     let vec-size = mul-int(size, size) in
     let content =
       Vector.from-list(L.iterate(vec-size, function (cursor) {
         let rem = rem-int(cursor, add-int(size, 1)) in
         if eq-int(rem, 0) {
-          one
+          !one
         } else {
-          zero
+          !zero
         }
       }))
     in
@@ -108,7 +108,7 @@ inline _one<a>(r: ring(a)): (int) -> matrix(a) {
 }
 
 inline _add<a>(r: ring(a)): (&matrix(a), &matrix(a)) -> matrix(a) {
-  use r {add} in
+  let Ring of {add = !add} = r in
   define _(mat1: &matrix(a), mat2: &matrix(a)): matrix(a) {
     let vec1 = get-content(mat1) in
     let vec2 = get-content(mat2) in
@@ -125,13 +125,13 @@ inline _add<a>(r: ring(a)): (&matrix(a), &matrix(a)) -> matrix(a) {
     Matrix of {
       row-size,
       col-size,
-      content = Vector.zip-with-N(vec1, vec2, lift-N2(add)),
+      content = Vector.zip-with-N(vec1, vec2, lift-N2(!add)),
     }
   }
 }
 
 inline _sub<a>(r: ring(a)): (&matrix(a), &matrix(a)) -> matrix(a) {
-  use r {sub} in
+  let Ring of {sub = !sub} = r in
   define _(mat1: &matrix(a), mat2: &matrix(a)): matrix(a) {
     let vec1 = get-content(mat1) in
     let vec2 = get-content(mat2) in
@@ -148,27 +148,27 @@ inline _sub<a>(r: ring(a)): (&matrix(a), &matrix(a)) -> matrix(a) {
     Matrix of {
       row-size,
       col-size,
-      content = Vector.zip-with-N(vec1, vec2, lift-N2(sub)),
+      content = Vector.zip-with-N(vec1, vec2, lift-N2(!sub)),
     }
   }
 }
 
-inline _iterate-sum<a>(r: ring(a), count: int, k: (int) -> a): a {
-  use r {zero, add} in
+inline _iterate-sum<a>(r: ring(a), count: int, !k: (int) -> a): a {
+  let Ring of {zero = !zero, add = !add} = r in
   let helper =
     define self(acc: a, cursor: int): a {
       if ge-int(cursor, count) {
         acc
       } else {
-        self(add(acc, k(cursor)), add-int(cursor, 1))
+        self(!add(acc, !k(cursor)), add-int(cursor, 1))
       }
     }
   in
-  helper(zero, 0)
+  helper(!zero, 0)
 }
 
 inline _mul<a>(!r: ring(a)): (&matrix(a), &matrix(a)) -> matrix(a) {
-  use !r {mul} in
+  let Ring of {mul = !mul} = !r in
   define _(mat1: &matrix(a), mat2: &matrix(a)): matrix(a) {
     let row-size-1 = get-row-size(mat1) in
     let row-size-2 = get-row-size(mat2) in
@@ -184,7 +184,7 @@ inline _mul<a>(!r: ring(a)): (&matrix(a), &matrix(a)) -> matrix(a) {
             _iterate-sum(!r, col-size-1, function (k) {
               let a_i_k = access(mat1, i, k) in
               let b_k_j = access(mat2, k, j) in
-              lift-N2(mul)(a_i_k, b_k_j)
+              lift-N2(!mul)(a_i_k, b_k_j)
             })
           })
         })
@@ -194,7 +194,7 @@ inline _mul<a>(!r: ring(a)): (&matrix(a), &matrix(a)) -> matrix(a) {
 }
 
 inline _mul-pointwise<a>(r: ring(a)): (&matrix(a), &matrix(a)) -> matrix(a) {
-  use r {mul} in
+  let Ring of {mul = !mul} = r in
   define _(mat1: &matrix(a), mat2: &matrix(a)): matrix(a) {
     let vec1 = get-content(mat1) in
     let vec2 = get-content(mat2) in
@@ -211,7 +211,7 @@ inline _mul-pointwise<a>(r: ring(a)): (&matrix(a), &matrix(a)) -> matrix(a) {
     Matrix of {
       row-size,
       col-size,
-      content = Vector.zip-with-N(vec1, vec2, lift-N2(mul)),
+      content = Vector.zip-with-N(vec1, vec2, lift-N2(!mul)),
     }
   }
 }

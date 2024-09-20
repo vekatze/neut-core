@@ -90,7 +90,7 @@ resource _vector-internal {
   },
 }
 
-inline create<a>(len: int, gen: (int) -> a): vector(a) {
+inline create<a>(len: int, !gen: (int) -> a): vector(a) {
   let word-size = Word.size in
   let ptr0 = malloc(mul-int(word-size, add-int(3, len))) in
   let ptr1 = add-int(ptr0, word-size) in
@@ -104,7 +104,7 @@ inline create<a>(len: int, gen: (int) -> a): vector(a) {
       if ge-int(index, len) {
         Unit
       } else {
-        let v = gen(index) in
+        let v = !gen(index) in
         Mem.store-int(Magic.cast(a, int, v), add-int(ptr3, mul-int(index, word-size)));
         self(add-int(index, 1))
       }
@@ -114,7 +114,7 @@ inline create<a>(len: int, gen: (int) -> a): vector(a) {
   magic cast(int, vector(a), ptr0)
 }
 
-inline create-maybe<a>(len: int, gen: (int) -> ?a): ?vector(a) {
+inline create-maybe<a>(len: int, !gen: (int) -> ?a): ?vector(a) {
   let word-size = Word.size in
   let ptr0 = malloc(mul-int(word-size, add-int(3, len))) in
   let ptr1 = add-int(ptr0, word-size) in
@@ -128,7 +128,7 @@ inline create-maybe<a>(len: int, gen: (int) -> ?a): ?vector(a) {
       if ge-int(index, len) {
         Right(Unit)
       } else {
-        match gen(index) {
+        match !gen(index) {
         | Left(_) =>
           Left(index)
         | Right(v) =>
@@ -161,7 +161,7 @@ define length<a>(xs: &vector(a)): int {
   sub-int(to, from)
 }
 
-inline for-each<a, b>(xs: vector(a), f: (a) -> b): vector(b) {
+inline for-each<a, b>(xs: vector(a), !f: (a) -> b): vector(b) {
   let word-size = Word.size in
   let ptr0 = Magic.cast(vector(a), int, xs) in
   let ptr1 = add-int(ptr0, word-size) in
@@ -177,7 +177,7 @@ inline for-each<a, b>(xs: vector(a), f: (a) -> b): vector(b) {
       } else {
         let value-ptr = add-int(ptr3, mul-int(index, word-size)) in
         let old-value = Magic.cast(int, a, Mem.load-int(value-ptr)) in
-        let new-value-ptr = Magic.cast(b, int, f(old-value)) in
+        let new-value-ptr = Magic.cast(b, int, !f(old-value)) in
         Mem.store-int(new-value-ptr, value-ptr);
         self(add-int(index, 1))
       }
@@ -194,7 +194,7 @@ inline for-each-N<a, b>(xs: &vector(a), f: (&a) -> b): vector(b) {
   })
 }
 
-inline for<a>(xs: vector(a), f: (a) -> unit): unit {
+inline for<a>(xs: vector(a), !f: (a) -> unit): unit {
   let word-size = Word.size in
   let ptr0 = magic cast(vector(a), int, xs) in
   let ptr1 = add-int(ptr0, word-size) in
@@ -208,7 +208,7 @@ inline for<a>(xs: vector(a), f: (a) -> unit): unit {
       } else {
         let value-ptr = add-int(ptr3, mul-int(index, word-size)) in
         let old-value = Mem.load-int(value-ptr) in
-        f(Magic.cast(int, a, old-value));
+        !f(Magic.cast(int, a, old-value));
         self(add-int(index, 1))
       }
     }
@@ -226,7 +226,7 @@ inline for-N<a>(xs: &vector(a), f: (&a) -> unit): unit {
 inline fold-left-N<elem-type, result-type>(
   acc: result-type,
   xs: &vector(elem-type),
-  consumer: (result-type, &elem-type) -> result-type,
+  !consumer: (result-type, &elem-type) -> result-type,
 ): result-type {
   let sz = length(xs) in
   let helper =
@@ -235,7 +235,7 @@ inline fold-left-N<elem-type, result-type>(
         acc
       } else {
         let y = _access(xs, cursor) in
-        loop(add-int(cursor, 1), consumer(acc, y), xs)
+        loop(add-int(cursor, 1), !consumer(acc, y), xs)
       }
     }
   in

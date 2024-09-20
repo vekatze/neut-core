@@ -22,6 +22,9 @@ data trope(k) {
 
 inline from-ord<k>(_ord: ord(&k)): trope(k) {
   use this.dictionary.from-ord(_ord) {insert, lookup, delete} in
+  let !insert = insert in
+  let !delete = delete in
+  let !lookup = lookup in
   Trope of {
     empty = empty(),
     singleton = {
@@ -31,13 +34,13 @@ inline from-ord<k>(_ord: ord(&k)): trope(k) {
     },
     insert = {
       function (s, k) {
-        insert(s, k, Unit)
+        !insert(s, k, Unit)
       }
     },
-    delete = exact delete,
+    delete = exact !delete,
     lookup = {
       function (s, k) {
-        match lookup(s, k) {
+        match !lookup(s, k) {
         | Right(_) =>
           True
         | Left(_) =>

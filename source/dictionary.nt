@@ -189,13 +189,13 @@ inline _balance-R<a, b>(k: a, x: b, l: dictionary(a, b), r: dictionary(a, b)): d
 }
 
 inline insert<k>(L: ord(&k)): <v>(dictionary(k, v), k, v) -> dictionary(k, v) {
-  let Ord of {compare} = L in
+  let Ord of {compare = !compare} = L in
   define self<v: type>(d: dictionary(k, v), key-X: k, val-X: v): dictionary(k, v) {
     match d {
     | Tip =>
       singleton(key-X, val-X)
     | Bin(size, key-Y, val-Y, left, right) =>
-      let order on key-X, key-Y = compare(key-X, key-Y) in
+      let order on key-X, key-Y = !compare(key-X, key-Y) in
       match order {
       | LT =>
         _balance-L(key-Y, val-Y, self(left, key-X, val-X), right)
@@ -209,13 +209,13 @@ inline insert<k>(L: ord(&k)): <v>(dictionary(k, v), k, v) -> dictionary(k, v) {
 }
 
 inline lookup<k>(L: ord(&k)): <v>(&dictionary(k, v), &k) -> ?&v {
-  let Ord of {compare} = L in
+  let Ord of {compare = !compare} = L in
   define self<v>(d: &dictionary(k, v), needle: &k): ?&v {
     case d {
     | Tip =>
       none()
     | Bin(_, k, x, l, r) =>
-      match compare(needle, k) {
+      match !compare(needle, k) {
       | LT =>
         self(l, needle)
       | GT =>
@@ -272,9 +272,9 @@ inline _glue<k, v>(d1: dictionary(k, v), d2: dictionary(k, v)): dictionary(k, v)
   }
 }
 
-inline delete<k>(L: ord(&k)): <v>(dictionary(k, v), k) -> dictionary(k, v) {
+inline delete<k>(!L: ord(&k)): <v>(dictionary(k, v), k) -> dictionary(k, v) {
   define self<v>(d: dictionary(k, v), needle: k): dictionary(k, v) {
-    let Ord of {compare} = L in
+    let Ord of {compare} = !L in
     match d {
     | Tip =>
       Tip
@@ -308,14 +308,14 @@ inline from-ord<k>(!_ord: ord(&k)): trope(k) {
   }
 }
 
-inline from-list<k, v>(_ord: ord(&k), kvs: list(pair(k, v))): dictionary(k, v) {
+inline from-list<k, v>(!_ord: ord(&k), kvs: list(pair(k, v))): dictionary(k, v) {
   let f =
     define self(kvs: list(pair(k, v)), acc: dictionary(k, v)): dictionary(k, v) {
       match kvs {
       | Nil =>
         acc
       | Cons(Pair(k, v), rest) =>
-        self(rest, insert(_ord)(acc, k, v))
+        self(rest, insert(!_ord)(acc, k, v))
       }
     }
   in

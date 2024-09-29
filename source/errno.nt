@@ -29,5 +29,5 @@ foreign {
 define get-error-message(e: errno): text {
   let Errno(i) = e in
   let c-str = magic external strerror(i) in
-  from-c-string(Magic.cast(int, c-string, c-str))
+  from-c-string(Magic.cast(int, &c-string, c-str))
 }

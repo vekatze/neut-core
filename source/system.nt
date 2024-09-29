@@ -60,7 +60,7 @@ define get-argv(): list(text) {
         let rest = get-argv-helper(add-int(i, 1)) in
         let str-ptr-ptr = add-int(argv, mul-int(i, u)) in
         let str-ptr = load-int(str-ptr-ptr) in
-        let t = from-c-string(Magic.cast(int, c-string, str-ptr)) in
+        let t = from-c-string(Magic.cast(int, &c-string, str-ptr)) in
         Cons(t, rest)
       }
     }

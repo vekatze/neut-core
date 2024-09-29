@@ -43,10 +43,10 @@ define to-c-string(t: &text): c-string {
   Magic.cast(int, c-string, new-ptr)
 }
 
-define from-c-string(s: c-string): text {
+define from-c-string(s: &c-string): text {
   let u = this.word.size in
   let u2 = mul-int(u, 2) in
-  let len on s = length-c-string(s) in
+  let len = length-c-string(s) in
   let new-ptr = malloc(add-int(add-int(len, u2), 1)) in
   Mem.store-int(0, new-ptr);
   Mem.store-int(len, add-int(new-ptr, u));

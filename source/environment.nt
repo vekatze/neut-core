@@ -21,7 +21,7 @@ define get-env(name: &text): ?text {
   if eq-int(tmp, 0) {
     none()
   } else {
-    Right(from-c-string(Magic.cast(int, c-string, tmp)))
+    Right(from-c-string(Magic.cast(int, &c-string, tmp)))
   }
 }
 

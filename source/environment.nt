@@ -1,7 +1,8 @@
 import {
   Magic,
   this.bool {bool},
-  this.c-string {c-string, from-c-string},
+  this.c-string {c-string, from-c-string, to-c-string},
+  this.control {discard},
   this.either {Right, none},
   this.errno {report-system-error, system},
   this.text {_get-content-pointer, text},
@@ -25,8 +26,8 @@ define get-env(name: &text): ?text {
 }
 
 define set-env(name: &text, value: &text, overwrite: bool): system(unit) {
-  let name-c-str = _get-content-pointer(name) in
-  let value-c-str = _get-content-pointer(value) in
+  let name-c-str = to-c-string(name) in
+  let value-c-str = to-c-string(value) in
   let flag: int =
     if overwrite {
       1
@@ -34,7 +35,9 @@ define set-env(name: &text, value: &text, overwrite: bool): system(unit) {
       0
     }
   in
-  let result = magic external setenv(name-c-str, value-c-str, flag) in
+  let result on name-c-str, value-c-str = magic external setenv(name-c-str, value-c-str, flag) in
+  discard(name-c-str);
+  discard(value-c-str);
   if eq-int(result, 0) {
     Right(Unit)
   } else {

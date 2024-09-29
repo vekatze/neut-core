@@ -63,26 +63,6 @@ define is-empty(t: &text): bool {
   eq-int(text-byte-length(t), 0)
 }
 
-define _get-c-string-length(ptr: int, index: int): int {
-  let c = Mem.load-int8(add-int(ptr, index)) in
-  if eq-int8(c, 0) {
-    index
-  } else {
-    _get-c-string-length(ptr, add-int(index, 1))
-  }
-}
-
-define _from-c-string(old-ptr: int): text {
-  let u = Word.size in
-  let u2 = mul-int(u, 2) in
-  let len = _get-c-string-length(old-ptr, 0) in
-  let new-ptr = Ext.malloc(add-int(len, u2)) in
-  Mem.store-int(0, new-ptr);
-  Mem.store-int(len, add-int(new-ptr, u));
-  _copy-binary(old-ptr, add-int(new-ptr, u2), 0, len);
-  Magic.cast(int, text, new-ptr)
-}
-
 // O(1)
 define _drop(t: text, offset: int): text {
   let t = magic cast(text, binary, t) in

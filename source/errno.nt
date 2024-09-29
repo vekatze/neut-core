@@ -1,7 +1,9 @@
 import {
+  Magic,
+  this.c-string {c-string, from-c-string},
   this.either {Left, either},
   this.foreign {get-errno},
-  this.text {_from-c-string, text},
+  this.text {text},
 }
 
 data errno {
@@ -27,5 +29,5 @@ foreign {
 define get-error-message(e: errno): text {
   let Errno(i) = e in
   let c-str = magic external strerror(i) in
-  _from-c-string(c-str)
+  from-c-string(Magic.cast(int, c-string, c-str))
 }

@@ -1,8 +1,10 @@
 import {
+  Magic,
   this.bool {bool},
+  this.c-string {c-string, from-c-string},
   this.either {Right, none},
   this.errno {report-system-error, system},
-  this.text {_from-c-string, _get-content-pointer, text},
+  this.text {_get-content-pointer, text},
   this.unit {Unit, unit},
 }
 
@@ -18,7 +20,7 @@ define get-env(name: &text): ?text {
   if eq-int(tmp, 0) {
     none()
   } else {
-    Right(_from-c-string(tmp))
+    Right(from-c-string(Magic.cast(int, c-string, tmp)))
   }
 }
 

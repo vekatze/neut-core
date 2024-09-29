@@ -1,0 +1,58 @@
+import {
+  Magic,
+  Mem,
+  this.external {free, malloc},
+  this.text {_get-content-pointer, text, text-byte-length},
+  this.text.io {print},
+  this.unit,
+  this.word,
+}
+
+foreign {
+  strlcpy(pointer, pointer, int): int,
+  strlen(pointer): int,
+}
+
+nominal {
+  c-string: type,
+}
+
+define _strlen(s: &c-string): int {
+  magic external strlen(s)
+}
+
+// null-terminated string
+resource c-string {
+  function (ptr: int) {
+    print("discarding\n");
+    free(ptr);
+    0
+  },
+  function (ptr: int) {
+    print("copying\n");
+    let s = Magic.cast(int, &c-string, ptr) in
+    let len = _strlen(s) in
+    let new-ptr = malloc(add-int(len, 1)) in
+    let _: int = magic external strlcpy(new-ptr, s, len) in
+    new-ptr
+  },
+}
+
+define _to-c-string(t: &text): c-string {
+  let len = text-byte-length(t) in
+  let new-ptr = malloc(add-int(len, 1)) in
+  let src-ptr = _get-content-pointer(t) in
+  let _: int = magic external strlcpy(new-ptr, src-ptr, add-int(len, 1)) in
+  Magic.cast(int, c-string, new-ptr)
+}
+
+define _from-c-string(s: c-string): text {
+  let u = this.word.size in
+  let u2 = mul-int(u, 2) in
+  let len on s = _strlen(s) in
+  let new-ptr = malloc(add-int(add-int(len, u2), 1)) in
+  Mem.store-int(0, new-ptr);
+  Mem.store-int(len, add-int(new-ptr, u));
+  let _: int = magic external strlcpy(add-int(new-ptr, u2), s, add-int(len, 1)) in
+  Magic.cast(int, text, new-ptr)
+}

@@ -31,7 +31,3 @@ define show-float(x: float): text {
 constant as-show: show(float) {
   Show(show-float)
 }
-
-define %lf(x: float): text {
-  show-float(x)
-}

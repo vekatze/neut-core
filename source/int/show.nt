@@ -31,14 +31,10 @@ constant as-show: show(int) {
   })
 }
 
-define %ld(x: int64): text {
-  as-show::show(x)
-}
-
-define %lu(x: int64): text {
-  _show("%lu", x)
-}
-
 define show-int(x: int): text {
   as-show::show(x)
+}
+
+define show-uint(x: int64): text {
+  _show("%lu", x)
 }

@@ -49,7 +49,7 @@
     cell [],
     channel [],
     either ["Left", "Right", "either", "none"],
-    list ["Cons", "Nil"],
+    list ["Cons", "Nil", "list"],
     ordering ["EQ", "GT", "LT", "ordering"],
     pair ["Pair", "pair"],
     rune.eq ["eq-rune", "ne-rune"],

@@ -7,7 +7,7 @@ import {
 foreign {
   exit(int): void,
   realloc(pointer, int): pointer,
-  open(pointer, int, int): int,
+  open(pointer, int): int,
   close(int): int,
   write(int, pointer, int): int,
   read(int, pointer, int): int,
@@ -65,9 +65,9 @@ define realloc(ptr: int, size: int): int {
 define open(path-address: int, oflag: int, mode: int): FD.descriptor {
   introspect os {
   | darwin =>
-    magic external open(path-address, oflag, mode)
+    magic external open(path-address, oflag)(mode: int)
   | linux =>
-    magic external open(path-address, oflag, mode)
+    magic external open(path-address, oflag)(mode: int)
   }
 }
 

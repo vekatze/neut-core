@@ -6,6 +6,7 @@ import {
   this.external {exit},
   this.list {Cons, list},
   this.memory {load-int},
+  this.pointer {_Pointer, shift},
   this.text {text},
   this.text.io {print},
   this.unit {Unit, unit},
@@ -42,15 +43,14 @@ define panic<a>(t: &text): a {
 }
 
 define get-argc(): int {
-  let argc-ptr: int = magic global("neut-unsafe-argc", pointer) in
-  let argc: int = load-int(argc-ptr) in
-  argc
+  let argc-ptr = _Pointer(magic global("neut-unsafe-argc", pointer)) in
+  load-int(argc-ptr)
 }
 
 define get-argv(): list(text) {
   let argc = get-argc() in
-  let argv-ptr: int = magic global("neut-unsafe-argv", pointer) in
-  let argv: int = load-int(argv-ptr) in
+  let argv-ptr = _Pointer(magic global("neut-unsafe-argv", pointer)) in
+  let argv = _Pointer(load-int(argv-ptr)) in
   let u = Word.size in
   let f =
     define get-argv-helper(i: int): list(text) {
@@ -58,7 +58,7 @@ define get-argv(): list(text) {
         []
       } else {
         let rest = get-argv-helper(add-int(i, 1)) in
-        let str-ptr-ptr = add-int(argv, mul-int(i, u)) in
+        let str-ptr-ptr = shift(argv, mul-int(i, u)) in
         let str-ptr = load-int(str-ptr-ptr) in
         let t = from-c-string(Magic.cast(int, &c-string, str-ptr)) in
         Cons(t, rest)

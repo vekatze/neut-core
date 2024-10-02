@@ -11,6 +11,7 @@ import {
   this.list {Cons, Nil, list, reverse},
   this.memory {load-int8},
   this.pair {Pair, pair},
+  this.pointer {pointer, shift},
   this.rune {load-rune, size-by-head-byte, store-rune, to-int32},
   this.unit {Unit, unit},
 }
@@ -32,11 +33,11 @@ inline text-byte-length(t: &text): int {
   binary-length(ptr)
 }
 
-define _get-content-pointer(t: &text): int {
-  let ptr = Magic.cast(&text, int, t) in
+define _get-content-pointer(t: &text): pointer {
+  let ptr = Magic.cast(&text, pointer, t) in
   let from = Mem.load-int(ptr) in
   let u = Word.size in
-  add-int(add-int(ptr, mul-int(u, 2)), from)
+  shift(ptr, add-int(mul-int(u, 2), from))
 }
 
 define join(xs: list(text)): text {
@@ -96,14 +97,14 @@ define _slice-N(t: &text, start: int, size: int): text {
   magic cast(binary, text, this.binary.slice-N(t, start, size))
 }
 
-define _match-text-content(ptr1: int, ptr2: int, len: int): bool {
+define _match-text-content(ptr1: pointer, ptr2: pointer, len: int): bool {
   let f =
     define helper(cursor: int): bool {
       if eq-int(cursor, len) {
         True
       } else {
-        let c1: int8 = Mem.load-int8(add-int(ptr1, cursor)) in
-        let c2: int8 = Mem.load-int8(add-int(ptr2, cursor)) in
+        let c1: int8 = Mem.load-int8(shift(ptr1, cursor)) in
+        let c2: int8 = Mem.load-int8(shift(ptr2, cursor)) in
         if eq-int8(c1, c2) {
           helper(add-int(cursor, 1))
         } else {
@@ -126,7 +127,7 @@ define break(haystack: &text, needle: &text): pair(text, text) {
       if lt-int(rem-len, needle-len) {
         Pair(*haystack, empty())
       } else {
-        let ptr1 = add-int(ptr, cursor) in
+        let ptr1 = shift(ptr, cursor) in
         if _match-text-content(ptr1, ptr2, needle-len) {
           let former = _take-N(haystack, cursor) in
           let latter = _drop-N(haystack, cursor) in
@@ -150,7 +151,7 @@ define intercalate-N(xs: list(&text), sep: &text): text {
 
 define _get-byte(t: &text, index: int): int8 {
   let ptr = _get-content-pointer(t) in
-  load-int8(add-int(ptr, index))
+  load-int8(shift(ptr, index))
 }
 
 define _get-rune-size(t: &text, index: int): int {
@@ -232,7 +233,7 @@ define split(haystack: &text, needle: &text): list(text) {
       if lt-int(rem-len, needle-len) {
         [_drop-N(haystack, pivot)]
       } else {
-        let current-ptr = add-int(haystack-ptr, add-int(pivot, cursor)) in
+        let current-ptr = shift(haystack-ptr, add-int(pivot, cursor)) in
         if _match-text-content(current-ptr, needle-ptr, needle-len) {
           let piece = _slice-N(haystack, pivot, cursor) in
           let next-pivot = add-int(pivot, add-int(cursor, needle-len)) in
@@ -279,11 +280,11 @@ define format(fmt: &text, args: list(text)): text {
   join(_format(fmt, args))
 }
 
-define _unpack(ptr: int, len: int, index: int, acc: list(rune)): list(rune) {
+define _unpack(ptr: pointer, len: int, index: int, acc: list(rune)): list(rune) {
   if ge-int(index, len) {
     reverse(acc)
   } else {
-    let r = load-rune(add-int(ptr, index)) in
+    let r = load-rune(shift(ptr, index)) in
     let s = this.rune.size(r) in
     _unpack(ptr, len, add-int(index, s), Cons(r, acc))
   }
@@ -310,22 +311,22 @@ define pack(xs: &list(rune)): text {
   let u2 = mul-int(u, 2) in
   let new-text = Ext.malloc(add-int(len, u2)) in
   Mem.store-int(0, new-text);
-  Mem.store-int(len, add-int(new-text, u));
-  let content-ptr = add-int(new-text, u2) in
+  Mem.store-int(len, shift(new-text, u));
+  let content-ptr = shift(new-text, u2) in
   let loop =
     define self(offset: int, xs: &list(rune)): unit {
       case xs {
       | Nil =>
         Unit
       | Cons(x, rest) =>
-        let current-content-ptr = add-int(content-ptr, offset) in
+        let current-content-ptr = shift(content-ptr, offset) in
         let stored-bytes = store-rune(*x, current-content-ptr) in
         self(add-int(offset, stored-bytes), rest)
       }
     }
   in
   loop(0, xs);
-  magic cast(int, text, new-text)
+  magic cast(pointer, text, new-text)
 }
 
 define reverse(t: &text): text {
@@ -335,7 +336,7 @@ define reverse(t: &text): text {
 }
 
 define _get-rune(t: &text, index: int): rune {
-  let ptr = add-int(_get-content-pointer(t), index) in
+  let ptr = shift(_get-content-pointer(t), index) in
   load-rune(ptr)
 }
 
@@ -608,14 +609,14 @@ define replicate(t: &text, n: int): text {
   let u2 = mul-int(u, 2) in
   let new-text = Ext.malloc(add-int(len, u2)) in
   Mem.store-int(0, new-text);
-  Mem.store-int(len, add-int(new-text, u));
-  let content-ptr = add-int(new-text, u2) in
+  Mem.store-int(len, shift(new-text, u));
+  let content-ptr = shift(new-text, u2) in
   let loop =
     define self(count: int, t: &text): unit {
       if ge-int(count, n) {
         Unit
       } else {
-        let current-content-ptr = add-int(content-ptr, mul-int(count, base-len)) in
+        let current-content-ptr = shift(content-ptr, mul-int(count, base-len)) in
         let x-ptr = _get-content-pointer(t) in
         _copy-binary(x-ptr, current-content-ptr, 0, base-len);
         self(add-int(count, 1), t)
@@ -623,7 +624,7 @@ define replicate(t: &text, n: int): text {
     }
   in
   loop(0, t);
-  magic cast(int, text, new-text)
+  magic cast(pointer, text, new-text)
 }
 
 inline fold<a>(acc: a, t: &text, !f: (a, rune) -> a): a {

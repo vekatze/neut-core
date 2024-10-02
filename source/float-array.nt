@@ -8,43 +8,45 @@ import {
   this.int.ord {as-ord-N},
   this.list {Cons, Nil, list, minimum},
   this.pair {Pair, pair},
+  this.pointer {_Pointer, extract, pointer, shift},
   this.unit {Unit, unit},
 }
 
-define _copy-float-array(source-pointer: int, target-pointer: int, index: int, from: int, to: int): unit {
+define _copy-float-array(source-pointer: pointer, target-pointer: pointer, index: int, from: int, to: int): unit {
   if eq-int(from, to) {
     Unit
   } else {
     let u = Word.size in
-    let value = Mem.load-float(add-int(source-pointer, mul-int(u, from))) in
-    Mem.store-float(value, add-int(target-pointer, mul-int(u, index)));
+    let value = Mem.load-float(shift(source-pointer, mul-int(u, from))) in
+    Mem.store-float(value, shift(target-pointer, mul-int(u, index)));
     _copy-float-array(source-pointer, target-pointer, add-int(index, 1), add-int(from, 1), to)
   }
 }
 
 resource float-array {
   function (x: int) {
-    Magic.cast(unit, int, free(x))
+    Magic.cast(unit, int, free(_Pointer(x)))
   },
   function (source-pointer: int) {
+    let source-pointer = _Pointer(source-pointer) in
     let u = Word.size in
     let u2 = mul-int(u, 2) in
     let from = Mem.load-int(source-pointer) in
-    let to = Mem.load-int(add-int(source-pointer, u)) in
+    let to = Mem.load-int(shift(source-pointer, u)) in
     let length = sub-int(to, from) in
     let target-pointer = malloc(add-int(mul-int(u, length), u2)) in
     Mem.store-int(0, target-pointer);
-    Mem.store-int(length, add-int(target-pointer, u));
-    _copy-float-array(add-int(source-pointer, u2), add-int(target-pointer, u2), 0, from, to);
-    target-pointer
+    Mem.store-int(length, shift(target-pointer, u));
+    _copy-float-array(shift(source-pointer, u2), shift(target-pointer, u2), 0, from, to);
+    extract(target-pointer)
   },
 }
 
 define length(xs: &float-array): int {
-  let source-pointer = magic cast(&float-array, int, xs) in
+  let source-pointer = magic cast(&float-array, pointer, xs) in
   let u = Word.size in
   let from = Mem.load-int(source-pointer) in
-  let to = Mem.load-int(add-int(source-pointer, u)) in
+  let to = Mem.load-int(shift(source-pointer, u)) in
   sub-int(to, from)
 }
 
@@ -54,46 +56,46 @@ define new(xs: list(float)): float-array {
   let u2 = mul-int(u, 2) in
   let base-pointer = malloc(add-int(mul-int(u, len), u2)) in
   Mem.store-int(0, base-pointer);
-  Mem.store-int(len, add-int(base-pointer, u));
-  let content-pointer: int = add-int(base-pointer, u2) in
+  Mem.store-int(len, shift(base-pointer, u));
+  let content-pointer = shift(base-pointer, u2) in
   let store-values =
     define self(values: list(float), index: int): unit {
       match values {
       | Nil =>
         Unit
       | Cons(v, rest) =>
-        Mem.store-float(v, add-int(content-pointer, mul-int(u, index)));
+        Mem.store-float(v, shift(content-pointer, mul-int(u, index)));
         self(rest, add-int(index, 1))
       }
     }
   in
   let _ = store-values(xs, 0) in
-  Magic.cast(int, float-array, base-pointer)
+  Magic.cast(pointer, float-array, base-pointer)
 }
 
 inline access(xs: &float-array, i: int): float {
-  let ptr = Magic.cast(&float-array, int, xs) in
+  let ptr = Magic.cast(&float-array, pointer, xs) in
   let u = Word.size in
   let from = Mem.load-int(ptr) in
   let u2 = mul-int(u, 2) in
-  Mem.load-float(add-int(add-int(ptr, u2), mul-int(u, add-int(from, i))))
+  Mem.load-float(shift(ptr, add-int(u2, mul-int(u, add-int(from, i)))))
 }
 
 inline store(xs: float-array, i: int, x: float): float-array {
-  let ptr = Magic.cast(float-array, int, xs) in
+  let ptr = Magic.cast(float-array, pointer, xs) in
   let u = Word.size in
   let from = Mem.load-int(ptr) in
   let u2 = mul-int(u, 2) in
-  Mem.store-float(x, add-int(add-int(ptr, u2), mul-int(u, add-int(from, i))));
-  Magic.cast(int, float-array, ptr)
+  Mem.store-float(x, shift(ptr, add-int(u2, mul-int(u, add-int(from, i)))));
+  Magic.cast(pointer, float-array, ptr)
 }
 
 // O(1)
 define tail(xs: float-array): float-array {
-  let ptr = Magic.cast(float-array, int, xs) in
+  let ptr = Magic.cast(float-array, pointer, xs) in
   let from = Mem.load-int(ptr) in
   Mem.store-int(add-int(from, 1), ptr);
-  Magic.cast(int, float-array, ptr)
+  Magic.cast(pointer, float-array, ptr)
 }
 
 // O(1)
@@ -116,10 +118,10 @@ define swap(xs: float-array, i: int, j: int): float-array {
 }
 
 inline for-each(xs: &float-array, !f: (float) -> unit): unit {
-  let ptr = Magic.cast(&float-array, int, xs) in
+  let ptr = Magic.cast(&float-array, pointer, xs) in
   let u = Word.size in
   let from = Mem.load-int(ptr) in
-  let to = Mem.load-int(add-int(ptr, u)) in
+  let to = Mem.load-int(shift(ptr, u)) in
   let len = sub-int(to, from) in
   let for-each-helper =
     define self(cursor: int): unit {

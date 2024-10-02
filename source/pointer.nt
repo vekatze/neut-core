@@ -6,3 +6,8 @@ define shift(p: pointer, offset: int): pointer {
   let _Pointer(addr) = p in
   _Pointer(add-int(addr, offset))
 }
+
+define extract(p: pointer): int {
+  let _Pointer(v) = p in
+  v
+}

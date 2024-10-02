@@ -1,59 +1,60 @@
 import {
+  this.pointer {pointer},
   this.unit {unit},
 }
 
-inline store-int(value: int, address: int): unit {
+inline store-int(value: int, address: pointer): unit {
   magic store(int, value, address)
 }
 
-inline store-int32(value: int32, address: int): unit {
+inline store-int32(value: int32, address: pointer): unit {
   magic store(int32, value, address)
 }
 
-inline store-int24(value: int24, address: int): unit {
+inline store-int24(value: int24, address: pointer): unit {
   magic store(int24, value, address)
 }
 
-inline store-int16(value: int16, address: int): unit {
+inline store-int16(value: int16, address: pointer): unit {
   magic store(int16, value, address)
 }
 
-inline store-int8(value: int8, address: int): unit {
+inline store-int8(value: int8, address: pointer): unit {
   magic store(int8, value, address)
 }
 
-inline store-int1(value: int1, address: int): unit {
+inline store-int1(value: int1, address: pointer): unit {
   magic store(int1, value, address)
 }
 
-inline load-int32(address: int): int32 {
-  magic load(int32, address)
-}
-
-inline load-int(address: int): int {
-  magic load(int, address)
-}
-
-inline load-int8(address: int): int8 {
-  magic load(int8, address)
-}
-
-inline load-int16(address: int): int16 {
-  magic load(int16, address)
-}
-
-inline load-int24(address: int): int24 {
-  magic load(int24, address)
-}
-
-inline load-int1(address: int): int1 {
-  magic load(int1, address)
-}
-
-inline store-float(value: float, address: int): unit {
+inline store-float(value: float, address: pointer): unit {
   magic store(float, value, address)
 }
 
-inline load-float(address: int): float {
+inline load-int32(address: pointer): int32 {
+  magic load(int32, address)
+}
+
+inline load-int(address: pointer): int {
+  magic load(int, address)
+}
+
+inline load-int8(address: pointer): int8 {
+  magic load(int8, address)
+}
+
+inline load-int16(address: pointer): int16 {
+  magic load(int16, address)
+}
+
+inline load-int24(address: pointer): int24 {
+  magic load(int24, address)
+}
+
+inline load-int1(address: pointer): int1 {
+  magic load(int1, address)
+}
+
+inline load-float(address: pointer): float {
   magic load(float, address)
 }

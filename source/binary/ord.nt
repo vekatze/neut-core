@@ -1,12 +1,13 @@
 import {
   O {EQ, GT, LT},
+  this.binary {_get-content-pointer, binary, binary-length},
   this.bool {False, True, bool},
   this.int {min-int},
   this.int.ord,
-  this.binary {_get-content-pointer, binary, binary-length},
   this.memory {load-int8},
   this.ord {Ord, ord},
   this.ordering {ordering},
+  this.pointer {pointer, shift},
 }
 
 define _cmp-int8(x: int8, y: int8): ordering {
@@ -21,12 +22,12 @@ define _cmp-int8(x: int8, y: int8): ordering {
 
 inline cmp-binary(xs1: &binary, xs2: &binary): ordering {
   let f =
-    define self(ptr1: int, ptr2: int, index: int, len: int, fallback: ordering): ordering {
+    define self(ptr1: pointer, ptr2: pointer, index: int, len: int, fallback: ordering): ordering {
       if eq-int(index, len) {
         fallback
       } else {
-        let v1 = load-int8(add-int(ptr1, index)) in
-        let v2 = load-int8(add-int(ptr2, index)) in
+        let v1 = load-int8(shift(ptr1, index)) in
+        let v2 = load-int8(shift(ptr2, index)) in
         match _cmp-int8(v1, v2) {
         | EQ =>
           self(ptr1, ptr2, add-int(index, 1), len, fallback)

@@ -3,10 +3,11 @@ import {
   this.bool {False, True, bool, not},
   this.eq {Eq, eq},
   this.memory {load-int8},
+  this.pointer {pointer, shift},
 }
 
 constant _cmp-ptr-t: type {
-  (ptr1: int, ptr2: int, index: int, to: int) -> bool
+  (ptr1: pointer, ptr2: pointer, index: int, to: int) -> bool
 }
 
 constant _cmp-array-t: type {
@@ -14,12 +15,12 @@ constant _cmp-array-t: type {
 }
 
 inline _cmp-binary(!cmp: (int8, int8) -> bool): _cmp-ptr-t {
-  define self(ptr1: int, ptr2: int, index: int, to: int): bool {
+  define self(ptr1: pointer, ptr2: pointer, index: int, to: int): bool {
     if eq-int(index, to) {
       True
     } else {
-      let v1 = load-int8(add-int(ptr1, index)) in
-      let v2 = load-int8(add-int(ptr2, index)) in
+      let v1 = load-int8(shift(ptr1, index)) in
+      let v2 = load-int8(shift(ptr2, index)) in
       if !cmp(v1, v2) {
         self(ptr1, ptr2, add-int(index, 1), to)
       } else {
@@ -29,7 +30,7 @@ inline _cmp-binary(!cmp: (int8, int8) -> bool): _cmp-ptr-t {
   }
 }
 
-define _eq-binary(ptr1: int, ptr2: int, index: int, to: int): bool {
+define _eq-binary(ptr1: pointer, ptr2: pointer, index: int, to: int): bool {
   _cmp-binary(eq-int8)(ptr1, ptr2, index, to)
 }
 
@@ -85,7 +86,7 @@ define eq-suffix(haystack: &binary, needle: &binary): bool {
   } else {
     let ptr1 = _get-content-pointer(needle) in
     let ptr2 = _get-content-pointer(haystack) in
-    let ptr2' = add-int(ptr2, sub-int(len-haystack, len-needle)) in
+    let ptr2' = shift(ptr2, sub-int(len-haystack, len-needle)) in
     _eq-binary(ptr1, ptr2', 0, len-needle)
   }
 }
@@ -96,7 +97,7 @@ define _eq-infix(index: int, len1: int, len2: int, needle: &binary, haystack: &b
   } else {
     let ptr1 = _get-content-pointer(needle) in
     let ptr2 = _get-content-pointer(haystack) in
-    let ptr2' = add-int(ptr2, index) in
+    let ptr2' = shift(ptr2, index) in
     if _eq-binary(ptr1, ptr2', 0, len1) {
       True
     } else {

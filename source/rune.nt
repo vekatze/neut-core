@@ -2,6 +2,7 @@ import {
   this.bool {and},
   this.either {Left, Right},
   this.memory {load-int8, store-int8},
+  this.pointer {pointer, shift},
   this.unit {Unit},
 }
 
@@ -55,39 +56,39 @@ define size-by-head-byte(head-byte: int8): int {
   }
 }
 
-define store-rune(value: rune, address: int): int {
+define store-rune(value: rune, address: pointer): int {
   let s = size(value) in
   let value = to-int32(value) in
   match s {
   | 1 =>
     let piece-0 = trunc-int32-int8(value) in
-    store-int8(piece-0, add-int(address, 0));
+    store-int8(piece-0, shift(address, 0));
     1
   | 2 =>
     let value = trunc-int32-int16(value) in
     let piece-0 = trunc-int16-int8(lshr-int16(and-int16(0b_1111_1111_0000_0000, value), 8)) in
     let piece-1 = trunc-int16-int8(lshr-int16(and-int16(0b_0000_0000_1111_1111, value), 0)) in
-    store-int8(piece-0, add-int(address, 0));
-    store-int8(piece-1, add-int(address, 1));
+    store-int8(piece-0, shift(address, 0));
+    store-int8(piece-1, shift(address, 1));
     2
   | 3 =>
     let value = trunc-int32-int24(value) in
     let piece-0 = trunc-int24-int8(lshr-int24(and-int24(0b_1111_1111_0000_0000_0000_0000, value), 16)) in
     let piece-1 = trunc-int24-int8(lshr-int24(and-int24(0b_0000_0000_1111_1111_0000_0000, value), 8)) in
     let piece-2 = trunc-int24-int8(lshr-int24(and-int24(0b_0000_0000_0000_0000_1111_1111, value), 0)) in
-    store-int8(piece-0, add-int(address, 0));
-    store-int8(piece-1, add-int(address, 1));
-    store-int8(piece-2, add-int(address, 2));
+    store-int8(piece-0, shift(address, 0));
+    store-int8(piece-1, shift(address, 1));
+    store-int8(piece-2, shift(address, 2));
     3
   | 4 =>
     let piece-0 = trunc-int32-int8(lshr-int32(and-int32(0b_1111_1111_0000_0000_0000_0000_0000_0000, value), 24)) in
     let piece-1 = trunc-int32-int8(lshr-int32(and-int32(0b_0000_0000_1111_1111_0000_0000_0000_0000, value), 16)) in
     let piece-2 = trunc-int32-int8(lshr-int32(and-int32(0b_0000_0000_0000_0000_1111_1111_0000_0000, value), 8)) in
     let piece-3 = trunc-int32-int8(lshr-int32(and-int32(0b_0000_0000_0000_0000_0000_0000_1111_1111, value), 0)) in
-    store-int8(piece-0, add-int(address, 0));
-    store-int8(piece-1, add-int(address, 1));
-    store-int8(piece-2, add-int(address, 2));
-    store-int8(piece-3, add-int(address, 3));
+    store-int8(piece-0, shift(address, 0));
+    store-int8(piece-1, shift(address, 1));
+    store-int8(piece-2, shift(address, 2));
+    store-int8(piece-3, shift(address, 3));
     4
   | _ =>
     // unreachable
@@ -95,7 +96,7 @@ define store-rune(value: rune, address: int): int {
   }
 }
 
-inline load-rune(address: int): rune {
+inline load-rune(address: pointer): rune {
   let x0 = load-int8(address) in
   if eq-int8(and-int8(x0, 0x80), 0x00) {
     // 0x00 = 0000 0000
@@ -104,15 +105,15 @@ inline load-rune(address: int): rune {
   } else-if eq-int8(and-int8(x0, 0xE0), 0xC0) {
     // 0xC0 = 1100 0000
     // 0xE0 = 1110 0000
-    let x1 = load-int8(add-int(address, 1)) in
+    let x1 = load-int8(shift(address, 1)) in
     let x0' = shl-int32(magic cast(int8, int32, x0), 8) in
     let x1' = shl-int32(magic cast(int8, int32, x1), 0) in
     unsafe-from-int32(or-int32(x0', x1'))
   } else-if eq-int8(and-int8(x0, 0xF0), 0xE0) {
     // 0xE0 = 1110 0000
     // 0xF0 = 1111 0000
-    let x1 = load-int8(add-int(address, 1)) in
-    let x2 = load-int8(add-int(address, 2)) in
+    let x1 = load-int8(shift(address, 1)) in
+    let x2 = load-int8(shift(address, 2)) in
     let x0' = shl-int32(magic cast(int8, int32, x0), 16) in
     let x1' = shl-int32(magic cast(int8, int32, x1), 8) in
     let x2' = shl-int32(magic cast(int8, int32, x2), 0) in
@@ -120,9 +121,9 @@ inline load-rune(address: int): rune {
   } else-if eq-int8(and-int8(x0, 0xF8), 0xF0) {
     // 0xF0 = 1111 0000
     // 0xF8 = 1111 1000
-    let x1 = load-int8(add-int(address, 1)) in
-    let x2 = load-int8(add-int(address, 2)) in
-    let x3 = load-int8(add-int(address, 3)) in
+    let x1 = load-int8(shift(address, 1)) in
+    let x2 = load-int8(shift(address, 2)) in
+    let x3 = load-int8(shift(address, 3)) in
     let x0' = shl-int32(magic cast(int8, int32, x0), 24) in
     let x1' = shl-int32(magic cast(int8, int32, x1), 16) in
     let x2' = shl-int32(magic cast(int8, int32, x2), 8) in

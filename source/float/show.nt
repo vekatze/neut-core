@@ -2,6 +2,7 @@ import {
   Ext,
   Word,
   this.memory {store-int},
+  this.pointer {pointer, shift},
   this.show {Show, show},
   this.text {_get-content-pointer, text},
   this.unit,
@@ -18,10 +19,10 @@ define _show(c-fmt: &text, x: float): text {
   let size: int = magic external snprintf(zero, zero, fmt)(x: float) in
   let ptr = Ext.malloc(add-int(add-int(size, 1), mul-int(Word.size, 2))) in
   store-int(0, ptr);
-  store-int(size, add-int(ptr, Word.size));
-  let buffer = add-int(ptr, mul-int(Word.size, 2)) in
+  store-int(size, shift(ptr, Word.size));
+  let buffer = shift(ptr, mul-int(Word.size, 2)) in
   let _: int = magic external snprintf(buffer, add-int(size, 1), fmt)(x: float) in
-  magic cast(int, text, ptr)
+  magic cast(pointer, text, ptr)
 }
 
 define show-float(x: float): text {

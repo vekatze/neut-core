@@ -9,6 +9,7 @@ import {
   this.either {Left, Right},
   this.int {sum-int},
   this.pair {Pair},
+  this.pointer {_Pointer, pointer, shift},
   this.unit {unit},
 }
 
@@ -30,33 +31,35 @@ define _new(a: type, q: Q.queue(a)): channel(a) {
   let u = Word.size in
   let ptr = Ext.malloc(sum-int([u, mutex-size, cond-size, u])) in
   Mem.store-int(Magic.cast(Q.queue(a), int, q), ptr);
-  Ext.thread-mutex-init(add-int(ptr, u));
-  Ext.thread-cond-init(add-int(ptr, add-int(u, mutex-size)));
-  Mem.store-int(Magic.cast(type, int, a), add-int(ptr, add-int(u, add-int(mutex-size, cond-size))));
-  Magic.cast(int, channel(a), ptr)
+  Ext.thread-mutex-init(shift(ptr, u));
+  Ext.thread-cond-init(shift(ptr, add-int(u, mutex-size)));
+  Mem.store-int(Magic.cast(type, int, a), shift(ptr, add-int(u, add-int(mutex-size, cond-size))));
+  Magic.cast(pointer, channel(a), ptr)
 }
 
 // (queue, thread-mutex, thread-cond)
 resource _channel {
   function (ch: int) {
+    let ch = _Pointer(ch) in
     let u = Word.size in
     let mutex-size = Ext.thread-mutex-size() in
     let cond-size = Ext.thread-cond-size() in
     let cond-offset = add-int(u, mutex-size) in
     let type-offset = add-int(u, add-int(mutex-size, cond-size)) in
-    let a = Magic.cast(int, type, Mem.load-int(add-int(ch, type-offset))) in
-    Ext.thread-cond-destroy(add-int(ch, cond-offset));
-    Ext.thread-mutex-destroy(add-int(ch, u));
+    let a = Magic.cast(int, type, Mem.load-int(shift(ch, type-offset))) in
+    Ext.thread-cond-destroy(shift(ch, cond-offset));
+    Ext.thread-mutex-destroy(shift(ch, u));
     let _: Q.queue(a) = magic cast(int, Q.queue(a), Mem.load-int(ch)) in
     Ext.free(ch);
     0
   },
   function (ch: int) {
+    let ch = _Pointer(ch) in
     let u = Word.size in
     let mutex-size = Ext.thread-mutex-size() in
     let cond-size = Ext.thread-cond-size() in
     let type-offset = add-int(u, add-int(mutex-size, cond-size)) in
-    let a = Magic.cast(int, type, Mem.load-int(add-int(ch, type-offset))) in
+    let a = Magic.cast(int, type, Mem.load-int(shift(ch, type-offset))) in
     let q: &Q.queue(a) = Magic.cast(int, &Q.queue(a), Mem.load-int(ch)) in
     let q-clone: Q.queue(a) = _get-clone(Q.queue(a), q) in
     Magic.cast(channel(a), int, _new(a, q-clone))
@@ -68,20 +71,20 @@ inline _new-channel<a>(): channel(a) {
 }
 
 define send<a>(ch: &channel(a), x: a): unit {
-  let ch = Magic.cast(&channel(a), int, ch) in
+  let ch = Magic.cast(&channel(a), pointer, ch) in
   let u = Word.size in
-  let mutex-ptr = add-int(ch, u) in
+  let mutex-ptr = shift(ch, u) in
   Ext.thread-mutex-lock(mutex-ptr);
   let q-base: int = Mem.load-int(ch) in
   let q: Q.queue(a) = Magic.cast(int, Q.queue(a), q-base) in
   let q = Q.enqueue(q, x) in
   Mem.store-int(Magic.cast(Q.queue(a), int, q), ch);
   let mutex-size = Ext.thread-mutex-size() in
-  Ext.thread-cond-signal(add-int(ch, add-int(u, mutex-size)));
+  Ext.thread-cond-signal(shift(ch, add-int(u, mutex-size)));
   Ext.thread-mutex-unlock(mutex-ptr)
 }
 
-define _receive-from-channel(a: type, ch: int, mutex-ptr: int): a {
+define _receive-from-channel(a: type, ch: pointer, mutex-ptr: pointer): a {
   let q: Q.queue(a) = Magic.cast(int, Q.queue(a), Mem.load-int(ch)) in
   match Q.dequeue(q) {
   | Right(Pair(v, q)) =>
@@ -92,16 +95,16 @@ define _receive-from-channel(a: type, ch: int, mutex-ptr: int): a {
     Mem.store-int(Magic.cast(Q.queue(int), int, Q.empty()), ch);
     let u = Word.size in
     let mutex-size = Ext.thread-mutex-size() in
-    let cond-ptr = add-int(ch, add-int(u, mutex-size)) in
+    let cond-ptr = shift(ch, add-int(u, mutex-size)) in
     Ext.thread-cond-wait(cond-ptr, mutex-ptr);
     _receive-from-channel(a, ch, mutex-ptr)
   }
 }
 
 define receive<a>(ch: &channel(a)): a {
-  let ch = Magic.cast(&channel(a), int, ch) in
+  let ch = Magic.cast(&channel(a), pointer, ch) in
   let u = Word.size in
-  let mutex-ptr = add-int(ch, u) in
+  let mutex-ptr = shift(ch, u) in
   Ext.thread-mutex-lock(mutex-ptr);
   _receive-from-channel(a, ch, mutex-ptr)
 }

@@ -6,6 +6,7 @@ import {
   Word,
   this.box,
   this.int {sum-int},
+  this.pointer {_Pointer, pointer, shift},
   this.unit {unit},
 }
 
@@ -27,33 +28,35 @@ define _new(a: type, val: a): cell(a) {
   let u = Word.size in
   let ptr = Ext.malloc(sum-int([u, mutex-size, cond-size, u])) in
   Mem.store-int(Magic.cast(a, int, val), ptr);
-  Ext.thread-mutex-init(add-int(ptr, u));
-  Ext.thread-cond-init(add-int(ptr, add-int(u, mutex-size)));
-  Mem.store-int(Magic.cast(type, int, a), add-int(ptr, add-int(u, add-int(mutex-size, cond-size))));
-  Magic.cast(int, cell(a), ptr)
+  Ext.thread-mutex-init(shift(ptr, u));
+  Ext.thread-cond-init(shift(ptr, add-int(u, mutex-size)));
+  Mem.store-int(Magic.cast(type, int, a), shift(ptr, add-int(u, add-int(mutex-size, cond-size))));
+  Magic.cast(pointer, cell(a), ptr)
 }
 
 // (content, thread-mutex, thread-cond)
 resource _cell {
   function (ch: int) {
+    let ch = _Pointer(ch) in
     let u = Word.size in
     let mutex-size = Ext.thread-mutex-size() in
     let cond-size = Ext.thread-cond-size() in
     let cond-offset = add-int(u, mutex-size) in
     let type-offset = add-int(u, add-int(mutex-size, cond-size)) in
-    let a = Magic.cast(int, type, Mem.load-int(add-int(ch, type-offset))) in
-    Ext.thread-cond-destroy(add-int(ch, cond-offset));
-    Ext.thread-mutex-destroy(add-int(ch, u));
+    let a = Magic.cast(int, type, Mem.load-int(shift(ch, type-offset))) in
+    Ext.thread-cond-destroy(shift(ch, cond-offset));
+    Ext.thread-mutex-destroy(shift(ch, u));
     let _: a = magic cast(int, a, Mem.load-int(ch)) in
     Ext.free(ch);
     0
   },
   function (ch: int) {
+    let ch = _Pointer(ch) in
     let u = Word.size in
     let mutex-size = Ext.thread-mutex-size() in
     let cond-size = Ext.thread-cond-size() in
     let type-offset = add-int(u, add-int(mutex-size, cond-size)) in
-    let a = Magic.cast(int, type, Mem.load-int(add-int(ch, type-offset))) in
+    let a = Magic.cast(int, type, Mem.load-int(shift(ch, type-offset))) in
     let val: &a = Magic.cast(int, &a, Mem.load-int(ch)) in
     let val-clone: a = _get-clone(a, val) in
     Magic.cast(cell(a), int, _new(a, val-clone))
@@ -65,58 +68,58 @@ define _new-cell<a>(x: a): cell(a) {
 }
 
 define mutate<a>(ch: &cell(a), f: (a) -> a): unit {
-  let ch = Magic.cast(&cell(a), int, ch) in
+  let ch = Magic.cast(&cell(a), pointer, ch) in
   let u = Word.size in
-  let mutex-ptr = add-int(ch, u) in
+  let mutex-ptr = shift(ch, u) in
   Ext.thread-mutex-lock(mutex-ptr);
   let val-base: int = Mem.load-int(ch) in
   let val: a = Magic.cast(int, a, val-base) in
   let new-val = f(val) in
   Mem.store-int(Magic.cast(a, int, new-val), ch);
   let mutex-size = Ext.thread-mutex-size() in
-  Ext.thread-cond-signal(add-int(ch, add-int(u, mutex-size)));
+  Ext.thread-cond-signal(shift(ch, add-int(u, mutex-size)));
   Ext.thread-mutex-unlock(mutex-ptr)
 }
 
 define borrow<a>(ch: &cell(a), f: (&a) -> unit): unit {
-  let ch = Magic.cast(&cell(a), int, ch) in
+  let ch = Magic.cast(&cell(a), pointer, ch) in
   let u = Word.size in
-  let mutex-ptr = add-int(ch, u) in
+  let mutex-ptr = shift(ch, u) in
   Ext.thread-mutex-lock(mutex-ptr);
   let val-base: int = Mem.load-int(ch) in
   let val: &a = Magic.cast(int, &a, val-base) in
   f(val);
   let mutex-size = Ext.thread-mutex-size() in
-  Ext.thread-cond-signal(add-int(ch, add-int(u, mutex-size)));
+  Ext.thread-cond-signal(shift(ch, add-int(u, mutex-size)));
   Ext.thread-mutex-unlock(mutex-ptr)
 }
 
 define read<a>(ch: &cell(a)): &a {
-  let ch = Magic.cast(&cell(a), int, ch) in
+  let ch = Magic.cast(&cell(a), pointer, ch) in
   let val-base = Mem.load-int(ch) in
   Magic.cast(int, &a, val-base)
 }
 
 define clone<a>(ch: &cell(a)): a {
-  let ch = Magic.cast(&cell(a), int, ch) in
+  let ch = Magic.cast(&cell(a), pointer, ch) in
   let u = Word.size in
-  let mutex-ptr = add-int(ch, u) in
+  let mutex-ptr = shift(ch, u) in
   Ext.thread-mutex-lock(mutex-ptr);
   let val-base: int = Mem.load-int(ch) in
   let val: &a = Magic.cast(int, &a, val-base) in
   let result = *val in
   let mutex-size = Ext.thread-mutex-size() in
-  Ext.thread-cond-signal(add-int(ch, add-int(u, mutex-size)));
+  Ext.thread-cond-signal(shift(ch, add-int(u, mutex-size)));
   Ext.thread-mutex-unlock(mutex-ptr);
   result
 }
 
 define extract<a>(c: cell(a)): a {
   let u = Word.size in
-  let ch = magic cast(cell(a), int, c) in
+  let ch = magic cast(cell(a), pointer, c) in
   let result = magic cast(int, a, Mem.load-int(ch)) in
-  Ext.thread-mutex-destroy(add-int(ch, u));
-  Ext.thread-cond-destroy(add-int(ch, add-int(u, Ext.thread-mutex-size())));
+  Ext.thread-mutex-destroy(shift(ch, u));
+  Ext.thread-cond-destroy(shift(ch, add-int(u, Ext.thread-mutex-size())));
   Ext.free(ch);
   result
 }

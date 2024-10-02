@@ -4,8 +4,9 @@ import {
   Mem,
   Word,
   this.bool,
-  this.unit {Unit, unit},
   this.box,
+  this.pointer {_Pointer, pointer, shift},
+  this.unit {Unit, unit},
 }
 
 inline _embody(a: type, x: &a): a {
@@ -18,7 +19,7 @@ inline _thread-size(): int {
 }
 
 nominal {
-  _await-and-write-result(addr: int): unit,
+  _await-and-write-result(addr: pointer): unit,
   thread(_: type): type,
   attach(a: type, e: thread(a)): a,
 }
@@ -26,7 +27,7 @@ nominal {
 resource _thread-inner {
   function (addr: int) {
     let u = Word.size in
-    let elem-type = Magic.cast(int, type, Mem.load-int(add-int(addr, u))) in
+    let elem-type = Magic.cast(int, type, Mem.load-int(_Pointer(add-int(addr, u)))) in
     let pr: thread(elem-type) = Magic.cast(int, thread(elem-type), addr) in
     let _: elem-type = this.thread.attach(elem-type, pr) in
     0
@@ -35,17 +36,18 @@ resource _thread-inner {
     let u = Word.size in
     let u2 = mul-int(u, 2) in
     let u3 = mul-int(u, 3) in
-    _await-and-write-result(addr);
-    let thread-id = Mem.load-int(addr) in
-    let elem-type = Magic.cast(int, type, Mem.load-int(add-int(addr, u))) in
-    let elem-value: &elem-type = Magic.cast(int, &elem-type, Mem.load-int(add-int(addr, u2))) in
+    _await-and-write-result(_Pointer(addr));
+    let thread-id = Mem.load-int(_Pointer(addr)) in
+    let elem-type = Magic.cast(int, type, Mem.load-int(_Pointer(add-int(addr, u)))) in
+    let elem-value: &elem-type = Magic.cast(int, &elem-type, Mem.load-int(_Pointer(add-int(addr, u2)))) in
     let new-addr = Ext.malloc(_thread-size()) in
     Mem.store-int(thread-id, new-addr);
-    Mem.store-int(Magic.cast(type, int, elem-type), add-int(new-addr, u));
+    Mem.store-int(Magic.cast(type, int, elem-type), shift(new-addr, u));
     let cloned-value: elem-type = _embody(elem-type, elem-value) in
-    Mem.store-int(Magic.cast(elem-type, int, cloned-value), add-int(new-addr, u2));
-    Mem.store-int1(1, add-int(new-addr, u3));
-    new-addr
+    Mem.store-int(Magic.cast(elem-type, int, cloned-value), shift(new-addr, u2));
+    Mem.store-int1(1, shift(new-addr, u3));
+    let _Pointer(p) = new-addr in
+    p
   },
 }
 
@@ -56,24 +58,24 @@ define thread(_: type): type {
 }
 
 define attach(a: type, e: thread(a)): a {
-  let addr = Magic.cast(thread(a), int, e) in
+  let addr = Magic.cast(thread(a), pointer, e) in
   _await-and-write-result(addr);
   let u = Word.size in
-  let value-ptr = add-int(addr, mul-int(u, 2)) in
+  let value-ptr = shift(addr, mul-int(u, 2)) in
   let value = Mem.load-int(value-ptr) in
   Ext.free(addr);
   Magic.cast(int, a, value)
 }
 
-define _await-and-write-result(addr: int): unit {
+define _await-and-write-result(addr: pointer): unit {
   let u = Word.size in
   let u2 = mul-int(u, 2) in
   let u3 = mul-int(u, 3) in
-  let finished-flag-ptr = add-int(addr, u3) in
+  let finished-flag-ptr = shift(addr, u3) in
   let finished-flag = Mem.load-int1(finished-flag-ptr) in
   if eq-int1(finished-flag, 0) {
     let thread-id = Mem.load-int(addr) in
-    let value-ptr = add-int(addr, u2) in
+    let value-ptr = shift(addr, u2) in
     Ext.thread-join(thread-id, value-ptr);
     Mem.store-int1(1, finished-flag-ptr)
   } else {
@@ -85,15 +87,15 @@ define _await-and-write-result(addr: int): unit {
 define detach(a: type, f: () -> a): thread(a) {
   let thread-func =
     function () {
-      Ext.thread-exit(Magic.cast(a, int, f()))
+      Ext.thread-exit(Magic.cast(a, pointer, f()))
     }
   in
   let u = Word.size in
   let u2 = mul-int(u, 2) in
   let u3 = mul-int(u, 3) in
-  let closure = Magic.cast(() -> unit, int, thread-func) in
-  let closure-env = Mem.load-int(add-int(closure, u)) in
-  let closure-label = Mem.load-int(add-int(closure, u2)) in
+  let closure = Magic.cast(() -> unit, pointer, thread-func) in
+  let closure-env = _Pointer(Mem.load-int(shift(closure, u))) in
+  let closure-label = _Pointer(Mem.load-int(shift(closure, u2))) in
   Ext.free(closure);
   let thread-id-pointer = Ext.malloc(u) in
   let thread-create =
@@ -111,8 +113,8 @@ define detach(a: type, f: () -> a): thread(a) {
   Ext.free(thread-id-pointer);
   let ptr = Ext.malloc(_thread-size()) in
   Mem.store-int(thread-id, ptr);
-  Mem.store-int(Magic.cast(type, int, a), add-int(ptr, u));
-  Mem.store-int(0, add-int(ptr, u2));
-  Mem.store-int1(0, add-int(ptr, u3));
-  Magic.cast(int, thread(a), ptr)
+  Mem.store-int(Magic.cast(type, int, a), shift(ptr, u));
+  Mem.store-int(0, shift(ptr, u2));
+  Mem.store-int1(0, shift(ptr, u3));
+  Magic.cast(pointer, thread(a), ptr)
 }

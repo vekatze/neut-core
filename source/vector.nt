@@ -9,37 +9,44 @@ import {
   this.external {free, malloc},
   this.int.ord {as-ord-N},
   this.list {Cons, Nil, list, minimum},
+  this.pointer {extract, pointer, shift},
   this.unit {Unit, unit},
 }
 
 data _vector-info {
 | _Vector-Info(
     word-size: int,
-    from-ptr: int,
-    to-ptr: int,
-    type-ptr: int,
-    content-ptr: int,
+    from-ptr: pointer,
+    to-ptr: pointer,
+    type-ptr: pointer,
+    content-ptr: pointer,
   )
 }
 
-define _discard-vector-content(ptr: int, elem-type: type, counter: int, size: int): unit {
+define _discard-vector-content(ptr: pointer, elem-type: type, counter: int, size: int): unit {
   if eq-int(counter, size) {
     Unit
   } else {
     let u = Word.size in
-    let _ = Magic.cast(int, elem-type, Mem.load-int(add-int(ptr, mul-int(counter, u)))) in
+    let _ = Magic.cast(int, elem-type, Mem.load-int(shift(ptr, mul-int(counter, u)))) in
     _discard-vector-content(ptr, elem-type, add-int(counter, 1), size)
   }
 }
 
-define _copy-vector-content(source-pointer: int, target-pointer: int, elem-type: type, counter: int, size: int): unit {
+define _copy-vector-content(
+  source-pointer: pointer,
+  target-pointer: pointer,
+  elem-type: type,
+  counter: int,
+  size: int,
+): unit {
   if eq-int(counter, size) {
     Unit
   } else {
     let u = Word.size in
-    let original = Magic.cast(int, &elem-type, Mem.load-int(add-int(source-pointer, mul-int(counter, u)))) in
+    let original = Magic.cast(int, &elem-type, Mem.load-int(shift(source-pointer, mul-int(counter, u)))) in
     let clone = *original in
-    Mem.store-int(Magic.cast(elem-type, int, clone), add-int(target-pointer, mul-int(counter, u)));
+    Mem.store-int(Magic.cast(elem-type, int, clone), shift(target-pointer, mul-int(counter, u)));
     _copy-vector-content(source-pointer, target-pointer, elem-type, add-int(counter, 1), size)
   }
 }
@@ -53,13 +60,13 @@ data vector(_: type) {
 }
 
 define _get-vector-info<a>(xs: &vector(a)): _vector-info {
-  let from-ptr = Magic.cast(&vector(a), int, xs) in
+  let from-ptr = Magic.cast(&vector(a), pointer, xs) in
   let word-size = Word.size in
-  let to-ptr = add-int(from-ptr, word-size) in
-  let type-ptr = add-int(from-ptr, mul-int(word-size, 2)) in
-  let base-content-ptr = add-int(from-ptr, mul-int(word-size, 3)) in
+  let to-ptr = shift(from-ptr, word-size) in
+  let type-ptr = shift(from-ptr, mul-int(word-size, 2)) in
+  let base-content-ptr = shift(from-ptr, mul-int(word-size, 3)) in
   let from = Mem.load-int(from-ptr) in
-  let content-ptr = add-int(base-content-ptr, mul-int(word-size, from)) in
+  let content-ptr = shift(base-content-ptr, mul-int(word-size, from)) in
   _Vector-Info of {word-size, from-ptr, to-ptr, type-ptr, content-ptr}
 }
 
@@ -83,19 +90,19 @@ resource _vector-internal {
     let elem-type: type = Magic.cast(int, type, Mem.load-int(type-ptr)) in
     let target-ptr = malloc(mul-int(word-size, add-int(size, 3))) in
     Mem.store-int(0, target-ptr);
-    Mem.store-int(size, add-int(target-ptr, word-size));
-    Mem.store-int(Magic.cast(type, int, elem-type), add-int(target-ptr, mul-int(word-size, 2)));
-    _copy-vector-content(content-ptr, add-int(target-ptr, mul-int(word-size, 3)), elem-type, 0, size);
-    target-ptr
+    Mem.store-int(size, shift(target-ptr, word-size));
+    Mem.store-int(Magic.cast(type, int, elem-type), shift(target-ptr, mul-int(word-size, 2)));
+    _copy-vector-content(content-ptr, shift(target-ptr, mul-int(word-size, 3)), elem-type, 0, size);
+    extract(target-ptr)
   },
 }
 
 inline create<a>(len: int, !gen: (int) -> a): vector(a) {
   let word-size = Word.size in
   let ptr0 = malloc(mul-int(word-size, add-int(3, len))) in
-  let ptr1 = add-int(ptr0, word-size) in
-  let ptr2 = add-int(ptr0, mul-int(word-size, 2)) in
-  let ptr3 = add-int(ptr0, mul-int(word-size, 3)) in
+  let ptr1 = shift(ptr0, word-size) in
+  let ptr2 = shift(ptr0, mul-int(word-size, 2)) in
+  let ptr3 = shift(ptr0, mul-int(word-size, 3)) in
   Mem.store-int(0, ptr0);
   Mem.store-int(len, ptr1);
   Mem.store-int(Magic.cast(type, int, a), ptr2);
@@ -105,21 +112,21 @@ inline create<a>(len: int, !gen: (int) -> a): vector(a) {
         Unit
       } else {
         let v = !gen(index) in
-        Mem.store-int(Magic.cast(a, int, v), add-int(ptr3, mul-int(index, word-size)));
+        Mem.store-int(Magic.cast(a, int, v), shift(ptr3, mul-int(index, word-size)));
         self(add-int(index, 1))
       }
     }
   in
   let _ = store-values(0) in
-  magic cast(int, vector(a), ptr0)
+  magic cast(pointer, vector(a), ptr0)
 }
 
 inline create-maybe<a>(len: int, !gen: (int) -> ?a): ?vector(a) {
   let word-size = Word.size in
   let ptr0 = malloc(mul-int(word-size, add-int(3, len))) in
-  let ptr1 = add-int(ptr0, word-size) in
-  let ptr2 = add-int(ptr0, mul-int(word-size, 2)) in
-  let ptr3 = add-int(ptr0, mul-int(word-size, 3)) in
+  let ptr1 = shift(ptr0, word-size) in
+  let ptr2 = shift(ptr0, mul-int(word-size, 2)) in
+  let ptr3 = shift(ptr0, mul-int(word-size, 3)) in
   Mem.store-int(0, ptr0);
   Mem.store-int(len, ptr1);
   Mem.store-int(Magic.cast(type, int, a), ptr2);
@@ -132,7 +139,7 @@ inline create-maybe<a>(len: int, !gen: (int) -> ?a): ?vector(a) {
         | Left(_) =>
           Left(index)
         | Right(v) =>
-          Mem.store-int(Magic.cast(a, int, v), add-int(ptr3, mul-int(index, word-size)));
+          Mem.store-int(Magic.cast(a, int, v), shift(ptr3, mul-int(index, word-size)));
           self(add-int(index, 1))
         }
       }
@@ -144,13 +151,13 @@ inline create-maybe<a>(len: int, !gen: (int) -> ?a): ?vector(a) {
     free(ptr0);
     none()
   | Right(_) =>
-    Right(magic cast(int, vector(a), ptr0))
+    Right(magic cast(pointer, vector(a), ptr0))
   }
 }
 
 inline _access<a>(xs: &vector(a), i: int): &a {
   let _Vector-Info of {content-ptr, word-size} = _get-vector-info(xs) in
-  let elem-address = add-int(content-ptr, mul-int(word-size, i)) in
+  let elem-address = shift(content-ptr, mul-int(word-size, i)) in
   Magic.cast(int, &a, Mem.load-int(elem-address))
 }
 
@@ -163,10 +170,10 @@ define length<a>(xs: &vector(a)): int {
 
 inline for-each<a, b>(xs: vector(a), !f: (a) -> b): vector(b) {
   let word-size = Word.size in
-  let ptr0 = Magic.cast(vector(a), int, xs) in
-  let ptr1 = add-int(ptr0, word-size) in
-  let ptr2 = add-int(ptr0, mul-int(word-size, 2)) in
-  let ptr3 = add-int(ptr0, mul-int(word-size, 3)) in
+  let ptr0 = Magic.cast(vector(a), pointer, xs) in
+  let ptr1 = shift(ptr0, word-size) in
+  let ptr2 = shift(ptr0, mul-int(word-size, 2)) in
+  let ptr3 = shift(ptr0, mul-int(word-size, 3)) in
   let from = Mem.load-int(ptr0) in
   let to = Mem.load-int(ptr1) in
   Mem.store-int(Magic.cast(type, int, b), ptr2);
@@ -175,7 +182,7 @@ inline for-each<a, b>(xs: vector(a), !f: (a) -> b): vector(b) {
       if ge-int(index, to) {
         Unit
       } else {
-        let value-ptr = add-int(ptr3, mul-int(index, word-size)) in
+        let value-ptr = shift(ptr3, mul-int(index, word-size)) in
         let old-value = Magic.cast(int, a, Mem.load-int(value-ptr)) in
         let new-value-ptr = Magic.cast(b, int, !f(old-value)) in
         Mem.store-int(new-value-ptr, value-ptr);
@@ -184,7 +191,7 @@ inline for-each<a, b>(xs: vector(a), !f: (a) -> b): vector(b) {
     }
   in
   store-values(from);
-  Magic.cast(int, vector(b), ptr0)
+  Magic.cast(pointer, vector(b), ptr0)
 }
 
 inline for-each-N<a, b>(xs: &vector(a), f: (&a) -> b): vector(b) {
@@ -196,9 +203,9 @@ inline for-each-N<a, b>(xs: &vector(a), f: (&a) -> b): vector(b) {
 
 inline for<a>(xs: vector(a), !f: (a) -> unit): unit {
   let word-size = Word.size in
-  let ptr0 = magic cast(vector(a), int, xs) in
-  let ptr1 = add-int(ptr0, word-size) in
-  let ptr3 = add-int(ptr0, mul-int(word-size, 3)) in
+  let ptr0 = magic cast(vector(a), pointer, xs) in
+  let ptr1 = shift(ptr0, word-size) in
+  let ptr3 = shift(ptr0, mul-int(word-size, 3)) in
   let from = Mem.load-int(ptr0) in
   let to = Mem.load-int(ptr1) in
   let loop =
@@ -206,7 +213,7 @@ inline for<a>(xs: vector(a), !f: (a) -> unit): unit {
       if ge-int(index, to) {
         Unit
       } else {
-        let value-ptr = add-int(ptr3, mul-int(index, word-size)) in
+        let value-ptr = shift(ptr3, mul-int(index, word-size)) in
         let old-value = Mem.load-int(value-ptr) in
         !f(Magic.cast(int, a, old-value));
         self(add-int(index, 1))
@@ -259,9 +266,9 @@ define from-list<a>(base-list: list(a)): vector(a) {
   let word-size = Word.size in
   let n on base-list = this.list.length(base-list) in
   let ptr0 = malloc(mul-int(word-size, add-int(3, n))) in
-  let ptr1 = add-int(ptr0, word-size) in
-  let ptr2 = add-int(ptr0, mul-int(word-size, 2)) in
-  let ptr3 = add-int(ptr0, mul-int(word-size, 3)) in
+  let ptr1 = shift(ptr0, word-size) in
+  let ptr2 = shift(ptr0, mul-int(word-size, 2)) in
+  let ptr3 = shift(ptr0, mul-int(word-size, 3)) in
   Mem.store-int(0, ptr0);
   Mem.store-int(n, ptr1);
   Mem.store-int(Magic.cast(type, int, a), ptr2);
@@ -271,13 +278,13 @@ define from-list<a>(base-list: list(a)): vector(a) {
       | Nil =>
         Unit
       | Cons(v, rest) =>
-        Mem.store-int(Magic.cast(a, int, v), add-int(ptr3, mul-int(index, word-size)));
+        Mem.store-int(Magic.cast(a, int, v), shift(ptr3, mul-int(index, word-size)));
         self(rest, add-int(index, 1))
       }
     }
   in
   let _ = store-values(base-list, 0) in
-  magic cast(int, _, ptr0)
+  magic cast(pointer, _, ptr0)
 }
 
 define to-list<a>(xs: vector(a)): list(a) {
@@ -285,13 +292,13 @@ define to-list<a>(xs: vector(a)): list(a) {
   let word-size = Word.size in
   let vecinfo on xs = _get-vector-info(xs) in
   let _Vector-Info of {content-ptr} = vecinfo in
-  let ptr0 = magic cast(vector(a), int, xs) in
+  let ptr0 = magic cast(vector(a), pointer, xs) in
   let loop =
     define self(index: int): list(a) {
       if ge-int(index, len) {
         Nil
       } else {
-        let value-ptr = add-int(content-ptr, mul-int(index, word-size)) in
+        let value-ptr = shift(content-ptr, mul-int(index, word-size)) in
         let value = Magic.cast(int, a, Mem.load-int(value-ptr)) in
         Cons(value, self(add-int(index, 1)))
       }

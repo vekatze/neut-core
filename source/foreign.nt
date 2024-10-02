@@ -1,5 +1,6 @@
 import {
   this.bool {bool},
+  this.pointer {pointer},
 }
 
 foreign {
@@ -109,18 +110,18 @@ constant UINT32_MAX: int {
   magic external neut_core_v0_50_UINT32_MAX()
 }
 
-inline _parse_binary(num-text-ptr: int, len: int, result-ptr: int): int32 {
+inline _parse_binary(num-text-ptr: pointer, len: int, result-ptr: pointer): int32 {
   magic external neut_core_v0_50_parse_binary(num-text-ptr, len, result-ptr)
 }
 
-inline _parse_decimal(num-text-ptr: int, len: int, result-ptr: int): int32 {
+inline _parse_decimal(num-text-ptr: pointer, len: int, result-ptr: pointer): int32 {
   magic external neut_core_v0_50_parse_decimal(num-text-ptr, len, result-ptr)
 }
 
-inline _parse_hex(num-text-ptr: int, len: int, result-ptr: int): int32 {
+inline _parse_hex(num-text-ptr: pointer, len: int, result-ptr: pointer): int32 {
   magic external neut_core_v0_50_parse_hex(num-text-ptr, len, result-ptr)
 }
 
-inline _parse_double(num-text-ptr: int, len: int, result-ptr: int): int32 {
+inline _parse_double(num-text-ptr: pointer, len: int, result-ptr: pointer): int32 {
   magic external neut_core_v0_50_parse_double(num-text-ptr, len, result-ptr)
 }

@@ -220,7 +220,8 @@ inline for<a>(xs: vector(a), !f: (a) -> unit): unit {
       }
     }
   in
-  loop(from)
+  loop(from);
+  free(ptr0)
 }
 
 inline for-N<a>(xs: &vector(a), f: (&a) -> unit): unit {

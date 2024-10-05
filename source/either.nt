@@ -19,3 +19,8 @@ define from-option<a>(none-or-value: ?a, fallback: a): a {
     fallback
   }
 }
+
+define to-option<a, b>(e: either(a, b)): ?b {
+  catch _ = e in
+  none()
+}

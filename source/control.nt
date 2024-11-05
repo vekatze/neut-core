@@ -36,15 +36,29 @@ inline try-loop<e>(count: int, !f: (int) -> either(e, unit)): either(e, unit) {
 
 inline grow<a>(seed: a, iteration: int, !step: (a, int) -> a): a {
   let helper =
-    define self(current: int, acc: a): a {
+    define self(acc: a, current: int): a {
       if ge-int(current, iteration) {
         acc
       } else {
-        self(add-int(current, 1), !step(acc, current))
+        self(!step(acc, current), add-int(current, 1))
       }
     }
   in
-  helper(0, seed)
+  helper(seed, 0)
+}
+
+inline try-grow<e, a>(seed: a, iteration: int, !step: (a, int) -> either(e, a)): either(e, a) {
+  let helper =
+    define self(acc: a, current: int): either(e, a) {
+      if ge-int(current, iteration) {
+        Right(acc)
+      } else {
+        try tmp = !step(acc, current) in
+        self(tmp, add-int(current, 1))
+      }
+    }
+  in
+  helper(seed, 0)
 }
 
 define discard<a>(_: a): unit {

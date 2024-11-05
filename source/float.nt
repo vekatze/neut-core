@@ -59,15 +59,15 @@ define fma(x: float, y: float, z: float): float {
   magic external llvm.fma.f64(x, y, z)
 }
 
-define fabs(x: float): float {
+define abs-float(x: float): float {
   magic external llvm.fabs.f64(x)
 }
 
-define minnum(x: float, y: float): float {
+define min-float(x: float, y: float): float {
   magic external llvm.minnum.f64(x, y)
 }
 
-define maxnum(x: float, y: float): float {
+define max-float(x: float, y: float): float {
   magic external llvm.maxnum.f64(x, y)
 }
 

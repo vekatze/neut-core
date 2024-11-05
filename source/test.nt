@@ -3,8 +3,6 @@ import {
   this.cell {mutate},
   this.control {discard},
   this.either {Left, Right, either},
-  this.float {power-float},
-  this.float.show {show-float},
   this.int {power-int},
   this.int.show {show-int},
   this.list {length, list},

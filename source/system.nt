@@ -8,12 +8,13 @@ import {
   this.memory {load-int},
   this.pointer {_Pointer, shift},
   this.text {text},
-  this.text.io {print},
+  this.text.io {fflush-all, print},
   this.unit {Unit, unit},
 }
 
 inline admit(a: type, t: &text): a {
   print(t);
+  fflush-all();
   exit(1)
 }
 
@@ -22,6 +23,7 @@ define _assert(message: &text, check: () -> bool): unit {
     Unit
   } else {
     print(message);
+    fflush-all();
     exit(1)
   }
 }
@@ -39,6 +41,7 @@ inline assert(message: &text, check: () -> bool): unit {
 
 define panic<a>(t: &text): a {
   print(t);
+  fflush-all();
   exit(1)
 }
 

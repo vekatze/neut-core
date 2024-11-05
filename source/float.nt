@@ -12,6 +12,7 @@ foreign {
   llvm.log2.f64(float): float,
   llvm.maxnum.f64(float, float): float,
   llvm.minnum.f64(float, float): float,
+  llvm.pow.f64(float, float): float,
   llvm.sin.f64(float): float,
   llvm.sqrt.f64(float): float,
   llvm.trunc.f64(float): float,
@@ -69,6 +70,10 @@ define min-float(x: float, y: float): float {
 
 define max-float(x: float, y: float): float {
   magic external llvm.maxnum.f64(x, y)
+}
+
+define power-float(x: float, y: float): float {
+  magic external llvm.pow.f64(x, y)
 }
 
 define floor(x: float): float {

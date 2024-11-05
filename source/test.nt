@@ -5,6 +5,7 @@ import {
   this.either {Left, Right, either},
   this.float {power-float},
   this.float.show {show-float},
+  this.int {power-int},
   this.int.show {show-int},
   this.list {length, list},
   this.pair {Pair, pair},
@@ -55,9 +56,9 @@ define use-rune(r: rune): unit {
 }
 
 define zen(): unit {
-  let k: float = 2 in
-  let val = power-float(k, 3) in
-  printf("{}\n", [show-float(val)]);
+  let k: int = 2 in
+  let val = power-int(k, 5) in
+  printf("{}\n", [show-int(val)]);
   let foo = `x` in
   use-rune(foo);
   match foo {

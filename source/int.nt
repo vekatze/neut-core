@@ -40,3 +40,18 @@ define abs-int(x: int): int {
     x
   }
 }
+
+define power-int(a: int, b: int): int {
+  let f =
+    define _power(a: int, b: int, result: int): int {
+      if le-int(b, 0) {
+        result
+      } else-if eq-int(rem-int(b, 2), 0) {
+        _power(mul-int(a, a), div-int(b, 2), result)
+      } else {
+        _power(mul-int(a, a), div-int(b, 2), mul-int(result, a))
+      }
+    }
+  in
+  f(a, b, 1)
+}

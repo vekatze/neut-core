@@ -2,7 +2,7 @@ import {
   Magic,
   Mem,
   Word,
-  this.bool,
+  this.bool {and},
   this.box,
   this.control {loop},
   this.either {Left, Right, either, from-option, none},
@@ -166,6 +166,14 @@ define length<a>(xs: &vector(a)): int {
   let from = Mem.load-int(from-ptr) in
   let to = Mem.load-int(to-ptr) in
   sub-int(to, from)
+}
+
+inline access<a>(xs: &vector(a), i: int): ?&a {
+  if and(le-int(0, i), lt-int(i, length(xs))) {
+    Right(_access(xs, i))
+  } else {
+    none()
+  }
 }
 
 inline for-each<a, b>(xs: vector(a), !f: (a) -> b): vector(b) {

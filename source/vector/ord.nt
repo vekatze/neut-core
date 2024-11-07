@@ -1,0 +1,106 @@
+import {
+  this.bool {False, True},
+  this.box,
+  this.either {Left, Right, either},
+  this.ord {ord},
+  this.ordering {LT},
+  this.system {panic},
+  this.text,
+  this.vector {_swap, vector},
+}
+
+define _find-lower<a>(!o: ord(&a), vs: &vector(a), from: int, to: int, pivot: &a): int {
+  if ge-int(from, to) {
+    -1
+  } else {
+    let v = core.vector._access(vs, from) in
+    match !o::compare(v, pivot) {
+    | LT =>
+      _find-lower(!o, vs, add-int(from, 1), to, pivot)
+    | _ =>
+      from
+    }
+  }
+}
+
+define _find-higher<a>(!o: ord(&a), vs: &vector(a), boundary: int, to: int, pivot: &a): int {
+  if le-int(to, boundary) {
+    -1
+  } else {
+    let v = core.vector._access(vs, to) in
+    match !o::compare(v, pivot) {
+    | LT =>
+      to
+    | _ =>
+      _find-higher(!o, vs, boundary, sub-int(to, 1), pivot)
+    }
+  }
+}
+
+inline _unsafe-extract<a, b>(x: either(a, b)): b {
+  match x {
+  | Left(_) =>
+    panic("fail: _unsafe-extract\n")
+  | Right(v) =>
+    v
+  }
+}
+
+inline vector-quicksort<a>(!o: ord(&a)): (!nes: (a) -> meta a, xs: vector(a)) -> vector(a) {
+  function (!nes: (a) -> meta a, xs: vector(a)) {
+    let f =
+      define outer-loop(vs: vector(a), from: int, to: int): vector(a) {
+        if ge-int(from, to) {
+          vs
+        } else {
+          let pivot-index = div-int(add-int(from, to), 2) in
+          letbox-T pivot on vs = !nes(*core.vector._access(vs, pivot-index)) in
+          let pivot-swap-loop =
+            define inner-loop(
+              vs: vector(a),
+              current-from: int,
+              current-to: int,
+              pivot: a,
+              boundary: int,
+            ): vector(a) {
+              let lower on vs, pivot = _find-lower(!o, vs, current-from, boundary, pivot) in
+              let higher on vs, pivot = _find-higher(!o, vs, boundary, current-to, pivot) in
+              match lt-int(lower, 0), lt-int(higher, 0) {
+              | True, True =>
+                outer-loop(outer-loop(vs, from, boundary), add-int(boundary, 1), to)
+              | True, False =>
+                let hi = higher in
+                let vs = _swap(vs, hi, boundary) in
+                inner-loop(vs, boundary, current-to, pivot, hi)
+              | False, True =>
+                let lo = lower in
+                let vs = _swap(vs, lo, boundary) in
+                inner-loop(vs, current-from, boundary, pivot, lo)
+              | False, False =>
+                let lo = lower in
+                let hi = higher in
+                let vs = _swap(vs, lo, hi) in
+                inner-loop(vs, add-int(lo, 1), sub-int(hi, 1), pivot, boundary)
+              }
+            }
+          in
+          pivot-swap-loop(vs, from, to, pivot, pivot-index)
+        }
+      }
+    in
+    let len on xs = core.vector.length(xs) in
+    f(xs, 0, sub-int(len, 1))
+  }
+}
+
+data trope(a) {
+| Trope(
+    quicksort: (!nes: (a) -> meta a, xs: vector(a)) -> vector(a),
+  )
+}
+
+inline from-ord<a>(o: ord(&a)): trope(a) {
+  Trope of {
+    quicksort = vector-quicksort(o),
+  }
+}

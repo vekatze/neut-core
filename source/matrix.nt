@@ -107,6 +107,12 @@ inline _one<a>(r: ring(a)): (int) -> matrix(a) {
   }
 }
 
+inline _lift<a, b, c>(f: (a, b) -> c): (&a, &b, int) -> c {
+  function (x, y, _) {
+    f(*x, *y)
+  }
+}
+
 inline _add<a>(r: ring(a)): (&matrix(a), &matrix(a)) -> matrix(a) {
   let Ring of {add = !add} = r in
   define _(mat1: &matrix(a), mat2: &matrix(a)): matrix(a) {
@@ -125,7 +131,7 @@ inline _add<a>(r: ring(a)): (&matrix(a), &matrix(a)) -> matrix(a) {
     Matrix of {
       row-size,
       col-size,
-      content = Vector.zip-with-N(vec1, vec2, lift-N2(!add)),
+      content = Vector.zip-with-N(vec1, vec2, _lift(!add)),
     }
   }
 }
@@ -148,7 +154,7 @@ inline _sub<a>(r: ring(a)): (&matrix(a), &matrix(a)) -> matrix(a) {
     Matrix of {
       row-size,
       col-size,
-      content = Vector.zip-with-N(vec1, vec2, lift-N2(!sub)),
+      content = Vector.zip-with-N(vec1, vec2, _lift(!sub)),
     }
   }
 }
@@ -211,12 +217,12 @@ inline _mul-pointwise<a>(r: ring(a)): (&matrix(a), &matrix(a)) -> matrix(a) {
     Matrix of {
       row-size,
       col-size,
-      content = Vector.zip-with-N(vec1, vec2, lift-N2(!mul)),
+      content = Vector.zip-with-N(vec1, vec2, _lift(!mul)),
     }
   }
 }
 
-define for-each-N<a, b>(mat: &matrix(a), f: (&a) -> b): matrix(b) {
+define for-each-N<a, b>(mat: &matrix(a), f: (&a, int) -> b): matrix(b) {
   let vec = get-content(mat) in
   Matrix of {
     row-size = get-row-size(mat),
@@ -241,7 +247,11 @@ define zip-with<a, b, c>(mat1: &matrix(a), mat2: &matrix(b), f: (&a, &b) -> c): 
   Matrix of {
     row-size = r1,
     col-size = c1,
-    content = Vector.zip-with-N(vec1, vec2, f),
+    content = {
+      Vector.zip-with-N(vec1, vec2, function (x, y, _) {
+        f(x, y)
+      })
+    },
   }
 }
 

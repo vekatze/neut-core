@@ -11,6 +11,7 @@ import {
   this.text,
   this.text.io {print, printf},
   this.unit {Unit, unit},
+  this.vector {create, for, slice, vector},
 }
 
 define with-cell(i: int): int {
@@ -54,6 +55,15 @@ define use-rune(r: rune): unit {
 }
 
 define zen(): unit {
+  let xs: vector(int) =
+    create(10, function (i) {
+      i
+    })
+  in
+  let ys = slice(xs, -2, 8) in
+  for(ys, function (y, _) {
+    printf("{}\n", [show-int(y)])
+  });
   let k: int = 2 in
   let val = power-int(k, 5) in
   printf("{}\n", [show-int(val)]);

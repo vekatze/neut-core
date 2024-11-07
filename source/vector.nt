@@ -2,15 +2,23 @@ import {
   Magic,
   Mem,
   Word,
-  this.bool {and},
+  this.bool {and, bool, not},
   this.box,
   this.control {loop},
   this.either {Left, Right, either, from-option, none},
   this.external {free, malloc},
+  this.function {compose},
+  this.int {max-int, min-int},
   this.int.ord {as-ord-N},
   this.list {Cons, Nil, list, minimum},
+  this.magic,
+  this.memory,
+  this.pair {Pair, pair},
   this.pointer {extract, pointer, shift},
+  this.system {panic},
+  this.text,
   this.unit {Unit, unit},
+  this.word,
 }
 
 data _vector-info {
@@ -59,7 +67,7 @@ data vector(_: type) {
 | _Vector(_vector-internal)
 }
 
-define _get-vector-info<a>(xs: &vector(a)): _vector-info {
+inline _get-vector-info<a>(xs: &vector(a)): _vector-info {
   let from-ptr = Magic.cast(&vector(a), pointer, xs) in
   let word-size = Word.size in
   let to-ptr = shift(from-ptr, word-size) in
@@ -121,7 +129,7 @@ inline create<a>(len: int, !gen: (int) -> a): vector(a) {
   magic cast(pointer, vector(a), ptr0)
 }
 
-inline create-maybe<a>(len: int, !gen: (int) -> ?a): ?vector(a) {
+inline create-maybe<e, a>(len: int, !gen: (int) -> either(e, a)): either(e, vector(a)) {
   let word-size = Word.size in
   let ptr0 = malloc(mul-int(word-size, add-int(3, len))) in
   let ptr1 = shift(ptr0, word-size) in
@@ -131,13 +139,13 @@ inline create-maybe<a>(len: int, !gen: (int) -> ?a): ?vector(a) {
   Mem.store-int(len, ptr1);
   Mem.store-int(Magic.cast(type, int, a), ptr2);
   let store-values =
-    define self(index: int): either(int, unit) {
+    define self(index: int): either(pair(e, int), unit) {
       if ge-int(index, len) {
         Right(Unit)
       } else {
         match !gen(index) {
-        | Left(_) =>
-          Left(index)
+        | Left(e) =>
+          Left(Pair(e, index))
         | Right(v) =>
           Mem.store-int(Magic.cast(a, int, v), shift(ptr3, mul-int(index, word-size)));
           self(add-int(index, 1))
@@ -146,13 +154,24 @@ inline create-maybe<a>(len: int, !gen: (int) -> ?a): ?vector(a) {
     }
   in
   match store-values(0) {
-  | Left(index) =>
+  | Left(Pair(e, index)) =>
     _discard-vector-content(ptr3, a, 0, index);
     free(ptr0);
-    none()
+    Left(e)
   | Right(_) =>
     Right(magic cast(pointer, vector(a), ptr0))
   }
+}
+
+define create-empty<a>(): vector(a) {
+  let word-size = Word.size in
+  let ptr0 = malloc(mul-int(word-size, 3)) in
+  let ptr1 = shift(ptr0, word-size) in
+  let ptr2 = shift(ptr0, mul-int(word-size, 2)) in
+  Mem.store-int(0, ptr0);
+  Mem.store-int(0, ptr1);
+  Mem.store-int(Magic.cast(type, int, a), ptr2);
+  magic cast(pointer, vector(a), ptr0)
 }
 
 inline _access<a>(xs: &vector(a), i: int): &a {
@@ -176,7 +195,7 @@ inline access<a>(xs: &vector(a), i: int): ?&a {
   }
 }
 
-inline for-each<a, b>(xs: vector(a), !f: (a) -> b): vector(b) {
+inline for-each<a, b>(xs: vector(a), !f: (a, int) -> b): vector(b) {
   let word-size = Word.size in
   let ptr0 = Magic.cast(vector(a), pointer, xs) in
   let ptr1 = shift(ptr0, word-size) in
@@ -192,7 +211,7 @@ inline for-each<a, b>(xs: vector(a), !f: (a) -> b): vector(b) {
       } else {
         let value-ptr = shift(ptr3, mul-int(index, word-size)) in
         let old-value = Magic.cast(int, a, Mem.load-int(value-ptr)) in
-        let new-value-ptr = Magic.cast(b, int, !f(old-value)) in
+        let new-value-ptr = Magic.cast(b, int, !f(old-value, index)) in
         Mem.store-int(new-value-ptr, value-ptr);
         self(add-int(index, 1))
       }
@@ -202,14 +221,58 @@ inline for-each<a, b>(xs: vector(a), !f: (a) -> b): vector(b) {
   Magic.cast(pointer, vector(b), ptr0)
 }
 
-inline for-each-N<a, b>(xs: &vector(a), f: (&a) -> b): vector(b) {
+inline for-each-N<a, b>(xs: &vector(a), f: (&a, int) -> b): vector(b) {
   let len = length(xs) in
   create(len, function (i) {
-    f(_access(xs, i))
+    f(_access(xs, i), i)
   })
 }
 
-inline for<a>(xs: vector(a), !f: (a) -> unit): unit {
+inline for-each-maybe<e, a, b>(xs: vector(a), !f: (a, int) -> either(e, b)): either(e, vector(b)) {
+  let word-size = Word.size in
+  let ptr0 = Magic.cast(vector(a), pointer, xs) in
+  let ptr1 = shift(ptr0, word-size) in
+  let ptr2 = shift(ptr0, mul-int(word-size, 2)) in
+  let ptr3 = shift(ptr0, mul-int(word-size, 3)) in
+  let from = Mem.load-int(ptr0) in
+  let to = Mem.load-int(ptr1) in
+  Mem.store-int(Magic.cast(type, int, b), ptr2);
+  let store-values =
+    define self(index: int): either(pair(e, int), unit) {
+      if ge-int(index, to) {
+        Right(Unit)
+      } else {
+        let value-ptr = shift(ptr3, mul-int(index, word-size)) in
+        let old-value = Magic.cast(int, a, Mem.load-int(value-ptr)) in
+        match !f(old-value, index) {
+        | Left(e) =>
+          Left(Pair(e, index))
+        | Right(v) =>
+          let new-value-ptr = Magic.cast(b, int, v) in
+          Mem.store-int(new-value-ptr, value-ptr);
+          self(add-int(index, 1))
+        }
+      }
+    }
+  in
+  match store-values(from) {
+  | Left(Pair(error, index)) =>
+    _discard-vector-content(ptr3, a, 0, index);
+    free(ptr0);
+    Left(error)
+  | Right(_) =>
+    Right(Magic.cast(pointer, vector(b), ptr0))
+  }
+}
+
+inline for-each-maybe-N<e, a, b>(xs: &vector(a), f: (&a, int) -> either(e, b)): either(e, vector(b)) {
+  let len = length(xs) in
+  create-maybe(len, function (i) {
+    f(_access(xs, i), i)
+  })
+}
+
+inline for<a>(xs: vector(a), !f: (a, int) -> unit): unit {
   let word-size = Word.size in
   let ptr0 = magic cast(vector(a), pointer, xs) in
   let ptr1 = shift(ptr0, word-size) in
@@ -223,7 +286,7 @@ inline for<a>(xs: vector(a), !f: (a) -> unit): unit {
       } else {
         let value-ptr = shift(ptr3, mul-int(index, word-size)) in
         let old-value = Mem.load-int(value-ptr) in
-        !f(Magic.cast(int, a, old-value));
+        !f(Magic.cast(int, a, old-value), index);
         self(add-int(index, 1))
       }
     }
@@ -232,17 +295,58 @@ inline for<a>(xs: vector(a), !f: (a) -> unit): unit {
   free(ptr0)
 }
 
-inline for-N<a>(xs: &vector(a), f: (&a) -> unit): unit {
+inline for-N<a>(xs: &vector(a), f: (&a, int) -> unit): unit {
   let len = length(xs) in
   loop(len, function (i) {
-    f(_access(xs, i))
+    f(_access(xs, i), i)
   })
+}
+
+define for-each-vertical<a, b>(xs: vector(a), col-size: int, !f: (a, int) -> b): vector(b) {
+  assert "core.vector.for-each-vertical: col-size > 0" {
+    gt-int(col-size, 0)
+  };
+  let word-size = core.word.size in
+  let ptr0 = core.magic.cast(vector(a), pointer, xs) in
+  let ptr1 = shift(ptr0, word-size) in
+  let ptr2 = shift(ptr0, mul-int(word-size, 2)) in
+  let ptr3 = shift(ptr0, mul-int(word-size, 3)) in
+  let from = core.memory.load-int(ptr0) in
+  let to = core.memory.load-int(ptr1) in
+  core.memory.store-int(core.magic.cast(type, int, b), ptr2);
+  let vec-size = sub-int(to, from) in
+  let store-values =
+    define self(index: int): unit {
+      if ge-int(index, to) {
+        Unit
+      } else {
+        let value-ptr = shift(ptr3, mul-int(index, word-size)) in
+        let old-value = core.magic.cast(int, a, core.memory.load-int(value-ptr)) in
+        let new-value-ptr = core.magic.cast(b, int, !f(old-value, index)) in
+        core.memory.store-int(new-value-ptr, value-ptr);
+        let next-index-cand = add-int(index, col-size) in
+        if lt-int(next-index-cand, vec-size) {
+          self(next-index-cand)
+        } else {
+          let current-column = rem-int(index, col-size) in
+          let next-column = add-int(current-column, 1) in
+          if ge-int(next-column, col-size) {
+            Unit
+          } else {
+            self(next-column)
+          }
+        }
+      }
+    }
+  in
+  store-values(from);
+  core.magic.cast(pointer, vector(b), ptr0)
 }
 
 inline fold-left-N<elem-type, result-type>(
   acc: result-type,
   xs: &vector(elem-type),
-  !consumer: (result-type, &elem-type) -> result-type,
+  !consumer: (result-type, &elem-type, int) -> result-type,
 ): result-type {
   let sz = length(xs) in
   let helper =
@@ -251,14 +355,33 @@ inline fold-left-N<elem-type, result-type>(
         acc
       } else {
         let y = _access(xs, cursor) in
-        loop(add-int(cursor, 1), !consumer(acc, y), xs)
+        loop(add-int(cursor, 1), !consumer(acc, y, cursor), xs)
       }
     }
   in
   helper(0, acc, xs)
 }
 
-inline zip-with-N<a, b, c>(xs: &vector(a), ys: &vector(b), f: (&a, &b) -> c): vector(c) {
+inline fold-left-reverse-N<elem-type, result-type>(
+  acc: result-type,
+  xs: &vector(elem-type),
+  !consumer: (result-type, &elem-type, int) -> result-type,
+): result-type {
+  let sz = core.vector.length(xs) in
+  let helper =
+    define loop(cursor: int, acc: result-type, xs: &vector(elem-type)): result-type {
+      if lt-int(cursor, 0) {
+        acc
+      } else {
+        let y = core.vector._access(xs, cursor) in
+        loop(sub-int(cursor, 1), !consumer(acc, y, cursor), xs)
+      }
+    }
+  in
+  helper(sub-int(sz, 1), acc, xs)
+}
+
+inline zip-with-N<a, b, c>(xs: &vector(a), ys: &vector(b), f: (&a, &b, int) -> c): vector(c) {
   let len1 = length(xs) in
   let len2 = length(ys) in
   let min-func = minimum(as-ord-N) in
@@ -267,7 +390,7 @@ inline zip-with-N<a, b, c>(xs: &vector(a), ys: &vector(b), f: (&a, &b) -> c): ve
   create(len, function (i) {
     let val1 = _access(xs, i) in
     let val2 = _access(ys, i) in
-    f(val1, val2)
+    f(val1, val2, i)
   })
 }
 
@@ -316,4 +439,198 @@ define to-list<a>(xs: vector(a)): list(a) {
   let result = loop(0) in
   free(ptr0);
   result
+}
+
+define exchange<a>(xs: vector(a), index: int, value: a): either(vector(a), pair(a, vector(a))) {
+  let len on xs = core.vector.length(xs) in
+  if and(le-int(0, index), lt-int(index, len)) {
+    let ptr0 = core.magic.cast(vector(a), pointer, xs) in
+    let ptr3 = shift(ptr0, mul-int(core.word.size, 3)) in
+    let value-ptr = shift(ptr3, mul-int(index, core.word.size)) in
+    let old-value = core.magic.cast(int, a, core.memory.load-int(value-ptr)) in
+    let new-value-ptr = core.magic.cast(a, int, value) in
+    core.memory.store-int(new-value-ptr, value-ptr);
+    let new-vector = core.magic.cast(pointer, vector(a), ptr0) in
+    Right(Pair(old-value, new-vector))
+  } else {
+    Left(xs)
+  }
+}
+
+define _swap<a>(xs: vector(a), i: int, j: int): vector(a) {
+  let p on xs =
+    let _Vector-Info of {content-ptr} = _get-vector-info(xs) in
+    content-ptr
+  in
+  let u = Word.size in
+  let value-i = Mem.load-int(shift(p, mul-int(i, u))) in
+  let value-j = Mem.load-int(shift(p, mul-int(j, u))) in
+  Mem.store-int(value-j, shift(p, mul-int(i, u)));
+  Mem.store-int(value-i, shift(p, mul-int(j, u)));
+  xs
+}
+
+define swap<a>(xs: vector(a), i: int, j: int): either(vector(a), vector(a)) {
+  let len on xs = length(xs) in
+  let b1 = and(le-int(0, i), lt-int(i, len)) in
+  let b2 = and(le-int(0, j), lt-int(j, len)) in
+  if and(b1, b2) {
+    Right(_swap(xs, i, j))
+  } else {
+    Right(xs)
+  }
+}
+
+inline _unsafe-extract<a, b>(x: either(a, b)): b {
+  match x {
+  | Left(_) =>
+    panic("fail: _unsafe-extract\n")
+  | Right(v) =>
+    v
+  }
+}
+
+define reverse<a>(xs: vector(a)): vector(a) {
+  let len on xs = core.vector.length(xs) in
+  let f =
+    define self(xs: vector(a), left: int, right: int): vector(a) {
+      if ge-int(left, right) {
+        xs
+      } else {
+        let xs = _unsafe-extract(swap(xs, left, right)) in
+        self(xs, add-int(left, 1), sub-int(right, 1))
+      }
+    }
+  in
+  f(xs, 0, sub-int(len, 1))
+}
+
+define take<a>(xs: vector(a), offset: int): vector(a) {
+  let offset = max-int(0, offset) in
+  let _ on xs =
+    let len = core.vector.length(xs) in
+    let rem-size = sub-int(len, offset) in
+    loop(rem-size, function (i) {
+      let v = core.vector._access(xs, add-int(i, offset)) in
+      let _ = core.magic.cast(&a, a, v) in
+      Unit
+    });
+    let ptr = core.magic.cast(&vector(a), pointer, xs) in
+    let from = core.memory.load-int(ptr) in
+    let to-ptr = shift(ptr, core.word.size) in
+    let to = core.memory.load-int(to-ptr) in
+    core.memory.store-int(min-int(to, add-int(from, offset)), to-ptr)
+  in
+  xs
+}
+
+define drop<a>(xs: vector(a), offset: int): vector(a) {
+  let offset = max-int(0, offset) in
+  let _ on xs =
+    loop(offset, function (i) {
+      let v = core.vector._access(xs, i) in
+      let _ = core.magic.cast(&a, a, v) in
+      Unit
+    });
+    let ptr = core.magic.cast(&vector(a), pointer, xs) in
+    let from = core.memory.load-int(ptr) in
+    let to-ptr = shift(ptr, core.word.size) in
+    let to = core.memory.load-int(to-ptr) in
+    core.memory.store-int(min-int(to, add-int(from, offset)), ptr)
+  in
+  xs
+}
+
+define slice<a>(xs: vector(a), from: int, to: int): vector(a) {
+  let base = sub-int(from, 1) in
+  let ys = drop(xs, base) in
+  take(ys, sub-int(to, base))
+}
+
+define take-end<a>(xs: vector(a), n: int): vector(a) {
+  let len on xs = core.vector.length(xs) in
+  drop(xs, sub-int(len, n))
+}
+
+define drop-end<a>(xs: vector(a), n: int): vector(a) {
+  let len on xs = core.vector.length(xs) in
+  take(xs, sub-int(len, n))
+}
+
+define find<a>(xs: &vector(a), !pred: (&a) -> bool): ?int {
+  let len = length(xs) in
+  let f =
+    define self(index: int): ?int {
+      if ge-int(index, len) {
+        none()
+      } else {
+        let value = _access(xs, index) in
+        if !pred(value) {
+          Right(index)
+        } else {
+          self(add-int(index, 1))
+        }
+      }
+    }
+  in
+  f(0)
+}
+
+define find-end<a>(xs: &vector(a), !pred: (&a) -> bool): ?int {
+  let len = length(xs) in
+  let f =
+    define self(index: int): ?int {
+      if lt-int(index, 0) {
+        none()
+      } else {
+        let value = _access(xs, index) in
+        if !pred(value) {
+          Right(index)
+        } else {
+          self(sub-int(index, 1))
+        }
+      }
+    }
+  in
+  f(sub-int(len, 1))
+}
+
+define take-while<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
+  let pivot-index on xs = find(xs, compose(not, !pred)) in
+  match pivot-index {
+  | Left(_) =>
+    xs
+  | Right(falsified-index) =>
+    take(xs, falsified-index)
+  }
+}
+
+define drop-while<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
+  let pivot-index on xs = find(xs, compose(not, !pred)) in
+  match pivot-index {
+  | Left(_) =>
+    create-empty()
+  | Right(falsified-index) =>
+    drop(xs, falsified-index)
+  }
+}
+
+define take-end-while<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
+  let pivot-index on xs = find-end(xs, compose(not, !pred)) in
+  match pivot-index {
+  | Left(_) =>
+    xs
+  | Right(falsified-index) =>
+    drop(xs, add-int(falsified-index, 1))
+  }
+}
+
+define drop-end-while<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
+  let pivot-index on xs = find-end(xs, compose(not, !pred)) in
+  match pivot-index {
+  | Left(_) =>
+    create-empty()
+  | Right(falsified-index) =>
+    take(xs, add-int(falsified-index, 1))
+  }
 }

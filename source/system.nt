@@ -18,16 +18,6 @@ inline admit(a: type, t: &text): a {
   exit(1)
 }
 
-define _assert(message: &text, check: () -> bool): unit {
-  if check() {
-    Unit
-  } else {
-    print(message);
-    fflush-all();
-    exit(1)
-  }
-}
-
 inline assert(message: &text, check: () -> bool): unit {
   introspect build-mode {
   | release =>
@@ -35,7 +25,13 @@ inline assert(message: &text, check: () -> bool): unit {
     let _ = message in
     Unit
   | default =>
-    _assert(message, check)
+    if check() {
+      Unit
+    } else {
+      print(message);
+      fflush-all();
+      exit(1)
+    }
   }
 }
 

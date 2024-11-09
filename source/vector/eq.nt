@@ -1,0 +1,38 @@
+import {
+  E,
+  this.bool {False, True, bool},
+  this.eq {Eq, eq},
+  this.vector {_access, length, vector},
+}
+
+inline as-eq<a>(class: eq(&a)): eq(&vector(a)) {
+  let Eq of {equal = !equal} = class in
+  Eq of {
+    equal = {
+      function (xs, ys) {
+        let len1 = length(xs) in
+        let len2 = length(ys) in
+        if ne-int(len1, len2) {
+          False
+        } else {
+          let f =
+            define loop(i: int): bool {
+              if ge-int(i, len1) {
+                True
+              } else {
+                let x = _access(xs, i) in
+                let y = _access(xs, i) in
+                if !equal(x, y) {
+                  loop(add-int(i, 1))
+                } else {
+                  False
+                }
+              }
+            }
+          in
+          f(0)
+        }
+      }
+    },
+  }
+}

@@ -3,7 +3,7 @@ import {
   this.box,
   this.either {Left, Right, either},
   this.int.parse {parse-hex},
-  this.list {Cons, Nil, any, concat, intercalate, list, try-for-each, try-for-each-N},
+  this.list {Cons, Nil, any, concat, for-each-maybe, for-each-maybe-N, intercalate, list},
   this.pair {Pair},
   this.rune,
   this.rune.eq {eq-rune},
@@ -99,13 +99,13 @@ define _parse-text-fragment(t: &text): either(error, list(text)) {
     // unreachable
     Left(Error(*"core.text.parse._parse-text-fragment"))
   | Cons(t', ts') =>
-    try fragment-lists = try-for-each(ts', _unquote-text) in
+    try fragment-lists = for-each-maybe(ts', _unquote-text) in
     Right(Cons(t', concat(fragment-lists)))
   }
 }
 
 define parse-text(t: &text): either(error, text) {
   pin ts = split(t, "\\\\") in
-  try tss = try-for-each-N(ts, _parse-text-fragment) in
+  try tss = for-each-maybe-N(ts, _parse-text-fragment) in
   Right(core.text.join(core.list.concat(intercalate(tss, [*"\\"]))))
 }

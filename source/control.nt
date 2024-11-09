@@ -19,7 +19,7 @@ inline loop(count: int, !f: (int) -> unit): unit {
   helper(0)
 }
 
-inline try-loop<e>(count: int, !f: (int) -> either(e, unit)): either(e, unit) {
+inline loop-maybe<e>(count: int, !f: (int) -> either(e, unit)): either(e, unit) {
   let helper =
     define self(cursor): either(e, unit) {
       match ge-int(cursor, count) {
@@ -47,7 +47,7 @@ inline grow<a>(seed: a, iteration: int, !step: (a, int) -> a): a {
   helper(seed, 0)
 }
 
-inline try-grow<e, a>(seed: a, iteration: int, !step: (a, int) -> either(e, a)): either(e, a) {
+inline grow-maybe<e, a>(seed: a, iteration: int, !step: (a, int) -> either(e, a)): either(e, a) {
   let helper =
     define self(acc: a, current: int): either(e, a) {
       if ge-int(current, iteration) {

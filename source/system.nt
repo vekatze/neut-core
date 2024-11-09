@@ -12,13 +12,13 @@ import {
   this.unit {Unit, unit},
 }
 
-inline admit(a: type, t: &text): a {
+inline _admit(a: type, t: &text): a {
   print(t);
   fflush-all();
   exit(1)
 }
 
-inline assert(message: &text, check: () -> bool): unit {
+inline _assert(message: &text, check: () -> bool): unit {
   introspect build-mode {
   | release =>
     let _ = check in

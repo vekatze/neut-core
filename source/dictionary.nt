@@ -10,7 +10,7 @@ import {
   this.list {Cons, Nil, append, list},
   this.ord,
   this.pair {Pair, pair},
-  this.system,
+  this.system {panic},
 }
 
 // size balanced tree
@@ -106,7 +106,7 @@ inline _balance-L<a, b>(k: a, x: b, l: dictionary(a, b), r: dictionary(a, b)): d
           // unreachable
           let !lk = lk in
           let !lx = lx in
-          let !tip = core.system.admit(_, "failure in core.dictionary._balance-L") in
+          let !tip = panic("failure in core.dictionary._balance-L") in
           Bin(ls, !lk, !lx, Bin(ls, !lk, !lx, !tip, !tip), Bin(ls, !lk, !lx, !tip, !tip))
         }
       } else {
@@ -175,7 +175,7 @@ inline _balance-R<a, b>(k: a, x: b, l: dictionary(a, b), r: dictionary(a, b)): d
           // unreachable
           let !rk = rk in
           let !rx = rx in
-          let !tip = core.system.admit(_, "failure in core.dictionary._balance-L") in
+          let !tip = panic("failure in core.dictionary._balance-L") in
           Bin(rs, !rk, !rx, Bin(rs, !rk, !rx, !tip, !tip), Bin(rs, !rk, !rx, !tip, !tip))
         }
       } else {

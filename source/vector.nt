@@ -615,7 +615,7 @@ define drop-while<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
   }
 }
 
-define take-end-while<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
+define take-while-end<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
   let pivot-index on xs = find-end(xs, compose(not, !pred)) in
   match pivot-index {
   | Left(_) =>
@@ -625,7 +625,7 @@ define take-end-while<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
   }
 }
 
-define drop-end-while<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
+define drop-while-end<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
   let pivot-index on xs = find-end(xs, compose(not, !pred)) in
   match pivot-index {
   | Left(_) =>

@@ -111,7 +111,7 @@ int neut_core_v0_50_errno() {
 }
 
 __attribute__((always_inline))
-int64_t neut_core_v0_50_UINT32_MAX() {
+uint32_t neut_core_v0_50_UINT32_MAX() {
   return UINT32_MAX;
 }
 

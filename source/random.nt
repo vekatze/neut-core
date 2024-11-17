@@ -3,23 +3,23 @@ import {
 }
 
 foreign {
-  arc4random_uniform(int): int,
+  arc4random_uniform(int32): int32,
 }
 
-define random(ubound: int): int {
+define random(ubound: int32): int {
   introspect os {
   | darwin =>
-    magic external arc4random_uniform(ubound)
+    zext-int32-int(magic external arc4random_uniform(ubound))
   | linux =>
     // requires glibc >= 2.36
-    magic external arc4random_uniform(ubound)
+    zext-int32-int(magic external arc4random_uniform(ubound))
   }
 }
 
-define random-in-range(lower-bound: int, upper-bound: int): int {
-  let range-size = sub-int(upper-bound, lower-bound) in
-  let value = random(add-int(range-size, 1)) in
-  add-int(value, lower-bound)
+define random-in-range(lower-bound: int32, upper-bound: int32): int {
+  let range-size = sub-int32(upper-bound, lower-bound) in
+  let value = random(add-int32(range-size, 1)) in
+  add-int(value, zext-int32-int(lower-bound))
 }
 
 define random-float(min: float, max: float): float {
@@ -28,7 +28,7 @@ define random-float(min: float, max: float): float {
   add-float(
     min,
     mul-float(
-      div-float(uitofp-int-float(numerator), uitofp-int-float(denominator)),
+      div-float(uitofp-int-float(numerator), uitofp-int32-float(denominator)),
       sub-float(max, min),
     ),
   )

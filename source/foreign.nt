@@ -25,7 +25,7 @@ foreign {
   neut_core_v0_50_thread_size(): c-size,
   neut_core_v0_50_thread_mutex_size(): c-size,
   neut_core_v0_50_thread_cond_size(): c-size,
-  neut_core_v0_50_UINT32_MAX(): int,
+  neut_core_v0_50_UINT32_MAX(): int32,
   neut_core_v0_50_parse_binary(pointer, int, pointer): int,
   neut_core_v0_50_parse_decimal(pointer, int, pointer): int,
   neut_core_v0_50_parse_hex(pointer, int, pointer): int,
@@ -116,7 +116,7 @@ constant THREAD_COND_SIZE: c-size {
   magic external neut_core_v0_50_thread_cond_size()
 }
 
-constant UINT32_MAX: int {
+constant UINT32_MAX: int32 {
   magic external neut_core_v0_50_UINT32_MAX()
 }
 

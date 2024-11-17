@@ -4,10 +4,12 @@ import {
   this.cell {mutate},
   this.control {discard},
   this.either {Left, Right, either},
+  this.float.show {show-float},
   this.int {power-int},
   this.int.show {show-int},
   this.list {length, list},
   this.pair {Pair, pair},
+  this.random {random-float},
   this.rune {to-int},
   this.text,
   this.text.io {print, printf},
@@ -65,6 +67,8 @@ define zen(): unit {
       i
     })
   in
+  let val = random-float(3.8, 10.2) in
+  printf("random-float: {}\n", [show-float(val)]);
   let ys = slice(xs, -2, 8) in
   for(ys, function (y, _) {
     printf("{}\n", [show-int(y)])

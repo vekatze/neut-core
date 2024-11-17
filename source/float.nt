@@ -16,8 +16,6 @@ foreign {
   llvm.sin.f64(float): float,
   llvm.sqrt.f64(float): float,
   llvm.trunc.f64(float): float,
-  snprintf(pointer, int, pointer): int,
-  sprintf(pointer, pointer): int,
 }
 
 define sqrt(x: float): float {

@@ -1,4 +1,5 @@
 import {
+  this.c-int {C-Int, c-int},
   this.unit {unit},
 }
 
@@ -64,4 +65,13 @@ inline load-int1(p: pointer): int1 {
 
 inline load-float(p: pointer): float {
   magic load(float, p)
+}
+
+inline load-c-int(p: pointer): c-int {
+  introspect arch {
+  | arm64 =>
+    C-Int(magic load(int32, p))
+  | amd64 =>
+    C-Int(magic load(int32, p))
+  }
 }

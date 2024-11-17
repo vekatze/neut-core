@@ -13,7 +13,7 @@ import {
   this.file.descriptor {stderr, stdin, stdout},
   this.foreign {_wcoredump, _wexitstatus, _wifexited, _wifsignaled, _wifstopped, _wstopsig, _wtermsig},
   this.list {Cons, fold-left-with-index, length, list},
-  this.memory {load-pointer, store-int},
+  this.memory {load-c-int, store-int},
   this.pair {Pair, pair},
   this.pointer {extract, null-pointer, shift},
   this.text {_get-content-pointer, text},
@@ -46,7 +46,7 @@ define _waitpid(pid: c-pid): system(process-result-status) {
     free(status-ptr);
     report-system-error()
   } else {
-    let stat-loc = load-pointer(status-ptr) in
+    let stat-loc = load-c-int(status-ptr) in
     free(status-ptr);
     if _wifexited(stat-loc) {
       let exit-status = _wexitstatus(stat-loc) in

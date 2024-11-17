@@ -6,13 +6,13 @@ import {
 
 foreign {
   neut_core_v0_50_errno(): c-int,
-  neut_core_v0_50_wifexited(pointer): c-int,
-  neut_core_v0_50_wifsignaled(pointer): c-int,
-  neut_core_v0_50_wifstopped(pointer): c-int,
-  neut_core_v0_50_wexitstatus(pointer): c-int,
-  neut_core_v0_50_wtermsig(pointer): c-int,
-  neut_core_v0_50_wcoredump(pointer): c-int,
-  neut_core_v0_50_wstopsig(pointer): c-int,
+  neut_core_v0_50_wifexited(c-int): c-int,
+  neut_core_v0_50_wifsignaled(c-int): c-int,
+  neut_core_v0_50_wifstopped(c-int): c-int,
+  neut_core_v0_50_wexitstatus(c-int): c-int,
+  neut_core_v0_50_wtermsig(c-int): c-int,
+  neut_core_v0_50_wcoredump(c-int): c-int,
+  neut_core_v0_50_wstopsig(c-int): c-int,
   neut_core_v0_50_word_size(): c-size,
   neut_core_v0_50_O_RDONLY(): c-int,
   neut_core_v0_50_O_WRONLY(): c-int,
@@ -40,31 +40,31 @@ define get-errno(): c-int {
   magic external neut_core_v0_50_errno()
 }
 
-define _wifexited(ptr: pointer): bool {
+define _wifexited(ptr: c-int): bool {
   _is-not-zero(magic external neut_core_v0_50_wifexited(ptr))
 }
 
-define _wifsignaled(ptr: pointer): bool {
+define _wifsignaled(ptr: c-int): bool {
   _is-not-zero(magic external neut_core_v0_50_wifsignaled(ptr))
 }
 
-define _wifstopped(ptr: pointer): bool {
+define _wifstopped(ptr: c-int): bool {
   _is-not-zero(magic external neut_core_v0_50_wifstopped(ptr))
 }
 
-define _wexitstatus(ptr: pointer): c-int {
+define _wexitstatus(ptr: c-int): c-int {
   magic external neut_core_v0_50_wexitstatus(ptr)
 }
 
-define _wtermsig(ptr: pointer): c-int {
+define _wtermsig(ptr: c-int): c-int {
   magic external neut_core_v0_50_wtermsig(ptr)
 }
 
-define _wcoredump(ptr: pointer): bool {
+define _wcoredump(ptr: c-int): bool {
   _is-not-zero(magic external neut_core_v0_50_wcoredump(ptr))
 }
 
-define _wstopsig(ptr: pointer): c-int {
+define _wstopsig(ptr: c-int): c-int {
   magic external neut_core_v0_50_wstopsig(ptr)
 }
 

@@ -2,8 +2,8 @@ import {
   FD,
   this.c-int {c-int, from-c-int},
   this.c-offset {c-offset},
-  this.c-size {c-size},
-  this.foreign {THREAD_COND_SIZE, THREAD_MUTEX_SIZE},
+  this.c-size {C-Size, c-size},
+  this.c-ssize {c-ssize},
   this.pointer {null-pointer},
   this.unit {Unit, unit},
 }
@@ -13,8 +13,8 @@ foreign {
   realloc(pointer, c-size): pointer,
   open(pointer, c-int): c-int,
   close(c-int): c-int,
-  write(c-int, pointer, c-size): c-size,
-  read(c-int, pointer, c-size): c-size,
+  write(c-int, pointer, c-size): c-ssize,
+  read(c-int, pointer, c-size): c-ssize,
   lseek(c-int, c-offset, c-int): c-offset,
   sleep(c-int): c-int,
   pthread_create(pointer, pointer, pointer, pointer): c-int,
@@ -46,8 +46,10 @@ define exit<a>(status: c-int): a {
 define malloc(size: c-size): pointer {
   introspect os {
   | darwin =>
+    let C-Size(size) = size in
     magic external malloc(size)
   | linux =>
+    let C-Size(size) = size in
     magic external malloc(size)
   }
 }
@@ -92,7 +94,7 @@ define close(f: FD.descriptor): int {
   }
 }
 
-define write(f: FD.descriptor, content-pointer: pointer, len: c-size): c-size {
+define write(f: FD.descriptor, content-pointer: pointer, len: c-size): c-ssize {
   let f = magic cast(FD.descriptor, c-int, f) in
   introspect os {
   | darwin =>
@@ -102,7 +104,7 @@ define write(f: FD.descriptor, content-pointer: pointer, len: c-size): c-size {
   }
 }
 
-define read(f: FD.descriptor, content-pointer: pointer, max-read-size: c-size): c-size {
+define read(f: FD.descriptor, content-pointer: pointer, max-read-size: c-size): c-ssize {
   let f = magic cast(FD.descriptor, c-int, f) in
   introspect os {
   | darwin =>
@@ -166,10 +168,6 @@ define thread-join(id: pointer, result-addr: pointer): unit {
   }
 }
 
-define thread-mutex-size(): int {
-  THREAD_MUTEX_SIZE
-}
-
 define thread-mutex-init(mutex-ptr: pointer): c-int {
   introspect os {
   | darwin =>
@@ -210,10 +208,6 @@ define thread-mutex-unlock(mutex-ptr: pointer): unit {
     let _ = magic external pthread_mutex_unlock(mutex-ptr) in
     Unit
   }
-}
-
-define thread-cond-size(): int {
-  THREAD_COND_SIZE
 }
 
 define thread-cond-init(cond-ptr: pointer): unit {

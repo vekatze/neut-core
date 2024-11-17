@@ -3,8 +3,9 @@ import {
   FD,
   Word,
   this.bool {bool},
-  this.c-int {c-int, eq-c-int, from-c-int},
-  this.c-pid {c-pid, eq-c-pid},
+  this.c-int {C-Int, c-int, eq-c-int, from-c-int},
+  this.c-pid {C-PID, c-pid, eq-c-pid},
+  this.c-size {C-Size},
   this.either {Left, Right},
   this.errno {Errno, report-system-error, system},
   this.external {free},
@@ -39,9 +40,9 @@ data process-result-status {
 }
 
 define _waitpid(pid: c-pid): system(process-result-status) {
-  let status-ptr = Ext.malloc(Word.size) in
-  let result = __waitpid(pid, status-ptr, 0) in
-  if eq-c-pid(result, -1) {
+  let status-ptr = Ext.malloc(C-Size(Word.size)) in
+  let result = __waitpid(pid, status-ptr, C-Int(0)) in
+  if eq-c-pid(result, C-PID(-1)) {
     free(status-ptr);
     report-system-error()
   } else {
@@ -66,7 +67,7 @@ define _waitpid(pid: c-pid): system(process-result-status) {
 
 define _make-argv(xs: list(pointer)): pointer {
   let len on xs = length(xs) in
-  let ptr = Ext.malloc(mul-int(Word.size, len)) in
+  let ptr = Ext.malloc(C-Size(mul-int(Word.size, len))) in
   fold-left-with-index(Unit, xs, function (_, x, i) {
     store-int(extract(x), shift(ptr, mul-int(Word.size, i)))
   });
@@ -74,9 +75,9 @@ define _make-argv(xs: list(pointer)): pointer {
 }
 
 define _create-pipe(): system(pair(FD.descriptor, FD.descriptor)) {
-  let ptr = Ext.malloc(mul-int(Word.size, 2)) in
+  let ptr = Ext.malloc(C-Size(mul-int(Word.size, 2))) in
   let result = magic external pipe(ptr) in
-  if eq-c-int(result, -1) {
+  if eq-c-int(result, C-Int(-1)) {
     free(ptr);
     report-system-error()
   } else {
@@ -91,16 +92,16 @@ define _dup2(fd1: FD.descriptor, fd2: FD.descriptor): system(unit) {
   let fd1 = magic cast(FD.descriptor, c-int, fd1) in
   let fd2 = magic cast(FD.descriptor, c-int, fd2) in
   let result = magic external dup2(fd1, fd2) in
-  if eq-c-int(result, -1) {
+  if eq-c-int(result, C-Int(-1)) {
     report-system-error()
   } else {
     Right(Unit)
   }
 }
 
-define _fork(): system(c-int) {
+define _fork(): system(c-pid) {
   let result = magic external fork() in
-  if eq-c-int(result, -1) {
+  if eq-c-pid(result, C-PID(-1)) {
     report-system-error()
   } else {
     Right(result)
@@ -132,9 +133,9 @@ define spawn(
   try Pair(out-reader, out-writer) = _create-pipe() in
   try Pair(error-reader, error-writer) = _create-pipe() in
   try pid = _fork() in
-  if eq-c-int(pid, -1) {
+  if eq-c-pid(pid, C-PID(-1)) {
     report-system-error()
-  } else-if eq-c-int(pid, 0) {
+  } else-if eq-c-pid(pid, C-PID(0)) {
     try _ = close(in-writer) in
     try _ = close(out-reader) in
     try _ = close(error-reader) in

@@ -2,7 +2,7 @@ import {
   Ext,
   Word,
   this.c-int {c-int, from-c-int},
-  this.c-size {c-size},
+  this.c-size {C-Size, c-size},
   this.memory {store-int},
   this.pointer {null-pointer, shift},
   this.show {Show, show},
@@ -17,8 +17,8 @@ foreign {
 
 define _show(c-fmt: &text, x: int): text {
   let fmt = _get-content-pointer(c-fmt) in
-  let size = from-c-int(magic external snprintf(null-pointer, 0, fmt)(x: int)) in
-  let ptr = Ext.malloc(add-int(size, add-int(1, mul-int(Word.size, 2)))) in
+  let size = from-c-int(magic external snprintf(null-pointer, C-Size(0), fmt)(x: int)) in
+  let ptr = Ext.malloc(C-Size(add-int(size, add-int(1, mul-int(Word.size, 2))))) in
   store-int(0, ptr);
   // ignore the trailing null character
   store-int(size, shift(ptr, Word.size));

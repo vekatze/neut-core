@@ -6,6 +6,8 @@ import {
   Word,
   this.binary {_get-content-pointer, binary, binary-length},
   this.bool,
+  this.c-size {C-Size, c-size, from-c-size, from-positive-ssize, lt-c-size},
+  this.c-ssize {C-SSize, from-c-ssize, lt-c-ssize},
   this.either {Right},
   this.errno {report-system-error, system},
   this.file.descriptor {descriptor},
@@ -21,11 +23,11 @@ define write(b: &binary, f: descriptor): system(unit) {
     define write-loop(acc: int): system(unit) {
       let rest = sub-int(len, acc) in
       let head-ptr = shift(content-pointer, acc) in
-      let bytes: int = core.external.write(f, head-ptr, rest) in
-      if lt-int(bytes, 0) {
+      let bytes = core.external.write(f, head-ptr, C-Size(rest)) in
+      if lt-c-ssize(bytes, C-SSize(0)) {
         report-system-error()
       } else {
-        let acc = add-int(acc, bytes) in
+        let acc = add-int(acc, from-c-ssize(bytes)) in
         if eq-int(acc, len) {
           Right(Unit)
         } else {
@@ -37,12 +39,12 @@ define write(b: &binary, f: descriptor): system(unit) {
   loop(0)
 }
 
-define _read-inner(from: FD.descriptor, ptr: pointer, ptr-size: int, len-cand: int, buffer-size: int): system(binary) {
+define _read-inner(from: FD.descriptor, ptr: pointer, ptr-size: int, len-cand: int, buffer-size: c-size): system(binary) {
   let u = this.word.size in
   let content-size = sub-int(ptr-size, mul-int(u, 2)) in
-  if lt-int(content-size, add-int(len-cand, buffer-size)) {
+  if lt-int(content-size, add-int(len-cand, from-c-size(buffer-size))) {
     let new-size = mul-int(ptr-size, 2) in
-    let new-ptr = Ext.realloc(ptr, new-size) in
+    let new-ptr = Ext.realloc(ptr, C-Size(new-size)) in
     if eq-int(extract(new-ptr), 0) {
       report-system-error()
     } else {
@@ -51,11 +53,11 @@ define _read-inner(from: FD.descriptor, ptr: pointer, ptr-size: int, len-cand: i
   } else {
     let content-ptr = shift(ptr, add-int(mul-int(u, 2), len-cand)) in
     let bytes = Ext.read(from, content-ptr, buffer-size) in
-    let next-len-cand = add-int(len-cand, bytes) in
-    if lt-int(bytes, 0) {
+    let next-len-cand = add-int(len-cand, from-c-ssize(bytes)) in
+    if lt-c-ssize(bytes, C-SSize(0)) {
       Ext.free(ptr);
       report-system-error()
-    } else-if lt-int(bytes, buffer-size) {
+    } else-if lt-c-size(from-positive-ssize(bytes), buffer-size) {
       Mem.store-int(next-len-cand, shift(ptr, u));
       Right(Magic.cast(pointer, binary, ptr))
     } else {
@@ -67,7 +69,7 @@ define _read-inner(from: FD.descriptor, ptr: pointer, ptr-size: int, len-cand: i
 define read(from: FD.descriptor, initial-buffer-size: int): system(binary) {
   let u = Word.size in
   let ptr-size = add-int(initial-buffer-size, mul-int(u, 2)) in
-  let ptr = Ext.malloc(ptr-size) in
+  let ptr = Ext.malloc(C-Size(ptr-size)) in
   Mem.store-int(0, ptr);
-  _read-inner(from, ptr, ptr-size, 0, initial-buffer-size)
+  _read-inner(from, ptr, ptr-size, 0, C-Size(initial-buffer-size))
 }

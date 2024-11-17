@@ -1,4 +1,9 @@
-constant c-size: type {
+import {
+  this.bool {bool},
+  this.c-ssize {C-SSize, c-ssize},
+}
+
+constant _c-size: type {
   introspect arch {
   | amd64 =>
     int64
@@ -7,6 +12,109 @@ constant c-size: type {
   }
 }
 
-data outer-c-size {
-| C-Size(c-size)
+data c-size {
+| C-Size(_c-size)
+}
+
+inline from-c-size(x: c-size): int {
+  let C-Size(x) = x in
+  introspect arch {
+  | amd64 =>
+    x
+  | arm64 =>
+    x
+  }
+}
+
+inline from-positive-ssize(x: c-ssize): c-size {
+  let C-SSize(x) = x in
+  C-Size(x)
+}
+
+inline add-c-size(x: c-size, y: c-size): c-size {
+  let C-Size(x) = x in
+  let C-Size(y) = y in
+  introspect arch {
+  | amd64 =>
+    C-Size(add-int(x, y))
+  | arm64 =>
+    C-Size(add-int(x, y))
+  }
+}
+
+inline mul-c-size(x: c-size, y: c-size): c-size {
+  let C-Size(x) = x in
+  let C-Size(y) = y in
+  introspect arch {
+  | amd64 =>
+    C-Size(mul-int(x, y))
+  | arm64 =>
+    C-Size(mul-int(x, y))
+  }
+}
+
+inline eq-c-size(x: c-size, y: c-size): bool {
+  let C-Size(x) = x in
+  let C-Size(y) = y in
+  introspect arch {
+  | amd64 =>
+    eq-int(x, y)
+  | arm64 =>
+    eq-int(x, y)
+  }
+}
+
+inline ne-c-size(x: c-size, y: c-size): bool {
+  let C-Size(x) = x in
+  let C-Size(y) = y in
+  introspect arch {
+  | amd64 =>
+    ne-int(x, y)
+  | arm64 =>
+    ne-int(x, y)
+  }
+}
+
+inline lt-c-size(x: c-size, y: c-size): bool {
+  let C-Size(x) = x in
+  let C-Size(y) = y in
+  introspect arch {
+  | amd64 =>
+    ult-int(x, y)
+  | arm64 =>
+    ult-int(x, y)
+  }
+}
+
+inline le-c-size(x: c-size, y: c-size): bool {
+  let C-Size(x) = x in
+  let C-Size(y) = y in
+  introspect arch {
+  | amd64 =>
+    ule-int(x, y)
+  | arm64 =>
+    ule-int(x, y)
+  }
+}
+
+inline gt-c-size(x: c-size, y: c-size): bool {
+  let C-Size(x) = x in
+  let C-Size(y) = y in
+  introspect arch {
+  | amd64 =>
+    ugt-int(x, y)
+  | arm64 =>
+    ugt-int(x, y)
+  }
+}
+
+inline ge-c-size(x: c-size, y: c-size): bool {
+  let C-Size(x) = x in
+  let C-Size(y) = y in
+  introspect arch {
+  | amd64 =>
+    uge-int(x, y)
+  | arm64 =>
+    uge-int(x, y)
+  }
 }

@@ -4,6 +4,7 @@ import {
   Word,
   this.bool {and, bool, not},
   this.box,
+  this.c-size {C-Size},
   this.control {loop},
   this.either {Left, Right, either, from-option, none},
   this.external {free, malloc},
@@ -96,7 +97,7 @@ resource _vector-internal {
     let to: int = Mem.load-int(to-ptr) in
     let size = sub-int(to, from) in
     let elem-type: type = Magic.cast(int, type, Mem.load-int(type-ptr)) in
-    let target-ptr = malloc(mul-int(word-size, add-int(size, 3))) in
+    let target-ptr = malloc(C-Size(mul-int(word-size, add-int(size, 3)))) in
     Mem.store-int(0, target-ptr);
     Mem.store-int(size, shift(target-ptr, word-size));
     Mem.store-int(Magic.cast(type, int, elem-type), shift(target-ptr, mul-int(word-size, 2)));
@@ -107,7 +108,7 @@ resource _vector-internal {
 
 inline create<a>(len: int, !gen: (int) -> a): vector(a) {
   let word-size = Word.size in
-  let ptr0 = malloc(mul-int(word-size, add-int(3, len))) in
+  let ptr0 = malloc(C-Size(mul-int(word-size, add-int(3, len)))) in
   let ptr1 = shift(ptr0, word-size) in
   let ptr2 = shift(ptr0, mul-int(word-size, 2)) in
   let ptr3 = shift(ptr0, mul-int(word-size, 3)) in
@@ -131,7 +132,7 @@ inline create<a>(len: int, !gen: (int) -> a): vector(a) {
 
 inline create-maybe<e, a>(len: int, !gen: (int) -> either(e, a)): either(e, vector(a)) {
   let word-size = Word.size in
-  let ptr0 = malloc(mul-int(word-size, add-int(3, len))) in
+  let ptr0 = malloc(C-Size(mul-int(word-size, add-int(3, len)))) in
   let ptr1 = shift(ptr0, word-size) in
   let ptr2 = shift(ptr0, mul-int(word-size, 2)) in
   let ptr3 = shift(ptr0, mul-int(word-size, 3)) in
@@ -165,7 +166,7 @@ inline create-maybe<e, a>(len: int, !gen: (int) -> either(e, a)): either(e, vect
 
 define create-empty<a>(): vector(a) {
   let word-size = Word.size in
-  let ptr0 = malloc(mul-int(word-size, 3)) in
+  let ptr0 = malloc(C-Size(mul-int(word-size, 3))) in
   let ptr1 = shift(ptr0, word-size) in
   let ptr2 = shift(ptr0, mul-int(word-size, 2)) in
   Mem.store-int(0, ptr0);
@@ -397,7 +398,7 @@ inline zip-with-N<a, b, c>(xs: &vector(a), ys: &vector(b), f: (&a, &b, int) -> c
 define from-list<a>(base-list: list(a)): vector(a) {
   let word-size = Word.size in
   let n on base-list = this.list.length(base-list) in
-  let ptr0 = malloc(mul-int(word-size, add-int(3, n))) in
+  let ptr0 = malloc(C-Size(mul-int(word-size, add-int(3, n)))) in
   let ptr1 = shift(ptr0, word-size) in
   let ptr2 = shift(ptr0, mul-int(word-size, 2)) in
   let ptr3 = shift(ptr0, mul-int(word-size, 3)) in

@@ -2,7 +2,7 @@ import {
   this.bool {bool},
 }
 
-constant c-pid: type {
+constant _c-pid: type {
   introspect arch {
   | amd64 =>
     int32
@@ -11,7 +11,13 @@ constant c-pid: type {
   }
 }
 
+data c-pid {
+| C-PID(_c-pid)
+}
+
 inline eq-c-pid(x: c-pid, y: c-pid): bool {
+  let C-PID(x) = x in
+  let C-PID(y) = y in
   introspect arch {
   | amd64 =>
     eq-int32(x, y)

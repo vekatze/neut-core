@@ -7,6 +7,7 @@ import {
   this.binary {_copy-binary, binary, binary-access, binary-length, binary-new},
   this.bool {False, True, bool},
   this.box,
+  this.c-size {C-Size},
   this.either {Right, none},
   this.list {Cons, Nil, list, reverse},
   this.memory {load-int8},
@@ -309,7 +310,7 @@ define pack(xs: &list(rune)): text {
   let len = _char-list-length(xs, 0) in
   let u = Word.size in
   let u2 = mul-int(u, 2) in
-  let new-text = Ext.malloc(add-int(len, u2)) in
+  let new-text = Ext.malloc(C-Size(add-int(len, u2))) in
   Mem.store-int(0, new-text);
   Mem.store-int(len, shift(new-text, u));
   let content-ptr = shift(new-text, u2) in
@@ -607,7 +608,7 @@ define replicate(t: &text, n: int): text {
   let len = mul-int(n, base-len) in
   let u = Word.size in
   let u2 = mul-int(u, 2) in
-  let new-text = Ext.malloc(add-int(len, u2)) in
+  let new-text = Ext.malloc(C-Size(add-int(len, u2))) in
   Mem.store-int(0, new-text);
   Mem.store-int(len, shift(new-text, u));
   let content-ptr = shift(new-text, u2) in

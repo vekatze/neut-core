@@ -3,6 +3,7 @@ import {
   Mem,
   Word,
   this.bool,
+  this.c-size {C-Size},
   this.either {Right, from-option, none},
   this.external {free, malloc},
   this.int.ord {as-ord-N},
@@ -35,7 +36,7 @@ resource float-array {
     let from = Mem.load-int(source-pointer) in
     let to = Mem.load-int(shift(source-pointer, u)) in
     let length = sub-int(to, from) in
-    let target-pointer = malloc(add-int(mul-int(u, length), u2)) in
+    let target-pointer = malloc(C-Size(add-int(mul-int(u, length), u2))) in
     Mem.store-int(0, target-pointer);
     Mem.store-int(length, shift(target-pointer, u));
     _copy-float-array(shift(source-pointer, u2), shift(target-pointer, u2), 0, from, to);
@@ -55,7 +56,7 @@ define new(xs: list(float)): float-array {
   let len on xs = this.list.length(xs) in
   let u = Word.size in
   let u2 = mul-int(u, 2) in
-  let base-pointer = malloc(add-int(mul-int(u, len), u2)) in
+  let base-pointer = malloc(C-Size(add-int(mul-int(u, len), u2))) in
   Mem.store-int(0, base-pointer);
   Mem.store-int(len, shift(base-pointer, u));
   let content-pointer = shift(base-pointer, u2) in

@@ -1,7 +1,7 @@
 import {
   Magic,
   this.bool {bool},
-  this.c-int {c-int, eq-c-int},
+  this.c-int {C-Int, c-int, eq-c-int},
   this.c-string {c-string, from-c-string, to-c-string},
   this.control {discard},
   this.either {Right, none},
@@ -39,12 +39,12 @@ define set-env(name: &text, value: &text, overwrite: bool): system(unit) {
     magic external setenv(
       magic cast(&c-string, pointer, name-c-str),
       magic cast(&c-string, pointer, value-c-str),
-      flag,
+      C-Int(flag),
     )
   in
   discard(name-c-str);
   discard(value-c-str);
-  if eq-c-int(result, 0) {
+  if eq-c-int(result, C-Int(0)) {
     Right(Unit)
   } else {
     report-system-error()

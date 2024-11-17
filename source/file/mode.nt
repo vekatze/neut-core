@@ -1,5 +1,5 @@
 import {
-  this.c-int {c-int, or-c-int},
+  this.c-int {C-Int, c-int, or-c-int},
   this.list {fold-left, list},
 }
 
@@ -16,7 +16,7 @@ data mode {
 }
 
 define interpret-mode(flag: mode): c-int {
-  match flag {
+  C-Int(match flag {
   | Owner-R =>
     0o400
   | Owner-W =>
@@ -35,11 +35,11 @@ define interpret-mode(flag: mode): c-int {
     0o2
   | Other-X =>
     0o1
-  }
+  })
 }
 
 define interpret(xs: list(mode)): c-int {
-  fold-left(0, xs, function (acc, x) {
+  fold-left(C-Int(0), xs, function (acc, x) {
     or-c-int(acc, interpret-mode(x))
   })
 }

@@ -1,7 +1,12 @@
 import {
+  this.c-size {c-size, from-c-size},
   this.foreign,
 }
 
 constant size: int {
+  from-c-size(this.foreign._size)
+}
+
+constant word-size: c-size {
   this.foreign._size
 }

@@ -5,6 +5,8 @@ import {
   Mem,
   Word,
   this.bool,
+  this.c-size {C-Size, c-size, from-c-size, from-positive-ssize, lt-c-size},
+  this.c-ssize {C-SSize, from-c-ssize, lt-c-ssize},
   this.either {Left, Right},
   this.errno {report-system-error, system},
   this.int.parse {parse-int},
@@ -22,11 +24,11 @@ define write(t: &text, f: FD.descriptor): system(int) {
   let to = Mem.load-int(shift(ptr, u)) in
   let content-pointer = shift(ptr, add-int(mul-int(u, 2), from)) in
   let len = sub-int(to, from) in
-  let bytes: int = Ext.write(f, content-pointer, len) in
-  if lt-int(bytes, 0) {
+  let bytes = Ext.write(f, content-pointer, C-Size(len)) in
+  if lt-c-ssize(bytes, C-SSize(0)) {
     report-system-error()
   } else {
-    Right(bytes)
+    Right(from-c-ssize(bytes))
   }
 }
 
@@ -80,12 +82,12 @@ define fflush-all(): unit {
   fflush(null-pointer)
 }
 
-define _read-inner(from: FD.descriptor, ptr: pointer, ptr-size: int, len-cand: int, buffer-size: int): system(text) {
+define _read-inner(from: FD.descriptor, ptr: pointer, ptr-size: int, len-cand: int, buffer-size: c-size): system(text) {
   let u = Word.size in
   let content-size = sub-int(ptr-size, mul-int(u, 2)) in
-  if lt-int(content-size, add-int(len-cand, buffer-size)) {
+  if lt-int(content-size, add-int(len-cand, from-c-size(buffer-size))) {
     let new-size = mul-int(ptr-size, 2) in
-    let new-ptr = Ext.realloc(ptr, new-size) in
+    let new-ptr = Ext.realloc(ptr, C-Size(new-size)) in
     if eq-int(extract(new-ptr), 0) {
       report-system-error()
     } else {
@@ -94,11 +96,11 @@ define _read-inner(from: FD.descriptor, ptr: pointer, ptr-size: int, len-cand: i
   } else {
     let content-ptr = shift(ptr, add-int(mul-int(u, 2), len-cand)) in
     let bytes = Ext.read(from, content-ptr, buffer-size) in
-    let next-len-cand = add-int(len-cand, bytes) in
-    if lt-int(bytes, 0) {
+    let next-len-cand = add-int(len-cand, from-c-ssize(bytes)) in
+    if lt-c-ssize(bytes, C-SSize(0)) {
       Ext.free(ptr);
       report-system-error()
-    } else-if lt-int(bytes, buffer-size) {
+    } else-if lt-c-size(from-positive-ssize(bytes), buffer-size) {
       Mem.store-int(next-len-cand, shift(ptr, u));
       Right(Magic.cast(pointer, text, ptr))
     } else {
@@ -110,9 +112,9 @@ define _read-inner(from: FD.descriptor, ptr: pointer, ptr-size: int, len-cand: i
 define read(from: FD.descriptor, initial-buffer-size: int): system(text) {
   let u = Word.size in
   let ptr-size = add-int(initial-buffer-size, mul-int(u, 2)) in
-  let ptr = Ext.malloc(ptr-size) in
+  let ptr = Ext.malloc(C-Size(ptr-size)) in
   Mem.store-int(0, ptr);
-  _read-inner(from, ptr, ptr-size, 0, initial-buffer-size)
+  _read-inner(from, ptr, ptr-size, 0, C-Size(initial-buffer-size))
 }
 
 define get-line(initial-buffer-size: int): system(text) {

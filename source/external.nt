@@ -2,13 +2,15 @@ import {
   FD,
   this.c-int {c-int, from-c-int},
   this.c-offset {c-offset},
-  this.c-size {C-Size, c-size},
+  this.c-size {c-size},
   this.c-ssize {c-ssize},
   this.pointer {null-pointer},
   this.unit {Unit, unit},
 }
 
 foreign {
+  malloc(c-size): pointer,
+  free(pointer): void,
   exit(c-int): void,
   realloc(pointer, c-size): pointer,
   open(pointer, c-int): c-int,
@@ -46,10 +48,8 @@ define exit<a>(status: c-int): a {
 define malloc(size: c-size): pointer {
   introspect os {
   | darwin =>
-    let C-Size(size) = size in
     magic external malloc(size)
   | linux =>
-    let C-Size(size) = size in
     magic external malloc(size)
   }
 }

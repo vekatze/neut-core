@@ -7,6 +7,7 @@
 #include <sys/errno.h>
 #include <sys/fcntl.h>
 #include <sys/wait.h>
+#include <stdint.h>
 
 
 __attribute__((always_inline))
@@ -45,7 +46,7 @@ int neut_core_v0_50_wstopsig(int stat) {
 }
 
 __attribute__((always_inline))
-int neut_core_v0_50_word_size() {
+size_t neut_core_v0_50_word_size() {
   return sizeof(void*);
 }
 
@@ -90,12 +91,17 @@ int neut_core_v0_50_SEEK_END() {
 }
 
 __attribute__((always_inline))
-int neut_core_v0_50_thread_mutex_size() {
+size_t neut_core_v0_50_thread_size() {
+  return sizeof(pthread_t);
+}
+
+__attribute__((always_inline))
+size_t neut_core_v0_50_thread_mutex_size() {
   return sizeof(pthread_mutex_t);
 }
 
 __attribute__((always_inline))
-int neut_core_v0_50_thread_cond_size() {
+size_t neut_core_v0_50_thread_cond_size() {
   return sizeof(pthread_cond_t);
 }
 
@@ -105,14 +111,14 @@ int neut_core_v0_50_errno() {
 }
 
 __attribute__((always_inline))
-int neut_core_v0_50_UINT32_MAX() {
+int64_t neut_core_v0_50_UINT32_MAX() {
   return UINT32_MAX;
 }
 
-int neut_core_v0_50_parse_binary(const char *str, size_t length, long *out_value) {
-  long result = 0;
-  size_t i = 0;
-  long sign = 1;
+int64_t neut_core_v0_50_parse_binary(const char *str, int64_t length, int64_t *out_value) {
+  int64_t result = 0;
+  int64_t i = 0;
+  int64_t sign = 1;
   if (i < length) {
     if (str[i] == '-') {
       sign = -1;
@@ -149,10 +155,10 @@ int neut_core_v0_50_parse_binary(const char *str, size_t length, long *out_value
   }
 }
 
-int neut_core_v0_50_parse_decimal(const char *str, size_t length, long *out_value) {
-  long result = 0;
-  size_t i = 0;
-  long sign = 1;
+int64_t neut_core_v0_50_parse_decimal(const char *str, int64_t length, int64_t *out_value) {
+  int64_t result = 0;
+  int64_t i = 0;
+  int64_t sign = 1;
   if (i < length) {
     if (str[i] == '-') {
       sign = -1;
@@ -186,10 +192,10 @@ int neut_core_v0_50_parse_decimal(const char *str, size_t length, long *out_valu
   }
 }
 
-int neut_core_v0_50_parse_hex(const char *str, size_t length, long *out_value) {
-  long result = 0;
-  size_t i = 0;
-  long sign = 1;
+int64_t neut_core_v0_50_parse_hex(const char *str, int64_t length, int64_t *out_value) {
+  int64_t result = 0;
+  int64_t i = 0;
+  int64_t sign = 1;
   if (i < length) {
     if (str[i] == '-') {
       sign = -1;
@@ -234,9 +240,9 @@ int neut_core_v0_50_parse_hex(const char *str, size_t length, long *out_value) {
   }
 }
 
-int neut_core_v0_50_parse_double(const char *str, size_t length, double *out_value) {
+int64_t neut_core_v0_50_parse_double(const char *str, int64_t length, double *out_value) {
   double result = 0.0;
-  size_t i = 0;
+  int64_t i = 0;
   double sign = 1.0;
   if (i < length) {
     unsigned char ch = str[i];

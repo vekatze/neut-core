@@ -1,6 +1,9 @@
 import {
-  this.pointer {pointer},
   this.unit {unit},
+}
+
+inline store-pointer(value: pointer, p: pointer): unit {
+  magic store(pointer, value, p)
 }
 
 inline store-int(value: int, p: pointer): unit {
@@ -31,12 +34,16 @@ inline store-float(value: float, p: pointer): unit {
   magic store(float, value, p)
 }
 
-inline load-int32(p: pointer): int32 {
-  magic load(int32, p)
+inline load-pointer(p: pointer): pointer {
+  magic load(pointer, p)
 }
 
 inline load-int(p: pointer): int {
   magic load(int, p)
+}
+
+inline load-int32(p: pointer): int32 {
+  magic load(int32, p)
 }
 
 inline load-int8(p: pointer): int8 {

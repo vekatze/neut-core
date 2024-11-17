@@ -1,5 +1,6 @@
 import {
   Magic,
+  this.c-int {c-int},
   this.c-string {c-string, from-c-string},
   this.either {Left, either},
   this.foreign {get-errno},
@@ -7,7 +8,7 @@ import {
 }
 
 data errno {
-| Errno(int)
+| Errno(c-int)
 }
 
 inline system(a: type): type {
@@ -23,11 +24,11 @@ define report-system-error<a>(): system(a) {
 }
 
 foreign {
-  strerror(int): pointer,
+  strerror(c-int): pointer,
 }
 
 define get-error-message(e: errno): text {
   let Errno(i) = e in
   let c-str = magic external strerror(i) in
-  from-c-string(Magic.cast(int, &c-string, c-str))
+  from-c-string(Magic.cast(pointer, &c-string, c-str))
 }

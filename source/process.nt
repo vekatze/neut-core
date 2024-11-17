@@ -3,6 +3,8 @@ import {
   FD,
   Word,
   this.bool {bool},
+  this.c-int {c-int, eq-c-int, from-c-int},
+  this.c-pid {c-pid, eq-c-pid},
   this.either {Left, Right},
   this.errno {Errno, report-system-error, system},
   this.external {free},
@@ -10,41 +12,40 @@ import {
   this.file.descriptor {stderr, stdin, stdout},
   this.foreign {_wcoredump, _wexitstatus, _wifexited, _wifsignaled, _wifstopped, _wstopsig, _wtermsig},
   this.list {Cons, fold-left-with-index, length, list},
-  this.memory {store-int},
+  this.memory {load-pointer, store-int},
   this.pair {Pair, pair},
-  this.pointer {_Pointer, extract, pointer, shift},
+  this.pointer {extract, null-pointer, shift},
   this.text {_get-content-pointer, text},
   this.text.io {print, print-int, read, write},
   this.unit {Unit, unit},
 }
 
 foreign {
-  __error(): int,
-  execvp(pointer, pointer): int,
-  fork(): int,
-  waitpid(int, pointer, int): int,
-  pipe(pointer): int,
-  dup2(int, int): int,
+  execvp(pointer, pointer): c-int,
+  fork(): c-pid,
+  waitpid(c-pid, pointer, c-int): c-pid,
+  pipe(pointer): c-int,
+  dup2(c-int, c-int): c-int,
 }
 
-define __waitpid(pid: int, status-ptr: pointer, option: int): int {
+define __waitpid(pid: c-pid, status-ptr: pointer, option: c-int): c-pid {
   magic external waitpid(pid, status-ptr, option)
 }
 
 data process-result-status {
-| Exited(status: int)
-| Signaled(termsig: int, coredump: bool)
-| Stopped(stopsig: int)
+| Exited(status: c-int)
+| Signaled(termsig: c-int, coredump: bool)
+| Stopped(stopsig: c-int)
 }
 
-define _waitpid(pid: int): system(process-result-status) {
+define _waitpid(pid: c-pid): system(process-result-status) {
   let status-ptr = Ext.malloc(Word.size) in
   let result = __waitpid(pid, status-ptr, 0) in
-  if eq-int(result, -1) {
+  if eq-c-pid(result, -1) {
     free(status-ptr);
     report-system-error()
   } else {
-    let stat-loc: int = magic load(int, status-ptr) in
+    let stat-loc = load-pointer(status-ptr) in
     free(status-ptr);
     if _wifexited(stat-loc) {
       let exit-status = _wexitstatus(stat-loc) in
@@ -75,7 +76,7 @@ define _make-argv(xs: list(pointer)): pointer {
 define _create-pipe(): system(pair(FD.descriptor, FD.descriptor)) {
   let ptr = Ext.malloc(mul-int(Word.size, 2)) in
   let result = magic external pipe(ptr) in
-  if eq-int(result, -1) {
+  if eq-c-int(result, -1) {
     free(ptr);
     report-system-error()
   } else {
@@ -87,17 +88,19 @@ define _create-pipe(): system(pair(FD.descriptor, FD.descriptor)) {
 }
 
 define _dup2(fd1: FD.descriptor, fd2: FD.descriptor): system(unit) {
+  let fd1 = magic cast(FD.descriptor, c-int, fd1) in
+  let fd2 = magic cast(FD.descriptor, c-int, fd2) in
   let result = magic external dup2(fd1, fd2) in
-  if eq-int(result, -1) {
+  if eq-c-int(result, -1) {
     report-system-error()
   } else {
     Right(Unit)
   }
 }
 
-define _fork(): system(int) {
+define _fork(): system(c-int) {
   let result = magic external fork() in
-  if eq-int(result, -1) {
+  if eq-c-int(result, -1) {
     report-system-error()
   } else {
     Right(result)
@@ -129,9 +132,9 @@ define spawn(
   try Pair(out-reader, out-writer) = _create-pipe() in
   try Pair(error-reader, error-writer) = _create-pipe() in
   try pid = _fork() in
-  if eq-int(pid, -1) {
+  if eq-c-int(pid, -1) {
     report-system-error()
-  } else-if eq-int(pid, 0) {
+  } else-if eq-c-int(pid, 0) {
     try _ = close(in-writer) in
     try _ = close(out-reader) in
     try _ = close(error-reader) in
@@ -140,9 +143,9 @@ define spawn(
     try _ = _dup2(error-writer, stderr) in
     use ps {process, args} in
     let raw-args = this.list.for-each(Cons(process, args), _get-content-pointer) in
-    let cmd-args = _make-argv(this.list.append(raw-args, [_Pointer(0)])) in
+    let cmd-args = _make-argv(this.list.append(raw-args, [null-pointer])) in
     let cmd = _get-content-pointer(process) in
-    magic external execvp(cmd, cmd-args);
+    let _ = magic external execvp(cmd, cmd-args) in
     report-system-error()
   } else {
     try _ = close(in-reader) in
@@ -165,7 +168,7 @@ define spawn(
 define _print-process-result-status(st: process-result-status): unit {
   match st {
   | Exited(status) =>
-    print-int(status)
+    print-int(from-c-int(status))
   | Signaled(_, _) =>
     Unit
   | Stopped(_) =>
@@ -194,6 +197,6 @@ define zen(): unit {
     print("success\n")
   | Left(Errno(num)) =>
     print("fail: ");
-    print-int(num)
+    print-int(from-c-int(num))
   }
 }

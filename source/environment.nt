@@ -1,6 +1,7 @@
 import {
   Magic,
   this.bool {bool},
+  this.c-int {c-int, eq-c-int},
   this.c-string {c-string, from-c-string, to-c-string},
   this.control {discard},
   this.either {Right, none},
@@ -11,34 +12,39 @@ import {
 
 foreign {
   getenv(pointer): pointer,
-  setenv(pointer, pointer, int): pointer,
-  putenv(pointer, pointer): pointer,
+  setenv(pointer, pointer, c-int): c-int,
 }
 
 define get-env(name: &text): ?text {
   let c-str = _get-content-pointer(name) in
   let tmp = magic external getenv(c-str) in
-  if eq-int(tmp, 0) {
+  if eq-int(magic cast(pointer, int, tmp), 0) {
     none()
   } else {
-    Right(from-c-string(Magic.cast(int, &c-string, tmp)))
+    Right(from-c-string(Magic.cast(pointer, &c-string, tmp)))
   }
 }
 
 define set-env(name: &text, value: &text, overwrite: bool): system(unit) {
   let name-c-str = to-c-string(name) in
   let value-c-str = to-c-string(value) in
-  let flag: int =
+  let flag =
     if overwrite {
       1
     } else {
       0
     }
   in
-  let result on name-c-str, value-c-str = magic external setenv(name-c-str, value-c-str, flag) in
+  let result on name-c-str, value-c-str =
+    magic external setenv(
+      magic cast(&c-string, pointer, name-c-str),
+      magic cast(&c-string, pointer, value-c-str),
+      flag,
+    )
+  in
   discard(name-c-str);
   discard(value-c-str);
-  if eq-int(result, 0) {
+  if eq-c-int(result, 0) {
     Right(Unit)
   } else {
     report-system-error()

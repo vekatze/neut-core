@@ -2,7 +2,7 @@ import {
   this.bool {and},
   this.either {Left, Right},
   this.memory {load-int8, store-int8},
-  this.pointer {pointer, shift},
+  this.pointer {shift},
   this.unit {Unit},
 }
 

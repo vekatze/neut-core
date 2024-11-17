@@ -14,7 +14,7 @@ import {
   this.magic,
   this.memory,
   this.pair {Pair, pair},
-  this.pointer {extract, pointer, shift},
+  this.pointer {extract, shift},
   this.system {panic},
   this.text,
   this.unit {Unit, unit},

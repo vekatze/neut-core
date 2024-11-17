@@ -9,7 +9,7 @@ import {
   this.either {Right},
   this.errno {report-system-error, system},
   this.file.descriptor {descriptor},
-  this.pointer {extract, pointer, shift},
+  this.pointer {extract, shift},
   this.unit {Unit, unit},
   this.word,
 }

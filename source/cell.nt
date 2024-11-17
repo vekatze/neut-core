@@ -6,7 +6,7 @@ import {
   Word,
   this.box,
   this.int {sum-int},
-  this.pointer {_Pointer, pointer, shift},
+  this.pointer {shift},
   this.unit {unit},
 }
 
@@ -28,7 +28,7 @@ define _new(a: type, val: a): cell(a) {
   let u = Word.size in
   let ptr = Ext.malloc(sum-int([u, mutex-size, cond-size, u])) in
   Mem.store-int(Magic.cast(a, int, val), ptr);
-  Ext.thread-mutex-init(shift(ptr, u));
+  let _ = Ext.thread-mutex-init(shift(ptr, u)) in
   Ext.thread-cond-init(shift(ptr, add-int(u, mutex-size)));
   Mem.store-int(Magic.cast(type, int, a), shift(ptr, add-int(u, add-int(mutex-size, cond-size))));
   Magic.cast(pointer, cell(a), ptr)
@@ -37,7 +37,7 @@ define _new(a: type, val: a): cell(a) {
 // (content, thread-mutex, thread-cond)
 resource _cell {
   function (ch: int) {
-    let ch = _Pointer(ch) in
+    let ch = magic cast(int, pointer, ch) in
     let u = Word.size in
     let mutex-size = Ext.thread-mutex-size() in
     let cond-size = Ext.thread-cond-size() in
@@ -51,7 +51,7 @@ resource _cell {
     0
   },
   function (ch: int) {
-    let ch = _Pointer(ch) in
+    let ch = magic cast(int, pointer, ch) in
     let u = Word.size in
     let mutex-size = Ext.thread-mutex-size() in
     let cond-size = Ext.thread-cond-size() in

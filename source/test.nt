@@ -1,4 +1,5 @@
 import {
+  this.bool {True, bool},
   this.box,
   this.cell {mutate},
   this.control {discard},
@@ -55,6 +56,10 @@ define use-rune(r: rune): unit {
 }
 
 define zen(): unit {
+  let yo: pair(int, bool) = Pair(3, True) in
+  // let Pair(_, y) on yo = *yo in
+  let tmp on yo = *yo in
+  let Pair(_, _) = tmp in
   let xs: vector(int) =
     create(10, function (i) {
       i

@@ -1,27 +1,27 @@
 import {
   Ext,
   Word,
+  this.c-int {add-c-int, c-int, from-c-int},
   this.memory {store-int},
-  this.pointer {pointer, shift},
+  this.pointer {null-pointer, shift},
   this.show {Show, show},
   this.text {_get-content-pointer, text},
   this.unit,
 }
 
 foreign {
-  snprintf(pointer, int, pointer): int,
-  sprintf(pointer, pointer): int,
+  snprintf(pointer, c-int, pointer): c-int,
+  sprintf(pointer, pointer): c-int,
 }
 
 define _show(c-fmt: &text, x: float): text {
   let fmt = _get-content-pointer(c-fmt) in
-  let zero: int = 0 in
-  let size: int = magic external snprintf(zero, zero, fmt)(x: float) in
-  let ptr = Ext.malloc(add-int(add-int(size, 1), mul-int(Word.size, 2))) in
+  let size = magic external snprintf(null-pointer, 0, fmt)(x: float) in
+  let ptr = Ext.malloc(add-int(from-c-int(add-c-int(size, 1)), mul-int(Word.size, 2))) in
   store-int(0, ptr);
-  store-int(size, shift(ptr, Word.size));
+  store-int(from-c-int(size), shift(ptr, Word.size));
   let buffer = shift(ptr, mul-int(Word.size, 2)) in
-  let _: int = magic external snprintf(buffer, add-int(size, 1), fmt)(x: float) in
+  let _ = magic external snprintf(buffer, add-c-int(size, 1), fmt)(x: float) in
   magic cast(pointer, text, ptr)
 }
 

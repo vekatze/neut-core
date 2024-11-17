@@ -1,0 +1,8 @@
+constant c-offset: type {
+  introspect arch {
+  | amd64 =>
+    int64
+  | arm64 =>
+    int64
+  }
+}

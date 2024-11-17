@@ -11,7 +11,7 @@ import {
   this.list {Cons, Nil, list, reverse},
   this.memory {load-int8},
   this.pair {Pair, pair},
-  this.pointer {pointer, shift},
+  this.pointer {shift},
   this.rune {load-rune, size-by-head-byte, store-rune, to-int32},
   this.unit {Unit, unit},
 }

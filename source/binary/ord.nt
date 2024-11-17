@@ -7,7 +7,7 @@ import {
   this.memory {load-int8},
   this.ord {Ord, ord},
   this.ordering {ordering},
-  this.pointer {pointer, shift},
+  this.pointer {shift},
 }
 
 define _cmp-int8(x: int8, y: int8): ordering {

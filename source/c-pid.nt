@@ -1,0 +1,21 @@
+import {
+  this.bool {bool},
+}
+
+constant c-pid: type {
+  introspect arch {
+  | amd64 =>
+    int32
+  | arm64 =>
+    int32
+  }
+}
+
+inline eq-c-pid(x: c-pid, y: c-pid): bool {
+  introspect arch {
+  | amd64 =>
+    eq-int32(x, y)
+  | arm64 =>
+    eq-int32(x, y)
+  }
+}

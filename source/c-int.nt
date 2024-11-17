@@ -1,0 +1,57 @@
+import {
+  this.bool {bool},
+}
+
+constant c-int: type {
+  introspect arch {
+  | amd64 =>
+    int32
+  | arm64 =>
+    int32
+  }
+}
+
+inline add-c-int(x: c-int, y: c-int): c-int {
+  introspect arch {
+  | amd64 =>
+    add-int32(x, y)
+  | arm64 =>
+    add-int32(x, y)
+  }
+}
+
+inline or-c-int(x: c-int, y: c-int): c-int {
+  introspect arch {
+  | amd64 =>
+    or-int32(x, y)
+  | arm64 =>
+    or-int32(x, y)
+  }
+}
+
+inline eq-c-int(x: c-int, y: c-int): bool {
+  introspect arch {
+  | amd64 =>
+    eq-int32(x, y)
+  | arm64 =>
+    eq-int32(x, y)
+  }
+}
+
+inline ne-c-int(x: c-int, y: c-int): bool {
+  introspect arch {
+  | amd64 =>
+    ne-int32(x, y)
+  | arm64 =>
+    ne-int32(x, y)
+  }
+}
+
+inline from-c-int(x: c-int): int {
+  introspect arch {
+  | amd64 =>
+    sext-int32-int(x)
+  | arm64 =>
+    sext-int32-int(x)
+  }
+}

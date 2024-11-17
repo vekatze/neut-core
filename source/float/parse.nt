@@ -3,7 +3,6 @@ import {
   this.either {Left, Right},
   this.foreign {_parse_double},
   this.memory {load-float},
-  this.pointer {_Pointer},
   this.text {_get-content-pointer, text},
   this.unit {Unit},
 }
@@ -11,9 +10,9 @@ import {
 inline parse-float(t: &text): ?float {
   let c-float-str = _get-content-pointer(t) in
   let len = core.text.length(t) in
-  let result-ptr = _Pointer(magic alloca(float, 1)) in
+  let result-ptr = magic alloca(float, 1) in
   let result-status = _parse_double(c-float-str, len, result-ptr) in
-  if lt-int32(result-status, 0) {
+  if lt-int(result-status, 0) {
     Left(Unit)
   } else {
     let result = load-float(result-ptr) in

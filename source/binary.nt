@@ -11,7 +11,7 @@ import {
   this.external {free, malloc},
   this.int {max-int, min-int},
   this.list {Cons, Nil, fold-left-N, length, list},
-  this.pointer {_Pointer, extract, pointer, shift},
+  this.pointer {extract, shift},
   this.unit {Unit, unit},
 }
 
@@ -33,10 +33,11 @@ define _copy-binary(source-pointer: pointer, target-pointer: pointer, index: int
 // internal representation: (head-index, last-index, byte-0, byte-1, ..., byte-n)
 resource binary {
   function (x: int) {
-    Magic.cast(unit, int, free(_Pointer(x)))
+    let x = magic cast(int, pointer, x) in
+    Magic.cast(unit, int, free(x))
   },
   function (source-pointer: int) {
-    let source-pointer = _Pointer(source-pointer) in
+    let source-pointer = magic cast(int, pointer, source-pointer) in
     let u = Word.size in
     let u2 = mul-int(u, 2) in
     let from = Mem.load-int(source-pointer) in

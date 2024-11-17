@@ -3,7 +3,7 @@ import {
   this.bool {False, True, bool, not},
   this.eq {Eq, eq},
   this.memory {load-int8},
-  this.pointer {pointer, shift},
+  this.pointer {shift},
 }
 
 constant _cmp-ptr-t: type {

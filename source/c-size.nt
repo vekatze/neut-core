@@ -1,0 +1,12 @@
+constant c-size: type {
+  introspect arch {
+  | amd64 =>
+    int64
+  | arm64 =>
+    int64
+  }
+}
+
+data outer-c-size {
+| C-Size(c-size)
+}

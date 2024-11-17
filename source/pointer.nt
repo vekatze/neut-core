@@ -1,13 +1,20 @@
-data pointer {
-| _Pointer(int)
+import {
+  this.c-int {c-int},
 }
 
 define shift(p: pointer, offset: int): pointer {
-  let _Pointer(addr) = p in
-  _Pointer(add-int(addr, offset))
+  let addr = magic cast(pointer, int, p) in
+  magic cast(int, pointer, add-int(addr, offset))
 }
 
 define extract(p: pointer): int {
-  let _Pointer(v) = p in
-  v
+  magic cast(pointer, int, p)
+}
+
+inline from-c-int(x: c-int): pointer {
+  magic cast(c-int, pointer, x)
+}
+
+constant null-pointer: pointer {
+  magic cast(int, pointer, 0)
 }

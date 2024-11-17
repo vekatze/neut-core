@@ -1,4 +1,5 @@
 import {
+  this.c-int {c-int},
   this.foreign {SEEK_CUR, SEEK_END, SEEK_SET},
 }
 
@@ -9,7 +10,7 @@ data seek {
 | END
 }
 
-define interpret(s: seek): int {
+define interpret(s: seek): c-int {
   match s {
   | SET =>
     SEEK_SET

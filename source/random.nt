@@ -6,29 +6,49 @@ foreign {
   arc4random_uniform(int32): int32,
 }
 
-define random(ubound: int32): int {
+define random-int32(ubound: int32): int32 {
   introspect os {
   | darwin =>
-    zext-int32-int(magic external arc4random_uniform(ubound))
+    magic external arc4random_uniform(ubound)
   | linux =>
     // requires glibc >= 2.36
-    zext-int32-int(magic external arc4random_uniform(ubound))
+    magic external arc4random_uniform(ubound)
   }
 }
 
-define random-in-range(lower-bound: int32, upper-bound: int32): int {
-  let range-size = sub-int32(upper-bound, lower-bound) in
-  let value = random(add-int32(range-size, 1)) in
-  add-int(value, zext-int32-int(lower-bound))
+define random-in-range-int32(lower-bound: int32, upper-bound: int32): int32 {
+  let range-size = add-int32(sub-int32(upper-bound, lower-bound), 1) in
+  let value = random-int32(range-size) in
+  add-int32(value, lower-bound)
+}
+
+define random-int(ubound: int32): int {
+  zext-int32-int(random-int32(ubound))
+}
+
+define random-in-range-int(lower-bound: int32, upper-bound: int32): int {
+  sext-int32-int(random-in-range-int32(lower-bound, upper-bound))
+}
+
+define random-float32(min: float32, max: float32): float32 {
+  let numerator = random-int32(UINT32_MAX) in
+  let denominator = UINT32_MAX in
+  add-float32(
+    min,
+    mul-float32(
+      div-float32(uitofp-int32-float32(numerator), uitofp-int32-float32(denominator)),
+      sub-float32(max, min),
+    ),
+  )
 }
 
 define random-float(min: float, max: float): float {
-  let numerator = random(UINT32_MAX) in
+  let numerator = random-int32(UINT32_MAX) in
   let denominator = UINT32_MAX in
   add-float(
     min,
     mul-float(
-      div-float(uitofp-int-float(numerator), uitofp-int32-float(denominator)),
+      div-float(uitofp-int32-float(numerator), uitofp-int32-float(denominator)),
       sub-float(max, min),
     ),
   )

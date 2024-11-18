@@ -9,7 +9,7 @@ import {
   this.int.show {show-int},
   this.list {length, list},
   this.pair {Pair, pair},
-  this.random {random-float},
+  this.random {random-float, random-float32, random-in-range-int, random-int},
   this.rune {to-int},
   this.text,
   this.text.io {print, printf},
@@ -57,6 +57,15 @@ define use-rune(r: rune): unit {
   }
 }
 
+define my-random-in-range(lower-bound: int32, upper-bound: int32): int {
+  let range-size = sub-int32(upper-bound, lower-bound) in
+  printf("range-size: {}\n", [show-int(sext-int32-int(range-size))]);
+  printf("range-upper: {}\n", [show-int(sext-int32-int(add-int32(range-size, 1)))]);
+  let value = random-int(add-int32(range-size, 1)) in
+  printf("value: {}\n", [show-int(value)]);
+  add-int(value, sext-int32-int(lower-bound))
+}
+
 define zen(): unit {
   let yo: pair(int, bool) = Pair(3, True) in
   // let Pair(_, y) on yo = *yo in
@@ -67,8 +76,8 @@ define zen(): unit {
       i
     })
   in
-  let val = random-float(3.8, 10.2) in
-  printf("random-float: {}\n", [show-float(val)]);
+  let val = random-float32(-5, 5) in
+  printf("random-float: {}\n", [show-float(fpext-float32-float(val))]);
   let ys = slice(xs, -2, 8) in
   for(ys, function (y, _) {
     printf("{}\n", [show-int(y)])

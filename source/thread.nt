@@ -5,7 +5,7 @@ import {
   Word,
   this.bool,
   this.box,
-  this.c-int {C-Int, eq-c-int},
+  this.c-int {eq-c-int},
   this.c-size {C-Size, add-c-size, c-size, mul-c-size},
   this.foreign {THREAD_SIZE},
   this.pointer {extract, shift},
@@ -105,7 +105,7 @@ define detach(a: type, f: () -> a): thread(a) {
   let thread-create =
     define naive-loop(): unit {
       let result = Ext.thread-create(thread-id-pointer, closure-label, closure-env) in
-      if eq-c-int(result, C-Int(0)) {
+      if eq-c-int(result, 0) {
         Unit
       } else {
         naive-loop()

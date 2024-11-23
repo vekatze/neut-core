@@ -2,7 +2,6 @@ import {
   Magic,
   Word,
   this.bool {bool},
-  this.c-int {C-Int},
   this.c-string {c-string, from-c-string},
   this.external {exit},
   this.list {Cons, list},
@@ -16,7 +15,7 @@ import {
 inline _admit(a: type, t: &text): a {
   print(t);
   fflush-all();
-  exit(C-Int(1))
+  exit(1)
 }
 
 inline _assert(message: &text, check: () -> bool): unit {
@@ -31,7 +30,7 @@ inline _assert(message: &text, check: () -> bool): unit {
     } else {
       print(message);
       fflush-all();
-      exit(C-Int(1))
+      exit(1)
     }
   }
 }
@@ -39,7 +38,7 @@ inline _assert(message: &text, check: () -> bool): unit {
 define panic<a>(t: &text): a {
   print(t);
   fflush-all();
-  exit(C-Int(1))
+  exit(1)
 }
 
 define get-argc(): int {

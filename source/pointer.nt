@@ -1,4 +1,5 @@
 import {
+  this.bool {bool},
   this.c-int {c-int},
 }
 
@@ -17,4 +18,8 @@ inline from-c-int(x: c-int): pointer {
 
 constant null-pointer: pointer {
   magic cast(int, pointer, 0)
+}
+
+inline is-null-pointer(p: pointer): bool {
+  eq-int(magic cast(pointer, int, p), 0)
 }

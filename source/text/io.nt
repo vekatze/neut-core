@@ -6,7 +6,7 @@ import {
   Word,
   this.bool,
   this.c-size {C-Size, c-size, from-c-size, from-positive-ssize, lt-c-size},
-  this.c-ssize {C-SSize, from-c-ssize, lt-c-ssize},
+  this.c-ssize {from-c-ssize, lt-c-ssize},
   this.either {Left, Right},
   this.errno {report-system-error, system},
   this.int.parse {parse-int},
@@ -25,7 +25,7 @@ define write(t: &text, f: FD.descriptor): system(int) {
   let content-pointer = shift(ptr, add-int(mul-int(u, 2), from)) in
   let len = sub-int(to, from) in
   let bytes = Ext.write(f, content-pointer, C-Size(len)) in
-  if lt-c-ssize(bytes, C-SSize(0)) {
+  if lt-c-ssize(bytes, 0) {
     report-system-error()
   } else {
     Right(from-c-ssize(bytes))
@@ -97,7 +97,7 @@ define _read-inner(from: FD.descriptor, ptr: pointer, ptr-size: int, len-cand: i
     let content-ptr = shift(ptr, add-int(mul-int(u, 2), len-cand)) in
     let bytes = Ext.read(from, content-ptr, buffer-size) in
     let next-len-cand = add-int(len-cand, from-c-ssize(bytes)) in
-    if lt-c-ssize(bytes, C-SSize(0)) {
+    if lt-c-ssize(bytes, 0) {
       Ext.free(ptr);
       report-system-error()
     } else-if lt-c-size(from-positive-ssize(bytes), buffer-size) {

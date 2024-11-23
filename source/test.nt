@@ -78,6 +78,7 @@ define zen(): unit {
   in
   let val = random-float32(-5, 5) in
   printf("random-float: {}\n", [show-float(fpext-float32-float(val))]);
+  printf("value: {}\n", [show-int(sext-int32-int(trunc-int-int32(-3234)))]);
   let ys = slice(xs, -2, 8) in
   for(ys, function (y, _) {
     printf("{}\n", [show-int(y)])

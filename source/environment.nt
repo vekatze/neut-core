@@ -44,7 +44,7 @@ define set-env(name: &text, value: &text, overwrite: bool): system(unit) {
   in
   discard(name-c-str);
   discard(value-c-str);
-  if eq-c-int(result, C-Int(0)) {
+  if eq-c-int(result, 0) {
     Right(Unit)
   } else {
     report-system-error()

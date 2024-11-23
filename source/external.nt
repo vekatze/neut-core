@@ -33,7 +33,7 @@ foreign {
 }
 
 define exit<a>(status: c-int): a {
-  introspect os {
+  introspect operating-system {
   | darwin =>
     let _ = magic external exit(status) in
     // unreachable
@@ -46,7 +46,7 @@ define exit<a>(status: c-int): a {
 }
 
 define malloc(size: c-size): pointer {
-  introspect os {
+  introspect operating-system {
   | darwin =>
     magic external malloc(size)
   | linux =>
@@ -55,7 +55,7 @@ define malloc(size: c-size): pointer {
 }
 
 define free(ptr: pointer): unit {
-  introspect os {
+  introspect operating-system {
   | darwin =>
     let _ = magic external free(ptr) in
     Unit
@@ -66,7 +66,7 @@ define free(ptr: pointer): unit {
 }
 
 define realloc(ptr: pointer, size: c-size): pointer {
-  introspect os {
+  introspect operating-system {
   | darwin =>
     magic external realloc(ptr, size)
   | linux =>
@@ -75,7 +75,7 @@ define realloc(ptr: pointer, size: c-size): pointer {
 }
 
 define open(path-address: pointer, oflag: c-int, mode: c-int): FD.descriptor {
-  introspect os {
+  introspect operating-system {
   | darwin =>
     let d = magic external open(path-address, oflag)(mode: c-int) in
     magic cast(c-int, FD.descriptor, d)
@@ -86,7 +86,7 @@ define open(path-address: pointer, oflag: c-int, mode: c-int): FD.descriptor {
 }
 
 define close(f: FD.descriptor): int {
-  introspect os {
+  introspect operating-system {
   | darwin =>
     from-c-int(magic external close(magic cast(FD.descriptor, c-int, f)))
   | linux =>
@@ -96,7 +96,7 @@ define close(f: FD.descriptor): int {
 
 define write(f: FD.descriptor, content-pointer: pointer, len: c-size): c-ssize {
   let f = magic cast(FD.descriptor, c-int, f) in
-  introspect os {
+  introspect operating-system {
   | darwin =>
     magic external write(f, content-pointer, len)
   | linux =>
@@ -106,7 +106,7 @@ define write(f: FD.descriptor, content-pointer: pointer, len: c-size): c-ssize {
 
 define read(f: FD.descriptor, content-pointer: pointer, max-read-size: c-size): c-ssize {
   let f = magic cast(FD.descriptor, c-int, f) in
-  introspect os {
+  introspect operating-system {
   | darwin =>
     magic external read(f, content-pointer, max-read-size)
   | linux =>
@@ -116,7 +116,7 @@ define read(f: FD.descriptor, content-pointer: pointer, max-read-size: c-size): 
 
 define lseek(f: FD.descriptor, offset: c-offset, seek-mode: c-int): c-offset {
   let f = magic cast(FD.descriptor, c-int, f) in
-  introspect os {
+  introspect operating-system {
   | darwin =>
     magic external lseek(f, offset, seek-mode)
   | linux =>
@@ -125,7 +125,7 @@ define lseek(f: FD.descriptor, offset: c-offset, seek-mode: c-int): c-offset {
 }
 
 define sleep(seconds: c-int): unit {
-  introspect os {
+  introspect operating-system {
   | darwin =>
     let _ = magic external sleep(seconds) in
     Unit
@@ -136,7 +136,7 @@ define sleep(seconds: c-int): unit {
 }
 
 define thread-create(id-ptr: pointer, thread-func-addr: pointer, thread-env-addr: pointer): c-int {
-  introspect os {
+  introspect operating-system {
   | darwin =>
     magic external pthread_create(id-ptr, null-pointer, thread-func-addr, thread-env-addr)
   | linux =>
@@ -145,7 +145,7 @@ define thread-create(id-ptr: pointer, thread-func-addr: pointer, thread-env-addr
 }
 
 define thread-exit(result-addr: pointer): unit {
-  introspect os {
+  introspect operating-system {
   | darwin =>
     let _ = magic external pthread_exit(result-addr) in
     Unit
@@ -158,7 +158,7 @@ define thread-exit(result-addr: pointer): unit {
 data ptherad-t {}
 
 define thread-join(id: pointer, result-addr: pointer): unit {
-  introspect os {
+  introspect operating-system {
   | darwin =>
     let _ = magic external pthread_join(id, result-addr) in
     Unit
@@ -169,7 +169,7 @@ define thread-join(id: pointer, result-addr: pointer): unit {
 }
 
 define thread-mutex-init(mutex-ptr: pointer): c-int {
-  introspect os {
+  introspect operating-system {
   | darwin =>
     magic external pthread_mutex_init(mutex-ptr, null-pointer)
   | linux =>
@@ -178,7 +178,7 @@ define thread-mutex-init(mutex-ptr: pointer): c-int {
 }
 
 define thread-mutex-destroy(mutex-ptr: pointer): unit {
-  introspect os {
+  introspect operating-system {
   | darwin =>
     let _ = magic external pthread_mutex_destroy(mutex-ptr) in
     Unit
@@ -189,7 +189,7 @@ define thread-mutex-destroy(mutex-ptr: pointer): unit {
 }
 
 define thread-mutex-lock(mutex-ptr: pointer): unit {
-  introspect os {
+  introspect operating-system {
   | darwin =>
     let _ = magic external pthread_mutex_lock(mutex-ptr) in
     Unit
@@ -200,7 +200,7 @@ define thread-mutex-lock(mutex-ptr: pointer): unit {
 }
 
 define thread-mutex-unlock(mutex-ptr: pointer): unit {
-  introspect os {
+  introspect operating-system {
   | darwin =>
     let _ = magic external pthread_mutex_unlock(mutex-ptr) in
     Unit
@@ -211,7 +211,7 @@ define thread-mutex-unlock(mutex-ptr: pointer): unit {
 }
 
 define thread-cond-init(cond-ptr: pointer): unit {
-  introspect os {
+  introspect operating-system {
   | darwin =>
     let _ = magic external pthread_cond_init(cond-ptr, null-pointer) in
     Unit
@@ -222,7 +222,7 @@ define thread-cond-init(cond-ptr: pointer): unit {
 }
 
 define thread-cond-destroy(cond-ptr: pointer): unit {
-  introspect os {
+  introspect operating-system {
   | darwin =>
     let _ = magic external pthread_cond_destroy(cond-ptr) in
     Unit
@@ -233,7 +233,7 @@ define thread-cond-destroy(cond-ptr: pointer): unit {
 }
 
 define thread-cond-signal(cond-ptr: pointer): unit {
-  introspect os {
+  introspect operating-system {
   | darwin =>
     let _ = magic external pthread_cond_signal(cond-ptr) in
     Unit
@@ -244,7 +244,7 @@ define thread-cond-signal(cond-ptr: pointer): unit {
 }
 
 define thread-cond-wait(cond-ptr: pointer, mutex-ptr: pointer): unit {
-  introspect os {
+  introspect operating-system {
   | darwin =>
     let _ = magic external pthread_cond_wait(cond-ptr, mutex-ptr) in
     Unit

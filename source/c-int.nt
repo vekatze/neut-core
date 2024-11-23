@@ -3,7 +3,7 @@ import {
 }
 
 constant _c-int: type {
-  introspect arch {
+  introspect architecture {
   | amd64 =>
     int32
   | arm64 =>
@@ -18,7 +18,7 @@ data c-int {
 inline add-c-int(x: c-int, y: c-int): c-int {
   let C-Int(x) = x in
   let C-Int(y) = y in
-  introspect arch {
+  introspect architecture {
   | amd64 =>
     C-Int(add-int32(x, y))
   | arm64 =>
@@ -29,7 +29,7 @@ inline add-c-int(x: c-int, y: c-int): c-int {
 inline or-c-int(x: c-int, y: c-int): c-int {
   let C-Int(x) = x in
   let C-Int(y) = y in
-  introspect arch {
+  introspect architecture {
   | amd64 =>
     C-Int(or-int32(x, y))
   | arm64 =>
@@ -40,7 +40,7 @@ inline or-c-int(x: c-int, y: c-int): c-int {
 inline eq-c-int(x: c-int, y: c-int): bool {
   let C-Int(x) = x in
   let C-Int(y) = y in
-  introspect arch {
+  introspect architecture {
   | amd64 =>
     eq-int32(x, y)
   | arm64 =>
@@ -51,7 +51,7 @@ inline eq-c-int(x: c-int, y: c-int): bool {
 inline ne-c-int(x: c-int, y: c-int): bool {
   let C-Int(x) = x in
   let C-Int(y) = y in
-  introspect arch {
+  introspect architecture {
   | amd64 =>
     ne-int32(x, y)
   | arm64 =>
@@ -61,7 +61,7 @@ inline ne-c-int(x: c-int, y: c-int): bool {
 
 inline from-c-int(x: c-int): int {
   let C-Int(x) = x in
-  introspect arch {
+  introspect architecture {
   | amd64 =>
     sext-int32-int(x)
   | arm64 =>

@@ -68,7 +68,7 @@ inline load-float(p: pointer): float {
 }
 
 inline load-c-int(p: pointer): c-int {
-  introspect arch {
+  introspect architecture {
   | arm64 =>
     C-Int(magic load(int32, p))
   | amd64 =>

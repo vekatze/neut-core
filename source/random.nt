@@ -7,7 +7,7 @@ foreign {
 }
 
 define random-int32(ubound: int32): int32 {
-  introspect os {
+  introspect operating-system {
   | darwin =>
     magic external arc4random_uniform(ubound)
   | linux =>

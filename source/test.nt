@@ -9,7 +9,7 @@ import {
   this.int.show {show-int},
   this.list {length, list},
   this.pair {Pair, pair},
-  this.random {random-float, random-float32, random-in-range-int, random-int},
+  this.random {random-float32, random-int},
   this.rune {to-int},
   this.text,
   this.text.io {print, printf},

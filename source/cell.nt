@@ -118,8 +118,8 @@ define clone<a>(ch: &cell(a)): a {
 
 define extract<a>(c: cell(a)): a {
   let u = Word.size in
-  let ch = magic cast(cell(a), pointer, c) in
-  let result = magic cast(int, a, Mem.load-int(ch)) in
+  let ch = Magic.cast(cell(a), pointer, c) in
+  let result = Magic.cast(int, a, Mem.load-int(ch)) in
   Ext.thread-mutex-destroy(shift(ch, u));
   Ext.thread-cond-destroy(shift(ch, add-int(u, from-c-size(THREAD_MUTEX_SIZE))));
   Ext.free(ch);

@@ -1,7 +1,7 @@
 import {
   this.bool {True, bool},
-  this.box,
-  this.cell {mutate},
+  this.box {axiom-T},
+  this.cell {extract, mutate, new-cell},
   this.control {discard},
   this.either {Left, Right, either},
   this.float.show {show-float},
@@ -11,7 +11,7 @@ import {
   this.pair {Pair, pair},
   this.random {random-float32, random-int},
   this.rune {to-int},
-  this.text,
+  this.text {text},
   this.text.io {print, printf},
   this.unit {Unit, unit},
   this.vector {create, for, slice, vector},
@@ -21,22 +21,22 @@ define with-cell(i: int): int {
   let c = new-cell(i) in
   let _ on c =
     mutate(c, function (x) {
-      add-int(x, 1)
+      quote {add-int(x, 1)}
     })
   in
   let _ on c =
     mutate(c, function (x) {
-      add-int(x, 1)
+      quote {add-int(x, 1)}
     })
   in
   let _ on c =
     mutate(c, function (x) {
-      add-int(x, 1)
+      quote {add-int(x, 1)}
     })
   in
   let _ on c =
     mutate(c, function (x) {
-      add-int(x, 21)
+      quote {add-int(x, 21)}
     })
   in
   this.cell.extract(c)
@@ -66,9 +66,31 @@ define my-random-in-range(lower-bound: int32, upper-bound: int32): int {
   add-int(value, sext-int32-int(lower-bound))
 }
 
+define use-text(x: &text): text {
+  axiom-T(box x {x})
+}
+
 define zen(): unit {
+  let k = use-text("te") in
+  printf("{}\n", [k]);
+  let v = with-cell(3) in
+  printf("result of with-cell(3): {}\n", [show-int(v)]);
+  let c = new-cell("hello") in
+  let _ on c =
+    let item = *"test" in
+    let _ on item =
+      mutate(c, function (_) {
+        box item {
+          let _ = item in
+          "hello"
+        }
+      })
+    in
+    Unit
+  in
+  let val = extract(c) in
+  printf("extracted: {}\n", [*val]);
   let yo: pair(int, bool) = Pair(3, True) in
-  // let Pair(_, y) on yo = *yo in
   let tmp on yo = *yo in
   let Pair(_, _) = tmp in
   let xs: vector(int) =

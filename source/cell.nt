@@ -4,7 +4,7 @@ import {
   Magic,
   Mem,
   Word,
-  this.box,
+  this.box {axiom-T},
   this.c-size {C-Size, from-c-size},
   this.foreign {THREAD_COND_SIZE, THREAD_MUTEX_SIZE},
   this.int {sum-int},
@@ -65,55 +65,42 @@ resource _cell {
   },
 }
 
-define _new-cell<a>(x: a): cell(a) {
-  _new(a, x)
+define new-cell<a>(initial-value: a): cell(a) {
+  _new(a, initial-value)
 }
 
-define mutate<a>(ch: &cell(a), f: (a) -> a): unit {
+define mutate<a>(ch: &cell(a), f: (a) -> meta a): unit {
   let ch = Magic.cast(&cell(a), pointer, ch) in
   let u = Word.size in
   let mutex-ptr = shift(ch, u) in
   Ext.thread-mutex-lock(mutex-ptr);
   let val-base: int = Mem.load-int(ch) in
   let val: a = Magic.cast(int, a, val-base) in
-  let new-val = f(val) in
+  let new-val = axiom-T(f(val)) in
   Mem.store-int(Magic.cast(a, int, new-val), ch);
   let mutex-size = from-c-size(THREAD_MUTEX_SIZE) in
   Ext.thread-cond-signal(shift(ch, add-int(u, mutex-size)));
   Ext.thread-mutex-unlock(mutex-ptr)
 }
 
-define borrow<a>(ch: &cell(a), f: (&a) -> unit): unit {
+define borrow<a, b>(ch: &cell(a), f: (&a) -> meta b): b {
   let ch = Magic.cast(&cell(a), pointer, ch) in
   let u = Word.size in
   let mutex-ptr = shift(ch, u) in
   Ext.thread-mutex-lock(mutex-ptr);
   let val-base: int = Mem.load-int(ch) in
   let val: &a = Magic.cast(int, &a, val-base) in
-  f(val);
-  let mutex-size = from-c-size(THREAD_MUTEX_SIZE) in
-  Ext.thread-cond-signal(shift(ch, add-int(u, mutex-size)));
-  Ext.thread-mutex-unlock(mutex-ptr)
-}
-
-define read<a>(ch: &cell(a)): &a {
-  let ch = Magic.cast(&cell(a), pointer, ch) in
-  let val-base = Mem.load-int(ch) in
-  Magic.cast(int, &a, val-base)
-}
-
-define clone<a>(ch: &cell(a)): a {
-  let ch = Magic.cast(&cell(a), pointer, ch) in
-  let u = Word.size in
-  let mutex-ptr = shift(ch, u) in
-  Ext.thread-mutex-lock(mutex-ptr);
-  let val-base: int = Mem.load-int(ch) in
-  let val: &a = Magic.cast(int, &a, val-base) in
-  let result = *val in
+  let result = f(val) in
   let mutex-size = from-c-size(THREAD_MUTEX_SIZE) in
   Ext.thread-cond-signal(shift(ch, add-int(u, mutex-size)));
   Ext.thread-mutex-unlock(mutex-ptr);
-  result
+  axiom-T(result)
+}
+
+define clone<a>(ch: &cell(a)): a {
+  borrow(ch, function (val: &a) {
+    box val {val}
+  })
 }
 
 define extract<a>(c: cell(a)): a {

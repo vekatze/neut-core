@@ -5,7 +5,7 @@ import {
   Mem,
   Q,
   Word,
-  this.box,
+  this.box {axiom-T},
   this.c-size {C-Size, from-c-size},
   this.either {Left, Right},
   this.foreign {THREAD_COND_SIZE, THREAD_MUTEX_SIZE},
@@ -68,17 +68,18 @@ resource _channel {
   },
 }
 
-inline _new-channel<a>(): channel(a) {
+inline new-channel<a>(): channel(a) {
   _new(a, Q.empty())
 }
 
-define send<a>(ch: &channel(a), x: a): unit {
+define send<a>(ch: &channel(a), x: meta a): unit {
   let ch = Magic.cast(&channel(a), pointer, ch) in
   let u = Word.size in
   let mutex-ptr = shift(ch, u) in
   Ext.thread-mutex-lock(mutex-ptr);
   let q-base: int = Mem.load-int(ch) in
   let q: Q.queue(a) = Magic.cast(int, Q.queue(a), q-base) in
+  let x = axiom-T(x) in
   let q = Q.enqueue(q, x) in
   Mem.store-int(Magic.cast(Q.queue(a), int, q), ch);
   let mutex-size = from-c-size(THREAD_MUTEX_SIZE) in

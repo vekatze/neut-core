@@ -275,7 +275,7 @@ inline for-each-maybe-N<e, a, b>(xs: &vector(a), f: (&a, int) -> either(e, b)): 
 
 inline for<a>(xs: vector(a), !f: (a, int) -> unit): unit {
   let word-size = Word.size in
-  let ptr0 = magic cast(vector(a), pointer, xs) in
+  let ptr0 = Magic.cast(vector(a), pointer, xs) in
   let ptr1 = shift(ptr0, word-size) in
   let ptr3 = shift(ptr0, mul-int(word-size, 3)) in
   let from = Mem.load-int(ptr0) in
@@ -425,7 +425,7 @@ define to-list<a>(xs: vector(a)): list(a) {
   let word-size = Word.size in
   let vecinfo on xs = _get-vector-info(xs) in
   let _Vector-Info of {content-ptr} = vecinfo in
-  let ptr0 = magic cast(vector(a), pointer, xs) in
+  let ptr0 = Magic.cast(vector(a), pointer, xs) in
   let loop =
     define self(index: int): list(a) {
       if ge-int(index, len) {

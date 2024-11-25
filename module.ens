@@ -2,6 +2,9 @@
   target {
     test {
       main "test.nt",
+      build-option [
+        "-fsanitize=address",
+      ],
     },
     bench-random-dict {
       main "bench/random-dict.nt",

@@ -49,8 +49,8 @@
   preset {
     bool ["False", "True", "and", "bool", "not", "or"],
     box [],
-    cell [],
-    channel [],
+    cell ["cell"],
+    channel ["channel"],
     either ["Left", "Right", "either", "none"],
     list ["Cons", "Nil", "list"],
     ordering ["EQ", "GT", "LT", "ordering"],

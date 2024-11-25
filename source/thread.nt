@@ -8,7 +8,7 @@ import {
   this.c-int {eq-c-int},
   this.c-size {C-Size, add-c-size, c-size, mul-c-size},
   this.foreign {THREAD_SIZE},
-  this.pointer {extract, shift},
+  this.pointer {shift},
   this.unit {Unit, unit},
 }
 
@@ -28,16 +28,14 @@ nominal {
 }
 
 resource _thread-inner {
-  function (addr: int) {
+  function (addr: pointer) {
     let u = Word.size in
-    let addr = magic cast(int, pointer, addr) in
     let elem-type = Magic.cast(int, type, Mem.load-int(shift(addr, u))) in
     let pr: thread(elem-type) = Magic.cast(pointer, thread(elem-type), addr) in
     let _: elem-type = this.thread.attach(elem-type, pr) in
-    0
+    Unit
   },
-  function (addr: int) {
-    let addr = magic cast(int, pointer, addr) in
+  function (addr: pointer) {
     let u = Word.size in
     let u2 = mul-int(u, 2) in
     let u3 = mul-int(u, 3) in
@@ -51,7 +49,7 @@ resource _thread-inner {
     let cloned-value: elem-type = _embody(elem-type, elem-value) in
     Mem.store-int(Magic.cast(elem-type, int, cloned-value), shift(new-addr, u2));
     Mem.store-int1(1, shift(new-addr, u3));
-    extract(new-addr)
+    new-addr
   },
 }
 

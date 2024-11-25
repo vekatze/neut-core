@@ -4,7 +4,7 @@ import {
   this.c-size {C-Size},
   this.external {free, malloc},
   this.memory {store-int8},
-  this.pointer {extract, shift},
+  this.pointer {shift},
   this.text {_get-content-pointer, text, text-byte-length},
   this.unit,
   this.word,
@@ -25,18 +25,16 @@ define length-c-string(s: &c-string): int {
 
 // null-terminated string
 resource c-string {
-  function (ptr: int) {
-    let ptr = magic cast(int, pointer, ptr) in
-    free(ptr);
-    0
+  function (ptr: pointer) {
+    free(ptr)
   },
-  function (ptr: int) {
-    let s = Magic.cast(int, &c-string, ptr) in
+  function (ptr: pointer) {
+    let s = Magic.cast(pointer, &c-string, ptr) in
     let len = length-c-string(s) in
     let new-ptr = malloc(C-Size(add-int(len, 1))) in
     let s2 = Magic.cast(&c-string, pointer, s) in
     let _ = magic external llvm.memcpy.p0.p0.i64(new-ptr, s2, len, 0) in
-    extract(new-ptr)
+    new-ptr
   },
 }
 

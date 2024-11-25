@@ -9,7 +9,7 @@ import {
   this.int.ord {as-ord-N},
   this.list {Cons, Nil, list, minimum},
   this.pair {Pair, pair},
-  this.pointer {extract, shift},
+  this.pointer {shift},
   this.unit {Unit, unit},
 }
 
@@ -23,12 +23,10 @@ define _copy-float-array(source-pointer: pointer, target-pointer: pointer, len: 
 }
 
 resource float-array {
-  function (x: int) {
-    let x = magic cast(int, pointer, x) in
-    Magic.cast(unit, int, free(x))
+  function (x: pointer) {
+    free(x)
   },
-  function (source-pointer: int) {
-    let source-pointer = magic cast(int, pointer, source-pointer) in
+  function (source-pointer: pointer) {
     let u = Word.size in
     let u2 = mul-int(u, 2) in
     let from = Mem.load-int(source-pointer) in

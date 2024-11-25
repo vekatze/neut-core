@@ -15,7 +15,7 @@ import {
   this.magic,
   this.memory,
   this.pair {Pair, pair},
-  this.pointer {extract, shift},
+  this.pointer {shift},
   this.system {panic},
   this.text,
   this.unit {Unit, unit},
@@ -80,19 +80,17 @@ inline _get-vector-info<a>(xs: &vector(a)): _vector-info {
 }
 
 resource _vector-internal {
-  function (ptr: int) {
-    let base-ptr = Magic.cast(int, &vector(int), ptr) in
-    let _Vector-Info of {from-ptr, to-ptr, type-ptr, content-ptr} = _get-vector-info(base-ptr) in
+  function (ptr: &vector(int)) {
+    let _Vector-Info of {from-ptr, to-ptr, type-ptr, content-ptr} = _get-vector-info(ptr) in
     let from: int = Mem.load-int(from-ptr) in
     let to: int = Mem.load-int(to-ptr) in
     let size = sub-int(to, from) in
     let elem-type = Magic.cast(int, type, Mem.load-int(type-ptr)) in
     _discard-vector-content(content-ptr, elem-type, 0, size);
-    Magic.cast(unit, int, free(from-ptr))
+    free(from-ptr)
   },
-  function (ptr: int) {
-    let base-ptr = Magic.cast(int, &vector(int), ptr) in
-    let _Vector-Info of {word-size, from-ptr, to-ptr, type-ptr, content-ptr} = _get-vector-info(base-ptr) in
+  function (ptr: &vector(int)) {
+    let _Vector-Info of {word-size, from-ptr, to-ptr, type-ptr, content-ptr} = _get-vector-info(ptr) in
     let from: int = Mem.load-int(from-ptr) in
     let to: int = Mem.load-int(to-ptr) in
     let size = sub-int(to, from) in
@@ -102,7 +100,7 @@ resource _vector-internal {
     Mem.store-int(size, shift(target-ptr, word-size));
     Mem.store-int(Magic.cast(type, int, elem-type), shift(target-ptr, mul-int(word-size, 2)));
     _copy-vector-content(content-ptr, shift(target-ptr, mul-int(word-size, 3)), elem-type, 0, size);
-    extract(target-ptr)
+    Magic.cast(pointer, &vector(int), target-ptr)
   },
 }
 

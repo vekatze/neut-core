@@ -38,8 +38,7 @@ define _new(a: type, val: a): cell(a) {
 
 // (content, thread-mutex, thread-cond)
 resource _cell {
-  function (ch: int) {
-    let ch = magic cast(int, pointer, ch) in
+  function (ch: pointer) {
     let u = Word.size in
     let mutex-size = from-c-size(THREAD_MUTEX_SIZE) in
     let cond-size = from-c-size(THREAD_COND_SIZE) in
@@ -49,11 +48,9 @@ resource _cell {
     Ext.thread-cond-destroy(shift(ch, cond-offset));
     Ext.thread-mutex-destroy(shift(ch, u));
     let _: a = magic cast(int, a, Mem.load-int(ch)) in
-    Ext.free(ch);
-    0
+    Ext.free(ch)
   },
-  function (ch: int) {
-    let ch = magic cast(int, pointer, ch) in
+  function (ch: pointer) {
     let u = Word.size in
     let mutex-size = from-c-size(THREAD_MUTEX_SIZE) in
     let cond-size = from-c-size(THREAD_COND_SIZE) in
@@ -61,7 +58,7 @@ resource _cell {
     let a = Magic.cast(int, type, Mem.load-int(shift(ch, type-offset))) in
     let val: &a = Magic.cast(int, &a, Mem.load-int(ch)) in
     let val-clone: a = _get-clone(a, val) in
-    Magic.cast(cell(a), int, _new(a, val-clone))
+    Magic.cast(cell(a), pointer, _new(a, val-clone))
   },
 }
 

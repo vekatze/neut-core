@@ -41,8 +41,7 @@ define _new(a: type, q: Q.queue(a)): channel(a) {
 
 // (queue, thread-mutex, thread-cond)
 resource _channel {
-  function (ch: int) {
-    let ch = magic cast(int, pointer, ch) in
+  function (ch: pointer) {
     let u = Word.size in
     let mutex-size = from-c-size(THREAD_MUTEX_SIZE) in
     let cond-size = from-c-size(THREAD_COND_SIZE) in
@@ -52,11 +51,9 @@ resource _channel {
     Ext.thread-cond-destroy(shift(ch, cond-offset));
     Ext.thread-mutex-destroy(shift(ch, u));
     let _: Q.queue(a) = magic cast(int, Q.queue(a), Mem.load-int(ch)) in
-    Ext.free(ch);
-    0
+    Ext.free(ch)
   },
-  function (ch: int) {
-    let ch = magic cast(int, pointer, ch) in
+  function (ch: pointer) {
     let u = Word.size in
     let mutex-size = from-c-size(THREAD_MUTEX_SIZE) in
     let cond-size = from-c-size(THREAD_COND_SIZE) in
@@ -64,7 +61,7 @@ resource _channel {
     let a = Magic.cast(int, type, Mem.load-int(shift(ch, type-offset))) in
     let q: &Q.queue(a) = Magic.cast(int, &Q.queue(a), Mem.load-int(ch)) in
     let q-clone: Q.queue(a) = _get-clone(Q.queue(a), q) in
-    Magic.cast(channel(a), int, _new(a, q-clone))
+    Magic.cast(channel(a), pointer, _new(a, q-clone))
   },
 }
 

@@ -71,8 +71,11 @@ define use-text(x: &text): text {
 }
 
 define zen(): unit {
-  let k = use-text("te") in
-  printf("{}\n", [k]);
+  let !k = use-text("te") in
+  printf("{}\n", [!k]);
+  printf("{}\n", [!k]);
+  printf("{}\n", [!k]);
+  printf("{}\n", [!k]);
   let v = with-cell(3) in
   printf("result of with-cell(3): {}\n", [show-int(v)]);
   let c = new-cell("hello") in

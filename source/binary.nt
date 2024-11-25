@@ -20,14 +20,9 @@ foreign {
   llvm.memcpy.p0.p0.i64(pointer, pointer, int64, int1): void,
 }
 
-define _copy-binary(source-pointer: pointer, target-pointer: pointer, index: int, to: int): unit {
-  if eq-int(index, to) {
-    Unit
-  } else {
-    let value = Mem.load-int8(shift(source-pointer, index)) in
-    Mem.store-int8(value, shift(target-pointer, index));
-    _copy-binary(source-pointer, target-pointer, add-int(index, 1), to)
-  }
+define _copy-binary(source-pointer: pointer, target-pointer: pointer, len: int): unit {
+  let _ = magic external llvm.memcpy.p0.p0.i64(target-pointer, source-pointer, len, 0) in
+  Unit
 }
 
 // int8-array
@@ -48,8 +43,8 @@ resource binary {
     Mem.store-int(0, target-pointer);
     Mem.store-int(length, shift(target-pointer, u));
     let source-pointer' = shift(source-pointer, add-int(u2, from)) in
-    _copy-binary(source-pointer', shift(target-pointer, u2), 0, to);
-    extract(target-pointer)
+    _copy-binary(source-pointer', shift(target-pointer, u2), length);
+    target-pointer
   },
 }
 
@@ -140,7 +135,7 @@ define join(xs: list(binary)): binary {
         let current-content-ptr = shift(content-ptr, offset) in
         let x-ptr on x = _get-content-pointer(x) in
         let x-len on x = binary-length(x) in
-        _copy-binary(x-ptr, current-content-ptr, 0, x-len);
+        _copy-binary(x-ptr, current-content-ptr, x-len);
         discard(x);
         self(add-int(offset, x-len), rest)
       }
@@ -171,7 +166,7 @@ define join-N(xs: list(&binary)): binary {
         let current-content-ptr = shift(content-ptr, offset) in
         let x-ptr = _get-content-pointer(x) in
         let x-len = binary-length(x) in
-        _copy-binary(x-ptr, current-content-ptr, 0, x-len);
+        _copy-binary(x-ptr, current-content-ptr, x-len);
         discard(x);
         self(add-int(offset, x-len), rest)
       }
@@ -256,7 +251,7 @@ define drop-N(t: &binary, offset: int): binary {
   let new-content-ptr = shift(new-ptr, mul-int(Word.size, 2)) in
   let adjusted-offset = min-int(offset, orig-size) in
   let content-ptr' = shift(content-ptr, adjusted-offset) in
-  _copy-binary(content-ptr', new-content-ptr, 0, new-size);
+  _copy-binary(content-ptr', new-content-ptr, new-size);
   Magic.cast(pointer, binary, new-ptr)
 }
 
@@ -269,7 +264,7 @@ define take-N(t: &binary, offset: int): binary {
   Mem.store-int(new-size, shift(new-ptr, core.word.size));
   let content-ptr = _get-content-pointer(t) in
   let new-content-ptr = shift(new-ptr, mul-int(core.word.size, 2)) in
-  _copy-binary(content-ptr, new-content-ptr, 0, new-size);
+  _copy-binary(content-ptr, new-content-ptr, new-size);
   core.magic.cast(pointer, binary, new-ptr)
 }
 
@@ -285,7 +280,7 @@ define slice-N(t: &binary, start: int, size: int): binary {
   Mem.store-int(0, new-ptr);
   Mem.store-int(new-size, shift(new-ptr, Word.size));
   let new-content-ptr = shift(new-ptr, mul-int(Word.size, 2)) in
-  _copy-binary(shift(content-ptr, start), new-content-ptr, 0, new-size);
+  _copy-binary(shift(content-ptr, start), new-content-ptr, new-size);
   Magic.cast(pointer, binary, new-ptr)
 }
 

@@ -13,15 +13,13 @@ import {
   this.unit {Unit, unit},
 }
 
-define _copy-float-array(source-pointer: pointer, target-pointer: pointer, index: int, from: int, to: int): unit {
-  if eq-int(from, to) {
-    Unit
-  } else {
-    let u = Word.size in
-    let value = Mem.load-float(shift(source-pointer, mul-int(u, from))) in
-    Mem.store-float(value, shift(target-pointer, mul-int(u, index)));
-    _copy-float-array(source-pointer, target-pointer, add-int(index, 1), add-int(from, 1), to)
-  }
+foreign {
+  llvm.memcpy.p0.p0.i64(pointer, pointer, int64, int1): void,
+}
+
+define _copy-float-array(source-pointer: pointer, target-pointer: pointer, len: int): unit {
+  let _ = magic external llvm.memcpy.p0.p0.i64(target-pointer, source-pointer, len, 0) in
+  Unit
 }
 
 resource float-array {
@@ -39,8 +37,9 @@ resource float-array {
     let target-pointer = malloc(C-Size(add-int(mul-int(u, length), u2))) in
     Mem.store-int(0, target-pointer);
     Mem.store-int(length, shift(target-pointer, u));
-    _copy-float-array(shift(source-pointer, u2), shift(target-pointer, u2), 0, from, to);
-    extract(target-pointer)
+    let source-pointer' = shift(source-pointer, add-int(u2, from)) in
+    _copy-float-array(source-pointer', shift(target-pointer, u2), length);
+    target-pointer
   },
 }
 

@@ -619,7 +619,7 @@ define replicate(t: &text, n: int): text {
       } else {
         let current-content-ptr = shift(content-ptr, mul-int(count, base-len)) in
         let x-ptr = _get-content-pointer(t) in
-        _copy-binary(x-ptr, current-content-ptr, 0, base-len);
+        _copy-binary(x-ptr, current-content-ptr, base-len);
         self(add-int(count, 1), t)
       }
     }

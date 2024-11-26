@@ -142,6 +142,29 @@ define break(haystack: &text, needle: &text): pair(text, text) {
   f(0)
 }
 
+define find-text(haystack: &text, needle: &text): bool {
+  let ptr = _get-content-pointer(haystack) in
+  let ptr2 = _get-content-pointer(needle) in
+  let len = text-byte-length(haystack) in
+  let needle-len = text-byte-length(needle) in
+  let f =
+    define loop(cursor: int): bool {
+      let rem-len = sub-int(len, cursor) in
+      if lt-int(rem-len, needle-len) {
+        False
+      } else {
+        let ptr1 = shift(ptr, cursor) in
+        if _match-text-content(ptr1, ptr2, needle-len) {
+          True
+        } else {
+          loop(add-int(cursor, 1))
+        }
+      }
+    }
+  in
+  f(0)
+}
+
 define intercalate(xs: list(text), sep: text): text {
   join(this.list.intercalate(xs, sep))
 }

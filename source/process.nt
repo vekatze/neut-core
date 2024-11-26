@@ -1,6 +1,7 @@
 import {
   Ext,
   FD,
+  Magic,
   Word,
   this.bool {bool},
   this.c-int {c-int, eq-c-int, from-c-int},
@@ -81,8 +82,8 @@ define _create-pipe(): system(pair(FD.descriptor, FD.descriptor)) {
     free(ptr);
     report-system-error()
   } else {
-    let reader = magic load(int32, ptr) in
-    let writer = magic load(int32, shift(ptr, 4)) in
+    let reader = Magic.cast(int32, FD.descriptor, magic load(int32, ptr)) in
+    let writer = Magic.cast(int32, FD.descriptor, magic load(int32, shift(ptr, 4))) in
     free(ptr);
     Right(Pair(reader, writer))
   }

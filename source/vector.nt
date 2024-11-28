@@ -469,14 +469,14 @@ define _swap<a>(xs: vector(a), i: int, j: int): vector(a) {
   xs
 }
 
-define swap<a>(xs: vector(a), i: int, j: int): either(vector(a), vector(a)) {
+define swap<a>(xs: vector(a), i: int, j: int): vector(a) {
   let len on xs = length(xs) in
   let b1 = and(le-int(0, i), lt-int(i, len)) in
   let b2 = and(le-int(0, j), lt-int(j, len)) in
   if and(b1, b2) {
-    Right(_swap(xs, i, j))
+    _swap(xs, i, j)
   } else {
-    Right(xs)
+    xs
   }
 }
 
@@ -496,7 +496,7 @@ define reverse<a>(xs: vector(a)): vector(a) {
       if ge-int(left, right) {
         xs
       } else {
-        let xs = _unsafe-extract(swap(xs, left, right)) in
+        let xs = swap(xs, left, right) in
         self(xs, add-int(left, 1), sub-int(right, 1))
       }
     }

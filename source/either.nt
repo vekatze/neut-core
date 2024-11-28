@@ -7,7 +7,7 @@ data either(e, a) {
 | Right(a)
 }
 
-constant none<a>: ?a {
+inline none<a>: ?a {
   Left(Unit)
 }
 

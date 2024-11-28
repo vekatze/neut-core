@@ -11,7 +11,7 @@ data queue(a: type) {
 | Queue(list(a), list(a))
 }
 
-constant empty<a>: queue(a) {
+inline empty<a>: queue(a) {
   Queue([], [])
 }
 

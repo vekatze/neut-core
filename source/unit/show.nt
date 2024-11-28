@@ -5,7 +5,7 @@ import {
   this.unit {Unit, unit},
 }
 
-constant as-show: show(unit) {
+inline as-show: show(unit) {
   Show(function (u) {
     match u {
     | Unit =>

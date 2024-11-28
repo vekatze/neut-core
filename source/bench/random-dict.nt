@@ -9,7 +9,7 @@ import {
   this.unit {Unit, unit},
 }
 
-constant intdict: Dict.trope(int) {
+inline intdict: Dict.trope(int) {
   Dict.from-ord(as-ord-N)
 }
 

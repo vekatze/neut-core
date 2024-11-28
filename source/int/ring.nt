@@ -2,7 +2,7 @@ import {
   this.ring {Ring, ring},
 }
 
-constant as-ring: ring(int) {
+inline as-ring: ring(int) {
   Ring of {
     zero = 0,
     add = add-int,

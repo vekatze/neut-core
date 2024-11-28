@@ -3,12 +3,12 @@ import {
   this.foreign,
 }
 
-constant size: int {
+inline size: int {
   magic opaque-value {
     from-c-size(this.foreign._size)
   }
 }
 
-constant word-size: c-size {
+inline word-size: c-size {
   this.foreign._size
 }

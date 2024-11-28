@@ -233,10 +233,10 @@ define show-text-N(t: &text): text {
   join(concat([[*"\""], _escape(t, len, 0, 0), [*"\""]]))
 }
 
-constant as-show: show(text) {
+inline as-show: show(text) {
   Show(show-text)
 }
 
-constant as-show-N: show(&text) {
+inline as-show-N: show(&text) {
   Show(show-text-N)
 }

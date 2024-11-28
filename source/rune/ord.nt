@@ -30,7 +30,7 @@ define ge-rune(r1: rune, r2: rune): bool {
   uge-int32(r1, r2)
 }
 
-constant as-ord: ord(rune) {
+inline as-ord: ord(rune) {
   Ord of {
     compare = {
       function (x, y) {
@@ -46,7 +46,7 @@ constant as-ord: ord(rune) {
   }
 }
 
-constant as-ord-N: ord(&rune) {
+inline as-ord-N: ord(&rune) {
   Ord of {
     compare = {
       function (x, y) {

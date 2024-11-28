@@ -30,6 +30,6 @@ define show-float(x: float): text {
   _show("%lf", x)
 }
 
-constant as-show: show(float) {
+inline as-show: show(float) {
   Show(show-float)
 }

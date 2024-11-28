@@ -44,12 +44,12 @@ define interpret(xs: list(mode)): c-int {
   })
 }
 
-constant default-file-mode: list(mode) {
+inline default-file-mode: list(mode) {
   // 644
   [Owner-R, Owner-W, Group-R, Other-R]
 }
 
-constant default-directory-mode: list(mode) {
+inline default-directory-mode: list(mode) {
   // 755
   [Owner-R, Owner-W, Owner-X, Group-R, Group-X, Other-R, Other-X]
 }

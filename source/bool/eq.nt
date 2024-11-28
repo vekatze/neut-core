@@ -3,7 +3,7 @@ import {
   this.eq {Eq, eq},
 }
 
-constant as-eq: eq(bool) {
+inline as-eq: eq(bool) {
   Eq(
     function (b1, b2) {
       if b1 {

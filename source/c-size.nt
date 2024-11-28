@@ -3,7 +3,7 @@ import {
   this.c-ssize {C-SSize, c-ssize},
 }
 
-constant _c-size: type {
+inline _c-size: type {
   introspect architecture {
   | amd64 =>
     int64

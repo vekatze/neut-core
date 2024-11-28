@@ -5,7 +5,7 @@ import {
   this.box,
 }
 
-constant as-ord: ord(int) {
+inline as-ord: ord(int) {
   Ord of {
     compare = {
       function (x, y) {
@@ -21,7 +21,7 @@ constant as-ord: ord(int) {
   }
 }
 
-constant as-ord-N: ord(&int) {
+inline as-ord-N: ord(&int) {
   Ord of {
     compare = {
       function (x, y) {
@@ -37,7 +37,7 @@ constant as-ord-N: ord(&int) {
   }
 }
 
-constant as-ord-int8: ord(int8) {
+inline as-ord-int8: ord(int8) {
   Ord of {
     compare = {
       function (x, y) {
@@ -53,7 +53,7 @@ constant as-ord-int8: ord(int8) {
   }
 }
 
-constant as-ord-int8-N: ord(&int8) {
+inline as-ord-int8-N: ord(&int8) {
   Ord of {
     compare = {
       function (x, y) {

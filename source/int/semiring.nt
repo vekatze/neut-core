@@ -3,6 +3,6 @@ import {
   this.semiring {from-ring, semiring},
 }
 
-constant as-semiring: semiring(int) {
+inline as-semiring: semiring(int) {
   from-ring(as-ring)
 }

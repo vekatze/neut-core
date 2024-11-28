@@ -2,7 +2,7 @@ import {
   this.field {Field, field},
 }
 
-constant as-field: field(float) {
+inline as-field: field(float) {
   Field of {
     zero = 0,
     add = add-float,

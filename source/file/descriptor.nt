@@ -1,18 +1,18 @@
 data descriptor {}
 
-constant stdin: descriptor {
+inline stdin: descriptor {
   magic opaque-value {
     magic cast(int, descriptor, 0)
   }
 }
 
-constant stdout: descriptor {
+inline stdout: descriptor {
   magic opaque-value {
     magic cast(int, descriptor, 1)
   }
 }
 
-constant stderr: descriptor {
+inline stderr: descriptor {
   magic opaque-value {
     magic cast(int, descriptor, 2)
   }

@@ -19,7 +19,7 @@ define ne-text(t1: &text, t2: &text): bool {
   ne-binary(xs1, xs2)
 }
 
-constant as-eq: eq(&text) {
+inline as-eq: eq(&text) {
   Eq of {equal = eq-text}
 }
 

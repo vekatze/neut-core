@@ -5,7 +5,7 @@ import {
   this.ord {Ord, ord},
 }
 
-constant as-ord: ord(float) {
+inline as-ord: ord(float) {
   Ord of {
     compare = {
       function (x, y) {
@@ -21,7 +21,7 @@ constant as-ord: ord(float) {
   }
 }
 
-constant as-ord-N: ord(&float) {
+inline as-ord-N: ord(&float) {
   Ord of {
     compare = {
       function (x, y) {

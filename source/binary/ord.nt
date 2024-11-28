@@ -82,7 +82,7 @@ define ge-binary(t1: &binary, t2: &binary): bool {
   }
 }
 
-constant as-ord: ord(&binary) {
+inline as-ord: ord(&binary) {
   Ord of {
     compare = {
       function (x, y) {

@@ -27,7 +27,7 @@ define _show(c-fmt: &text, x: int): text {
   magic cast(pointer, text, ptr)
 }
 
-constant as-show: show(int) {
+inline as-show: show(int) {
   Show(function (x) {
     _show("%ld", x)
   })

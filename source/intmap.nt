@@ -24,19 +24,19 @@ data intmap(a) {
   )
 }
 
-constant _Key: type {
+inline _Key: type {
   int
 }
 
-constant _Mask: type {
+inline _Mask: type {
   int
 }
 
-constant _Prefix: type {
+inline _Prefix: type {
   int
 }
 
-constant empty<a>: intmap(a) {
+inline empty<a>: intmap(a) {
   Nil
 }
 

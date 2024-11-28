@@ -3,6 +3,6 @@ import {
   this.list {for-each, list},
 }
 
-constant as-functor: functor(list) {
+inline as-functor: functor(list) {
   Functor of {for-each}
 }

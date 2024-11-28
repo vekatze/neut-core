@@ -3,6 +3,6 @@ import {
   this.monoid {from-group, monoid},
 }
 
-constant as-monoid: monoid(int) {
+inline as-monoid: monoid(int) {
   from-group(as-group)
 }

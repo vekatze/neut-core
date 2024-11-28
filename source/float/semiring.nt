@@ -3,6 +3,6 @@ import {
   this.semiring {semiring},
 }
 
-constant as-semiring: semiring(float) {
+inline as-semiring: semiring(float) {
   this.semiring.from-field(as-field)
 }

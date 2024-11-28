@@ -3,7 +3,7 @@ import {
   this.ring {ring},
 }
 
-constant as-ring: ring(float) {
+inline as-ring: ring(float) {
   this.ring.from-field(as-field)
 }
 

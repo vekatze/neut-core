@@ -2,7 +2,7 @@ import {
   this.group {Group, group},
 }
 
-constant as-group: group(int) {
+inline as-group: group(int) {
   Group of {
     one = 0,
     mul = add-int,

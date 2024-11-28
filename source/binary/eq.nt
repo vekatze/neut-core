@@ -6,11 +6,11 @@ import {
   this.pointer {shift},
 }
 
-constant _cmp-ptr-t: type {
+inline _cmp-ptr-t: type {
   (ptr1: pointer, ptr2: pointer, index: int, to: int) -> bool
 }
 
-constant _cmp-array-t: type {
+inline _cmp-array-t: type {
   (t1: &binary, t2: &binary) -> bool
 }
 
@@ -56,7 +56,7 @@ define ne-binary(t1: &binary, t2: &binary): bool {
   not(eq-binary(t1, t2))
 }
 
-constant as-eq: eq(&binary) {
+inline as-eq: eq(&binary) {
   Eq of {equal = eq-binary}
 }
 

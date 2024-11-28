@@ -2,7 +2,7 @@ import {
   this.bool {bool},
 }
 
-constant _c-pid: type {
+inline _c-pid: type {
   introspect architecture {
   | amd64 =>
     int32

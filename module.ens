@@ -8,6 +8,9 @@
     },
     bench-random-dict {
       main "bench/random-dict.nt",
+      build-option [
+        "-fsanitize=address",
+      ],
     },
   },
   foreign {

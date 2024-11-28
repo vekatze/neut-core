@@ -1,0 +1,169 @@
+import {
+  this.bool {bool},
+}
+
+constant _c-long: type {
+  introspect architecture {
+  | amd64 =>
+    int64
+  | arm64 =>
+    int64
+  }
+}
+
+data c-long {
+| C-Long(int64)
+}
+
+define add-c-long(x: c-long, y: c-long): c-long {
+  let C-Long(x) = x in
+  let C-Long(y) = y in
+  introspect architecture {
+  | amd64 =>
+    C-Long(add-int64(x, y))
+  | arm64 =>
+    C-Long(add-int64(x, y))
+  }
+}
+
+inline sub-c-long(x: c-long, y: c-long): c-long {
+  let C-Long(x) = x in
+  let C-Long(y) = y in
+  introspect architecture {
+  | amd64 =>
+    C-Long(sub-int64(x, y))
+  | arm64 =>
+    C-Long(sub-int64(x, y))
+  }
+}
+
+inline mul-c-long(x: c-long, y: c-long): c-long {
+  let C-Long(x) = x in
+  let C-Long(y) = y in
+  introspect architecture {
+  | amd64 =>
+    C-Long(mul-int64(x, y))
+  | arm64 =>
+    C-Long(mul-int64(x, y))
+  }
+}
+
+inline div-c-long(x: c-long, y: c-long): c-long {
+  let C-Long(x) = x in
+  let C-Long(y) = y in
+  introspect architecture {
+  | amd64 =>
+    C-Long(div-int64(x, y))
+  | arm64 =>
+    C-Long(div-int64(x, y))
+  }
+}
+
+inline and-c-long(x: c-long, y: c-long): c-long {
+  let C-Long(x) = x in
+  let C-Long(y) = y in
+  introspect architecture {
+  | amd64 =>
+    C-Long(and-int64(x, y))
+  | arm64 =>
+    C-Long(and-int64(x, y))
+  }
+}
+
+inline or-c-long(x: c-long, y: c-long): c-long {
+  let C-Long(x) = x in
+  let C-Long(y) = y in
+  introspect architecture {
+  | amd64 =>
+    C-Long(or-int64(x, y))
+  | arm64 =>
+    C-Long(or-int64(x, y))
+  }
+}
+
+inline xor-c-long(x: c-long, y: c-long): c-long {
+  let C-Long(x) = x in
+  let C-Long(y) = y in
+  introspect architecture {
+  | amd64 =>
+    C-Long(xor-int64(x, y))
+  | arm64 =>
+    C-Long(xor-int64(x, y))
+  }
+}
+
+inline eq-c-long(x: c-long, y: c-long): bool {
+  let C-Long(x) = x in
+  let C-Long(y) = y in
+  introspect architecture {
+  | amd64 =>
+    eq-int64(x, y)
+  | arm64 =>
+    eq-int64(x, y)
+  }
+}
+
+inline ne-c-long(x: c-long, y: c-long): bool {
+  let C-Long(x) = x in
+  let C-Long(y) = y in
+  introspect architecture {
+  | amd64 =>
+    ne-int64(x, y)
+  | arm64 =>
+    ne-int64(x, y)
+  }
+}
+
+inline lt-c-long(x: c-long, y: c-long): bool {
+  let C-Long(x) = x in
+  let C-Long(y) = y in
+  introspect architecture {
+  | amd64 =>
+    lt-int64(x, y)
+  | arm64 =>
+    lt-int64(x, y)
+  }
+}
+
+inline le-c-long(x: c-long, y: c-long): bool {
+  let C-Long(x) = x in
+  let C-Long(y) = y in
+  introspect architecture {
+  | amd64 =>
+    le-int64(x, y)
+  | arm64 =>
+    le-int64(x, y)
+  }
+}
+
+inline gt-c-long(x: c-long, y: c-long): bool {
+  let C-Long(x) = x in
+  let C-Long(y) = y in
+  introspect architecture {
+  | amd64 =>
+    gt-int64(x, y)
+  | arm64 =>
+    gt-int64(x, y)
+  }
+}
+
+inline ge-c-long(x: c-long, y: c-long): bool {
+  let C-Long(x) = x in
+  let C-Long(y) = y in
+  introspect architecture {
+  | amd64 =>
+    ge-int64(x, y)
+  | arm64 =>
+    ge-int64(x, y)
+  }
+}
+
+inline from-c-long(x: c-long): int {
+  let C-Long(x) = x in
+  introspect architecture {
+  | amd64 =>
+    x
+  | arm64 =>
+    x
+  }
+}

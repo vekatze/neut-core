@@ -66,7 +66,7 @@ resource _channel {
 }
 
 inline new-channel<a>(): channel(a) {
-  _new(a, Q.empty())
+  _new(a, Q.empty)
 }
 
 define send<a>(ch: &channel(a), x: meta a): unit {
@@ -92,7 +92,7 @@ define _receive-from-channel(a: type, ch: pointer, mutex-ptr: pointer): a {
     Ext.thread-mutex-unlock(mutex-ptr);
     v
   | Left(_) =>
-    Mem.store-int(Magic.cast(Q.queue(int), int, Q.empty()), ch);
+    Mem.store-int(Magic.cast(Q.queue(int), int, Q.empty), ch);
     let u = Word.size in
     let mutex-size = from-c-size(THREAD_MUTEX_SIZE) in
     let cond-ptr = shift(ch, add-int(u, mutex-size)) in

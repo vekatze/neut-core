@@ -14,7 +14,7 @@ constant intdict: Dict.trope(int) {
 }
 
 define make-big-dictionary(): dictionary(int, int) {
-  grow(Dict.empty(), 700000, function (acc, _) {
+  grow(Dict.empty, 700000, function (acc, _) {
     let key = random-int(1000000) in
     let val = random-int(1000000) in
     intdict::insert(acc, key, val)

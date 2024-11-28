@@ -368,7 +368,7 @@ define _get-rune(t: &text, index: int): rune {
 define uncons(t: text): ?pair(rune, text) {
   let len on t = text-byte-length(t) in
   if eq-int(len, 0) {
-    none()
+    none
   } else {
     let ch on t = _get-rune(t, 0) in
     let char-len = this.rune.size(ch) in
@@ -714,7 +714,7 @@ define find(t: &text, !pred: (rune) -> bool): ?int {
   let f =
     define self(byte-index: int, index: int): ?int {
       if ge-int(byte-index, len) {
-        none()
+        none
       } else {
         let ch = _get-rune(t, byte-index) in
         if !pred(ch) {
@@ -734,7 +734,7 @@ define find-end(t: &text, !pred: (rune) -> bool): ?int {
   let f =
     define self(t: &text, byte-index: int, index: int): ?int {
       if lt-int(byte-index, 0) {
-        none()
+        none
       } else {
         let rune-size = _get-rune-size-end(t, byte-index) in
         let rune-head-byte-index = sub-int(byte-index, sub-int(rune-size, 1)) in

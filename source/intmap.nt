@@ -36,7 +36,7 @@ constant _Prefix: type {
   int
 }
 
-inline empty<a>(): intmap(a) {
+constant empty<a>: intmap(a) {
   Nil
 }
 
@@ -107,12 +107,12 @@ define insert<a>(t: intmap(a), k: _Key, x: a): intmap(a) {
 define lookup<a>(t: &intmap(a), k: _Key): ?&a {
   case t {
   | Nil =>
-    none()
+    none
   | Tip(kx, x) =>
     if eq-int(k, *kx) {
       Right(x)
     } else {
-      none()
+      none
     }
   | Bin(_, m, l, r) =>
     if _zero(k, *m) {

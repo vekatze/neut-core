@@ -34,7 +34,7 @@ inline size<k, v>(d: &dictionary(k, v)): int {
   }
 }
 
-inline empty<k, v>(): dictionary(k, v) {
+constant empty<k, v>: dictionary(k, v) {
   Tip
 }
 
@@ -213,7 +213,7 @@ inline lookup<k>(L: ord(&k)): <v>(&dictionary(k, v), &k) -> ?&v {
   define self<v>(d: &dictionary(k, v), needle: &k): ?&v {
     case d {
     | Tip =>
-      none()
+      none
     | Bin(_, k, x, l, r) =>
       match !compare(needle, k) {
       | LT =>

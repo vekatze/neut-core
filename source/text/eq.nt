@@ -46,7 +46,7 @@ define strip-prefix(haystack: &text, needle: &text): ?text {
     let needle-len = text-byte-length(needle) in
     Right(_drop-N(haystack, needle-len))
   } else {
-    none()
+    none
   }
 }
 
@@ -55,6 +55,6 @@ define strip-suffix(haystack: &text, needle: &text): ?text {
     let new-haystack-len = sub-int(text-byte-length(haystack), text-byte-length(needle)) in
     Right(_take-N(haystack, new-haystack-len))
   } else {
-    none()
+    none
   }
 }

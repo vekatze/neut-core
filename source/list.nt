@@ -302,7 +302,7 @@ define unzip<a, b>(xs: list(pair(a, b))): pair(list(a), list(b)) {
 define uncons<a>(xs: list(a)): ?pair(a, list(a)) {
   match xs {
   | Nil =>
-    none()
+    none
   | Cons(y, ys) =>
     Right(Pair(y, ys))
   }
@@ -346,7 +346,7 @@ inline find<a>(xs: &list(a), !pred: (&a) -> bool): ?&a {
     define self(ys: &list(a)): ?&a {
       case ys {
       | Nil =>
-        none()
+        none
       | Cons(z, zs) =>
         if !pred(z) {
           Right(z)
@@ -401,7 +401,7 @@ inline minimum<a>(as-ord: ord(&a)): (list(a)) -> ?a {
     let Ord of {compare} = as-ord in
     match xs {
     | Nil =>
-      none()
+      none
     | Cons(y, ys) =>
       Right(fold-left(y, ys, function (acc, y) {
         let order on acc, y = compare(acc, y) in
@@ -437,7 +437,7 @@ inline maximum<a>(as-ord: ord(&a)): (list(a)) -> ?a {
     in
     match xs {
     | Nil =>
-      none()
+      none
     | Cons(y, ys) =>
       Right(helper(y, ys))
     }
@@ -553,7 +553,7 @@ define is-empty<a>(xs: &list(a)): bool {
 define nth<a>(xs: &list(a), n: int): ?a {
   case xs {
   | Nil =>
-    none()
+    none
   | Cons(y, ys) =>
     if le-int(n, 0) {
       Right(*y)

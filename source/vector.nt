@@ -190,7 +190,7 @@ inline access<a>(xs: &vector(a), i: int): ?&a {
   if and(le-int(0, i), lt-int(i, length(xs))) {
     Right(_access(xs, i))
   } else {
-    none()
+    none
   }
 }
 
@@ -561,7 +561,7 @@ define find<a>(xs: &vector(a), !pred: (&a) -> bool): ?int {
   let f =
     define self(index: int): ?int {
       if ge-int(index, len) {
-        none()
+        none
       } else {
         let value = _access(xs, index) in
         if !pred(value) {
@@ -580,7 +580,7 @@ define find-end<a>(xs: &vector(a), !pred: (&a) -> bool): ?int {
   let f =
     define self(index: int): ?int {
       if lt-int(index, 0) {
-        none()
+        none
       } else {
         let value = _access(xs, index) in
         if !pred(value) {

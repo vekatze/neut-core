@@ -315,7 +315,7 @@ define find(xs: &binary, !pred: (int8) -> bool): ?int {
   let f =
     define self(index: int): ?int {
       if ge-int(index, len) {
-        none()
+        none
       } else {
         let ch = binary-access(xs, index) in
         if !pred(ch) {
@@ -334,7 +334,7 @@ define find-end(xs: &binary, !pred: (int8) -> bool): ?int {
   let f =
     define self(xs: &binary, index: int): ?int {
       if lt-int(index, 0) {
-        none()
+        none
       } else {
         let ch = binary-access(xs, index) in
         if !pred(ch) {

@@ -11,7 +11,7 @@ data queue(a: type) {
 | Queue(list(a), list(a))
 }
 
-define empty<a>(): queue(a) {
+constant empty<a>: queue(a) {
   Queue([], [])
 }
 
@@ -19,7 +19,7 @@ define dequeue<a>(q: queue(a)): ?pair(a, queue(a)) {
   let Queue(ls, rs) = q in
   match ls, rs {
   | Nil, Nil =>
-    none()
+    none
   | Cons(l, ls-rest), rs =>
     Right(Pair(l, Queue(ls-rest, rs)))
   | Nil, rs =>

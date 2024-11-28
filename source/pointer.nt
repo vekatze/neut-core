@@ -17,7 +17,9 @@ inline from-c-int(x: c-int): pointer {
 }
 
 constant null-pointer: pointer {
-  magic cast(int, pointer, 0)
+  magic opaque-value {
+    magic cast(int, pointer, 0)
+  }
 }
 
 inline is-null-pointer(p: pointer): bool {

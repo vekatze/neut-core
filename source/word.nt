@@ -4,7 +4,9 @@ import {
 }
 
 constant size: int {
-  from-c-size(this.foreign._size)
+  magic opaque-value {
+    from-c-size(this.foreign._size)
+  }
 }
 
 constant word-size: c-size {

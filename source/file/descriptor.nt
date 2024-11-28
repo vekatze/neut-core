@@ -1,14 +1,19 @@
-data descriptor {
-}
+data descriptor {}
 
 constant stdin: descriptor {
-  magic cast(int, descriptor, 0)
+  magic opaque-value {
+    magic cast(int, descriptor, 0)
+  }
 }
 
 constant stdout: descriptor {
-  magic cast(int, descriptor, 1)
+  magic opaque-value {
+    magic cast(int, descriptor, 1)
+  }
 }
 
 constant stderr: descriptor {
-  magic cast(int, descriptor, 2)
+  magic opaque-value {
+    magic cast(int, descriptor, 2)
+  }
 }

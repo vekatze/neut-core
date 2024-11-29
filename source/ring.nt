@@ -1,7 +1,3 @@
-import {
-  this.field {Field, field},
-}
-
 data ring(a) {
 | Ring(
     zero: a,
@@ -10,14 +6,4 @@ data ring(a) {
     one: a,
     mul: (a, a) -> a,
   )
-}
-
-inline from-field<a>(f: field(a)): ring(a) {
-  let Field of {zero, add, sub, one, mul} = f in
-  Ring of {zero, add, sub, one, mul}
-}
-
-define from-field-opaque<a>(f: field(a)): ring(a) {
-  let Field of {zero, add, sub, one, mul} = f in
-  Ring of {zero, add, sub, one, mul}
 }

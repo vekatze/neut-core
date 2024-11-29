@@ -1,5 +1,4 @@
 import {
-  this.field {Field, field},
   this.ring {Ring, ring},
 }
 
@@ -8,11 +7,6 @@ data semiring(a) {
     add: (a, a) -> a,
     mul: (a, a) -> a,
   )
-}
-
-inline from-field<a>(f: field(a)): semiring(a) {
-  let Field of {add, mul} = f in
-  Semiring of {add, mul}
 }
 
 inline from-ring<a>(f: ring(a)): semiring(a) {

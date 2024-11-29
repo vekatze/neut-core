@@ -1,8 +1,0 @@
-import {
-  this.float.field {as-field},
-  this.semiring {semiring},
-}
-
-inline as-semiring: semiring(float) {
-  this.semiring.from-field(as-field)
-}

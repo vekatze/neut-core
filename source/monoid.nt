@@ -1,26 +1,6 @@
-import {
-  this.group {Group, group},
-  this.ring {Ring, ring},
-}
-
 data monoid(a) {
 | Monoid(
     e: a,
     op: (a, a) -> a,
   )
-}
-
-inline from-group<a>(G: group(a)): monoid(a) {
-  let Group of {one, mul} = G in
-  Monoid of {e = one, op = mul}
-}
-
-inline from-ring-multiplicative<a>(R: ring(a)): monoid(a) {
-  let Ring of {one, mul} = R in
-  Monoid of {e = one, op = mul}
-}
-
-inline from-ring-additive<a>(R: ring(a)): monoid(a) {
-  let Ring of {zero, add} = R in
-  Monoid of {e = zero, op = add}
 }

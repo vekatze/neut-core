@@ -182,7 +182,7 @@ define zen(): unit {
   let cmd =
     Process-Spec of {
       process = "sh",
-      args = ["-c", "\"ls /\""],
+      args = ["-c", "ls /"],
       input = "",
     }
   in

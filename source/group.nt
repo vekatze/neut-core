@@ -1,8 +1,0 @@
-data group(a) {
-| Group(
-    one: a,
-    mul: (a, a) -> a,
-    // inv(x) == div(one, x),
-    div: (a, a) -> a,
-  )
-}

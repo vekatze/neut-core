@@ -1,6 +1,0 @@
-data lattice(a) {
-| Lattice(
-    join: (a, a) -> a,
-    meet: (a, a) -> a,
-  )
-}

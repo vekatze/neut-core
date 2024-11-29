@@ -1,8 +1,0 @@
-import {
-  this.int.ring {as-ring},
-  this.semiring {from-ring, semiring},
-}
-
-inline as-semiring: semiring(int) {
-  from-ring(as-ring)
-}

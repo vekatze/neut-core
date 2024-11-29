@@ -1,9 +1,0 @@
-data ring(a) {
-| Ring(
-    zero: a,
-    add: (a, a) -> a,
-    sub: (a, a) -> a,
-    one: a,
-    mul: (a, a) -> a,
-  )
-}

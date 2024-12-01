@@ -1,7 +1,6 @@
 import {
   this.bool {False, True, bool},
-  this.list {Cons, fold-right, list},
-  this.pair {Pair, pair},
+  this.unit {Unit},
 }
 
 data either(a, b) {
@@ -27,14 +26,33 @@ define is-right<a, b>(v: &either(a, b)): bool {
   }
 }
 
-define partition<a, b>(xs: list(either(a, b))): pair(list(a), list(b)) {
-  fold-right(xs, Pair([], []), function (elem, acc) {
-    let Pair(ls, rs) = acc in
-    match elem {
-    | Left(l) =>
-      Pair(Cons(l, ls), rs)
-    | Right(r) =>
-      Pair(ls, Cons(r, rs))
-    }
-  })
+inline none<a>: ?a {
+  Left(Unit)
+}
+
+define from-option<a>(value-or-none: ?a, fallback: a): a {
+  match value-or-none {
+  | Right(value) =>
+    value
+  | Left(_) =>
+    fallback
+  }
+}
+
+define to-option-from-right<a, b>(v: either(a, b)): ?b {
+  match v {
+  | Right(r) =>
+    Right(r)
+  | Left(_) =>
+    none
+  }
+}
+
+define to-option-from-left<a, b>(v: either(a, b)): ?a {
+  match v {
+  | Right(_) =>
+    none
+  | Left(v) =>
+    Right(v)
+  }
 }

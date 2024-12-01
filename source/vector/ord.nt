@@ -1,11 +1,8 @@
 import {
   this.bool {False, True},
   this.box,
-  this.except {Error, OK, except},
   this.ord {ord},
   this.ordering {LT},
-  this.system {panic},
-  this.text,
   this.vector {_swap, vector},
 }
 
@@ -34,15 +31,6 @@ define _find-higher<a>(!o: ord(&a), vs: &vector(a), boundary: int, to: int, pivo
     | _ =>
       _find-higher(!o, vs, boundary, sub-int(to, 1), pivot)
     }
-  }
-}
-
-inline _unsafe-extract<a, b>(x: except(a, b)): b {
-  match x {
-  | Error(_) =>
-    panic("fail: _unsafe-extract\n")
-  | OK(v) =>
-    v
   }
 }
 

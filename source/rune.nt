@@ -1,6 +1,6 @@
 import {
   this.bool {and},
-  this.except {Error, OK},
+  this.either {Left, Right},
   this.memory {load-int8, store-int8},
   this.pointer {shift},
   this.unit {Unit},
@@ -138,7 +138,7 @@ inline load-rune(address: pointer): rune {
 define from-int(value: int): ?rune {
   if le-int(0, value) {
     if le-int(value, 0x80) {
-      OK(magic cast(int, rune, value))
+      Right(magic cast(int, rune, value))
     } else-if le-int(value, 0x07ff) {
       let mask-X = 0b_1100_0000_1000_0000 in
       let mask-0 = 0b_0000_0111_1100_0000 in
@@ -147,7 +147,7 @@ define from-int(value: int): ?rune {
       let value-0 = and-int16(mask-0, value) in
       let value-1 = and-int16(mask-1, value) in
       let value-0' = shl-int16(value-0, 2) in
-      OK(magic cast(int16, rune, or-int16(or-int16(mask-X, value-0'), value-1)))
+      Right(magic cast(int16, rune, or-int16(or-int16(mask-X, value-0'), value-1)))
     } else-if le-int(value, 0xffff) {
       let mask-X = 0b_1110_0000_1000_0000_1000_0000 in
       let mask-0 = 0b_0000_0000_1111_0000_0000_0000 in
@@ -159,7 +159,7 @@ define from-int(value: int): ?rune {
       let value-2 = and-int24(mask-2, value) in
       let value-0' = shl-int24(value-0, 4) in
       let value-1' = shl-int24(value-1, 2) in
-      OK(magic cast(int24, rune, or-int24(or-int24(or-int24(mask-X, value-0'), value-1'), value-2)))
+      Right(magic cast(int24, rune, or-int24(or-int24(or-int24(mask-X, value-0'), value-1'), value-2)))
     } else-if le-int(value, 0x10ffff) {
       let mask-X: int32 = 0b_1111_0000_1000_0000_1000_0000_1000_0000 in
       let mask-0: int32 = 0b_0000_0000_0001_1100_0000_0000_0000_0000 in
@@ -174,7 +174,7 @@ define from-int(value: int): ?rune {
       let value-0' = shl-int32(value-0, 6) in
       let value-1' = shl-int32(value-1, 4) in
       let value-2' = shl-int32(value-2, 2) in
-      OK(
+      Right(
         magic cast(
           int32,
           rune,
@@ -185,9 +185,9 @@ define from-int(value: int): ?rune {
         ),
       )
     } else {
-      Error(Unit)
+      Left(Unit)
     }
   } else {
-    Error(Unit)
+    Left(Unit)
   }
 }

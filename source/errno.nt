@@ -2,7 +2,7 @@ import {
   Magic,
   this.c-int {c-int},
   this.c-string {c-string, from-c-string},
-  this.except {Error, except},
+  this.either {Left, either},
   this.foreign {get-errno},
   this.text {text},
 }
@@ -12,7 +12,7 @@ data errno {
 }
 
 inline system(a: type): type {
-  except(errno, a)
+  either(errno, a)
 }
 
 define get-system-error(): errno {
@@ -20,7 +20,7 @@ define get-system-error(): errno {
 }
 
 define report-system-error<a>(): system(a) {
-  Error(get-system-error())
+  Left(get-system-error())
 }
 
 foreign {

@@ -1,6 +1,6 @@
 import {
   this.bool {False, True, bool},
-  this.except {OK, none},
+  this.either {Right, none},
   this.list {Cons, Nil, length, list},
   this.pair {Pair, pair},
   this.unit,
@@ -21,7 +21,7 @@ define dequeue<a>(q: queue(a)): ?pair(a, queue(a)) {
   | Nil, Nil =>
     none
   | Cons(l, ls-rest), rs =>
-    OK(Pair(l, Queue(ls-rest, rs)))
+    Right(Pair(l, Queue(ls-rest, rs)))
   | Nil, rs =>
     dequeue(Queue(rs, []))
   }

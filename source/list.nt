@@ -2,7 +2,7 @@ import {
   Ord {Ord, ord},
   this.bool {False, True, and, bool, or},
   this.box,
-  this.except {Error, OK, except, none},
+  this.either {Left, Right, either, none},
   this.monoid {Monoid, monoid},
   this.ordering {GT, LT},
   this.pair {Pair, pair},
@@ -159,32 +159,32 @@ inline for-each-N<a, b>(xs: &list(a), !f: (&a) -> b): list(b) {
   helper(xs, [])
 }
 
-inline for-each-E<a, e, b>(xs: list(a), !f: (a) -> except(e, b)): except(e, list(b)) {
+inline for-each-E<a, e, b>(xs: list(a), !f: (a) -> either(e, b)): either(e, list(b)) {
   let f =
-    define self(xs: list(a)): except(e, list(b)) {
+    define self(xs: list(a)): either(e, list(b)) {
       match xs {
       | Nil =>
-        OK(Nil)
+        Right(Nil)
       | Cons(y, ys) =>
         try z = !f(y) in
         try zs = self(ys) in
-        OK(Cons(z, zs))
+        Right(Cons(z, zs))
       }
     }
   in
   f(xs)
 }
 
-inline for-each-EN<a, e, b>(xs: &list(a), !f: (&a) -> except(e, b)): except(e, list(b)) {
+inline for-each-EN<a, e, b>(xs: &list(a), !f: (&a) -> either(e, b)): either(e, list(b)) {
   let f =
-    define self(xs: &list(a)): except(e, list(b)) {
+    define self(xs: &list(a)): either(e, list(b)) {
       case xs {
       | Nil =>
-        OK(Nil)
+        Right(Nil)
       | Cons(y, ys) =>
         try z = !f(y) in
         try zs = self(ys) in
-        OK(Cons(z, zs))
+        Right(Cons(z, zs))
       }
     }
   in
@@ -228,12 +228,12 @@ inline iterate<a>(count: int, !f: (int) -> a): list(a) {
   helper(0)
 }
 
-inline iterate-E<e, a>(count: int, !f: (int) -> except(e, a)): except(e, list(a)) {
+inline iterate-E<e, a>(count: int, !f: (int) -> either(e, a)): either(e, list(a)) {
   let helper =
-    define self(acc: list(a), cursor: int): except(e, list(a)) {
+    define self(acc: list(a), cursor: int): either(e, list(a)) {
       match ge-int(cursor, count) {
       | True =>
-        OK(reverse(acc))
+        Right(reverse(acc))
       | False =>
         try v = !f(cursor) in
         self(Cons(v, acc), add-int(cursor, 1))
@@ -299,12 +299,24 @@ define unzip<a, b>(xs: list(pair(a, b))): pair(list(a), list(b)) {
   })
 }
 
+define partition<a, b>(xs: list(either(a, b))): pair(list(a), list(b)) {
+  fold-right(xs, Pair([], []), function (elem, acc) {
+    let Pair(ls, rs) = acc in
+    match elem {
+    | Left(l) =>
+      Pair(Cons(l, ls), rs)
+    | Right(r) =>
+      Pair(ls, Cons(r, rs))
+    }
+  })
+}
+
 define uncons<a>(xs: list(a)): ?pair(a, list(a)) {
   match xs {
   | Nil =>
     none
   | Cons(y, ys) =>
-    OK(Pair(y, ys))
+    Right(Pair(y, ys))
   }
 }
 
@@ -313,9 +325,9 @@ define unsnoc<a>(xs: list(a)): ?pair(list(a), a) {
     define _unsnoc(xs: list(a), acc: list(a)): ?pair(list(a), a) {
       match xs {
       | Nil =>
-        Error(Unit)
+        Left(Unit)
       | Cons(y, Nil) =>
-        OK(Pair(reverse(acc), y))
+        Right(Pair(reverse(acc), y))
       | Cons(y, ys) =>
         _unsnoc(ys, Cons(y, acc))
       }
@@ -349,7 +361,7 @@ inline find<a>(xs: &list(a), !pred: (&a) -> bool): ?&a {
         none
       | Cons(z, zs) =>
         if !pred(z) {
-          OK(z)
+          Right(z)
         } else {
           self(zs)
         }
@@ -381,9 +393,9 @@ inline filter<a>(xs: list(a), !pred: (&a) -> bool): list(a) {
 define filter-some<a>(xs: list(?a)): list(a) {
   fold-right(xs, [], function (x, acc) {
     match x {
-    | OK(v) =>
+    | Right(v) =>
       Cons(v, acc)
-    | Error(_) =>
+    | Left(_) =>
       acc
     }
   })
@@ -403,7 +415,7 @@ inline minimum<a>(as-ord: ord(&a)): (list(a)) -> ?a {
     | Nil =>
       none
     | Cons(y, ys) =>
-      OK(fold-left(y, ys, function (acc, y) {
+      Right(fold-left(y, ys, function (acc, y) {
         let order on acc, y = compare(acc, y) in
         match order {
         | LT =>
@@ -439,7 +451,7 @@ inline maximum<a>(as-ord: ord(&a)): (list(a)) -> ?a {
     | Nil =>
       none
     | Cons(y, ys) =>
-      OK(helper(y, ys))
+      Right(helper(y, ys))
     }
   }
 }
@@ -556,7 +568,7 @@ define nth<a>(xs: &list(a), n: int): ?a {
     none
   | Cons(y, ys) =>
     if le-int(n, 0) {
-      OK(*y)
+      Right(*y)
     } else {
       nth(ys, sub-int(n, 1))
     }

@@ -8,7 +8,7 @@ import {
   this.bool {False, True, bool},
   this.box,
   this.c-size {C-Size},
-  this.except {OK, none},
+  this.either {Right, none},
   this.list {Cons, Nil, list, reverse},
   this.memory {load-int8},
   this.pair {Pair, pair},
@@ -373,7 +373,7 @@ define uncons(t: text): ?pair(rune, text) {
     let ch on t = _get-rune(t, 0) in
     let char-len = this.rune.size(ch) in
     let t = _drop(t, char-len) in
-    OK(Pair(ch, t))
+    Right(Pair(ch, t))
   }
 }
 
@@ -718,7 +718,7 @@ define find(t: &text, !pred: (rune) -> bool): ?int {
       } else {
         let ch = _get-rune(t, byte-index) in
         if !pred(ch) {
-          OK(index)
+          Right(index)
         } else {
           let char-len = this.rune.size(ch) in
           self(add-int(byte-index, char-len), add-int(index, 1))
@@ -740,7 +740,7 @@ define find-end(t: &text, !pred: (rune) -> bool): ?int {
         let rune-head-byte-index = sub-int(byte-index, sub-int(rune-size, 1)) in
         let ch = _get-rune(t, rune-head-byte-index) in
         if !pred(ch) {
-          OK(index)
+          Right(index)
         } else {
           self(t, sub-int(byte-index, rune-size), add-int(index, 1))
         }

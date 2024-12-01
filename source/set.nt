@@ -2,7 +2,7 @@ import {
   Ord {ord},
   this.bool {False, True, bool},
   this.dictionary {dictionary, empty, singleton},
-  this.except {Error, OK},
+  this.either {Left, Right},
   this.unit {Unit, unit},
 }
 
@@ -41,9 +41,9 @@ inline from-ord<k>(_ord: ord(&k)): trope(k) {
     lookup = {
       function (s, k) {
         match !lookup(s, k) {
-        | OK(_) =>
+        | Right(_) =>
           True
-        | Error(_) =>
+        | Left(_) =>
           False
         }
       }

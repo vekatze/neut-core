@@ -7,7 +7,7 @@ import {
   Word,
   this.box {axiom-T},
   this.c-size {C-Size, from-c-size},
-  this.except {Error, OK},
+  this.either {Left, Right},
   this.foreign {THREAD_COND_SIZE, THREAD_MUTEX_SIZE},
   this.int {sum-int},
   this.pair {Pair},
@@ -87,11 +87,11 @@ define send<a>(ch: &channel(a), x: meta a): unit {
 define _receive-from-channel(a: type, ch: pointer, mutex-ptr: pointer): a {
   let q: Q.queue(a) = Magic.cast(int, Q.queue(a), Mem.load-int(ch)) in
   match Q.dequeue(q) {
-  | OK(Pair(v, q)) =>
+  | Right(Pair(v, q)) =>
     Mem.store-int(Magic.cast(Q.queue(a), int, q), ch);
     Ext.thread-mutex-unlock(mutex-ptr);
     v
-  | Error(_) =>
+  | Left(_) =>
     Mem.store-int(Magic.cast(Q.queue(int), int, Q.empty), ch);
     let u = Word.size in
     let mutex-size = from-c-size(THREAD_MUTEX_SIZE) in

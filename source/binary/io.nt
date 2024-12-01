@@ -8,7 +8,7 @@ import {
   this.bool,
   this.c-size {C-Size, c-size, from-c-size, from-positive-ssize, lt-c-size},
   this.c-ssize {from-c-ssize, lt-c-ssize},
-  this.except {OK},
+  this.either {Right},
   this.errno {report-system-error, system},
   this.file.descriptor {descriptor},
   this.pointer {extract, shift},
@@ -29,7 +29,7 @@ define write(b: &binary, f: descriptor): system(unit) {
       } else {
         let acc = add-int(acc, from-c-ssize(bytes)) in
         if eq-int(acc, len) {
-          OK(Unit)
+          Right(Unit)
         } else {
           write-loop(acc)
         }
@@ -59,7 +59,7 @@ define _read-inner(from: FD.descriptor, ptr: pointer, ptr-size: int, len-cand: i
       report-system-error()
     } else-if lt-c-size(from-positive-ssize(bytes), buffer-size) {
       Mem.store-int(next-len-cand, shift(ptr, u));
-      OK(Magic.cast(pointer, binary, ptr))
+      Right(Magic.cast(pointer, binary, ptr))
     } else {
       _read-inner(from, ptr, ptr-size, next-len-cand, buffer-size)
     }

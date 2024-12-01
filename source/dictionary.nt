@@ -1,7 +1,7 @@
 import {
   Ord {Ord, ord},
   core.bool,
-  core.except {OK, none},
+  core.either {Right, none},
   core.ordering {EQ, GT, LT},
   core.system,
   core.text,
@@ -221,7 +221,7 @@ inline lookup<k>(L: ord(&k)): <v>(&dictionary(k, v), &k) -> ?&v {
       | GT =>
         self(r, needle)
       | EQ =>
-        OK(x)
+        Right(x)
       }
     }
   }

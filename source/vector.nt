@@ -128,7 +128,7 @@ inline create<a>(len: int, !gen: (int) -> a): vector(a) {
   magic cast(pointer, vector(a), ptr0)
 }
 
-inline create-maybe<e, a>(len: int, !gen: (int) -> either(e, a)): either(e, vector(a)) {
+inline create-E<e, a>(len: int, !gen: (int) -> either(e, a)): either(e, vector(a)) {
   let word-size = Word.size in
   let ptr0 = malloc(C-Size(mul-int(word-size, add-int(3, len)))) in
   let ptr1 = shift(ptr0, word-size) in
@@ -227,7 +227,7 @@ inline for-each-N<a, b>(xs: &vector(a), f: (&a, int) -> b): vector(b) {
   })
 }
 
-inline for-each-maybe<e, a, b>(xs: vector(a), !f: (a, int) -> either(e, b)): either(e, vector(b)) {
+inline for-each-E<e, a, b>(xs: vector(a), !f: (a, int) -> either(e, b)): either(e, vector(b)) {
   let word-size = Word.size in
   let ptr0 = Magic.cast(vector(a), pointer, xs) in
   let ptr1 = shift(ptr0, word-size) in
@@ -264,9 +264,9 @@ inline for-each-maybe<e, a, b>(xs: vector(a), !f: (a, int) -> either(e, b)): eit
   }
 }
 
-inline for-each-maybe-N<e, a, b>(xs: &vector(a), f: (&a, int) -> either(e, b)): either(e, vector(b)) {
+inline for-each-EN<e, a, b>(xs: &vector(a), f: (&a, int) -> either(e, b)): either(e, vector(b)) {
   let len = length(xs) in
-  create-maybe(len, function (i) {
+  create-E(len, function (i) {
     f(_access(xs, i), i)
   })
 }

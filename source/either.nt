@@ -21,6 +21,10 @@ define from-option<a>(none-or-value: ?a, fallback: a): a {
 }
 
 define to-option<a, b>(e: either(a, b)): ?b {
-  catch _ = e in
-  none
+  match e {
+  | Left(_) =>
+    none
+  | Right(v) =>
+    Right(v)
+  }
 }

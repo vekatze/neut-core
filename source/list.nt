@@ -159,7 +159,7 @@ inline for-each-N<a, b>(xs: &list(a), !f: (&a) -> b): list(b) {
   helper(xs, [])
 }
 
-inline for-each-maybe<a, e, b>(xs: list(a), !f: (a) -> either(e, b)): either(e, list(b)) {
+inline for-each-E<a, e, b>(xs: list(a), !f: (a) -> either(e, b)): either(e, list(b)) {
   let f =
     define self(xs: list(a)): either(e, list(b)) {
       match xs {
@@ -175,7 +175,7 @@ inline for-each-maybe<a, e, b>(xs: list(a), !f: (a) -> either(e, b)): either(e, 
   f(xs)
 }
 
-inline for-each-maybe-N<a, e, b>(xs: &list(a), !f: (&a) -> either(e, b)): either(e, list(b)) {
+inline for-each-EN<a, e, b>(xs: &list(a), !f: (&a) -> either(e, b)): either(e, list(b)) {
   let f =
     define self(xs: &list(a)): either(e, list(b)) {
       case xs {
@@ -228,7 +228,7 @@ inline iterate<a>(count: int, !f: (int) -> a): list(a) {
   helper(0)
 }
 
-inline iterate-maybe<e, a>(count: int, !f: (int) -> either(e, a)): either(e, list(a)) {
+inline iterate-E<e, a>(count: int, !f: (int) -> either(e, a)): either(e, list(a)) {
   let helper =
     define self(acc: list(a), cursor: int): either(e, list(a)) {
       match ge-int(cursor, count) {

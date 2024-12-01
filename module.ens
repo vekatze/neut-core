@@ -54,6 +54,7 @@
     box [],
     cell ["cell"],
     channel ["channel"],
+    either ["Left", "Right", "either"],
     eq ["Eq", "eq"],
     except ["Error", "OK", "except", "none"],
     list ["Cons", "Nil", "list"],

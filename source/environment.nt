@@ -4,7 +4,7 @@ import {
   this.c-int {C-Int, c-int, eq-c-int},
   this.c-string {c-string, from-c-string, to-c-string},
   this.control {discard},
-  this.either {Right, none},
+  this.except {OK, none},
   this.errno {report-system-error, system},
   this.text {_get-content-pointer, text},
   this.unit {Unit, unit},
@@ -21,7 +21,7 @@ define get-env(name: &text): ?text {
   if eq-int(magic cast(pointer, int, tmp), 0) {
     none
   } else {
-    Right(from-c-string(Magic.cast(pointer, &c-string, tmp)))
+    OK(from-c-string(Magic.cast(pointer, &c-string, tmp)))
   }
 }
 
@@ -45,7 +45,7 @@ define set-env(name: &text, value: &text, overwrite: bool): system(unit) {
   discard(name-c-str);
   discard(value-c-str);
   if eq-c-int(result, 0) {
-    Right(Unit)
+    OK(Unit)
   } else {
     report-system-error()
   }

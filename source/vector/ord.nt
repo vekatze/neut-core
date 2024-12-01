@@ -1,7 +1,7 @@
 import {
   this.bool {False, True},
   this.box,
-  this.either {Left, Right, either},
+  this.except {Error, OK, except},
   this.ord {ord},
   this.ordering {LT},
   this.system {panic},
@@ -37,11 +37,11 @@ define _find-higher<a>(!o: ord(&a), vs: &vector(a), boundary: int, to: int, pivo
   }
 }
 
-inline _unsafe-extract<a, b>(x: either(a, b)): b {
+inline _unsafe-extract<a, b>(x: except(a, b)): b {
   match x {
-  | Left(_) =>
+  | Error(_) =>
     panic("fail: _unsafe-extract\n")
-  | Right(v) =>
+  | OK(v) =>
     v
   }
 }

@@ -3,7 +3,7 @@ import {
   TIO,
   this.box,
   this.control {grow},
-  this.either {Left, Right},
+  this.except {Error, OK},
   this.int.ord {as-ord-N},
   this.random {random-int},
   this.unit {Unit, unit},
@@ -27,9 +27,9 @@ define random-lookup-sum(d: &dictionary(int, int)): unit {
       let key = random-int(1000000) in
       let val on key =
         match intdict::lookup(d, key) {
-        | Left(_) =>
+        | Error(_) =>
           0
-        | Right(v) =>
+        | OK(v) =>
           *v
         }
       in

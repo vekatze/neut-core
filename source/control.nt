@@ -1,6 +1,6 @@
 import {
   core.bool {False, True},
-  core.either {Right, either},
+  core.except {OK, except},
   core.unit {Unit, unit},
 }
 
@@ -19,12 +19,12 @@ inline loop(count: int, !f: (int) -> unit): unit {
   helper(0)
 }
 
-inline loop-E<e>(count: int, !f: (int) -> either(e, unit)): either(e, unit) {
+inline loop-E<e>(count: int, !f: (int) -> except(e, unit)): except(e, unit) {
   let helper =
-    define self(cursor): either(e, unit) {
+    define self(cursor): except(e, unit) {
       match ge-int(cursor, count) {
       | True =>
-        Right(Unit)
+        OK(Unit)
       | False =>
         try _ = !f(cursor) in
         self(add-int(cursor, 1))
@@ -47,11 +47,11 @@ inline grow<a>(seed: a, iteration: int, !step: (a, int) -> a): a {
   helper(seed, 0)
 }
 
-inline grow-E<e, a>(seed: a, iteration: int, !step: (a, int) -> either(e, a)): either(e, a) {
+inline grow-E<e, a>(seed: a, iteration: int, !step: (a, int) -> except(e, a)): except(e, a) {
   let helper =
-    define self(acc: a, current: int): either(e, a) {
+    define self(acc: a, current: int): except(e, a) {
       if ge-int(current, iteration) {
-        Right(acc)
+        OK(acc)
       } else {
         try tmp = !step(acc, current) in
         self(tmp, add-int(current, 1))

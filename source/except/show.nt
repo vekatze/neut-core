@@ -1,0 +1,17 @@
+import {
+  this.except {Error, OK, except},
+  this.list,
+  this.show {Show, show},
+  this.text {format},
+}
+
+inline as-show<a, b>(s1: show(a), s2: show(b)): show(except(a, b)) {
+  Show(function (val) {
+    match val {
+    | Error(x) =>
+      format("Error({})", [s1::show(x)])
+    | OK(y) =>
+      format("OK({})", [s2::show(y)])
+    }
+  })
+}

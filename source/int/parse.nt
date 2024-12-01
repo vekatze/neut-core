@@ -1,6 +1,6 @@
 import {
   this.bool,
-  this.either {Left, Right},
+  this.except {Error, OK},
   this.foreign {_parse_binary, _parse_decimal, _parse_hex},
   this.memory {load-int},
   this.text {_get-content-pointer, text},
@@ -13,10 +13,10 @@ inline parse-binary(t: &text): ?int {
   let result-ptr = magic alloca(int, 1) in
   let result-status = _parse_binary(c-int-str, len, result-ptr) in
   if lt-int(result-status, 0) {
-    Left(Unit)
+    Error(Unit)
   } else {
     let result = load-int(result-ptr) in
-    Right(result)
+    OK(result)
   }
 }
 
@@ -26,10 +26,10 @@ inline parse-int(t: &text): ?int {
   let result-ptr = magic alloca(int, 1) in
   let result-status = _parse_decimal(c-int-str, len, result-ptr) in
   if lt-int(result-status, 0) {
-    Left(Unit)
+    Error(Unit)
   } else {
     let result = load-int(result-ptr) in
-    Right(result)
+    OK(result)
   }
 }
 
@@ -39,9 +39,9 @@ inline parse-hex(t: &text): ?int {
   let result-ptr = magic alloca(int, 1) in
   let result-status = _parse_hex(c-int-str, len, result-ptr) in
   if lt-int(result-status, 0) {
-    Left(Unit)
+    Error(Unit)
   } else {
     let result = load-int(result-ptr) in
-    Right(result)
+    OK(result)
   }
 }

@@ -1,0 +1,30 @@
+import {
+  this.unit {Unit},
+}
+
+data except(e, a) {
+| Error(e)
+| OK(a)
+}
+
+inline none<a>: ?a {
+  Error(Unit)
+}
+
+define from-option<a>(none-or-value: ?a, fallback: a): a {
+  match none-or-value {
+  | OK(value) =>
+    value
+  | Error(_) =>
+    fallback
+  }
+}
+
+define to-option<a, b>(e: except(a, b)): ?b {
+  match e {
+  | OK(v) =>
+    OK(v)
+  | Error(_) =>
+    none
+  }
+}

@@ -7,7 +7,7 @@ import {
   this.c-int {c-int, eq-c-int, from-c-int},
   this.c-pid {c-pid, eq-c-pid},
   this.c-size {C-Size},
-  this.either {Left, Right},
+  this.except {Error, OK},
   this.errno {Errno, report-system-error, system},
   this.external {free},
   this.file {close},
@@ -51,14 +51,14 @@ define _waitpid(pid: c-pid): system(process-result-status) {
     free(status-ptr);
     if _wifexited(stat-loc) {
       let exit-status = _wexitstatus(stat-loc) in
-      Right(Exited(exit-status))
+      OK(Exited(exit-status))
     } else-if _wifsignaled(stat-loc) {
       let termsig = _wtermsig(stat-loc) in
       let coredump = _wcoredump(stat-loc) in
-      Right(Signaled(termsig, coredump))
+      OK(Signaled(termsig, coredump))
     } else-if _wifstopped(stat-loc) {
       let stopsig = _wstopsig(stat-loc) in
-      Right(Stopped(stopsig))
+      OK(Stopped(stopsig))
     } else {
       // unreachable
       report-system-error()
@@ -85,7 +85,7 @@ define _create-pipe(): system(pair(FD.descriptor, FD.descriptor)) {
     let reader = Magic.cast(int32, FD.descriptor, magic load(int32, ptr)) in
     let writer = Magic.cast(int32, FD.descriptor, magic load(int32, shift(ptr, 4))) in
     free(ptr);
-    Right(Pair(reader, writer))
+    OK(Pair(reader, writer))
   }
 }
 
@@ -96,7 +96,7 @@ define _dup2(fd1: FD.descriptor, fd2: FD.descriptor): system(unit) {
   if eq-c-int(result, -1) {
     report-system-error()
   } else {
-    Right(Unit)
+    OK(Unit)
   }
 }
 
@@ -105,7 +105,7 @@ define _fork(): system(c-pid) {
   if eq-c-pid(result, -1) {
     report-system-error()
   } else {
-    Right(result)
+    OK(result)
   }
 }
 
@@ -159,7 +159,7 @@ define spawn(
     try stdout-text = read(out-reader, stdout-initial-buffer-size) in
     try stderr-text = read(error-reader, stderr-initial-buffer-size) in
     try status = _waitpid(pid) in
-    Right(Process-Result of {
+    OK(Process-Result of {
       status,
       stdout-text,
       stderr-text,
@@ -187,7 +187,7 @@ define zen(): unit {
     }
   in
   match spawn(cmd, 1024, 1024) {
-  | Right(result) =>
+  | OK(result) =>
     use result {stdout-text, stderr-text, status} in
     let _ on stdout-text = print(stdout-text) in
     let _ on stderr-text = print(stderr-text) in
@@ -197,7 +197,7 @@ define zen(): unit {
     _print-process-result-status(status);
     print("\n");
     print("success\n")
-  | Left(Errno(num)) =>
+  | Error(Errno(num)) =>
     print("fail: ");
     print-int(from-c-int(num))
   }

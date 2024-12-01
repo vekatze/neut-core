@@ -8,7 +8,7 @@ import {
   this.box,
   this.c-size {C-Size},
   this.control {discard},
-  this.either {Right, none},
+  this.except {OK, none},
   this.external {free, malloc},
   this.int {max-int, min-int},
   this.list {Cons, Nil, fold-left-N, length, list},
@@ -319,7 +319,7 @@ define find(xs: &binary, !pred: (int8) -> bool): ?int {
       } else {
         let ch = binary-access(xs, index) in
         if !pred(ch) {
-          Right(index)
+          OK(index)
         } else {
           self(add-int(index, 1))
         }
@@ -338,7 +338,7 @@ define find-end(xs: &binary, !pred: (int8) -> bool): ?int {
       } else {
         let ch = binary-access(xs, index) in
         if !pred(ch) {
-          Right(sub-int(len, add-int(index, 1)))
+          OK(sub-int(len, add-int(index, 1)))
         } else {
           self(xs, sub-int(index, 1))
         }

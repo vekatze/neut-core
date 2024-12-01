@@ -2,7 +2,7 @@ import {
   Ord {Ord, ord},
   this.bool {False, True, and, bool, or},
   this.box,
-  this.either {Left, Right, either, none},
+  this.except {Error, OK, except, none},
   this.monoid {Monoid, monoid},
   this.ordering {GT, LT},
   this.pair {Pair, pair},
@@ -159,32 +159,32 @@ inline for-each-N<a, b>(xs: &list(a), !f: (&a) -> b): list(b) {
   helper(xs, [])
 }
 
-inline for-each-E<a, e, b>(xs: list(a), !f: (a) -> either(e, b)): either(e, list(b)) {
+inline for-each-E<a, e, b>(xs: list(a), !f: (a) -> except(e, b)): except(e, list(b)) {
   let f =
-    define self(xs: list(a)): either(e, list(b)) {
+    define self(xs: list(a)): except(e, list(b)) {
       match xs {
       | Nil =>
-        Right(Nil)
+        OK(Nil)
       | Cons(y, ys) =>
         try z = !f(y) in
         try zs = self(ys) in
-        Right(Cons(z, zs))
+        OK(Cons(z, zs))
       }
     }
   in
   f(xs)
 }
 
-inline for-each-EN<a, e, b>(xs: &list(a), !f: (&a) -> either(e, b)): either(e, list(b)) {
+inline for-each-EN<a, e, b>(xs: &list(a), !f: (&a) -> except(e, b)): except(e, list(b)) {
   let f =
-    define self(xs: &list(a)): either(e, list(b)) {
+    define self(xs: &list(a)): except(e, list(b)) {
       case xs {
       | Nil =>
-        Right(Nil)
+        OK(Nil)
       | Cons(y, ys) =>
         try z = !f(y) in
         try zs = self(ys) in
-        Right(Cons(z, zs))
+        OK(Cons(z, zs))
       }
     }
   in
@@ -228,12 +228,12 @@ inline iterate<a>(count: int, !f: (int) -> a): list(a) {
   helper(0)
 }
 
-inline iterate-E<e, a>(count: int, !f: (int) -> either(e, a)): either(e, list(a)) {
+inline iterate-E<e, a>(count: int, !f: (int) -> except(e, a)): except(e, list(a)) {
   let helper =
-    define self(acc: list(a), cursor: int): either(e, list(a)) {
+    define self(acc: list(a), cursor: int): except(e, list(a)) {
       match ge-int(cursor, count) {
       | True =>
-        Right(reverse(acc))
+        OK(reverse(acc))
       | False =>
         try v = !f(cursor) in
         self(Cons(v, acc), add-int(cursor, 1))
@@ -304,7 +304,7 @@ define uncons<a>(xs: list(a)): ?pair(a, list(a)) {
   | Nil =>
     none
   | Cons(y, ys) =>
-    Right(Pair(y, ys))
+    OK(Pair(y, ys))
   }
 }
 
@@ -313,9 +313,9 @@ define unsnoc<a>(xs: list(a)): ?pair(list(a), a) {
     define _unsnoc(xs: list(a), acc: list(a)): ?pair(list(a), a) {
       match xs {
       | Nil =>
-        Left(Unit)
+        Error(Unit)
       | Cons(y, Nil) =>
-        Right(Pair(reverse(acc), y))
+        OK(Pair(reverse(acc), y))
       | Cons(y, ys) =>
         _unsnoc(ys, Cons(y, acc))
       }
@@ -349,7 +349,7 @@ inline find<a>(xs: &list(a), !pred: (&a) -> bool): ?&a {
         none
       | Cons(z, zs) =>
         if !pred(z) {
-          Right(z)
+          OK(z)
         } else {
           self(zs)
         }
@@ -381,9 +381,9 @@ inline filter<a>(xs: list(a), !pred: (&a) -> bool): list(a) {
 define filter-some<a>(xs: list(?a)): list(a) {
   fold-right(xs, [], function (x, acc) {
     match x {
-    | Right(v) =>
+    | OK(v) =>
       Cons(v, acc)
-    | Left(_) =>
+    | Error(_) =>
       acc
     }
   })
@@ -403,7 +403,7 @@ inline minimum<a>(as-ord: ord(&a)): (list(a)) -> ?a {
     | Nil =>
       none
     | Cons(y, ys) =>
-      Right(fold-left(y, ys, function (acc, y) {
+      OK(fold-left(y, ys, function (acc, y) {
         let order on acc, y = compare(acc, y) in
         match order {
         | LT =>
@@ -439,7 +439,7 @@ inline maximum<a>(as-ord: ord(&a)): (list(a)) -> ?a {
     | Nil =>
       none
     | Cons(y, ys) =>
-      Right(helper(y, ys))
+      OK(helper(y, ys))
     }
   }
 }
@@ -556,7 +556,7 @@ define nth<a>(xs: &list(a), n: int): ?a {
     none
   | Cons(y, ys) =>
     if le-int(n, 0) {
-      Right(*y)
+      OK(*y)
     } else {
       nth(ys, sub-int(n, 1))
     }

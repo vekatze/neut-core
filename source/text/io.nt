@@ -7,7 +7,7 @@ import {
   this.bool,
   this.c-size {C-Size, c-size, from-c-size, from-positive-ssize, lt-c-size},
   this.c-ssize {from-c-ssize, lt-c-ssize},
-  this.either {Left, Right},
+  this.except {Error, OK},
   this.errno {report-system-error, system},
   this.int.parse {parse-int},
   this.list {for, list},
@@ -28,7 +28,7 @@ define write(t: &text, f: FD.descriptor): system(int) {
   if lt-c-ssize(bytes, 0) {
     report-system-error()
   } else {
-    Right(from-c-ssize(bytes))
+    OK(from-c-ssize(bytes))
   }
 }
 
@@ -102,7 +102,7 @@ define _read-inner(from: FD.descriptor, ptr: pointer, ptr-size: int, len-cand: i
       report-system-error()
     } else-if lt-c-size(from-positive-ssize(bytes), buffer-size) {
       Mem.store-int(next-len-cand, shift(ptr, u));
-      Right(Magic.cast(pointer, text, ptr))
+      OK(Magic.cast(pointer, text, ptr))
     } else {
       _read-inner(from, ptr, ptr-size, next-len-cand, buffer-size)
     }
@@ -123,9 +123,9 @@ define get-line(initial-buffer-size: int): system(text) {
 
 define zen(): unit {
   match parse-int("123123123") {
-  | Right(v) =>
+  | OK(v) =>
     print-int(v)
-  | Left(_) =>
+  | Error(_) =>
     print("failed to parse\n")
   }
 }

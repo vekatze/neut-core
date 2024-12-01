@@ -1,7 +1,7 @@
 import {
   this.bool {bool},
   this.box,
-  this.either {Right, none},
+  this.except {OK, none},
   this.list {Cons, append, list},
   this.pair {Pair, pair},
   this.unit,
@@ -110,7 +110,7 @@ define lookup<a>(t: &intmap(a), k: _Key): ?&a {
     none
   | Tip(kx, x) =>
     if eq-int(k, *kx) {
-      Right(x)
+      OK(x)
     } else {
       none
     }

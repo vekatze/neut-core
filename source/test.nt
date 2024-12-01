@@ -3,7 +3,7 @@ import {
   this.box {axiom-T},
   this.cell {extract, mutate, new-cell},
   this.control {discard},
-  this.either {Left, Right, either},
+  this.except {Error, OK, except},
   this.float.show {show-float},
   this.int {power-int},
   this.int.show {show-int},
@@ -130,15 +130,15 @@ define zen(): unit {
   | _ =>
     Unit
   };
-  let p: either(pair(rune, type), type) = Left(Pair(`x`, type)) in
+  let p: except(pair(rune, type), type) = Error(Pair(`x`, type)) in
   match p {
-  | Right(_) =>
+  | OK(_) =>
     print("right\n")
-  | Left(Pair(`a`, _)) =>
+  | Error(Pair(`a`, _)) =>
     print("pair-a\n")
-  | Left(Pair(`x`, _)) =>
+  | Error(Pair(`x`, _)) =>
     print("pair-x\n")
-  | Left(Pair(_, _)) =>
+  | Error(Pair(_, _)) =>
     print("pair-x\n")
   };
   let !xs: list(int) = [1, 2, 3] in

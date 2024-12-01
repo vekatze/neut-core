@@ -45,13 +45,21 @@ define from-left<a, b>(lr: either(a, b), fallback: a): a {
 }
 
 inline map-right<a, b, c>(v: either(a, b), f: (b) -> c): either(a, c) {
-  try val = v in
-  Right(f(val))
+  match v {
+  | Left(l) =>
+    Left(l)
+  | Right(r) =>
+    Right(f(r))
+  }
 }
 
 inline map-left<a, b, c>(v: either(a, b), f: (a) -> c): either(c, b) {
-  cotry val = v in
-  Left(f(val))
+  match v {
+  | Left(l) =>
+    Left(f(l))
+  | Right(r) =>
+    Right(r)
+  }
 }
 
 define swap<a, b>(v: either(a, b)): either(b, a) {

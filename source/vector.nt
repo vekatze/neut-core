@@ -6,7 +6,7 @@ import {
   this.box,
   this.c-size {C-Size},
   this.control {loop},
-  this.either {Left, Right, either, from-option, none},
+  this.either {Left, Right, either, from-right, none},
   this.external {free, malloc},
   this.function {compose},
   this.int {max-int, min-int},
@@ -385,7 +385,7 @@ inline zip-with-N<a, b, c>(xs: &vector(a), ys: &vector(b), f: (&a, &b, int) -> c
   let len2 = length(ys) in
   let min-func = minimum(as-ord-N) in
   let len-or-none = min-func([len1, len2]) in
-  let len = from-option(len-or-none, 0) in
+  let len = from-right(len-or-none, 0) in
   create(len, function (i) {
     let val1 = _access(xs, i) in
     let val2 = _access(ys, i) in

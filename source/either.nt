@@ -26,34 +26,21 @@ define is-right<a, b>(v: &either(a, b)): bool {
   }
 }
 
-inline none<a>: ?a {
-  Left(Unit)
-}
-
-define from-option<a>(value-or-none: ?a, fallback: a): a {
-  match value-or-none {
-  | Right(value) =>
-    value
+define from-right<a, b>(lr: either(a, b), fallback: b): b {
+  match lr {
+  | Right(r) =>
+    r
   | Left(_) =>
     fallback
   }
 }
 
-define to-option-from-right<a, b>(v: either(a, b)): ?b {
-  match v {
-  | Right(r) =>
-    Right(r)
-  | Left(_) =>
-    none
-  }
-}
-
-define to-option-from-left<a, b>(v: either(a, b)): ?a {
-  match v {
+define from-left<a, b>(lr: either(a, b), fallback: a): a {
+  match lr {
   | Right(_) =>
-    none
-  | Left(v) =>
-    Right(v)
+    fallback
+  | Left(l) =>
+    l
   }
 }
 
@@ -65,4 +52,26 @@ inline map-right<a, b, c>(v: either(a, b), f: (b) -> c): either(a, c) {
 inline map-left<a, b, c>(v: either(a, b), f: (a) -> c): either(c, b) {
   cotry val = v in
   Left(f(val))
+}
+
+define swap<a, b>(v: either(a, b)): either(b, a) {
+  match v {
+  | Left(l) =>
+    Right(l)
+  | Right(r) =>
+    Left(r)
+  }
+}
+
+inline none<a>: ?a {
+  Left(Unit)
+}
+
+define to-option<a, b>(v: either(a, b)): ?b {
+  match v {
+  | Right(r) =>
+    Right(r)
+  | Left(_) =>
+    none
+  }
 }

@@ -3,11 +3,12 @@ import {
   this.box {axiom-T},
   this.cell {extract, mutate, new-cell},
   this.control {discard},
+  this.either {Left, Right, either, partition},
   this.except {Error, OK, except},
   this.float.show {show-float},
   this.int {power-int},
   this.int.show {show-int},
-  this.list {length, list},
+  this.list {for-each, length, list},
   this.pair {Pair, pair},
   this.random {random-float32, random-int},
   this.rune {to-int},
@@ -71,6 +72,13 @@ define use-text(x: &text): text {
 }
 
 define zen(): unit {
+  let xs: list(either(int, bool)) = [Left(3), Right(True), Left(2), Right(True), Left(134), Right(True)] in
+  let Pair(ys, _) = partition(xs) in
+  let _ =
+    for-each(ys, function (y) {
+      printf("item: {}\n", [show-int(y)])
+    })
+  in
   let !k = use-text("te") in
   printf("{}\n", [!k]);
   printf("{}\n", [!k]);

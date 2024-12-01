@@ -56,3 +56,13 @@ define to-option-from-left<a, b>(v: either(a, b)): ?a {
     Right(v)
   }
 }
+
+inline map-right<a, b, c>(v: either(a, b), f: (b) -> c): either(a, c) {
+  try val = v in
+  Right(f(val))
+}
+
+inline map-left<a, b, c>(v: either(a, b), f: (a) -> c): either(c, b) {
+  cotry val = v in
+  Left(f(val))
+}

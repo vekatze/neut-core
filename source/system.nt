@@ -12,7 +12,7 @@ import {
   this.unit {Unit, unit},
 }
 
-inline _admit(a: type, t: &text): a {
+define panic<a>(t: &text): a {
   print(t);
   fflush-all();
   exit(1)
@@ -28,17 +28,9 @@ inline _assert(message: &text, check: () -> bool): unit {
     if check() {
       Unit
     } else {
-      print(message);
-      fflush-all();
-      exit(1)
+      panic(message)
     }
   }
-}
-
-define panic<a>(t: &text): a {
-  print(t);
-  fflush-all();
-  exit(1)
 }
 
 define get-argc(): int {

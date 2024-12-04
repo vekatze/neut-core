@@ -87,8 +87,8 @@ define zen(): unit {
   printf("result of with-cell(3): {}\n", [show-int(v)]);
   let c = new-cell("hello") in
   let _ on c =
-    let item = *"test" in
-    let _ on item =
+    let item = "test" in
+    let _ =
       mutate(c, function (_) {
         box item {
           let _ = item in
@@ -100,8 +100,8 @@ define zen(): unit {
   in
   let val = extract(c) in
   printf("extracted: {}\n", [*val]);
-  let yo: pair(int, bool) = Pair(3, True) in
-  let tmp on yo = *yo in
+  pin yo: pair(int, bool) = Pair(3, True) in
+  let tmp = *yo in
   let Pair(_, _) = tmp in
   let xs: vector(int) =
     create(10, function (i) {

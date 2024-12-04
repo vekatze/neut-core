@@ -263,11 +263,11 @@ inline _glue<k, v>(d1: dictionary(k, v), d2: dictionary(k, v)): dictionary(k, v)
     d1
   | Bin(ls, lk, lx, ll, lr), Bin(rs, rk, rx, rl, rr) =>
     if gt-int(ls, rs) {
-      let _View of {key, value, dictionary} = _max-view-sure(lk, lx, ll, lr) in
-      _balance-R(key, value, dictionary, Bin(rs, rk, rx, rl, rr))
+      let _View of {key, value, dictionary = l'} = _max-view-sure(lk, lx, ll, lr) in
+      _balance-R(key, value, l', Bin(rs, rk, rx, rl, rr))
     } else {
-      let _View of {key, value, dictionary} = _min-view-sure(rk, rx, rl, rr) in
-      _balance-R(key, value, dictionary, Bin(ls, lk, lx, ll, lr))
+      let _View of {key, value, dictionary = r'} = _min-view-sure(rk, rx, rl, rr) in
+      _balance-L(key, value, Bin(ls, lk, lx, ll, lr), r')
     }
   }
 }

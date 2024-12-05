@@ -1,0 +1,30 @@
+import {
+  E,
+  this.bool {and},
+  this.eq {Eq, eq},
+  this.pair {Pair, pair},
+}
+
+inline as-eq<a, b>(f: eq(a), g: eq(b)): eq(pair(a, b)) {
+  Eq of {
+    equal = {
+      function (p1, p2) {
+        let Pair(x1, y1) = p1 in
+        let Pair(x2, y2) = p2 in
+        and(f::equal(x1, x2), g::equal(y1, y2))
+      }
+    },
+  }
+}
+
+inline as-eq-N<a, b>(f: eq(&a), g: eq(&b)): eq(&pair(a, b)) {
+  Eq of {
+    equal = {
+      function (p1, p2) {
+        tie Pair(x1, y1) = p1 in
+        tie Pair(x2, y2) = p2 in
+        and(f::equal(x1, x2), g::equal(y1, y2))
+      }
+    },
+  }
+}

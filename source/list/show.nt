@@ -1,6 +1,6 @@
 import {
   this.box,
-  this.list {Cons, append, for-each, intercalate, list},
+  this.list {Cons, append, for-each, for-each-N, intercalate, list},
   this.show {Show, show},
   this.text {join},
 }
@@ -9,6 +9,14 @@ inline as-show<a>(s: show(a)): show(list(a)) {
   Show(function (xs) {
     let Show(f) = s in
     let ys = for-each(xs, f) in
+    join(Cons(*"[", append(intercalate(ys, *", "), [*"]"])))
+  })
+}
+
+inline as-show-N<a>(s: show(&a)): show(&list(a)) {
+  Show(function (xs) {
+    let Show(f) = s in
+    let ys = for-each-N(xs, f) in
     join(Cons(*"[", append(intercalate(ys, *", "), [*"]"])))
   })
 }

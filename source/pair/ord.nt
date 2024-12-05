@@ -1,0 +1,81 @@
+import {
+  this.ord {Ord, ord},
+  this.ordering {EQ, GT, LT},
+  this.pair {Pair, pair},
+}
+
+inline as-ord<a, b>(f: ord(a), g: ord(b)): ord(pair(a, b)) {
+  Ord of {
+    compare = {
+      function (p1, p2) {
+        let Pair(x1, y1) = p1 in
+        let Pair(x2, y2) = p2 in
+        match f::compare(x1, x2) {
+        | LT =>
+          LT
+        | GT =>
+          GT
+        | EQ =>
+          g::compare(y1, y2)
+        }
+      }
+    },
+  }
+}
+
+inline as-ord'<a, b>(f: ord(a), g: ord(b)): ord(pair(a, b)) {
+  Ord of {
+    compare = {
+      function (p1, p2) {
+        let Pair(x1, y1) = p1 in
+        let Pair(x2, y2) = p2 in
+        match g::compare(y1, y2) {
+        | LT =>
+          LT
+        | GT =>
+          GT
+        | EQ =>
+          f::compare(x1, x2)
+        }
+      }
+    },
+  }
+}
+
+inline as-ord-N<a, b>(f: ord(&a), g: ord(&b)): ord(&pair(a, b)) {
+  Ord of {
+    compare = {
+      function (p1, p2) {
+        tie Pair(x1, y1) = p1 in
+        tie Pair(x2, y2) = p2 in
+        match f::compare(x1, x2) {
+        | LT =>
+          LT
+        | GT =>
+          GT
+        | EQ =>
+          g::compare(y1, y2)
+        }
+      }
+    },
+  }
+}
+
+inline as-ord-N'<a, b>(f: ord(&a), g: ord(&b)): ord(&pair(a, b)) {
+  Ord of {
+    compare = {
+      function (p1, p2) {
+        tie Pair(x1, y1) = p1 in
+        tie Pair(x2, y2) = p2 in
+        match g::compare(y1, y2) {
+        | LT =>
+          LT
+        | GT =>
+          GT
+        | EQ =>
+          f::compare(x1, x2)
+        }
+      }
+    },
+  }
+}

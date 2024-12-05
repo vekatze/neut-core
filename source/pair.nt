@@ -1,3 +1,28 @@
 data pair(a, b) {
 | Pair(left: a, right: b)
 }
+
+define first<a, b>(p: pair(a, b)): a {
+  let Pair(x, _) = p in
+  x
+}
+
+define first-N<a, b>(p: &pair(a, b)): &a {
+  tie Pair(x, _) = p in
+  x
+}
+
+define second<a, b>(p: pair(a, b)): b {
+  let Pair(_, y) = p in
+  y
+}
+
+define second-N<a, b>(p: &pair(a, b)): &b {
+  tie Pair(_, y) = p in
+  y
+}
+
+define swap<a, b>(p: pair(a, b)): pair(b, a) {
+  let Pair(x, y) = p in
+  Pair(y, x)
+}

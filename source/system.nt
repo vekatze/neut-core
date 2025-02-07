@@ -8,7 +8,7 @@ import {
 }
 
 data system-error {
-| Syscall-Error(c-int)
+| Library-Error(c-int)
 | Value-Error(text)
 }
 
@@ -17,7 +17,7 @@ inline system(a: type): type {
 }
 
 define get-system-error(): system-error {
-  Syscall-Error(get-errno())
+  Library-Error(get-errno())
 }
 
 define report-system-error<a>(): system(a) {
@@ -30,7 +30,7 @@ foreign {
 
 define get-error-message(e: system-error): text {
   match e {
-  | Syscall-Error(i) =>
+  | Library-Error(i) =>
     let c-str = magic external strerror(i) in
     from-c-string(Magic.cast(pointer, &c-string, c-str))
   | Value-Error(message) =>

@@ -5,7 +5,7 @@ import {
   this.c-string {c-string, from-c-string, to-c-string},
   this.control {discard},
   this.either {Right, none},
-  this.errno {report-system-error, system},
+  this.system {report-system-error, system},
   this.text {_get-content-pointer, text},
   this.unit {Unit, unit},
 }

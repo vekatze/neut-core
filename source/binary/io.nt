@@ -9,9 +9,9 @@ import {
   this.c-size {C-Size, c-size, from-c-size, from-positive-ssize, lt-c-size},
   this.c-ssize {from-c-ssize, lt-c-ssize},
   this.either {Right},
-  this.errno {report-system-error, system},
   this.file.descriptor {descriptor},
   this.pointer {extract, shift},
+  this.system {report-system-error, system},
   this.unit {Unit, unit},
   this.word,
 }

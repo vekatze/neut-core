@@ -8,7 +8,6 @@ import {
   this.c-pid {c-pid, eq-c-pid},
   this.c-size {C-Size},
   this.either {Left, Right},
-  this.errno {report-system-error, system},
   this.external {free},
   this.file {close},
   this.file.descriptor {stderr, stdin, stdout},
@@ -17,6 +16,7 @@ import {
   this.memory {load-c-int, store-int},
   this.pair {Pair, pair},
   this.pointer {extract, null-pointer, shift},
+  this.system {report-system-error, system},
   this.text {_get-content-pointer, text},
   this.text.io {print, print-int, read, write},
   this.unit {Unit, unit},
@@ -199,7 +199,7 @@ define zen(): unit {
     print("success\n")
   | Left(e) =>
     print("fail: ");
-    pin message = this.errno.get-error-message(e) in
+    pin message = this.system.get-error-message(e) in
     print(message)
   }
 }

@@ -5,8 +5,8 @@ import {
   FM,
   this.bool,
   this.either {Right},
-  this.errno {report-system-error, system},
   this.list {list},
+  this.system {report-system-error, system},
   this.text {_get-content-pointer, text},
   this.unit {Unit, unit},
 }

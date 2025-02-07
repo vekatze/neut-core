@@ -8,12 +8,12 @@ import {
   this.c-size {C-Size, c-size, from-c-size, from-positive-ssize, lt-c-size},
   this.c-ssize {from-c-ssize, lt-c-ssize},
   this.either {Left, Right},
-  this.errno {Value-Error, get-error-message, report-system-error, system},
   this.file.descriptor {stdin},
   this.int.show {show-int},
   this.list {for, list},
   this.memory,
   this.pointer {extract, null-pointer, shift},
+  this.system {Value-Error, get-error-message, report-system-error, system},
   this.text {_format, _get-content-pointer, format, text, text-byte-length},
   this.unit {Unit, unit},
 }

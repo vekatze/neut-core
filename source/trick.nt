@@ -12,7 +12,7 @@ import {
   this.unit {Unit, unit},
 }
 
-define panic<a>(t: &text): a {
+define unsafe-panic<a>(t: &text): a {
   print(t);
   fflush-all();
   exit(1)
@@ -28,7 +28,7 @@ inline _assert(message: &text, check: () -> bool): unit {
     if check() {
       Unit
     } else {
-      panic(message)
+      unsafe-panic(message)
     }
   }
 }

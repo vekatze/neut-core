@@ -17,7 +17,7 @@ import {
   this.pair {Pair, pair},
   this.pointer {shift},
   this.text,
-  this.trick {panic},
+  this.trick {unsafe-panic},
   this.unit {Unit, unit},
   this.word,
 }
@@ -483,7 +483,7 @@ define swap<a>(xs: vector(a), i: int, j: int): vector(a) {
 inline _unsafe-extract<a, b>(x: either(a, b)): b {
   match x {
   | Left(_) =>
-    panic("fail: _unsafe-extract\n")
+    unsafe-panic("fail: _unsafe-extract\n")
   | Right(v) =>
     v
   }

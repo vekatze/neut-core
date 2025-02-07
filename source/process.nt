@@ -8,7 +8,7 @@ import {
   this.c-pid {c-pid, eq-c-pid},
   this.c-size {C-Size},
   this.either {Left, Right},
-  this.errno {Errno, report-system-error, system},
+  this.errno {report-system-error, system},
   this.external {free},
   this.file {close},
   this.file.descriptor {stderr, stdin, stdout},
@@ -197,8 +197,9 @@ define zen(): unit {
     _print-process-result-status(status);
     print("\n");
     print("success\n")
-  | Left(Errno(num)) =>
+  | Left(e) =>
     print("fail: ");
-    print-int(from-c-int(num))
+    pin message = this.errno.get-error-message(e) in
+    print(message)
   }
 }

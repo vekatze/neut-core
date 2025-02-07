@@ -8,12 +8,13 @@ import {
   this.c-size {C-Size, c-size, from-c-size, from-positive-ssize, lt-c-size},
   this.c-ssize {from-c-ssize, lt-c-ssize},
   this.either {Left, Right},
-  this.errno {report-system-error, system},
-  this.int.parse {parse-int},
+  this.errno {Value-Error, get-error-message, report-system-error, system},
+  this.file.descriptor {stdin},
+  this.int.show {show-int},
   this.list {for, list},
   this.memory,
   this.pointer {extract, null-pointer, shift},
-  this.text {_format, _get-content-pointer, text, text-byte-length},
+  this.text {_format, _get-content-pointer, format, text, text-byte-length},
   this.unit {Unit, unit},
 }
 
@@ -110,11 +111,18 @@ define _read-inner(from: FD.descriptor, ptr: pointer, ptr-size: int, len-cand: i
 }
 
 define read(from: FD.descriptor, initial-buffer-size: int): system(text) {
-  let u = Word.size in
-  let ptr-size = add-int(initial-buffer-size, mul-int(u, 2)) in
-  let ptr = Ext.malloc(C-Size(ptr-size)) in
-  Mem.store-int(0, ptr);
-  _read-inner(from, ptr, ptr-size, 0, C-Size(initial-buffer-size))
+  if le-int(initial-buffer-size, 0) {
+    Left(Value-Error(format(
+      "core.text.io.read: initial-buffer-size must be positive, but got: {}\n",
+      [show-int(initial-buffer-size)],
+    )))
+  } else {
+    let u = Word.size in
+    let ptr-size = add-int(initial-buffer-size, mul-int(u, 2)) in
+    let ptr = Ext.malloc(C-Size(ptr-size)) in
+    Mem.store-int(0, ptr);
+    _read-inner(from, ptr, ptr-size, 0, C-Size(initial-buffer-size))
+  }
 }
 
 define get-line(initial-buffer-size: int): system(text) {
@@ -122,10 +130,13 @@ define get-line(initial-buffer-size: int): system(text) {
 }
 
 define zen(): unit {
-  match parse-int("123123123") {
-  | Right(v) =>
-    print-int(v)
-  | Left(_) =>
-    print("failed to parse\n")
+  print("hey\n");
+  fflush-all();
+  let value = read(stdin, 0) in
+  match value {
+  | Right(_) =>
+    print("success\n")
+  | Left(e) =>
+    printf("{}\n", [get-error-message(e)])
   }
 }

@@ -68,6 +68,7 @@
     text.io ["print", "printf"],
     text.ord ["lt-text", "le-text", "gt-text", "ge-text"],
     thread ["thread"],
+    trick [],
     unit ["Unit", "unit"],
   },
 }

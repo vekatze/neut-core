@@ -5,5 +5,5 @@ An implementation of the core library.
 ## Installation
 
 ```sh
-neut get core https://github.com/vekatze/neut-core/raw/main/release/0-50-45.tar.zst
+neut get core https://github.com/vekatze/neut-core/raw/main/release/0-50-46.tar.zst
 ```

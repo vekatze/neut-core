@@ -13,7 +13,7 @@ import {
   this.int.show {show-int},
   this.list,
   this.pointer {extract, shift},
-  this.system {Value-Error, report-system-error, system},
+  this.system {Application-Error, report-system-error, system},
   this.text {format},
   this.unit {Unit, unit},
   this.word,
@@ -42,7 +42,13 @@ define write(b: &binary, f: descriptor): system(unit) {
   loop(0)
 }
 
-define _read-inner(from: FD.descriptor, ptr: pointer, ptr-size: int, len-cand: int, buffer-size: c-size): system(binary) {
+define _read-inner(
+  from: FD.descriptor,
+  ptr: pointer,
+  ptr-size: int,
+  len-cand: int,
+  buffer-size: c-size,
+): system(binary) {
   let u = this.word.size in
   let content-size = sub-int(ptr-size, mul-int(u, 2)) in
   if lt-int(content-size, add-int(len-cand, from-c-size(buffer-size))) {
@@ -71,7 +77,7 @@ define _read-inner(from: FD.descriptor, ptr: pointer, ptr-size: int, len-cand: i
 
 define read(from: FD.descriptor, initial-buffer-size: int): system(binary) {
   if le-int(initial-buffer-size, 0) {
-    Left(Value-Error(format(
+    Left(Application-Error(format(
       "core.binary.io.read: initial-buffer-size must be positive, but got: {}\n",
       [show-int(initial-buffer-size)],
     )))

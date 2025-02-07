@@ -7,9 +7,13 @@ import {
   this.text {text},
 }
 
+inline errno: type {
+  c-int
+}
+
 data system-error {
-| Library-Error(c-int)
-| Value-Error(text)
+| OS-Error(errno)
+| Application-Error(text)
 }
 
 inline system(a: type): type {
@@ -17,7 +21,7 @@ inline system(a: type): type {
 }
 
 define get-system-error(): system-error {
-  Library-Error(get-errno())
+  OS-Error(get-errno())
 }
 
 define report-system-error<a>(): system(a) {
@@ -25,15 +29,15 @@ define report-system-error<a>(): system(a) {
 }
 
 foreign {
-  strerror(c-int): pointer,
+  strerror(errno): pointer,
 }
 
 define get-error-message(e: system-error): text {
   match e {
-  | Library-Error(i) =>
+  | OS-Error(i) =>
     let c-str = magic external strerror(i) in
     from-c-string(Magic.cast(pointer, &c-string, c-str))
-  | Value-Error(message) =>
+  | Application-Error(message) =>
     message
   }
 }

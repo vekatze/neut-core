@@ -1,36 +1,20 @@
 import {
-  Ext,
   FD,
   Magic,
-  Mem,
-  Word,
-  this.bool,
-  this.c-size {C-Size, c-size, from-c-size, from-positive-ssize, lt-c-size},
-  this.c-ssize {from-c-ssize, lt-c-ssize},
+  this.binary {binary},
+  this.binary.io,
   this.either {Left, Right},
-  this.file.descriptor {stdin},
-  this.int.show {show-int},
+  this.file.descriptor {stdin, stdout},
   this.list {for, list},
-  this.memory,
-  this.pointer {extract, null-pointer, shift},
-  this.system {Value-Error, get-error-message, report-system-error, system},
-  this.text {_format, _get-content-pointer, format, text, text-byte-length},
+  this.pointer {null-pointer},
+  this.system {get-error-message, system},
+  this.text {_format, _get-content-pointer, text, text-byte-length},
   this.unit {Unit, unit},
 }
 
-define write(t: &text, f: FD.descriptor): system(int) {
-  let ptr = Magic.cast(&text, pointer, t) in
-  let u = Word.size in
-  let from = Mem.load-int(ptr) in
-  let to = Mem.load-int(shift(ptr, u)) in
-  let content-pointer = shift(ptr, add-int(mul-int(u, 2), from)) in
-  let len = sub-int(to, from) in
-  let bytes = Ext.write(f, content-pointer, C-Size(len)) in
-  if lt-c-ssize(bytes, 0) {
-    report-system-error()
-  } else {
-    Right(from-c-ssize(bytes))
-  }
+define write(t: &text, f: FD.descriptor): system(unit) {
+  let ptr = Magic.cast(&text, &binary, t) in
+  this.binary.io.write(ptr, f)
 }
 
 foreign {
@@ -83,46 +67,9 @@ define fflush-all(): unit {
   fflush(null-pointer)
 }
 
-define _read-inner(from: FD.descriptor, ptr: pointer, ptr-size: int, len-cand: int, buffer-size: c-size): system(text) {
-  let u = Word.size in
-  let content-size = sub-int(ptr-size, mul-int(u, 2)) in
-  if lt-int(content-size, add-int(len-cand, from-c-size(buffer-size))) {
-    let new-size = mul-int(ptr-size, 2) in
-    let new-ptr = Ext.realloc(ptr, C-Size(new-size)) in
-    if eq-int(extract(new-ptr), 0) {
-      report-system-error()
-    } else {
-      _read-inner(from, new-ptr, new-size, len-cand, buffer-size)
-    }
-  } else {
-    let content-ptr = shift(ptr, add-int(mul-int(u, 2), len-cand)) in
-    let bytes = Ext.read(from, content-ptr, buffer-size) in
-    let next-len-cand = add-int(len-cand, from-c-ssize(bytes)) in
-    if lt-c-ssize(bytes, 0) {
-      Ext.free(ptr);
-      report-system-error()
-    } else-if lt-c-size(from-positive-ssize(bytes), buffer-size) {
-      Mem.store-int(next-len-cand, shift(ptr, u));
-      Right(Magic.cast(pointer, text, ptr))
-    } else {
-      _read-inner(from, ptr, ptr-size, next-len-cand, buffer-size)
-    }
-  }
-}
-
 define read(from: FD.descriptor, initial-buffer-size: int): system(text) {
-  if le-int(initial-buffer-size, 0) {
-    Left(Value-Error(format(
-      "core.text.io.read: initial-buffer-size must be positive, but got: {}\n",
-      [show-int(initial-buffer-size)],
-    )))
-  } else {
-    let u = Word.size in
-    let ptr-size = add-int(initial-buffer-size, mul-int(u, 2)) in
-    let ptr = Ext.malloc(C-Size(ptr-size)) in
-    Mem.store-int(0, ptr);
-    _read-inner(from, ptr, ptr-size, 0, C-Size(initial-buffer-size))
-  }
+  try bin = this.binary.io.read(from, initial-buffer-size) in
+  Right(Magic.cast(binary, text, bin))
 }
 
 define get-line(initial-buffer-size: int): system(text) {
@@ -131,6 +78,7 @@ define get-line(initial-buffer-size: int): system(text) {
 
 define zen(): unit {
   print("hey\n");
+  let _ = write("hello.\n", stdout) in
   fflush-all();
   let value = read(stdin, 0) in
   match value {

@@ -3,14 +3,13 @@ import {
   core.bool,
   core.either {Right, none},
   core.ordering {EQ, GT, LT},
-  core.system,
   core.text,
   core.unit,
   this.box,
   this.list {Cons, Nil, append, list},
   this.ord,
   this.pair {Pair, pair},
-  this.system {panic},
+  this.trick {panic},
 }
 
 // size balanced tree

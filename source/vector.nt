@@ -16,8 +16,8 @@ import {
   this.memory,
   this.pair {Pair, pair},
   this.pointer {shift},
-  this.system {panic},
   this.text,
+  this.trick {panic},
   this.unit {Unit, unit},
   this.word,
 }

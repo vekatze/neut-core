@@ -55,3 +55,11 @@ define power-int(a: int, b: int): int {
   in
   f(a, b, 1)
 }
+
+inline int-max: int {
+  9_223_372_036_854_775_807
+}
+
+inline int-min: int {
+  -9_223_372_036_854_775_808
+}

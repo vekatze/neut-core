@@ -78,7 +78,7 @@ define _read-inner(
 define read(from: FD.descriptor, initial-buffer-size: int): system(binary) {
   if le-int(initial-buffer-size, 0) {
     Left(Application-Error(format(
-      "core.binary.io.read: initial-buffer-size must be positive, but got: {}\n",
+      "core.binary.io.read: initial-buffer-size must be positive, but got: {}",
       [show-int(initial-buffer-size)],
     )))
   } else {

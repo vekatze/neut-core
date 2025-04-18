@@ -1,7 +1,7 @@
 import {
   this.bool {True, bool},
   this.box {axiom-T},
-  this.cell {extract, mutate, new-cell},
+  this.cell {_new-cell, extract, mutate},
   this.control {discard},
   this.either {Left, Right, either},
   this.float.show {show-float},
@@ -18,25 +18,25 @@ import {
 }
 
 define with-cell(i: int): int {
-  let c = new-cell(i) in
+  let c = _new-cell(i) in
   let _ on c =
     mutate(c, function (x) {
-      quote {add-int(x, 1)}
+      add-int(x, 1)
     })
   in
   let _ on c =
     mutate(c, function (x) {
-      quote {add-int(x, 1)}
+      add-int(x, 1)
     })
   in
   let _ on c =
     mutate(c, function (x) {
-      quote {add-int(x, 1)}
+      add-int(x, 1)
     })
   in
   let _ on c =
     mutate(c, function (x) {
-      quote {add-int(x, 21)}
+      add-int(x, 21)
     })
   in
   this.cell.extract(c)
@@ -85,21 +85,19 @@ define zen(): unit {
   printf("{}\n", [!k]);
   let v = with-cell(3) in
   printf("result of with-cell(3): {}\n", [show-int(v)]);
-  let c = new-cell("hello") in
+  let c = new-cell(*"hello") in
   let _ on c =
     let item = "test" in
     let _ =
       mutate(c, function (_) {
-        box item {
-          let _ = item in
-          "hello"
-        }
+        let _ = item in
+        *"hello"
       })
     in
     Unit
   in
   let val = extract(c) in
-  printf("extracted: {}\n", [*val]);
+  printf("extracted: {}\n", [val]);
   pin yo: pair(int, bool) = Pair(3, True) in
   let tmp = *yo in
   let Pair(_, _) = tmp in

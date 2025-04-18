@@ -62,25 +62,42 @@ resource _cell {
   },
 }
 
-define new-cell<a>(initial-value: a): cell(a) {
+inline _new-cell<a>(initial-value: a): cell(a) {
   _new(a, initial-value)
 }
 
-define mutate<a>(ch: &cell(a), f: (a) -> meta a): unit {
+inline mutate<a>(ch: &cell(a), f: (a) -> a): unit {
   let ch = Magic.cast(&cell(a), pointer, ch) in
   let u = Word.size in
   let mutex-ptr = shift(ch, u) in
   Ext.thread-mutex-lock(mutex-ptr);
   let val-base: int = Mem.load-int(ch) in
   let val: a = Magic.cast(int, a, val-base) in
-  let new-val = axiom-T(f(val)) in
+  let new-val = f(val) in
   Mem.store-int(Magic.cast(a, int, new-val), ch);
   let mutex-size = from-c-size(THREAD_MUTEX_SIZE) in
   Ext.thread-cond-signal(shift(ch, add-int(u, mutex-size)));
   Ext.thread-mutex-unlock(mutex-ptr)
 }
 
-define borrow<a, b>(ch: &cell(a), f: (&a) -> meta b): b {
+inline clone-mutate<a>(ch: &cell(a), f: (a) -> a): a {
+  let ch = Magic.cast(&cell(a), pointer, ch) in
+  let u = Word.size in
+  let mutex-ptr = shift(ch, u) in
+  Ext.thread-mutex-lock(mutex-ptr);
+  let val-base: int = Mem.load-int(ch) in
+  let val: &a = Magic.cast(int, &a, val-base) in
+  let val-clone = *val in
+  let orig-val = Magic.cast(&a, a, val) in
+  let new-val = f(orig-val) in
+  Mem.store-int(Magic.cast(a, int, new-val), ch);
+  let mutex-size = from-c-size(THREAD_MUTEX_SIZE) in
+  Ext.thread-cond-signal(shift(ch, add-int(u, mutex-size)));
+  Ext.thread-mutex-unlock(mutex-ptr);
+  val-clone
+}
+
+inline borrow<a, b>(ch: &cell(a), f: (&a) -> meta b): b {
   let ch = Magic.cast(&cell(a), pointer, ch) in
   let u = Word.size in
   let mutex-ptr = shift(ch, u) in

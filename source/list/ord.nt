@@ -16,7 +16,8 @@ inline as-ord<a>(!o: ord(a)): ord(list(a)) {
         | Cons(_, _), Nil =>
           GT
         | Cons(x, xs), Cons(y, ys) =>
-          match !o::compare(x, y) {
+          let Ord of {compare} = !o in
+          match compare(x, y) {
           | LT =>
             LT
           | GT =>
@@ -42,7 +43,8 @@ inline as-ord-N<a>(!o: ord(&a)): ord(&list(a)) {
         | Cons(_, _), Nil =>
           GT
         | Cons(x, xs), Cons(y, ys) =>
-          match !o::compare(x, y) {
+          let Ord of {compare} = !o in
+          match compare(x, y) {
           | LT =>
             LT
           | GT =>

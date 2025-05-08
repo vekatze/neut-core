@@ -21,7 +21,7 @@ data trope(k) {
 }
 
 inline from-ord<k>(_ord: ord(&k)): trope(k) {
-  use this.dictionary.from-ord(_ord) {insert, lookup, delete} in
+  let this.dictionary.Trope of {insert, lookup, delete} = this.dictionary.from-ord(_ord) in
   let !insert = insert in
   let !delete = delete in
   let !lookup = lookup in

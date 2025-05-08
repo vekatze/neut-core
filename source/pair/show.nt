@@ -11,7 +11,9 @@ inline as-show<a, b>(s1: show(a), s2: show(b)): show(pair(a, b)) {
     show = {
       function (p) {
         let Pair(x, y) = p in
-        join([*"(", intercalate([s1::show(x), s2::show(y)], *", "), *")"])
+        let Show of {show = show1} = s1 in
+        let Show of {show = show2} = s2 in
+        join([*"(", intercalate([show1(x), show2(y)], *", "), *")"])
       }
     },
   }

@@ -2,6 +2,7 @@ import {
   O {EQ},
   Ord {ord},
   this.bool {False, True, bool},
+  this.ord {Ord},
 }
 
 data eq(a) {
@@ -14,7 +15,8 @@ inline from-ord<a>(o: ord(a)): eq(a) {
   Eq of {
     equal = {
       function (x, y) {
-        match o::compare(x, y) {
+        let Ord of {compare} = o in
+        match compare(x, y) {
         | EQ =>
           True
         | _ =>
@@ -29,7 +31,8 @@ inline comap<a, b>(e: eq(b), !f: (a) -> b): eq(a) {
   Eq of {
     equal = {
       function (x, y) {
-        e::equal(!f(x), !f(y))
+        let Eq of {equal} = e in
+        equal(!f(x), !f(y))
       }
     },
   }

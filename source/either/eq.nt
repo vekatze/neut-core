@@ -11,9 +11,11 @@ inline as-eq<a, b>(f: eq(a), g: eq(b)): eq(either(a, b)) {
       function (p1, p2) {
         match p1, p2 {
         | Left(l1), Left(l2) =>
-          f::equal(l1, l2)
+          let Eq of {equal} = f in
+          equal(l1, l2)
         | Right(r1), Right(r2) =>
-          g::equal(r1, r2)
+          let Eq of {equal} = g in
+          equal(r1, r2)
         | _, _ =>
           False
         }
@@ -28,9 +30,11 @@ inline as-eq-N<a, b>(f: eq(&a), g: eq(&b)): eq(&either(a, b)) {
       function (p1, p2) {
         case p1, p2 {
         | Left(l1), Left(l2) =>
-          f::equal(l1, l2)
+          let Eq of {equal} = f in
+          equal(l1, l2)
         | Right(r1), Right(r2) =>
-          g::equal(r1, r2)
+          let Eq of {equal} = g in
+          equal(r1, r2)
         | _, _ =>
           False
         }

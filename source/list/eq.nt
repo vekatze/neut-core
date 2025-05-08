@@ -64,7 +64,8 @@ inline member<a>(!e: eq(&a)): (xs: &list(a), value: &a) -> bool {
     | Nil =>
       False
     | Cons(y, ys) =>
-      if !e::equal(value, y) {
+      let Eq of {equal} = !e in
+      if equal(value, y) {
         True
       } else {
         member(ys, value)

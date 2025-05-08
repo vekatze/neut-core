@@ -34,7 +34,8 @@ inline as-show: show(int) {
 }
 
 define show-int(x: int): text {
-  as-show::show(x)
+  let Show of {show} = as-show in
+  show(x)
 }
 
 define show-uint(x: int64): text {

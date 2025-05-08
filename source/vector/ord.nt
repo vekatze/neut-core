@@ -1,7 +1,7 @@
 import {
   this.bool {False, True},
   this.box,
-  this.ord {ord},
+  this.ord {Ord, ord},
   this.ordering {LT},
   this.vector {_swap, vector},
 }
@@ -11,7 +11,8 @@ define _find-lower<a>(!o: ord(&a), vs: &vector(a), from: int, to: int, pivot: &a
     -1
   } else {
     let v = core.vector._access(vs, from) in
-    match !o::compare(v, pivot) {
+    let Ord of {compare} = !o in
+    match compare(v, pivot) {
     | LT =>
       _find-lower(!o, vs, add-int(from, 1), to, pivot)
     | _ =>
@@ -25,7 +26,8 @@ define _find-higher<a>(!o: ord(&a), vs: &vector(a), boundary: int, to: int, pivo
     -1
   } else {
     let v = core.vector._access(vs, to) in
-    match !o::compare(v, pivot) {
+    let Ord of {compare} = !o in
+    match compare(v, pivot) {
     | LT =>
       to
     | _ =>

@@ -3,6 +3,7 @@ import {
   TIO,
   this.box,
   this.control {grow},
+  this.dictionary {Trope},
   this.either {Left, Right},
   this.int.ord {as-ord-N},
   this.random {random-int},
@@ -17,16 +18,18 @@ define make-big-dictionary(): dictionary(int, int) {
   grow(Dict.empty, 700000, function (acc, _) {
     let key = random-int(1000000) in
     let val = random-int(1000000) in
-    intdict::insert(acc, key, val)
+    let Trope of {insert} = intdict in
+    insert(acc, key, val)
   })
 }
 
 define random-lookup-sum(d: &dictionary(int, int)): unit {
+  let Trope of {lookup} = intdict in
   let rsum =
     grow(0, 700000, function (acc, _) {
       let key = random-int(1000000) in
       let val on key =
-        match intdict::lookup(d, key) {
+        match lookup(d, key) {
         | Left(_) =>
           0
         | Right(v) =>

@@ -27,7 +27,8 @@ inline as-eq-N: eq(&rune) {
   Eq of {
     equal = {
       function (x, y) {
-        as-eq::equal(*x, *y)
+        let Eq of {equal} = as-eq in
+        equal(*x, *y)
       }
     },
   }

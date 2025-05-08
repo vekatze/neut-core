@@ -40,7 +40,10 @@ inline cmp-binary(xs1: &binary, xs2: &binary): ordering {
   let len1 = binary-length(xs1) in
   let len2 = binary-length(xs2) in
   let min-len = min-int(len1, len2) in
-  let fallback-value = this.int.ord.as-ord::compare(len1, len2) in
+  let fallback-value =
+    let Ord of {compare} = this.int.ord.as-ord in
+    compare(len1, len2)
+  in
   let ptr1 = _get-content-pointer(xs1) in
   let ptr2 = _get-content-pointer(xs2) in
   f(ptr1, ptr2, 0, min-len, fallback-value)

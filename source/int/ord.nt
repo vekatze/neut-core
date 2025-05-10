@@ -1,8 +1,8 @@
 import {
   O {EQ, GT, LT},
   this.bool,
-  this.ord {Ord, ord},
   this.box,
+  this.ord {Ord, ord},
 }
 
 inline as-ord: ord(int) {

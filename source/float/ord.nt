@@ -1,7 +1,7 @@
 import {
   O {EQ, GT, LT},
-  this.box,
   this.bool,
+  this.box,
   this.ord {Ord, ord},
 }
 

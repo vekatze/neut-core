@@ -57,3 +57,14 @@ inline lt-c-ssize(x: c-ssize, y: c-ssize): bool {
     lt-int(x, y)
   }
 }
+
+inline eq-c-ssize(x: c-ssize, y: c-ssize): bool {
+  let C-SSize(x) = x in
+  let C-SSize(y) = y in
+  introspect architecture {
+  | amd64 =>
+    eq-int(x, y)
+  | arm64 =>
+    eq-int(x, y)
+  }
+}

@@ -6,8 +6,8 @@ import {
   Word,
   this.binary {_get-content-pointer, binary, binary-length},
   this.bool,
-  this.c-size {C-Size, c-size, from-c-size, from-positive-ssize, lt-c-size},
-  this.c-ssize {from-c-ssize, lt-c-ssize},
+  this.c-size {C-Size, c-size, from-c-size},
+  this.c-ssize {eq-c-ssize, from-c-ssize, lt-c-ssize},
   this.either {Left, Right},
   this.file.descriptor {descriptor},
   this.int.show {show-int},
@@ -66,7 +66,7 @@ define _read-inner(
     if lt-c-ssize(bytes, 0) {
       Ext.free(ptr);
       report-system-error()
-    } else-if lt-c-size(from-positive-ssize(bytes), buffer-size) {
+    } else-if eq-c-ssize(bytes, 0) {
       Mem.store-int(next-len-cand, shift(ptr, u));
       Right(Magic.cast(pointer, binary, ptr))
     } else {

@@ -1,0 +1,86 @@
+import {
+  Ext,
+  Magic,
+  Mem,
+  Word,
+  this.box,
+  this.c-size {C-Size},
+  this.pair {Pair, pair},
+  this.pointer {shift},
+  this.unit {Unit, unit},
+}
+
+inline _get-clone(a: type, x: &a): a {
+  *x
+}
+
+nominal {
+  _ref: type,
+}
+
+data ref(_: type) {
+| _Ref(_ref)
+}
+
+define _make(a: type, val: a): ref(a) {
+  let u = Word.size in
+  let ptr = Ext.malloc(C-Size(mul-int(Word.size, 2))) in
+  Mem.store-int(Magic.cast(a, int, val), ptr);
+  Mem.store-int(Magic.cast(type, int, a), shift(ptr, u));
+  Magic.cast(pointer, ref(a), ptr)
+}
+
+// (content, type)
+resource _ref {
+  function (r: pointer) {
+    let u = Word.size in
+    let a = Magic.cast(int, type, Mem.load-int(shift(r, u))) in
+    let _: a = magic cast(int, a, Mem.load-int(r)) in
+    Ext.free(r)
+  },
+  function (r: pointer) {
+    let u = Word.size in
+    let a = Magic.cast(int, type, Mem.load-int(shift(r, u))) in
+    let val: &a = Magic.cast(int, &a, Mem.load-int(r)) in
+    let val-clone: a = _get-clone(a, val) in
+    Magic.cast(ref(a), pointer, _make(a, val-clone))
+  },
+}
+
+inline _make-ref<a>(initial-value: a): ref(a) {
+  _make(a, initial-value)
+}
+
+inline modify<a, b>(r: &ref(a), f: (a) -> pair(a, b)): b {
+  let r = Magic.cast(&ref(a), pointer, r) in
+  let orig-val = Magic.cast(int, a, Mem.load-int(r)) in
+  let Pair(new-val, result) = f(orig-val) in
+  Mem.store-int(Magic.cast(a, int, new-val), r);
+  result
+}
+
+inline mutate<a>(r: &ref(a), f: (a) -> a): unit {
+  modify(r, function (x) {
+    Pair(f(x), Unit)
+  })
+}
+
+inline borrow<a, b>(r: &ref(a), f: (&a) -> meta b): b {
+  let r = Magic.cast(&ref(a), pointer, r) in
+  let orig-val = Magic.cast(int, &a, Mem.load-int(r)) in
+  letbox-T result = f(orig-val) in
+  result
+}
+
+define clone<a>(r: &ref(a)): a {
+  modify(r, function (!val: a) {
+    Pair(!val, !val)
+  })
+}
+
+define extract<a>(c: ref(a)): a {
+  let r = Magic.cast(ref(a), pointer, c) in
+  let result = Magic.cast(int, a, Mem.load-int(r)) in
+  Ext.free(r);
+  result
+}

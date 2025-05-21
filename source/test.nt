@@ -10,6 +10,7 @@ import {
   this.list {for-each, length, list, partition},
   this.pair {Pair, pair},
   this.random {random-float32, random-int},
+  this.ref {_make-ref, ref},
   this.rune {to-int},
   this.text {text},
   this.text.io {print, printf},
@@ -72,6 +73,12 @@ define use-text(x: &text): text {
 
 define zen(): unit {
   this.vector.zen();
+  pin r: ref(int) = _make-ref(123) in
+  this.ref.mutate(r, function (x) {
+    add-int(x, 10)
+  });
+  let value = this.ref.clone(r) in
+  printf("ref-value: {}\n", [show-int(value)]);
   let xs: list(either(int, bool)) = [Left(3), Right(True), Left(2), Right(True), Left(134), Right(True)] in
   let Pair(ys, _) = partition(xs) in
   let _ =

@@ -37,7 +37,7 @@ define _new(a: type, val: a): cell(a) {
   Magic.cast(pointer, cell(a), ptr)
 }
 
-// (content, thread-mutex, thread-cond)
+// (content, thread-mutex, thread-cond, type)
 resource _cell {
   function (ch: pointer) {
     let u = Word.size in

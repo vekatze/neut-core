@@ -4,7 +4,7 @@ import {
   Magic,
   Mem,
   Word,
-  this.box {axiom-T},
+  this.box,
   this.c-size {C-Size, from-c-size},
   this.foreign {THREAD_COND_SIZE, THREAD_MUTEX_SIZE},
   this.int {sum-int},
@@ -95,11 +95,11 @@ inline borrow<a, b>(ch: &cell(a), f: (&a) -> meta b): b {
   Ext.thread-mutex-lock(mutex-ptr);
   let val-base: int = Mem.load-int(ch) in
   let val: &a = Magic.cast(int, &a, val-base) in
-  let result = f(val) in
+  letbox-T result = f(val) in
   let mutex-size = from-c-size(THREAD_MUTEX_SIZE) in
   Ext.thread-cond-signal(shift(ch, add-int(u, mutex-size)));
   Ext.thread-mutex-unlock(mutex-ptr);
-  axiom-T(result)
+  result
 }
 
 define clone<a>(ch: &cell(a)): a {

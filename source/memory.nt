@@ -35,6 +35,14 @@ inline store-float(value: float, p: pointer): unit {
   magic store(float, value, p)
 }
 
+inline store-float32(value: float32, p: pointer): unit {
+  magic store(float32, value, p)
+}
+
+inline store-float16(value: float16, p: pointer): unit {
+  magic store(float16, value, p)
+}
+
 inline load-pointer(p: pointer): pointer {
   magic load(pointer, p)
 }
@@ -65,6 +73,14 @@ inline load-int1(p: pointer): int1 {
 
 inline load-float(p: pointer): float {
   magic load(float, p)
+}
+
+inline load-float32(p: pointer): float32 {
+  magic load(float32, p)
+}
+
+inline load-float16(p: pointer): float16 {
+  magic load(float16, p)
 }
 
 inline load-c-int(p: pointer): c-int {

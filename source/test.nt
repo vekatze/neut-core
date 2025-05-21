@@ -14,7 +14,7 @@ import {
   this.text {text},
   this.text.io {print, printf},
   this.unit {Unit, unit},
-  this.vector {create, for, slice, vector},
+  this.vector,
 }
 
 define with-cell(i: int): int {
@@ -71,6 +71,7 @@ define use-text(x: &text): text {
 }
 
 define zen(): unit {
+  this.vector.zen();
   let xs: list(either(int, bool)) = [Left(3), Right(True), Left(2), Right(True), Left(134), Right(True)] in
   let Pair(ys, _) = partition(xs) in
   let _ =
@@ -101,18 +102,9 @@ define zen(): unit {
   pin yo: pair(int, bool) = Pair(3, True) in
   let tmp = *yo in
   let Pair(_, _) = tmp in
-  let xs: vector(int) =
-    create(10, function (i) {
-      i
-    })
-  in
   let val = random-float32(-5, 5) in
   printf("random-float: {}\n", [show-float(fpext-float32-float(val))]);
   printf("value: {}\n", [show-int(sext-int32-int(trunc-int-int32(-3234)))]);
-  let ys = slice(xs, -2, 8) in
-  for(ys, function (y, _) {
-    printf("{}\n", [show-int(y)])
-  });
   let k: int = 2 in
   let val = power-int(k, 5) in
   printf("{}\n", [show-int(val)]);

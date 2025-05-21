@@ -8,8 +8,9 @@ import {
   this.c-size {C-Size, from-c-size},
   this.foreign {THREAD_COND_SIZE, THREAD_MUTEX_SIZE},
   this.int {sum-int},
+  this.pair {Pair, pair},
   this.pointer {shift},
-  this.unit {unit},
+  this.unit {Unit, unit},
 }
 
 inline _get-clone(a: type, x: &a): a {
@@ -66,35 +67,25 @@ inline _new-cell<a>(initial-value: a): cell(a) {
   _new(a, initial-value)
 }
 
-inline mutate<a>(ch: &cell(a), f: (a) -> a): unit {
+inline modify<a, b>(ch: &cell(a), f: (a) -> pair(a, b)): b {
   let ch = Magic.cast(&cell(a), pointer, ch) in
   let u = Word.size in
   let mutex-ptr = shift(ch, u) in
   Ext.thread-mutex-lock(mutex-ptr);
   let val-base: int = Mem.load-int(ch) in
-  let val: a = Magic.cast(int, a, val-base) in
-  let new-val = f(val) in
-  Mem.store-int(Magic.cast(a, int, new-val), ch);
-  let mutex-size = from-c-size(THREAD_MUTEX_SIZE) in
-  Ext.thread-cond-signal(shift(ch, add-int(u, mutex-size)));
-  Ext.thread-mutex-unlock(mutex-ptr)
-}
-
-inline clone-mutate<a>(ch: &cell(a), f: (a) -> a): a {
-  let ch = Magic.cast(&cell(a), pointer, ch) in
-  let u = Word.size in
-  let mutex-ptr = shift(ch, u) in
-  Ext.thread-mutex-lock(mutex-ptr);
-  let val-base: int = Mem.load-int(ch) in
-  let val: &a = Magic.cast(int, &a, val-base) in
-  let val-clone = *val in
-  let orig-val = Magic.cast(&a, a, val) in
-  let new-val = f(orig-val) in
+  let orig-val = Magic.cast(int, a, val-base) in
+  let Pair(new-val, result) = f(orig-val) in
   Mem.store-int(Magic.cast(a, int, new-val), ch);
   let mutex-size = from-c-size(THREAD_MUTEX_SIZE) in
   Ext.thread-cond-signal(shift(ch, add-int(u, mutex-size)));
   Ext.thread-mutex-unlock(mutex-ptr);
-  val-clone
+  result
+}
+
+inline mutate<a>(ch: &cell(a), f: (a) -> a): unit {
+  modify(ch, function (x) {
+    Pair(f(x), Unit)
+  })
 }
 
 inline borrow<a, b>(ch: &cell(a), f: (&a) -> meta b): b {

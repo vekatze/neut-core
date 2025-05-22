@@ -119,66 +119,6 @@ inline _set-to<a>(xs: &vector(a), to: int): unit {
   Mem.store-int(to, shift(vector-ptr, mul-int(Word.size, 2)))
 }
 
-define _extend-right<a>(xs: vector(a), new-capacity: int): vector(a) {
-  print("extend-right\n");
-  let buffer-ptr on xs = _get-buffer-ptr(xs) in
-  let new-buffer-ptr = Ext.realloc(buffer-ptr, C-Size(mul-int(Word.size, new-capacity))) in
-  let _ on xs =
-    _set-buffer-ptr(xs, new-buffer-ptr);
-    _set-capacity(xs, new-capacity)
-  in
-  xs
-}
-
-define snoc<a>(xs: vector(a), x: a): vector(a) {
-  let capacity on xs = get-capacity(xs) in
-  let len on xs = length(xs) in
-  let to on xs = _get-to(xs) in
-  if lt-int(to, capacity) {
-    let next-element-ptr on xs = _get-element-pointer(xs, len) in
-    store-int(Magic.cast(a, int, x), next-element-ptr);
-    let _ on xs = _shift-to(xs, 1) in
-    xs
-  } else {
-    let xs' = _extend-right(xs, mul-int(capacity, 2)) in
-    snoc(xs', x)
-  }
-}
-
-foreign {
-  llvm.memmove.p0.p0.i64(pointer, pointer, int64, int1): void,
-  llvm.memcpy.p0.p0.i64(pointer, pointer, int64, int1): void,
-}
-
-define _extend-left<a>(xs: vector(a)): vector(a) {
-  let base-capacity on xs = get-capacity(xs) in
-  let new-capacity = mul-int(base-capacity, 2) in
-  let buffer-ptr on xs = _get-buffer-ptr(xs) in
-  let new-buffer-ptr = Ext.realloc(buffer-ptr, C-Size(mul-int(Word.size, new-capacity))) in
-  let new-head-ptr = shift(new-buffer-ptr, mul-int(Word.size, base-capacity)) in
-  let _ = magic external llvm.memcpy.p0.p0.i64(new-head-ptr, new-buffer-ptr, mul-int(Word.size, base-capacity), 0) in
-  let _ on xs =
-    _shift-from(xs, base-capacity);
-    _shift-to(xs, base-capacity);
-    _set-buffer-ptr(xs, new-buffer-ptr);
-    _set-capacity(xs, new-capacity)
-  in
-  xs
-}
-
-define cons<a>(xs: vector(a), x: a): vector(a) {
-  let from on xs = _get-from(xs) in
-  if gt-int(from, 0) {
-    let next-element-ptr on xs = _get-element-pointer(xs, -1) in
-    store-int(Magic.cast(a, int, x), next-element-ptr);
-    let _ on xs = _shift-from(xs, -1) in
-    xs
-  } else {
-    let xs = _extend-left(xs) in
-    cons(xs, x)
-  }
-}
-
 define make<a>(capacity: int): vector(a) {
   let capacity = max-int(capacity, 1) in
   let word-size = Word.size in
@@ -245,6 +185,65 @@ resource _vector-internal {
     _copy-vector-content(xs, ys, elem-type, 0, len);
     ys
   },
+}
+
+foreign {
+  llvm.memmove.p0.p0.i64(pointer, pointer, int64, int1): void,
+  llvm.memcpy.p0.p0.i64(pointer, pointer, int64, int1): void,
+}
+
+define _extend-left<a>(xs: vector(a)): vector(a) {
+  let base-capacity on xs = get-capacity(xs) in
+  let new-capacity = mul-int(base-capacity, 2) in
+  let buffer-ptr on xs = _get-buffer-ptr(xs) in
+  let new-buffer-ptr = Ext.realloc(buffer-ptr, C-Size(mul-int(Word.size, new-capacity))) in
+  let new-head-ptr = shift(new-buffer-ptr, mul-int(Word.size, base-capacity)) in
+  let _ = magic external llvm.memcpy.p0.p0.i64(new-head-ptr, new-buffer-ptr, mul-int(Word.size, base-capacity), 0) in
+  let _ on xs =
+    _shift-from(xs, base-capacity);
+    _shift-to(xs, base-capacity);
+    _set-buffer-ptr(xs, new-buffer-ptr);
+    _set-capacity(xs, new-capacity)
+  in
+  xs
+}
+
+define cons<a>(xs: vector(a), x: a): vector(a) {
+  let from on xs = _get-from(xs) in
+  if gt-int(from, 0) {
+    let next-element-ptr on xs = _get-element-pointer(xs, -1) in
+    store-int(Magic.cast(a, int, x), next-element-ptr);
+    let _ on xs = _shift-from(xs, -1) in
+    xs
+  } else {
+    let xs = _extend-left(xs) in
+    cons(xs, x)
+  }
+}
+
+define _extend-right<a>(xs: vector(a), new-capacity: int): vector(a) {
+  let buffer-ptr on xs = _get-buffer-ptr(xs) in
+  let new-buffer-ptr = Ext.realloc(buffer-ptr, C-Size(mul-int(Word.size, new-capacity))) in
+  let _ on xs =
+    _set-buffer-ptr(xs, new-buffer-ptr);
+    _set-capacity(xs, new-capacity)
+  in
+  xs
+}
+
+define snoc<a>(xs: vector(a), x: a): vector(a) {
+  let capacity on xs = get-capacity(xs) in
+  let len on xs = length(xs) in
+  let to on xs = _get-to(xs) in
+  if lt-int(to, capacity) {
+    let next-element-ptr on xs = _get-element-pointer(xs, len) in
+    store-int(Magic.cast(a, int, x), next-element-ptr);
+    let _ on xs = _shift-to(xs, 1) in
+    xs
+  } else {
+    let xs' = _extend-right(xs, mul-int(capacity, 2)) in
+    snoc(xs', x)
+  }
 }
 
 inline _access<a>(xs: &vector(a), i: int): &a {

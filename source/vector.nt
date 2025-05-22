@@ -3,14 +3,14 @@ import {
   Magic,
   Mem,
   Word,
-  this.bool {and, bool, not},
+  this.bool {False, True, and, bool, not},
   this.box,
   this.c-size {C-Size},
   this.control {grow, loop},
   this.either {Left, Right, either, from-right, none},
   this.external {free, malloc},
   this.function {compose},
-  this.int {max-int, min-int},
+  this.int {abs-int, max-int, min-int},
   this.int.ord {as-ord-N},
   this.int.show {show-int},
   this.list {Cons, Nil, list, minimum},
@@ -120,16 +120,15 @@ inline _set-to<a>(xs: &vector(a), to: int): unit {
   Mem.store-int(to, shift(vector-ptr, mul-int(Word.size, 2)))
 }
 
-define make<a>(capacity: int): vector(a) {
-  let capacity = max-int(capacity, 1) in
+define make<a>(initial-capacity: int): vector(a) {
+  let abs-capacity = abs-int(initial-capacity) in
   let word-size = Word.size in
   let vector-ptr = malloc(C-Size(mul-int(word-size, 5))) in
-  let buffer-ptr = malloc(C-Size(mul-int(word-size, capacity))) in
-  let from = 0 in
-  let to = 0 in
-  Mem.store-int(capacity, vector-ptr);
-  Mem.store-int(from, shift(vector-ptr, mul-int(word-size, 1)));
-  Mem.store-int(to, shift(vector-ptr, mul-int(word-size, 2)));
+  let buffer-ptr = malloc(C-Size(mul-int(word-size, abs-capacity))) in
+  let initial-cursor = match gt-int(initial-capacity, 0) {True => 0 | False => abs-capacity} in
+  Mem.store-int(abs-capacity, vector-ptr);
+  Mem.store-int(initial-cursor, shift(vector-ptr, mul-int(word-size, 1)));
+  Mem.store-int(initial-cursor, shift(vector-ptr, mul-int(word-size, 2)));
   Mem.store-int(Magic.cast(type, int, a), shift(vector-ptr, mul-int(word-size, 3)));
   Mem.store-pointer(buffer-ptr, shift(vector-ptr, mul-int(word-size, 4)));
   magic cast(pointer, vector(a), vector-ptr)
@@ -193,61 +192,67 @@ foreign {
   llvm.memcpy.p0.p0.i64(pointer, pointer, int64, int1): void,
 }
 
-define _extend-left<a>(xs: vector(a)): vector(a) {
-  let base-capacity on xs = get-capacity(xs) in
-  let new-capacity = mul-int(base-capacity, 2) in
+inline _extend-factor: int {
+  2
+}
+
+define _extend-front<a>(xs: vector(a)): vector(a) {
+  let current-capacity on xs = max-int(get-capacity(xs), 1) in
+  let new-capacity = mul-int(current-capacity, _extend-factor) in
   let buffer-ptr on xs = _get-buffer-ptr(xs) in
   let new-buffer-ptr = Ext.realloc(buffer-ptr, C-Size(mul-int(Word.size, new-capacity))) in
-  let new-head-ptr = shift(new-buffer-ptr, mul-int(Word.size, base-capacity)) in
-  let _ = magic external llvm.memcpy.p0.p0.i64(new-head-ptr, new-buffer-ptr, mul-int(Word.size, base-capacity), 0) in
+  let new-head-ptr = shift(new-buffer-ptr, mul-int(Word.size, current-capacity)) in
+  let _ = magic external llvm.memcpy.p0.p0.i64(new-head-ptr, new-buffer-ptr, mul-int(Word.size, current-capacity), 0) in
   let _ on xs =
-    _shift-from(xs, base-capacity);
-    _shift-to(xs, base-capacity);
+    _shift-from(xs, current-capacity);
+    _shift-to(xs, current-capacity);
     _set-buffer-ptr(xs, new-buffer-ptr);
     _set-capacity(xs, new-capacity)
   in
   xs
 }
 
-define cons<a>(xs: vector(a), x: a): vector(a) {
+define _extend-back<a>(xs: vector(a)): vector(a) {
+  let current-capacity on xs = max-int(get-capacity(xs), 1) in
+  let new-capacity = mul-int(current-capacity, _extend-factor) in
+  let buffer-ptr on xs = _get-buffer-ptr(xs) in
+  let new-buffer-ptr = Ext.realloc(buffer-ptr, C-Size(mul-int(Word.size, new-capacity))) in
+  let _ on xs =
+    _set-buffer-ptr(xs, new-buffer-ptr);
+    _set-capacity(xs, new-capacity)
+  in
+  xs
+}
+
+define push-front<a>(xs: vector(a), x: a): vector(a) {
   let from on xs = _get-from(xs) in
   if gt-int(from, 0) {
-    let next-element-ptr on xs = _get-element-pointer(xs, -1) in
-    store-int(Magic.cast(a, int, x), next-element-ptr);
+    let new-element-ptr on xs = _get-element-pointer(xs, -1) in
+    store-int(Magic.cast(a, int, x), new-element-ptr);
     let _ on xs = _shift-from(xs, -1) in
     xs
   } else {
-    let xs = _extend-left(xs) in
-    cons(xs, x)
+    let xs = _extend-front(xs) in
+    push-front(xs, x)
   }
 }
 
-define _extend-right<a>(xs: vector(a), new-capacity: int): vector(a) {
-  let buffer-ptr on xs = _get-buffer-ptr(xs) in
-  let new-buffer-ptr = Ext.realloc(buffer-ptr, C-Size(mul-int(Word.size, new-capacity))) in
-  let _ on xs =
-    _set-buffer-ptr(xs, new-buffer-ptr);
-    _set-capacity(xs, new-capacity)
-  in
-  xs
-}
-
-define snoc<a>(xs: vector(a), x: a): vector(a) {
+define push-back<a>(xs: vector(a), x: a): vector(a) {
   let capacity on xs = get-capacity(xs) in
-  let len on xs = length(xs) in
   let to on xs = _get-to(xs) in
   if lt-int(to, capacity) {
-    let next-element-ptr on xs = _get-element-pointer(xs, len) in
-    store-int(Magic.cast(a, int, x), next-element-ptr);
+    let len on xs = length(xs) in
+    let new-element-ptr on xs = _get-element-pointer(xs, len) in
+    store-int(Magic.cast(a, int, x), new-element-ptr);
     let _ on xs = _shift-to(xs, 1) in
     xs
   } else {
-    let xs' = _extend-right(xs, mul-int(capacity, 2)) in
-    snoc(xs', x)
+    let xs' = _extend-back(xs) in
+    push-back(xs', x)
   }
 }
 
-inline uncons<a>(xs: vector(a)): ?pair(a, vector(a)) {
+inline pop-front<a>(xs: vector(a)): ?pair(a, vector(a)) {
   let len on xs = length(xs) in
   if eq-int(len, 0) {
     none
@@ -259,7 +264,7 @@ inline uncons<a>(xs: vector(a)): ?pair(a, vector(a)) {
   }
 }
 
-inline unsnoc<a>(xs: vector(a)): ?pair(vector(a), a) {
+inline pop-back<a>(xs: vector(a)): ?pair(vector(a), a) {
   let len on xs = length(xs) in
   if eq-int(len, 0) {
     none
@@ -364,7 +369,7 @@ inline for-each<a, b>(xs: vector(a), !f: (a, int) -> b): vector(b) {
 inline for-each-N<a, b>(xs: &vector(a), f: (&a, int) -> b): vector(b) {
   let capacity = get-capacity(xs) in
   fold-left-N(make(capacity), xs, function (acc, x, i) {
-    snoc(acc, f(x, i))
+    push-back(acc, f(x, i))
   })
 }
 
@@ -436,14 +441,14 @@ inline zip-with-N<a, b, c>(xs: &vector(a), ys: &vector(b), f: (&a, &b, int) -> c
   grow(result, len, function (acc, i) {
     let val1 = _access(xs, i) in
     let val2 = _access(ys, i) in
-    snoc(acc, f(val1, val2, i))
+    push-back(acc, f(val1, val2, i))
   })
 }
 
 define from-list<a>(base-list: list(a)): vector(a) {
   let len on base-list = this.list.length(base-list) in
   this.list.fold-left(make(len), base-list, function (acc, x) {
-    snoc(acc, x)
+    push-back(acc, x)
   })
 }
 
@@ -665,33 +670,33 @@ define drop-while-end<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
 }
 
 define zen(): unit {
-  let xs: vector(text) = make(2) in
-  let xs = cons(xs, *"a") in
-  let xs = snoc(xs, *"b") in
-  let xs = cons(xs, *"c") in
+  let xs: vector(text) = make(0) in
+  let xs = push-back(xs, *"b") in
+  let xs = push-front(xs, *"a") in
+  let xs = push-front(xs, *"c") in
   let !xs = drop(xs, 2) in
   let _ = !xs in
   let _ = !xs in
   let _ = !xs in
-  let xs = cons(!xs, *"d") in
-  let xs = snoc(xs, *"e") in
-  let xs = cons(xs, *"f") in
-  let xs = snoc(xs, *"g") in
-  let xs = cons(xs, *"h") in
+  let xs = push-front(!xs, *"d") in
+  let xs = push-back(xs, *"e") in
+  let xs = push-front(xs, *"f") in
+  let xs = push-back(xs, *"g") in
+  let xs = push-front(xs, *"h") in
   let !xs = xs in
   // let !xs = drop(xs, 3) in
   let _ = !xs in
   // let !xs = drop(!xs, 3) in
   let _ = !xs in
   let _ = !xs in
-  let _ = cons(!xs, *"foo") in
+  let _ = push-front(!xs, *"foo") in
   let _ = !xs in
   let _ = !xs in
   let _ = !xs in
-  // let xs = snoc(xs, 7) in
-  // let xs = snoc(xs, 8) in
-  // let xs = snoc(xs, 9) in
-  // let xs = snoc(xs, 10) in
+  // let xs = push-back(xs, 7) in
+  // let xs = push-back(xs, 8) in
+  // let xs = push-back(xs, 9) in
+  // let xs = push-back(xs, 10) in
   // let xs = take(xs, 5) in
   // let !xs = delete(xs, 0) in
   // let _ = !xs in
@@ -709,13 +714,14 @@ define zen(): unit {
   let !zs = delete(reverse(zs), 100) in
   let _ = !zs in
   let _ = !zs in
-  match unsnoc(!zs) {
+  match pop-back(!zs) {
   | Left(_) =>
     print("left\n")
   | Right(Pair(!rest, z)) =>
     let _ = !rest in
     let _ = !rest in
     let len on !rest = length(!rest) in
+    let _ = !rest in
     printf("right. last-elem = {}\n", [z]);
     printf("right. len = {}\n", [show-int(len)])
   };

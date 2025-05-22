@@ -119,7 +119,8 @@ inline _set-to<a>(xs: &vector(a), to: int): unit {
   Mem.store-int(to, shift(vector-ptr, mul-int(Word.size, 2)))
 }
 
-define _resize<a>(xs: vector(a), new-capacity: int): vector(a) {
+define _extend-right<a>(xs: vector(a), new-capacity: int): vector(a) {
+  print("extend-right\n");
   let buffer-ptr on xs = _get-buffer-ptr(xs) in
   let new-buffer-ptr = Ext.realloc(buffer-ptr, C-Size(mul-int(Word.size, new-capacity))) in
   let _ on xs =
@@ -139,8 +140,42 @@ define append<a>(xs: vector(a), x: a): vector(a) {
     let _ on xs = _shift-to(xs, 1) in
     xs
   } else {
-    let xs' = _resize(xs, mul-int(capacity, 2)) in
+    let xs' = _extend-right(xs, mul-int(capacity, 2)) in
     append(xs', x)
+  }
+}
+
+foreign {
+  llvm.memmove.p0.p0.i64(pointer, pointer, int64, int1): void,
+  llvm.memcpy.p0.p0.i64(pointer, pointer, int64, int1): void,
+}
+
+define _extend-left<a>(xs: vector(a)): vector(a) {
+  let base-capacity on xs = get-capacity(xs) in
+  let new-capacity = mul-int(base-capacity, 2) in
+  let buffer-ptr on xs = _get-buffer-ptr(xs) in
+  let new-buffer-ptr = Ext.realloc(buffer-ptr, C-Size(mul-int(Word.size, new-capacity))) in
+  let new-head-ptr = shift(new-buffer-ptr, mul-int(Word.size, base-capacity)) in
+  let _ = magic external llvm.memcpy.p0.p0.i64(new-head-ptr, new-buffer-ptr, mul-int(Word.size, base-capacity), 0) in
+  let _ on xs =
+    _shift-from(xs, base-capacity);
+    _shift-to(xs, base-capacity);
+    _set-buffer-ptr(xs, new-buffer-ptr);
+    _set-capacity(xs, new-capacity)
+  in
+  xs
+}
+
+define cons<a>(xs: vector(a), x: a): vector(a) {
+  let from on xs = _get-from(xs) in
+  if gt-int(from, 0) {
+    let next-element-ptr on xs = _get-element-pointer(xs, -1) in
+    store-int(Magic.cast(a, int, x), next-element-ptr);
+    let _ on xs = _shift-from(xs, -1) in
+    xs
+  } else {
+    let xs = _extend-left(xs) in
+    cons(xs, x)
   }
 }
 
@@ -500,10 +535,6 @@ define drop-end<a>(xs: vector(a), n: int): vector(a) {
   take(xs, sub-int(len, n))
 }
 
-foreign {
-  llvm.memmove.p0.p0.i64(pointer, pointer, int64, int1): void,
-}
-
 define delete<a>(xs: vector(a), index: int): vector(a) {
   let len on xs = length(xs) in
   if eq-int(0, index) {
@@ -611,25 +642,25 @@ define drop-while-end<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
 
 define zen(): unit {
   let xs: vector(text) = make(2) in
-  let xs = append(xs, *"a") in
+  let xs = cons(xs, *"a") in
   let xs = append(xs, *"b") in
-  let xs = append(xs, *"c") in
-  let !xs = take(xs, 100) in
+  let xs = cons(xs, *"c") in
+  let !xs = drop(xs, 2) in
   let _ = !xs in
   let _ = !xs in
   let _ = !xs in
-  let xs = append(!xs, *"d") in
+  let xs = cons(!xs, *"d") in
   let xs = append(xs, *"e") in
-  let xs = append(xs, *"f") in
+  let xs = cons(xs, *"f") in
   let xs = append(xs, *"g") in
-  let xs = append(xs, *"h") in
+  let xs = cons(xs, *"h") in
   let !xs = xs in
   // let !xs = drop(xs, 3) in
   let _ = !xs in
   // let !xs = drop(!xs, 3) in
   let _ = !xs in
   let _ = !xs in
-  let _ = append(!xs, *"foo") in
+  let _ = cons(!xs, *"foo") in
   let _ = !xs in
   let _ = !xs in
   let _ = !xs in

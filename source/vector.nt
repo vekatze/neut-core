@@ -12,6 +12,7 @@ import {
   this.function {compose},
   this.int {max-int, min-int},
   this.int.ord {as-ord-N},
+  this.int.show {show-int},
   this.list {Cons, Nil, list, minimum},
   this.magic,
   this.memory {store-int},
@@ -243,6 +244,30 @@ define snoc<a>(xs: vector(a), x: a): vector(a) {
   } else {
     let xs' = _extend-right(xs, mul-int(capacity, 2)) in
     snoc(xs', x)
+  }
+}
+
+inline uncons<a>(xs: vector(a)): ?pair(a, vector(a)) {
+  let len on xs = length(xs) in
+  if eq-int(len, 0) {
+    none
+  } else {
+    let first-value-pointer on xs = _get-element-pointer(xs, 0) in
+    let first-value = Magic.cast(int, a, Mem.load-int(first-value-pointer)) in
+    let _ on xs = _shift-from(xs, 1) in
+    Right(Pair(first-value, xs))
+  }
+}
+
+inline unsnoc<a>(xs: vector(a)): ?pair(vector(a), a) {
+  let len on xs = length(xs) in
+  if eq-int(len, 0) {
+    none
+  } else {
+    let last-value-pointer on xs = _get-element-pointer(xs, sub-int(len, 1)) in
+    let last-value = Magic.cast(int, a, Mem.load-int(last-value-pointer)) in
+    let _ on xs = _shift-to(xs, -1) in
+    Right(Pair(xs, last-value))
   }
 }
 
@@ -684,6 +709,16 @@ define zen(): unit {
   let !zs = delete(reverse(zs), 100) in
   let _ = !zs in
   let _ = !zs in
+  match unsnoc(!zs) {
+  | Left(_) =>
+    print("left\n")
+  | Right(Pair(!rest, z)) =>
+    let _ = !rest in
+    let _ = !rest in
+    let len on !rest = length(!rest) in
+    printf("right. last-elem = {}\n", [z]);
+    printf("right. len = {}\n", [show-int(len)])
+  };
   pin zs = !zs in
   // let mini-zs =
   //   drop-while-end(*zs, function (x) {

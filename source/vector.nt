@@ -130,7 +130,7 @@ define _extend-right<a>(xs: vector(a), new-capacity: int): vector(a) {
   xs
 }
 
-define append<a>(xs: vector(a), x: a): vector(a) {
+define snoc<a>(xs: vector(a), x: a): vector(a) {
   let capacity on xs = get-capacity(xs) in
   let len on xs = length(xs) in
   let to on xs = _get-to(xs) in
@@ -141,7 +141,7 @@ define append<a>(xs: vector(a), x: a): vector(a) {
     xs
   } else {
     let xs' = _extend-right(xs, mul-int(capacity, 2)) in
-    append(xs', x)
+    snoc(xs', x)
   }
 }
 
@@ -340,7 +340,7 @@ inline for-each<a, b>(xs: vector(a), !f: (a, int) -> b): vector(b) {
 inline for-each-N<a, b>(xs: &vector(a), f: (&a, int) -> b): vector(b) {
   let capacity = get-capacity(xs) in
   fold-left-N(make(capacity), xs, function (acc, x, i) {
-    append(acc, f(x, i))
+    snoc(acc, f(x, i))
   })
 }
 
@@ -412,14 +412,14 @@ inline zip-with-N<a, b, c>(xs: &vector(a), ys: &vector(b), f: (&a, &b, int) -> c
   grow(result, len, function (acc, i) {
     let val1 = _access(xs, i) in
     let val2 = _access(ys, i) in
-    append(acc, f(val1, val2, i))
+    snoc(acc, f(val1, val2, i))
   })
 }
 
 define from-list<a>(base-list: list(a)): vector(a) {
   let len on base-list = this.list.length(base-list) in
   this.list.fold-left(make(len), base-list, function (acc, x) {
-    append(acc, x)
+    snoc(acc, x)
   })
 }
 
@@ -643,16 +643,16 @@ define drop-while-end<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
 define zen(): unit {
   let xs: vector(text) = make(2) in
   let xs = cons(xs, *"a") in
-  let xs = append(xs, *"b") in
+  let xs = snoc(xs, *"b") in
   let xs = cons(xs, *"c") in
   let !xs = drop(xs, 2) in
   let _ = !xs in
   let _ = !xs in
   let _ = !xs in
   let xs = cons(!xs, *"d") in
-  let xs = append(xs, *"e") in
+  let xs = snoc(xs, *"e") in
   let xs = cons(xs, *"f") in
-  let xs = append(xs, *"g") in
+  let xs = snoc(xs, *"g") in
   let xs = cons(xs, *"h") in
   let !xs = xs in
   // let !xs = drop(xs, 3) in
@@ -664,10 +664,10 @@ define zen(): unit {
   let _ = !xs in
   let _ = !xs in
   let _ = !xs in
-  // let xs = append(xs, 7) in
-  // let xs = append(xs, 8) in
-  // let xs = append(xs, 9) in
-  // let xs = append(xs, 10) in
+  // let xs = snoc(xs, 7) in
+  // let xs = snoc(xs, 8) in
+  // let xs = snoc(xs, 9) in
+  // let xs = snoc(xs, 10) in
   // let xs = take(xs, 5) in
   // let !xs = delete(xs, 0) in
   // let _ = !xs in

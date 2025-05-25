@@ -29,6 +29,11 @@ define empty(): text {
   create([])
 }
 
+inline to-binary(x: &text): &binary {
+  tie _Text(content) = x in
+  content
+}
+
 inline text-byte-length(t: &text): int {
   let ptr = magic cast(&text, &binary, t) in
   binary-length(ptr)

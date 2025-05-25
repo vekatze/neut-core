@@ -20,7 +20,7 @@ foreign {
   llvm.memcpy.p0.p0.i64(pointer, pointer, int64, int1): void,
 }
 
-define _copy-binary(source-pointer: pointer, target-pointer: pointer, len: int): unit {
+inline _copy-binary(source-pointer: pointer, target-pointer: pointer, len: int): unit {
   let _ = magic external llvm.memcpy.p0.p0.i64(target-pointer, source-pointer, len, 0) in
   Unit
 }

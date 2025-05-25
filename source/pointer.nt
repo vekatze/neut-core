@@ -3,7 +3,7 @@ import {
   this.c-int {c-int},
 }
 
-define shift(p: pointer, offset: int): pointer {
+inline shift(p: pointer, offset: int): pointer {
   let addr = magic cast(pointer, int, p) in
   magic cast(int, pointer, add-int(addr, offset))
 }

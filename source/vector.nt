@@ -25,16 +25,6 @@ import {
   this.word,
 }
 
-data _vector-info {
-| _Vector-Info(
-    capacity: int,
-    from: int,
-    to: int,
-    elem-type: type,
-    content-ptr: pointer,
-  )
-}
-
 nominal {
   _vector-internal: type,
 }

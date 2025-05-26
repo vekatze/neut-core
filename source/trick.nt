@@ -2,13 +2,12 @@ import {
   this.bool {bool},
   this.external {exit},
   this.text {text},
-  this.text.io {fflush-all, print},
+  this.text.io {print},
   this.unit {Unit, unit},
 }
 
 define unsafe-panic<a>(t: &text): a {
   print(t);
-  fflush-all();
   exit(1)
 }
 

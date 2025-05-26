@@ -3,68 +3,35 @@ import {
   Magic,
   this.binary {binary},
   this.binary.io,
-  this.either {Left, Right},
-  this.file.descriptor {stdin, stdout},
+  this.control {loop},
+  this.either {Right},
+  this.file.descriptor {stdout},
+  this.int.show {show-int},
   this.list {for, list},
-  this.pointer {null-pointer},
-  this.system {get-error-message, system},
-  this.text {_format, _get-content-pointer, text, text-byte-length},
+  this.system {system},
+  this.text {_format, text, to-binary},
   this.unit {Unit, unit},
 }
 
-define write(t: &text, f: FD.descriptor): system(unit) {
-  let ptr = Magic.cast(&text, &binary, t) in
-  this.binary.io.write(ptr, f)
-}
-
-foreign {
-  printf(pointer): void,
-  fflush(pointer): void,
+define write(f: FD.descriptor, t: &text): system(unit) {
+  this.binary.io.write(f, to-binary(t))
 }
 
 define print(t: &text): unit {
-  let fmt = _get-content-pointer("%.*s\0") in
-  let len = text-byte-length(t) in
-  let val = _get-content-pointer(t) in
-  let _ = magic external printf(fmt)(len: int, val: pointer) in
+  let _ = write(stdout, t) in
   Unit
 }
 
 define printf(fmt: &text, args: list(text)): unit {
   for(_format(fmt, args), function (p) {
-    let _ on p = print(p) in
-    let _ = p in
-    Unit
+    pin p = p in
+    print(p)
   })
 }
 
 define print-int(x: int): unit {
-  let fmt = _get-content-pointer("%ld\0") in
-  let _ = magic external printf(fmt)(x: int) in
-  Unit
-}
-
-define print-line(t: &text): unit {
-  let fmt = _get-content-pointer("%.*s\n\0") in
-  let len = text-byte-length(t) in
-  let val = _get-content-pointer(t) in
-  let _ = magic external printf(fmt)(len: int, val: pointer) in
-  Unit
-}
-
-define print-float(x: float): unit {
-  let fmt = _get-content-pointer("%lf\0") in
-  let _ = magic external printf(fmt)(x: float) in
-  Unit
-}
-
-define fflush(ptr: pointer): unit {
-  let _ = magic external fflush(ptr) in
-  Unit
-}
-
-define fflush-all(): unit {
-  fflush(null-pointer)
+  pin int-text = show-int(x) in
+  print(int-text)
 }
 
 define read(from: FD.descriptor, initial-buffer-size: int): system(text) {
@@ -78,13 +45,17 @@ define get-line(initial-buffer-size: int): system(text) {
 
 define zen(): unit {
   print("hey\n");
-  let _ = write("hello.\n", stdout) in
-  fflush-all();
-  let value = read(stdin, 0) in
-  match value {
-  | Right(_) =>
-    print("success\n")
-  | Left(e) =>
-    printf("{}\n", [get-error-message(e)])
-  }
+  loop(10000, function (_) {
+    let _ = write(stdout, "hello.\n") in
+    Unit
+  });
+  Unit
+  // let _ = write(stdout, "hello.\n") in
+  // let value = read(stdin, 10) in
+  // match value {
+  // | Right(_) =>
+  //   print("success\n")
+  // | Left(e) =>
+  //   printf("{}\n", [get-error-message(e)])
+  // }
 }

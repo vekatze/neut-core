@@ -154,7 +154,7 @@ define spawn(
     try _ = close(out-writer) in
     try _ = close(error-writer) in
     let Process-Spec of {input} = ps in
-    try _ = write(input, in-writer) in
+    try _ = write(in-writer, input) in
     try _ = close(in-writer) in
     try stdout-text = read(out-reader, stdout-initial-buffer-size) in
     try stderr-text = read(error-reader, stderr-initial-buffer-size) in

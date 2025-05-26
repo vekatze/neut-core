@@ -1,0 +1,77 @@
+import {
+  this.binary.buffer,
+  this.bool,
+  this.control {loop},
+  this.file.descriptor {descriptor, stdout},
+  this.int.show {show-int},
+  this.list {Cons, Nil, list},
+  this.pointer {shift},
+  this.text {_get-content-pointer, _match-text-content, text, text-byte-length, to-binary},
+  this.unit {Unit, unit},
+}
+
+data buffer {
+| _Buffer(this.binary.buffer.buffer)
+}
+
+inline make-buffer(d: descriptor, capacity: int): buffer {
+  _Buffer(this.binary.buffer.make-buffer(d, capacity))
+}
+
+inline flush(b: &buffer): unit {
+  tie _Buffer(b) = b in
+  this.binary.buffer.flush(b)
+}
+
+inline write(b: &buffer, content: &text): unit {
+  tie _Buffer(b) = b in
+  this.binary.buffer.write(b, to-binary(content))
+}
+
+define writef(text-buffer: &buffer, fmt: &text, args: list(text)): unit {
+  tie _Buffer(b) = text-buffer in
+  let haystack-ptr = _get-content-pointer(fmt) in
+  let needle = "{}" in
+  let needle-ptr = _get-content-pointer(needle) in
+  let len = text-byte-length(fmt) in
+  let needle-len = text-byte-length(needle) in
+  let fmt-content-pointer = _get-content-pointer(fmt) in
+  let f =
+    define writef-loop(pivot: int, cursor: int, args: list(text)): unit {
+      let rem-len = sub-int(len, add-int(pivot, cursor)) in
+      if lt-int(rem-len, needle-len) {
+        this.binary.buffer._write(b, shift(fmt-content-pointer, pivot), add-int(cursor, 1))
+      } else {
+        let current-ptr = shift(haystack-ptr, add-int(pivot, cursor)) in
+        if _match-text-content(current-ptr, needle-ptr, needle-len) {
+          this.binary.buffer._write(b, shift(fmt-content-pointer, pivot), cursor);
+          let next-pivot = add-int(pivot, add-int(cursor, needle-len)) in
+          match args {
+          | Nil =>
+            writef-loop(next-pivot, 0, Nil)
+          | Cons(a, rest) =>
+            pin a = a in
+            write(text-buffer, a);
+            writef-loop(next-pivot, 0, rest)
+          }
+        } else {
+          writef-loop(pivot, add-int(cursor, 1), args)
+        }
+      }
+    }
+  in
+  f(0, 0, args)
+}
+
+define zen(): unit {
+  let !k = make-buffer(stdout, 4096) in
+  pin k = !k in
+  loop(10000000, function (_) {
+    write(k, "hello ");
+    pin t = show-int(1234) in
+    write(k, t);
+    write(k, "\n")
+  });
+  flush(k);
+  Unit
+}

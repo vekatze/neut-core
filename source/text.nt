@@ -7,7 +7,7 @@ import {
   this.binary {_copy-binary, binary, binary-access, binary-length, binary-new},
   this.bool {False, True, bool},
   this.box,
-  this.c-size {C-Size},
+  this.c-size {C-Size, c-size},
   this.either {Right, none},
   this.list {Cons, Nil, list, reverse},
   this.memory {load-int8},
@@ -103,23 +103,13 @@ define _slice-N(t: &text, start: int, size: int): text {
   magic cast(binary, text, this.binary.slice-N(t, start, size))
 }
 
+foreign {
+  memcmp(pointer, pointer, c-size): int,
+}
+
 define _match-text-content(ptr1: pointer, ptr2: pointer, len: int): bool {
-  let f =
-    define helper(cursor: int): bool {
-      if eq-int(cursor, len) {
-        True
-      } else {
-        let c1: int8 = Mem.load-int8(shift(ptr1, cursor)) in
-        let c2: int8 = Mem.load-int8(shift(ptr2, cursor)) in
-        if eq-int8(c1, c2) {
-          helper(add-int(cursor, 1))
-        } else {
-          False
-        }
-      }
-    }
-  in
-  f(0)
+  let result = magic external memcmp(ptr1, ptr2, C-Size(len)) in
+  eq-int(result, 0)
 }
 
 define break(haystack: &text, needle: &text): pair(text, text) {

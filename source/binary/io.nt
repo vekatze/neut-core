@@ -19,19 +19,17 @@ import {
   this.word,
 }
 
-define write(b: &binary, f: descriptor): system(unit) {
-  let content-pointer = _get-content-pointer(b) in
-  let len = binary-length(b) in
+define _write-loop(d: descriptor, p: pointer, size: int): system(unit) {
   let loop =
     define write-loop(acc: int): system(unit) {
-      let rest = sub-int(len, acc) in
-      let head-ptr = shift(content-pointer, acc) in
-      let bytes = core.external.write(f, head-ptr, C-Size(rest)) in
+      let rest = sub-int(size, acc) in
+      let head-ptr = shift(p, acc) in
+      let bytes = core.external.write(d, head-ptr, C-Size(rest)) in
       if lt-c-ssize(bytes, 0) {
         report-system-error()
       } else {
         let acc = add-int(acc, from-c-ssize(bytes)) in
-        if eq-int(acc, len) {
+        if eq-int(acc, size) {
           Right(Unit)
         } else {
           write-loop(acc)
@@ -40,6 +38,12 @@ define write(b: &binary, f: descriptor): system(unit) {
     }
   in
   loop(0)
+}
+
+define write(d: descriptor, b: &binary): system(unit) {
+  let content-pointer = _get-content-pointer(b) in
+  let len = binary-length(b) in
+  _write-loop(d, content-pointer, len)
 }
 
 define _read-inner(

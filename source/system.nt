@@ -20,11 +20,11 @@ inline system(a: type): type {
   either(system-error, a)
 }
 
-define get-system-error(): system-error {
+inline get-system-error(): system-error {
   OS-Error(get-errno())
 }
 
-define report-system-error<a>(): system(a) {
+inline report-system-error<a>(): system(a) {
   Left(get-system-error())
 }
 

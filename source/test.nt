@@ -1,4 +1,5 @@
 import {
+  this.binary.buffer,
   this.bool {True, bool},
   this.box {axiom-T},
   this.cell {_new-cell, extract, mutate},
@@ -13,6 +14,7 @@ import {
   this.ref {_make-ref, ref},
   this.rune {to-int},
   this.text {text},
+  this.text.buffer,
   this.text.io {print, printf},
   this.unit {Unit, unit},
   this.vector,
@@ -72,6 +74,8 @@ define use-text(x: &text): text {
 }
 
 define zen(): unit {
+  this.binary.buffer.zen();
+  this.text.buffer.zen();
   this.vector.zen();
   pin r: ref(int) = _make-ref(123) in
   this.ref.mutate(r, function (x) {

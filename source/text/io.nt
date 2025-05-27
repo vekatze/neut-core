@@ -17,6 +17,14 @@ define write(f: FD.descriptor, t: &text): system(unit) {
   this.binary.io.write(f, to-binary(t))
 }
 
+define writef(f: FD.descriptor, fmt: &text, args: list(text)): unit {
+  for(_format(fmt, args), function (p) {
+    pin p = p in
+    let _ = write(f, p) in
+    Unit
+  })
+}
+
 define print(t: &text): unit {
   let _ = write(stdout, t) in
   Unit
@@ -45,6 +53,7 @@ define get-line(initial-buffer-size: int): system(text) {
 
 define zen(): unit {
   print("hey\n");
+  writef(stdout, "hello, {}!\n", [show-int(1234)]);
   loop(10000, function (_) {
     let _ = write(stdout, "hello.\n") in
     Unit

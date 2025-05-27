@@ -5,31 +5,32 @@ import {
 }
 
 foreign {
-  neut_core_v0_50_errno(): c-int,
-  neut_core_v0_50_wifexited(c-int): c-int,
-  neut_core_v0_50_wifsignaled(c-int): c-int,
-  neut_core_v0_50_wifstopped(c-int): c-int,
-  neut_core_v0_50_wexitstatus(c-int): c-int,
-  neut_core_v0_50_wtermsig(c-int): c-int,
-  neut_core_v0_50_wcoredump(c-int): c-int,
-  neut_core_v0_50_wstopsig(c-int): c-int,
-  neut_core_v0_50_word_size(): c-size,
-  neut_core_v0_50_O_RDONLY(): c-int,
-  neut_core_v0_50_O_WRONLY(): c-int,
-  neut_core_v0_50_O_RDWR(): c-int,
-  neut_core_v0_50_O_CREAT(): c-int,
-  neut_core_v0_50_O_APPEND(): c-int,
-  neut_core_v0_50_SEEK_SET(): c-int,
-  neut_core_v0_50_SEEK_CUR(): c-int,
-  neut_core_v0_50_SEEK_END(): c-int,
-  neut_core_v0_50_thread_size(): c-size,
-  neut_core_v0_50_thread_mutex_size(): c-size,
-  neut_core_v0_50_thread_cond_size(): c-size,
-  neut_core_v0_50_UINT32_MAX(): int32,
-  neut_core_v0_50_parse_binary(pointer, int, pointer): int,
-  neut_core_v0_50_parse_decimal(pointer, int, pointer): int,
-  neut_core_v0_50_parse_hex(pointer, int, pointer): int,
-  neut_core_v0_50_parse_double(pointer, int, pointer): int,
+  neut_core_v0_51_errno(): c-int,
+  neut_core_v0_51_wifexited(c-int): c-int,
+  neut_core_v0_51_wifsignaled(c-int): c-int,
+  neut_core_v0_51_wifstopped(c-int): c-int,
+  neut_core_v0_51_wexitstatus(c-int): c-int,
+  neut_core_v0_51_wtermsig(c-int): c-int,
+  neut_core_v0_51_wcoredump(c-int): c-int,
+  neut_core_v0_51_wstopsig(c-int): c-int,
+  neut_core_v0_51_word_size(): c-size,
+  neut_core_v0_51_O_RDONLY(): c-int,
+  neut_core_v0_51_O_WRONLY(): c-int,
+  neut_core_v0_51_O_RDWR(): c-int,
+  neut_core_v0_51_O_CREAT(): c-int,
+  neut_core_v0_51_O_APPEND(): c-int,
+  neut_core_v0_51_SEEK_SET(): c-int,
+  neut_core_v0_51_SEEK_CUR(): c-int,
+  neut_core_v0_51_SEEK_END(): c-int,
+  neut_core_v0_51_thread_size(): c-size,
+  neut_core_v0_51_thread_mutex_size(): c-size,
+  neut_core_v0_51_thread_cond_size(): c-size,
+  neut_core_v0_51_UINT32_MAX(): int32,
+  neut_core_v0_51_sleep(float64): int,
+  neut_core_v0_51_parse_binary(pointer, int, pointer): int,
+  neut_core_v0_51_parse_decimal(pointer, int, pointer): int,
+  neut_core_v0_51_parse_hex(pointer, int, pointer): int,
+  neut_core_v0_51_parse_double(pointer, int, pointer): int,
 }
 
 inline _is-not-zero(x: c-int): bool {
@@ -37,135 +38,139 @@ inline _is-not-zero(x: c-int): bool {
 }
 
 define get-errno(): c-int {
-  magic external neut_core_v0_50_errno()
+  magic external neut_core_v0_51_errno()
 }
 
 define _wifexited(ptr: c-int): bool {
-  _is-not-zero(magic external neut_core_v0_50_wifexited(ptr))
+  _is-not-zero(magic external neut_core_v0_51_wifexited(ptr))
 }
 
 define _wifsignaled(ptr: c-int): bool {
-  _is-not-zero(magic external neut_core_v0_50_wifsignaled(ptr))
+  _is-not-zero(magic external neut_core_v0_51_wifsignaled(ptr))
 }
 
 define _wifstopped(ptr: c-int): bool {
-  _is-not-zero(magic external neut_core_v0_50_wifstopped(ptr))
+  _is-not-zero(magic external neut_core_v0_51_wifstopped(ptr))
 }
 
 define _wexitstatus(ptr: c-int): c-int {
-  magic external neut_core_v0_50_wexitstatus(ptr)
+  magic external neut_core_v0_51_wexitstatus(ptr)
 }
 
 define _wtermsig(ptr: c-int): c-int {
-  magic external neut_core_v0_50_wtermsig(ptr)
+  magic external neut_core_v0_51_wtermsig(ptr)
 }
 
 define _wcoredump(ptr: c-int): bool {
-  _is-not-zero(magic external neut_core_v0_50_wcoredump(ptr))
+  _is-not-zero(magic external neut_core_v0_51_wcoredump(ptr))
 }
 
 define _wstopsig(ptr: c-int): c-int {
-  magic external neut_core_v0_50_wstopsig(ptr)
+  magic external neut_core_v0_51_wstopsig(ptr)
 }
 
 inline _size: c-size {
   magic opaque-value {
-    magic external neut_core_v0_50_word_size()
+    magic external neut_core_v0_51_word_size()
   }
 }
 
 inline O_RDONLY: c-int {
   magic opaque-value {
-    magic external neut_core_v0_50_O_RDONLY()
+    magic external neut_core_v0_51_O_RDONLY()
   }
 }
 
 inline O_WRONLY: c-int {
   magic opaque-value {
-    magic external neut_core_v0_50_O_WRONLY()
+    magic external neut_core_v0_51_O_WRONLY()
   }
 }
 
 inline O_RDWR: c-int {
   magic opaque-value {
-    magic external neut_core_v0_50_O_RDWR()
+    magic external neut_core_v0_51_O_RDWR()
   }
 }
 
 inline O_CREAT: c-int {
   magic opaque-value {
-    magic external neut_core_v0_50_O_CREAT()
+    magic external neut_core_v0_51_O_CREAT()
   }
 }
 
 inline O_APPEND: c-int {
   magic opaque-value {
-    magic external neut_core_v0_50_O_APPEND()
+    magic external neut_core_v0_51_O_APPEND()
   }
 }
 
 inline SEEK_SET: c-int {
   magic opaque-value {
-    magic external neut_core_v0_50_SEEK_SET()
+    magic external neut_core_v0_51_SEEK_SET()
   }
 }
 
 inline SEEK_CUR: c-int {
   magic opaque-value {
-    magic external neut_core_v0_50_SEEK_CUR()
+    magic external neut_core_v0_51_SEEK_CUR()
   }
 }
 
 inline SEEK_END: c-int {
   magic opaque-value {
-    magic external neut_core_v0_50_SEEK_END()
+    magic external neut_core_v0_51_SEEK_END()
   }
 }
 
 inline THREAD_SIZE: c-size {
   magic opaque-value {
-    magic external neut_core_v0_50_thread_size()
+    magic external neut_core_v0_51_thread_size()
   }
 }
 
 inline THREAD_MUTEX_SIZE: c-size {
   magic opaque-value {
-    magic external neut_core_v0_50_thread_mutex_size()
+    magic external neut_core_v0_51_thread_mutex_size()
   }
 }
 
 inline THREAD_COND_SIZE: c-size {
   magic opaque-value {
-    magic external neut_core_v0_50_thread_cond_size()
+    magic external neut_core_v0_51_thread_cond_size()
   }
 }
 
 inline UINT32_MAX: int32 {
   magic opaque-value {
-    magic external neut_core_v0_50_UINT32_MAX()
+    magic external neut_core_v0_51_UINT32_MAX()
   }
+}
+
+inline sleep(duration: float64): int {
+  magic external neut_core_v0_51_sleep(duration)
 }
 
 inline _parse_binary(num-text-ptr: pointer, len: int, result-ptr: pointer): int {
   magic opaque-value {
-    magic external neut_core_v0_50_parse_binary(num-text-ptr, len, result-ptr)
+    magic external neut_core_v0_51_parse_binary(num-text-ptr, len, result-ptr)
   }
 }
 
 inline _parse_decimal(num-text-ptr: pointer, len: int, result-ptr: pointer): int {
   magic opaque-value {
-    magic external neut_core_v0_50_parse_decimal(num-text-ptr, len, result-ptr)
+    magic external neut_core_v0_51_parse_decimal(num-text-ptr, len, result-ptr)
   }
 }
 
 inline _parse_hex(num-text-ptr: pointer, len: int, result-ptr: pointer): int {
   magic opaque-value {
-    magic external neut_core_v0_50_parse_hex(num-text-ptr, len, result-ptr)
+    magic external neut_core_v0_51_parse_hex(num-text-ptr, len, result-ptr)
   }
 }
 
 inline _parse_double(num-text-ptr: pointer, len: int, result-ptr: pointer): int {
   magic opaque-value {
-    magic external neut_core_v0_50_parse_double(num-text-ptr, len, result-ptr)
+    magic external neut_core_v0_51_parse_double(num-text-ptr, len, result-ptr)
   }
 }

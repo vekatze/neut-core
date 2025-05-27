@@ -8,114 +8,122 @@
 #include <sys/fcntl.h>
 #include <sys/wait.h>
 #include <stdint.h>
+#include <float.h>
 
 
 __attribute__((always_inline))
-int neut_core_v0_50_wifexited(int stat) {
+int neut_core_v0_51_wifexited(int stat) {
   return WIFEXITED(stat);
 }
 
 __attribute__((always_inline))
-int neut_core_v0_50_wifsignaled(int stat) {
+int neut_core_v0_51_wifsignaled(int stat) {
   return WIFSIGNALED(stat);
 }
 
 __attribute__((always_inline))
-int neut_core_v0_50_wifstopped(int stat) {
+int neut_core_v0_51_wifstopped(int stat) {
   return WIFSTOPPED(stat);
 }
 
 __attribute__((always_inline))
-int neut_core_v0_50_wexitstatus(int stat) {
+int neut_core_v0_51_wexitstatus(int stat) {
   return WEXITSTATUS(stat);
 }
 
 __attribute__((always_inline))
-int neut_core_v0_50_wtermsig(int stat) {
+int neut_core_v0_51_wtermsig(int stat) {
   return WTERMSIG(stat);
 }
 
 __attribute__((always_inline))
-int neut_core_v0_50_wcoredump(int stat) {
+int neut_core_v0_51_wcoredump(int stat) {
   return WCOREDUMP(stat);
 }
 
 __attribute__((always_inline))
-int neut_core_v0_50_wstopsig(int stat) {
+int neut_core_v0_51_wstopsig(int stat) {
   return WSTOPSIG(stat);
 }
 
 __attribute__((always_inline))
-size_t neut_core_v0_50_word_size() {
+size_t neut_core_v0_51_word_size() {
   return sizeof(void*);
 }
 
 __attribute__((always_inline))
-int neut_core_v0_50_O_RDONLY() {
+int neut_core_v0_51_O_RDONLY() {
   return O_RDONLY;
 }
 
 __attribute__((always_inline))
-int neut_core_v0_50_O_WRONLY() {
+int neut_core_v0_51_O_WRONLY() {
   return O_WRONLY;
 }
 
 __attribute__((always_inline))
-int neut_core_v0_50_O_RDWR() {
+int neut_core_v0_51_O_RDWR() {
   return O_RDWR;
 }
 
 __attribute__((always_inline))
-int neut_core_v0_50_O_CREAT() {
+int neut_core_v0_51_O_CREAT() {
   return O_CREAT;
 }
 
 __attribute__((always_inline))
-int neut_core_v0_50_O_APPEND() {
+int neut_core_v0_51_O_APPEND() {
   return O_APPEND;
 }
 
 __attribute__((always_inline))
-int neut_core_v0_50_SEEK_SET() {
+int neut_core_v0_51_SEEK_SET() {
   return SEEK_SET;
 }
 
 __attribute__((always_inline))
-int neut_core_v0_50_SEEK_CUR() {
+int neut_core_v0_51_SEEK_CUR() {
   return SEEK_CUR;
 }
 
 __attribute__((always_inline))
-int neut_core_v0_50_SEEK_END() {
+int neut_core_v0_51_SEEK_END() {
   return SEEK_END;
 }
 
 __attribute__((always_inline))
-size_t neut_core_v0_50_thread_size() {
+size_t neut_core_v0_51_thread_size() {
   return sizeof(pthread_t);
 }
 
 __attribute__((always_inline))
-size_t neut_core_v0_50_thread_mutex_size() {
+size_t neut_core_v0_51_thread_mutex_size() {
   return sizeof(pthread_mutex_t);
 }
 
 __attribute__((always_inline))
-size_t neut_core_v0_50_thread_cond_size() {
+size_t neut_core_v0_51_thread_cond_size() {
   return sizeof(pthread_cond_t);
 }
 
 __attribute__((always_inline))
-int neut_core_v0_50_errno() {
+int neut_core_v0_51_errno() {
   return errno;
 }
 
 __attribute__((always_inline))
-uint32_t neut_core_v0_50_UINT32_MAX() {
+uint32_t neut_core_v0_51_UINT32_MAX() {
   return UINT32_MAX;
 }
 
-int64_t neut_core_v0_50_parse_binary(const char *str, int64_t length, int64_t *out_value) {
+int neut_core_v0_51_sleep(double duration) {
+  struct timespec ts;
+  ts.tv_sec = (time_t)duration;
+  ts.tv_nsec = (long)((duration - ts.tv_sec) * 1e9);
+  return nanosleep(&ts, NULL);
+}
+
+int64_t neut_core_v0_51_parse_binary(const char *str, int64_t length, int64_t *out_value) {
   int64_t result = 0;
   int64_t i = 0;
   int64_t sign = 1;
@@ -155,7 +163,7 @@ int64_t neut_core_v0_50_parse_binary(const char *str, int64_t length, int64_t *o
   }
 }
 
-int64_t neut_core_v0_50_parse_decimal(const char *str, int64_t length, int64_t *out_value) {
+int64_t neut_core_v0_51_parse_decimal(const char *str, int64_t length, int64_t *out_value) {
   int64_t result = 0;
   int64_t i = 0;
   int64_t sign = 1;
@@ -192,7 +200,7 @@ int64_t neut_core_v0_50_parse_decimal(const char *str, int64_t length, int64_t *
   }
 }
 
-int64_t neut_core_v0_50_parse_hex(const char *str, int64_t length, int64_t *out_value) {
+int64_t neut_core_v0_51_parse_hex(const char *str, int64_t length, int64_t *out_value) {
   int64_t result = 0;
   int64_t i = 0;
   int64_t sign = 1;
@@ -240,7 +248,7 @@ int64_t neut_core_v0_50_parse_hex(const char *str, int64_t length, int64_t *out_
   }
 }
 
-int64_t neut_core_v0_50_parse_double(const char *str, int64_t length, double *out_value) {
+int64_t neut_core_v0_51_parse_double(const char *str, int64_t length, double *out_value) {
   double result = 0.0;
   int64_t i = 0;
   double sign = 1.0;

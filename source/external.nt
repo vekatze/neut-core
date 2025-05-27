@@ -18,7 +18,6 @@ foreign {
   write(c-int, pointer, c-size): c-ssize,
   read(c-int, pointer, c-size): c-ssize,
   lseek(c-int, c-offset, c-int): c-offset,
-  sleep(c-int): c-int,
   pthread_create(pointer, pointer, pointer, pointer): c-int,
   pthread_exit(pointer): void,
   pthread_join(pointer, pointer): c-int,
@@ -121,17 +120,6 @@ define lseek(f: FD.descriptor, offset: c-offset, seek-mode: c-int): c-offset {
     magic external lseek(f, offset, seek-mode)
   | linux =>
     magic external lseek(f, offset, seek-mode)
-  }
-}
-
-define sleep(seconds: c-int): unit {
-  introspect operating-system {
-  | darwin =>
-    let _ = magic external sleep(seconds) in
-    Unit
-  | linux =>
-    let _ = magic external sleep(seconds) in
-    Unit
   }
 }
 

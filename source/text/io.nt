@@ -37,11 +37,6 @@ define printf(fmt: &text, args: list(text)): unit {
   })
 }
 
-define print-int(x: int): unit {
-  pin int-text = show-int(x) in
-  print(int-text)
-}
-
 define read(from: FD.descriptor, initial-buffer-size: int): system(text) {
   try bin = this.binary.io.read(from, initial-buffer-size) in
   Right(Magic.cast(binary, text, bin))

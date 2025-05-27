@@ -12,13 +12,14 @@ import {
   this.file {close},
   this.file.descriptor {stderr, stdin, stdout},
   this.foreign {_wcoredump, _wexitstatus, _wifexited, _wifsignaled, _wifstopped, _wstopsig, _wtermsig},
+  this.int.show {show-int},
   this.list {Cons, fold-left-with-index, length, list},
   this.memory {load-c-int, store-int},
   this.pair {Pair, pair},
   this.pointer {extract, null-pointer, shift},
   this.system {report-system-error, system},
   this.text {_get-content-pointer, text},
-  this.text.io {print, print-int, read, write},
+  this.text.io {print, printf, read, write},
   this.unit {Unit, unit},
 }
 
@@ -170,7 +171,7 @@ define spawn(
 define _print-process-result-status(st: process-result-status): unit {
   match st {
   | Exited(status) =>
-    print-int(from-c-int(status))
+    printf("{}\n", [show-int(from-c-int(status))])
   | Signaled(_, _) =>
     Unit
   | Stopped(_) =>

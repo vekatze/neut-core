@@ -6,7 +6,11 @@ import {
   this.dictionary {Trope},
   this.either {Left, Right},
   this.int.ord {as-ord-N},
+  this.int.show {show-int},
+  this.list,
   this.random {random-int},
+  this.text,
+  this.text.io {printf},
   this.unit {Unit, unit},
 }
 
@@ -40,7 +44,7 @@ define random-lookup-sum(d: &dictionary(int, int)): unit {
       add-int(acc, val)
     })
   in
-  TIO.print-int(rsum)
+  printf("{}\n", [show-int(rsum)])
 }
 
 define main(): unit {

@@ -479,14 +479,14 @@ inline take-while-N(t: &text, !pred: (rune) -> bool): text {
   let f =
     define self(index: int, acc: list(rune)): list(rune) {
       if ge-int(index, len) {
-        core.list.reverse(acc)
+        this.list.reverse(acc)
       } else {
         let ch = _get-rune(t, index) in
         if !pred(ch) {
           let char-len = this.rune.size(ch) in
           self(add-int(index, char-len), Cons(ch, acc))
         } else {
-          core.list.reverse(acc)
+          this.list.reverse(acc)
         }
       }
     }

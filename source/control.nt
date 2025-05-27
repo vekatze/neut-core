@@ -1,7 +1,7 @@
 import {
-  core.bool {False, True},
-  core.either {Right, either},
-  core.unit {Unit, unit},
+  this.bool {False, True},
+  this.either {Right, either},
+  this.unit {Unit, unit},
 }
 
 inline loop(count: int, !f: (int) -> unit): unit {

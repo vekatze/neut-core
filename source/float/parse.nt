@@ -9,7 +9,7 @@ import {
 
 inline parse-float(t: &text): ?float {
   let c-float-str = _get-content-pointer(t) in
-  let len = core.text.length(t) in
+  let len = this.text.length(t) in
   let result-ptr = magic alloca(float, 1) in
   let result-status = _parse_double(c-float-str, len, result-ptr) in
   if lt-int(result-status, 0) {

@@ -253,13 +253,13 @@ define drop-N(t: &binary, offset: int): binary {
 
 define take-N(t: &binary, offset: int): binary {
   let ptr = cast(&binary, pointer, t) in
-  let to = load-int(shift(ptr, core.word.size)) in
+  let to = load-int(shift(ptr, this.word.size)) in
   let new-size = min-int(to, offset) in
-  let new-ptr = malloc(C-Size(add-int(offset, mul-int(core.word.size, 2)))) in
+  let new-ptr = malloc(C-Size(add-int(offset, mul-int(this.word.size, 2)))) in
   store-int(0, new-ptr);
-  store-int(new-size, shift(new-ptr, core.word.size));
+  store-int(new-size, shift(new-ptr, this.word.size));
   let content-ptr = _get-content-pointer(t) in
-  let new-content-ptr = shift(new-ptr, mul-int(core.word.size, 2)) in
+  let new-content-ptr = shift(new-ptr, mul-int(this.word.size, 2)) in
   _copy-binary(content-ptr, new-content-ptr, new-size);
   cast(pointer, binary, new-ptr)
 }

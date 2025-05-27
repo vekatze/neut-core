@@ -4,7 +4,7 @@ import {
   this.c-size {C-Size, c-size, from-c-size},
   this.c-ssize {eq-c-ssize, from-c-ssize, lt-c-ssize},
   this.either {Left, Right},
-  this.external {free, malloc, read, realloc},
+  this.external {free, malloc, read, realloc, write},
   this.file.descriptor {descriptor},
   this.int.show {show-int},
   this.list,
@@ -22,7 +22,7 @@ define _write-loop(d: descriptor, p: pointer, size: int): system(unit) {
     define write-loop(acc: int): system(unit) {
       let rest = sub-int(size, acc) in
       let head-ptr = shift(p, acc) in
-      let bytes = core.external.write(d, head-ptr, C-Size(rest)) in
+      let bytes = write(d, head-ptr, C-Size(rest)) in
       if lt-c-ssize(bytes, 0) {
         report-system-error()
       } else {

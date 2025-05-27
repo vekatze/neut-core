@@ -2,7 +2,7 @@ import {
   this.bool {bool},
   this.box,
   this.either {Right, none},
-  this.list {Cons, append, list},
+  this.list {append, list},
   this.pair {Pair, pair},
   this.unit,
   this.word,
@@ -166,9 +166,9 @@ inline from-list<v>(kvs: list(pair(int, v))): intmap(v) {
   let f =
     define self(kvs: list(pair(int, v)), acc: intmap(v)): intmap(v) {
       match kvs {
-      | core.list.Nil =>
+      | this.list.Nil =>
         acc
-      | Cons(Pair(k, v), rest) =>
+      | this.list.Cons(Pair(k, v), rest) =>
         self(rest, insert(acc, k, v))
       }
     }

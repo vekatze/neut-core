@@ -299,13 +299,13 @@ inline fold-left-reverse-N<elem-type, result-type>(
   xs: &vector(elem-type),
   !consumer: (result-type, &elem-type, int) -> result-type,
 ): result-type {
-  let sz = core.vector.length(xs) in
+  let sz = length(xs) in
   let helper =
     define loop(cursor: int, acc: result-type, xs: &vector(elem-type)): result-type {
       if lt-int(cursor, 0) {
         acc
       } else {
-        let y = core.vector._access(xs, cursor) in
+        let y = this.vector._access(xs, cursor) in
         loop(sub-int(cursor, 1), !consumer(acc, y, cursor), xs)
       }
     }
@@ -385,7 +385,7 @@ inline for-N<a>(xs: &vector(a), f: (&a, int) -> unit): unit {
 }
 
 define for-each-vertical<a, b>(xs: vector(a), col-size: int, !f: (a, int) -> b): vector(b) {
-  assert "core.vector.for-each-vertical: col-size > 0" {
+  assert "this.vector.for-each-vertical: col-size > 0" {
     gt-int(col-size, 0)
   };
   let _ on xs = _set-elem-type(xs, b) in
@@ -492,7 +492,7 @@ define swap<a>(xs: vector(a), i: int, j: int): vector(a) {
 }
 
 define reverse<a>(xs: vector(a)): vector(a) {
-  let len on xs = core.vector.length(xs) in
+  let len on xs = length(xs) in
   let f =
     define self(xs: vector(a), left: int, right: int): vector(a) {
       if ge-int(left, right) {
@@ -508,10 +508,10 @@ define reverse<a>(xs: vector(a)): vector(a) {
 
 define take<a>(xs: vector(a), n: int): vector(a) {
   let _ on xs =
-    let len = core.vector.length(xs) in
+    let len = length(xs) in
     let n = max-int(0, n) in
     loop(sub-int(len, n), function (i) {
-      let v = core.vector._access(xs, add-int(i, n)) in
+      let v = this.vector._access(xs, add-int(i, n)) in
       let _ = cast(&a, a, v) in
       Unit
     });
@@ -526,7 +526,7 @@ define drop<a>(xs: vector(a), n: int): vector(a) {
   let _ on xs =
     let n = min-int(max-int(0, n), length(xs)) in
     loop(n, function (i) {
-      let v = core.vector._access(xs, i) in
+      let v = this.vector._access(xs, i) in
       let _ = cast(&a, a, v) in
       Unit
     });
@@ -541,12 +541,12 @@ define slice<a>(xs: vector(a), from: int, to: int): vector(a) {
 }
 
 define take-end<a>(xs: vector(a), n: int): vector(a) {
-  let len on xs = core.vector.length(xs) in
+  let len on xs = length(xs) in
   drop(xs, sub-int(len, n))
 }
 
 define drop-end<a>(xs: vector(a), n: int): vector(a) {
-  let len on xs = core.vector.length(xs) in
+  let len on xs = length(xs) in
   take(xs, sub-int(len, n))
 }
 

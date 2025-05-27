@@ -10,7 +10,7 @@ define _find-lower<a>(!o: ord(&a), vs: &vector(a), from: int, to: int, pivot: &a
   if ge-int(from, to) {
     -1
   } else {
-    let v = core.vector._access(vs, from) in
+    let v = this.vector._access(vs, from) in
     let Ord of {compare} = !o in
     match compare(v, pivot) {
     | LT =>
@@ -25,7 +25,7 @@ define _find-higher<a>(!o: ord(&a), vs: &vector(a), boundary: int, to: int, pivo
   if le-int(to, boundary) {
     -1
   } else {
-    let v = core.vector._access(vs, to) in
+    let v = this.vector._access(vs, to) in
     let Ord of {compare} = !o in
     match compare(v, pivot) {
     | LT =>
@@ -44,7 +44,7 @@ inline vector-quicksort<a>(!o: ord(&a)): (!nes: (a) -> meta a, xs: vector(a)) ->
           vs
         } else {
           let pivot-index = div-int(add-int(from, to), 2) in
-          letbox-T pivot on vs = !nes(*core.vector._access(vs, pivot-index)) in
+          letbox-T pivot on vs = !nes(*this.vector._access(vs, pivot-index)) in
           let pivot-swap-loop =
             define inner-loop(
               vs: vector(a),
@@ -78,7 +78,7 @@ inline vector-quicksort<a>(!o: ord(&a)): (!nes: (a) -> meta a, xs: vector(a)) ->
         }
       }
     in
-    let len on xs = core.vector.length(xs) in
+    let len on xs = this.vector.length(xs) in
     f(xs, 0, sub-int(len, 1))
   }
 }

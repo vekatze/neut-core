@@ -1,8 +1,7 @@
 import {
-  Magic,
-  Mem,
   this.c-size {C-Size},
   this.external {free, malloc},
+  this.magic {cast},
   this.memory {store-int8},
   this.pointer {shift},
   this.text {_get-content-pointer, text, text-byte-length},
@@ -29,10 +28,10 @@ resource c-string {
     free(ptr)
   },
   function (ptr: pointer) {
-    let s = Magic.cast(pointer, &c-string, ptr) in
+    let s = cast(pointer, &c-string, ptr) in
     let len = length-c-string(s) in
     let new-ptr = malloc(C-Size(add-int(len, 1))) in
-    let s2 = Magic.cast(&c-string, pointer, s) in
+    let s2 = cast(&c-string, pointer, s) in
     let _ = magic external llvm.memcpy.p0.p0.i64(new-ptr, s2, len, 0) in
     new-ptr
   },
@@ -44,7 +43,7 @@ define to-c-string(t: &text): c-string {
   let src-ptr = _get-content-pointer(t) in
   let _ = magic external llvm.memcpy.p0.p0.i64(new-ptr, src-ptr, len, 0) in
   store-int8(0, shift(new-ptr, len));
-  Magic.cast(pointer, c-string, new-ptr)
+  cast(pointer, c-string, new-ptr)
 }
 
 define from-c-string(s: &c-string): text {
@@ -52,8 +51,8 @@ define from-c-string(s: &c-string): text {
   let u2 = mul-int(u, 2) in
   let len = length-c-string(s) in
   let new-ptr = malloc(C-Size(add-int(len, u2))) in
-  Mem.store-int(0, new-ptr);
-  Mem.store-int(len, shift(new-ptr, u));
+  this.memory.store-int(0, new-ptr);
+  this.memory.store-int(len, shift(new-ptr, u));
   let _ = magic external llvm.memcpy.p0.p0.i64(shift(new-ptr, u2), magic cast(&c-string, pointer, s), len, 0) in
-  Magic.cast(pointer, text, new-ptr)
+  cast(pointer, text, new-ptr)
 }

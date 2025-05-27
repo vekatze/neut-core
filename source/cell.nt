@@ -1,16 +1,26 @@
 import {
-  Ext,
-  List,
-  Magic,
-  Mem,
-  Word,
   this.box,
   this.c-size {C-Size, from-c-size},
+  this.external {
+    free,
+    malloc,
+    thread-cond-destroy,
+    thread-cond-init,
+    thread-cond-signal,
+    thread-mutex-destroy,
+    thread-mutex-init,
+    thread-mutex-lock,
+    thread-mutex-unlock,
+  },
   this.foreign {THREAD_COND_SIZE, THREAD_MUTEX_SIZE},
   this.int {sum-int},
+  this.list,
+  this.magic {cast},
+  this.memory {load-int, store-int},
   this.pair {Pair, pair},
   this.pointer {shift},
   this.unit {Unit, unit},
+  this.word,
 }
 
 inline _get-clone(a: type, x: &a): a {
@@ -28,38 +38,38 @@ data cell(_: type) {
 define _new(a: type, val: a): cell(a) {
   let mutex-size = from-c-size(THREAD_MUTEX_SIZE) in
   let cond-size = from-c-size(THREAD_COND_SIZE) in
-  let u = Word.size in
-  let ptr = Ext.malloc(C-Size(sum-int([u, mutex-size, cond-size, u]))) in
-  Mem.store-int(Magic.cast(a, int, val), ptr);
-  let _ = Ext.thread-mutex-init(shift(ptr, u)) in
-  Ext.thread-cond-init(shift(ptr, add-int(u, mutex-size)));
-  Mem.store-int(Magic.cast(type, int, a), shift(ptr, add-int(u, add-int(mutex-size, cond-size))));
-  Magic.cast(pointer, cell(a), ptr)
+  let u = this.word.size in
+  let ptr = malloc(C-Size(sum-int([u, mutex-size, cond-size, u]))) in
+  store-int(cast(a, int, val), ptr);
+  let _ = thread-mutex-init(shift(ptr, u)) in
+  thread-cond-init(shift(ptr, add-int(u, mutex-size)));
+  store-int(cast(type, int, a), shift(ptr, add-int(u, add-int(mutex-size, cond-size))));
+  cast(pointer, cell(a), ptr)
 }
 
 // (content, thread-mutex, thread-cond, type)
 resource _cell {
   function (ch: pointer) {
-    let u = Word.size in
+    let u = this.word.size in
     let mutex-size = from-c-size(THREAD_MUTEX_SIZE) in
     let cond-size = from-c-size(THREAD_COND_SIZE) in
     let cond-offset = add-int(u, mutex-size) in
     let type-offset = add-int(u, add-int(mutex-size, cond-size)) in
-    let a = Magic.cast(int, type, Mem.load-int(shift(ch, type-offset))) in
-    Ext.thread-cond-destroy(shift(ch, cond-offset));
-    Ext.thread-mutex-destroy(shift(ch, u));
-    let _: a = magic cast(int, a, Mem.load-int(ch)) in
-    Ext.free(ch)
+    let a = cast(int, type, load-int(shift(ch, type-offset))) in
+    thread-cond-destroy(shift(ch, cond-offset));
+    thread-mutex-destroy(shift(ch, u));
+    let _: a = magic cast(int, a, load-int(ch)) in
+    free(ch)
   },
   function (ch: pointer) {
-    let u = Word.size in
+    let u = this.word.size in
     let mutex-size = from-c-size(THREAD_MUTEX_SIZE) in
     let cond-size = from-c-size(THREAD_COND_SIZE) in
     let type-offset = add-int(u, add-int(mutex-size, cond-size)) in
-    let a = Magic.cast(int, type, Mem.load-int(shift(ch, type-offset))) in
-    let val: &a = Magic.cast(int, &a, Mem.load-int(ch)) in
+    let a = cast(int, type, load-int(shift(ch, type-offset))) in
+    let val: &a = cast(int, &a, load-int(ch)) in
     let val-clone: a = _get-clone(a, val) in
-    Magic.cast(cell(a), pointer, _new(a, val-clone))
+    cast(cell(a), pointer, _new(a, val-clone))
   },
 }
 
@@ -68,17 +78,17 @@ inline _new-cell<a>(initial-value: a): cell(a) {
 }
 
 inline modify<a, b>(ch: &cell(a), f: (a) -> pair(a, b)): b {
-  let ch = Magic.cast(&cell(a), pointer, ch) in
-  let u = Word.size in
+  let ch = cast(&cell(a), pointer, ch) in
+  let u = this.word.size in
   let mutex-ptr = shift(ch, u) in
-  Ext.thread-mutex-lock(mutex-ptr);
-  let val-base: int = Mem.load-int(ch) in
-  let orig-val = Magic.cast(int, a, val-base) in
+  thread-mutex-lock(mutex-ptr);
+  let val-base: int = load-int(ch) in
+  let orig-val = cast(int, a, val-base) in
   let Pair(new-val, result) = f(orig-val) in
-  Mem.store-int(Magic.cast(a, int, new-val), ch);
+  store-int(cast(a, int, new-val), ch);
   let mutex-size = from-c-size(THREAD_MUTEX_SIZE) in
-  Ext.thread-cond-signal(shift(ch, add-int(u, mutex-size)));
-  Ext.thread-mutex-unlock(mutex-ptr);
+  thread-cond-signal(shift(ch, add-int(u, mutex-size)));
+  thread-mutex-unlock(mutex-ptr);
   result
 }
 
@@ -89,16 +99,16 @@ inline mutate<a>(ch: &cell(a), f: (a) -> a): unit {
 }
 
 inline borrow<a, b>(ch: &cell(a), f: (&a) -> meta b): b {
-  let ch = Magic.cast(&cell(a), pointer, ch) in
-  let u = Word.size in
+  let ch = cast(&cell(a), pointer, ch) in
+  let u = this.word.size in
   let mutex-ptr = shift(ch, u) in
-  Ext.thread-mutex-lock(mutex-ptr);
-  let val-base: int = Mem.load-int(ch) in
-  let val: &a = Magic.cast(int, &a, val-base) in
+  thread-mutex-lock(mutex-ptr);
+  let val-base: int = load-int(ch) in
+  let val: &a = cast(int, &a, val-base) in
   letbox-T result = f(val) in
   let mutex-size = from-c-size(THREAD_MUTEX_SIZE) in
-  Ext.thread-cond-signal(shift(ch, add-int(u, mutex-size)));
-  Ext.thread-mutex-unlock(mutex-ptr);
+  thread-cond-signal(shift(ch, add-int(u, mutex-size)));
+  thread-mutex-unlock(mutex-ptr);
   result
 }
 
@@ -109,11 +119,11 @@ define clone<a>(ch: &cell(a)): a {
 }
 
 define extract<a>(c: cell(a)): a {
-  let u = Word.size in
-  let ch = Magic.cast(cell(a), pointer, c) in
-  let result = Magic.cast(int, a, Mem.load-int(ch)) in
-  Ext.thread-mutex-destroy(shift(ch, u));
-  Ext.thread-cond-destroy(shift(ch, add-int(u, from-c-size(THREAD_MUTEX_SIZE))));
-  Ext.free(ch);
+  let u = this.word.size in
+  let ch = cast(cell(a), pointer, c) in
+  let result = cast(int, a, load-int(ch)) in
+  thread-mutex-destroy(shift(ch, u));
+  thread-cond-destroy(shift(ch, add-int(u, from-c-size(THREAD_MUTEX_SIZE))));
+  this.external.free(ch);
   result
 }

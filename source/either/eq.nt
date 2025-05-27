@@ -1,5 +1,4 @@
 import {
-  E,
   this.bool {False},
   this.either {Left, Right, either},
   this.eq {Eq, eq},

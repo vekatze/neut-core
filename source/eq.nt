@@ -1,8 +1,7 @@
 import {
-  O {EQ},
-  Ord {ord},
   this.bool {False, True, bool},
-  this.ord {Ord},
+  this.ord {Ord, ord},
+  this.ordering {EQ},
 }
 
 data eq(a) {

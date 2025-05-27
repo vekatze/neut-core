@@ -1,29 +1,35 @@
 import {
-  Ext,
-  FD,
-  FF,
-  FM,
   this.bool,
   this.either {Right},
+  this.external,
+  this.file.descriptor {descriptor},
+  this.file.flag {flag},
+  this.file.mode {mode},
   this.list {list},
   this.system {report-system-error, system},
   this.text {_get-content-pointer, text},
   this.unit {Unit, unit},
 }
 
-define open(path: &text, xs: list(FF.flag), ms: list(FM.mode)): system(FD.descriptor) {
+define open(path: &text, xs: list(flag), ms: list(mode)): system(descriptor) {
   pin path' = this.text.append(path, "\0") in
   let actual-path-string = _get-content-pointer(path') in
-  let fd = Ext.open(actual-path-string, FF.interpret(xs), FM.interpret(ms)) in
-  if lt-int32(magic cast(FD.descriptor, int32, fd), 0) {
+  let fd =
+    this.external.open(
+      actual-path-string,
+      this.file.mode.interpret(ms),
+      this.file.flag.interpret(xs),
+    )
+  in
+  if lt-int32(magic cast(descriptor, int32, fd), 0) {
     report-system-error()
   } else {
     Right(fd)
   }
 }
 
-define close(f: FD.descriptor): system(unit) {
-  let result = Ext.close(f) in
+define close(f: descriptor): system(unit) {
+  let result = this.external.close(f) in
   if eq-int(result, 0) {
     Right(Unit)
   } else {

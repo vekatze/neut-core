@@ -1,12 +1,11 @@
 import {
-  O {EQ, GT, LT},
   this.binary {_get-content-pointer, binary, binary-length},
   this.bool {False, True, bool},
   this.int {min-int},
   this.int.ord,
   this.memory {load-int8},
   this.ord {Ord, ord},
-  this.ordering {ordering},
+  this.ordering {EQ, GT, LT, ordering},
   this.pointer {shift},
 }
 

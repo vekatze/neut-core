@@ -1,8 +1,8 @@
 import {
-  E,
+  this.eq {eq, from-ord},
   this.float.ord {as-ord},
 }
 
-inline as-eq: E.eq(float) {
-  E.from-ord(as-ord)
+inline as-eq: eq(float) {
+  from-ord(as-ord)
 }

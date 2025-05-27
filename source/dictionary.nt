@@ -1,5 +1,4 @@
 import {
-  Ord {Ord, ord},
   core.bool,
   core.either {Right, none},
   core.ordering {EQ, GT, LT},
@@ -7,7 +6,7 @@ import {
   core.unit,
   this.box,
   this.list {Cons, Nil, append, list},
-  this.ord,
+  this.ord {Ord, ord},
   this.pair {Pair, pair},
   this.trick {unsafe-panic},
 }

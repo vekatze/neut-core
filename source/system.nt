@@ -1,9 +1,9 @@
 import {
-  Magic,
   this.c-int {c-int},
   this.c-string {c-string, from-c-string},
   this.either {Left, either},
   this.foreign {get-errno},
+  this.magic,
   this.text {text},
 }
 
@@ -36,7 +36,7 @@ define get-error-message(e: system-error): text {
   match e {
   | OS-Error(i) =>
     let c-str = magic external strerror(i) in
-    from-c-string(Magic.cast(pointer, &c-string, c-str))
+    from-c-string(this.magic.cast(pointer, &c-string, c-str))
   | Application-Error(message) =>
     message
   }

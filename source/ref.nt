@@ -1,13 +1,13 @@
 import {
-  Ext,
-  Magic,
-  Mem,
-  Word,
   this.box,
   this.c-size {C-Size},
+  this.external,
+  this.magic {cast},
+  this.memory {load-int, store-int},
   this.pair {Pair, pair},
   this.pointer {shift},
   this.unit {Unit, unit},
+  this.word,
 }
 
 inline _get-clone(a: type, x: &a): a {
@@ -23,27 +23,27 @@ data ref(_: type) {
 }
 
 define _make(a: type, val: a): ref(a) {
-  let u = Word.size in
-  let ptr = Ext.malloc(C-Size(mul-int(Word.size, 2))) in
-  Mem.store-int(Magic.cast(a, int, val), ptr);
-  Mem.store-int(Magic.cast(type, int, a), shift(ptr, u));
-  Magic.cast(pointer, ref(a), ptr)
+  let u = this.word.size in
+  let ptr = this.external.malloc(C-Size(mul-int(this.word.size, 2))) in
+  store-int(cast(a, int, val), ptr);
+  store-int(cast(type, int, a), shift(ptr, u));
+  cast(pointer, ref(a), ptr)
 }
 
 // (content, type)
 resource _ref {
   function (r: pointer) {
-    let u = Word.size in
-    let a = Magic.cast(int, type, Mem.load-int(shift(r, u))) in
-    let _: a = magic cast(int, a, Mem.load-int(r)) in
-    Ext.free(r)
+    let u = this.word.size in
+    let a = cast(int, type, load-int(shift(r, u))) in
+    let _: a = magic cast(int, a, load-int(r)) in
+    this.external.free(r)
   },
   function (r: pointer) {
-    let u = Word.size in
-    let a = Magic.cast(int, type, Mem.load-int(shift(r, u))) in
-    let val: &a = Magic.cast(int, &a, Mem.load-int(r)) in
+    let u = this.word.size in
+    let a = cast(int, type, load-int(shift(r, u))) in
+    let val: &a = cast(int, &a, load-int(r)) in
     let val-clone: a = _get-clone(a, val) in
-    Magic.cast(ref(a), pointer, _make(a, val-clone))
+    cast(ref(a), pointer, _make(a, val-clone))
   },
 }
 
@@ -52,10 +52,10 @@ inline _make-ref<a>(initial-value: a): ref(a) {
 }
 
 inline modify<a, b>(r: &ref(a), f: (a) -> pair(a, b)): b {
-  let r = Magic.cast(&ref(a), pointer, r) in
-  let orig-val = Magic.cast(int, a, Mem.load-int(r)) in
+  let r = cast(&ref(a), pointer, r) in
+  let orig-val = cast(int, a, load-int(r)) in
   let Pair(new-val, result) = f(orig-val) in
-  Mem.store-int(Magic.cast(a, int, new-val), r);
+  store-int(cast(a, int, new-val), r);
   result
 }
 
@@ -66,8 +66,8 @@ inline mutate<a>(r: &ref(a), f: (a) -> a): unit {
 }
 
 inline borrow<a, b>(r: &ref(a), f: (&a) -> meta b): b {
-  let r = Magic.cast(&ref(a), pointer, r) in
-  let orig-val = Magic.cast(int, &a, Mem.load-int(r)) in
+  let r = cast(&ref(a), pointer, r) in
+  let orig-val = cast(int, &a, load-int(r)) in
   letbox-T result = f(orig-val) in
   result
 }
@@ -79,8 +79,8 @@ define clone<a>(r: &ref(a)): a {
 }
 
 define extract<a>(c: ref(a)): a {
-  let r = Magic.cast(ref(a), pointer, c) in
-  let result = Magic.cast(int, a, Mem.load-int(r)) in
-  Ext.free(r);
+  let r = cast(ref(a), pointer, c) in
+  let result = cast(int, a, load-int(r)) in
+  this.external.free(r);
   result
 }

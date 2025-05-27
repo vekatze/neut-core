@@ -1,5 +1,4 @@
 import {
-  E,
   this.bool {True},
   this.eq {Eq, eq},
   this.unit {Unit, unit},

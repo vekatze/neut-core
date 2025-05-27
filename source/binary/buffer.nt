@@ -1,7 +1,4 @@
 import {
-  Ext,
-  Mem,
-  Word,
   this.binary {binary, binary-length},
   this.binary.io,
   this.bool,
@@ -9,7 +6,7 @@ import {
   this.control {discard},
   this.external {free, malloc},
   this.file.descriptor {descriptor, stdout},
-  this.memory,
+  this.memory {load-int, store-int},
   this.pointer {shift},
   this.text {to-binary},
   this.unit {Unit, unit},
@@ -26,7 +23,7 @@ inline _memcpy(target-pointer: pointer, source-pointer: pointer, len: int): unit
 }
 
 inline _get-pointer-size-from-capacity(capacity: int) {
-  let u = Word.size in
+  let u = this.word.size in
   add-int(capacity, mul-int(u, 3))
 }
 
@@ -36,8 +33,8 @@ resource _buffer-internal {
     free(x)
   },
   function (source-pointer: pointer) {
-    let u = Word.size in
-    let capacity = Mem.load-int(shift(source-pointer, u)) in
+    let u = this.word.size in
+    let capacity = load-int(shift(source-pointer, u)) in
     let pointer-size = _get-pointer-size-from-capacity(capacity) in
     let new-pointer = malloc(C-Size(pointer-size)) in
     _memcpy(new-pointer, source-pointer, pointer-size);
@@ -57,35 +54,35 @@ define make-buffer(d: descriptor, capacity: int): buffer {
       4096
     }
   in
-  let word-size = Word.size in
+  let word-size = this.word.size in
   let pointer-size = _get-pointer-size-from-capacity(capacity) in
   let buffer-ptr = malloc(C-Size(pointer-size)) in
-  Mem.store-int(0, buffer-ptr);
-  Mem.store-int(capacity, shift(buffer-ptr, word-size));
-  Mem.store-int(magic cast(descriptor, int, d), shift(buffer-ptr, mul-int(word-size, 2)));
+  store-int(0, buffer-ptr);
+  store-int(capacity, shift(buffer-ptr, word-size));
+  store-int(magic cast(descriptor, int, d), shift(buffer-ptr, mul-int(word-size, 2)));
   magic cast(pointer, buffer, buffer-ptr)
 }
 
 inline _get-current-size(b: &buffer): int {
-  Mem.load-int(magic cast(&buffer, pointer, b))
+  load-int(magic cast(&buffer, pointer, b))
 }
 
 inline _set-current-size(b: &buffer, size: int): unit {
-  Mem.store-int(size, magic cast(&buffer, pointer, b))
+  store-int(size, magic cast(&buffer, pointer, b))
 }
 
 inline _get-capacity(b: &buffer): int {
-  let u = Word.size in
-  Mem.load-int(shift(magic cast(&buffer, pointer, b), u))
+  let u = this.word.size in
+  load-int(shift(magic cast(&buffer, pointer, b), u))
 }
 
 inline _get-descriptor(b: &buffer): descriptor {
-  let u2 = mul-int(Word.size, 2) in
-  magic cast(int, descriptor, Mem.load-int(shift(magic cast(&buffer, pointer, b), u2)))
+  let u2 = mul-int(this.word.size, 2) in
+  magic cast(int, descriptor, load-int(shift(magic cast(&buffer, pointer, b), u2)))
 }
 
 inline _get-content-pointer(b: &buffer): pointer {
-  let u3 = mul-int(Word.size, 3) in
+  let u3 = mul-int(this.word.size, 3) in
   shift(magic cast(&buffer, pointer, b), u3)
 }
 

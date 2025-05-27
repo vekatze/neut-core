@@ -1,17 +1,15 @@
 import {
-  Ext,
-  FD,
-  Magic,
-  Mem,
-  Word,
   this.binary {_get-content-pointer, binary, binary-length},
   this.bool,
   this.c-size {C-Size, c-size, from-c-size},
   this.c-ssize {eq-c-ssize, from-c-ssize, lt-c-ssize},
   this.either {Left, Right},
+  this.external {free, malloc, read, realloc},
   this.file.descriptor {descriptor},
   this.int.show {show-int},
   this.list,
+  this.magic,
+  this.memory,
   this.pointer {extract, shift},
   this.system {Application-Error, report-system-error, system},
   this.text {format},
@@ -47,7 +45,7 @@ define write(d: descriptor, b: &binary): system(unit) {
 }
 
 define _read-inner(
-  from: FD.descriptor,
+  from: descriptor,
   ptr: pointer,
   ptr-size: int,
   len-cand: int,
@@ -57,7 +55,7 @@ define _read-inner(
   let content-size = sub-int(ptr-size, mul-int(u, 2)) in
   if lt-int(content-size, add-int(len-cand, from-c-size(buffer-size))) {
     let new-size = mul-int(ptr-size, 2) in
-    let new-ptr = Ext.realloc(ptr, C-Size(new-size)) in
+    let new-ptr = realloc(ptr, C-Size(new-size)) in
     if eq-int(extract(new-ptr), 0) {
       report-system-error()
     } else {
@@ -65,31 +63,31 @@ define _read-inner(
     }
   } else {
     let content-ptr = shift(ptr, add-int(mul-int(u, 2), len-cand)) in
-    let bytes = Ext.read(from, content-ptr, buffer-size) in
+    let bytes = read(from, content-ptr, buffer-size) in
     let next-len-cand = add-int(len-cand, from-c-ssize(bytes)) in
     if lt-c-ssize(bytes, 0) {
-      Ext.free(ptr);
+      free(ptr);
       report-system-error()
     } else-if eq-c-ssize(bytes, 0) {
-      Mem.store-int(next-len-cand, shift(ptr, u));
-      Right(Magic.cast(pointer, binary, ptr))
+      this.memory.store-int(next-len-cand, shift(ptr, u));
+      Right(this.magic.cast(pointer, binary, ptr))
     } else {
       _read-inner(from, ptr, ptr-size, next-len-cand, buffer-size)
     }
   }
 }
 
-define read(from: FD.descriptor, initial-buffer-size: int): system(binary) {
+define read(from: descriptor, initial-buffer-size: int): system(binary) {
   if le-int(initial-buffer-size, 0) {
     Left(Application-Error(format(
       "core.binary.io.read: initial-buffer-size must be positive, but got: {}",
       [show-int(initial-buffer-size)],
     )))
   } else {
-    let u = Word.size in
+    let u = this.word.size in
     let ptr-size = add-int(initial-buffer-size, mul-int(u, 2)) in
-    let ptr = Ext.malloc(C-Size(ptr-size)) in
-    Mem.store-int(0, ptr);
+    let ptr = malloc(C-Size(ptr-size)) in
+    this.memory.store-int(0, ptr);
     _read-inner(from, ptr, ptr-size, 0, C-Size(initial-buffer-size))
   }
 }

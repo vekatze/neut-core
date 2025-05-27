@@ -1,23 +1,22 @@
 import {
-  FD,
-  Magic,
   this.binary {binary},
   this.binary.io,
   this.control {loop},
   this.either {Right},
-  this.file.descriptor {stdout},
+  this.file.descriptor {descriptor, stdin, stdout},
   this.int.show {show-int},
   this.list {for, list},
+  this.magic,
   this.system {system},
   this.text {_format, text, to-binary},
   this.unit {Unit, unit},
 }
 
-define write(f: FD.descriptor, t: &text): system(unit) {
+define write(f: descriptor, t: &text): system(unit) {
   this.binary.io.write(f, to-binary(t))
 }
 
-define writef(f: FD.descriptor, fmt: &text, args: list(text)): unit {
+define writef(f: descriptor, fmt: &text, args: list(text)): unit {
   for(_format(fmt, args), function (p) {
     pin p = p in
     let _ = write(f, p) in
@@ -37,13 +36,13 @@ define printf(fmt: &text, args: list(text)): unit {
   })
 }
 
-define read(from: FD.descriptor, initial-buffer-size: int): system(text) {
+define read(from: descriptor, initial-buffer-size: int): system(text) {
   try bin = this.binary.io.read(from, initial-buffer-size) in
-  Right(Magic.cast(binary, text, bin))
+  Right(this.magic.cast(binary, text, bin))
 }
 
 define get-line(initial-buffer-size: int): system(text) {
-  read(FD.stdin, initial-buffer-size)
+  read(stdin, initial-buffer-size)
 }
 
 define zen(): unit {

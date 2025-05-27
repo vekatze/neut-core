@@ -1,5 +1,4 @@
 import {
-  E,
   this.bool {False, True, bool},
   this.eq {Eq, eq},
   this.vector {_access, length, vector},

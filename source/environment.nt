@@ -1,17 +1,17 @@
 import {
-  Magic,
-  Word,
   this.bool {bool},
   this.c-int {C-Int, c-int, eq-c-int},
   this.c-string {c-string, from-c-string, to-c-string},
   this.control {discard},
   this.either {Right, none},
   this.list {Cons, list},
+  this.magic,
   this.memory {load-int, load-pointer},
   this.pointer {shift},
   this.system {report-system-error, system},
   this.text {_get-content-pointer, text},
   this.unit {Unit, unit},
+  this.word,
 }
 
 foreign {
@@ -25,7 +25,7 @@ define get-env(name: &text): ?text {
   if eq-int(magic cast(pointer, int, tmp), 0) {
     none
   } else {
-    Right(from-c-string(Magic.cast(pointer, &c-string, tmp)))
+    Right(from-c-string(this.magic.cast(pointer, &c-string, tmp)))
   }
 }
 
@@ -64,7 +64,7 @@ define get-argv(): list(text) {
   let argc = get-argc() in
   let argv-ptr = magic global("neut-unsafe-argv", pointer) in
   let argv = load-pointer(argv-ptr) in
-  let u = Word.size in
+  let u = this.word.size in
   let f =
     define get-argv-helper(i: int): list(text) {
       if eq-int(i, argc) {
@@ -73,7 +73,7 @@ define get-argv(): list(text) {
         let rest = get-argv-helper(add-int(i, 1)) in
         let str-ptr-ptr = shift(argv, mul-int(i, u)) in
         let str-ptr = load-int(str-ptr-ptr) in
-        let t = from-c-string(Magic.cast(int, &c-string, str-ptr)) in
+        let t = from-c-string(this.magic.cast(int, &c-string, str-ptr)) in
         Cons(t, rest)
       }
     }

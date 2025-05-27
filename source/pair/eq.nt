@@ -1,5 +1,4 @@
 import {
-  E,
   this.bool {and},
   this.eq {Eq, eq},
   this.pair {Pair, pair},

@@ -1,8 +1,8 @@
 import {
-  O {EQ, GT, LT},
   this.bool,
   this.box,
   this.ord {Ord, ord},
+  this.ordering {EQ, GT, LT},
 }
 
 inline as-ord: ord(float) {

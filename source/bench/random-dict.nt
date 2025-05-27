@@ -1,9 +1,7 @@
 import {
-  Dict {dictionary},
-  TIO,
   this.box,
   this.control {grow},
-  this.dictionary {Trope},
+  this.dictionary {Trope, dictionary},
   this.either {Left, Right},
   this.int.ord {as-ord-N},
   this.int.show {show-int},
@@ -14,12 +12,12 @@ import {
   this.unit {Unit, unit},
 }
 
-inline intdict: Dict.trope(int) {
-  Dict.from-ord(as-ord-N)
+inline intdict: this.dictionary.trope(int) {
+  this.dictionary.from-ord(as-ord-N)
 }
 
 define make-big-dictionary(): dictionary(int, int) {
-  grow(Dict.empty, 700000, function (acc, _) {
+  grow(this.dictionary.empty, 700000, function (acc, _) {
     let key = random-int(1000000) in
     let val = random-int(1000000) in
     let Trope of {insert} = intdict in

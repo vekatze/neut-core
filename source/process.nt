@@ -1,19 +1,16 @@
 import {
-  Ext,
-  FD,
-  Magic,
-  Word,
   this.bool {bool},
   this.c-int {c-int, eq-c-int, from-c-int},
   this.c-pid {c-pid, eq-c-pid},
   this.c-size {C-Size},
   this.either {Left, Right},
-  this.external {free},
+  this.external {free, malloc},
   this.file {close},
-  this.file.descriptor {stderr, stdin, stdout},
+  this.file.descriptor {descriptor, stderr, stdin, stdout},
   this.foreign {_wcoredump, _wexitstatus, _wifexited, _wifsignaled, _wifstopped, _wstopsig, _wtermsig},
   this.int.show {show-int},
   this.list {Cons, fold-left-with-index, length, list},
+  this.magic,
   this.memory {load-c-int, store-int},
   this.pair {Pair, pair},
   this.pointer {extract, null-pointer, shift},
@@ -21,6 +18,7 @@ import {
   this.text {_get-content-pointer, text},
   this.text.io {print, printf, read, write},
   this.unit {Unit, unit},
+  this.word,
 }
 
 foreign {
@@ -42,7 +40,7 @@ data process-result-status {
 }
 
 define _waitpid(pid: c-pid): system(process-result-status) {
-  let status-ptr = Ext.malloc(C-Size(Word.size)) in
+  let status-ptr = malloc(C-Size(this.word.size)) in
   let result = __waitpid(pid, status-ptr, 0) in
   if eq-c-pid(result, -1) {
     free(status-ptr);
@@ -69,30 +67,30 @@ define _waitpid(pid: c-pid): system(process-result-status) {
 
 define _make-argv(xs: list(pointer)): pointer {
   let len on xs = length(xs) in
-  let ptr = Ext.malloc(C-Size(mul-int(Word.size, len))) in
+  let ptr = malloc(C-Size(mul-int(this.word.size, len))) in
   fold-left-with-index(Unit, xs, function (_, x, i) {
-    store-int(extract(x), shift(ptr, mul-int(Word.size, i)))
+    store-int(extract(x), shift(ptr, mul-int(this.word.size, i)))
   });
   ptr
 }
 
-define _create-pipe(): system(pair(FD.descriptor, FD.descriptor)) {
-  let ptr = Ext.malloc(C-Size(mul-int(Word.size, 2))) in
+define _create-pipe(): system(pair(descriptor, descriptor)) {
+  let ptr = malloc(C-Size(mul-int(this.word.size, 2))) in
   let result = magic external pipe(ptr) in
   if eq-c-int(result, -1) {
     free(ptr);
     report-system-error()
   } else {
-    let reader = Magic.cast(int32, FD.descriptor, magic load(int32, ptr)) in
-    let writer = Magic.cast(int32, FD.descriptor, magic load(int32, shift(ptr, 4))) in
+    let reader = this.magic.cast(int32, descriptor, magic load(int32, ptr)) in
+    let writer = this.magic.cast(int32, descriptor, magic load(int32, shift(ptr, 4))) in
     free(ptr);
     Right(Pair(reader, writer))
   }
 }
 
-define _dup2(fd1: FD.descriptor, fd2: FD.descriptor): system(unit) {
-  let fd1 = magic cast(FD.descriptor, c-int, fd1) in
-  let fd2 = magic cast(FD.descriptor, c-int, fd2) in
+define _dup2(fd1: descriptor, fd2: descriptor): system(unit) {
+  let fd1 = magic cast(descriptor, c-int, fd1) in
+  let fd2 = magic cast(descriptor, c-int, fd2) in
   let result = magic external dup2(fd1, fd2) in
   if eq-c-int(result, -1) {
     report-system-error()

@@ -1,9 +1,9 @@
 import {
-  Ord {Ord, ord},
   this.bool {False, True, and, bool, or},
   this.box,
   this.either {Left, Right, either, none},
   this.monoid {Monoid, monoid},
+  this.ord {Ord, ord},
   this.ordering {GT, LT},
   this.pair {Pair, pair},
   this.unit {Unit, unit},

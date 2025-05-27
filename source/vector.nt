@@ -1,21 +1,17 @@
 import {
-  Ext,
-  Magic,
-  Mem,
-  Word,
   this.bool {False, True, and, bool, not},
   this.box,
   this.c-size {C-Size},
   this.control {grow, loop},
   this.either {Left, Right, either, from-right, none},
-  this.external {free, malloc},
+  this.external {free, malloc, realloc},
   this.function {compose},
   this.int {abs-int, max-int, min-int},
   this.int.ord {as-ord-N},
   this.int.show {show-int},
   this.list {Cons, Nil, list, minimum},
-  this.magic,
-  this.memory {store-int},
+  this.magic {cast},
+  this.memory {load-int, load-pointer, store-int, store-pointer},
   this.pair {Pair, pair},
   this.pointer {shift},
   this.text {replicate, text},
@@ -35,49 +31,49 @@ data vector(_: type) {
 }
 
 inline get-capacity<a>(xs: &vector(a)): int {
-  let vector-ptr = Magic.cast(&vector(a), pointer, xs) in
-  Mem.load-int(vector-ptr)
+  let vector-ptr = cast(&vector(a), pointer, xs) in
+  load-int(vector-ptr)
 }
 
 inline _get-from<a>(xs: &vector(a)): int {
-  let vector-ptr = Magic.cast(&vector(a), pointer, xs) in
-  Mem.load-int(shift(vector-ptr, Word.size))
+  let vector-ptr = cast(&vector(a), pointer, xs) in
+  load-int(shift(vector-ptr, this.word.size))
 }
 
 inline _get-to<a>(xs: &vector(a)): int {
-  let vector-ptr = Magic.cast(&vector(a), pointer, xs) in
-  Mem.load-int(shift(vector-ptr, mul-int(Word.size, 2)))
+  let vector-ptr = cast(&vector(a), pointer, xs) in
+  load-int(shift(vector-ptr, mul-int(this.word.size, 2)))
 }
 
 inline _get-elem-type<a>(xs: &vector(a)): type {
-  let vector-ptr = Magic.cast(&vector(a), pointer, xs) in
-  Magic.cast(int, type, Mem.load-int(shift(vector-ptr, mul-int(Word.size, 3))))
+  let vector-ptr = cast(&vector(a), pointer, xs) in
+  cast(int, type, load-int(shift(vector-ptr, mul-int(this.word.size, 3))))
 }
 
 inline _set-elem-type<a>(xs: &vector(a), b: type): unit {
-  let vector-ptr = Magic.cast(&vector(a), pointer, xs) in
-  Mem.store-int(Magic.cast(type, int, b), shift(vector-ptr, mul-int(Word.size, 3)))
+  let vector-ptr = cast(&vector(a), pointer, xs) in
+  store-int(cast(type, int, b), shift(vector-ptr, mul-int(this.word.size, 3)))
 }
 
 inline _get-buffer-ptr<a>(xs: &vector(a)): pointer {
-  let vector-ptr = Magic.cast(&vector(a), pointer, xs) in
-  Mem.load-pointer(shift(vector-ptr, mul-int(Word.size, 4)))
+  let vector-ptr = cast(&vector(a), pointer, xs) in
+  load-pointer(shift(vector-ptr, mul-int(this.word.size, 4)))
 }
 
 define _set-buffer-ptr<a>(xs: &vector(a), buffer-ptr: pointer): unit {
-  let vector-ptr = Magic.cast(&vector(a), pointer, xs) in
-  Mem.store-pointer(buffer-ptr, shift(vector-ptr, mul-int(Word.size, 4)))
+  let vector-ptr = cast(&vector(a), pointer, xs) in
+  store-pointer(buffer-ptr, shift(vector-ptr, mul-int(this.word.size, 4)))
 }
 
 define _set-capacity<a>(xs: &vector(a), capacity: int): unit {
-  let vector-ptr = Magic.cast(&vector(a), pointer, xs) in
-  Mem.store-int(capacity, vector-ptr)
+  let vector-ptr = cast(&vector(a), pointer, xs) in
+  store-int(capacity, vector-ptr)
 }
 
 define _get-element-pointer<a>(xs: &vector(a), index: int): pointer {
   let from = _get-from(xs) in
   let buffer-ptr = _get-buffer-ptr(xs) in
-  shift(buffer-ptr, mul-int(Word.size, add-int(from, index)))
+  shift(buffer-ptr, mul-int(this.word.size, add-int(from, index)))
 }
 
 define length<a>(xs: &vector(a)): int {
@@ -87,40 +83,40 @@ define length<a>(xs: &vector(a)): int {
 }
 
 inline _shift-from<a>(xs: &vector(a), offset: int): unit {
-  let vector-ptr = Magic.cast(&vector(a), pointer, xs) in
-  let from-ptr = shift(vector-ptr, mul-int(Word.size, 1)) in
-  let current-value = Mem.load-int(from-ptr) in
-  Mem.store-int(add-int(current-value, offset), from-ptr)
+  let vector-ptr = cast(&vector(a), pointer, xs) in
+  let from-ptr = shift(vector-ptr, mul-int(this.word.size, 1)) in
+  let current-value = load-int(from-ptr) in
+  store-int(add-int(current-value, offset), from-ptr)
 }
 
 inline _shift-to<a>(xs: &vector(a), offset: int): unit {
-  let vector-ptr = Magic.cast(&vector(a), pointer, xs) in
-  let to-ptr = shift(vector-ptr, mul-int(Word.size, 2)) in
-  let current-value = Mem.load-int(to-ptr) in
-  Mem.store-int(add-int(current-value, offset), to-ptr)
+  let vector-ptr = cast(&vector(a), pointer, xs) in
+  let to-ptr = shift(vector-ptr, mul-int(this.word.size, 2)) in
+  let current-value = load-int(to-ptr) in
+  store-int(add-int(current-value, offset), to-ptr)
 }
 
 inline _set-from<a>(xs: &vector(a), from: int): unit {
-  let vector-ptr = Magic.cast(&vector(a), pointer, xs) in
-  Mem.store-int(from, shift(vector-ptr, Word.size))
+  let vector-ptr = cast(&vector(a), pointer, xs) in
+  store-int(from, shift(vector-ptr, this.word.size))
 }
 
 inline _set-to<a>(xs: &vector(a), to: int): unit {
-  let vector-ptr = Magic.cast(&vector(a), pointer, xs) in
-  Mem.store-int(to, shift(vector-ptr, mul-int(Word.size, 2)))
+  let vector-ptr = cast(&vector(a), pointer, xs) in
+  store-int(to, shift(vector-ptr, mul-int(this.word.size, 2)))
 }
 
 define make<a>(initial-capacity: int): vector(a) {
   let abs-capacity = abs-int(initial-capacity) in
-  let word-size = Word.size in
+  let word-size = this.word.size in
   let vector-ptr = malloc(C-Size(mul-int(word-size, 5))) in
   let buffer-ptr = malloc(C-Size(mul-int(word-size, abs-capacity))) in
   let initial-cursor = match gt-int(initial-capacity, 0) {True => 0 | False => abs-capacity} in
-  Mem.store-int(abs-capacity, vector-ptr);
-  Mem.store-int(initial-cursor, shift(vector-ptr, mul-int(word-size, 1)));
-  Mem.store-int(initial-cursor, shift(vector-ptr, mul-int(word-size, 2)));
-  Mem.store-int(Magic.cast(type, int, a), shift(vector-ptr, mul-int(word-size, 3)));
-  Mem.store-pointer(buffer-ptr, shift(vector-ptr, mul-int(word-size, 4)));
+  store-int(abs-capacity, vector-ptr);
+  store-int(initial-cursor, shift(vector-ptr, mul-int(word-size, 1)));
+  store-int(initial-cursor, shift(vector-ptr, mul-int(word-size, 2)));
+  store-int(cast(type, int, a), shift(vector-ptr, mul-int(word-size, 3)));
+  store-pointer(buffer-ptr, shift(vector-ptr, mul-int(word-size, 4)));
   magic cast(pointer, vector(a), vector-ptr)
 }
 
@@ -129,7 +125,7 @@ define _discard-vector-content<a>(xs: &vector(a), elem-type: type, index: int, l
     Unit
   } else {
     let element-ptr = _get-element-pointer(xs, index) in
-    let _ = Magic.cast(int, elem-type, Mem.load-int(element-ptr)) in
+    let _ = cast(int, elem-type, load-int(element-ptr)) in
     _discard-vector-content(xs, elem-type, add-int(index, 1), len)
   }
 }
@@ -146,9 +142,9 @@ define _copy-vector-content(
   } else {
     let source-ptr = _get-element-pointer(xs, index) in
     let target-ptr = _get-element-pointer(ys, index) in
-    let original = Magic.cast(int, &elem-type, Mem.load-int(source-ptr)) in
+    let original = cast(int, &elem-type, load-int(source-ptr)) in
     let clone = *original in
-    Mem.store-int(Magic.cast(elem-type, int, clone), target-ptr);
+    store-int(cast(elem-type, int, clone), target-ptr);
     _copy-vector-content(xs, ys, elem-type, add-int(index, 1), len)
   }
 }
@@ -160,11 +156,11 @@ resource _vector-internal {
     let elem-type = _get-elem-type(xs) in
     _discard-vector-content(xs, elem-type, 0, len);
     free(_get-buffer-ptr(xs));
-    free(Magic.cast(&vector(pointer), pointer, xs))
+    free(cast(&vector(pointer), pointer, xs))
   },
   function (xs: &vector(pointer)) {
     let capacity = get-capacity(xs) in
-    let ys: &vector(pointer) = Magic.cast(vector(pointer), &vector(pointer), make(capacity)) in
+    let ys: &vector(pointer) = cast(vector(pointer), &vector(pointer), make(capacity)) in
     let elem-type = _get-elem-type(xs) in
     let from = _get-from(xs) in
     let to = _get-to(xs) in
@@ -190,9 +186,9 @@ define _extend-front<a>(xs: vector(a)): vector(a) {
   let current-capacity on xs = max-int(get-capacity(xs), 1) in
   let new-capacity = mul-int(current-capacity, _extend-factor) in
   let buffer-ptr on xs = _get-buffer-ptr(xs) in
-  let new-buffer-ptr = Ext.realloc(buffer-ptr, C-Size(mul-int(Word.size, new-capacity))) in
-  let new-head-ptr = shift(new-buffer-ptr, mul-int(Word.size, current-capacity)) in
-  let _ = magic external llvm.memcpy.p0.p0.i64(new-head-ptr, new-buffer-ptr, mul-int(Word.size, current-capacity), 0) in
+  let new-buffer-ptr = realloc(buffer-ptr, C-Size(mul-int(this.word.size, new-capacity))) in
+  let new-head-ptr = shift(new-buffer-ptr, mul-int(this.word.size, current-capacity)) in
+  let _ = magic external llvm.memcpy.p0.p0.i64(new-head-ptr, new-buffer-ptr, mul-int(this.word.size, current-capacity), 0) in
   let _ on xs =
     _shift-from(xs, current-capacity);
     _shift-to(xs, current-capacity);
@@ -206,7 +202,7 @@ define _extend-back<a>(xs: vector(a)): vector(a) {
   let current-capacity on xs = max-int(get-capacity(xs), 1) in
   let new-capacity = mul-int(current-capacity, _extend-factor) in
   let buffer-ptr on xs = _get-buffer-ptr(xs) in
-  let new-buffer-ptr = Ext.realloc(buffer-ptr, C-Size(mul-int(Word.size, new-capacity))) in
+  let new-buffer-ptr = realloc(buffer-ptr, C-Size(mul-int(this.word.size, new-capacity))) in
   let _ on xs =
     _set-buffer-ptr(xs, new-buffer-ptr);
     _set-capacity(xs, new-capacity)
@@ -218,7 +214,7 @@ define push-front<a>(xs: vector(a), x: a): vector(a) {
   let from on xs = _get-from(xs) in
   if gt-int(from, 0) {
     let new-element-ptr on xs = _get-element-pointer(xs, -1) in
-    store-int(Magic.cast(a, int, x), new-element-ptr);
+    store-int(cast(a, int, x), new-element-ptr);
     let _ on xs = _shift-from(xs, -1) in
     xs
   } else {
@@ -233,7 +229,7 @@ define push-back<a>(xs: vector(a), x: a): vector(a) {
   if lt-int(to, capacity) {
     let len on xs = length(xs) in
     let new-element-ptr on xs = _get-element-pointer(xs, len) in
-    store-int(Magic.cast(a, int, x), new-element-ptr);
+    store-int(cast(a, int, x), new-element-ptr);
     let _ on xs = _shift-to(xs, 1) in
     xs
   } else {
@@ -248,7 +244,7 @@ inline pop-front<a>(xs: vector(a)): ?pair(a, vector(a)) {
     none
   } else {
     let first-value-pointer on xs = _get-element-pointer(xs, 0) in
-    let first-value = Magic.cast(int, a, Mem.load-int(first-value-pointer)) in
+    let first-value = cast(int, a, load-int(first-value-pointer)) in
     let _ on xs = _shift-from(xs, 1) in
     Right(Pair(first-value, xs))
   }
@@ -260,7 +256,7 @@ inline pop-back<a>(xs: vector(a)): ?pair(vector(a), a) {
     none
   } else {
     let last-value-pointer on xs = _get-element-pointer(xs, sub-int(len, 1)) in
-    let last-value = Magic.cast(int, a, Mem.load-int(last-value-pointer)) in
+    let last-value = cast(int, a, load-int(last-value-pointer)) in
     let _ on xs = _shift-to(xs, -1) in
     Right(Pair(xs, last-value))
   }
@@ -268,7 +264,7 @@ inline pop-back<a>(xs: vector(a)): ?pair(vector(a), a) {
 
 inline _access<a>(xs: &vector(a), i: int): &a {
   let element-pointer = _get-element-pointer(xs, i) in
-  Magic.cast(int, &a, Mem.load-int(element-pointer))
+  cast(int, &a, load-int(element-pointer))
 }
 
 inline access<a>(xs: &vector(a), i: int): ?&a {
@@ -346,14 +342,14 @@ inline for-each<a, b>(xs: vector(a), !f: (a, int) -> b): vector(b) {
         xs
       } else {
         let element-ptr on xs = _get-element-pointer(xs, index) in
-        let old-value = Magic.cast(int, a, Mem.load-int(element-ptr)) in
-        let new-element-ptr = Magic.cast(b, int, !f(old-value, index)) in
-        Mem.store-int(new-element-ptr, element-ptr);
+        let old-value = cast(int, a, load-int(element-ptr)) in
+        let new-element-ptr = cast(b, int, !f(old-value, index)) in
+        store-int(new-element-ptr, element-ptr);
         self(xs, add-int(index, 1))
       }
     }
   in
-  Magic.cast(vector(a), vector(b), update-values(xs, 0))
+  cast(vector(a), vector(b), update-values(xs, 0))
 }
 
 inline for-each-N<a, b>(xs: &vector(a), f: (&a, int) -> b): vector(b) {
@@ -370,10 +366,10 @@ inline for<a>(xs: vector(a), !f: (a, int) -> unit): unit {
       if ge-int(index, len) {
         let buffer-ptr on xs = _get-buffer-ptr(xs) in
         free(buffer-ptr);
-        free(Magic.cast(vector(a), pointer, xs))
+        free(cast(vector(a), pointer, xs))
       } else {
         let element-ptr on xs = _get-element-pointer(xs, index) in
-        let old-value = Magic.cast(int, a, Mem.load-int(element-ptr)) in
+        let old-value = cast(int, a, load-int(element-ptr)) in
         !f(old-value, index);
         self(xs, add-int(index, 1))
       }
@@ -400,9 +396,9 @@ define for-each-vertical<a, b>(xs: vector(a), col-size: int, !f: (a, int) -> b):
         xs
       } else {
         let value-ptr on xs = _get-element-pointer(xs, index) in
-        let old-value = Magic.cast(int, a, Mem.load-int(value-ptr)) in
-        let new-value-ptr = Magic.cast(b, int, !f(old-value, index)) in
-        Mem.store-int(new-value-ptr, value-ptr);
+        let old-value = cast(int, a, load-int(value-ptr)) in
+        let new-value-ptr = cast(b, int, !f(old-value, index)) in
+        store-int(new-value-ptr, value-ptr);
         let next-index-cand = add-int(index, col-size) in
         if lt-int(next-index-cand, vec-size) {
           self(xs, next-index-cand)
@@ -418,7 +414,7 @@ define for-each-vertical<a, b>(xs: vector(a), col-size: int, !f: (a, int) -> b):
       }
     }
   in
-  Magic.cast(vector(a), vector(b), store-values(xs, 0))
+  cast(vector(a), vector(b), store-values(xs, 0))
 }
 
 inline zip-with-N<a, b, c>(xs: &vector(a), ys: &vector(b), f: (&a, &b, int) -> c): vector(c) {
@@ -448,13 +444,13 @@ define to-list<a>(xs: vector(a)): list(a) {
     define self(xs: vector(a), index: int): list(a) {
       if ge-int(index, len) {
         let buffer-ptr on xs = _get-buffer-ptr(xs) in
-        let vector-ptr = Magic.cast(vector(a), pointer, xs) in
-        Ext.free(buffer-ptr);
-        Ext.free(vector-ptr);
+        let vector-ptr = cast(vector(a), pointer, xs) in
+        free(buffer-ptr);
+        free(vector-ptr);
         Nil
       } else {
         let value-ptr on xs = _get-element-pointer(xs, index) in
-        let value = Magic.cast(int, a, Mem.load-int(value-ptr)) in
+        let value = cast(int, a, load-int(value-ptr)) in
         Cons(value, self(xs, add-int(index, 1)))
       }
     }
@@ -466,8 +462,8 @@ define exchange<a>(xs: vector(a), index: int, value: a): either(vector(a), pair(
   let len on xs = length(xs) in
   if and(le-int(0, index), lt-int(index, len)) {
     let value-ptr on xs = _get-element-pointer(xs, index) in
-    let old-value = Magic.cast(int, a, Mem.load-int(value-ptr)) in
-    Mem.store-int(Magic.cast(a, int, value), value-ptr);
+    let old-value = cast(int, a, load-int(value-ptr)) in
+    store-int(cast(a, int, value), value-ptr);
     Right(Pair(old-value, xs))
   } else {
     Left(xs)
@@ -477,10 +473,10 @@ define exchange<a>(xs: vector(a), index: int, value: a): either(vector(a), pair(
 define _swap<a>(xs: vector(a), i: int, j: int): vector(a) {
   let value-i-ptr on xs = _get-element-pointer(xs, i) in
   let value-j-ptr on xs = _get-element-pointer(xs, j) in
-  let value-i = Mem.load-int(value-i-ptr) in
-  let value-j = Mem.load-int(value-j-ptr) in
-  Mem.store-int(value-j, value-i-ptr);
-  Mem.store-int(value-i, value-j-ptr);
+  let value-i = load-int(value-i-ptr) in
+  let value-j = load-int(value-j-ptr) in
+  store-int(value-j, value-i-ptr);
+  store-int(value-i, value-j-ptr);
   xs
 }
 
@@ -516,7 +512,7 @@ define take<a>(xs: vector(a), n: int): vector(a) {
     let n = max-int(0, n) in
     loop(sub-int(len, n), function (i) {
       let v = core.vector._access(xs, add-int(i, n)) in
-      let _ = Magic.cast(&a, a, v) in
+      let _ = cast(&a, a, v) in
       Unit
     });
     let from = _get-from(xs) in
@@ -531,7 +527,7 @@ define drop<a>(xs: vector(a), n: int): vector(a) {
     let n = min-int(max-int(0, n), length(xs)) in
     loop(n, function (i) {
       let v = core.vector._access(xs, i) in
-      let _ = Magic.cast(&a, a, v) in
+      let _ = cast(&a, a, v) in
       Unit
     });
     _shift-from(xs, n)
@@ -562,12 +558,12 @@ define delete<a>(xs: vector(a), index: int): vector(a) {
     drop-end(xs, 1)
   } else-if and(lt-int(0, index), lt-int(index, sub-int(len, 1))) {
     let value-ptr on xs = _get-element-pointer(xs, index) in
-    let _ = Magic.cast(int, a, Mem.load-int(value-ptr)) in
+    let _ = cast(int, a, load-int(value-ptr)) in
     let pivot = div-int(len, 2) in
     if lt-int(index, pivot) {
       let source-ptr on xs = _get-element-pointer(xs, 0) in
       let target-ptr on xs = _get-element-pointer(xs, 1) in
-      let copy-bytes = mul-int(Word.size, index) in
+      let copy-bytes = mul-int(this.word.size, index) in
       let _ = magic external llvm.memmove.p0.p0.i64(target-ptr, source-ptr, copy-bytes, 0) in
       let _ on xs = _shift-from(xs, 1) in
       xs
@@ -575,7 +571,7 @@ define delete<a>(xs: vector(a), index: int): vector(a) {
       let next-value-index = add-int(index, 1) in
       let source-ptr on xs = _get-element-pointer(xs, next-value-index) in
       let target-ptr = value-ptr in
-      let copy-bytes = mul-int(Word.size, sub-int(len, next-value-index)) in
+      let copy-bytes = mul-int(this.word.size, sub-int(len, next-value-index)) in
       let _ = magic external llvm.memmove.p0.p0.i64(target-ptr, source-ptr, copy-bytes, 0) in
       let _ on xs = _shift-to(xs, -1) in
       xs

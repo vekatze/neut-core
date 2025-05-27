@@ -1,9 +1,9 @@
 import {
-  FD,
   this.c-int {c-int, from-c-int},
   this.c-offset {c-offset},
   this.c-size {c-size},
   this.c-ssize {c-ssize},
+  this.file.descriptor {descriptor},
   this.pointer {null-pointer},
   this.unit {Unit, unit},
 }
@@ -73,28 +73,28 @@ define realloc(ptr: pointer, size: c-size): pointer {
   }
 }
 
-define open(path-address: pointer, oflag: c-int, mode: c-int): FD.descriptor {
+define open(path-address: pointer, oflag: c-int, mode: c-int): descriptor {
   introspect operating-system {
   | darwin =>
     let d = magic external open(path-address, oflag)(mode: c-int) in
-    magic cast(c-int, FD.descriptor, d)
+    magic cast(c-int, descriptor, d)
   | linux =>
     let d = magic external open(path-address, oflag)(mode: c-int) in
-    magic cast(c-int, FD.descriptor, d)
+    magic cast(c-int, descriptor, d)
   }
 }
 
-define close(f: FD.descriptor): int {
+define close(f: descriptor): int {
   introspect operating-system {
   | darwin =>
-    from-c-int(magic external close(magic cast(FD.descriptor, c-int, f)))
+    from-c-int(magic external close(magic cast(descriptor, c-int, f)))
   | linux =>
-    from-c-int(magic external close(magic cast(FD.descriptor, c-int, f)))
+    from-c-int(magic external close(magic cast(descriptor, c-int, f)))
   }
 }
 
-define write(f: FD.descriptor, content-pointer: pointer, len: c-size): c-ssize {
-  let f = magic cast(FD.descriptor, c-int, f) in
+define write(f: descriptor, content-pointer: pointer, len: c-size): c-ssize {
+  let f = magic cast(descriptor, c-int, f) in
   introspect operating-system {
   | darwin =>
     magic external write(f, content-pointer, len)
@@ -103,8 +103,8 @@ define write(f: FD.descriptor, content-pointer: pointer, len: c-size): c-ssize {
   }
 }
 
-define read(f: FD.descriptor, content-pointer: pointer, max-read-size: c-size): c-ssize {
-  let f = magic cast(FD.descriptor, c-int, f) in
+define read(f: descriptor, content-pointer: pointer, max-read-size: c-size): c-ssize {
+  let f = magic cast(descriptor, c-int, f) in
   introspect operating-system {
   | darwin =>
     magic external read(f, content-pointer, max-read-size)
@@ -113,8 +113,8 @@ define read(f: FD.descriptor, content-pointer: pointer, max-read-size: c-size): 
   }
 }
 
-define lseek(f: FD.descriptor, offset: c-offset, seek-mode: c-int): c-offset {
-  let f = magic cast(FD.descriptor, c-int, f) in
+define lseek(f: descriptor, offset: c-offset, seek-mode: c-int): c-offset {
+  let f = magic cast(descriptor, c-int, f) in
   introspect operating-system {
   | darwin =>
     magic external lseek(f, offset, seek-mode)

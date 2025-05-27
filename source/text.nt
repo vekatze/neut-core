@@ -1,27 +1,25 @@
 import {
-  Ext,
-  L,
-  Magic,
-  Mem,
-  Word,
   this.binary {_copy-binary, binary, binary-access, binary-length, binary-new},
   this.bool {False, True, bool},
   this.box,
   this.c-size {C-Size, c-size},
   this.either {Right, none},
+  this.external {malloc},
   this.list {Cons, Nil, list, reverse},
-  this.memory {load-int8},
+  this.magic,
+  this.memory {load-int, load-int8, store-int},
   this.pair {Pair, pair},
   this.pointer {shift},
   this.rune {load-rune, size-by-head-byte, store-rune, to-int32},
   this.unit {Unit, unit},
+  this.word,
 }
 
 data text {
 | _Text(content: binary)
 }
 
-define create(xs: L.list(int8)): text {
+define create(xs: list(int8)): text {
   magic cast(binary, text, binary-new(xs))
 }
 
@@ -40,9 +38,9 @@ inline text-byte-length(t: &text): int {
 }
 
 define _get-content-pointer(t: &text): pointer {
-  let ptr = Magic.cast(&text, pointer, t) in
-  let from = Mem.load-int(ptr) in
-  let u = Word.size in
+  let ptr = this.magic.cast(&text, pointer, t) in
+  let from = load-int(ptr) in
+  let u = this.word.size in
   shift(ptr, add-int(mul-int(u, 2), from))
 }
 
@@ -326,11 +324,11 @@ define _char-list-length(xs: &list(rune), acc: int): int {
 
 define pack(xs: &list(rune)): text {
   let len = _char-list-length(xs, 0) in
-  let u = Word.size in
+  let u = this.word.size in
   let u2 = mul-int(u, 2) in
-  let new-text = Ext.malloc(C-Size(add-int(len, u2))) in
-  Mem.store-int(0, new-text);
-  Mem.store-int(len, shift(new-text, u));
+  let new-text = malloc(C-Size(add-int(len, u2))) in
+  store-int(0, new-text);
+  store-int(len, shift(new-text, u));
   let content-ptr = shift(new-text, u2) in
   let loop =
     define self(offset: int, xs: &list(rune)): unit {
@@ -624,11 +622,11 @@ inline drop-while-end-N(t: &text, !pred: (rune) -> bool): text {
 define replicate(t: &text, n: int): text {
   let base-len = text-byte-length(t) in
   let len = mul-int(n, base-len) in
-  let u = Word.size in
+  let u = this.word.size in
   let u2 = mul-int(u, 2) in
-  let new-text = Ext.malloc(C-Size(add-int(len, u2))) in
-  Mem.store-int(0, new-text);
-  Mem.store-int(len, shift(new-text, u));
+  let new-text = malloc(C-Size(add-int(len, u2))) in
+  store-int(0, new-text);
+  store-int(len, shift(new-text, u));
   let content-ptr = shift(new-text, u2) in
   let loop =
     define self(count: int, t: &text): unit {

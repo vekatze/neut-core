@@ -1,8 +1,7 @@
 import {
-  E,
   this.bool {False, True, bool},
   this.box,
-  this.eq {Eq, eq},
+  this.eq {Eq, comap, eq},
   this.list {Cons, Nil, list},
 }
 
@@ -82,7 +81,7 @@ inline nub<a>(!e: eq(&a)): (xs: &list(a)) -> list(a) {
         | Nil =>
           Nil
         | Cons(y, ys) =>
-          let already-found-p on y, acc = member(E.comap(!e, exact _nop-copy))(acc, y) in
+          let already-found-p on y, acc = member(comap(!e, exact _nop-copy))(acc, y) in
           if already-found-p {
             nub(ys, acc)
           } else {

@@ -18,8 +18,8 @@ nominal {
   c-string: type,
 }
 
-define length-c-string(s: &c-string): int {
-  magic external strlen(magic cast(&c-string, pointer, s))
+define _length-c-string(s: pointer): int {
+  magic external strlen(s)
 }
 
 // null-terminated string
@@ -28,13 +28,15 @@ resource c-string {
     free(ptr)
   },
   function (ptr: pointer) {
-    let s = cast(pointer, &c-string, ptr) in
-    let len = length-c-string(s) in
+    let len = _length-c-string(ptr) in
     let new-ptr = malloc(C-Size(add-int(len, 1))) in
-    let s2 = cast(&c-string, pointer, s) in
-    let _ = magic external llvm.memcpy.p0.p0.i64(new-ptr, s2, len, 0) in
+    let _ = magic external llvm.memcpy.p0.p0.i64(new-ptr, ptr, len, 0) in
     new-ptr
   },
+}
+
+define length-c-string(s: &c-string): int {
+  _length-c-string(magic cast(&c-string, pointer, s))
 }
 
 define to-c-string(t: &text): c-string {

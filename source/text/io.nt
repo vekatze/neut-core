@@ -1,13 +1,11 @@
 import {
   this.binary {binary},
   this.binary.io,
-  this.control {loop},
-  this.either {Right},
+  this.either {Left, Right},
   this.file.descriptor {descriptor, stdin, stdout},
-  this.int.show {show-int},
   this.list {for, list},
   this.magic,
-  this.system {system},
+  this.system {get-error-message, system},
   this.text {_format, text, to-binary},
   this.unit {Unit, unit},
 }
@@ -46,19 +44,21 @@ define get-line(initial-buffer-size: int): system(text) {
 }
 
 define zen(): unit {
-  print("hey\n");
-  writef(stdout, "hello, {}!\n", [show-int(1234)]);
-  loop(10000, function (_) {
-    let _ = write(stdout, "hello.\n") in
-    Unit
-  });
-  Unit
-  // let _ = write(stdout, "hello.\n") in
-  // let value = read(stdin, 10) in
-  // match value {
-  // | Right(_) =>
-  //   print("success\n")
-  // | Left(e) =>
-  //   printf("{}\n", [get-error-message(e)])
-  // }
+  // print("hey\n");
+  // writef(stdout, "hello, {}!\n", [show-int(1234)]);
+  // loop(10000, function (_) {
+  //   let _ = write(stdout, "hello.\n") in
+  //   Unit
+  // });
+  // Unit
+  let _ = write(stdout, "hello.\n") in
+  let value = read(stdin, 10) in
+  match value {
+  | Right(_) =>
+    // pin txt = _Text(value) in
+    print("success\n")
+    // print(txt)
+  | Left(e) =>
+    printf("{}\n", [get-error-message(e)])
+  }
 }

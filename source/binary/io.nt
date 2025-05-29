@@ -1,10 +1,10 @@
 import {
   this.binary {_get-content-pointer, binary, binary-length},
   this.bool,
-  this.c-size {C-Size, c-size, from-c-size},
-  this.c-ssize {eq-c-ssize, from-c-ssize, lt-c-ssize},
+  this.c-size {C-Size},
+  this.c-ssize {C-SSize, from-c-ssize, lt-c-ssize},
   this.either {Left, Right},
-  this.external {free, malloc, read, realloc, write},
+  this.external {malloc, read, realloc, write},
   this.file.descriptor {descriptor},
   this.int.show {show-int},
   this.list,
@@ -45,34 +45,31 @@ define write(d: descriptor, b: &binary): system(unit) {
 }
 
 define _read-inner(
-  from: descriptor,
-  ptr: pointer,
-  ptr-size: int,
-  len-cand: int,
-  buffer-size: c-size,
+  data-source: descriptor,
+  base-ptr: pointer,
+  current-length: int,
+  buffer-size: int,
 ): system(binary) {
   let u = this.word.size in
-  let content-size = sub-int(ptr-size, mul-int(u, 2)) in
-  if lt-int(content-size, add-int(len-cand, from-c-size(buffer-size))) {
-    let new-size = mul-int(ptr-size, 2) in
-    let new-ptr = realloc(ptr, C-Size(new-size)) in
-    if eq-int(extract(new-ptr), 0) {
-      report-system-error()
-    } else {
-      _read-inner(from, new-ptr, new-size, len-cand, buffer-size)
-    }
+  let content-ptr = shift(base-ptr, add-int(mul-int(u, 2), current-length)) in
+  let readable-size = sub-int(buffer-size, current-length) in
+  let C-SSize(bytes) = read(data-source, content-ptr, C-Size(readable-size)) in
+  let next-length = add-int(current-length, bytes) in
+  if lt-int(bytes, 0) {
+    report-system-error()
+  } else-if eq-int(bytes, 0) {
+    this.memory.store-int(next-length, shift(base-ptr, u));
+    Right(this.magic.cast(pointer, binary, base-ptr))
+  } else-if lt-int(bytes, readable-size) {
+    _read-inner(data-source, base-ptr, next-length, buffer-size)
   } else {
-    let content-ptr = shift(ptr, add-int(mul-int(u, 2), len-cand)) in
-    let bytes = read(from, content-ptr, buffer-size) in
-    let next-len-cand = add-int(len-cand, from-c-ssize(bytes)) in
-    if lt-c-ssize(bytes, 0) {
-      free(ptr);
+    let new-buffer-size = mul-int(buffer-size, 2) in
+    let new-size = add-int(mul-int(u, 2), new-buffer-size) in
+    let new-base-ptr = realloc(base-ptr, C-Size(new-size)) in
+    if eq-int(extract(new-base-ptr), 0) {
       report-system-error()
-    } else-if eq-c-ssize(bytes, 0) {
-      this.memory.store-int(next-len-cand, shift(ptr, u));
-      Right(this.magic.cast(pointer, binary, ptr))
     } else {
-      _read-inner(from, ptr, ptr-size, next-len-cand, buffer-size)
+      _read-inner(data-source, new-base-ptr, next-length, new-buffer-size)
     }
   }
 }
@@ -85,9 +82,9 @@ define read(from: descriptor, initial-buffer-size: int): system(binary) {
     )))
   } else {
     let u = this.word.size in
-    let ptr-size = add-int(initial-buffer-size, mul-int(u, 2)) in
+    let ptr-size = add-int(mul-int(u, 2), initial-buffer-size) in
     let ptr = malloc(C-Size(ptr-size)) in
     this.memory.store-int(0, ptr);
-    _read-inner(from, ptr, ptr-size, 0, C-Size(initial-buffer-size))
+    _read-inner(from, ptr, 0, initial-buffer-size)
   }
 }

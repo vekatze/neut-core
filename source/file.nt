@@ -17,8 +17,8 @@ define open(path: &text, xs: list(flag), ms: list(mode)): system(descriptor) {
   let fd =
     this.external.open(
       actual-path-string,
-      this.file.mode.interpret(ms),
       this.file.flag.interpret(xs),
+      this.file.mode.interpret(ms),
     )
   in
   if lt-int32(magic cast(descriptor, int32, fd), 0) {

@@ -6,7 +6,7 @@ import {
   this.unit {Unit, unit},
 }
 
-define unsafe-panic<a>(t: &text): a {
+define panic<a>(t: &text): a {
   print(t);
   exit(1)
 }
@@ -21,7 +21,7 @@ inline _assert(message: &text, check: () -> bool): unit {
     if check() {
       Unit
     } else {
-      unsafe-panic(message)
+      panic(message)
     }
   }
 }

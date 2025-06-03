@@ -1,6 +1,7 @@
 import {
   this.binary {_get-content-pointer, binary, binary-length},
   this.bool {False, True, bool},
+  this.box,
   this.int {min-int},
   this.int.ord,
   this.memory {load-int8},
@@ -36,15 +37,15 @@ inline cmp-binary(xs1: &binary, xs2: &binary): ordering {
       }
     }
   in
-  let len1 = binary-length(xs1) in
-  let len2 = binary-length(xs2) in
-  let min-len = min-int(len1, len2) in
+  pin len1 = binary-length(xs1) in
+  pin len2 = binary-length(xs2) in
   let fallback-value =
     let Ord of {compare} = this.int.ord.as-ord in
     compare(len1, len2)
   in
   let ptr1 = _get-content-pointer(xs1) in
   let ptr2 = _get-content-pointer(xs2) in
+  let min-len = min-int(*len1, *len2) in
   f(ptr1, ptr2, 0, min-len, fallback-value)
 }
 
@@ -84,7 +85,7 @@ define ge-binary(t1: &binary, t2: &binary): bool {
   }
 }
 
-inline as-ord: ord(&binary) {
+inline as-ord: ord(binary) {
   Ord of {
     compare = {
       function (x, y) {

@@ -8,19 +8,6 @@ inline as-ord: ord(unit) {
   Ord of {
     compare = {
       function (x1, x2) {
-        match x1, x2 {
-        | Unit, Unit =>
-          EQ
-        }
-      }
-    },
-  }
-}
-
-inline as-ord-N: ord(&unit) {
-  Ord of {
-    compare = {
-      function (x1, x2) {
         case x1, x2 {
         | Unit, Unit =>
           EQ

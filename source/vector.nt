@@ -8,7 +8,7 @@ import {
   this.function {compose},
   this.int {abs-int, max-int, min-int},
   this.int.io {print-int-line},
-  this.int.ord {as-ord-N},
+  this.int.ord {as-ord},
   this.list {Cons, Nil, list, minimum},
   this.magic {cast},
   this.memory {load-int, load-pointer, store-int, store-pointer},
@@ -420,7 +420,7 @@ define for-each-vertical<a, b>(xs: vector(a), col-size: int, !f: (a, int) -> b):
 inline zip-with-N<a, b, c>(xs: &vector(a), ys: &vector(b), f: (&a, &b, int) -> c): vector(c) {
   let len1 = length(xs) in
   let len2 = length(ys) in
-  let min-func = minimum(as-ord-N) in
+  let min-func = minimum(as-ord) in
   let len-or-none = min-func([len1, len2]) in
   let len = from-right(len-or-none, 0) in
   let result = make(len) in

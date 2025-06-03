@@ -9,22 +9,6 @@ inline as-ord: ord(int) {
   Ord of {
     compare = {
       function (x, y) {
-        if gt-int(x, y) {
-          GT
-        } else-if lt-int(x, y) {
-          LT
-        } else {
-          EQ
-        }
-      }
-    },
-  }
-}
-
-inline as-ord-N: ord(&int) {
-  Ord of {
-    compare = {
-      function (x, y) {
         if gt-int(*x, *y) {
           GT
         } else-if lt-int(*x, *y) {
@@ -38,22 +22,6 @@ inline as-ord-N: ord(&int) {
 }
 
 inline as-ord-int8: ord(int8) {
-  Ord of {
-    compare = {
-      function (x, y) {
-        if gt-int8(x, y) {
-          GT
-        } else-if lt-int8(x, y) {
-          LT
-        } else {
-          EQ
-        }
-      }
-    },
-  }
-}
-
-inline as-ord-int8-N: ord(&int8) {
   Ord of {
     compare = {
       function (x, y) {

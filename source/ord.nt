@@ -4,6 +4,6 @@ import {
 
 data ord(a) {
 | Ord(
-    compare: (a, a) -> ordering,
+    compare: (&a, &a) -> ordering,
   )
 }

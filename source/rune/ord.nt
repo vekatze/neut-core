@@ -34,22 +34,6 @@ inline as-ord: ord(rune) {
   Ord of {
     compare = {
       function (x, y) {
-        if gt-rune(x, y) {
-          GT
-        } else-if lt-rune(x, y) {
-          LT
-        } else {
-          EQ
-        }
-      }
-    },
-  }
-}
-
-inline as-ord-N: ord(&rune) {
-  Ord of {
-    compare = {
-      function (x, y) {
         if gt-rune(*x, *y) {
           GT
         } else-if lt-rune(*x, *y) {

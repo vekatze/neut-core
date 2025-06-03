@@ -408,7 +408,7 @@ inline sum<a>(as-monoid: monoid(a), xs: list(a)): a {
   })
 }
 
-inline minimum<a>(as-ord: ord(&a)): (list(a)) -> ?a {
+inline minimum<a>(as-ord: ord(a)): (list(a)) -> ?a {
   function (xs) {
     let Ord of {compare} = as-ord in
     match xs {
@@ -428,7 +428,7 @@ inline minimum<a>(as-ord: ord(&a)): (list(a)) -> ?a {
   }
 }
 
-inline maximum<a>(as-ord: ord(&a)): (list(a)) -> ?a {
+inline maximum<a>(as-ord: ord(a)): (list(a)) -> ?a {
   function (xs) {
     let Ord of {compare = !compare} = as-ord in
     let helper =

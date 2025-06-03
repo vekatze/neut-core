@@ -56,7 +56,7 @@ define ne-binary(t1: &binary, t2: &binary): bool {
   not(eq-binary(t1, t2))
 }
 
-inline as-eq: eq(&binary) {
+inline as-eq: eq(binary) {
   Eq of {equal = eq-binary}
 }
 

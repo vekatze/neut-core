@@ -1,12 +1,8 @@
 import {
   this.eq {eq, from-ord},
-  this.int.ord {as-ord, as-ord-N},
+  this.int.ord {as-ord},
 }
 
 inline as-eq: eq(int) {
   from-ord(as-ord)
-}
-
-inline as-eq-N: eq(&int) {
-  from-ord(as-ord-N)
 }

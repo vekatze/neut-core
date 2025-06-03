@@ -4,7 +4,7 @@ import {
   this.vector {_access, length, vector},
 }
 
-inline as-eq<a>(class: eq(&a)): eq(&vector(a)) {
+inline as-eq<a>(class: eq(a)): eq(vector(a)) {
   let Eq of {equal = !equal} = class in
   Eq of {
     equal = {

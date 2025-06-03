@@ -8,19 +8,6 @@ inline as-eq: eq(unit) {
   Eq of {
     equal = {
       function (x1, x2) {
-        match x1, x2 {
-        | Unit, Unit =>
-          True
-        }
-      }
-    },
-  }
-}
-
-inline as-eq-N: eq(&unit) {
-  Eq of {
-    equal = {
-      function (x1, x2) {
         case x1, x2 {
         | Unit, Unit =>
           True

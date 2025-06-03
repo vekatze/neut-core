@@ -1,34 +1,29 @@
 import {
   this.box,
   this.control {grow},
-  this.dictionary {Trope, dictionary},
+  this.dictionary {dictionary, insert, lookup},
   this.either {Left, Right},
   this.int.io {print-int-line},
-  this.int.ord {as-ord-N},
+  this.int.ord,
+  this.ord {ord},
   this.random {random-int},
   this.unit {Unit, unit},
 }
 
-inline intdict: this.dictionary.trope(int) {
-  this.dictionary.from-ord(as-ord-N)
-}
-
-define make-big-dictionary(): dictionary(int, int) {
+define make-big-dictionary(k: &ord(int)): dictionary(int, int) {
   grow(this.dictionary.empty, 700000, function (acc, _) {
     let key = random-int(1000000) in
     let val = random-int(1000000) in
-    let Trope of {insert} = intdict in
-    insert(acc, key, val)
+    insert(k, acc, key, val)
   })
 }
 
-define random-lookup-sum(d: &dictionary(int, int)): unit {
-  let Trope of {lookup} = intdict in
+define random-lookup-sum(k: &ord(int), d: &dictionary(int, int)): unit {
   let rsum =
     grow(0, 700000, function (acc, _) {
       let key = random-int(1000000) in
       let val on key =
-        match lookup(d, key) {
+        match lookup(k, d, key) {
         | Left(_) =>
           0
         | Right(v) =>
@@ -43,8 +38,9 @@ define random-lookup-sum(d: &dictionary(int, int)): unit {
 }
 
 define main(): unit {
-  let big-dictionary = make-big-dictionary() in
-  let _ on big-dictionary = random-lookup-sum(big-dictionary) in
+  pin k = this.int.ord.as-ord in
+  let big-dictionary = make-big-dictionary(k) in
+  let _ on big-dictionary = random-lookup-sum(k, big-dictionary) in
   let _ = big-dictionary in
   Unit
 }

@@ -8,33 +8,6 @@ inline as-ord<a>(!o: ord(a)): ord(list(a)) {
   Ord of {
     compare = {
       define self(xs, ys) {
-        match xs, ys {
-        | Nil, Nil =>
-          EQ
-        | Nil, Cons(_, _) =>
-          LT
-        | Cons(_, _), Nil =>
-          GT
-        | Cons(x, xs), Cons(y, ys) =>
-          let Ord of {compare} = !o in
-          match compare(x, y) {
-          | LT =>
-            LT
-          | GT =>
-            GT
-          | EQ =>
-            self(xs, ys)
-          }
-        }
-      }
-    },
-  }
-}
-
-inline as-ord-N<a>(!o: ord(&a)): ord(&list(a)) {
-  Ord of {
-    compare = {
-      define self(xs, ys) {
         case xs, ys {
         | Nil, Nil =>
           EQ

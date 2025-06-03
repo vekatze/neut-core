@@ -6,7 +6,7 @@ import {
 
 data eq(a) {
 | Eq(
-    equal: (a, a) -> bool,
+    equal: (&a, &a) -> bool,
   )
 }
 
@@ -21,17 +21,6 @@ inline from-ord<a>(o: ord(a)): eq(a) {
         | _ =>
           False
         }
-      }
-    },
-  }
-}
-
-inline comap<a, b>(e: eq(b), !f: (a) -> b): eq(a) {
-  Eq of {
-    equal = {
-      function (x, y) {
-        let Eq of {equal} = e in
-        equal(!f(x), !f(y))
       }
     },
   }

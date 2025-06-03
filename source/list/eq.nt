@@ -1,35 +1,11 @@
 import {
   this.bool {False, True, bool},
   this.box,
-  this.eq {Eq, comap, eq},
+  this.eq {Eq, eq},
   this.list {Cons, Nil, list},
 }
 
 inline as-eq<a>(f: eq(a)): eq(list(a)) {
-  let Eq of {equal = !eq} = f in
-  Eq of {
-    equal = {
-      define self(xs, ys) {
-        match xs, ys {
-        | Nil, Nil =>
-          True
-        | Nil, Cons(_, _) =>
-          False
-        | Cons(_, _), Nil =>
-          False
-        | Cons(x, xs), Cons(y, ys) =>
-          if !eq(x, y) {
-            self(xs, ys)
-          } else {
-            False
-          }
-        }
-      }
-    },
-  }
-}
-
-inline as-eq-N<a>(f: eq(&a)): eq(&list(a)) {
   let Eq of {equal = !eq} = f in
   Eq of {
     equal = {
@@ -57,53 +33,35 @@ define _nop-copy<a>(x: &&a): &a {
   *x
 }
 
-inline member<a>(!e: eq(&a)): (xs: &list(a), value: &a) -> bool {
-  define member(xs: &list(a), value: &a): bool {
-    case xs {
-    | Nil =>
-      False
-    | Cons(y, ys) =>
-      let Eq of {equal} = !e in
-      if equal(value, y) {
-        True
-      } else {
-        member(ys, value)
-      }
+define member<a>(e: &eq(a), xs: &list(a), value: &a): bool {
+  case xs {
+  | Nil =>
+    False
+  | Cons(y, ys) =>
+    tie Eq of {equal} = e in
+    if equal(value, y) {
+      True
+    } else {
+      member(e, ys, value)
     }
   }
 }
 
-inline nub<a>(!e: eq(&a)): (xs: &list(a)) -> list(a) {
-  function (xs) {
-    let f =
-      define nub(xs: &list(a), acc: list(&a)): list(a) {
-        case xs {
-        | Nil =>
-          Nil
-        | Cons(y, ys) =>
-          let already-found-p on y, acc = member(comap(!e, exact _nop-copy))(acc, y) in
-          if already-found-p {
-            nub(ys, acc)
-          } else {
-            Cons(*y, nub(ys, Cons(y, acc)))
-          }
+define nub<a>(e: &eq(a), xs: list(a)): list(a) {
+  let f =
+    define nub(xs: list(a), acc: list(a)): list(a) {
+      match xs {
+      | Nil =>
+        Nil
+      | Cons(!y, ys) =>
+        let already-found-p on acc, !y = member(e, acc, !y) in
+        if already-found-p {
+          nub(ys, acc)
+        } else {
+          Cons(!y, nub(ys, Cons(!y, acc)))
         }
       }
-    in
-    f(xs, [])
-  }
-}
-
-data trope(a) {
-| Trope(
-    member: (xs: &list(a), value: &a) -> bool,
-    nub: (xs: &list(a)) -> list(a),
-  )
-}
-
-inline from-eq<a>(!e: eq(&a)): trope(a) {
-  Trope of {
-    nub = nub(!e),
-    member = member(!e),
-  }
+    }
+  in
+  f(xs, [])
 }

@@ -4,30 +4,16 @@ import {
   this.list {Cons, Nil, list},
 }
 
-inline _elem<a>(!e: eq(&a)): (xs: &list(a), x: &a) -> bool {
-  define self(xs: &list(a), x: &a): bool {
-    case xs {
-    | Nil =>
-      False
-    | Cons(y, ys) =>
-      let Eq of {equal} = !e in
-      if equal(x, y) {
-        True
-      } else {
-        self(ys, x)
-      }
+define elem<a>(e: &eq(a), xs: &list(a), x: &a): bool {
+  case xs {
+  | Nil =>
+    False
+  | Cons(y, ys) =>
+    tie Eq of {equal} = e in
+    if equal(x, y) {
+      True
+    } else {
+      elem(e, ys, x)
     }
-  }
-}
-
-data trope(a) {
-| Trope(
-    elem: (xs: &list(a), x: &a) -> bool,
-  )
-}
-
-inline from-eq<a>(e: eq(&a)): trope(a) {
-  Trope of {
-    elem = _elem(e),
   }
 }

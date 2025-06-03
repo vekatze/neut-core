@@ -30,7 +30,7 @@ define ge-text(t1: &text, t2: &text): bool {
   ge-binary(xs1, xs2)
 }
 
-inline as-ord: ord(&text) {
+inline as-ord: ord(text) {
   Ord of {
     compare = {
       function (x, y) {

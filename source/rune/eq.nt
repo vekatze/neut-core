@@ -19,16 +19,9 @@ define ne-rune(r1: rune, r2: rune): bool {
 
 inline as-eq: eq(rune) {
   Eq of {
-    equal = eq-rune,
-  }
-}
-
-inline as-eq-N: eq(&rune) {
-  Eq of {
     equal = {
       function (x, y) {
-        let Eq of {equal} = as-eq in
-        equal(*x, *y)
+        eq-rune(*x, *y)
       }
     },
   }

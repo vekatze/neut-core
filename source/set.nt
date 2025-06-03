@@ -1,52 +1,39 @@
 import {
   this.bool {False, True, bool},
-  this.dictionary {dictionary, empty, singleton},
+  this.dictionary {dictionary},
   this.either {Left, Right},
   this.ord {ord},
   this.unit {Unit, unit},
 }
 
-inline set(a): type {
-  dictionary(a, unit)
+data set(a) {
+| _Set(dictionary(a, unit))
 }
 
-data trope(k) {
-| Trope(
-    empty: set(k),
-    singleton: (k) -> set(k),
-    insert: (set(k), k) -> set(k),
-    delete: (set(k), k) -> set(k),
-    lookup: (&set(k), &k) -> bool,
-  )
+define empty<a>: set(a) {
+  _Set(this.dictionary.empty)
 }
 
-inline from-ord<k>(_ord: ord(&k)): trope(k) {
-  let this.dictionary.Trope of {insert, lookup, delete} = this.dictionary.from-ord(_ord) in
-  let !insert = insert in
-  let !delete = delete in
-  let !lookup = lookup in
-  Trope of {
-    empty,
-    singleton = {
-      function (k) {
-        singleton(k, Unit)
-      }
-    },
-    insert = {
-      function (s, k) {
-        !insert(s, k, Unit)
-      }
-    },
-    delete = exact !delete,
-    lookup = {
-      function (s, k) {
-        match !lookup(s, k) {
-        | Right(_) =>
-          True
-        | Left(_) =>
-          False
-        }
-      }
-    },
+define singleton<a>(x: a): set(a) {
+  _Set(this.dictionary.singleton(x, Unit))
+}
+
+define insert<a>(k: &ord(a), s: set(a), x: a): set(a) {
+  let _Set(s) = s in
+  _Set(this.dictionary.insert(k, s, x, Unit))
+}
+
+define delete<a>(k: &ord(a), s: set(a), x: a): set(a) {
+  let _Set(s) = s in
+  _Set(this.dictionary.delete(k, s, x))
+}
+
+define member<a>(k: &ord(a), s: &set(a), x: &a): bool {
+  tie _Set(s) = s in
+  match this.dictionary.lookup(k, s, x) {
+  | Right(_) =>
+    True
+  | Left(_) =>
+    False
   }
 }

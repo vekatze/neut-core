@@ -9,22 +9,6 @@ inline as-ord: ord(float) {
   Ord of {
     compare = {
       function (x, y) {
-        if gt-float(x, y) {
-          GT
-        } else-if lt-float(x, y) {
-          LT
-        } else {
-          EQ
-        }
-      }
-    },
-  }
-}
-
-inline as-ord-N: ord(&float) {
-  Ord of {
-    compare = {
-      function (x, y) {
         if gt-float(*x, *y) {
           GT
         } else-if lt-float(*x, *y) {

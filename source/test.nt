@@ -1,7 +1,7 @@
 import {
   this.bool {True, bool},
   this.box {axiom-T},
-  this.cell {_new-cell, extract, mutate},
+  this.cell {_make-cell, extract, mutate},
   this.control {discard},
   this.either {Left, Right, either},
   this.float.io {print-float-line},
@@ -17,7 +17,7 @@ import {
 }
 
 define with-cell(i: int): int {
-  let c = _new-cell(i) in
+  let c = _make-cell(i) in
   let _ on c =
     mutate(c, function (x) {
       add-int(x, 1)
@@ -97,7 +97,7 @@ define zen(): unit {
   let v = with-cell(3) in
   print("result of with-cell(3): ");
   print-int-line(v);
-  let c = new-cell(*"hello") in
+  let c = make-cell(*"hello") in
   let _ on c =
     let item = "test" in
     let _ =

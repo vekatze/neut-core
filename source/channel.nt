@@ -76,7 +76,7 @@ resource _channel {
   },
 }
 
-inline _new-channel<a>(): channel(a) {
+inline _make-channel<a>(): channel(a) {
   _new(a, empty)
 }
 

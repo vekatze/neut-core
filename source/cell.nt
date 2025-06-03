@@ -73,7 +73,7 @@ resource _cell {
   },
 }
 
-inline _new-cell<a>(initial-value: a): cell(a) {
+inline _make-cell<a>(initial-value: a): cell(a) {
   _new(a, initial-value)
 }
 

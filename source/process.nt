@@ -8,7 +8,7 @@ import {
   this.file {close},
   this.file.descriptor {descriptor, stderr, stdin, stdout},
   this.foreign {_wcoredump, _wexitstatus, _wifexited, _wifsignaled, _wifstopped, _wstopsig, _wtermsig},
-  this.int.show {show-int},
+  this.int.io {print-int-line},
   this.list {Cons, fold-left-with-index, length, list},
   this.magic,
   this.memory {load-c-int, store-int},
@@ -16,7 +16,7 @@ import {
   this.pointer {extract, null-pointer, shift},
   this.system {report-system-error, system},
   this.text {_get-content-pointer, text},
-  this.text.io {print, printf, read, write},
+  this.text.io {print, print-line, read, write},
   this.unit {Unit, unit},
   this.word,
 }
@@ -169,7 +169,7 @@ define spawn(
 define _print-process-result-status(st: process-result-status): unit {
   match st {
   | Exited(status) =>
-    printf("{}\n", [show-int(from-c-int(status))])
+    print-int-line(from-c-int(status))
   | Signaled(_, _) =>
     Unit
   | Stopped(_) =>
@@ -194,8 +194,7 @@ define zen(): unit {
     let _ = stderr-text in
     print("exit-code: ");
     _print-process-result-status(status);
-    print("\n");
-    print("success\n")
+    print-line("success")
   | Left(e) =>
     print("fail: ");
     pin message = this.system.get-error-message(e) in

@@ -4,16 +4,15 @@ import {
   this.cell {_new-cell, extract, mutate},
   this.control {discard},
   this.either {Left, Right, either},
-  this.float.show {show-float},
+  this.float.io {print-float-line},
   this.int {power-int},
-  this.int.show {show-int},
+  this.int.io {print-int-line},
   this.list {for-each, length, list, partition},
   this.pair {Pair, pair},
   this.random {random-float32, random-int},
   this.ref {_make-ref, ref},
-  this.rune {to-int},
   this.text {text},
-  this.text.io {print, printf},
+  this.text.io {print, print-line},
   this.unit {Unit, unit},
 }
 
@@ -59,10 +58,13 @@ define use-rune(r: rune): unit {
 
 define my-random-in-range(lower-bound: int32, upper-bound: int32): int {
   let range-size = sub-int32(upper-bound, lower-bound) in
-  printf("range-size: {}\n", [show-int(sext-int32-int(range-size))]);
-  printf("range-upper: {}\n", [show-int(sext-int32-int(add-int32(range-size, 1)))]);
+  print("range-size: ");
+  print-int-line(sext-int32-int(range-size));
+  print("range-upper: ");
+  print-int-line(sext-int32-int(add-int32(range-size, 1)));
   let value = random-int(add-int32(range-size, 1)) in
-  printf("value: {}\n", [show-int(value)]);
+  print("value: ");
+  print-int-line(value);
   add-int(value, sext-int32-int(lower-bound))
 }
 
@@ -76,21 +78,25 @@ define zen(): unit {
     add-int(x, 10)
   });
   let value = this.ref.clone(r) in
-  printf("ref-value: {}\n", [show-int(value)]);
+  print("ref-value: ");
+  print-int-line(value);
   let xs: list(either(int, bool)) = [Left(3), Right(True), Left(2), Right(True), Left(134), Right(True)] in
   let Pair(ys, _) = partition(xs) in
   let _ =
     for-each(ys, function (y) {
-      printf("item: {}\n", [show-int(y)])
+      print("item: ");
+      print-int-line(y)
     })
   in
   let !k = use-text("te") in
-  printf("{}\n", [!k]);
-  printf("{}\n", [!k]);
-  printf("{}\n", [!k]);
-  printf("{}\n", [!k]);
+  let _ on !k = print-line(!k) in
+  let _ on !k = print-line(!k) in
+  let _ on !k = print-line(!k) in
+  let _ on !k = print-line(!k) in
+  let _ = !k in
   let v = with-cell(3) in
-  printf("result of with-cell(3): {}\n", [show-int(v)]);
+  print("result of with-cell(3): ");
+  print-int-line(v);
   let c = new-cell(*"hello") in
   let _ on c =
     let item = "test" in
@@ -102,17 +108,20 @@ define zen(): unit {
     in
     Unit
   in
-  let val = extract(c) in
-  printf("extracted: {}\n", [val]);
+  pin val = extract(c) in
+  print("extracted: ");
+  print-line(val);
   pin yo: pair(int, bool) = Pair(3, True) in
   let tmp = *yo in
   let Pair(_, _) = tmp in
   let val = random-float32(-5, 5) in
-  printf("random-float: {}\n", [show-float(fpext-float32-float(val))]);
-  printf("value: {}\n", [show-int(sext-int32-int(trunc-int-int32(-3234)))]);
+  print("random-float: ");
+  print-float-line(fpext-float32-float(val), 7);
+  print("value: ");
+  print-int-line(sext-int32-int(trunc-int-int32(-3234)));
   let k: int = 2 in
   let val = power-int(k, 5) in
-  printf("{}\n", [show-int(val)]);
+  print-int-line(val);
   let foo = `x` in
   use-rune(foo);
   match foo {
@@ -151,9 +160,12 @@ define zen(): unit {
   let _ = discard(!xs) in
   let _ = discard(!xs) in
   let _ = discard(!xs) in
-  printf("len: {}\n", [show-int(len)]);
-  printf("rune-as-int: {}\n", [show-int(to-int(foo))]);
+  print("len: ");
+  print-int-line(len);
+  print("rune-as-int: ");
+  print-int-line(len);
   print("hello, world\n");
+  print-line("yo");
   Unit
 }
 

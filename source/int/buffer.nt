@@ -1,0 +1,82 @@
+import {
+  this.buffer {buffer, flush, make-buffer},
+  this.file.descriptor {stdout},
+  this.pointer {shift},
+  this.text,
+  this.text.buffer {write},
+  this.unit {unit},
+}
+
+foreign {
+  neut_core_v0_51_write_int64_core(pointer, int, int32): int,
+}
+
+define write-int(b: &buffer, x: int): unit {
+  let buffer-ptr = magic alloca(int, 22) in
+  let buf-end = shift(buffer-ptr, 22) in
+  let len = magic external neut_core_v0_51_write_int64_core(buf-end, x, 0) in
+  this.buffer._write(b, shift(buf-end, mul-int(-1, len)), len)
+}
+
+define write-int-line(b: &buffer, x: int): unit {
+  let buffer-ptr = magic alloca(int, 22) in
+  let buf-end = shift(buffer-ptr, 22) in
+  let len = magic external neut_core_v0_51_write_int64_core(buf-end, x, 1) in
+  this.buffer._write(b, shift(buf-end, mul-int(-1, len)), len)
+}
+
+define zen(): unit {
+  pin b = make-buffer(stdout, 10) in
+  write-int(b, 0);
+  write(b, "\n");
+  write-int(b, 1);
+  write(b, "\n");
+  write-int(b, -1);
+  write(b, "\n");
+  write-int(b, 9223372036854775807);
+  write(b, "\n");
+  write-int(b, -9223372036854775808);
+  write(b, "\n");
+  write-int(b, 9223372036854775806);
+  write(b, "\n");
+  write-int(b, -9223372036854775807);
+  write(b, "\n");
+  write-int(b, 0x7fffffffffffffff);
+  write(b, "\n");
+  write-int(b, 0x8000000000000000);
+  write(b, "\n");
+  write-int(b, 0x0000000100000000);
+  write(b, "\n");
+  write-int(b, 0xffffffffffffffff);
+  write(b, "\n");
+  write-int(b, 1234567890123456789);
+  write(b, "\n");
+  write-int(b, -1234567890123456789);
+  write(b, "\n");
+  write-int(b, 1000000000000000000);
+  write(b, "\n");
+  write-int(b, -1000000000000000000);
+  write(b, "\n");
+  write-int(b, 999999999999999999);
+  write(b, "\n");
+  write-int(b, -999999999999999999);
+  write(b, "\n");
+  write-int-line(b, 0);
+  write-int-line(b, 1);
+  write-int-line(b, -1);
+  write-int-line(b, 9223372036854775807);
+  write-int-line(b, -9223372036854775808);
+  write-int-line(b, 9223372036854775806);
+  write-int-line(b, -9223372036854775807);
+  write-int-line(b, 0x7fffffffffffffff);
+  write-int-line(b, 0x8000000000000000);
+  write-int-line(b, 0x0000000100000000);
+  write-int-line(b, 0xffffffffffffffff);
+  write-int-line(b, 1234567890123456789);
+  write-int-line(b, -1234567890123456789);
+  write-int-line(b, 1000000000000000000);
+  write-int-line(b, -1000000000000000000);
+  write-int-line(b, 999999999999999999);
+  write-int-line(b, -999999999999999999);
+  flush(b)
+}

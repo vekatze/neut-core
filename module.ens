@@ -40,7 +40,7 @@
     system [],
     text ["text"],
     text.eq ["eq-text", "ne-text"],
-    text.io ["print", "printf"],
+    text.io ["print"],
     text.ord ["lt-text", "le-text", "gt-text", "ge-text"],
     thread ["thread"],
     trick [],

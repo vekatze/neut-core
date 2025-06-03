@@ -1,0 +1,37 @@
+import {
+  this.file.descriptor {descriptor, stdout},
+  this.text,
+  this.text.io {print},
+  this.unit {Unit, unit},
+}
+
+foreign {
+  neut_core_v0_51_write_double(int32, float, int): void,
+  neut_core_v0_51_write_double_line(int32, float, int): void,
+}
+
+define write-float(d: descriptor, x: float, decimals: int): unit {
+  let d' = magic cast(descriptor, int32, d) in
+  let _ = magic external neut_core_v0_51_write_double(d', x, decimals) in
+  Unit
+}
+
+define write-float-line(d: descriptor, x: float, decimals): unit {
+  let d' = magic cast(descriptor, int32, d) in
+  let _ = magic external neut_core_v0_51_write_double_line(d', x, decimals) in
+  Unit
+}
+
+define print-float(x: float, decimals: int): unit {
+  write-float(stdout, x, decimals)
+}
+
+define print-float-line(x: float, decimals): unit {
+  write-float-line(stdout, x, decimals)
+}
+
+define zen(): unit {
+  print-float(1234.56789, 2);
+  print("\n");
+  print-float-line(123.45, 7)
+}

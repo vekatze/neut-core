@@ -1,136 +1,12 @@
 import {
   this.binary {binary, binary-length},
-  this.binary.io,
-  this.bool,
-  this.c-size {C-Size},
-  this.control {discard},
-  this.external {free, malloc},
-  this.file.descriptor {descriptor, stdout},
-  this.memory {load-int, store-int},
-  this.pointer {shift},
+  this.buffer {_write, buffer, flush, make-buffer},
+  this.file.descriptor {stdout},
   this.text {to-binary},
-  this.unit {Unit, unit},
-  this.word,
+  this.unit {unit},
 }
 
-foreign {
-  llvm.memcpy.p0.p0.i64(pointer, pointer, int64, int1): void,
-}
-
-inline _memcpy(target-pointer: pointer, source-pointer: pointer, len: int): unit {
-  let _ = magic external llvm.memcpy.p0.p0.i64(target-pointer, source-pointer, len, 0) in
-  Unit
-}
-
-inline _get-pointer-size-from-capacity(capacity: int) {
-  let u = this.word.size in
-  add-int(capacity, mul-int(u, 3))
-}
-
-// internal representation: (current-size, capacity, descriptor, byte-0, byte-1, ..., byte-n)
-resource _buffer-internal {
-  function (x: pointer) {
-    free(x)
-  },
-  function (source-pointer: pointer) {
-    let u = this.word.size in
-    let capacity = load-int(shift(source-pointer, u)) in
-    let pointer-size = _get-pointer-size-from-capacity(capacity) in
-    let new-pointer = malloc(C-Size(pointer-size)) in
-    _memcpy(new-pointer, source-pointer, pointer-size);
-    new-pointer
-  },
-}
-
-data buffer {
-| _Buffer(_buffer-internal)
-}
-
-define make-buffer(d: descriptor, capacity: int): buffer {
-  let capacity =
-    if gt-int(capacity, 0) {
-      capacity
-    } else {
-      4096
-    }
-  in
-  let word-size = this.word.size in
-  let pointer-size = _get-pointer-size-from-capacity(capacity) in
-  let buffer-ptr = malloc(C-Size(pointer-size)) in
-  store-int(0, buffer-ptr);
-  store-int(capacity, shift(buffer-ptr, word-size));
-  store-int(magic cast(descriptor, int, d), shift(buffer-ptr, mul-int(word-size, 2)));
-  magic cast(pointer, buffer, buffer-ptr)
-}
-
-inline _get-current-size(b: &buffer): int {
-  load-int(magic cast(&buffer, pointer, b))
-}
-
-inline _set-current-size(b: &buffer, size: int): unit {
-  store-int(size, magic cast(&buffer, pointer, b))
-}
-
-inline _get-capacity(b: &buffer): int {
-  let u = this.word.size in
-  load-int(shift(magic cast(&buffer, pointer, b), u))
-}
-
-inline _get-descriptor(b: &buffer): descriptor {
-  let u2 = mul-int(this.word.size, 2) in
-  magic cast(int, descriptor, load-int(shift(magic cast(&buffer, pointer, b), u2)))
-}
-
-inline _get-content-pointer(b: &buffer): pointer {
-  let u3 = mul-int(this.word.size, 3) in
-  shift(magic cast(&buffer, pointer, b), u3)
-}
-
-inline _get-next-content-pointer(b: &buffer): pointer {
-  let current-size = _get-current-size(b) in
-  let content-pointer = _get-content-pointer(b) in
-  shift(content-pointer, current-size)
-}
-
-define flush(b: &buffer): unit {
-  let descriptor = _get-descriptor(b) in
-  let current-size = _get-current-size(b) in
-  let content-pointer = _get-content-pointer(b) in
-  let _ = this.binary.io._write-loop(descriptor, content-pointer, current-size) in
-  _set-current-size(b, 0)
-}
-
-define _write(b: &buffer, content-pointer: pointer, content-length: int): unit {
-  let capacity = _get-capacity(b) in
-  let loop =
-    define _buffer-write-loop(current-buffer-size: int, source-pointer: pointer, remaining: int): unit {
-      let new-buffer-size = add-int(current-buffer-size, remaining) in
-      if le-int(new-buffer-size, capacity) {
-        let next-content-pointer = _get-next-content-pointer(b) in
-        _memcpy(next-content-pointer, source-pointer, remaining);
-        _set-current-size(b, new-buffer-size)
-      } else {
-        let written-size = sub-int(capacity, current-buffer-size) in
-        let next-content-pointer = _get-next-content-pointer(b) in
-        _memcpy(next-content-pointer, source-pointer, written-size);
-        _set-current-size(b, capacity);
-        flush(b);
-        _buffer-write-loop(
-          0,
-          shift(source-pointer, written-size),
-          sub-int(remaining, written-size),
-        )
-      }
-    }
-  in
-  loop(
-    _get-current-size(b),
-    content-pointer,
-    content-length,
-  )
-}
-
-define write(b: &buffer, content: &binary): unit {
+define write-binary(b: &buffer, content: &binary): unit {
   _write(
     b,
     this.binary._get-content-pointer(content),
@@ -140,18 +16,16 @@ define write(b: &buffer, content: &binary): unit {
 
 define zen(): unit {
   let !k = make-buffer(stdout, 0) in
-  let _ = discard(!k) in
   let _ = !k in
   let _ = !k in
   pin k = !k in
-  write(k, to-binary("hello\n"));
-  write(k, to-binary("hello\n"));
-  write(k, to-binary("hello\n"));
-  write(k, to-binary("hello\n"));
-  write(k, to-binary("hello\n"));
-  write(k, to-binary("hello\n"));
-  write(k, to-binary("hello\n"));
-  write(k, to-binary("hello\n"));
-  flush(k);
-  Unit
+  write-binary(k, to-binary("hello\n"));
+  write-binary(k, to-binary("hello\n"));
+  write-binary(k, to-binary("hello\n"));
+  write-binary(k, to-binary("hello\n"));
+  write-binary(k, to-binary("hello\n"));
+  write-binary(k, to-binary("hello\n"));
+  write-binary(k, to-binary("hello\n"));
+  write-binary(k, to-binary("hello\n"));
+  flush(k)
 }

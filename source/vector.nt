@@ -7,15 +7,15 @@ import {
   this.external {free, malloc, realloc},
   this.function {compose},
   this.int {abs-int, max-int, min-int},
+  this.int.io {print-int-line},
   this.int.ord {as-ord-N},
-  this.int.show {show-int},
   this.list {Cons, Nil, list, minimum},
   this.magic {cast},
   this.memory {load-int, load-pointer, store-int, store-pointer},
   this.pair {Pair, pair},
   this.pointer {shift},
   this.text {replicate, text},
-  this.text.io {print, printf},
+  this.text.io {print, print-line},
   this.trick,
   this.unit {Unit, unit},
   this.word,
@@ -708,29 +708,23 @@ define zen(): unit {
     let _ = !rest in
     let len on !rest = length(!rest) in
     let _ = !rest in
-    printf("right. last-elem = {}\n", [z]);
-    printf("right. len = {}\n", [show-int(len)])
+    print("right. last-elem = ");
+    let _ on z = print-line(z) in
+    let _ = z in
+    print("len = ");
+    print-int-line(len)
   };
   pin zs = !zs in
-  // let mini-zs =
-  //   drop-while-end(*zs, function (x) {
-  //     gt-int(*x, 10000)
-  //   })
-  // in
-  // let _ =
-  //   for-each-vertical(drop(*xs, 3), 3, function (x, _) {
-  //     printf("{}, ", [show-int(x)])
-  //   })
-  // in
   for(*zs, function (x, _) {
-    printf("{}, ", [x])
+    pin x = x in
+    print(x);
+    print(", ")
   });
   print("\n----\n");
   for(!xs, function (x, _) {
-    printf("{}, ", [x])
+    pin x = x in
+    print(x);
+    print(", ")
   });
   print("\n")
-  // let capacity = get-capacity(zs) in
-  // printf("num of items: {}\n", [show-int(length(zs))]);
-  // printf("capacity: {}\n", [show-int(capacity)])
 }

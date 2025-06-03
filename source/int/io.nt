@@ -1,0 +1,29 @@
+import {
+  this.file.descriptor {descriptor, stdout},
+  this.unit {Unit, unit},
+}
+
+foreign {
+  neut_core_v0_51_write_int64(int32, int64): void,
+  neut_core_v0_51_write_int64_nl(int32, int64): void,
+}
+
+define write-int(d: descriptor, x: int): unit {
+  let d' = magic cast(descriptor, int32, d) in
+  let _ = magic external neut_core_v0_51_write_int64(d', x) in
+  Unit
+}
+
+define write-int-line(d: descriptor, x: int): unit {
+  let d' = magic cast(descriptor, int32, d) in
+  let _ = magic external neut_core_v0_51_write_int64_nl(d', x) in
+  Unit
+}
+
+define print-int(x: int): unit {
+  write-int(stdout, x)
+}
+
+define print-int-line(x: int): unit {
+  write-int-line(stdout, x)
+}

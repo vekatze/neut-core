@@ -1,0 +1,85 @@
+import {
+  this.bool,
+  this.buffer {buffer, flush, make-buffer},
+  this.file.descriptor {stdout},
+  this.text,
+  this.text.buffer {write},
+  this.unit {Unit, unit},
+}
+
+foreign {
+  neut_core_v0_51_build_fixed_buf(pointer, int, float, int, int): int,
+}
+
+define write-float(b: &buffer, x: float, decimals: int): unit {
+  let size = 64 in
+  let add-newline = 0 in
+  let buffer-ptr = magic alloca(int, size) in
+  let len = magic external neut_core_v0_51_build_fixed_buf(buffer-ptr, size, x, decimals, add-newline) in
+  if gt-int(len, 0) {
+    this.buffer._write(b, buffer-ptr, len)
+  } else {
+    Unit
+  }
+}
+
+define write-float-line(b: &buffer, x: float, decimals: int): unit {
+  let size = 65 in
+  let add-newline = 1 in
+  let buffer-ptr = magic alloca(int, size) in
+  let len = magic external neut_core_v0_51_build_fixed_buf(buffer-ptr, size, x, decimals, add-newline) in
+  if gt-int(len, 0) {
+    this.buffer._write(b, buffer-ptr, len)
+  } else {
+    Unit
+  }
+}
+
+define zen(): unit {
+  pin b = make-buffer(stdout, 10) in
+  write-float(b, 3.141592, 4);
+  write(b, "\n");
+  write-float(b, 3.141592, 0);
+  write(b, "\n");
+  write-float(b, 3333333333.141592, 60);
+  write(b, "\n");
+  write-float(b, 0.0, 7);
+  write(b, "\n");
+  write-float(b, 0.0, 4);
+  write(b, "\n");
+  write-float(b, -0.0, 7);
+  write(b, "\n");
+  write-float(b, -0.0, 4);
+  write(b, "\n");
+  write-float(b, 1.0, 7);
+  write(b, "\n");
+  write-float(b, -1.0, 7);
+  write(b, "\n");
+  write-float(b, 3.141592653589793, 7);
+  write(b, "\n");
+  write-float(b, 1e-40, 7);
+  write(b, "\n");
+  write-float(b, 1e+38, 7);
+  write(b, "\n");
+  write-float(b, -1e+38, 7);
+  write(b, "\n");
+  write-float(b, 1.17549435e-38, 7);
+  write(b, "\n");
+  write-float(b, 1.40129846e-45, 7);
+  write(b, "\n");
+  write-float(b, -1.40129846e-45, 7);
+  write(b, "\n");
+  write-float-line(b, -3.141592, 7);
+  write-float-line(b, 0.0, 7);
+  write-float-line(b, -0.0, 7);
+  write-float-line(b, 1.0, 7);
+  write-float-line(b, -1.0, 7);
+  write-float-line(b, 3.141592653589793, 7);
+  write-float-line(b, 1e-40, 7);
+  write-float-line(b, 1e+38, 7);
+  write-float-line(b, -1e+38, 7);
+  write-float-line(b, 1.17549435e-38, 7);
+  write-float-line(b, 1.40129846e-45, 7);
+  write-float-line(b, -1.40129846e-45, 7);
+  flush(b)
+}

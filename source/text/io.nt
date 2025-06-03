@@ -3,23 +3,26 @@ import {
   this.binary.io,
   this.either {Left, Right},
   this.file.descriptor {descriptor, stdin, stdout},
-  this.list {for, list},
   this.magic,
   this.system {get-error-message, system},
-  this.text {_format, text, to-binary},
+  this.text {_get-content-pointer, text, text-byte-length, to-binary},
   this.unit {Unit, unit},
+}
+
+foreign {
+  neut_core_v0_51_write_line(int32, int, pointer): int,
 }
 
 define write(f: descriptor, t: &text): system(unit) {
   this.binary.io.write(f, to-binary(t))
 }
 
-define writef(f: descriptor, fmt: &text, args: list(text)): unit {
-  for(_format(fmt, args), function (p) {
-    pin p = p in
-    let _ = write(f, p) in
-    Unit
-  })
+define write-line(d: descriptor, t: &text): unit {
+  let d' = magic cast(descriptor, int32, d) in
+  let len = text-byte-length(t) in
+  let ptr = _get-content-pointer(t) in
+  let _ = magic external neut_core_v0_51_write_line(d', len, ptr) in
+  Unit
 }
 
 define print(t: &text): unit {
@@ -27,11 +30,9 @@ define print(t: &text): unit {
   Unit
 }
 
-define printf(fmt: &text, args: list(text)): unit {
-  for(_format(fmt, args), function (p) {
-    pin p = p in
-    print(p)
-  })
+define print-line(t: &text): unit {
+  let _ = write-line(stdout, t) in
+  Unit
 }
 
 define read(from: descriptor, initial-buffer-size: int): system(text) {
@@ -45,11 +46,6 @@ define get-line(initial-buffer-size: int): system(text) {
 
 define zen(): unit {
   // print("hey\n");
-  // writef(stdout, "hello, {}!\n", [show-int(1234)]);
-  // loop(10000, function (_) {
-  //   let _ = write(stdout, "hello.\n") in
-  //   Unit
-  // });
   // Unit
   let _ = write(stdout, "hello.\n") in
   let value = read(stdin, 10) in
@@ -59,6 +55,8 @@ define zen(): unit {
     print("success\n")
     // print(txt)
   | Left(e) =>
-    printf("{}\n", [get-error-message(e)])
+    pin text = get-error-message(e) in
+    print(text);
+    print("\n")
   }
 }

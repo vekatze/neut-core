@@ -5,13 +5,13 @@ import {
 }
 
 inline as-eq<a, b>(f: eq(a), g: eq(b)): eq(pair(a, b)) {
-  let Eq of {equal = equal-f} = f in
-  let Eq of {equal = equal-g} = g in
+  let Eq of {equal = equal-f} = f;
+  let Eq of {equal = equal-g} = g;
   Eq of {
     equal = {
       function (p1, p2) {
-        tie Pair(x1, y1) = p1 in
-        tie Pair(x2, y2) = p2 in
+        tie Pair(x1, y1) = p1;
+        tie Pair(x2, y2) = p2;
         and(equal-f(x1, x2), equal-g(y1, y2))
       }
     },

@@ -10,10 +10,10 @@ inline as-eq<a, b>(f: eq(a), g: eq(b)): eq(either(a, b)) {
       function (p1, p2) {
         case p1, p2 {
         | Left(l1), Left(l2) =>
-          let Eq of {equal} = f in
+          let Eq of {equal} = f;
           equal(l1, l2)
         | Right(r1), Right(r2) =>
-          let Eq of {equal} = g in
+          let Eq of {equal} = g;
           equal(r1, r2)
         | _, _ =>
           False

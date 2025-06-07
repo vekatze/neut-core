@@ -11,14 +11,14 @@ foreign {
 }
 
 define write-float(d: descriptor, x: float, decimals: int): unit {
-  let d' = magic cast(descriptor, int32, d) in
-  let _ = magic external neut_core_v0_51_write_double(d', x, decimals) in
+  let d' = magic cast(descriptor, int32, d);
+  let _ = magic external neut_core_v0_51_write_double(d', x, decimals);
   Unit
 }
 
 define write-float-line(d: descriptor, x: float, decimals): unit {
-  let d' = magic cast(descriptor, int32, d) in
-  let _ = magic external neut_core_v0_51_write_double_line(d', x, decimals) in
+  let d' = magic cast(descriptor, int32, d);
+  let _ = magic external neut_core_v0_51_write_double_line(d', x, decimals);
   Unit
 }
 

@@ -23,8 +23,8 @@ data ref(_: type) {
 }
 
 define _make(a: type, val: a): ref(a) {
-  let u = this.word.size in
-  let ptr = this.external.malloc(C-Size(mul-int(this.word.size, 2))) in
+  let u = this.word.size;
+  let ptr = this.external.malloc(C-Size(mul-int(this.word.size, 2)));
   store-int(cast(a, int, val), ptr);
   store-int(cast(type, int, a), shift(ptr, u));
   cast(pointer, ref(a), ptr)
@@ -33,16 +33,16 @@ define _make(a: type, val: a): ref(a) {
 // (content, type)
 resource _ref {
   function (r: pointer) {
-    let u = this.word.size in
-    let a = cast(int, type, load-int(shift(r, u))) in
-    let _: a = magic cast(int, a, load-int(r)) in
+    let u = this.word.size;
+    let a = cast(int, type, load-int(shift(r, u)));
+    let _: a = magic cast(int, a, load-int(r));
     this.external.free(r)
   },
   function (r: pointer) {
-    let u = this.word.size in
-    let a = cast(int, type, load-int(shift(r, u))) in
-    let val: &a = cast(int, &a, load-int(r)) in
-    let val-clone: a = _get-clone(a, val) in
+    let u = this.word.size;
+    let a = cast(int, type, load-int(shift(r, u)));
+    let val: &a = cast(int, &a, load-int(r));
+    let val-clone: a = _get-clone(a, val);
     cast(ref(a), pointer, _make(a, val-clone))
   },
 }
@@ -52,9 +52,9 @@ inline _make-ref<a>(initial-value: a): ref(a) {
 }
 
 inline modify<a, b>(r: &ref(a), f: (a) -> pair(a, b)): b {
-  let r = cast(&ref(a), pointer, r) in
-  let orig-val = cast(int, a, load-int(r)) in
-  let Pair(new-val, result) = f(orig-val) in
+  let r = cast(&ref(a), pointer, r);
+  let orig-val = cast(int, a, load-int(r));
+  let Pair(new-val, result) = f(orig-val);
   store-int(cast(a, int, new-val), r);
   result
 }
@@ -66,9 +66,9 @@ inline mutate<a>(r: &ref(a), f: (a) -> a): unit {
 }
 
 inline borrow<a, b>(r: &ref(a), f: (&a) -> meta b): b {
-  let r = cast(&ref(a), pointer, r) in
-  let orig-val = cast(int, &a, load-int(r)) in
-  letbox-T result = f(orig-val) in
+  let r = cast(&ref(a), pointer, r);
+  let orig-val = cast(int, &a, load-int(r));
+  letbox-T result = f(orig-val);
   result
 }
 
@@ -79,8 +79,8 @@ define clone<a>(r: &ref(a)): a {
 }
 
 define extract<a>(c: ref(a)): a {
-  let r = cast(ref(a), pointer, c) in
-  let result = cast(int, a, load-int(r)) in
+  let r = cast(ref(a), pointer, c);
+  let result = cast(int, a, load-int(r));
   this.external.free(r);
   result
 }

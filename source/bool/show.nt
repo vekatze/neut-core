@@ -16,7 +16,7 @@ inline as-show: show(bool) {
 }
 
 define show(b: bool): text {
-  let Show of {show} = as-show in
+  let Show of {show} = as-show;
   show(b)
 }
 

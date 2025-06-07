@@ -12,8 +12,8 @@ import {
 
 define make-big-dictionary(k: &ord(int)): dictionary(int, int) {
   grow(this.dictionary.empty, 700000, function (acc, _) {
-    let key = random-int(1000000) in
-    let val = random-int(1000000) in
+    let key = random-int(1000000);
+    let val = random-int(1000000);
     insert(k, acc, key, val)
   })
 }
@@ -21,26 +21,24 @@ define make-big-dictionary(k: &ord(int)): dictionary(int, int) {
 define random-lookup-sum(k: &ord(int), d: &dictionary(int, int)): unit {
   let rsum =
     grow(0, 700000, function (acc, _) {
-      let key = random-int(1000000) in
+      let key = random-int(1000000);
       let val on key =
         match lookup(k, d, key) {
         | Left(_) =>
           0
         | Right(v) =>
           *v
-        }
-      in
-      let _ = key in
+        };
+      let _ = key;
       add-int(acc, val)
-    })
-  in
+    });
   print-int-line(rsum)
 }
 
 define main(): unit {
-  pin k = this.int.ord.as-ord in
-  let big-dictionary = make-big-dictionary(k) in
-  let _ on big-dictionary = random-lookup-sum(k, big-dictionary) in
-  let _ = big-dictionary in
+  pin k = this.int.ord.as-ord;
+  let big-dictionary = make-big-dictionary(k);
+  let _ on big-dictionary = random-lookup-sum(k, big-dictionary);
+  let _ = big-dictionary;
   Unit
 }

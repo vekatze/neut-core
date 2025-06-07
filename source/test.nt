@@ -17,27 +17,23 @@ import {
 }
 
 define with-cell(i: int): int {
-  let c = _make-cell(i) in
+  let c = _make-cell(i);
   let _ on c =
     mutate(c, function (x) {
       add-int(x, 1)
-    })
-  in
+    });
   let _ on c =
     mutate(c, function (x) {
       add-int(x, 1)
-    })
-  in
+    });
   let _ on c =
     mutate(c, function (x) {
       add-int(x, 1)
-    })
-  in
+    });
   let _ on c =
     mutate(c, function (x) {
       add-int(x, 21)
-    })
-  in
+    });
   this.cell.extract(c)
 }
 
@@ -57,12 +53,12 @@ define use-rune(r: rune): unit {
 }
 
 define my-random-in-range(lower-bound: int32, upper-bound: int32): int {
-  let range-size = sub-int32(upper-bound, lower-bound) in
+  let range-size = sub-int32(upper-bound, lower-bound);
   print("range-size: ");
   print-int-line(sext-int32-int(range-size));
   print("range-upper: ");
   print-int-line(sext-int32-int(add-int32(range-size, 1)));
-  let value = random-int(add-int32(range-size, 1)) in
+  let value = random-int(add-int32(range-size, 1));
   print("value: ");
   print-int-line(value);
   add-int(value, sext-int32-int(lower-bound))
@@ -73,56 +69,54 @@ define use-text(x: &text): text {
 }
 
 define zen(): unit {
-  pin r: ref(int) = _make-ref(123) in
+  pin r: ref(int) = _make-ref(123);
   this.ref.mutate(r, function (x) {
     add-int(x, 10)
   });
-  let value = this.ref.clone(r) in
+  let value = this.ref.clone(r);
   print("ref-value: ");
   print-int-line(value);
-  let xs: list(either(int, bool)) = [Left(3), Right(True), Left(2), Right(True), Left(134), Right(True)] in
-  let Pair(ys, _) = partition(xs) in
+  let xs: list(either(int, bool)) = [Left(3), Right(True), Left(2), Right(True), Left(134), Right(True)];
+  let Pair(ys, _) = partition(xs);
   let _ =
     for-each(ys, function (y) {
       print("item: ");
       print-int-line(y)
-    })
-  in
-  let !k = use-text("te") in
-  let _ on !k = print-line(!k) in
-  let _ on !k = print-line(!k) in
-  let _ on !k = print-line(!k) in
-  let _ on !k = print-line(!k) in
-  let _ = !k in
-  let v = with-cell(3) in
+    });
+  let !k = use-text("te");
+  let _ on !k = print-line(!k);
+  let _ on !k = print-line(!k);
+  let _ on !k = print-line(!k);
+  let _ on !k = print-line(!k);
+  let _ = !k;
+  let v = with-cell(3);
   print("result of with-cell(3): ");
   print-int-line(v);
-  let c = make-cell(*"hello") in
-  let _ on c =
-    let item = "test" in
+  let c = make-cell(*"hello");
+  let _ on c = {
+    let item = "test";
     let _ =
       mutate(c, function (_) {
-        let _ = item in
+        let _ = item;
         *"hello"
-      })
-    in
+      });
     Unit
-  in
-  pin val = extract(c) in
+  };
+  pin val = extract(c);
   print("extracted: ");
   print-line(val);
-  pin yo: pair(int, bool) = Pair(3, True) in
-  let tmp = *yo in
-  let Pair(_, _) = tmp in
-  let val = random-float32(-5, 5) in
+  pin yo: pair(int, bool) = Pair(3, True);
+  let tmp = *yo;
+  let Pair(_, _) = tmp;
+  let val = random-float32(-5, 5);
   print("random-float: ");
   print-float-line(fpext-float32-float(val), 7);
   print("value: ");
   print-int-line(sext-int32-int(trunc-int-int32(-3234)));
-  let k: int = 2 in
-  let val = power-int(k, 5) in
+  let k: int = 2;
+  let val = power-int(k, 5);
   print-int-line(val);
-  let foo = `x` in
+  let foo = `x`;
   use-rune(foo);
   match foo {
   | `a` =>
@@ -134,14 +128,14 @@ define zen(): unit {
   | _ =>
     print("other\n")
   };
-  let k: rune = `x` in
+  let k: rune = `x`;
   match k {
   | `x` =>
     print("test")
   | _ =>
     Unit
   };
-  let p: either(pair(rune, type), type) = Left(Pair(`x`, type)) in
+  let p: either(pair(rune, type), type) = Left(Pair(`x`, type));
   match p {
   | Right(_) =>
     print("right\n")
@@ -152,23 +146,22 @@ define zen(): unit {
   | Left(Pair(_, _)) =>
     print("pair-x\n")
   };
-  let !xs: list(int) = [1, 2, 3] in
-  letbox len on !xs =
+  let !xs: list(int) = [1, 2, 3];
+  letbox len on !xs = {
     discard(*!xs);
     box-int(length(!xs))
-  in
-  let _ = discard(!xs) in
-  let _ = discard(!xs) in
-  let _ = discard(!xs) in
+  };
+  let _ = discard(!xs);
+  let _ = discard(!xs);
+  let _ = discard(!xs);
   print("len: ");
   print-int-line(len);
   print("rune-as-int: ");
   print-int-line(len);
   print("hello, world\n");
   print-line("yo");
-  Unit
 }
 
 define main(): unit {
-  zen()
+  zen();
 }

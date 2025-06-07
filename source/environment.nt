@@ -20,8 +20,8 @@ foreign {
 }
 
 define get-env(name: &text): ?text {
-  let c-str = _get-content-pointer(name) in
-  let tmp = magic external getenv(c-str) in
+  let c-str = _get-content-pointer(name);
+  let tmp = magic external getenv(c-str);
   if eq-int(magic cast(pointer, int, tmp), 0) {
     none
   } else {
@@ -30,22 +30,20 @@ define get-env(name: &text): ?text {
 }
 
 define set-env(name: &text, value: &text, overwrite: bool): system(unit) {
-  let name-c-str = to-c-string(name) in
-  let value-c-str = to-c-string(value) in
+  let name-c-str = to-c-string(name);
+  let value-c-str = to-c-string(value);
   let flag =
     if overwrite {
       1
     } else {
       0
-    }
-  in
+    };
   let result on name-c-str, value-c-str =
     magic external setenv(
       magic cast(&c-string, pointer, name-c-str),
       magic cast(&c-string, pointer, value-c-str),
       C-Int(flag),
-    )
-  in
+    );
   discard(name-c-str);
   discard(value-c-str);
   if eq-c-int(result, 0) {
@@ -56,27 +54,26 @@ define set-env(name: &text, value: &text, overwrite: bool): system(unit) {
 }
 
 define get-argc(): int {
-  let argc-ptr = magic global("neut-unsafe-argc", pointer) in
+  let argc-ptr = magic global("neut-unsafe-argc", pointer);
   load-int(argc-ptr)
 }
 
 define get-argv(): list(text) {
-  let argc = get-argc() in
-  let argv-ptr = magic global("neut-unsafe-argv", pointer) in
-  let argv = load-pointer(argv-ptr) in
-  let u = this.word.size in
+  let argc = get-argc();
+  let argv-ptr = magic global("neut-unsafe-argv", pointer);
+  let argv = load-pointer(argv-ptr);
+  let u = this.word.size;
   let f =
     define get-argv-helper(i: int): list(text) {
       if eq-int(i, argc) {
         []
       } else {
-        let rest = get-argv-helper(add-int(i, 1)) in
-        let str-ptr-ptr = shift(argv, mul-int(i, u)) in
-        let str-ptr = load-int(str-ptr-ptr) in
-        let t = from-c-string(this.magic.cast(int, &c-string, str-ptr)) in
+        let rest = get-argv-helper(add-int(i, 1));
+        let str-ptr-ptr = shift(argv, mul-int(i, u));
+        let str-ptr = load-int(str-ptr-ptr);
+        let t = from-c-string(this.magic.cast(int, &c-string, str-ptr));
         Cons(t, rest)
       }
-    }
-  in
+    };
   f(0)
 }

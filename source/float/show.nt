@@ -16,13 +16,13 @@ foreign {
 }
 
 define _show(c-fmt: &text, x: float): text {
-  let fmt = _get-content-pointer(c-fmt) in
-  let size = magic external snprintf(null-pointer, 0, fmt)(x: float) in
-  let ptr = this.external.malloc(C-Size(add-int(from-c-int(add-c-int(size, 1)), mul-int(this.word.size, 2)))) in
+  let fmt = _get-content-pointer(c-fmt);
+  let size = magic external snprintf(null-pointer, 0, fmt)(x: float);
+  let ptr = this.external.malloc(C-Size(add-int(from-c-int(add-c-int(size, 1)), mul-int(this.word.size, 2))));
   store-int(0, ptr);
   store-int(from-c-int(size), shift(ptr, this.word.size));
-  let buffer = shift(ptr, mul-int(this.word.size, 2)) in
-  let _ = magic external snprintf(buffer, add-c-int(size, 1), fmt)(x: float) in
+  let buffer = shift(ptr, mul-int(this.word.size, 2));
+  let _ = magic external snprintf(buffer, add-c-int(size, 1), fmt)(x: float);
   magic cast(pointer, text, ptr)
 }
 

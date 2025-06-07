@@ -1,13 +1,13 @@
 inline axiom-K<a, b>(f: meta (a) -> b, x: meta a): meta b {
   box {
-    letbox f' = f in
-    letbox x' = x in
+    letbox f' = f;
+    letbox x' = x;
     f'(x')
   }
 }
 
 inline axiom-T<a>(x: meta a): a {
-  letbox-T x' = x in
+  letbox-T x' = x;
   x'
 }
 

@@ -16,8 +16,8 @@ data c-pid {
 }
 
 inline eq-c-pid(x: c-pid, y: c-pid): bool {
-  let C-PID(x) = x in
-  let C-PID(y) = y in
+  let C-PID(x) = x;
+  let C-PID(y) = y;
   introspect architecture {
   | amd64 =>
     eq-int32(x, y)

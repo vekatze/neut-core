@@ -9,14 +9,14 @@ foreign {
 }
 
 define write-int(d: descriptor, x: int): unit {
-  let d' = magic cast(descriptor, int32, d) in
-  let _ = magic external neut_core_v0_51_write_int64(d', x) in
+  let d' = magic cast(descriptor, int32, d);
+  let _ = magic external neut_core_v0_51_write_int64(d', x);
   Unit
 }
 
 define write-int-line(d: descriptor, x: int): unit {
-  let d' = magic cast(descriptor, int32, d) in
-  let _ = magic external neut_core_v0_51_write_int64_nl(d', x) in
+  let d' = magic cast(descriptor, int32, d);
+  let _ = magic external neut_core_v0_51_write_int64_nl(d', x);
   Unit
 }
 

@@ -14,7 +14,7 @@ inline from-ord<a>(o: ord(a)): eq(a) {
   Eq of {
     equal = {
       function (x, y) {
-        let Ord of {compare} = o in
+        let Ord of {compare} = o;
         match compare(x, y) {
         | EQ =>
           True

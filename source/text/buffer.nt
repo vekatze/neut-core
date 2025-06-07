@@ -5,7 +5,7 @@ import {
   this.file.descriptor {stdout},
   this.int.show {show-int},
   this.text {text, to-binary},
-  this.unit {Unit, unit},
+  this.unit {unit},
 }
 
 define write(b: &buffer, content: &text): unit {
@@ -13,14 +13,13 @@ define write(b: &buffer, content: &text): unit {
 }
 
 define zen(): unit {
-  let !k = make-buffer(stdout, 4096) in
-  pin k = !k in
+  let !k = make-buffer(stdout, 4096);
+  pin k = !k;
   loop(10000000, function (_) {
     write(k, "hello ");
-    pin t = show-int(1234) in
+    pin t = show-int(1234);
     write(k, t);
     write(k, "\n")
   });
   flush(k);
-  Unit
 }

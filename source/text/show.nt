@@ -184,26 +184,26 @@ define _escape(t: &text, len: int, pivot: int, cursor: int): list(text) {
     function () {
       _escape(t, len, pivot, add-int(cursor, 1))
     }
-  in
-  let index = add-int(pivot, cursor) in
+   ;
+  let index = add-int(pivot, cursor);
   if ge-int(index, len) {
     [_drop-N(t, pivot)]
   } else {
-    let head-char = _get-byte(t, index) in
-    let char-len = size-by-head-byte(head-char) in
+    let head-char = _get-byte(t, index);
+    let char-len = size-by-head-byte(head-char);
     if _is-1-byte-escaped-character(head-char) {
-      let piece = _slice-N(t, pivot, cursor) in
-      let escaped-control-char = _get-escaped-character-1(head-char) in
-      let rest = _escape(t, len, add-int(add-int(pivot, cursor), char-len), 0) in
+      let piece = _slice-N(t, pivot, cursor);
+      let escaped-control-char = _get-escaped-character-1(head-char);
+      let rest = _escape(t, len, add-int(add-int(pivot, cursor), char-len), 0);
       Cons(piece, Cons(*escaped-control-char, rest))
     } else {
       if eq-int(char-len, 2) {
         if eq-int8(head-char, 0xc2) {
-          let head-char-2 = _get-byte(t, add-int(index, 1)) in
+          let head-char-2 = _get-byte(t, add-int(index, 1));
           if _is-2-byte-escaped-character(head-char-2) {
-            let piece = _slice-N(t, pivot, cursor) in
-            let escaped-control-char = _get-escaped-character-2(head-char-2) in
-            let rest = _escape(t, len, add-int(add-int(pivot, cursor), char-len), 0) in
+            let piece = _slice-N(t, pivot, cursor);
+            let escaped-control-char = _get-escaped-character-2(head-char-2);
+            let rest = _escape(t, len, add-int(add-int(pivot, cursor), char-len), 0);
             Cons(piece, Cons(*escaped-control-char, rest))
           } else {
             _next()
@@ -219,8 +219,8 @@ define _escape(t: &text, len: int, pivot: int, cursor: int): list(text) {
 }
 
 define quote-text(t: text): text {
-  pin t = t in
-  let len = text-byte-length(t) in
+  pin t = t;
+  let len = text-byte-length(t);
   join(concat([[*"\""], _escape(t, len, 0, 0), [*"\""]]))
 }
 
@@ -229,7 +229,7 @@ define show-text(t: text): text {
 }
 
 define show-text-N(t: &text): text {
-  let len = text-byte-length(t) in
+  let len = text-byte-length(t);
   join(concat([[*"\""], _escape(t, len, 0, 0), [*"\""]]))
 }
 

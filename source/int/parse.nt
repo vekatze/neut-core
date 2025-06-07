@@ -8,40 +8,40 @@ import {
 }
 
 inline parse-binary(t: &text): ?int {
-  let c-int-str = _get-content-pointer(t) in
-  let len = this.text.length(t) in
-  let result-ptr = magic alloca(int, 1) in
-  let result-status = _parse_binary(c-int-str, len, result-ptr) in
+  let c-int-str = _get-content-pointer(t);
+  let len = this.text.length(t);
+  let result-ptr = magic alloca(int, 1);
+  let result-status = _parse_binary(c-int-str, len, result-ptr);
   if lt-int(result-status, 0) {
     Left(Unit)
   } else {
-    let result = load-int(result-ptr) in
+    let result = load-int(result-ptr);
     Right(result)
   }
 }
 
 inline parse-int(t: &text): ?int {
-  let c-int-str = _get-content-pointer(t) in
-  let len = this.text.length(t) in
-  let result-ptr = magic alloca(int, 1) in
-  let result-status = _parse_decimal(c-int-str, len, result-ptr) in
+  let c-int-str = _get-content-pointer(t);
+  let len = this.text.length(t);
+  let result-ptr = magic alloca(int, 1);
+  let result-status = _parse_decimal(c-int-str, len, result-ptr);
   if lt-int(result-status, 0) {
     Left(Unit)
   } else {
-    let result = load-int(result-ptr) in
+    let result = load-int(result-ptr);
     Right(result)
   }
 }
 
 inline parse-hex(t: &text): ?int {
-  let c-int-str = _get-content-pointer(t) in
-  let len = this.text.length(t) in
-  let result-ptr = magic alloca(int, 1) in
-  let result-status = _parse_hex(c-int-str, len, result-ptr) in
+  let c-int-str = _get-content-pointer(t);
+  let len = this.text.length(t);
+  let result-ptr = magic alloca(int, 1);
+  let result-status = _parse_hex(c-int-str, len, result-ptr);
   if lt-int(result-status, 0) {
     Left(Unit)
   } else {
-    let result = load-int(result-ptr) in
+    let result = load-int(result-ptr);
     Right(result)
   }
 }

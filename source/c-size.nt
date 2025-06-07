@@ -17,7 +17,7 @@ data c-size {
 }
 
 inline from-c-size(x: c-size): int {
-  let C-Size(x) = x in
+  let C-Size(x) = x;
   introspect architecture {
   | amd64 =>
     x
@@ -27,13 +27,13 @@ inline from-c-size(x: c-size): int {
 }
 
 inline from-positive-ssize(x: c-ssize): c-size {
-  let C-SSize(x) = x in
+  let C-SSize(x) = x;
   C-Size(x)
 }
 
 inline add-c-size(x: c-size, y: c-size): c-size {
-  let C-Size(x) = x in
-  let C-Size(y) = y in
+  let C-Size(x) = x;
+  let C-Size(y) = y;
   introspect architecture {
   | amd64 =>
     C-Size(add-int(x, y))
@@ -43,8 +43,8 @@ inline add-c-size(x: c-size, y: c-size): c-size {
 }
 
 inline mul-c-size(x: c-size, y: c-size): c-size {
-  let C-Size(x) = x in
-  let C-Size(y) = y in
+  let C-Size(x) = x;
+  let C-Size(y) = y;
   introspect architecture {
   | amd64 =>
     C-Size(mul-int(x, y))
@@ -54,8 +54,8 @@ inline mul-c-size(x: c-size, y: c-size): c-size {
 }
 
 inline eq-c-size(x: c-size, y: c-size): bool {
-  let C-Size(x) = x in
-  let C-Size(y) = y in
+  let C-Size(x) = x;
+  let C-Size(y) = y;
   introspect architecture {
   | amd64 =>
     eq-int(x, y)
@@ -65,8 +65,8 @@ inline eq-c-size(x: c-size, y: c-size): bool {
 }
 
 inline ne-c-size(x: c-size, y: c-size): bool {
-  let C-Size(x) = x in
-  let C-Size(y) = y in
+  let C-Size(x) = x;
+  let C-Size(y) = y;
   introspect architecture {
   | amd64 =>
     ne-int(x, y)
@@ -76,8 +76,8 @@ inline ne-c-size(x: c-size, y: c-size): bool {
 }
 
 inline lt-c-size(x: c-size, y: c-size): bool {
-  let C-Size(x) = x in
-  let C-Size(y) = y in
+  let C-Size(x) = x;
+  let C-Size(y) = y;
   introspect architecture {
   | amd64 =>
     ult-int(x, y)
@@ -87,8 +87,8 @@ inline lt-c-size(x: c-size, y: c-size): bool {
 }
 
 inline le-c-size(x: c-size, y: c-size): bool {
-  let C-Size(x) = x in
-  let C-Size(y) = y in
+  let C-Size(x) = x;
+  let C-Size(y) = y;
   introspect architecture {
   | amd64 =>
     ule-int(x, y)
@@ -98,8 +98,8 @@ inline le-c-size(x: c-size, y: c-size): bool {
 }
 
 inline gt-c-size(x: c-size, y: c-size): bool {
-  let C-Size(x) = x in
-  let C-Size(y) = y in
+  let C-Size(x) = x;
+  let C-Size(y) = y;
   introspect architecture {
   | amd64 =>
     ugt-int(x, y)
@@ -109,8 +109,8 @@ inline gt-c-size(x: c-size, y: c-size): bool {
 }
 
 inline ge-c-size(x: c-size, y: c-size): bool {
-  let C-Size(x) = x in
-  let C-Size(y) = y in
+  let C-Size(x) = x;
+  let C-Size(y) = y;
   introspect architecture {
   | amd64 =>
     uge-int(x, y)

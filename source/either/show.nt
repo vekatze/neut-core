@@ -9,10 +9,10 @@ inline as-show<a, b>(s1: show(a), s2: show(b)): show(either(a, b)) {
   Show(function (val) {
     match val {
     | Left(x) =>
-      let Show of {show} = s1 in
+      let Show of {show} = s1;
       format("Left({})", [show(x)])
     | Right(y) =>
-      let Show of {show} = s2 in
+      let Show of {show} = s2;
       format("Right({})", [show(y)])
     }
   })

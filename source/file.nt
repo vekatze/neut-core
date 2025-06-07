@@ -12,15 +12,14 @@ import {
 }
 
 define open(path: &text, xs: list(flag), ms: list(mode)): system(descriptor) {
-  pin path' = this.text.append(path, "\0") in
-  let actual-path-string = _get-content-pointer(path') in
+  pin path' = this.text.append(path, "\0");
+  let actual-path-string = _get-content-pointer(path');
   let fd =
     this.external.open(
       actual-path-string,
       this.file.flag.interpret(xs),
       this.file.mode.interpret(ms),
-    )
-  in
+    );
   if lt-int32(magic cast(descriptor, int32, fd), 0) {
     report-system-error()
   } else {
@@ -29,7 +28,7 @@ define open(path: &text, xs: list(flag), ms: list(mode)): system(descriptor) {
 }
 
 define close(f: descriptor): system(unit) {
-  let result = this.external.close(f) in
+  let result = this.external.close(f);
   if eq-int(result, 0) {
     Right(Unit)
   } else {

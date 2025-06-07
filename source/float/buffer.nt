@@ -12,10 +12,10 @@ foreign {
 }
 
 define write-float(b: &buffer, x: float, decimals: int): unit {
-  let size = 64 in
-  let add-newline = 0 in
-  let buffer-ptr = magic alloca(int, size) in
-  let len = magic external neut_core_v0_51_build_fixed_buf(buffer-ptr, size, x, decimals, add-newline) in
+  let size = 64;
+  let add-newline = 0;
+  let buffer-ptr = magic alloca(int, size);
+  let len = magic external neut_core_v0_51_build_fixed_buf(buffer-ptr, size, x, decimals, add-newline);
   if gt-int(len, 0) {
     this.buffer._write(b, buffer-ptr, len)
   } else {
@@ -24,10 +24,10 @@ define write-float(b: &buffer, x: float, decimals: int): unit {
 }
 
 define write-float-line(b: &buffer, x: float, decimals: int): unit {
-  let size = 65 in
-  let add-newline = 1 in
-  let buffer-ptr = magic alloca(int, size) in
-  let len = magic external neut_core_v0_51_build_fixed_buf(buffer-ptr, size, x, decimals, add-newline) in
+  let size = 65;
+  let add-newline = 1;
+  let buffer-ptr = magic alloca(int, size);
+  let len = magic external neut_core_v0_51_build_fixed_buf(buffer-ptr, size, x, decimals, add-newline);
   if gt-int(len, 0) {
     this.buffer._write(b, buffer-ptr, len)
   } else {
@@ -36,7 +36,7 @@ define write-float-line(b: &buffer, x: float, decimals: int): unit {
 }
 
 define zen(): unit {
-  pin b = make-buffer(stdout, 10) in
+  pin b = make-buffer(stdout, 10);
   write-float(b, 3.141592, 4);
   write(b, "\n");
   write-float(b, 3.141592, 0);

@@ -28,35 +28,35 @@ define empty(): text {
 }
 
 inline to-binary(x: &text): &binary {
-  tie _Text(content) = x in
+  tie _Text(content) = x;
   content
 }
 
 inline text-byte-length(t: &text): int {
-  let ptr = magic cast(&text, &binary, t) in
+  let ptr = magic cast(&text, &binary, t);
   binary-length(ptr)
 }
 
 define _get-content-pointer(t: &text): pointer {
-  let ptr = this.magic.cast(&text, pointer, t) in
-  let from = load-int(ptr) in
-  let u = this.word.size in
+  let ptr = this.magic.cast(&text, pointer, t);
+  let from = load-int(ptr);
+  let u = this.word.size;
   shift(ptr, add-int(mul-int(u, 2), from))
 }
 
 define join(xs: list(text)): text {
-  let xs' = magic cast(list(text), list(binary), xs) in
+  let xs' = magic cast(list(text), list(binary), xs);
   _Text(this.binary.join(xs'))
 }
 
 define join-N(xs: list(&text)): text {
-  let xs' = magic cast(list(&text), list(&binary), xs) in
+  let xs' = magic cast(list(&text), list(&binary), xs);
   _Text(this.binary.join-N(xs'))
 }
 
 define append(t1: &text, t2: &text): text {
-  tie _Text(t1) = t1 in
-  tie _Text(t2) = t2 in
+  tie _Text(t1) = t1;
+  tie _Text(t2) = t2;
   _Text(this.binary.append(t1, t2))
 }
 
@@ -70,34 +70,34 @@ define is-empty(t: &text): bool {
 
 // O(1)
 define _drop(t: text, offset: int): text {
-  let t = magic cast(text, binary, t) in
+  let t = magic cast(text, binary, t);
   magic cast(binary, text, this.binary.drop(t, offset))
 }
 
 // O(1)
 define _take(t: text, offset: int): text {
-  let t = magic cast(text, binary, t) in
+  let t = magic cast(text, binary, t);
   magic cast(binary, text, this.binary.take(t, offset))
 }
 
 // O(1)
 define _slice(t: text, start: int, size: int): text {
-  let t = magic cast(text, binary, t) in
+  let t = magic cast(text, binary, t);
   magic cast(binary, text, this.binary.slice(t, start, size))
 }
 
 define _drop-N(t: &text, offset: int): text {
-  let t = magic cast(&text, &binary, t) in
+  let t = magic cast(&text, &binary, t);
   magic cast(binary, text, this.binary.drop-N(t, offset))
 }
 
 define _take-N(t: &text, offset: int): text {
-  let t = magic cast(&text, &binary, t) in
+  let t = magic cast(&text, &binary, t);
   magic cast(binary, text, this.binary.take-N(t, offset))
 }
 
 define _slice-N(t: &text, start: int, size: int): text {
-  let t = magic cast(&text, &binary, t) in
+  let t = magic cast(&text, &binary, t);
   magic cast(binary, text, this.binary.slice-N(t, start, size))
 }
 
@@ -106,55 +106,53 @@ foreign {
 }
 
 define _match-text-content(ptr1: pointer, ptr2: pointer, len: int): bool {
-  let result = magic external memcmp(ptr1, ptr2, C-Size(len)) in
+  let result = magic external memcmp(ptr1, ptr2, C-Size(len));
   eq-int(result, 0)
 }
 
 define break(haystack: &text, needle: &text): pair(text, text) {
-  let ptr = _get-content-pointer(haystack) in
-  let ptr2 = _get-content-pointer(needle) in
-  let len = text-byte-length(haystack) in
-  let needle-len = text-byte-length(needle) in
+  let ptr = _get-content-pointer(haystack);
+  let ptr2 = _get-content-pointer(needle);
+  let len = text-byte-length(haystack);
+  let needle-len = text-byte-length(needle);
   let f =
     define loop(cursor: int): pair(text, text) {
-      let rem-len = sub-int(len, cursor) in
+      let rem-len = sub-int(len, cursor);
       if lt-int(rem-len, needle-len) {
         Pair(*haystack, empty())
       } else {
-        let ptr1 = shift(ptr, cursor) in
+        let ptr1 = shift(ptr, cursor);
         if _match-text-content(ptr1, ptr2, needle-len) {
-          let former = _take-N(haystack, cursor) in
-          let latter = _drop-N(haystack, cursor) in
+          let former = _take-N(haystack, cursor);
+          let latter = _drop-N(haystack, cursor);
           Pair(former, latter)
         } else {
           loop(add-int(cursor, 1))
         }
       }
-    }
-  in
+    };
   f(0)
 }
 
 define find-text(haystack: &text, needle: &text): bool {
-  let ptr = _get-content-pointer(haystack) in
-  let ptr2 = _get-content-pointer(needle) in
-  let len = text-byte-length(haystack) in
-  let needle-len = text-byte-length(needle) in
+  let ptr = _get-content-pointer(haystack);
+  let ptr2 = _get-content-pointer(needle);
+  let len = text-byte-length(haystack);
+  let needle-len = text-byte-length(needle);
   let f =
     define loop(cursor: int): bool {
-      let rem-len = sub-int(len, cursor) in
+      let rem-len = sub-int(len, cursor);
       if lt-int(rem-len, needle-len) {
         False
       } else {
-        let ptr1 = shift(ptr, cursor) in
+        let ptr1 = shift(ptr, cursor);
         if _match-text-content(ptr1, ptr2, needle-len) {
           True
         } else {
           loop(add-int(cursor, 1))
         }
       }
-    }
-  in
+    };
   f(0)
 }
 
@@ -167,25 +165,25 @@ define intercalate-N(xs: list(&text), sep: &text): text {
 }
 
 define _get-byte(t: &text, index: int): int8 {
-  let ptr = _get-content-pointer(t) in
+  let ptr = _get-content-pointer(t);
   load-int8(shift(ptr, index))
 }
 
 define _get-rune-size(t: &text, index: int): int {
-  let head-byte = _get-byte(t, index) in
+  let head-byte = _get-byte(t, index);
   size-by-head-byte(head-byte)
 }
 
 define _get-rune-size-end(t: &text, index: int): int {
-  let b0 = _get-byte(t, index) in
+  let b0 = _get-byte(t, index);
   if ult-int8(b0, 0x80) {
     1
   } else {
-    let b1 = _get-byte(t, sub-int(index, 1)) in
+    let b1 = _get-byte(t, sub-int(index, 1));
     if uge-int8(b1, 0xc0) {
       2
     } else {
-      let b2 = _get-byte(t, sub-int(index, 2)) in
+      let b2 = _get-byte(t, sub-int(index, 2));
       if uge-int8(b2, 0xc0) {
         3
       } else {
@@ -196,28 +194,28 @@ define _get-rune-size-end(t: &text, index: int): int {
 }
 
 define singleton(value: rune): text {
-  let s = this.rune.size(value) in
-  let value = to-int32(value) in
+  let s = this.rune.size(value);
+  let value = to-int32(value);
   match s {
   | 1 =>
-    let piece-0 = trunc-int32-int8(value) in
+    let piece-0 = trunc-int32-int8(value);
     create([piece-0])
   | 2 =>
-    let value = trunc-int32-int16(value) in
-    let piece-0 = trunc-int16-int8(lshr-int16(and-int16(0b_1111_1111_0000_0000, value), 8)) in
-    let piece-1 = trunc-int16-int8(lshr-int16(and-int16(0b_0000_0000_1111_1111, value), 0)) in
+    let value = trunc-int32-int16(value);
+    let piece-0 = trunc-int16-int8(lshr-int16(and-int16(0b_1111_1111_0000_0000, value), 8));
+    let piece-1 = trunc-int16-int8(lshr-int16(and-int16(0b_0000_0000_1111_1111, value), 0));
     create([piece-0, piece-1])
   | 3 =>
-    let value = trunc-int32-int24(value) in
-    let piece-0 = trunc-int24-int8(lshr-int24(and-int24(0b_1111_1111_0000_0000_0000_0000, value), 16)) in
-    let piece-1 = trunc-int24-int8(lshr-int24(and-int24(0b_0000_0000_1111_1111_0000_0000, value), 8)) in
-    let piece-2 = trunc-int24-int8(lshr-int24(and-int24(0b_0000_0000_0000_0000_1111_1111, value), 0)) in
+    let value = trunc-int32-int24(value);
+    let piece-0 = trunc-int24-int8(lshr-int24(and-int24(0b_1111_1111_0000_0000_0000_0000, value), 16));
+    let piece-1 = trunc-int24-int8(lshr-int24(and-int24(0b_0000_0000_1111_1111_0000_0000, value), 8));
+    let piece-2 = trunc-int24-int8(lshr-int24(and-int24(0b_0000_0000_0000_0000_1111_1111, value), 0));
     create([piece-0, piece-1, piece-2])
   | 4 =>
-    let piece-0 = trunc-int32-int8(lshr-int32(and-int32(0b_1111_1111_0000_0000_0000_0000_0000_0000, value), 24)) in
-    let piece-1 = trunc-int32-int8(lshr-int32(and-int32(0b_0000_0000_1111_1111_0000_0000_0000_0000, value), 16)) in
-    let piece-2 = trunc-int32-int8(lshr-int32(and-int32(0b_0000_0000_0000_0000_1111_1111_0000_0000, value), 8)) in
-    let piece-3 = trunc-int32-int8(lshr-int32(and-int32(0b_0000_0000_0000_0000_0000_0000_1111_1111, value), 0)) in
+    let piece-0 = trunc-int32-int8(lshr-int32(and-int32(0b_1111_1111_0000_0000_0000_0000_0000_0000, value), 24));
+    let piece-1 = trunc-int32-int8(lshr-int32(and-int32(0b_0000_0000_1111_1111_0000_0000_0000_0000, value), 16));
+    let piece-2 = trunc-int32-int8(lshr-int32(and-int32(0b_0000_0000_0000_0000_1111_1111_0000_0000, value), 8));
+    let piece-3 = trunc-int32-int8(lshr-int32(and-int32(0b_0000_0000_0000_0000_0000_0000_1111_1111, value), 0));
     create([piece-0, piece-1, piece-2, piece-3])
   | _ =>
     // U+FFFE Noncharacter
@@ -229,39 +227,38 @@ define _length(t: &text, len: int, index: int, acc: int): int {
   if ge-int(index, len) {
     acc
   } else {
-    let rune-size = _get-rune-size(t, index) in
+    let rune-size = _get-rune-size(t, index);
     _length(t, len, add-int(index, rune-size), add-int(acc, 1))
   }
 }
 
 define length(t: &text): int {
-  let len = text-byte-length(t) in
+  let len = text-byte-length(t);
   _length(t, len, 0, 0)
 }
 
 define split(haystack: &text, needle: &text): list(text) {
-  let haystack-ptr = _get-content-pointer(haystack) in
-  let needle-ptr = _get-content-pointer(needle) in
-  let len = text-byte-length(haystack) in
-  let needle-len = text-byte-length(needle) in
+  let haystack-ptr = _get-content-pointer(haystack);
+  let needle-ptr = _get-content-pointer(needle);
+  let len = text-byte-length(haystack);
+  let needle-len = text-byte-length(needle);
   let f =
     define loop(pivot: int, cursor: int): list(text) {
-      let rem-len = sub-int(len, add-int(pivot, cursor)) in
+      let rem-len = sub-int(len, add-int(pivot, cursor));
       if lt-int(rem-len, needle-len) {
         [_drop-N(haystack, pivot)]
       } else {
-        let current-ptr = shift(haystack-ptr, add-int(pivot, cursor)) in
+        let current-ptr = shift(haystack-ptr, add-int(pivot, cursor));
         if _match-text-content(current-ptr, needle-ptr, needle-len) {
-          let piece = _slice-N(haystack, pivot, cursor) in
-          let next-pivot = add-int(pivot, add-int(cursor, needle-len)) in
-          let rest = loop(next-pivot, 0) in
+          let piece = _slice-N(haystack, pivot, cursor);
+          let next-pivot = add-int(pivot, add-int(cursor, needle-len));
+          let rest = loop(next-pivot, 0);
           Cons(piece, rest)
         } else {
           loop(pivot, add-int(cursor, 1))
         }
       }
-    }
-  in
+    };
   if eq-int(needle-len, 0) {
     []
   } else {
@@ -301,15 +298,15 @@ define _unpack(ptr: pointer, len: int, index: int, acc: list(rune)): list(rune) 
   if ge-int(index, len) {
     reverse(acc)
   } else {
-    let r = load-rune(shift(ptr, index)) in
-    let s = this.rune.size(r) in
+    let r = load-rune(shift(ptr, index));
+    let s = this.rune.size(r);
     _unpack(ptr, len, add-int(index, s), Cons(r, acc))
   }
 }
 
 define unpack(t: &text): list(rune) {
-  let ptr = _get-content-pointer(t) in
-  let len = text-byte-length(t) in
+  let ptr = _get-content-pointer(t);
+  let len = text-byte-length(t);
   _unpack(ptr, len, 0, [])
 }
 
@@ -323,49 +320,48 @@ define _char-list-length(xs: &list(rune), acc: int): int {
 }
 
 define pack(xs: &list(rune)): text {
-  let len = _char-list-length(xs, 0) in
-  let u = this.word.size in
-  let u2 = mul-int(u, 2) in
-  let new-text = malloc(C-Size(add-int(len, u2))) in
+  let len = _char-list-length(xs, 0);
+  let u = this.word.size;
+  let u2 = mul-int(u, 2);
+  let new-text = malloc(C-Size(add-int(len, u2)));
   store-int(0, new-text);
   store-int(len, shift(new-text, u));
-  let content-ptr = shift(new-text, u2) in
+  let content-ptr = shift(new-text, u2);
   let loop =
     define self(offset: int, xs: &list(rune)): unit {
       case xs {
       | Nil =>
         Unit
       | Cons(x, rest) =>
-        let current-content-ptr = shift(content-ptr, offset) in
-        let stored-bytes = store-rune(*x, current-content-ptr) in
+        let current-content-ptr = shift(content-ptr, offset);
+        let stored-bytes = store-rune(*x, current-content-ptr);
         self(add-int(offset, stored-bytes), rest)
       }
-    }
-  in
+    };
   loop(0, xs);
   magic cast(pointer, text, new-text)
 }
 
 define reverse(t: &text): text {
   // for now
-  pin xs = this.list.reverse(unpack(t)) in
+  pin xs = this.list.reverse(unpack(t));
   pack(xs)
 }
 
 define _get-rune(t: &text, index: int): rune {
-  let ptr = shift(_get-content-pointer(t), index) in
+  let ptr = shift(_get-content-pointer(t), index);
   load-rune(ptr)
 }
 
 // // O(1)
 define uncons(t: text): ?pair(rune, text) {
-  let len on t = text-byte-length(t) in
+  let len on t = text-byte-length(t);
   if eq-int(len, 0) {
     none
   } else {
-    let ch on t = _get-rune(t, 0) in
-    let char-len = this.rune.size(ch) in
-    let t = _drop(t, char-len) in
+    let ch on t = _get-rune(t, 0);
+    let char-len = this.rune.size(ch);
+    let t = _drop(t, char-len);
     Right(Pair(ch, t))
   }
 }
@@ -376,7 +372,7 @@ define _find-pivot(char-len: int, len: int, t: &text, index: int, char-count: in
   } else-if ge-int(char-count, char-len) {
     index
   } else {
-    let char-size = _get-rune-size(t, index) in
+    let char-size = _get-rune-size(t, index);
     _find-pivot(char-len, len, t, add-int(index, char-size), add-int(char-count, 1))
   }
 }
@@ -387,358 +383,344 @@ define _find-pivot-end(char-len: int, len: int, t: &text, index: int, char-count
   } else-if ge-int(char-count, char-len) {
     add-int(index, 1)
   } else {
-    let rune-size = _get-rune-size-end(t, index) in
+    let rune-size = _get-rune-size-end(t, index);
     _find-pivot-end(char-len, len, t, sub-int(index, rune-size), add-int(char-count, 1))
   }
 }
 
 define take(t: text, n: int): text {
-  let len on t = text-byte-length(t) in
-  let pivot on t = _find-pivot(n, len, t, 0, 0) in
+  let len on t = text-byte-length(t);
+  let pivot on t = _find-pivot(n, len, t, 0, 0);
   _take(t, pivot)
 }
 
 define take-N(t: &text, n: int): text {
-  let len = text-byte-length(t) in
-  let pivot = _find-pivot(n, len, t, 0, 0) in
+  let len = text-byte-length(t);
+  let pivot = _find-pivot(n, len, t, 0, 0);
   _take-N(t, pivot)
 }
 
 define drop(t: text, n: int): text {
-  let len on t = text-byte-length(t) in
-  let pivot on t = _find-pivot(n, len, t, 0, 0) in
+  let len on t = text-byte-length(t);
+  let pivot on t = _find-pivot(n, len, t, 0, 0);
   _drop(t, pivot)
 }
 
 define drop-N(t: &text, n: int): text {
-  let len = text-byte-length(t) in
-  let pivot = _find-pivot(n, len, t, 0, 0) in
+  let len = text-byte-length(t);
+  let pivot = _find-pivot(n, len, t, 0, 0);
   _drop-N(t, pivot)
 }
 
 define take-end(t: text, n: int): text {
-  let len on t = text-byte-length(t) in
-  let pivot on t = _find-pivot-end(n, len, t, sub-int(len, 1), 0) in
+  let len on t = text-byte-length(t);
+  let pivot on t = _find-pivot-end(n, len, t, sub-int(len, 1), 0);
   _drop(t, pivot)
 }
 
 define take-end-N(t: &text, n: int): text {
-  let len = text-byte-length(t) in
-  let pivot = _find-pivot-end(n, len, t, sub-int(len, 1), 0) in
+  let len = text-byte-length(t);
+  let pivot = _find-pivot-end(n, len, t, sub-int(len, 1), 0);
   _drop-N(t, pivot)
 }
 
 define drop-end(t: text, n: int): text {
-  let len on t = text-byte-length(t) in
-  let pivot on t = _find-pivot-end(n, len, t, sub-int(len, 1), 0) in
+  let len on t = text-byte-length(t);
+  let pivot on t = _find-pivot-end(n, len, t, sub-int(len, 1), 0);
   _take(t, pivot)
 }
 
 define drop-end-N(t: &text, n: int): text {
-  let len = text-byte-length(t) in
-  let pivot = _find-pivot-end(n, len, t, sub-int(len, 1), 0) in
+  let len = text-byte-length(t);
+  let pivot = _find-pivot-end(n, len, t, sub-int(len, 1), 0);
   _take-N(t, pivot)
 }
 
 define slice(t: text, start: int, size: int): text {
-  let len on t = text-byte-length(t) in
-  let start-byte-index on t = _find-pivot(start, len, t, 0, 0) in
-  let end-byte-index on t = _find-pivot(size, len, t, start-byte-index, 0) in
+  let len on t = text-byte-length(t);
+  let start-byte-index on t = _find-pivot(start, len, t, 0, 0);
+  let end-byte-index on t = _find-pivot(size, len, t, start-byte-index, 0);
   _slice(t, start-byte-index, sub-int(end-byte-index, start-byte-index))
 }
 
 define slice-N(t: &text, start: int, size: int): text {
-  let len = text-byte-length(t) in
-  let start-byte-index = _find-pivot(start, len, t, 0, 0) in
-  let end-byte-index = _find-pivot(size, len, t, start-byte-index, 0) in
+  let len = text-byte-length(t);
+  let start-byte-index = _find-pivot(start, len, t, 0, 0);
+  let end-byte-index = _find-pivot(size, len, t, start-byte-index, 0);
   _slice-N(t, start-byte-index, sub-int(end-byte-index, start-byte-index))
 }
 
 inline take-while(t: text, !pred: (rune) -> bool): text {
   let f =
     define self(t: text, index: int): text {
-      let len on t = text-byte-length(t) in
+      let len on t = text-byte-length(t);
       if ge-int(index, len) {
         take(t, index)
       } else {
-        let ch on t = _get-rune(t, index) in
+        let ch on t = _get-rune(t, index);
         if !pred(ch) {
-          let char-len = this.rune.size(ch) in
+          let char-len = this.rune.size(ch);
           self(t, add-int(index, char-len))
         } else {
           take(t, index)
         }
       }
-    }
-  in
+    };
   f(t, 0)
 }
 
 inline take-while-N(t: &text, !pred: (rune) -> bool): text {
-  let len = text-byte-length(t) in
+  let len = text-byte-length(t);
   let f =
     define self(index: int, acc: list(rune)): list(rune) {
       if ge-int(index, len) {
         this.list.reverse(acc)
       } else {
-        let ch = _get-rune(t, index) in
+        let ch = _get-rune(t, index);
         if !pred(ch) {
-          let char-len = this.rune.size(ch) in
+          let char-len = this.rune.size(ch);
           self(add-int(index, char-len), Cons(ch, acc))
         } else {
           this.list.reverse(acc)
         }
       }
-    }
-  in
-  pin cs = f(0, []) in
+    };
+  pin cs = f(0, []);
   pack(cs)
 }
 
 inline take-while-end(t: text, !pred: (rune) -> bool): text {
-  let len on t = text-byte-length(t) in
+  let len on t = text-byte-length(t);
   let f =
     define self(t: text, index: int): text {
       if lt-int(index, 0) {
         t
       } else {
-        let rune-size on t = _get-rune-size-end(t, index) in
-        let rune-head-index = sub-int(index, sub-int(rune-size, 1)) in
-        let ch on t = _get-rune(t, rune-head-index) in
+        let rune-size on t = _get-rune-size-end(t, index);
+        let rune-head-index = sub-int(index, sub-int(rune-size, 1));
+        let ch on t = _get-rune(t, rune-head-index);
         if !pred(ch) {
           self(t, sub-int(index, rune-size))
         } else {
           _drop(t, add-int(index, 1))
         }
       }
-    }
-  in
+    };
   f(t, sub-int(len, 1))
 }
 
 inline take-while-end-N(t: &text, !pred: (rune) -> bool): text {
-  let len = text-byte-length(t) in
+  let len = text-byte-length(t);
   let f =
     define self(t: &text, index: int): text {
       if lt-int(index, 0) {
         *t
       } else {
-        let rune-size = _get-rune-size-end(t, index) in
-        let rune-head-index = sub-int(index, sub-int(rune-size, 1)) in
-        let ch = _get-rune(t, rune-head-index) in
+        let rune-size = _get-rune-size-end(t, index);
+        let rune-head-index = sub-int(index, sub-int(rune-size, 1));
+        let ch = _get-rune(t, rune-head-index);
         if !pred(ch) {
           self(t, sub-int(index, rune-size))
         } else {
           _drop-N(t, add-int(index, 1))
         }
       }
-    }
-  in
+    };
   f(t, sub-int(len, 1))
 }
 
 inline drop-while(t: text, !pred: (rune) -> bool): text {
   let f =
     define self(t: text): text {
-      let b on t = this.text.is-empty(t) in
+      let b on t = this.text.is-empty(t);
       if b {
         empty()
       } else {
-        let ch on t = _get-rune(t, 0) in
-        let cond = !pred(ch) in
+        let ch on t = _get-rune(t, 0);
+        let cond = !pred(ch);
         if cond {
           self(drop(t, 1))
         } else {
           t
         }
       }
-    }
-  in
+    };
   f(t)
 }
 
 inline drop-while-N(t: &text, !pred: (rune) -> bool): text {
-  let len = text-byte-length(t) in
+  let len = text-byte-length(t);
   let f =
     define self(index: int): text {
       if ge-int(index, len) {
         empty()
       } else {
-        let ch = _get-rune(t, index) in
+        let ch = _get-rune(t, index);
         if !pred(ch) {
-          let char-len = this.rune.size(ch) in
+          let char-len = this.rune.size(ch);
           self(add-int(index, char-len))
         } else {
           _drop-N(t, index)
         }
       }
-    }
-  in
+    };
   f(0)
 }
 
 inline drop-while-end(t: text, !pred: (rune) -> bool): text {
-  let len on t = text-byte-length(t) in
+  let len on t = text-byte-length(t);
   let f =
     define self(t: text, index: int): text {
       if lt-int(index, 0) {
         empty()
       } else {
-        let rune-size on t = _get-rune-size-end(t, index) in
-        let rune-head-index = sub-int(index, sub-int(rune-size, 1)) in
-        let ch on t = _get-rune(t, rune-head-index) in
+        let rune-size on t = _get-rune-size-end(t, index);
+        let rune-head-index = sub-int(index, sub-int(rune-size, 1));
+        let ch on t = _get-rune(t, rune-head-index);
         if !pred(ch) {
           self(t, sub-int(index, rune-size))
         } else {
           _take(t, add-int(index, 1))
         }
       }
-    }
-  in
+    };
   f(t, sub-int(len, 1))
 }
 
 inline drop-while-end-N(t: &text, !pred: (rune) -> bool): text {
-  let len = text-byte-length(t) in
+  let len = text-byte-length(t);
   let f =
     define self(t: &text, index: int): text {
       if lt-int(index, 0) {
         empty()
       } else {
-        let rune-size = _get-rune-size-end(t, index) in
-        let rune-head-index = sub-int(index, sub-int(rune-size, 1)) in
-        let ch = _get-rune(t, rune-head-index) in
+        let rune-size = _get-rune-size-end(t, index);
+        let rune-head-index = sub-int(index, sub-int(rune-size, 1));
+        let ch = _get-rune(t, rune-head-index);
         if !pred(ch) {
           self(t, sub-int(index, rune-size))
         } else {
           _take-N(t, add-int(index, 1))
         }
       }
-    }
-  in
+    };
   f(t, sub-int(len, 1))
 }
 
 define replicate(t: &text, n: int): text {
-  let base-len = text-byte-length(t) in
-  let len = mul-int(n, base-len) in
-  let u = this.word.size in
-  let u2 = mul-int(u, 2) in
-  let new-text = malloc(C-Size(add-int(len, u2))) in
+  let base-len = text-byte-length(t);
+  let len = mul-int(n, base-len);
+  let u = this.word.size;
+  let u2 = mul-int(u, 2);
+  let new-text = malloc(C-Size(add-int(len, u2)));
   store-int(0, new-text);
   store-int(len, shift(new-text, u));
-  let content-ptr = shift(new-text, u2) in
+  let content-ptr = shift(new-text, u2);
   let loop =
     define self(count: int, t: &text): unit {
       if ge-int(count, n) {
         Unit
       } else {
-        let current-content-ptr = shift(content-ptr, mul-int(count, base-len)) in
-        let x-ptr = _get-content-pointer(t) in
+        let current-content-ptr = shift(content-ptr, mul-int(count, base-len));
+        let x-ptr = _get-content-pointer(t);
         _copy-binary(x-ptr, current-content-ptr, base-len);
         self(add-int(count, 1), t)
       }
-    }
-  in
+    };
   loop(0, t);
   magic cast(pointer, text, new-text)
 }
 
 inline fold<a>(acc: a, t: &text, !f: (a, rune) -> a): a {
-  let len = text-byte-length(t) in
+  let len = text-byte-length(t);
   let f =
     define self(index: int, acc: a): a {
       if ge-int(index, len) {
         acc
       } else {
-        let ch = _get-rune(t, index) in
-        let char-len = this.rune.size(ch) in
+        let ch = _get-rune(t, index);
+        let char-len = this.rune.size(ch);
         self(add-int(index, char-len), !f(acc, ch))
       }
-    }
-  in
+    };
   f(0, acc)
 }
 
 inline all(t: &text, !pred: (rune) -> bool): bool {
-  let len = text-byte-length(t) in
+  let len = text-byte-length(t);
   let f =
     define self(index: int): bool {
       if ge-int(index, len) {
         True
       } else {
-        let ch = _get-rune(t, index) in
-        let cond = !pred(ch) in
+        let ch = _get-rune(t, index);
+        let cond = !pred(ch);
         if cond {
-          let char-len = this.rune.size(ch) in
+          let char-len = this.rune.size(ch);
           self(add-int(index, char-len))
         } else {
           False
         }
       }
-    }
-  in
+    };
   f(0)
 }
 
 inline any(t: &text, !pred: (rune) -> bool): bool {
-  let len = text-byte-length(t) in
+  let len = text-byte-length(t);
   let f =
     define self(index: int): bool {
       if ge-int(index, len) {
         False
       } else {
-        let ch = _get-rune(t, index) in
-        let cond = !pred(ch) in
+        let ch = _get-rune(t, index);
+        let cond = !pred(ch);
         if cond {
           True
         } else {
-          let char-len = this.rune.size(ch) in
+          let char-len = this.rune.size(ch);
           self(add-int(index, char-len))
         }
       }
-    }
-  in
+    };
   f(0)
 }
 
 define find(t: &text, !pred: (rune) -> bool): ?int {
-  let len = text-byte-length(t) in
+  let len = text-byte-length(t);
   let f =
     define self(byte-index: int, index: int): ?int {
       if ge-int(byte-index, len) {
         none
       } else {
-        let ch = _get-rune(t, byte-index) in
+        let ch = _get-rune(t, byte-index);
         if !pred(ch) {
           Right(index)
         } else {
-          let char-len = this.rune.size(ch) in
+          let char-len = this.rune.size(ch);
           self(add-int(byte-index, char-len), add-int(index, 1))
         }
       }
-    }
-  in
+    };
   f(0, 0)
 }
 
 define find-end(t: &text, !pred: (rune) -> bool): ?int {
-  let len = text-byte-length(t) in
+  let len = text-byte-length(t);
   let f =
     define self(t: &text, byte-index: int, index: int): ?int {
       if lt-int(byte-index, 0) {
         none
       } else {
-        let rune-size = _get-rune-size-end(t, byte-index) in
-        let rune-head-byte-index = sub-int(byte-index, sub-int(rune-size, 1)) in
-        let ch = _get-rune(t, rune-head-byte-index) in
+        let rune-size = _get-rune-size-end(t, byte-index);
+        let rune-head-byte-index = sub-int(byte-index, sub-int(rune-size, 1));
+        let ch = _get-rune(t, rune-head-byte-index);
         if !pred(ch) {
           Right(index)
         } else {
           self(t, sub-int(byte-index, rune-size), add-int(index, 1))
         }
       }
-    }
-  in
+    };
   f(t, sub-int(len, 1), 0)
 }

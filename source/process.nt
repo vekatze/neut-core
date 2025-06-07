@@ -40,23 +40,23 @@ data process-result-status {
 }
 
 define _waitpid(pid: c-pid): system(process-result-status) {
-  let status-ptr = malloc(C-Size(this.word.size)) in
-  let result = __waitpid(pid, status-ptr, 0) in
+  let status-ptr = malloc(C-Size(this.word.size));
+  let result = __waitpid(pid, status-ptr, 0);
   if eq-c-pid(result, -1) {
     free(status-ptr);
     report-system-error()
   } else {
-    let stat-loc = load-c-int(status-ptr) in
+    let stat-loc = load-c-int(status-ptr);
     free(status-ptr);
     if _wifexited(stat-loc) {
-      let exit-status = _wexitstatus(stat-loc) in
+      let exit-status = _wexitstatus(stat-loc);
       Right(Exited(exit-status))
     } else-if _wifsignaled(stat-loc) {
-      let termsig = _wtermsig(stat-loc) in
-      let coredump = _wcoredump(stat-loc) in
+      let termsig = _wtermsig(stat-loc);
+      let coredump = _wcoredump(stat-loc);
       Right(Signaled(termsig, coredump))
     } else-if _wifstopped(stat-loc) {
-      let stopsig = _wstopsig(stat-loc) in
+      let stopsig = _wstopsig(stat-loc);
       Right(Stopped(stopsig))
     } else {
       // unreachable
@@ -66,8 +66,8 @@ define _waitpid(pid: c-pid): system(process-result-status) {
 }
 
 define _make-argv(xs: list(pointer)): pointer {
-  let len on xs = length(xs) in
-  let ptr = malloc(C-Size(mul-int(this.word.size, len))) in
+  let len on xs = length(xs);
+  let ptr = malloc(C-Size(mul-int(this.word.size, len)));
   fold-left-with-index(Unit, xs, function (_, x, i) {
     store-int(extract(x), shift(ptr, mul-int(this.word.size, i)))
   });
@@ -75,23 +75,23 @@ define _make-argv(xs: list(pointer)): pointer {
 }
 
 define _create-pipe(): system(pair(descriptor, descriptor)) {
-  let ptr = malloc(C-Size(mul-int(this.word.size, 2))) in
-  let result = magic external pipe(ptr) in
+  let ptr = malloc(C-Size(mul-int(this.word.size, 2)));
+  let result = magic external pipe(ptr);
   if eq-c-int(result, -1) {
     free(ptr);
     report-system-error()
   } else {
-    let reader = this.magic.cast(int32, descriptor, magic load(int32, ptr)) in
-    let writer = this.magic.cast(int32, descriptor, magic load(int32, shift(ptr, 4))) in
+    let reader = this.magic.cast(int32, descriptor, magic load(int32, ptr));
+    let writer = this.magic.cast(int32, descriptor, magic load(int32, shift(ptr, 4)));
     free(ptr);
     Right(Pair(reader, writer))
   }
 }
 
 define _dup2(fd1: descriptor, fd2: descriptor): system(unit) {
-  let fd1 = magic cast(descriptor, c-int, fd1) in
-  let fd2 = magic cast(descriptor, c-int, fd2) in
-  let result = magic external dup2(fd1, fd2) in
+  let fd1 = magic cast(descriptor, c-int, fd1);
+  let fd2 = magic cast(descriptor, c-int, fd2);
+  let result = magic external dup2(fd1, fd2);
   if eq-c-int(result, -1) {
     report-system-error()
   } else {
@@ -100,7 +100,7 @@ define _dup2(fd1: descriptor, fd2: descriptor): system(unit) {
 }
 
 define _fork(): system(c-pid) {
-  let result = magic external fork() in
+  let result = magic external fork();
   if eq-c-pid(result, -1) {
     report-system-error()
   } else {
@@ -129,35 +129,35 @@ define spawn(
   stdout-initial-buffer-size: int,
   stderr-initial-buffer-size: int,
 ): system(process-result) {
-  try Pair(in-reader, in-writer) = _create-pipe() in
-  try Pair(out-reader, out-writer) = _create-pipe() in
-  try Pair(error-reader, error-writer) = _create-pipe() in
-  try pid = _fork() in
+  try Pair(in-reader, in-writer) = _create-pipe();
+  try Pair(out-reader, out-writer) = _create-pipe();
+  try Pair(error-reader, error-writer) = _create-pipe();
+  try pid = _fork();
   if eq-c-pid(pid, -1) {
     report-system-error()
   } else-if eq-c-pid(pid, 0) {
-    try _ = close(in-writer) in
-    try _ = close(out-reader) in
-    try _ = close(error-reader) in
-    try _ = _dup2(in-reader, stdin) in
-    try _ = _dup2(out-writer, stdout) in
-    try _ = _dup2(error-writer, stderr) in
-    let Process-Spec of {process, args} = ps in
-    let raw-args = this.list.for-each(Cons(process, args), _get-content-pointer) in
-    let cmd-args = _make-argv(this.list.append(raw-args, [null-pointer])) in
-    let cmd = _get-content-pointer(process) in
-    let _ = magic external execvp(cmd, cmd-args) in
+    try _ = close(in-writer);
+    try _ = close(out-reader);
+    try _ = close(error-reader);
+    try _ = _dup2(in-reader, stdin);
+    try _ = _dup2(out-writer, stdout);
+    try _ = _dup2(error-writer, stderr);
+    let Process-Spec of {process, args} = ps;
+    let raw-args = this.list.for-each(Cons(process, args), _get-content-pointer);
+    let cmd-args = _make-argv(this.list.append(raw-args, [null-pointer]));
+    let cmd = _get-content-pointer(process);
+    let _ = magic external execvp(cmd, cmd-args);
     report-system-error()
   } else {
-    try _ = close(in-reader) in
-    try _ = close(out-writer) in
-    try _ = close(error-writer) in
-    let Process-Spec of {input} = ps in
-    try _ = write(in-writer, input) in
-    try _ = close(in-writer) in
-    try stdout-text = read(out-reader, stdout-initial-buffer-size) in
-    try stderr-text = read(error-reader, stderr-initial-buffer-size) in
-    try status = _waitpid(pid) in
+    try _ = close(in-reader);
+    try _ = close(out-writer);
+    try _ = close(error-writer);
+    let Process-Spec of {input} = ps;
+    try _ = write(in-writer, input);
+    try _ = close(in-writer);
+    try stdout-text = read(out-reader, stdout-initial-buffer-size);
+    try stderr-text = read(error-reader, stderr-initial-buffer-size);
+    try status = _waitpid(pid);
     Right(Process-Result of {
       status,
       stdout-text,
@@ -183,21 +183,20 @@ define zen(): unit {
       process = "sh",
       args = ["-c", "ls /"],
       input = "",
-    }
-  in
+    };
   match spawn(cmd, 1024, 1024) {
   | Right(result) =>
-    let Process-Result of {stdout-text, stderr-text, status} = result in
-    let _ on stdout-text = print(stdout-text) in
-    let _ on stderr-text = print(stderr-text) in
-    let _ = stdout-text in
-    let _ = stderr-text in
+    let Process-Result of {stdout-text, stderr-text, status} = result;
+    let _ on stdout-text = print(stdout-text);
+    let _ on stderr-text = print(stderr-text);
+    let _ = stdout-text;
+    let _ = stderr-text;
     print("exit-code: ");
     _print-process-result-status(status);
     print-line("success")
   | Left(e) =>
     print("fail: ");
-    pin message = this.system.get-error-message(e) in
+    pin message = this.system.get-error-message(e);
     print(message)
   }
 }

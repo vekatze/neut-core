@@ -5,10 +5,10 @@ import {
 }
 
 define show-rune(ch: rune): text {
-  let base = this.text.singleton(ch) in
-  let len on base = text-byte-length(base) in
-  let result on base = join(_escape(base, len, 0, 0)) in
-  let _ = base in
+  let base = this.text.singleton(ch);
+  let len on base = text-byte-length(base);
+  let result on base = join(_escape(base, len, 0, 0));
+  let _ = base;
   result
 }
 

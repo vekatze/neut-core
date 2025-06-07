@@ -14,8 +14,8 @@ define panic<a>(t: &text): a {
 inline _assert(message: &text, check: () -> bool): unit {
   introspect build-mode {
   | release =>
-    let _ = check in
-    let _ = message in
+    let _ = check;
+    let _ = message;
     Unit
   | default =>
     if check() {

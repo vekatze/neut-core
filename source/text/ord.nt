@@ -7,26 +7,26 @@ import {
 }
 
 define lt-text(t1: &text, t2: &text): bool {
-  tie _Text(xs1) = t1 in
-  tie _Text(xs2) = t2 in
+  tie _Text(xs1) = t1;
+  tie _Text(xs2) = t2;
   lt-binary(xs1, xs2)
 }
 
 define le-text(t1: &text, t2: &text): bool {
-  tie _Text(xs1) = t1 in
-  tie _Text(xs2) = t2 in
+  tie _Text(xs1) = t1;
+  tie _Text(xs2) = t2;
   le-binary(xs1, xs2)
 }
 
 define gt-text(t1: &text, t2: &text): bool {
-  tie _Text(xs1) = t1 in
-  tie _Text(xs2) = t2 in
+  tie _Text(xs1) = t1;
+  tie _Text(xs2) = t2;
   gt-binary(xs1, xs2)
 }
 
 define ge-text(t1: &text, t2: &text): bool {
-  tie _Text(xs1) = t1 in
-  tie _Text(xs2) = t2 in
+  tie _Text(xs1) = t1;
+  tie _Text(xs2) = t2;
   ge-binary(xs1, xs2)
 }
 

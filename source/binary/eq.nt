@@ -19,8 +19,8 @@ inline _cmp-binary(!cmp: (int8, int8) -> bool): _cmp-ptr-t {
     if eq-int(index, to) {
       True
     } else {
-      let v1 = load-int8(shift(ptr1, index)) in
-      let v2 = load-int8(shift(ptr2, index)) in
+      let v1 = load-int8(shift(ptr1, index));
+      let v2 = load-int8(shift(ptr2, index));
       if !cmp(v1, v2) {
         self(ptr1, ptr2, add-int(index, 1), to)
       } else {
@@ -36,13 +36,13 @@ define _eq-binary(ptr1: pointer, ptr2: pointer, index: int, to: int): bool {
 
 inline cmp-binary(cmp: _cmp-ptr-t): _cmp-array-t {
   function (t1: &binary, t2: &binary): bool {
-    let len1 = binary-length(t1) in
-    let len2 = binary-length(t2) in
+    let len1 = binary-length(t1);
+    let len2 = binary-length(t2);
     if ne-int(len1, len2) {
       False
     } else {
-      let ptr1 = _get-content-pointer(t1) in
-      let ptr2 = _get-content-pointer(t2) in
+      let ptr1 = _get-content-pointer(t1);
+      let ptr2 = _get-content-pointer(t2);
       cmp(ptr1, ptr2, 0, len1)
     }
   }
@@ -64,13 +64,13 @@ inline as-eq: eq(binary) {
 // eq-prefix("foobar", "") => True
 // eq-prefix("foobar", "bar") => False
 define eq-prefix(haystack: &binary, needle: &binary): bool {
-  let len-haystack = binary-length(haystack) in
-  let len-needle = binary-length(needle) in
+  let len-haystack = binary-length(haystack);
+  let len-needle = binary-length(needle);
   if lt-int(len-haystack, len-needle) {
     False
   } else {
-    let ptr1 = _get-content-pointer(needle) in
-    let ptr2 = _get-content-pointer(haystack) in
+    let ptr1 = _get-content-pointer(needle);
+    let ptr2 = _get-content-pointer(haystack);
     _eq-binary(ptr1, ptr2, 0, len-needle)
   }
 }
@@ -79,14 +79,14 @@ define eq-prefix(haystack: &binary, needle: &binary): bool {
 // eq-suffix("foobar", "") => True
 // eq-suffix("foobar", "foo") => False
 define eq-suffix(haystack: &binary, needle: &binary): bool {
-  let len-haystack = binary-length(haystack) in
-  let len-needle = binary-length(needle) in
+  let len-haystack = binary-length(haystack);
+  let len-needle = binary-length(needle);
   if lt-int(len-haystack, len-needle) {
     False
   } else {
-    let ptr1 = _get-content-pointer(needle) in
-    let ptr2 = _get-content-pointer(haystack) in
-    let ptr2' = shift(ptr2, sub-int(len-haystack, len-needle)) in
+    let ptr1 = _get-content-pointer(needle);
+    let ptr2 = _get-content-pointer(haystack);
+    let ptr2' = shift(ptr2, sub-int(len-haystack, len-needle));
     _eq-binary(ptr1, ptr2', 0, len-needle)
   }
 }
@@ -95,9 +95,9 @@ define _eq-infix(index: int, len1: int, len2: int, needle: &binary, haystack: &b
   if lt-int(len2, add-int(index, len1)) {
     False
   } else {
-    let ptr1 = _get-content-pointer(needle) in
-    let ptr2 = _get-content-pointer(haystack) in
-    let ptr2' = shift(ptr2, index) in
+    let ptr1 = _get-content-pointer(needle);
+    let ptr2 = _get-content-pointer(haystack);
+    let ptr2' = shift(ptr2, index);
     if _eq-binary(ptr1, ptr2', 0, len1) {
       True
     } else {
@@ -111,7 +111,7 @@ define _eq-infix(index: int, len1: int, len2: int, needle: &binary, haystack: &b
 // eq-infix("foobar", "fo") => True
 // eq-infix("foobar", "fb") => False
 define eq-infix(haystack: &binary, needle: &binary): bool {
-  let len-haystack = binary-length(haystack) in
-  let len-needle = binary-length(needle) in
+  let len-haystack = binary-length(haystack);
+  let len-needle = binary-length(needle);
   _eq-infix(0, len-needle, len-haystack, needle, haystack)
 }

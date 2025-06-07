@@ -61,7 +61,7 @@ inline _nomatch(i: _Key, p: _Prefix, m: _Mask): bool {
 }
 
 inline _link-with-mask<a>(m: _Mask, p1: _Prefix, t1: intmap(a), t2: intmap(a)): intmap(a) {
-  let p = _mask(p1, m) in
+  let p = _mask(p1, m);
   if _zero(p1, m) {
     Bin(p, m, t1, t2)
   } else {
@@ -71,7 +71,7 @@ inline _link-with-mask<a>(m: _Mask, p1: _Prefix, t1: intmap(a), t2: intmap(a)): 
 
 // from `Utils.Containers.Internal.BitUtil`
 inline _highest-bit-mask(w: int): int {
-  let size-in-bits = mul-int(this.word.size, 8) in
+  let size-in-bits = mul-int(this.word.size, 8);
   shl-int(1, sub-int(sub-int(size-in-bits, 1), magic external llvm.ctlz.i64(w)))
 }
 
@@ -171,8 +171,7 @@ inline from-list<v>(kvs: list(pair(int, v))): intmap(v) {
       | this.list.Cons(Pair(k, v), rest) =>
         self(rest, insert(acc, k, v))
       }
-    }
-  in
+    };
   f(kvs, Nil)
 }
 
@@ -183,8 +182,8 @@ define to-list<v>(kvs: intmap(v)): list(pair(int, v)) {
   | Tip(k, v) =>
     [Pair(k, v)]
   | Bin(_, _, d1, d2) =>
-    let xs = to-list(d1) in
-    let ys = to-list(d2) in
+    let xs = to-list(d1);
+    let ys = to-list(d2);
     append(xs, ys)
   }
 }

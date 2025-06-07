@@ -16,7 +16,7 @@ inline empty<a>: queue(a) {
 }
 
 define dequeue<a>(q: queue(a)): ?pair(a, queue(a)) {
-  let Queue(ls, rs) = q in
+  let Queue(ls, rs) = q;
   match ls, rs {
   | Nil, Nil =>
     none
@@ -28,15 +28,15 @@ define dequeue<a>(q: queue(a)): ?pair(a, queue(a)) {
 }
 
 define enqueue<a>(q: queue(a), x: a): queue(a) {
-  let Queue(ls, rs) = q in
+  let Queue(ls, rs) = q;
   Queue(ls, Cons(x, rs))
 }
 
 define size<a>(q: &queue(a)): int {
   case q {
   | Queue(ls, rs) =>
-    let l1 = length(ls) in
-    let l2 = length(rs) in
+    let l1 = length(ls);
+    let l2 = length(rs);
     add-int(l1, l2)
   }
 }

@@ -8,14 +8,14 @@ import {
 }
 
 define eq-text(t1: &text, t2: &text): bool {
-  tie _Text(xs1) = t1 in
-  tie _Text(xs2) = t2 in
+  tie _Text(xs1) = t1;
+  tie _Text(xs2) = t2;
   eq-binary(xs1, xs2)
 }
 
 define ne-text(t1: &text, t2: &text): bool {
-  tie _Text(xs1) = t1 in
-  tie _Text(xs2) = t2 in
+  tie _Text(xs1) = t1;
+  tie _Text(xs2) = t2;
   ne-binary(xs1, xs2)
 }
 
@@ -24,26 +24,26 @@ inline as-eq: eq(text) {
 }
 
 define eq-prefix(haystack: &text, needle: &text): bool {
-  tie _Text(haystack') = haystack in
-  tie _Text(needle') = needle in
+  tie _Text(haystack') = haystack;
+  tie _Text(needle') = needle;
   this.binary.eq.eq-prefix(haystack', needle')
 }
 
 define eq-suffix(haystack: &text, needle: &text): bool {
-  tie _Text(haystack') = haystack in
-  tie _Text(needle') = needle in
+  tie _Text(haystack') = haystack;
+  tie _Text(needle') = needle;
   this.binary.eq.eq-suffix(haystack', needle')
 }
 
 define eq-infix(haystack: &text, needle: &text): bool {
-  tie _Text(haystack') = haystack in
-  tie _Text(needle') = needle in
+  tie _Text(haystack') = haystack;
+  tie _Text(needle') = needle;
   this.binary.eq.eq-infix(haystack', needle')
 }
 
 define strip-prefix(haystack: &text, needle: &text): ?text {
   if eq-prefix(haystack, needle) {
-    let needle-len = text-byte-length(needle) in
+    let needle-len = text-byte-length(needle);
     Right(_drop-N(haystack, needle-len))
   } else {
     none
@@ -52,7 +52,7 @@ define strip-prefix(haystack: &text, needle: &text): ?text {
 
 define strip-suffix(haystack: &text, needle: &text): ?text {
   if eq-suffix(haystack, needle) {
-    let new-haystack-len = sub-int(text-byte-length(haystack), text-byte-length(needle)) in
+    let new-haystack-len = sub-int(text-byte-length(haystack), text-byte-length(needle));
     Right(_take-N(haystack, new-haystack-len))
   } else {
     none

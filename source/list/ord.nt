@@ -16,7 +16,7 @@ inline as-ord<a>(!o: ord(a)): ord(list(a)) {
         | Cons(_, _), Nil =>
           GT
         | Cons(x, xs), Cons(y, ys) =>
-          let Ord of {compare} = !o in
+          let Ord of {compare} = !o;
           match compare(x, y) {
           | LT =>
             LT

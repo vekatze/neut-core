@@ -16,14 +16,14 @@ foreign {
 }
 
 define _show(c-fmt: &text, x: int): text {
-  let fmt = _get-content-pointer(c-fmt) in
-  let size = from-c-int(magic external snprintf(null-pointer, C-Size(0), fmt)(x: int)) in
-  let ptr = this.external.malloc(C-Size(add-int(size, add-int(1, mul-int(this.word.size, 2))))) in
+  let fmt = _get-content-pointer(c-fmt);
+  let size = from-c-int(magic external snprintf(null-pointer, C-Size(0), fmt)(x: int));
+  let ptr = this.external.malloc(C-Size(add-int(size, add-int(1, mul-int(this.word.size, 2)))));
   store-int(0, ptr);
   // ignore the trailing null character
   store-int(size, shift(ptr, this.word.size));
-  let buffer = shift(ptr, mul-int(this.word.size, 2)) in
-  let _ = magic external sprintf(buffer, fmt)(x: int) in
+  let buffer = shift(ptr, mul-int(this.word.size, 2));
+  let _ = magic external sprintf(buffer, fmt)(x: int);
   magic cast(pointer, text, ptr)
 }
 
@@ -34,7 +34,7 @@ inline as-show: show(int) {
 }
 
 define show-int(x: int): text {
-  let Show of {show} = as-show in
+  let Show of {show} = as-show;
   show(x)
 }
 

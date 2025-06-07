@@ -19,7 +19,7 @@ foreign {
 }
 
 inline _copy-binary(source-pointer: pointer, target-pointer: pointer, len: int): unit {
-  let _ = magic external llvm.memcpy.p0.p0.i64(target-pointer, source-pointer, len, 0) in
+  let _ = magic external llvm.memcpy.p0.p0.i64(target-pointer, source-pointer, len, 0);
   Unit
 }
 
@@ -30,35 +30,35 @@ resource binary {
     free(x)
   },
   function (source-pointer: pointer) {
-    let u = this.word.size in
-    let u2 = mul-int(u, 2) in
-    let from = load-int(source-pointer) in
-    let to = load-int(shift(source-pointer, u)) in
-    let length = sub-int(to, from) in
-    let target-pointer = malloc(C-Size(add-int(length, u2))) in
+    let u = this.word.size;
+    let u2 = mul-int(u, 2);
+    let from = load-int(source-pointer);
+    let to = load-int(shift(source-pointer, u));
+    let length = sub-int(to, from);
+    let target-pointer = malloc(C-Size(add-int(length, u2)));
     store-int(0, target-pointer);
     store-int(length, shift(target-pointer, u));
-    let source-pointer' = shift(source-pointer, add-int(u2, from)) in
+    let source-pointer' = shift(source-pointer, add-int(u2, from));
     _copy-binary(source-pointer', shift(target-pointer, u2), length);
     target-pointer
   },
 }
 
 define binary-length(xs: &binary): int {
-  let source-pointer = magic cast(&binary, pointer, xs) in
-  let u = this.word.size in
-  let from = load-int(source-pointer) in
-  let to = load-int(shift(source-pointer, u)) in
+  let source-pointer = magic cast(&binary, pointer, xs);
+  let u = this.word.size;
+  let from = load-int(source-pointer);
+  let to = load-int(shift(source-pointer, u));
   sub-int(to, from)
 }
 
 define allocate(len: int): binary {
-  let u = this.word.size in
-  let u2 = mul-int(u, 2) in
-  let base-pointer = malloc(C-Size(add-int(len, u2))) in
+  let u = this.word.size;
+  let u2 = mul-int(u, 2);
+  let base-pointer = malloc(C-Size(add-int(len, u2)));
   store-int(0, base-pointer);
   store-int(len, shift(base-pointer, u));
-  let content-pointer = shift(base-pointer, u2) in
+  let content-pointer = shift(base-pointer, u2);
   let store-values =
     define self(index: int): unit {
       if ge-int(index, len) {
@@ -67,20 +67,19 @@ define allocate(len: int): binary {
         store-int8(0, shift(content-pointer, index));
         self(add-int(index, 1))
       }
-    }
-  in
-  let _ = store-values(0) in
+    };
+  let _ = store-values(0);
   cast(pointer, binary, base-pointer)
 }
 
 define binary-new(xs: list(int8)): binary {
-  let len on xs = length(xs) in
-  let u = this.word.size in
-  let u2 = mul-int(u, 2) in
-  let base-pointer = malloc(C-Size(add-int(len, u2))) in
+  let len on xs = length(xs);
+  let u = this.word.size;
+  let u2 = mul-int(u, 2);
+  let base-pointer = malloc(C-Size(add-int(len, u2)));
   store-int(0, base-pointer);
   store-int(len, shift(base-pointer, u));
-  let content-pointer = shift(base-pointer, u2) in
+  let content-pointer = shift(base-pointer, u2);
   let store-values =
     define self(values: list(int8), index: int): unit {
       match values {
@@ -90,23 +89,22 @@ define binary-new(xs: list(int8)): binary {
         store-int8(v, shift(content-pointer, index));
         self(rest, add-int(index, 1))
       }
-    }
-  in
-  let _ = store-values(xs, 0) in
+    };
+  let _ = store-values(xs, 0);
   cast(pointer, binary, base-pointer)
 }
 
 define binary-access(xs: &binary, i: int): int8 {
-  let ptr = cast(&binary, pointer, xs) in
-  let u = this.word.size in
-  let u2 = mul-int(u, 2) in
+  let ptr = cast(&binary, pointer, xs);
+  let u = this.word.size;
+  let u2 = mul-int(u, 2);
   load-int8(shift(ptr, add-int(u2, i)))
 }
 
 define _get-content-pointer(t: &binary): pointer {
-  let ptr = cast(&binary, pointer, t) in
-  let from = load-int(ptr) in
-  let u = this.word.size in
+  let ptr = cast(&binary, pointer, t);
+  let from = load-int(ptr);
+  let u = this.word.size;
   shift(ptr, add-int(mul-int(u, 2), from))
 }
 
@@ -114,29 +112,27 @@ define join(xs: list(binary)): binary {
   let len on xs =
     fold-left-N(0, xs, function (acc, x) {
       add-int(acc, binary-length(x))
-    })
-  in
-  let u = this.word.size in
-  let u2 = mul-int(u, 2) in
-  let new-binary = malloc(C-Size(add-int(len, u2))) in
+    });
+  let u = this.word.size;
+  let u2 = mul-int(u, 2);
+  let new-binary = malloc(C-Size(add-int(len, u2)));
   store-int(0, new-binary);
   store-int(len, shift(new-binary, u));
-  let content-ptr = shift(new-binary, u2) in
+  let content-ptr = shift(new-binary, u2);
   let loop =
     define self(offset: int, xs: list(binary)): unit {
       match xs {
       | Nil =>
         Unit
       | Cons(x, rest) =>
-        let current-content-ptr = shift(content-ptr, offset) in
-        let x-ptr on x = _get-content-pointer(x) in
-        let x-len on x = binary-length(x) in
+        let current-content-ptr = shift(content-ptr, offset);
+        let x-ptr on x = _get-content-pointer(x);
+        let x-len on x = binary-length(x);
         _copy-binary(x-ptr, current-content-ptr, x-len);
         discard(x);
         self(add-int(offset, x-len), rest)
       }
-    }
-  in
+    };
   loop(0, xs);
   magic cast(pointer, binary, new-binary)
 }
@@ -145,48 +141,46 @@ define join-N(xs: list(&binary)): binary {
   let len on xs =
     fold-left-N(0, xs, function (acc, x) {
       add-int(acc, binary-length(*x))
-    })
-  in
-  let u = this.word.size in
-  let u2 = mul-int(u, 2) in
-  let new-binary = malloc(C-Size(add-int(len, u2))) in
+    });
+  let u = this.word.size;
+  let u2 = mul-int(u, 2);
+  let new-binary = malloc(C-Size(add-int(len, u2)));
   store-int(0, new-binary);
   store-int(len, shift(new-binary, u));
-  let content-ptr = shift(new-binary, u2) in
+  let content-ptr = shift(new-binary, u2);
   let loop =
     define self(offset: int, xs: list(&binary)): unit {
       match xs {
       | Nil =>
         Unit
       | Cons(x, rest) =>
-        let current-content-ptr = shift(content-ptr, offset) in
-        let x-ptr = _get-content-pointer(x) in
-        let x-len = binary-length(x) in
+        let current-content-ptr = shift(content-ptr, offset);
+        let x-ptr = _get-content-pointer(x);
+        let x-len = binary-length(x);
         _copy-binary(x-ptr, current-content-ptr, x-len);
         discard(x);
         self(add-int(offset, x-len), rest)
       }
-    }
-  in
+    };
   loop(0, xs);
   magic cast(pointer, binary, new-binary)
 }
 
 define append(t1: &binary, t2: &binary): binary {
-  let p1 = cast(&binary, pointer, t1) in
-  let p2 = cast(&binary, pointer, t2) in
-  let from1 = load-int(p1) in
-  let from2 = load-int(p2) in
-  let u = this.word.size in
-  let u2 = mul-int(u, 2) in
-  let to1 = load-int(shift(p1, u)) in
-  let to2 = load-int(shift(p2, u)) in
-  let len1 = sub-int(to1, from1) in
-  let len2 = sub-int(to2, from2) in
-  let new-len = add-int(len1, len2) in
-  let content1 = shift(p1, u2) in
-  let content2 = shift(p2, u2) in
-  let new-binary = malloc(C-Size(add-int(new-len, u2))) in
+  let p1 = cast(&binary, pointer, t1);
+  let p2 = cast(&binary, pointer, t2);
+  let from1 = load-int(p1);
+  let from2 = load-int(p2);
+  let u = this.word.size;
+  let u2 = mul-int(u, 2);
+  let to1 = load-int(shift(p1, u));
+  let to2 = load-int(shift(p2, u));
+  let len1 = sub-int(to1, from1);
+  let len2 = sub-int(to2, from2);
+  let new-len = add-int(len1, len2);
+  let content1 = shift(p1, u2);
+  let content2 = shift(p2, u2);
+  let new-binary = malloc(C-Size(add-int(new-len, u2)));
   store-int(0, new-binary);
   store-int(new-len, shift(new-binary, u));
   let !store-values =
@@ -194,13 +188,12 @@ define append(t1: &binary, t2: &binary): binary {
       if eq-int(current-index, array-length) {
         Unit
       } else {
-        let char = load-int8(shift(content-array, current-index)) in
+        let char = load-int8(shift(content-array, current-index));
         store-int8(char, shift(target-pointer, current-index));
         store-values(target-pointer, content-array, add-int(current-index, 1), array-length)
       }
-    }
-  in
-  let str-pointer = shift(new-binary, u2) in
+    };
+  let str-pointer = shift(new-binary, u2);
   !store-values(str-pointer, shift(content1, from1), 0, len1);
   !store-values(shift(str-pointer, len1), shift(content2, from2), 0, len2);
   cast(pointer, binary, new-binary)
@@ -208,27 +201,27 @@ define append(t1: &binary, t2: &binary): binary {
 
 // O(1)
 define drop(t: binary, offset: int): binary {
-  let offset = max-int(0, offset) in
-  let _ on t =
-    let ptr = cast(&binary, pointer, t) in
-    let from = load-int(ptr) in
-    let to-ptr = shift(ptr, this.word.size) in
-    let to = load-int(to-ptr) in
+  let offset = max-int(0, offset);
+  let _ on t = {
+    let ptr = cast(&binary, pointer, t);
+    let from = load-int(ptr);
+    let to-ptr = shift(ptr, this.word.size);
+    let to = load-int(to-ptr);
     store-int(min-int(to, add-int(from, offset)), ptr)
-  in
+  };
   t
 }
 
 // O(1)
 define take(t: binary, offset: int): binary {
-  let offset = max-int(0, offset) in
-  let _ on t =
-    let ptr = cast(&binary, pointer, t) in
-    let from = load-int(ptr) in
-    let to-ptr = shift(ptr, this.word.size) in
-    let to = load-int(to-ptr) in
+  let offset = max-int(0, offset);
+  let _ on t = {
+    let ptr = cast(&binary, pointer, t);
+    let from = load-int(ptr);
+    let to-ptr = shift(ptr, this.word.size);
+    let to = load-int(to-ptr);
     store-int(min-int(to, add-int(from, offset)), to-ptr)
-  in
+  };
   t
 }
 
@@ -238,65 +231,65 @@ define slice(t: binary, start: int, size: int): binary {
 }
 
 define drop-N(t: &binary, offset: int): binary {
-  let content-ptr = _get-content-pointer(t) in
-  let orig-size = binary-length(t) in
-  let new-size = max-int(0, sub-int(orig-size, offset)) in
-  let new-ptr = malloc(C-Size(add-int(new-size, mul-int(this.word.size, 2)))) in
+  let content-ptr = _get-content-pointer(t);
+  let orig-size = binary-length(t);
+  let new-size = max-int(0, sub-int(orig-size, offset));
+  let new-ptr = malloc(C-Size(add-int(new-size, mul-int(this.word.size, 2))));
   store-int(0, new-ptr);
   store-int(new-size, shift(new-ptr, this.word.size));
-  let new-content-ptr = shift(new-ptr, mul-int(this.word.size, 2)) in
-  let adjusted-offset = min-int(offset, orig-size) in
-  let content-ptr' = shift(content-ptr, adjusted-offset) in
+  let new-content-ptr = shift(new-ptr, mul-int(this.word.size, 2));
+  let adjusted-offset = min-int(offset, orig-size);
+  let content-ptr' = shift(content-ptr, adjusted-offset);
   _copy-binary(content-ptr', new-content-ptr, new-size);
   cast(pointer, binary, new-ptr)
 }
 
 define take-N(t: &binary, offset: int): binary {
-  let ptr = cast(&binary, pointer, t) in
-  let to = load-int(shift(ptr, this.word.size)) in
-  let new-size = min-int(to, offset) in
-  let new-ptr = malloc(C-Size(add-int(offset, mul-int(this.word.size, 2)))) in
+  let ptr = cast(&binary, pointer, t);
+  let to = load-int(shift(ptr, this.word.size));
+  let new-size = min-int(to, offset);
+  let new-ptr = malloc(C-Size(add-int(offset, mul-int(this.word.size, 2))));
   store-int(0, new-ptr);
   store-int(new-size, shift(new-ptr, this.word.size));
-  let content-ptr = _get-content-pointer(t) in
-  let new-content-ptr = shift(new-ptr, mul-int(this.word.size, 2)) in
+  let content-ptr = _get-content-pointer(t);
+  let new-content-ptr = shift(new-ptr, mul-int(this.word.size, 2));
   _copy-binary(content-ptr, new-content-ptr, new-size);
   cast(pointer, binary, new-ptr)
 }
 
 define slice-N(t: &binary, start: int, size: int): binary {
-  let start = max-int(start, 0) in
-  let size = max-int(size, 0) in
-  let ptr = cast(&binary, pointer, t) in
-  let content-ptr = _get-content-pointer(t) in
-  let to-ptr = shift(ptr, this.word.size) in
-  let to = load-int(to-ptr) in
-  let new-size = min-int(size, to) in
-  let new-ptr = malloc(C-Size(add-int(new-size, mul-int(this.word.size, 2)))) in
+  let start = max-int(start, 0);
+  let size = max-int(size, 0);
+  let ptr = cast(&binary, pointer, t);
+  let content-ptr = _get-content-pointer(t);
+  let to-ptr = shift(ptr, this.word.size);
+  let to = load-int(to-ptr);
+  let new-size = min-int(size, to);
+  let new-ptr = malloc(C-Size(add-int(new-size, mul-int(this.word.size, 2))));
   store-int(0, new-ptr);
   store-int(new-size, shift(new-ptr, this.word.size));
-  let new-content-ptr = shift(new-ptr, mul-int(this.word.size, 2)) in
+  let new-content-ptr = shift(new-ptr, mul-int(this.word.size, 2));
   _copy-binary(shift(content-ptr, start), new-content-ptr, new-size);
   cast(pointer, binary, new-ptr)
 }
 
 define take-end(t: binary, offset: int): binary {
-  let len on t = binary-length(t) in
+  let len on t = binary-length(t);
   drop(t, sub-int(len, offset))
 }
 
 define take-end-N(t: &binary, offset: int): binary {
-  let len = binary-length(t) in
+  let len = binary-length(t);
   drop-N(t, sub-int(len, offset))
 }
 
 define drop-end(t: binary, offset: int): binary {
-  let len on t = binary-length(t) in
+  let len on t = binary-length(t);
   take(t, sub-int(len, offset))
 }
 
 define drop-end-N(t: &binary, offset: int): binary {
-  let len = binary-length(t) in
+  let len = binary-length(t);
   take-N(t, sub-int(len, offset))
 }
 
@@ -309,39 +302,37 @@ define intercalate-N(xs: list(&binary), sep: &binary): binary {
 }
 
 define find(xs: &binary, !pred: (int8) -> bool): ?int {
-  let len = binary-length(xs) in
+  let len = binary-length(xs);
   let f =
     define self(index: int): ?int {
       if ge-int(index, len) {
         none
       } else {
-        let ch = binary-access(xs, index) in
+        let ch = binary-access(xs, index);
         if !pred(ch) {
           Right(index)
         } else {
           self(add-int(index, 1))
         }
       }
-    }
-  in
+    };
   f(0)
 }
 
 define find-end(xs: &binary, !pred: (int8) -> bool): ?int {
-  let len = binary-length(xs) in
+  let len = binary-length(xs);
   let f =
     define self(xs: &binary, index: int): ?int {
       if lt-int(index, 0) {
         none
       } else {
-        let ch = binary-access(xs, index) in
+        let ch = binary-access(xs, index);
         if !pred(ch) {
           Right(sub-int(len, add-int(index, 1)))
         } else {
           self(xs, sub-int(index, 1))
         }
       }
-    }
-  in
+    };
   f(xs, sub-int(len, 1))
 }

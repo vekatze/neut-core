@@ -12,8 +12,7 @@ define sum-int(xs: list(int)): int {
       | Cons(z, zs) =>
         loop(zs, add-int(z, acc))
       }
-    }
-  in
+    };
   f(xs, 0)
 }
 
@@ -51,8 +50,7 @@ define power-int(a: int, b: int): int {
       } else {
         _power(mul-int(a, a), div-int(b, 2), mul-int(result, a))
       }
-    }
-  in
+    };
   f(a, b, 1)
 }
 

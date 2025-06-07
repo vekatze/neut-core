@@ -6,14 +6,14 @@ import {
 }
 
 define eq-rune(r1: rune, r2: rune): bool {
-  let r1 = to-int32(r1) in
-  let r2 = to-int32(r2) in
+  let r1 = to-int32(r1);
+  let r2 = to-int32(r2);
   eq-int32(r1, r2)
 }
 
 define ne-rune(r1: rune, r2: rune): bool {
-  let r1 = to-int32(r1) in
-  let r2 = to-int32(r2) in
+  let r1 = to-int32(r1);
+  let r2 = to-int32(r2);
   ne-int32(r1, r2)
 }
 

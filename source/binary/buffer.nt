@@ -15,10 +15,10 @@ define write-binary(b: &buffer, content: &binary): unit {
 }
 
 define zen(): unit {
-  let !k = make-buffer(stdout, 0) in
-  let _ = !k in
-  let _ = !k in
-  pin k = !k in
+  let !k = make-buffer(stdout, 0);
+  let _ = !k;
+  let _ = !k;
+  pin k = !k;
   write-binary(k, to-binary("hello\n"));
   write-binary(k, to-binary("hello\n"));
   write-binary(k, to-binary("hello\n"));

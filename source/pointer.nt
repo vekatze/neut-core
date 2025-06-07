@@ -4,7 +4,7 @@ import {
 }
 
 inline shift(p: pointer, offset: int): pointer {
-  let addr = magic cast(pointer, int, p) in
+  let addr = magic cast(pointer, int, p);
   magic cast(int, pointer, add-int(addr, offset))
 }
 

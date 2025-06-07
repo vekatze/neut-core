@@ -5,12 +5,12 @@ import {
 }
 
 inline as-eq<a>(class: eq(a)): eq(vector(a)) {
-  let Eq of {equal = !equal} = class in
+  let Eq of {equal = !equal} = class;
   Eq of {
     equal = {
       function (xs, ys) {
-        let len1 = length(xs) in
-        let len2 = length(ys) in
+        let len1 = length(xs);
+        let len2 = length(ys);
         if ne-int(len1, len2) {
           False
         } else {
@@ -19,16 +19,15 @@ inline as-eq<a>(class: eq(a)): eq(vector(a)) {
               if ge-int(i, len1) {
                 True
               } else {
-                let x = _access(xs, i) in
-                let y = _access(xs, i) in
+                let x = _access(xs, i);
+                let y = _access(xs, i);
                 if !equal(x, y) {
                   loop(add-int(i, 1))
                 } else {
                   False
                 }
               }
-            }
-          in
+            };
           f(0)
         }
       }

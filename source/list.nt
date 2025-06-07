@@ -28,8 +28,7 @@ inline fold-left<elem-type, result-type>(
       | Cons(y, ys) =>
         loop(!consumer(acc, y), ys)
       }
-    }
-  in
+    };
   helper(acc, xs)
 }
 
@@ -46,8 +45,7 @@ inline fold-left-N<elem-type, result-type>(
       | Cons(y, ys) =>
         loop(!consumer(acc, y), ys)
       }
-    }
-  in
+    };
   helper(acc, xs)
 }
 
@@ -64,8 +62,7 @@ inline fold-left-with-index<elem-type, result-type>(
       | Cons(y, ys) =>
         loop(!consumer(acc, y, i), ys, add-int(i, 1))
       }
-    }
-  in
+    };
   helper(acc, xs, 0)
 }
 
@@ -82,8 +79,7 @@ inline fold-right<elem-type, result-type>(
       | Cons(y, ys) =>
         !consumer(y, loop(ys, acc))
       }
-    }
-  in
+    };
   helper(xs, acc)
 }
 
@@ -100,8 +96,7 @@ inline fold-right-N<elem-type, result-type>(
       | Cons(y, ys) =>
         !consumer(y, loop(ys, acc))
       }
-    }
-  in
+    };
   helper(xs, acc)
 }
 
@@ -140,8 +135,7 @@ inline for-each<a, b>(xs: list(a), !f: (a) -> b): list(b) {
       | Cons(y, ys) =>
         Cons(!f(y), loop(ys, acc))
       }
-    }
-  in
+    };
   helper(xs, [])
 }
 
@@ -154,8 +148,7 @@ inline for-each-N<a, b>(xs: &list(a), !f: (&a) -> b): list(b) {
       | Cons(y, ys) =>
         Cons(!f(y), loop(ys, acc))
       }
-    }
-  in
+    };
   helper(xs, [])
 }
 
@@ -166,12 +159,11 @@ inline for-each-E<a, e, b>(xs: list(a), !f: (a) -> either(e, b)): either(e, list
       | Nil =>
         Right(Nil)
       | Cons(y, ys) =>
-        try z = !f(y) in
-        try zs = self(ys) in
+        try z = !f(y);
+        try zs = self(ys);
         Right(Cons(z, zs))
       }
-    }
-  in
+    };
   f(xs)
 }
 
@@ -182,22 +174,21 @@ inline for-each-EN<a, e, b>(xs: &list(a), !f: (&a) -> either(e, b)): either(e, l
       | Nil =>
         Right(Nil)
       | Cons(y, ys) =>
-        try z = !f(y) in
-        try zs = self(ys) in
+        try z = !f(y);
+        try zs = self(ys);
         Right(Cons(z, zs))
       }
-    }
-  in
+    };
   f(xs)
 }
 
 inline for<a>(xs: list(a), f: (a) -> unit): unit {
-  let _ = for-each(xs, f) in
+  let _ = for-each(xs, f);
   Unit
 }
 
 inline for-N<a>(xs: &list(a), f: (&a) -> unit): unit {
-  let _ = for-each-N(xs, f) in
+  let _ = for-each-N(xs, f);
   Unit
 }
 
@@ -223,8 +214,7 @@ inline iterate<a>(count: int, !f: (int) -> a): list(a) {
       } else {
         Cons(!f(cursor), self(add-int(cursor, 1)))
       }
-    }
-  in
+    };
   helper(0)
 }
 
@@ -235,11 +225,10 @@ inline iterate-E<e, a>(count: int, !f: (int) -> either(e, a)): either(e, list(a)
       | True =>
         Right(reverse(acc))
       | False =>
-        try v = !f(cursor) in
+        try v = !f(cursor);
         self(Cons(v, acc), add-int(cursor, 1))
       }
-    }
-  in
+    };
   helper([], 0)
 }
 
@@ -260,8 +249,7 @@ inline zip-with<a, b, c>(xs: list(a), ys: list(b), !f: (a, b) -> c): list(c) {
       | Cons(x, xs'), Cons(y, ys') =>
         Cons(!f(x, y), loop(xs', ys'))
       }
-    }
-  in
+    };
   k(xs, ys)
 }
 
@@ -276,8 +264,7 @@ inline zip-with-N<a, b, c>(xs: &list(a), ys: &list(b), !f: (&a, &b) -> c): list(
       | Cons(x, xs'), Cons(y, ys') =>
         Cons(!f(x, y), loop(xs', ys'))
       }
-    }
-  in
+    };
   k(xs, ys)
 }
 
@@ -293,15 +280,15 @@ define zip-N<a, b>(xs: &list(a), ys: &list(b)): list(pair(&a, &b)) {
 
 define unzip<a, b>(xs: list(pair(a, b))): pair(list(a), list(b)) {
   fold-right(xs, Pair([], []), function (x, acc) {
-    let Pair(l, r) = x in
-    let Pair(rest-l, rest-r) = acc in
+    let Pair(l, r) = x;
+    let Pair(rest-l, rest-r) = acc;
     Pair(Cons(l, rest-l), Cons(r, rest-r))
   })
 }
 
 define partition<a, b>(xs: list(either(a, b))): pair(list(a), list(b)) {
   fold-right(xs, Pair([], []), function (elem, acc) {
-    let Pair(ls, rs) = acc in
+    let Pair(ls, rs) = acc;
     match elem {
     | Left(l) =>
       Pair(Cons(l, ls), rs)
@@ -331,8 +318,7 @@ define unsnoc<a>(xs: list(a)): ?pair(list(a), a) {
       | Cons(y, ys) =>
         _unsnoc(ys, Cons(y, acc))
       }
-    }
-  in
+    };
   f(xs, [])
 }
 
@@ -366,8 +352,7 @@ inline find<a>(xs: &list(a), !pred: (&a) -> bool): ?&a {
           self(zs)
         }
       }
-    }
-  in
+    };
   f(xs)
 }
 
@@ -378,15 +363,14 @@ inline filter<a>(xs: list(a), !pred: (&a) -> bool): list(a) {
       | Nil =>
         Nil
       | Cons(y, ys) =>
-        let b on y = !pred(y) in
+        let b on y = !pred(y);
         if b {
           Cons(y, self(ys))
         } else {
           self(ys)
         }
       }
-    }
-  in
+    };
   f(xs)
 }
 
@@ -402,7 +386,7 @@ define filter-some<a>(xs: list(?a)): list(a) {
 }
 
 inline sum<a>(as-monoid: monoid(a), xs: list(a)): a {
-  let Monoid of {e, op} = as-monoid in
+  let Monoid of {e, op} = as-monoid;
   fold-left(e, xs, function (acc, x) {
     op(acc, x)
   })
@@ -410,13 +394,13 @@ inline sum<a>(as-monoid: monoid(a), xs: list(a)): a {
 
 inline minimum<a>(as-ord: ord(a)): (list(a)) -> ?a {
   function (xs) {
-    let Ord of {compare} = as-ord in
+    let Ord of {compare} = as-ord;
     match xs {
     | Nil =>
       none
     | Cons(y, ys) =>
       Right(fold-left(y, ys, function (acc, y) {
-        let order on acc, y = compare(acc, y) in
+        let order on acc, y = compare(acc, y);
         match order {
         | LT =>
           acc
@@ -430,14 +414,14 @@ inline minimum<a>(as-ord: ord(a)): (list(a)) -> ?a {
 
 inline maximum<a>(as-ord: ord(a)): (list(a)) -> ?a {
   function (xs) {
-    let Ord of {compare = !compare} = as-ord in
+    let Ord of {compare = !compare} = as-ord;
     let helper =
       define self(cand: a, ys: list(a)): a {
         match ys {
         | Nil =>
           cand
         | Cons(z, zs) =>
-          let order on cand, z = !compare(cand, z) in
+          let order on cand, z = !compare(cand, z);
           match order {
           | GT =>
             self(cand, zs)
@@ -445,8 +429,7 @@ inline maximum<a>(as-ord: ord(a)): (list(a)) -> ?a {
             self(z, zs)
           }
         }
-      }
-    in
+      };
     match xs {
     | Nil =>
       none
@@ -548,8 +531,7 @@ define product<a, b>(xs: list(a), ys: list(b)): list(pair(a, b)) {
       for-each(ys, function (y) {
         Pair(x, y)
       })
-    })
-  in
+    });
   concat(xyss)
 }
 
@@ -582,16 +564,15 @@ inline span<a>(xs: list(a), !pred: (&a) -> bool): pair(list(a), list(a)) {
       | [] =>
         Pair([], [])
       | Cons(y, ys) =>
-        let cond on y = !pred(y) in
+        let cond on y = !pred(y);
         if cond {
-          let Pair(former, latter) = self(ys) in
+          let Pair(former, latter) = self(ys);
           Pair(Cons(y, former), latter)
         } else {
           Pair([], Cons(y, ys))
         }
       }
-    }
-  in
+    };
   f(xs)
 }
 
@@ -603,14 +584,13 @@ inline span-N<a>(xs: &list(a), !pred: (&a) -> bool): pair(list(a), list(a)) {
         Pair([], [])
       | Cons(y, ys) =>
         if !pred(y) {
-          let Pair(former, latter) = self(ys) in
+          let Pair(former, latter) = self(ys);
           Pair(Cons(*y, former), latter)
         } else {
           Pair([], Cons(*y, *ys))
         }
       }
-    }
-  in
+    };
   f(xs)
 }
 
@@ -621,15 +601,14 @@ inline take-while<a>(xs: list(a), !pred: (&a) -> bool): list(a) {
       | [] =>
         []
       | Cons(y, ys) =>
-        let cond on y = !pred(y) in
+        let cond on y = !pred(y);
         if cond {
           Cons(y, self(ys))
         } else {
           []
         }
       }
-    }
-  in
+    };
   f(xs)
 }
 
@@ -646,8 +625,7 @@ inline take-while-N<a>(xs: &list(a), !pred: (&a) -> bool): list(a) {
           []
         }
       }
-    }
-  in
+    };
   f(xs)
 }
 
@@ -658,15 +636,14 @@ inline drop-while<a>(xs: list(a), !pred: (&a) -> bool): list(a) {
       | [] =>
         []
       | Cons(y, ys) =>
-        let cond on y = !pred(y) in
+        let cond on y = !pred(y);
         if cond {
           self(ys)
         } else {
           Cons(y, ys)
         }
       }
-    }
-  in
+    };
   f(xs)
 }
 
@@ -683,7 +660,6 @@ inline drop-while-N<a>(xs: &list(a), !pred: (&a) -> bool): list(a) {
           Cons(*y, *ys)
         }
       }
-    }
-  in
+    };
   f(xs)
 }

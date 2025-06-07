@@ -31,87 +31,87 @@ data vector(_: type) {
 }
 
 inline get-capacity<a>(xs: &vector(a)): int {
-  let vector-ptr = cast(&vector(a), pointer, xs) in
+  let vector-ptr = cast(&vector(a), pointer, xs);
   load-int(vector-ptr)
 }
 
 inline _get-from<a>(xs: &vector(a)): int {
-  let vector-ptr = cast(&vector(a), pointer, xs) in
+  let vector-ptr = cast(&vector(a), pointer, xs);
   load-int(shift(vector-ptr, this.word.size))
 }
 
 inline _get-to<a>(xs: &vector(a)): int {
-  let vector-ptr = cast(&vector(a), pointer, xs) in
+  let vector-ptr = cast(&vector(a), pointer, xs);
   load-int(shift(vector-ptr, mul-int(this.word.size, 2)))
 }
 
 inline _get-elem-type<a>(xs: &vector(a)): type {
-  let vector-ptr = cast(&vector(a), pointer, xs) in
+  let vector-ptr = cast(&vector(a), pointer, xs);
   cast(int, type, load-int(shift(vector-ptr, mul-int(this.word.size, 3))))
 }
 
 inline _set-elem-type<a>(xs: &vector(a), b: type): unit {
-  let vector-ptr = cast(&vector(a), pointer, xs) in
+  let vector-ptr = cast(&vector(a), pointer, xs);
   store-int(cast(type, int, b), shift(vector-ptr, mul-int(this.word.size, 3)))
 }
 
 inline _get-buffer-ptr<a>(xs: &vector(a)): pointer {
-  let vector-ptr = cast(&vector(a), pointer, xs) in
+  let vector-ptr = cast(&vector(a), pointer, xs);
   load-pointer(shift(vector-ptr, mul-int(this.word.size, 4)))
 }
 
 define _set-buffer-ptr<a>(xs: &vector(a), buffer-ptr: pointer): unit {
-  let vector-ptr = cast(&vector(a), pointer, xs) in
+  let vector-ptr = cast(&vector(a), pointer, xs);
   store-pointer(buffer-ptr, shift(vector-ptr, mul-int(this.word.size, 4)))
 }
 
 define _set-capacity<a>(xs: &vector(a), capacity: int): unit {
-  let vector-ptr = cast(&vector(a), pointer, xs) in
+  let vector-ptr = cast(&vector(a), pointer, xs);
   store-int(capacity, vector-ptr)
 }
 
 define _get-element-pointer<a>(xs: &vector(a), index: int): pointer {
-  let from = _get-from(xs) in
-  let buffer-ptr = _get-buffer-ptr(xs) in
+  let from = _get-from(xs);
+  let buffer-ptr = _get-buffer-ptr(xs);
   shift(buffer-ptr, mul-int(this.word.size, add-int(from, index)))
 }
 
 define length<a>(xs: &vector(a)): int {
-  let from = _get-from(xs) in
-  let to = _get-to(xs) in
+  let from = _get-from(xs);
+  let to = _get-to(xs);
   sub-int(to, from)
 }
 
 inline _shift-from<a>(xs: &vector(a), offset: int): unit {
-  let vector-ptr = cast(&vector(a), pointer, xs) in
-  let from-ptr = shift(vector-ptr, mul-int(this.word.size, 1)) in
-  let current-value = load-int(from-ptr) in
+  let vector-ptr = cast(&vector(a), pointer, xs);
+  let from-ptr = shift(vector-ptr, mul-int(this.word.size, 1));
+  let current-value = load-int(from-ptr);
   store-int(add-int(current-value, offset), from-ptr)
 }
 
 inline _shift-to<a>(xs: &vector(a), offset: int): unit {
-  let vector-ptr = cast(&vector(a), pointer, xs) in
-  let to-ptr = shift(vector-ptr, mul-int(this.word.size, 2)) in
-  let current-value = load-int(to-ptr) in
+  let vector-ptr = cast(&vector(a), pointer, xs);
+  let to-ptr = shift(vector-ptr, mul-int(this.word.size, 2));
+  let current-value = load-int(to-ptr);
   store-int(add-int(current-value, offset), to-ptr)
 }
 
 inline _set-from<a>(xs: &vector(a), from: int): unit {
-  let vector-ptr = cast(&vector(a), pointer, xs) in
+  let vector-ptr = cast(&vector(a), pointer, xs);
   store-int(from, shift(vector-ptr, this.word.size))
 }
 
 inline _set-to<a>(xs: &vector(a), to: int): unit {
-  let vector-ptr = cast(&vector(a), pointer, xs) in
+  let vector-ptr = cast(&vector(a), pointer, xs);
   store-int(to, shift(vector-ptr, mul-int(this.word.size, 2)))
 }
 
 define make<a>(initial-capacity: int): vector(a) {
-  let abs-capacity = abs-int(initial-capacity) in
-  let word-size = this.word.size in
-  let vector-ptr = malloc(C-Size(mul-int(word-size, 5))) in
-  let buffer-ptr = malloc(C-Size(mul-int(word-size, abs-capacity))) in
-  let initial-cursor = match gt-int(initial-capacity, 0) {True => 0 | False => abs-capacity} in
+  let abs-capacity = abs-int(initial-capacity);
+  let word-size = this.word.size;
+  let vector-ptr = malloc(C-Size(mul-int(word-size, 5)));
+  let buffer-ptr = malloc(C-Size(mul-int(word-size, abs-capacity)));
+  let initial-cursor = match gt-int(initial-capacity, 0) {True => 0 | False => abs-capacity};
   store-int(abs-capacity, vector-ptr);
   store-int(initial-cursor, shift(vector-ptr, mul-int(word-size, 1)));
   store-int(initial-cursor, shift(vector-ptr, mul-int(word-size, 2)));
@@ -124,8 +124,8 @@ define _discard-vector-content<a>(xs: &vector(a), elem-type: type, index: int, l
   if eq-int(index, len) {
     Unit
   } else {
-    let element-ptr = _get-element-pointer(xs, index) in
-    let _ = cast(int, elem-type, load-int(element-ptr)) in
+    let element-ptr = _get-element-pointer(xs, index);
+    let _ = cast(int, elem-type, load-int(element-ptr));
     _discard-vector-content(xs, elem-type, add-int(index, 1), len)
   }
 }
@@ -140,10 +140,10 @@ define _copy-vector-content(
   if eq-int(index, len) {
     Unit
   } else {
-    let source-ptr = _get-element-pointer(xs, index) in
-    let target-ptr = _get-element-pointer(ys, index) in
-    let original = cast(int, &elem-type, load-int(source-ptr)) in
-    let clone = *original in
+    let source-ptr = _get-element-pointer(xs, index);
+    let target-ptr = _get-element-pointer(ys, index);
+    let original = cast(int, &elem-type, load-int(source-ptr));
+    let clone = *original;
     store-int(cast(elem-type, int, clone), target-ptr);
     _copy-vector-content(xs, ys, elem-type, add-int(index, 1), len)
   }
@@ -152,19 +152,19 @@ define _copy-vector-content(
 // (capacity: int, from: int, to: int, elem-type: type, ptr-to-buffer: pointer)
 resource _vector-internal {
   function (xs: &vector(pointer)) {
-    let len = length(xs) in
-    let elem-type = _get-elem-type(xs) in
+    let len = length(xs);
+    let elem-type = _get-elem-type(xs);
     _discard-vector-content(xs, elem-type, 0, len);
     free(_get-buffer-ptr(xs));
     free(cast(&vector(pointer), pointer, xs))
   },
   function (xs: &vector(pointer)) {
-    let capacity = get-capacity(xs) in
-    let ys: &vector(pointer) = cast(vector(pointer), &vector(pointer), make(capacity)) in
-    let elem-type = _get-elem-type(xs) in
-    let from = _get-from(xs) in
-    let to = _get-to(xs) in
-    let len = length(xs) in
+    let capacity = get-capacity(xs);
+    let ys: &vector(pointer) = cast(vector(pointer), &vector(pointer), make(capacity));
+    let elem-type = _get-elem-type(xs);
+    let from = _get-from(xs);
+    let to = _get-to(xs);
+    let len = length(xs);
     _set-from(ys, from);
     _set-to(ys, to);
     _set-elem-type(ys, elem-type);
@@ -183,87 +183,93 @@ inline _extend-factor: int {
 }
 
 define _extend-front<a>(xs: vector(a)): vector(a) {
-  let current-capacity on xs = max-int(get-capacity(xs), 1) in
-  let new-capacity = mul-int(current-capacity, _extend-factor) in
-  let buffer-ptr on xs = _get-buffer-ptr(xs) in
-  let new-buffer-ptr = realloc(buffer-ptr, C-Size(mul-int(this.word.size, new-capacity))) in
-  let new-head-ptr = shift(new-buffer-ptr, mul-int(this.word.size, current-capacity)) in
-  let _ = magic external llvm.memcpy.p0.p0.i64(new-head-ptr, new-buffer-ptr, mul-int(this.word.size, current-capacity), 0) in
-  let _ on xs =
+  let current-capacity on xs = max-int(get-capacity(xs), 1);
+  let new-capacity = mul-int(current-capacity, _extend-factor);
+  let buffer-ptr on xs = _get-buffer-ptr(xs);
+  let new-buffer-ptr = realloc(buffer-ptr, C-Size(mul-int(this.word.size, new-capacity)));
+  let new-head-ptr = shift(new-buffer-ptr, mul-int(this.word.size, current-capacity));
+  let _ =
+    magic external llvm.memcpy.p0.p0.i64(
+      new-head-ptr,
+      new-buffer-ptr,
+      mul-int(this.word.size, current-capacity),
+      0,
+    );
+  let _ on xs = {
     _shift-from(xs, current-capacity);
     _shift-to(xs, current-capacity);
     _set-buffer-ptr(xs, new-buffer-ptr);
     _set-capacity(xs, new-capacity)
-  in
+  };
   xs
 }
 
 define _extend-back<a>(xs: vector(a)): vector(a) {
-  let current-capacity on xs = max-int(get-capacity(xs), 1) in
-  let new-capacity = mul-int(current-capacity, _extend-factor) in
-  let buffer-ptr on xs = _get-buffer-ptr(xs) in
-  let new-buffer-ptr = realloc(buffer-ptr, C-Size(mul-int(this.word.size, new-capacity))) in
-  let _ on xs =
+  let current-capacity on xs = max-int(get-capacity(xs), 1);
+  let new-capacity = mul-int(current-capacity, _extend-factor);
+  let buffer-ptr on xs = _get-buffer-ptr(xs);
+  let new-buffer-ptr = realloc(buffer-ptr, C-Size(mul-int(this.word.size, new-capacity)));
+  let _ on xs = {
     _set-buffer-ptr(xs, new-buffer-ptr);
     _set-capacity(xs, new-capacity)
-  in
+  };
   xs
 }
 
 define push-front<a>(xs: vector(a), x: a): vector(a) {
-  let from on xs = _get-from(xs) in
+  let from on xs = _get-from(xs);
   if gt-int(from, 0) {
-    let new-element-ptr on xs = _get-element-pointer(xs, -1) in
+    let new-element-ptr on xs = _get-element-pointer(xs, -1);
     store-int(cast(a, int, x), new-element-ptr);
-    let _ on xs = _shift-from(xs, -1) in
+    let _ on xs = _shift-from(xs, -1);
     xs
   } else {
-    let xs = _extend-front(xs) in
+    let xs = _extend-front(xs);
     push-front(xs, x)
   }
 }
 
 define push-back<a>(xs: vector(a), x: a): vector(a) {
-  let capacity on xs = get-capacity(xs) in
-  let to on xs = _get-to(xs) in
+  let capacity on xs = get-capacity(xs);
+  let to on xs = _get-to(xs);
   if lt-int(to, capacity) {
-    let len on xs = length(xs) in
-    let new-element-ptr on xs = _get-element-pointer(xs, len) in
+    let len on xs = length(xs);
+    let new-element-ptr on xs = _get-element-pointer(xs, len);
     store-int(cast(a, int, x), new-element-ptr);
-    let _ on xs = _shift-to(xs, 1) in
+    let _ on xs = _shift-to(xs, 1);
     xs
   } else {
-    let xs' = _extend-back(xs) in
+    let xs' = _extend-back(xs);
     push-back(xs', x)
   }
 }
 
 inline pop-front<a>(xs: vector(a)): ?pair(a, vector(a)) {
-  let len on xs = length(xs) in
+  let len on xs = length(xs);
   if eq-int(len, 0) {
     none
   } else {
-    let first-value-pointer on xs = _get-element-pointer(xs, 0) in
-    let first-value = cast(int, a, load-int(first-value-pointer)) in
-    let _ on xs = _shift-from(xs, 1) in
+    let first-value-pointer on xs = _get-element-pointer(xs, 0);
+    let first-value = cast(int, a, load-int(first-value-pointer));
+    let _ on xs = _shift-from(xs, 1);
     Right(Pair(first-value, xs))
   }
 }
 
 inline pop-back<a>(xs: vector(a)): ?pair(vector(a), a) {
-  let len on xs = length(xs) in
+  let len on xs = length(xs);
   if eq-int(len, 0) {
     none
   } else {
-    let last-value-pointer on xs = _get-element-pointer(xs, sub-int(len, 1)) in
-    let last-value = cast(int, a, load-int(last-value-pointer)) in
-    let _ on xs = _shift-to(xs, -1) in
+    let last-value-pointer on xs = _get-element-pointer(xs, sub-int(len, 1));
+    let last-value = cast(int, a, load-int(last-value-pointer));
+    let _ on xs = _shift-to(xs, -1);
     Right(Pair(xs, last-value))
   }
 }
 
 inline _access<a>(xs: &vector(a), i: int): &a {
-  let element-pointer = _get-element-pointer(xs, i) in
+  let element-pointer = _get-element-pointer(xs, i);
   cast(int, &a, load-int(element-pointer))
 }
 
@@ -280,17 +286,16 @@ inline fold-left-N<elem-type, result-type>(
   xs: &vector(elem-type),
   !consumer: (result-type, &elem-type, int) -> result-type,
 ): result-type {
-  let sz = length(xs) in
+  let sz = length(xs);
   let helper =
     define loop(cursor: int, acc, xs) {
       if eq-int(cursor, sz) {
         acc
       } else {
-        let y = _access(xs, cursor) in
+        let y = _access(xs, cursor);
         loop(add-int(cursor, 1), !consumer(acc, y, cursor), xs)
       }
-    }
-  in
+    };
   helper(0, acc, xs)
 }
 
@@ -299,17 +304,16 @@ inline fold-left-reverse-N<elem-type, result-type>(
   xs: &vector(elem-type),
   !consumer: (result-type, &elem-type, int) -> result-type,
 ): result-type {
-  let sz = length(xs) in
+  let sz = length(xs);
   let helper =
     define loop(cursor: int, acc: result-type, xs: &vector(elem-type)): result-type {
       if lt-int(cursor, 0) {
         acc
       } else {
-        let y = this.vector._access(xs, cursor) in
+        let y = this.vector._access(xs, cursor);
         loop(sub-int(cursor, 1), !consumer(acc, y, cursor), xs)
       }
-    }
-  in
+    };
   helper(sub-int(sz, 1), acc, xs)
 }
 
@@ -318,63 +322,60 @@ inline fold-left-EN<e, elem-type, result-type>(
   xs: &vector(elem-type),
   !consumer: (result-type, &elem-type, int) -> either(e, result-type),
 ): either(e, result-type) {
-  let sz = length(xs) in
+  let sz = length(xs);
   let helper =
     define loop(cursor: int, acc, xs) {
       if eq-int(cursor, sz) {
         Right(acc)
       } else {
-        let y = _access(xs, cursor) in
-        try v = !consumer(acc, y, cursor) in
+        let y = _access(xs, cursor);
+        try v = !consumer(acc, y, cursor);
         loop(add-int(cursor, 1), v, xs)
       }
-    }
-  in
+    };
   helper(0, acc, xs)
 }
 
 inline for-each<a, b>(xs: vector(a), !f: (a, int) -> b): vector(b) {
-  let _ on xs = _set-elem-type(xs, b) in
-  let len on xs = length(xs) in
+  let _ on xs = _set-elem-type(xs, b);
+  let len on xs = length(xs);
   let update-values =
     define self(xs: vector(a), index: int): vector(a) {
       if ge-int(index, len) {
         xs
       } else {
-        let element-ptr on xs = _get-element-pointer(xs, index) in
-        let old-value = cast(int, a, load-int(element-ptr)) in
-        let new-element-ptr = cast(b, int, !f(old-value, index)) in
+        let element-ptr on xs = _get-element-pointer(xs, index);
+        let old-value = cast(int, a, load-int(element-ptr));
+        let new-element-ptr = cast(b, int, !f(old-value, index));
         store-int(new-element-ptr, element-ptr);
         self(xs, add-int(index, 1))
       }
-    }
-  in
+    };
   cast(vector(a), vector(b), update-values(xs, 0))
 }
 
 inline for-each-N<a, b>(xs: &vector(a), f: (&a, int) -> b): vector(b) {
-  let capacity = get-capacity(xs) in
+  let capacity = get-capacity(xs);
   fold-left-N(make(capacity), xs, function (acc, x, i) {
     push-back(acc, f(x, i))
   })
 }
 
 inline for<a>(xs: vector(a), !f: (a, int) -> unit): unit {
-  let len on xs = length(xs) in
+  let len on xs = length(xs);
   let loop =
     define self(xs: vector(a), index: int): unit {
       if ge-int(index, len) {
-        let buffer-ptr on xs = _get-buffer-ptr(xs) in
+        let buffer-ptr on xs = _get-buffer-ptr(xs);
         free(buffer-ptr);
         free(cast(vector(a), pointer, xs))
       } else {
-        let element-ptr on xs = _get-element-pointer(xs, index) in
-        let old-value = cast(int, a, load-int(element-ptr)) in
+        let element-ptr on xs = _get-element-pointer(xs, index);
+        let old-value = cast(int, a, load-int(element-ptr));
         !f(old-value, index);
         self(xs, add-int(index, 1))
       }
-    }
-  in
+    };
   loop(xs, 0)
 }
 
@@ -388,23 +389,23 @@ define for-each-vertical<a, b>(xs: vector(a), col-size: int, !f: (a, int) -> b):
   assert "this.vector.for-each-vertical: col-size > 0" {
     gt-int(col-size, 0)
   };
-  let _ on xs = _set-elem-type(xs, b) in
-  let vec-size on xs = length(xs) in
+  let _ on xs = _set-elem-type(xs, b);
+  let vec-size on xs = length(xs);
   let store-values =
     define self(xs: vector(a), index: int): vector(a) {
       if ge-int(index, vec-size) {
         xs
       } else {
-        let value-ptr on xs = _get-element-pointer(xs, index) in
-        let old-value = cast(int, a, load-int(value-ptr)) in
-        let new-value-ptr = cast(b, int, !f(old-value, index)) in
+        let value-ptr on xs = _get-element-pointer(xs, index);
+        let old-value = cast(int, a, load-int(value-ptr));
+        let new-value-ptr = cast(b, int, !f(old-value, index));
         store-int(new-value-ptr, value-ptr);
-        let next-index-cand = add-int(index, col-size) in
+        let next-index-cand = add-int(index, col-size);
         if lt-int(next-index-cand, vec-size) {
           self(xs, next-index-cand)
         } else {
-          let current-column = rem-int(index, col-size) in
-          let next-column = add-int(current-column, 1) in
+          let current-column = rem-int(index, col-size);
+          let next-column = add-int(current-column, 1);
           if ge-int(next-column, col-size) {
             xs
           } else {
@@ -412,57 +413,55 @@ define for-each-vertical<a, b>(xs: vector(a), col-size: int, !f: (a, int) -> b):
           }
         }
       }
-    }
-  in
+    };
   cast(vector(a), vector(b), store-values(xs, 0))
 }
 
 inline zip-with-N<a, b, c>(xs: &vector(a), ys: &vector(b), f: (&a, &b, int) -> c): vector(c) {
-  let len1 = length(xs) in
-  let len2 = length(ys) in
-  let min-func = minimum(as-ord) in
-  let len-or-none = min-func([len1, len2]) in
-  let len = from-right(len-or-none, 0) in
-  let result = make(len) in
+  let len1 = length(xs);
+  let len2 = length(ys);
+  let min-func = minimum(as-ord);
+  let len-or-none = min-func([len1, len2]);
+  let len = from-right(len-or-none, 0);
+  let result = make(len);
   grow(result, len, function (acc, i) {
-    let val1 = _access(xs, i) in
-    let val2 = _access(ys, i) in
+    let val1 = _access(xs, i);
+    let val2 = _access(ys, i);
     push-back(acc, f(val1, val2, i))
   })
 }
 
 define from-list<a>(base-list: list(a)): vector(a) {
-  let len on base-list = this.list.length(base-list) in
+  let len on base-list = this.list.length(base-list);
   this.list.fold-left(make(len), base-list, function (acc, x) {
     push-back(acc, x)
   })
 }
 
 define to-list<a>(xs: vector(a)): list(a) {
-  let len on xs = length(xs) in
+  let len on xs = length(xs);
   let loop =
     define self(xs: vector(a), index: int): list(a) {
       if ge-int(index, len) {
-        let buffer-ptr on xs = _get-buffer-ptr(xs) in
-        let vector-ptr = cast(vector(a), pointer, xs) in
+        let buffer-ptr on xs = _get-buffer-ptr(xs);
+        let vector-ptr = cast(vector(a), pointer, xs);
         free(buffer-ptr);
         free(vector-ptr);
         Nil
       } else {
-        let value-ptr on xs = _get-element-pointer(xs, index) in
-        let value = cast(int, a, load-int(value-ptr)) in
+        let value-ptr on xs = _get-element-pointer(xs, index);
+        let value = cast(int, a, load-int(value-ptr));
         Cons(value, self(xs, add-int(index, 1)))
       }
-    }
-  in
+    };
   loop(xs, 0)
 }
 
 define exchange<a>(xs: vector(a), index: int, value: a): either(vector(a), pair(a, vector(a))) {
-  let len on xs = length(xs) in
+  let len on xs = length(xs);
   if and(le-int(0, index), lt-int(index, len)) {
-    let value-ptr on xs = _get-element-pointer(xs, index) in
-    let old-value = cast(int, a, load-int(value-ptr)) in
+    let value-ptr on xs = _get-element-pointer(xs, index);
+    let old-value = cast(int, a, load-int(value-ptr));
     store-int(cast(a, int, value), value-ptr);
     Right(Pair(old-value, xs))
   } else {
@@ -471,19 +470,19 @@ define exchange<a>(xs: vector(a), index: int, value: a): either(vector(a), pair(
 }
 
 define _swap<a>(xs: vector(a), i: int, j: int): vector(a) {
-  let value-i-ptr on xs = _get-element-pointer(xs, i) in
-  let value-j-ptr on xs = _get-element-pointer(xs, j) in
-  let value-i = load-int(value-i-ptr) in
-  let value-j = load-int(value-j-ptr) in
+  let value-i-ptr on xs = _get-element-pointer(xs, i);
+  let value-j-ptr on xs = _get-element-pointer(xs, j);
+  let value-i = load-int(value-i-ptr);
+  let value-j = load-int(value-j-ptr);
   store-int(value-j, value-i-ptr);
   store-int(value-i, value-j-ptr);
   xs
 }
 
 define swap<a>(xs: vector(a), i: int, j: int): vector(a) {
-  let len on xs = length(xs) in
-  let b1 = and(le-int(0, i), lt-int(i, len)) in
-  let b2 = and(le-int(0, j), lt-int(j, len)) in
+  let len on xs = length(xs);
+  let b1 = and(le-int(0, i), lt-int(i, len));
+  let b2 = and(le-int(0, j), lt-int(j, len));
   if and(b1, b2) {
     _swap(xs, i, j)
   } else {
@@ -492,88 +491,87 @@ define swap<a>(xs: vector(a), i: int, j: int): vector(a) {
 }
 
 define reverse<a>(xs: vector(a)): vector(a) {
-  let len on xs = length(xs) in
+  let len on xs = length(xs);
   let f =
     define self(xs: vector(a), left: int, right: int): vector(a) {
       if ge-int(left, right) {
         xs
       } else {
-        let xs = swap(xs, left, right) in
+        let xs = swap(xs, left, right);
         self(xs, add-int(left, 1), sub-int(right, 1))
       }
-    }
-  in
+    };
   f(xs, 0, sub-int(len, 1))
 }
 
 define take<a>(xs: vector(a), n: int): vector(a) {
-  let _ on xs =
-    let len = length(xs) in
-    let n = max-int(0, n) in
+  let _ on xs = {
+    let len = length(xs);
+    let n = max-int(0, n);
     loop(sub-int(len, n), function (i) {
-      let v = this.vector._access(xs, add-int(i, n)) in
-      let _ = cast(&a, a, v) in
+      let v = this.vector._access(xs, add-int(i, n));
+      let _ = cast(&a, a, v);
       Unit
     });
-    let from = _get-from(xs) in
-    let to = _get-to(xs) in
+    let from = _get-from(xs);
+    let to = _get-to(xs);
     _set-to(xs, min-int(to, add-int(from, n)))
-  in
+  };
   xs
 }
 
 define drop<a>(xs: vector(a), n: int): vector(a) {
-  let _ on xs =
-    let n = min-int(max-int(0, n), length(xs)) in
+  let _ on xs = {
+    let n = min-int(max-int(0, n), length(xs));
     loop(n, function (i) {
-      let v = this.vector._access(xs, i) in
-      let _ = cast(&a, a, v) in
+      let v = this.vector._access(xs, i);
+      let _ = cast(&a, a, v);
       Unit
     });
     _shift-from(xs, n)
-  in
+  };
   xs
 }
 
 define slice<a>(xs: vector(a), from: int, to: int): vector(a) {
-  let ys = drop(xs, from) in
+  let ys = drop(xs, from);
   take(ys, sub-int(to, from))
 }
 
 define take-end<a>(xs: vector(a), n: int): vector(a) {
-  let len on xs = length(xs) in
+  let len on xs = length(xs);
   drop(xs, sub-int(len, n))
 }
 
 define drop-end<a>(xs: vector(a), n: int): vector(a) {
-  let len on xs = length(xs) in
+  let len on xs = length(xs);
   take(xs, sub-int(len, n))
 }
 
 define delete<a>(xs: vector(a), index: int): vector(a) {
-  let len on xs = length(xs) in
+  let len on xs = length(xs);
   if eq-int(0, index) {
     drop(xs, 1)
   } else-if eq-int(index, sub-int(len, 1)) {
     drop-end(xs, 1)
   } else-if and(lt-int(0, index), lt-int(index, sub-int(len, 1))) {
-    let value-ptr on xs = _get-element-pointer(xs, index) in
-    let _ = cast(int, a, load-int(value-ptr)) in
-    let pivot = div-int(len, 2) in
+    let value-ptr on xs = _get-element-pointer(xs, index);
+    let _ = cast(int, a, load-int(value-ptr));
+    let pivot = div-int(len, 2);
     if lt-int(index, pivot) {
-      let source-ptr on xs = _get-element-pointer(xs, 0) in
-      let target-ptr on xs = _get-element-pointer(xs, 1) in
-      let copy-bytes = mul-int(this.word.size, index) in
-      let _ = magic external llvm.memmove.p0.p0.i64(target-ptr, source-ptr, copy-bytes, 0) in
-      let _ on xs = _shift-from(xs, 1) in
+      let source-ptr on xs = _get-element-pointer(xs, 0);
+      let target-ptr on xs = _get-element-pointer(xs, 1);
+      let copy-bytes = mul-int(this.word.size, index);
+      let _ = magic external llvm.memmove.p0.p0.i64(target-ptr, source-ptr, copy-bytes, 0);
+      let _ on xs = _shift-from(xs, 1);
       xs
     } else {
-      let next-value-index = add-int(index, 1) in
-      let source-ptr on xs = _get-element-pointer(xs, next-value-index) in
-      let target-ptr = value-ptr in
-      let copy-bytes = mul-int(this.word.size, sub-int(len, next-value-index)) in
-      let _ = magic external llvm.memmove.p0.p0.i64(target-ptr, source-ptr, copy-bytes, 0) in
-      let _ on xs = _shift-to(xs, -1) in
+      let next-value-index = add-int(index, 1);
+      let source-ptr on xs = _get-element-pointer(xs, next-value-index);
+      let target-ptr = value-ptr;
+      let copy-bytes = mul-int(this.word.size, sub-int(len, next-value-index));
+      let _ = magic external llvm.memmove.p0.p0.i64(target-ptr, source-ptr, copy-bytes, 0);
+      let _ on xs = _shift-to(xs, -1);
       xs
     }
   } else {
@@ -582,45 +580,43 @@ define delete<a>(xs: vector(a), index: int): vector(a) {
 }
 
 define find<a>(xs: &vector(a), !pred: (&a) -> bool): int {
-  let len = length(xs) in
+  let len = length(xs);
   let f =
     define self(index: int): int {
       if ge-int(index, len) {
         -1
       } else {
-        let value = _access(xs, index) in
+        let value = _access(xs, index);
         if !pred(value) {
           index
         } else {
           self(add-int(index, 1))
         }
       }
-    }
-  in
+    };
   f(0)
 }
 
 define find-end<a>(xs: &vector(a), !pred: (&a) -> bool): int {
-  let len = length(xs) in
+  let len = length(xs);
   let f =
     define self(index: int): int {
       if lt-int(index, 0) {
         -1
       } else {
-        let value = _access(xs, index) in
+        let value = _access(xs, index);
         if !pred(value) {
           index
         } else {
           self(sub-int(index, 1))
         }
       }
-    }
-  in
+    };
   f(sub-int(len, 1))
 }
 
 define take-while<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
-  let pivot-index on xs = find(xs, compose(not, !pred)) in
+  let pivot-index on xs = find(xs, compose(not, !pred));
   if lt-int(pivot-index, 0) {
     xs
   } else {
@@ -629,7 +625,7 @@ define take-while<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
 }
 
 define drop-while<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
-  let pivot-index on xs = find(xs, compose(not, !pred)) in
+  let pivot-index on xs = find(xs, compose(not, !pred));
   if lt-int(pivot-index, 0) {
     make(1)
   } else {
@@ -638,7 +634,7 @@ define drop-while<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
 }
 
 define take-while-end<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
-  let pivot-index on xs = find-end(xs, compose(not, !pred)) in
+  let pivot-index on xs = find-end(xs, compose(not, !pred));
   if lt-int(pivot-index, 0) {
     xs
   } else {
@@ -647,7 +643,7 @@ define take-while-end<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
 }
 
 define drop-while-end<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
-  let pivot-index on xs = find-end(xs, compose(not, !pred)) in
+  let pivot-index on xs = find-end(xs, compose(not, !pred));
   if lt-int(pivot-index, 0) {
     make(0)
   } else {
@@ -656,73 +652,72 @@ define drop-while-end<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
 }
 
 define zen(): unit {
-  let xs: vector(text) = make(0) in
-  let xs = push-back(xs, *"b") in
-  let xs = push-front(xs, *"a") in
-  let xs = push-front(xs, *"c") in
-  let !xs = drop(xs, 2) in
-  let _ = !xs in
-  let _ = !xs in
-  let _ = !xs in
-  let xs = push-front(!xs, *"d") in
-  let xs = push-back(xs, *"e") in
-  let xs = push-front(xs, *"f") in
-  let xs = push-back(xs, *"g") in
-  let xs = push-front(xs, *"h") in
-  let !xs = xs in
-  // let !xs = drop(xs, 3) in
-  let _ = !xs in
-  // let !xs = drop(!xs, 3) in
-  let _ = !xs in
-  let _ = !xs in
-  let _ = push-front(!xs, *"foo") in
-  let _ = !xs in
-  let _ = !xs in
-  let _ = !xs in
-  // let xs = push-back(xs, 7) in
-  // let xs = push-back(xs, 8) in
-  // let xs = push-back(xs, 9) in
-  // let xs = push-back(xs, 10) in
-  // let xs = take(xs, 5) in
-  // let !xs = delete(xs, 0) in
-  // let _ = !xs in
-  // let _ = !xs in
-  // let _ = !xs in
-  // let _ = !xs in
-  pin xs = !xs in
-  let ys: vector(int) = from-list(to-list(from-list([1, 2, 3, 4, 5]))) in
-  pin ys = ys in
+  let xs: vector(text) = make(0);
+  let xs = push-back(xs, *"b");
+  let xs = push-front(xs, *"a");
+  let xs = push-front(xs, *"c");
+  let !xs = drop(xs, 2);
+  let _ = !xs;
+  let _ = !xs;
+  let _ = !xs;
+  let xs = push-front(!xs, *"d");
+  let xs = push-back(xs, *"e");
+  let xs = push-front(xs, *"f");
+  let xs = push-back(xs, *"g");
+  let xs = push-front(xs, *"h");
+  let !xs = xs;
+  // let !xs = drop(xs, 3);
+  let _ = !xs;
+  // let !xs = drop(!xs, 3);
+  let _ = !xs;
+  let _ = !xs;
+  let _ = push-front(!xs, *"foo");
+  let _ = !xs;
+  let _ = !xs;
+  let _ = !xs;
+  // let xs = push-back(xs, 7);
+  // let xs = push-back(xs, 8);
+  // let xs = push-back(xs, 9);
+  // let xs = push-back(xs, 10);
+  // let xs = take(xs, 5);
+  // let !xs = delete(xs, 0);
+  // let _ = !xs;
+  // let _ = !xs;
+  // let _ = !xs;
+  // let _ = !xs;
+  pin xs = !xs;
+  let ys: vector(int) = from-list(to-list(from-list([1, 2, 3, 4, 5])));
+  pin ys = ys;
   let zs =
     zip-with-N(xs, ys, function (x, y, _) {
       replicate(x, *y)
-    })
-  in
-  let !zs = delete(reverse(zs), 100) in
-  let _ = !zs in
-  let _ = !zs in
+    });
+  let !zs = delete(reverse(zs), 100);
+  let _ = !zs;
+  let _ = !zs;
   match pop-back(!zs) {
   | Left(_) =>
     print("left\n")
   | Right(Pair(!rest, z)) =>
-    let _ = !rest in
-    let _ = !rest in
-    let len on !rest = length(!rest) in
-    let _ = !rest in
+    let _ = !rest;
+    let _ = !rest;
+    let len on !rest = length(!rest);
+    let _ = !rest;
     print("right. last-elem = ");
-    let _ on z = print-line(z) in
-    let _ = z in
+    let _ on z = print-line(z);
+    let _ = z;
     print("len = ");
     print-int-line(len)
   };
-  pin zs = !zs in
+  pin zs = !zs;
   for(*zs, function (x, _) {
-    pin x = x in
+    pin x = x;
     print(x);
     print(", ")
   });
   print("\n----\n");
   for(!xs, function (x, _) {
-    pin x = x in
+    pin x = x;
     print(x);
     print(", ")
   });

@@ -28,9 +28,9 @@ resource c-string {
     free(ptr)
   },
   function (ptr: pointer) {
-    let len = _length-c-string(ptr) in
-    let new-ptr = malloc(C-Size(add-int(len, 1))) in
-    let _ = magic external llvm.memcpy.p0.p0.i64(new-ptr, ptr, len, 0) in
+    let len = _length-c-string(ptr);
+    let new-ptr = malloc(C-Size(add-int(len, 1)));
+    let _ = magic external llvm.memcpy.p0.p0.i64(new-ptr, ptr, len, 0);
     new-ptr
   },
 }
@@ -40,21 +40,21 @@ define length-c-string(s: &c-string): int {
 }
 
 define to-c-string(t: &text): c-string {
-  let len = text-byte-length(t) in
-  let new-ptr = malloc(C-Size(add-int(len, 1))) in
-  let src-ptr = _get-content-pointer(t) in
-  let _ = magic external llvm.memcpy.p0.p0.i64(new-ptr, src-ptr, len, 0) in
+  let len = text-byte-length(t);
+  let new-ptr = malloc(C-Size(add-int(len, 1)));
+  let src-ptr = _get-content-pointer(t);
+  let _ = magic external llvm.memcpy.p0.p0.i64(new-ptr, src-ptr, len, 0);
   store-int8(0, shift(new-ptr, len));
   cast(pointer, c-string, new-ptr)
 }
 
 define from-c-string(s: &c-string): text {
-  let u = this.word.size in
-  let u2 = mul-int(u, 2) in
-  let len = length-c-string(s) in
-  let new-ptr = malloc(C-Size(add-int(len, u2))) in
+  let u = this.word.size;
+  let u2 = mul-int(u, 2);
+  let len = length-c-string(s);
+  let new-ptr = malloc(C-Size(add-int(len, u2)));
   this.memory.store-int(0, new-ptr);
   this.memory.store-int(len, shift(new-ptr, u));
-  let _ = magic external llvm.memcpy.p0.p0.i64(shift(new-ptr, u2), magic cast(&c-string, pointer, s), len, 0) in
+  let _ = magic external llvm.memcpy.p0.p0.i64(shift(new-ptr, u2), magic cast(&c-string, pointer, s), len, 0);
   cast(pointer, text, new-ptr)
 }

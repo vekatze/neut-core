@@ -26,8 +26,8 @@ inline cmp-binary(xs1: &binary, xs2: &binary): ordering {
       if eq-int(index, len) {
         fallback
       } else {
-        let v1 = load-int8(shift(ptr1, index)) in
-        let v2 = load-int8(shift(ptr2, index)) in
+        let v1 = load-int8(shift(ptr1, index));
+        let v2 = load-int8(shift(ptr2, index));
         match _cmp-int8(v1, v2) {
         | EQ =>
           self(ptr1, ptr2, add-int(index, 1), len, fallback)
@@ -35,17 +35,16 @@ inline cmp-binary(xs1: &binary, xs2: &binary): ordering {
           o
         }
       }
-    }
-  in
-  pin len1 = binary-length(xs1) in
-  pin len2 = binary-length(xs2) in
-  let fallback-value =
-    let Ord of {compare} = this.int.ord.as-ord in
+    };
+  pin len1 = binary-length(xs1);
+  pin len2 = binary-length(xs2);
+  let fallback-value = {
+    let Ord of {compare} = this.int.ord.as-ord;
     compare(len1, len2)
-  in
-  let ptr1 = _get-content-pointer(xs1) in
-  let ptr2 = _get-content-pointer(xs2) in
-  let min-len = min-int(*len1, *len2) in
+  };
+  let ptr1 = _get-content-pointer(xs1);
+  let ptr2 = _get-content-pointer(xs2);
+  let min-len = min-int(*len1, *len2);
   f(ptr1, ptr2, 0, min-len, fallback-value)
 }
 

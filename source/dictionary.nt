@@ -62,15 +62,15 @@ inline _balance-L<a, b>(k: a, x: b, l: dictionary(a, b), r: dictionary(a, b)): d
         Bin(3, lk, lx, Bin(lls, llk, llx, lll, llr), Bin(1, k, x, Tip, Tip))
       | Bin(lls, llk, llx, lll, llr), Bin(lrs, lrk, lrx, lrl, lrr) =>
         if lt-int(lrs, mul-int(_ratio, lls)) {
-          let ll = Bin(lls, llk, llx, lll, llr) in
-          let lr = Bin(lrs, lrk, lrx, lrl, lrr) in
+          let ll = Bin(lls, llk, llx, lll, llr);
+          let lr = Bin(lrs, lrk, lrx, lrl, lrr);
           Bin(add-int(1, ls), lk, lx, ll, Bin(add-int(1, lrs), k, x, lr, Tip))
         } else {
-          let ll = Bin(lls, llk, llx, lll, llr) in
-          let lrls on lrl = size(lrl) in
-          let lrrs on lrr = size(lrr) in
-          let ls' = add-int(1, add-int(lls, lrls)) in
-          let rs' = add-int(1, lrrs) in
+          let ll = Bin(lls, llk, llx, lll, llr);
+          let lrls on lrl = size(lrl);
+          let lrrs on lrr = size(lrr);
+          let ls' = add-int(1, add-int(lls, lrls));
+          let rs' = add-int(1, lrrs);
           Bin(add-int(1, ls), lrk, lrx, Bin(ls', lk, lx, ll, lrl), Bin(rs', k, x, lrr, Tip))
         }
       }
@@ -78,37 +78,37 @@ inline _balance-L<a, b>(k: a, x: b, l: dictionary(a, b), r: dictionary(a, b)): d
   | Bin(rs, rk, rx, rl, rr) =>
     match l {
     | Tip =>
-      let r = Bin(rs, rk, rx, rl, rr) in
+      let r = Bin(rs, rk, rx, rl, rr);
       Bin(add-int(1, rs), k, x, Tip, r)
     | Bin(ls, lk, lx, ll, lr) =>
       if gt-int(ls, mul-int(_delta, rs)) {
         match ll, lr {
         | Bin(lls, llk, llx, lll, llr), Bin(lrs, lrk, lrx, lrl, lrr) =>
-          let lrls on lrl = size(lrl) in
-          let lrrs on lrr = size(lrr) in
-          let ll = Bin(lls, llk, llx, lll, llr) in
-          let r = Bin(rs, rk, rx, rl, rr) in
+          let lrls on lrl = size(lrl);
+          let lrrs on lrr = size(lrr);
+          let ll = Bin(lls, llk, llx, lll, llr);
+          let r = Bin(rs, rk, rx, rl, rr);
           if lt-int(lrs, mul-int(_ratio, lls)) {
-            let s' = add-int(1, add-int(ls, rs)) in
-            let rs' = add-int(1, add-int(rs, lrs)) in
+            let s' = add-int(1, add-int(ls, rs));
+            let rs' = add-int(1, add-int(rs, lrs));
             Bin(s', lk, lx, ll, Bin(rs', k, x, Bin(lrs, lrk, lrx, lrl, lrr), r))
           } else {
-            let s' = add-int(1, add-int(ls, rs)) in
-            let ls' = add-int(1, add-int(lls, lrls)) in
-            let rs' = add-int(1, add-int(rs, lrrs)) in
+            let s' = add-int(1, add-int(ls, rs));
+            let ls' = add-int(1, add-int(lls, lrls));
+            let rs' = add-int(1, add-int(rs, lrrs));
             Bin(s', lrk, lrx, Bin(ls', lk, lx, ll, lrl), Bin(rs', k, x, lrr, r))
           }
         | _, _ =>
           // unreachable
-          let !lk = lk in
-          let !lx = lx in
-          let !tip = panic("failure in (core).dictionary._balance-L") in
+          let !lk = lk;
+          let !lx = lx;
+          let !tip = panic("failure in (core).dictionary._balance-L");
           Bin(ls, !lk, !lx, Bin(ls, !lk, !lx, !tip, !tip), Bin(ls, !lk, !lx, !tip, !tip))
         }
       } else {
-        let s' = add-int(1, add-int(ls, rs)) in
-        let l = Bin(ls, lk, lx, ll, lr) in
-        let r = Bin(rs, rk, rx, rl, rr) in
+        let s' = add-int(1, add-int(ls, rs));
+        let l = Bin(ls, lk, lx, ll, lr);
+        let r = Bin(rs, rk, rx, rl, rr);
         Bin(s', k, x, l, r)
       }
     }
@@ -131,15 +131,15 @@ inline _balance-R<a, b>(k: a, x: b, l: dictionary(a, b), r: dictionary(a, b)): d
         Bin(3, rlk, rlx, Bin(1, k, x, Tip, Tip), Bin(1, rk, rx, Tip, Tip))
       | Bin(rls, rlk, rlx, rll, rlr), Bin(rrs, rrk, rrx, rrl, rrr) =>
         if lt-int(rls, mul-int(_ratio, rrs)) {
-          let rl = Bin(rls, rlk, rlx, rll, rlr) in
-          let rr = Bin(rrs, rrk, rrx, rrl, rrr) in
+          let rl = Bin(rls, rlk, rlx, rll, rlr);
+          let rr = Bin(rrs, rrk, rrx, rrl, rrr);
           Bin(add-int(1, rs), rk, rx, Bin(add-int(1, rls), k, x, Tip, rl), rr)
         } else {
-          let rr = Bin(rrs, rrk, rrx, rrl, rrr) in
-          let rlrs on rlr = size(rlr) in
-          let rlls on rll = size(rll) in
-          let rs' = add-int(1, rlls) in
-          let ls' = add-int(1, add-int(rrs, rlrs)) in
+          let rr = Bin(rrs, rrk, rrx, rrl, rrr);
+          let rlrs on rlr = size(rlr);
+          let rlls on rll = size(rll);
+          let rs' = add-int(1, rlls);
+          let ls' = add-int(1, add-int(rrs, rlrs));
           Bin(add-int(1, rs), rlk, rlx, Bin(rs', k, x, Tip, rll), Bin(ls', rk, rx, rlr, rr))
         }
       }
@@ -147,37 +147,37 @@ inline _balance-R<a, b>(k: a, x: b, l: dictionary(a, b), r: dictionary(a, b)): d
   | Bin(ls, lk, lx, ll, lr) =>
     match r {
     | Tip =>
-      let l = Bin(ls, lk, lx, ll, lr) in
+      let l = Bin(ls, lk, lx, ll, lr);
       Bin(add-int(1, ls), k, x, l, Tip)
     | Bin(rs, rk, rx, rl, rr) =>
       if gt-int(rs, mul-int(_delta, ls)) {
         match rl, rr {
         | Bin(rls, rlk, rlx, rll, rlr), Bin(rrs, rrk, rrx, rrl, rrr) =>
-          let rlls on rll = size(rll) in
-          let rlrs on rlr = size(rlr) in
-          let rr = Bin(rrs, rrk, rrx, rrl, rrr) in
-          let l = Bin(ls, lk, lx, ll, lr) in
+          let rlls on rll = size(rll);
+          let rlrs on rlr = size(rlr);
+          let rr = Bin(rrs, rrk, rrx, rrl, rrr);
+          let l = Bin(ls, lk, lx, ll, lr);
           if lt-int(rls, mul-int(_ratio, rrs)) {
-            let s' = add-int(1, add-int(ls, rs)) in
-            let rs' = add-int(1, add-int(rs, rls)) in
+            let s' = add-int(1, add-int(ls, rs));
+            let rs' = add-int(1, add-int(rs, rls));
             Bin(s', rk, rx, Bin(rs', k, x, l, Bin(rls, rlk, rlx, rll, rlr)), rr)
           } else {
-            let s' = add-int(1, add-int(ls, rs)) in
-            let ls' = add-int(1, add-int(ls, rlls)) in
-            let rs' = add-int(1, add-int(rrs, rlrs)) in
+            let s' = add-int(1, add-int(ls, rs));
+            let ls' = add-int(1, add-int(ls, rlls));
+            let rs' = add-int(1, add-int(rrs, rlrs));
             Bin(s', rlk, rlx, Bin(ls', k, x, l, rll), Bin(rs', rk, rx, rlr, rr))
           }
         | _, _ =>
           // unreachable
-          let !rk = rk in
-          let !rx = rx in
-          let !tip = panic("failure in (core).dictionary._balance-L") in
+          let !rk = rk;
+          let !rx = rx;
+          let !tip = panic("failure in (core).dictionary._balance-L");
           Bin(rs, !rk, !rx, Bin(rs, !rk, !rx, !tip, !tip), Bin(rs, !rk, !rx, !tip, !tip))
         }
       } else {
-        let s' = add-int(1, add-int(ls, rs)) in
-        let l = Bin(ls, lk, lx, ll, lr) in
-        let r = Bin(rs, rk, rx, rl, rr) in
+        let s' = add-int(1, add-int(ls, rs));
+        let l = Bin(ls, lk, lx, ll, lr);
+        let r = Bin(rs, rk, rx, rl, rr);
         Bin(s', k, x, l, r)
       }
     }
@@ -185,12 +185,12 @@ inline _balance-R<a, b>(k: a, x: b, l: dictionary(a, b), r: dictionary(a, b)): d
 }
 
 define insert<k, v>(L: &ord(k), d: dictionary(k, v), key-X: k, val-X: v): dictionary(k, v) {
-  tie Ord of {compare = !compare} = L in
+  tie Ord of {compare = !compare} = L;
   match d {
   | Tip =>
     singleton(key-X, val-X)
   | Bin(size, key-Y, val-Y, left, right) =>
-    let order on key-X, key-Y = !compare(key-X, key-Y) in
+    let order on key-X, key-Y = !compare(key-X, key-Y);
     match order {
     | LT =>
       _balance-L(key-Y, val-Y, insert(L, left, key-X, val-X), right)
@@ -203,7 +203,7 @@ define insert<k, v>(L: &ord(k), d: dictionary(k, v), key-X: k, val-X: v): dictio
 }
 
 define lookup<k, v>(L: &ord(k), d: &dictionary(k, v), needle: &k): ?&v {
-  tie Ord of {compare} = L in
+  tie Ord of {compare} = L;
   case d {
   | Tip =>
     none
@@ -232,7 +232,7 @@ define _min-view-sure<a, b>(k: a, x: b, l: dictionary(a, b), r: dictionary(a, b)
   | Tip =>
     _View(k, x, r)
   | Bin(_, lk, lx, ll, lr) =>
-    let _View of {key, value, dictionary = l'} = _min-view-sure(lk, lx, ll, lr) in
+    let _View of {key, value, dictionary = l'} = _min-view-sure(lk, lx, ll, lr);
     _View(key, value, _balance-R(k, x, l', r))
   }
 }
@@ -242,7 +242,7 @@ define _max-view-sure<a, b>(k: a, x: b, l: dictionary(a, b), r: dictionary(a, b)
   | Tip =>
     _View(k, x, l)
   | Bin(_, rk, rx, rl, rr) =>
-    let _View of {key, value, dictionary = r'} = _max-view-sure(rk, rx, rl, rr) in
+    let _View of {key, value, dictionary = r'} = _max-view-sure(rk, rx, rl, rr);
     _View(key, value, _balance-L(k, x, l, r'))
   }
 }
@@ -255,22 +255,22 @@ inline _glue<k, v>(d1: dictionary(k, v), d2: dictionary(k, v)): dictionary(k, v)
     d1
   | Bin(ls, lk, lx, ll, lr), Bin(rs, rk, rx, rl, rr) =>
     if gt-int(ls, rs) {
-      let _View of {key, value, dictionary = l'} = _max-view-sure(lk, lx, ll, lr) in
+      let _View of {key, value, dictionary = l'} = _max-view-sure(lk, lx, ll, lr);
       _balance-R(key, value, l', Bin(rs, rk, rx, rl, rr))
     } else {
-      let _View of {key, value, dictionary = r'} = _min-view-sure(rk, rx, rl, rr) in
+      let _View of {key, value, dictionary = r'} = _min-view-sure(rk, rx, rl, rr);
       _balance-L(key, value, Bin(ls, lk, lx, ll, lr), r')
     }
   }
 }
 
 define delete<k, v>(L: &ord(k), d: dictionary(k, v), needle: k): dictionary(k, v) {
-  tie Ord of {compare} = L in
+  tie Ord of {compare} = L;
   match d {
   | Tip =>
     Tip
   | Bin(_, kx, x, l, r) =>
-    let order on needle, kx = compare(needle, kx) in
+    let order on needle, kx = compare(needle, kx);
     match order {
     | LT =>
       _balance-R(kx, x, delete(L, l, needle), r)

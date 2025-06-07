@@ -6,7 +6,7 @@ import {
 }
 
 inline as-eq<a>(f: eq(a)): eq(list(a)) {
-  let Eq of {equal = !eq} = f in
+  let Eq of {equal = !eq} = f;
   Eq of {
     equal = {
       define self(xs, ys) {
@@ -38,7 +38,7 @@ define member<a>(e: &eq(a), xs: &list(a), value: &a): bool {
   | Nil =>
     False
   | Cons(y, ys) =>
-    tie Eq of {equal} = e in
+    tie Eq of {equal} = e;
     if equal(value, y) {
       True
     } else {
@@ -54,14 +54,13 @@ define nub<a>(e: &eq(a), xs: list(a)): list(a) {
       | Nil =>
         Nil
       | Cons(!y, ys) =>
-        let already-found-p on acc, !y = member(e, acc, !y) in
+        let already-found-p on acc, !y = member(e, acc, !y);
         if already-found-p {
           nub(ys, acc)
         } else {
           Cons(!y, nub(ys, Cons(!y, acc)))
         }
       }
-    }
-  in
+    };
   f(xs, [])
 }

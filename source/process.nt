@@ -180,9 +180,9 @@ define _print-process-result-status(st: process-result-status): unit {
 define zen(): unit {
   let cmd =
     Process-Spec of {
-      process = "sh",
-      args = ["-c", "ls /"],
-      input = "",
+      process := "sh",
+      args := ["-c", "ls /"],
+      input := "",
     };
   match spawn(cmd, 1024, 1024) {
   | Right(result) =>

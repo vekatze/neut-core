@@ -6,9 +6,9 @@ import {
 }
 
 inline as-eq<a>(f: eq(a)): eq(list(a)) {
-  let Eq of {equal = !eq} = f;
+  let Eq of {equal := !eq} = f;
   Eq of {
-    equal = {
+    equal := {
       define self(xs, ys) {
         case xs, ys {
         | Nil, Nil =>

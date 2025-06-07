@@ -6,7 +6,7 @@ import {
 
 inline as-ord<a>(!o: ord(a)): ord(list(a)) {
   Ord of {
-    compare = {
+    compare := {
       define self(xs, ys) {
         case xs, ys {
         | Nil, Nil =>

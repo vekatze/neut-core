@@ -7,7 +7,7 @@ import {
 
 inline as-ord: ord(int) {
   Ord of {
-    compare = {
+    compare := {
       function (x, y) {
         if gt-int(*x, *y) {
           GT
@@ -23,7 +23,7 @@ inline as-ord: ord(int) {
 
 inline as-ord-int8: ord(int8) {
   Ord of {
-    compare = {
+    compare := {
       function (x, y) {
         if gt-int8(*x, *y) {
           GT

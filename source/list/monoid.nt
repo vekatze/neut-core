@@ -5,8 +5,8 @@ import {
 
 inline as-monoid<a>(): monoid(list(a)) {
   Monoid of {
-    e = [],
-    op = {
+    e := [],
+    op := {
       function (x, y) {
         append(x, y)
       }

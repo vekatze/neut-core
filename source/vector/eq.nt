@@ -5,9 +5,9 @@ import {
 }
 
 inline as-eq<a>(class: eq(a)): eq(vector(a)) {
-  let Eq of {equal = !equal} = class;
+  let Eq of {equal := !equal} = class;
   Eq of {
-    equal = {
+    equal := {
       function (xs, ys) {
         let len1 = length(xs);
         let len2 = length(ys);

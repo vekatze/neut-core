@@ -14,6 +14,6 @@ define show-rune(ch: rune): text {
 
 inline as-show: show(rune) {
   Show of {
-    show = show-rune,
+    show := show-rune,
   }
 }

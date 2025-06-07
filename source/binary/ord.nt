@@ -86,7 +86,7 @@ define ge-binary(t1: &binary, t2: &binary): bool {
 
 inline as-ord: ord(binary) {
   Ord of {
-    compare = {
+    compare := {
       function (x, y) {
         cmp-binary(x, y)
       }

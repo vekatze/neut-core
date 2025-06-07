@@ -19,7 +19,7 @@ define ne-rune(r1: rune, r2: rune): bool {
 
 inline as-eq: eq(rune) {
   Eq of {
-    equal = {
+    equal := {
       function (x, y) {
         eq-rune(*x, *y)
       }

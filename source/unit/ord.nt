@@ -6,7 +6,7 @@ import {
 
 inline as-ord: ord(unit) {
   Ord of {
-    compare = {
+    compare := {
       function (x1, x2) {
         case x1, x2 {
         | Unit, Unit =>

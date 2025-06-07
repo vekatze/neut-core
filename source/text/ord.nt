@@ -32,7 +32,7 @@ define ge-text(t1: &text, t2: &text): bool {
 
 inline as-ord: ord(text) {
   Ord of {
-    compare = {
+    compare := {
       function (x, y) {
         if gt-text(x, y) {
           GT

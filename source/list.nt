@@ -414,7 +414,7 @@ inline minimum<a>(as-ord: ord(a)): (list(a)) -> ?a {
 
 inline maximum<a>(as-ord: ord(a)): (list(a)) -> ?a {
   function (xs) {
-    let Ord of {compare = !compare} = as-ord;
+    let Ord of {compare := !compare} = as-ord;
     let helper =
       define self(cand: a, ys: list(a)): a {
         match ys {

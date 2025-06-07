@@ -6,7 +6,7 @@ import {
 
 inline as-eq<a, b>(f: eq(a), g: eq(b)): eq(either(a, b)) {
   Eq of {
-    equal = {
+    equal := {
       function (p1, p2) {
         case p1, p2 {
         | Left(l1), Left(l2) =>

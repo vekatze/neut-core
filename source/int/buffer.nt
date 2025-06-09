@@ -1,10 +1,11 @@
 import {
   this.buffer {buffer, flush, make-buffer},
+  this.control {nop},
   this.file.descriptor {stdout},
   this.pointer {shift},
   this.text,
   this.text.buffer {write},
-  this.unit {unit},
+  this.unit {Unit, unit},
 }
 
 foreign {
@@ -15,14 +16,20 @@ define write-int(b: &buffer, x: int): unit {
   let buffer-ptr = magic alloca(int, 22);
   let buf-end = shift(buffer-ptr, 22);
   let len = magic external neut_core_v0_51_write_int64_core(buf-end, x, 0);
-  this.buffer._write(b, shift(buf-end, mul-int(-1, len)), len)
+  let _ = this.buffer._write(b, shift(buf-end, mul-int(-1, len)), len);
+  // avoid tail-calling
+  nop();
+  Unit
 }
 
 define write-int-line(b: &buffer, x: int): unit {
   let buffer-ptr = magic alloca(int, 22);
   let buf-end = shift(buffer-ptr, 22);
   let len = magic external neut_core_v0_51_write_int64_core(buf-end, x, 1);
-  this.buffer._write(b, shift(buf-end, mul-int(-1, len)), len)
+  let _ = this.buffer._write(b, shift(buf-end, mul-int(-1, len)), len);
+  // avoid tail-calling
+  nop();
+  Unit
 }
 
 define zen(): unit {

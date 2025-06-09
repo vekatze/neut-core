@@ -60,3 +60,7 @@ inline grow-E<e, a>(seed: a, iteration: int, !step: (a, int) -> either(e, a)): e
 define discard<a>(_: a): unit {
   Unit
 }
+
+define nop(): unit {
+  Unit
+}

@@ -1,0 +1,58 @@
+import {
+  this.binary.io {_write-loop},
+  this.control {nop},
+  this.file.descriptor {descriptor, stdout},
+  this.pointer {shift},
+  this.rune {store-rune},
+  this.system {system},
+  this.unit {Unit, unit},
+}
+
+define write-rune(k: descriptor, x: rune): system(unit) {
+  let s = this.rune.size(x);
+  let buffer-ptr = magic alloca(int32, 1);
+  let _ = store-rune(x, buffer-ptr);
+  let result = _write-loop(k, buffer-ptr, s);
+  // avoid tail-calling `_write-loop` (which relies on `alloca`)
+  nop();
+  result
+}
+
+define write-rune-line(k: descriptor, x: rune): system(unit) {
+  let s = this.rune.size(x);
+  let buffer-ptr = magic alloca(int32, 2);
+  let _ = store-rune(x, buffer-ptr);
+  let _ = store-rune(`\n`, shift(buffer-ptr, s));
+  let result = _write-loop(k, buffer-ptr, add-int(s, 1));
+  // avoid tail-calling
+  nop();
+  result
+}
+
+define print-rune(x: rune): unit {
+  let _ = write-rune(stdout, x);
+  Unit
+}
+
+define print-rune-line(x: rune): unit {
+  let _ = write-rune-line(stdout, x);
+  Unit
+}
+
+define zen(): unit {
+  let _ = write-rune(stdout, `a`);
+  let _ = write-rune(stdout, `b`);
+  let _ = write-rune(stdout, `c`);
+  let _ = write-rune(stdout, `\n`);
+  let _ = write-rune-line(stdout, `a`);
+  let _ = write-rune-line(stdout, `b`);
+  let _ = write-rune-line(stdout, `c`);
+  let _ = print-rune(`a`);
+  let _ = print-rune(`b`);
+  let _ = print-rune(`c`);
+  let _ = print-rune(`\n`);
+  let _ = print-rune-line(`a`);
+  let _ = print-rune-line(`b`);
+  let _ = print-rune-line(`c`);
+  Unit
+}

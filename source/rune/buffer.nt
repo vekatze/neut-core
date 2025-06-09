@@ -1,0 +1,34 @@
+import {
+  this.buffer {_write, buffer, flush, make-buffer},
+  this.control {nop},
+  this.file.descriptor {stdout},
+  this.rune {store-rune},
+  this.unit {Unit, unit},
+}
+
+define write-rune(k: &buffer, x: rune): unit {
+  let buffer-ptr = magic alloca(int32, 1);
+  let size = store-rune(x, buffer-ptr);
+  let _ = _write(k, buffer-ptr, size);
+  nop();
+  Unit
+}
+
+define write-rune-line(k: &buffer, x: rune): unit {
+  write-rune(k, x);
+  write-rune(k, `\n`);
+}
+
+define zen(): unit {
+  let !k = make-buffer(stdout, 4);
+  pin k = !k;
+  write-rune(k, `a`);
+  write-rune(k, `b`);
+  write-rune(k, `あ`);
+  write-rune-line(k, `α`);
+  write-rune(k, `a`);
+  write-rune(k, `b`);
+  write-rune(k, `あ`);
+  write-rune-line(k, `α`);
+  flush(k);
+}

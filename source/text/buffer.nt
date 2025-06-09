@@ -1,9 +1,8 @@
 import {
   this.binary.buffer,
   this.buffer {buffer, flush, make-buffer},
-  this.control {loop},
   this.file.descriptor {stdout},
-  this.int.show {show-int},
+  this.rune.buffer {write-rune},
   this.text {text, to-binary},
   this.unit {unit},
 }
@@ -12,14 +11,15 @@ define write(b: &buffer, content: &text): unit {
   this.binary.buffer.write-binary(b, to-binary(content))
 }
 
+define write-line(b: &buffer, content: &text): unit {
+  write(b, content);
+  write-rune(b, `\n`)
+}
+
 define zen(): unit {
   let !k = make-buffer(stdout, 4096);
   pin k = !k;
-  loop(10000000, function (_) {
-    write(k, "hello ");
-    pin t = show-int(1234);
-    write(k, t);
-    write(k, "\n")
-  });
+  write-line(k, "hello!");
+  write-line(k, "hello!");
   flush(k);
 }

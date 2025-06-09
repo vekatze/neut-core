@@ -1,0 +1,34 @@
+import {
+  this.bool {bool},
+  this.file.descriptor {descriptor, stdout},
+  this.system {system},
+  this.text,
+  this.text.io {write, write-line},
+  this.unit {Unit, unit},
+}
+
+define write-bool(k: descriptor, x: bool): system(unit) {
+  if x {
+    write(k, "True")
+  } else {
+    write(k, "False")
+  }
+}
+
+define write-bool-line(k: descriptor, x: bool): unit {
+  if x {
+    write-line(k, "True");
+  } else {
+    write-line(k, "False")
+  }
+}
+
+define print-bool(x: bool): unit {
+  let _ = write-bool(stdout, x);
+  Unit
+}
+
+define print-bool-line(x: bool): unit {
+  let _ = write-bool-line(stdout, x);
+  Unit
+}

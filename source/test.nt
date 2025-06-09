@@ -100,7 +100,7 @@ define zen(): unit {
         let _ = item;
         *"hello"
       });
-    Unit
+    Unit;
   };
   pin val = extract(c);
   print("extracted: ");

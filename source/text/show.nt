@@ -183,8 +183,7 @@ define _escape(t: &text, len: int, pivot: int, cursor: int): list(text) {
   let _next =
     function () {
       _escape(t, len, pivot, add-int(cursor, 1))
-    }
-   ;
+    };
   let index = add-int(pivot, cursor);
   if ge-int(index, len) {
     [_drop-N(t, pivot)]

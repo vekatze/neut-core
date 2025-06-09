@@ -34,7 +34,6 @@ define _write-loop(d: descriptor, p: pointer, size: int): system(unit) {
         }
       }
     };
-
   loop(0)
 }
 

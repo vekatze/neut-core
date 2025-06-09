@@ -1,6 +1,5 @@
 import {
   this.bool {bool},
-  this.box,
   this.c-size {C-Size},
   this.control {discard},
   this.either {Right, none},
@@ -137,10 +136,10 @@ define join(xs: list(binary)): binary {
   magic cast(pointer, binary, new-binary)
 }
 
-define join-N(xs: list(&binary)): binary {
-  let len on xs =
+define join-N(xs: &list(binary)): binary {
+  let len =
     fold-left-N(0, xs, function (acc, x) {
-      add-int(acc, binary-length(*x))
+      add-int(acc, binary-length(x))
     });
   let u = this.word.size;
   let u2 = mul-int(u, 2);
@@ -149,8 +148,8 @@ define join-N(xs: list(&binary)): binary {
   store-int(len, shift(new-binary, u));
   let content-ptr = shift(new-binary, u2);
   let loop =
-    define self(offset: int, xs: list(&binary)): unit {
-      match xs {
+    define self(offset: int, xs: &list(binary)): unit {
+      case xs {
       | Nil =>
         Unit
       | Cons(x, rest) =>
@@ -158,7 +157,6 @@ define join-N(xs: list(&binary)): binary {
         let x-ptr = _get-content-pointer(x);
         let x-len = binary-length(x);
         _copy-binary(x-ptr, current-content-ptr, x-len);
-        discard(x);
         self(add-int(offset, x-len), rest)
       }
     };
@@ -297,8 +295,45 @@ define intercalate(xs: list(binary), sep: binary): binary {
   join(this.list.intercalate(xs, sep))
 }
 
-define intercalate-N(xs: list(&binary), sep: &binary): binary {
-  join-N(this.list.intercalate(xs, sep))
+define intercalate-N(xs: &list(binary), sep: &binary): binary {
+  let base-len =
+    fold-left-N(0, xs, function (acc, x) {
+      add-int(acc, binary-length(x))
+    });
+  let xs-len = this.list.length(xs);
+  let sep-num = max-int(0, sub-int(xs-len, 1));
+  let len = add-int(base-len, mul-int(binary-length(sep), sep-num));
+  let u = this.word.size;
+  let u2 = mul-int(u, 2);
+  let new-binary = malloc(C-Size(add-int(len, u2)));
+  store-int(0, new-binary);
+  store-int(len, shift(new-binary, u));
+  let content-ptr = shift(new-binary, u2);
+  let loop =
+    define self(offset: int, xs: &list(binary)): unit {
+      case xs {
+      | Nil =>
+        Unit
+      | Cons(x, rest) =>
+        let current-content-ptr = shift(content-ptr, offset);
+        let x-ptr = _get-content-pointer(x);
+        let x-len = binary-length(x);
+        _copy-binary(x-ptr, current-content-ptr, x-len);
+        let new-offset = add-int(offset, x-len);
+        case rest {
+        | Nil =>
+          self(new-offset, rest)
+        | Cons(_, _) =>
+          let current-content-ptr = shift(content-ptr, new-offset);
+          let sep-ptr = _get-content-pointer(sep);
+          let sep-len = binary-length(sep);
+          _copy-binary(sep-ptr, current-content-ptr, sep-len);
+          self(add-int(new-offset, sep-len), rest)
+        };
+      }
+    };
+  loop(0, xs);
+  magic cast(pointer, binary, new-binary)
 }
 
 define find(xs: &binary, !pred: (int8) -> bool): ?int {

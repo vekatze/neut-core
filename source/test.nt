@@ -11,7 +11,7 @@ import {
   this.pair {Pair, pair},
   this.random {random-float32, random-int},
   this.ref {_make-ref, ref},
-  this.text {text},
+  this.text {lines, text, unlines},
   this.text.io {print, print-line},
   this.unit {Unit, unit},
 }
@@ -69,6 +69,13 @@ define use-text(x: &text): text {
 }
 
 define zen(): unit {
+  pin xs = [*"foo", *"bar", *"buz"];
+  pin yo = this.text.intercalate-N(xs, ", yo, ");
+  print-line(yo);
+  let t = "foo\nbar\nbuz";
+  pin yo = lines(t);
+  pin sometext' = unlines(yo);
+  print-line(sometext');
   pin r: ref(int) = _make-ref(123);
   this.ref.mutate(r, function (x) {
     add-int(x, 10)

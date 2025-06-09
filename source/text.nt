@@ -49,8 +49,8 @@ define join(xs: list(text)): text {
   _Text(this.binary.join(xs'))
 }
 
-define join-N(xs: list(&text)): text {
-  let xs' = magic cast(list(&text), list(&binary), xs);
+define join-N(xs: &list(text)): text {
+  let xs' = magic cast(&list(text), &list(binary), xs);
   _Text(this.binary.join-N(xs'))
 }
 
@@ -160,8 +160,9 @@ define intercalate(xs: list(text), sep: text): text {
   join(this.list.intercalate(xs, sep))
 }
 
-define intercalate-N(xs: list(&text), sep: &text): text {
-  join-N(this.list.intercalate(xs, sep))
+define intercalate-N(xs: &list(text), sep: &text): text {
+  let xs' = magic cast(&list(text), &list(binary), xs);
+  _Text(this.binary.intercalate-N(xs', to-binary(sep)))
 }
 
 define _get-byte(t: &text, index: int): int8 {
@@ -264,6 +265,14 @@ define split(haystack: &text, needle: &text): list(text) {
   } else {
     f(0, 0)
   }
+}
+
+define lines(haystack: &text): list(text) {
+  split(haystack, "\n")
+}
+
+define unlines(xs: &list(text)): text {
+  intercalate-N(xs, "\n")
 }
 
 define replace(haystack: &text, from: &text, to: text): text {

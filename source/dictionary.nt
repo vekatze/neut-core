@@ -2,8 +2,10 @@ import {
   this.bool,
   this.box,
   this.either {Right, none},
+  this.list {Cons, Nil, append, list},
   this.ord {Ord, ord},
   this.ordering {EQ, GT, LT},
+  this.pair {Pair, pair},
   this.text,
   this.trick {panic},
   this.unit,
@@ -279,5 +281,29 @@ define delete<k, v>(L: &ord(k), d: dictionary(k, v), needle: k): dictionary(k, v
     | EQ =>
       _glue(l, r)
     }
+  }
+}
+
+inline from-list<k, v>(_ord: &ord(k), kvs: list(pair(k, v))): dictionary(k, v) {
+  let f =
+    define self(kvs: list(pair(k, v)), acc: dictionary(k, v)): dictionary(k, v) {
+      match kvs {
+      | Nil =>
+        acc
+      | Cons(Pair(k, v), rest) =>
+        self(rest, insert(_ord, acc, k, v))
+      }
+    };
+  f(kvs, Tip)
+}
+
+define to-list<k, v>(d: dictionary(k, v)): list(pair(k, v)) {
+  match d {
+  | Tip =>
+    []
+  | Bin(_, k, v, d1, d2) =>
+    let xs = to-list(d1);
+    let ys = to-list(d2);
+    append(xs, Cons(Pair(k, v), ys))
   }
 }

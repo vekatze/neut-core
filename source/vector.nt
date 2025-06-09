@@ -651,6 +651,19 @@ define drop-while-end<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
   }
 }
 
+define lift-vector<a>(xs: vector(a), _: (a) -> meta a): meta vector(a) {
+  magic cast(vector(a), meta vector(a), xs)
+  // admissible:
+  //   let base: meta vector(a) = box {make(10)};
+  //   this.list.fold-left(base, to-list(xs), function (acc, x) {
+  //     box {
+  //       letbox v = acc;
+  //       letbox x' = f(x);
+  //       push-back(v, x')
+  //     }
+  //   })
+}
+
 define zen(): unit {
   let xs: vector(text) = make(0);
   let xs = push-back(xs, *"b");

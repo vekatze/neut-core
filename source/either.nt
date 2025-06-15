@@ -87,7 +87,3 @@ define to-option<a, b>(v: either(a, b)): ?b {
     none
   }
 }
-
-inline region<a>: type {
-  either(a, unit)
-}

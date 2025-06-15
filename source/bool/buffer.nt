@@ -1,14 +1,14 @@
 import {
   this.bool {bool},
   this.buffer {buffer},
-  this.either {right-unit},
+  this.either {rho},
   this.system {system},
   this.text,
   this.text.buffer {write, write-line},
   this.unit {unit},
 }
 
-define write-bool<r := right-unit>(k: &buffer, x: bool): system(unit) {
+define write-bool<r := rho>(k: &buffer, x: bool): system(unit) {
   if x {
     try _ = r;
     write(k, "True")
@@ -18,7 +18,7 @@ define write-bool<r := right-unit>(k: &buffer, x: bool): system(unit) {
   }
 }
 
-define write-bool-line<r := right-unit>(k: &buffer, x: bool): system(unit) {
+define write-bool-line<r := rho>(k: &buffer, x: bool): system(unit) {
   if x {
     try _ = r;
     write-line(k, "True")

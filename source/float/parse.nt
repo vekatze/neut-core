@@ -1,13 +1,13 @@
 import {
   this.bool,
-  this.either {Left, Right, right-unit},
+  this.either {Left, Right, rho},
   this.foreign {_parse_double},
   this.memory {load-float},
   this.text {_get-content-pointer, text},
   this.unit {Unit},
 }
 
-inline parse-float<r := right-unit>(t: &text): ?float {
+inline parse-float<r := rho>(t: &text): ?float {
   let c-float-str = _get-content-pointer(t);
   let len = this.text.length(t);
   let result-ptr = magic alloca(float, 1);

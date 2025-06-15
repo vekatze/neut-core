@@ -75,7 +75,7 @@ inline none<a>: ?a {
   Left(Unit)
 }
 
-inline right-unit<a>: either(a, unit) {
+inline rho<a>: either(a, unit) {
   Right(Unit)
 }
 

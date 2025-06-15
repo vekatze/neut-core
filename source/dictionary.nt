@@ -1,7 +1,7 @@
 import {
   this.bool,
   this.box,
-  this.either {Right, none, right-unit},
+  this.either {Right, none, rho},
   this.list {Cons, Nil, append, list},
   this.ord {Ord, ord},
   this.ordering {EQ, GT, LT},
@@ -204,7 +204,7 @@ define insert<k, v>(L: &ord(k), d: dictionary(k, v), key-X: k, val-X: v): dictio
   }
 }
 
-define lookup<k, v, reg := right-unit>(L: &ord(k), d: &dictionary(k, v), needle: &k): ?&v {
+define lookup<k, v, reg := rho>(L: &ord(k), d: &dictionary(k, v), needle: &k): ?&v {
   tie Ord of {compare} = L;
   case d {
   | Tip =>

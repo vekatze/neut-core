@@ -1,6 +1,6 @@
 import {
   this.bool {bool},
-  this.either {right-unit},
+  this.either {rho},
   this.file.descriptor {descriptor, stdout},
   this.system {system},
   this.text,
@@ -8,7 +8,7 @@ import {
   this.unit {Unit, unit},
 }
 
-define write-bool<r := right-unit>(k: descriptor, x: bool): system(unit) {
+define write-bool<r := rho>(k: descriptor, x: bool): system(unit) {
   if x {
     try _ = r;
     write(k, "True")
@@ -18,7 +18,7 @@ define write-bool<r := right-unit>(k: descriptor, x: bool): system(unit) {
   }
 }
 
-define write-bool-line<r := right-unit>(k: descriptor, x: bool): system(unit) {
+define write-bool-line<r := rho>(k: descriptor, x: bool): system(unit) {
   if x {
     try _ = r;
     write-line(k, "True")

@@ -1,7 +1,7 @@
 import {
   this.buffer {_write, buffer, flush, make-buffer},
   this.control {nop},
-  this.either {Left, Right, right-unit},
+  this.either {Left, Right, rho},
   this.file.descriptor {stdout},
   this.rune {store-rune},
   this.system {system},
@@ -10,7 +10,7 @@ import {
   this.unit {Unit, unit},
 }
 
-define write-rune<r := right-unit>(k: &buffer, x: rune): system(unit) {
+define write-rune<r := rho>(k: &buffer, x: rune): system(unit) {
   let buffer-ptr = magic alloca(int32, 1);
   let size = store-rune(x, buffer-ptr);
   let result = _write(k, buffer-ptr, size, r);
@@ -18,7 +18,7 @@ define write-rune<r := right-unit>(k: &buffer, x: rune): system(unit) {
   result
 }
 
-define write-rune-line<r := right-unit>(k: &buffer, x: rune): system(unit) {
+define write-rune-line<r := rho>(k: &buffer, x: rune): system(unit) {
   try _ = r;
   try _ = write-rune(k, x);
   try _ = write-rune(k, `\n`);

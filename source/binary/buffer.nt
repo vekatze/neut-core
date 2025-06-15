@@ -1,14 +1,14 @@
 import {
   this.binary {binary, binary-length},
   this.buffer {_write, buffer, flush, make-buffer},
-  this.either {right-unit},
+  this.either {rho},
   this.file.descriptor {stdout},
   this.system {system},
   this.text {to-binary},
   this.unit {Unit, unit},
 }
 
-define write-binary<r := right-unit>(b: &buffer, content: &binary): system(unit) {
+define write-binary<r := rho>(b: &buffer, content: &binary): system(unit) {
   _write(
     b,
     this.binary._get-content-pointer(content),

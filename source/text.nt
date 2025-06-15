@@ -3,7 +3,7 @@ import {
   this.bool {False, True, bool},
   this.box,
   this.c-size {C-Size, c-size},
-  this.either {Right, none, right-unit},
+  this.either {Right, none, rho},
   this.external {malloc},
   this.list {Cons, Nil, list, reverse},
   this.magic,
@@ -362,7 +362,7 @@ define _get-rune(t: &text, index: int): rune {
   load-rune(ptr)
 }
 
-define uncons<r := right-unit>(t: text): ?pair(rune, text) {
+define uncons<r := rho>(t: text): ?pair(rune, text) {
   let len on t = text-byte-length(t);
   if eq-int(len, 0) {
     try _ = r;

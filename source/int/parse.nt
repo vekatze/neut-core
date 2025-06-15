@@ -1,13 +1,13 @@
 import {
   this.bool,
-  this.either {Left, Right, right-unit},
+  this.either {Left, Right, rho},
   this.foreign {_parse_binary, _parse_decimal, _parse_hex},
   this.memory {load-int},
   this.text {_get-content-pointer, text},
   this.unit {Unit},
 }
 
-define parse-binary<r := right-unit>(t: &text): ?int {
+define parse-binary<r := rho>(t: &text): ?int {
   let c-int-str = _get-content-pointer(t);
   let len = this.text.length(t);
   let result-ptr = magic alloca(int, 1);
@@ -22,7 +22,7 @@ define parse-binary<r := right-unit>(t: &text): ?int {
   }
 }
 
-define parse-int<r := right-unit>(t: &text): ?int {
+define parse-int<r := rho>(t: &text): ?int {
   let c-int-str = _get-content-pointer(t);
   let len = this.text.length(t);
   let result-ptr = magic alloca(int, 1);
@@ -37,7 +37,7 @@ define parse-int<r := right-unit>(t: &text): ?int {
   }
 }
 
-define parse-hex<r := right-unit>(t: &text): ?int {
+define parse-hex<r := rho>(t: &text): ?int {
   let c-int-str = _get-content-pointer(t);
   let len = this.text.length(t);
   let result-ptr = magic alloca(int, 1);

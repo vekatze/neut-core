@@ -2,7 +2,7 @@ import {
   this.binary {binary},
   this.binary.io,
   this.bool,
-  this.either {Left, Right, right-unit},
+  this.either {Left, Right, rho},
   this.file.descriptor {descriptor, stdin, stdout},
   this.magic,
   this.system {get-error-message, report-system-error, system},
@@ -14,12 +14,12 @@ foreign {
   neut_core_v0_51_write_line(int32, int, pointer): int,
 }
 
-define write<r := right-unit>(f: descriptor, t: &text): system(unit) {
+define write<r := rho>(f: descriptor, t: &text): system(unit) {
   try _ = r;
   this.binary.io.write(f, to-binary(t))
 }
 
-define write-line<r := right-unit>(d: descriptor, t: &text): system(unit) {
+define write-line<r := rho>(d: descriptor, t: &text): system(unit) {
   let d' = magic cast(descriptor, int32, d);
   let len = text-byte-length(t);
   let ptr = _get-content-pointer(t);
@@ -43,13 +43,13 @@ define print-line(t: &text): unit {
   Unit
 }
 
-define read<r := right-unit>(from: descriptor, initial-buffer-size: int): system(text) {
+define read<r := rho>(from: descriptor, initial-buffer-size: int): system(text) {
   try _ = r;
   try bin = this.binary.io.read(from, initial-buffer-size);
   Right(this.magic.cast(binary, text, bin))
 }
 
-define read-stdin<r := right-unit>(initial-buffer-size: int): system(text) {
+define read-stdin<r := rho>(initial-buffer-size: int): system(text) {
   try _ = r;
   read(stdin, initial-buffer-size)
 }

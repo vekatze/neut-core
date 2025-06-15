@@ -3,7 +3,7 @@ import {
   this.c-int {c-int, eq-c-int, from-c-int},
   this.c-pid {c-pid, eq-c-pid},
   this.c-size {C-Size},
-  this.either {Left, Right, right-unit},
+  this.either {Left, Right, rho},
   this.external {free, malloc},
   this.file {close},
   this.file.descriptor {descriptor, stderr, stdin, stdout},
@@ -39,7 +39,7 @@ data process-result-status {
 | Stopped(stopsig: c-int)
 }
 
-define _waitpid<r := right-unit>(pid: c-pid): system(process-result-status) {
+define _waitpid<r := rho>(pid: c-pid): system(process-result-status) {
   let status-ptr = malloc(C-Size(this.word.size));
   let result = __waitpid(pid, status-ptr, 0);
   if eq-c-pid(result, -1) {
@@ -79,7 +79,7 @@ define _make-argv(xs: list(pointer)): pointer {
   ptr
 }
 
-define _create-pipe<r := right-unit>(): system(pair(descriptor, descriptor)) {
+define _create-pipe<r := rho>(): system(pair(descriptor, descriptor)) {
   let ptr = malloc(C-Size(mul-int(this.word.size, 2)));
   let result = magic external pipe(ptr);
   if eq-c-int(result, -1) {
@@ -95,7 +95,7 @@ define _create-pipe<r := right-unit>(): system(pair(descriptor, descriptor)) {
   }
 }
 
-define _dup2<r := right-unit>(fd1: descriptor, fd2: descriptor): system(unit) {
+define _dup2<r := rho>(fd1: descriptor, fd2: descriptor): system(unit) {
   let fd1 = magic cast(descriptor, c-int, fd1);
   let fd2 = magic cast(descriptor, c-int, fd2);
   let result = magic external dup2(fd1, fd2);
@@ -108,7 +108,7 @@ define _dup2<r := right-unit>(fd1: descriptor, fd2: descriptor): system(unit) {
   }
 }
 
-define _fork<r := right-unit>(): system(c-pid) {
+define _fork<r := rho>(): system(c-pid) {
   let result = magic external fork();
   if eq-c-pid(result, -1) {
     try _ = r;
@@ -135,7 +135,7 @@ data process-result {
   )
 }
 
-define spawn<r := right-unit>(
+define spawn<r := rho>(
   ps: process-spec,
   stdout-initial-buffer-size: int,
   stderr-initial-buffer-size: int,

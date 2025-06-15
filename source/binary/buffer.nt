@@ -1,29 +1,20 @@
 import {
   this.binary {binary, binary-length},
   this.buffer {_write, buffer, flush, make-buffer},
-  this.either {Right, region, right-unit},
+  this.either {right-unit},
   this.file.descriptor {stdout},
   this.system {system},
   this.text {to-binary},
   this.unit {Unit, unit},
 }
 
-define _write-binary(b: &buffer, content: &binary, r: region): system(unit) {
+define write-binary<r := right-unit>(b: &buffer, content: &binary): system(unit) {
   _write(
     b,
     this.binary._get-content-pointer(content),
     binary-length(content),
     r,
   )
-}
-
-inline write-binary(b: &buffer, content: &binary): system(unit) {
-  _write-binary(b, content, Right(Unit))
-}
-
-define write-binary-2<r := right-unit>(b: &buffer, content: &binary): system(unit) {
-  try _ = r;
-  _write-binary(b, content, Right(Unit))
 }
 
 define zen(): unit {

@@ -1,7 +1,7 @@
 import {
   this.bool,
   this.buffer {buffer, flush, make-buffer},
-  this.either {Right, region},
+  this.either {Right, right-unit},
   this.file.descriptor {stdout},
   this.system {system},
   this.text,
@@ -13,7 +13,7 @@ foreign {
   neut_core_v0_51_build_fixed_buf(pointer, int, float, int, int): int,
 }
 
-define _write-float(b: &buffer, x: float, decimals: int, r: region): system(unit) {
+define write-float<r := right-unit>(b: &buffer, x: float, decimals: int): system(unit) {
   let size = 64;
   let add-newline = 0;
   let buffer-ptr = magic alloca(int, size);
@@ -26,11 +26,7 @@ define _write-float(b: &buffer, x: float, decimals: int, r: region): system(unit
   }
 }
 
-inline write-float(b: &buffer, x: float, decimals: int): system(unit) {
-  _write-float(b, x, decimals, Right(Unit))
-}
-
-define _write-float-line(b: &buffer, x: float, decimals: int, r: region): system(unit) {
+define write-float-line<r := right-unit>(b: &buffer, x: float, decimals: int): system(unit) {
   let size = 65;
   let add-newline = 1;
   let buffer-ptr = magic alloca(int, size);
@@ -41,10 +37,6 @@ define _write-float-line(b: &buffer, x: float, decimals: int, r: region): system
     try _ = r;
     Right(Unit)
   }
-}
-
-inline write-float-line(b: &buffer, x: float, decimals: int): system(unit) {
-  _write-float-line(b, x, decimals, Right(Unit))
 }
 
 define zen(): unit {

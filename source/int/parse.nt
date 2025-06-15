@@ -1,13 +1,13 @@
 import {
   this.bool,
-  this.either {Left, Right, region},
+  this.either {Left, Right, right-unit},
   this.foreign {_parse_binary, _parse_decimal, _parse_hex},
   this.memory {load-int},
   this.text {_get-content-pointer, text},
   this.unit {Unit},
 }
 
-define _parse-binary(t: &text, r: region): ?int {
+define parse-binary<r := right-unit>(t: &text): ?int {
   let c-int-str = _get-content-pointer(t);
   let len = this.text.length(t);
   let result-ptr = magic alloca(int, 1);
@@ -22,11 +22,7 @@ define _parse-binary(t: &text, r: region): ?int {
   }
 }
 
-inline parse-binary(t: &text): ?int {
-  _parse-binary(t, Right(Unit))
-}
-
-define _parse-int(t: &text, r: region): ?int {
+define parse-int<r := right-unit>(t: &text): ?int {
   let c-int-str = _get-content-pointer(t);
   let len = this.text.length(t);
   let result-ptr = magic alloca(int, 1);
@@ -41,11 +37,7 @@ define _parse-int(t: &text, r: region): ?int {
   }
 }
 
-inline parse-int(t: &text): ?int {
-  _parse-int(t, Right(Unit))
-}
-
-define _parse-hex(t: &text, r: region): ?int {
+define parse-hex<r := right-unit>(t: &text): ?int {
   let c-int-str = _get-content-pointer(t);
   let len = this.text.length(t);
   let result-ptr = magic alloca(int, 1);
@@ -58,8 +50,4 @@ define _parse-hex(t: &text, r: region): ?int {
     try _ = r;
     Right(result)
   }
-}
-
-inline parse-hex(t: &text): ?int {
-  _parse-hex(t, Right(Unit))
 }

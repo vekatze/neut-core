@@ -1,7 +1,7 @@
 import {
   this.buffer {buffer, flush, make-buffer},
   this.control {nop},
-  this.either {Right, region},
+  this.either {Right, right-unit},
   this.file.descriptor {stdout},
   this.pointer {shift},
   this.system {system},
@@ -14,7 +14,7 @@ foreign {
   neut_core_v0_51_write_int64_core(pointer, int, int32): int,
 }
 
-define _write-int(b: &buffer, x: int, r: region): system(unit) {
+define write-int<r := right-unit>(b: &buffer, x: int): system(unit) {
   let buffer-ptr = magic alloca(int, 22);
   let buf-end = shift(buffer-ptr, 22);
   let len = magic external neut_core_v0_51_write_int64_core(buf-end, x, 0);
@@ -24,11 +24,7 @@ define _write-int(b: &buffer, x: int, r: region): system(unit) {
   result
 }
 
-inline write-int(b: &buffer, x: int): system(unit) {
-  _write-int(b, x, Right(Unit))
-}
-
-define _write-int-line(b: &buffer, x: int, r: region): system(unit) {
+define write-int-line<r := right-unit>(b: &buffer, x: int): system(unit) {
   let buffer-ptr = magic alloca(int, 22);
   let buf-end = shift(buffer-ptr, 22);
   let len = magic external neut_core_v0_51_write_int64_core(buf-end, x, 1);
@@ -36,10 +32,6 @@ define _write-int-line(b: &buffer, x: int, r: region): system(unit) {
   // avoid tail-calling
   nop();
   result
-}
-
-inline write-int-line(b: &buffer, x: int): system(unit) {
-  _write-int-line(b, x, Right(Unit))
 }
 
 define zen(): unit {

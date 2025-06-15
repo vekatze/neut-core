@@ -1,6 +1,6 @@
 import {
   this.bool,
-  this.either {Right, region},
+  this.either {Right, right-unit},
   this.file.descriptor {descriptor, stdout},
   this.system {report-system-error, system},
   this.text,
@@ -13,7 +13,7 @@ foreign {
   neut_core_v0_51_write_double_line(int32, float, int): int,
 }
 
-define _write-float(d: descriptor, x: float, decimals: int, r: region): system(unit) {
+define write-float<r := right-unit>(d: descriptor, x: float, decimals: int): system(unit) {
   let d' = magic cast(descriptor, int32, d);
   let result = magic external neut_core_v0_51_write_double(d', x, decimals);
   if lt-int(result, 0) {
@@ -25,11 +25,7 @@ define _write-float(d: descriptor, x: float, decimals: int, r: region): system(u
   }
 }
 
-inline write-float(d: descriptor, x: float, decimals: int): system(unit) {
-  _write-float(d, x, decimals, Right(Unit))
-}
-
-define _write-float-line(d: descriptor, x: float, decimals: int, r: region): system(unit) {
+define write-float-line<r := right-unit>(d: descriptor, x: float, decimals: int): system(unit) {
   let d' = magic cast(descriptor, int32, d);
   let result = magic external neut_core_v0_51_write_double_line(d', x, decimals);
   if lt-int(result, 0) {
@@ -39,10 +35,6 @@ define _write-float-line(d: descriptor, x: float, decimals: int, r: region): sys
     try _ = r;
     Right(Unit)
   }
-}
-
-inline write-float-line(d: descriptor, x: float, decimals: int): system(unit) {
-  _write-float-line(d, x, decimals, Right(Unit))
 }
 
 define print-float(x: float, decimals: int): unit {

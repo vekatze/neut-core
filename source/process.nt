@@ -3,7 +3,7 @@ import {
   this.c-int {c-int, eq-c-int, from-c-int},
   this.c-pid {c-pid, eq-c-pid},
   this.c-size {C-Size},
-  this.either {Left, Right, region, right-unit},
+  this.either {Left, Right, right-unit},
   this.external {free, malloc},
   this.file {close},
   this.file.descriptor {descriptor, stderr, stdin, stdout},
@@ -135,11 +135,10 @@ data process-result {
   )
 }
 
-define _spawn(
+define spawn<r := right-unit>(
   ps: process-spec,
   stdout-initial-buffer-size: int,
   stderr-initial-buffer-size: int,
-  r: region,
 ): system(process-result) {
   try _ = r;
   try Pair(in-reader, in-writer) = _create-pipe();
@@ -177,14 +176,6 @@ define _spawn(
       stderr-text,
     })
   }
-}
-
-inline spawn(
-  ps: process-spec,
-  stdout-initial-buffer-size: int,
-  stderr-initial-buffer-size: int,
-): system(process-result) {
-  _spawn(ps, stdout-initial-buffer-size, stderr-initial-buffer-size, Right(Unit))
 }
 
 define _print-process-result-status(st: process-result-status): unit {

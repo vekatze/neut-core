@@ -1,6 +1,6 @@
 import {
   this.bool,
-  this.either {Right, region},
+  this.either {Right, right-unit},
   this.file.descriptor {descriptor, stdout},
   this.system {report-system-error, system},
   this.text,
@@ -13,7 +13,7 @@ foreign {
   neut_core_v0_51_write_int64_nl(int32, int64): int,
 }
 
-define _write-int(d: descriptor, x: int, r: region): system(unit) {
+define write-int<r := right-unit>(d: descriptor, x: int): system(unit) {
   let d' = magic cast(descriptor, int32, d);
   let result = magic external neut_core_v0_51_write_int64(d', x);
   if lt-int(result, 0) {
@@ -25,11 +25,7 @@ define _write-int(d: descriptor, x: int, r: region): system(unit) {
   }
 }
 
-inline write-int(d: descriptor, x: int): system(unit) {
-  _write-int(d, x, Right(Unit))
-}
-
-define _write-int-line(d: descriptor, x: int, r: region): system(unit) {
+define write-int-line<r := right-unit>(d: descriptor, x: int): system(unit) {
   let d' = magic cast(descriptor, int32, d);
   let result = magic external neut_core_v0_51_write_int64_nl(d', x);
   if lt-int(result, 0) {
@@ -39,10 +35,6 @@ define _write-int-line(d: descriptor, x: int, r: region): system(unit) {
     try _ = r;
     Right(Unit)
   }
-}
-
-inline write-int-line(d: descriptor, x: int): system(unit) {
-  _write-int-line(d, x, Right(Unit))
 }
 
 define print-int(x: int): unit {

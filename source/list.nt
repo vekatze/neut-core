@@ -1,7 +1,7 @@
 import {
   this.bool {False, True, and, bool, or},
   this.box,
-  this.either {Left, Right, either, none, region},
+  this.either {Left, Right, either, none, right-unit},
   this.monoid {Monoid, monoid},
   this.ord {Ord, ord},
   this.ordering {GT, LT},
@@ -298,7 +298,7 @@ define partition<a, b>(xs: list(either(a, b))): pair(list(a), list(b)) {
   })
 }
 
-define uncons<a>(xs: list(a), r: region): ?pair(a, list(a)) {
+define uncons<a, r := right-unit>(xs: list(a)): ?pair(a, list(a)) {
   match xs {
   | Nil =>
     try _ = r;

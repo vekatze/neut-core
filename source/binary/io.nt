@@ -3,7 +3,7 @@ import {
   this.bool,
   this.c-size {C-Size},
   this.c-ssize {C-SSize, from-c-ssize, lt-c-ssize},
-  this.either {Left, Right, region},
+  this.either {Left, Right, right-unit},
   this.external {malloc, read, realloc, write},
   this.file.descriptor {descriptor},
   this.int.show {show-int},
@@ -17,9 +17,9 @@ import {
   this.word,
 }
 
-define _write-loop(d: descriptor, p: pointer, size: int, r: region): system(unit) {
+define _write-loop(d: descriptor, p: pointer, size: int, r: system(unit)): system(unit) {
   let loop =
-    define write-loop(acc: int, r: region): system(unit) {
+    define write-loop(acc: int, r: system(unit)): system(unit) {
       let rest = sub-int(size, acc);
       let head-ptr = shift(p, acc);
       let bytes = write(d, head-ptr, C-Size(rest));
@@ -39,14 +39,10 @@ define _write-loop(d: descriptor, p: pointer, size: int, r: region): system(unit
   loop(0, r)
 }
 
-define _write(d: descriptor, b: &binary, r: region): system(unit) {
+define write<r := right-unit>(d: descriptor, b: &binary): system(unit) {
   let content-pointer = _get-content-pointer(b);
   let len = binary-length(b);
   _write-loop(d, content-pointer, len, r)
-}
-
-inline write(d: descriptor, b: &binary): system(unit) {
-  _write(d, b, Right(Unit))
 }
 
 define _read-inner(
@@ -54,7 +50,7 @@ define _read-inner(
   base-ptr: pointer,
   current-length: int,
   buffer-size: int,
-  r: region,
+  r: system(unit),
 ): system(binary) {
   let u = this.word.size;
   let content-ptr = shift(base-ptr, add-int(mul-int(u, 2), current-length));
@@ -83,7 +79,7 @@ define _read-inner(
   }
 }
 
-define read(from: descriptor, initial-buffer-size: int, r: region): system(binary) {
+define read<r := right-unit>(from: descriptor, initial-buffer-size: int): system(binary) {
   if le-int(initial-buffer-size, 0) {
     try _ = r;
     Left(Application-Error(format(

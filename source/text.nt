@@ -3,7 +3,7 @@ import {
   this.bool {False, True, bool},
   this.box,
   this.c-size {C-Size, c-size},
-  this.either {Right, none, region},
+  this.either {Right, none, right-unit},
   this.external {malloc},
   this.list {Cons, Nil, list, reverse},
   this.magic,
@@ -362,7 +362,7 @@ define _get-rune(t: &text, index: int): rune {
   load-rune(ptr)
 }
 
-define _uncons(t: text, r: region): ?pair(rune, text) {
+define uncons<r := right-unit>(t: text): ?pair(rune, text) {
   let len on t = text-byte-length(t);
   if eq-int(len, 0) {
     try _ = r;
@@ -374,11 +374,6 @@ define _uncons(t: text, r: region): ?pair(rune, text) {
     try _ = r;
     Right(Pair(ch, t))
   }
-}
-
-// O(1)
-inline uncons(t: text): ?pair(rune, text) {
-  _uncons(t, Right(Unit))
 }
 
 define _find-pivot(char-len: int, len: int, t: &text, index: int, char-count: int): int {

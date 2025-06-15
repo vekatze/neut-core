@@ -2,7 +2,7 @@ import {
   this.binary {binary},
   this.binary.io,
   this.bool,
-  this.either {Left, Right, region},
+  this.either {Left, Right, right-unit},
   this.file.descriptor {descriptor, stdin, stdout},
   this.magic,
   this.system {get-error-message, report-system-error, system},
@@ -14,16 +14,12 @@ foreign {
   neut_core_v0_51_write_line(int32, int, pointer): int,
 }
 
-define _write(f: descriptor, t: &text, r: region): system(unit) {
+define write<r := right-unit>(f: descriptor, t: &text): system(unit) {
   try _ = r;
   this.binary.io.write(f, to-binary(t))
 }
 
-inline write(f: descriptor, t: &text): system(unit) {
-  _write(f, t, Right(Unit))
-}
-
-define _write-line(d: descriptor, t: &text, r: region): system(unit) {
+define write-line<r := right-unit>(d: descriptor, t: &text): system(unit) {
   let d' = magic cast(descriptor, int32, d);
   let len = text-byte-length(t);
   let ptr = _get-content-pointer(t);
@@ -37,10 +33,6 @@ define _write-line(d: descriptor, t: &text, r: region): system(unit) {
   }
 }
 
-inline write-line(d: descriptor, t: &text): system(unit) {
-  _write-line(d, t, Right(Unit))
-}
-
 define print(t: &text): unit {
   let _ = write(stdout, t);
   Unit
@@ -51,22 +43,15 @@ define print-line(t: &text): unit {
   Unit
 }
 
-define _read(from: descriptor, initial-buffer-size: int, r: region): system(text) {
-  try bin = this.binary.io.read(from, initial-buffer-size, r);
+define read<r := right-unit>(from: descriptor, initial-buffer-size: int): system(text) {
+  try _ = r;
+  try bin = this.binary.io.read(from, initial-buffer-size);
   Right(this.magic.cast(binary, text, bin))
 }
 
-inline read(from: descriptor, initial-buffer-size: int): system(text) {
-  _read(from, initial-buffer-size, Right(Unit))
-}
-
-define _get-line(initial-buffer-size: int, r: region): system(text) {
+define read-stdin<r := right-unit>(initial-buffer-size: int): system(text) {
   try _ = r;
   read(stdin, initial-buffer-size)
-}
-
-inline get-line(initial-buffer-size: int): system(text) {
-  _get-line(initial-buffer-size, Right(Unit))
 }
 
 define zen(): unit {

@@ -1,14 +1,14 @@
 import {
   this.bool {bool},
   this.buffer {buffer},
-  this.either {Right, region},
+  this.either {right-unit},
   this.system {system},
   this.text,
   this.text.buffer {write, write-line},
-  this.unit {Unit, unit},
+  this.unit {unit},
 }
 
-define _write-bool(k: &buffer, x: bool, r: region): system(unit) {
+define write-bool<r := right-unit>(k: &buffer, x: bool): system(unit) {
   if x {
     try _ = r;
     write(k, "True")
@@ -18,11 +18,7 @@ define _write-bool(k: &buffer, x: bool, r: region): system(unit) {
   }
 }
 
-inline write-bool(k: &buffer, x: bool): system(unit) {
-  _write-bool(k, x, Right(Unit))
-}
-
-define _write-bool-line(k: &buffer, x: bool, r: region): system(unit) {
+define write-bool-line<r := right-unit>(k: &buffer, x: bool): system(unit) {
   if x {
     try _ = r;
     write-line(k, "True")
@@ -30,8 +26,4 @@ define _write-bool-line(k: &buffer, x: bool, r: region): system(unit) {
     try _ = r;
     write-line(k, "False")
   }
-}
-
-inline write-bool-line(k: &buffer, x: bool): system(unit) {
-  _write-bool-line(k, x, Right(Unit))
 }

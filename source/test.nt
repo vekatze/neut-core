@@ -52,6 +52,31 @@ define use-rune(r: rune): unit {
   }
 }
 
+define some-func<x := 10, z := 30>(y: int): int {
+  add-int(add-int(x, y), z)
+}
+
+define some-func-2<x: int := 10, z: int := 30>(): int {
+  add-int(add-int(x, 10), z)
+}
+
+define some-func-3<x := 10, z := 30>(): int {
+  add-int(add-int(x, 10), z)
+}
+
+data some-item {
+| Item
+}
+
+data fo {
+| Fo
+}
+
+define use-id(): unit {
+  let w = some-func of {y := 20};
+  print-int-line(w);
+}
+
 define my-random-in-range(lower-bound: int32, upper-bound: int32): int {
   let range-size = sub-int32(upper-bound, lower-bound);
   print("range-size: ");
@@ -66,6 +91,14 @@ define my-random-in-range(lower-bound: int32, upper-bound: int32): int {
 
 define use-text(x: &text): text {
   axiom-T(box x {x})
+}
+
+data pack(a) {
+| Pack(a)
+}
+
+define item: int {
+  10
 }
 
 define zen(): unit {
@@ -142,17 +175,17 @@ define zen(): unit {
   | _ =>
     Unit
   };
-  let p: either(pair(rune, type), type) = Left(Pair(`x`, type));
-  match p {
-  | Right(_) =>
-    print("right\n")
-  | Left(Pair(`a`, _)) =>
-    print("pair-a\n")
-  | Left(Pair(`x`, _)) =>
-    print("pair-x\n")
-  | Left(Pair(_, _)) =>
-    print("pair-x\n")
-  };
+  // let p: either(pair(rune, type), type) = Left(Pair(`x`, type));
+  // match p {
+  // | Right(_) =>
+  //   print("right\n")
+  // | Left(Pair(`a`, _)) =>
+  //   print("pair-a\n")
+  // | Left(Pair(`x`, _)) =>
+  //   print("pair-x\n")
+  // | Left(Pair(_, _)) =>
+  //   print("pair-x\n")
+  // };
   let !xs: list(int) = [1, 2, 3];
   letbox len on !xs = {
     discard(*!xs);
@@ -167,8 +200,34 @@ define zen(): unit {
   print-int-line(len);
   print("hello, world\n");
   print-line("yo");
+  use-id();
 }
 
 define main(): unit {
   zen();
+}
+
+define id<a>(x: a): a {
+  x
+}
+
+data config(a) {
+| Config(
+    x: a,
+    hoge: int,
+  )
+}
+
+define my-func<a: type>(
+  some-value: a,
+): a {
+  some-value
+}
+
+define my-id(a: type, x: a): a {
+  x
+}
+
+define id-id(a: type, x: a): a {
+  my-id((a: type, x: a) -> a, my-id)(a, x)
 }

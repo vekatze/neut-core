@@ -1,25 +1,41 @@
 import {
   this.binary.buffer,
   this.buffer {buffer, flush, make-buffer},
+  this.either {Right, region},
   this.file.descriptor {stdout},
   this.rune.buffer {write-rune},
+  this.system {system},
   this.text {text, to-binary},
-  this.unit {unit},
+  this.unit {Unit, unit},
 }
 
-define write(b: &buffer, content: &text): unit {
+define _write(b: &buffer, content: &text, r: region): system(unit) {
+  try _ = r;
   this.binary.buffer.write-binary(b, to-binary(content))
 }
 
-define write-line(b: &buffer, content: &text): unit {
-  write(b, content);
+inline write(b: &buffer, content: &text): system(unit) {
+  _write(b, content, Right(Unit))
+}
+
+define _write-line(b: &buffer, content: &text, r: region): system(unit) {
+  try _ = r;
+  try _ = write(b, content);
   write-rune(b, `\n`)
+}
+
+inline write-line(b: &buffer, content: &text): system(unit) {
+  _write-line(b, content, Right(Unit))
 }
 
 define zen(): unit {
   let !k = make-buffer(stdout, 4096);
   pin k = !k;
-  write-line(k, "hello!");
-  write-line(k, "hello!");
-  flush(k);
+  let _: system(unit) = {
+    try _ = write-line(k, "hello!");
+    try _ = write-line(k, "hello!");
+    try _ = flush(k);
+    Right(Unit)
+  };
+  Unit
 }

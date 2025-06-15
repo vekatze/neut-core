@@ -1,8 +1,10 @@
 import {
   this.buffer {buffer, flush, make-buffer},
   this.control {nop},
+  this.either {Right, region},
   this.file.descriptor {stdout},
   this.pointer {shift},
+  this.system {system},
   this.text,
   this.text.buffer {write},
   this.unit {Unit, unit},
@@ -12,78 +14,90 @@ foreign {
   neut_core_v0_51_write_int64_core(pointer, int, int32): int,
 }
 
-define write-int(b: &buffer, x: int): unit {
+define _write-int(b: &buffer, x: int, r: region): system(unit) {
   let buffer-ptr = magic alloca(int, 22);
   let buf-end = shift(buffer-ptr, 22);
   let len = magic external neut_core_v0_51_write_int64_core(buf-end, x, 0);
-  let _ = this.buffer._write(b, shift(buf-end, mul-int(-1, len)), len);
+  let result = this.buffer._write(b, shift(buf-end, mul-int(-1, len)), len, r);
   // avoid tail-calling
   nop();
-  Unit
+  result
 }
 
-define write-int-line(b: &buffer, x: int): unit {
+inline write-int(b: &buffer, x: int): system(unit) {
+  _write-int(b, x, Right(Unit))
+}
+
+define _write-int-line(b: &buffer, x: int, r: region): system(unit) {
   let buffer-ptr = magic alloca(int, 22);
   let buf-end = shift(buffer-ptr, 22);
   let len = magic external neut_core_v0_51_write_int64_core(buf-end, x, 1);
-  let _ = this.buffer._write(b, shift(buf-end, mul-int(-1, len)), len);
+  let result = this.buffer._write(b, shift(buf-end, mul-int(-1, len)), len, r);
   // avoid tail-calling
   nop();
-  Unit
+  result
+}
+
+inline write-int-line(b: &buffer, x: int): system(unit) {
+  _write-int-line(b, x, Right(Unit))
 }
 
 define zen(): unit {
   pin b = make-buffer(stdout, 10);
-  write-int(b, 0);
-  write(b, "\n");
-  write-int(b, 1);
-  write(b, "\n");
-  write-int(b, -1);
-  write(b, "\n");
-  write-int(b, 9223372036854775807);
-  write(b, "\n");
-  write-int(b, -9223372036854775808);
-  write(b, "\n");
-  write-int(b, 9223372036854775806);
-  write(b, "\n");
-  write-int(b, -9223372036854775807);
-  write(b, "\n");
-  write-int(b, 0x7fffffffffffffff);
-  write(b, "\n");
-  write-int(b, 0x8000000000000000);
-  write(b, "\n");
-  write-int(b, 0x0000000100000000);
-  write(b, "\n");
-  write-int(b, 0xffffffffffffffff);
-  write(b, "\n");
-  write-int(b, 1234567890123456789);
-  write(b, "\n");
-  write-int(b, -1234567890123456789);
-  write(b, "\n");
-  write-int(b, 1000000000000000000);
-  write(b, "\n");
-  write-int(b, -1000000000000000000);
-  write(b, "\n");
-  write-int(b, 999999999999999999);
-  write(b, "\n");
-  write-int(b, -999999999999999999);
-  write(b, "\n");
-  write-int-line(b, 0);
-  write-int-line(b, 1);
-  write-int-line(b, -1);
-  write-int-line(b, 9223372036854775807);
-  write-int-line(b, -9223372036854775808);
-  write-int-line(b, 9223372036854775806);
-  write-int-line(b, -9223372036854775807);
-  write-int-line(b, 0x7fffffffffffffff);
-  write-int-line(b, 0x8000000000000000);
-  write-int-line(b, 0x0000000100000000);
-  write-int-line(b, 0xffffffffffffffff);
-  write-int-line(b, 1234567890123456789);
-  write-int-line(b, -1234567890123456789);
-  write-int-line(b, 1000000000000000000);
-  write-int-line(b, -1000000000000000000);
-  write-int-line(b, 999999999999999999);
-  write-int-line(b, -999999999999999999);
-  flush(b)
+  let _: system(unit) = {
+    try _ = write-int(b, 0);
+    try _ = write(b, "\n");
+    try _ = write-int(b, 1);
+    try _ = write(b, "\n");
+    try _ = write-int(b, -1);
+    try _ = write(b, "\n");
+    try _ = write-int(b, 9223372036854775807);
+    try _ = write(b, "\n");
+    try _ = write-int(b, -9223372036854775808);
+    try _ = write(b, "\n");
+    try _ = write-int(b, 9223372036854775806);
+    try _ = write(b, "\n");
+    try _ = write-int(b, -9223372036854775807);
+    try _ = write(b, "\n");
+    try _ = write-int(b, 0x7fffffffffffffff);
+    try _ = write(b, "\n");
+    try _ = write-int(b, 0x8000000000000000);
+    try _ = write(b, "\n");
+    try _ = write-int(b, 0x0000000100000000);
+    try _ = write(b, "\n");
+    try _ = write-int(b, 0xffffffffffffffff);
+    try _ = write(b, "\n");
+    try _ = write-int(b, 1234567890123456789);
+    try _ = write(b, "\n");
+    try _ = write-int(b, -1234567890123456789);
+    try _ = write(b, "\n");
+    try _ = write-int(b, 1000000000000000000);
+    try _ = write(b, "\n");
+    try _ = write-int(b, -1000000000000000000);
+    try _ = write(b, "\n");
+    try _ = write-int(b, 999999999999999999);
+    try _ = write(b, "\n");
+    try _ = write-int(b, -999999999999999999);
+    try _ = write(b, "\n");
+    try _ = write-int-line(b, 0);
+    try _ = write-int-line(b, 1);
+    try _ = write-int-line(b, -1);
+    try _ = write-int-line(b, 9223372036854775807);
+    try _ = write-int-line(b, -9223372036854775808);
+    try _ = write-int-line(b, 9223372036854775806);
+    try _ = write-int-line(b, -9223372036854775807);
+    try _ = write-int-line(b, 0x7fffffffffffffff);
+    try _ = write-int-line(b, 0x8000000000000000);
+    try _ = write-int-line(b, 0x0000000100000000);
+    try _ = write-int-line(b, 0xffffffffffffffff);
+    try _ = write-int-line(b, 1234567890123456789);
+    try _ = write-int-line(b, -1234567890123456789);
+    try _ = write-int-line(b, 1000000000000000000);
+    try _ = write-int-line(b, -1000000000000000000);
+    try _ = write-int-line(b, 999999999999999999);
+    try _ = write-int-line(b, -999999999999999999);
+    try _ = flush(b);
+    Right(Unit)
+  };
+  Unit
 }

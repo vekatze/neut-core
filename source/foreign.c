@@ -311,6 +311,21 @@ int64_t neut_core_v0_51_parse_double(const char *str, int64_t length,
   }
 }
 
+int64_t neut_core_v0_51_write_loop(int fd, const char *buf, size_t len) {
+  size_t off = 0;
+  while (off < len) {
+    ssize_t w = write(fd, buf + off, len - off);
+    if (w < 0) {
+      if (errno == EINTR) {
+        continue;
+      }
+      return -1;
+    }
+    off += (size_t)w;
+  }
+  return (int64_t)len;
+}
+
 ssize_t neut_core_v0_51_write_line(int fd, size_t len, const char *s) {
   struct iovec iov[2] = {{.iov_base = (void *)s, .iov_len = len},
                          {.iov_base = (void *)"\n", .iov_len = 1}};
@@ -342,18 +357,20 @@ int neut_core_v0_51_write_int64_core(char *buf_end, int64_t v, int add_nl) {
   return (int)(buf_end - p);
 }
 
-void neut_core_v0_51_write_int64(int fd, int64_t v) {
+int64_t neut_core_v0_51_write_int64(int fd, int64_t v) {
   char buf[22];
   char *end = buf + sizeof(buf);
   int len = neut_core_v0_51_write_int64_core(end, v, 0);
-  write(fd, end - len, (size_t)len);
+  return neut_core_v0_51_write_loop(fd, end-len, (size_t)len);
+  /* write(fd, end - len, (size_t)len); */
 }
 
-void neut_core_v0_51_write_int64_nl(int fd, int64_t v) {
+int64_t neut_core_v0_51_write_int64_nl(int fd, int64_t v) {
   char buf[22];
   char *end = buf + sizeof(buf);
   int len = neut_core_v0_51_write_int64_core(end, v, 1);
-  write(fd, end - len, (size_t)len);
+  return neut_core_v0_51_write_loop(fd, end-len, (size_t)len);
+  /* write(fd, end - len, (size_t)len); */
 }
 
 size_t neut_core_v0_51_build_fixed_buf(char *buf, size_t cap, double value,
@@ -389,7 +406,7 @@ size_t neut_core_v0_51_build_fixed_buf(char *buf, size_t cap, double value,
   return (size_t)n;
 }
 
-ssize_t neut_core_v0_51_write_double(int fd, double value, int decimals) {
+int64_t neut_core_v0_51_write_double(int fd, double value, int decimals) {
   char buf[64];
   size_t len =
       neut_core_v0_51_build_fixed_buf(buf, sizeof buf, value, decimals, 0);
@@ -397,21 +414,10 @@ ssize_t neut_core_v0_51_write_double(int fd, double value, int decimals) {
     return -1;
   }
 
-  size_t off = 0;
-  while (off < len) {
-    ssize_t w = write(fd, buf + off, len - off);
-    if (w < 0) {
-      if (errno == EINTR) {
-        continue;
-      }
-      return -1;
-    }
-    off += (size_t)w;
-  }
-  return (ssize_t)len;
+  return neut_core_v0_51_write_loop(fd, buf, len);
 }
 
-ssize_t neut_core_v0_51_write_double_line(int fd, double value, int decimals) {
+int64_t neut_core_v0_51_write_double_line(int fd, double value, int decimals) {
   char buf[65];
   size_t len =
       neut_core_v0_51_build_fixed_buf(buf, sizeof buf, value, decimals, 1);
@@ -419,16 +425,5 @@ ssize_t neut_core_v0_51_write_double_line(int fd, double value, int decimals) {
     return -1;
   }
 
-  size_t off = 0;
-  while (off < len) {
-    ssize_t w = write(fd, buf + off, len - off);
-    if (w < 0) {
-      if (errno == EINTR) {
-        continue;
-      }
-      return -1;
-    }
-    off += (size_t)w;
-  }
-  return (ssize_t)len;
+  return neut_core_v0_51_write_loop(fd, buf, len);
 }

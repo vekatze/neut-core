@@ -1,7 +1,9 @@
 import {
   this.bool,
   this.buffer {buffer, flush, make-buffer},
+  this.either {Right, region},
   this.file.descriptor {stdout},
+  this.system {system},
   this.text,
   this.text.buffer {write},
   this.unit {Unit, unit},
@@ -11,75 +13,88 @@ foreign {
   neut_core_v0_51_build_fixed_buf(pointer, int, float, int, int): int,
 }
 
-define write-float(b: &buffer, x: float, decimals: int): unit {
+define _write-float(b: &buffer, x: float, decimals: int, r: region): system(unit) {
   let size = 64;
   let add-newline = 0;
   let buffer-ptr = magic alloca(int, size);
   let len = magic external neut_core_v0_51_build_fixed_buf(buffer-ptr, size, x, decimals, add-newline);
   if gt-int(len, 0) {
-    this.buffer._write(b, buffer-ptr, len)
+    this.buffer._write(b, buffer-ptr, len, r)
   } else {
-    Unit
+    try _ = r;
+    Right(Unit)
   }
 }
 
-define write-float-line(b: &buffer, x: float, decimals: int): unit {
+inline write-float(b: &buffer, x: float, decimals: int): system(unit) {
+  _write-float(b, x, decimals, Right(Unit))
+}
+
+define _write-float-line(b: &buffer, x: float, decimals: int, r: region): system(unit) {
   let size = 65;
   let add-newline = 1;
   let buffer-ptr = magic alloca(int, size);
   let len = magic external neut_core_v0_51_build_fixed_buf(buffer-ptr, size, x, decimals, add-newline);
   if gt-int(len, 0) {
-    this.buffer._write(b, buffer-ptr, len)
+    this.buffer._write(b, buffer-ptr, len, r)
   } else {
-    Unit
+    try _ = r;
+    Right(Unit)
   }
+}
+
+inline write-float-line(b: &buffer, x: float, decimals: int): system(unit) {
+  _write-float-line(b, x, decimals, Right(Unit))
 }
 
 define zen(): unit {
   pin b = make-buffer(stdout, 10);
-  write-float(b, 3.141592, 4);
-  write(b, "\n");
-  write-float(b, 3.141592, 0);
-  write(b, "\n");
-  write-float(b, 3333333333.141592, 60);
-  write(b, "\n");
-  write-float(b, 0.0, 7);
-  write(b, "\n");
-  write-float(b, 0.0, 4);
-  write(b, "\n");
-  write-float(b, -0.0, 7);
-  write(b, "\n");
-  write-float(b, -0.0, 4);
-  write(b, "\n");
-  write-float(b, 1.0, 7);
-  write(b, "\n");
-  write-float(b, -1.0, 7);
-  write(b, "\n");
-  write-float(b, 3.141592653589793, 7);
-  write(b, "\n");
-  write-float(b, 1e-40, 7);
-  write(b, "\n");
-  write-float(b, 1e+38, 7);
-  write(b, "\n");
-  write-float(b, -1e+38, 7);
-  write(b, "\n");
-  write-float(b, 1.17549435e-38, 7);
-  write(b, "\n");
-  write-float(b, 1.40129846e-45, 7);
-  write(b, "\n");
-  write-float(b, -1.40129846e-45, 7);
-  write(b, "\n");
-  write-float-line(b, -3.141592, 7);
-  write-float-line(b, 0.0, 7);
-  write-float-line(b, -0.0, 7);
-  write-float-line(b, 1.0, 7);
-  write-float-line(b, -1.0, 7);
-  write-float-line(b, 3.141592653589793, 7);
-  write-float-line(b, 1e-40, 7);
-  write-float-line(b, 1e+38, 7);
-  write-float-line(b, -1e+38, 7);
-  write-float-line(b, 1.17549435e-38, 7);
-  write-float-line(b, 1.40129846e-45, 7);
-  write-float-line(b, -1.40129846e-45, 7);
-  flush(b)
+  let _: system(unit) = {
+    try _ = write-float(b, 3.141592, 4);
+    try _ = write(b, "\n");
+    try _ = write-float(b, 3.141592, 0);
+    try _ = write(b, "\n");
+    try _ = write-float(b, 3333333333.141592, 60);
+    try _ = write(b, "\n");
+    try _ = write-float(b, 0.0, 7);
+    try _ = write(b, "\n");
+    try _ = write-float(b, 0.0, 4);
+    try _ = write(b, "\n");
+    try _ = write-float(b, -0.0, 7);
+    try _ = write(b, "\n");
+    try _ = write-float(b, -0.0, 4);
+    try _ = write(b, "\n");
+    try _ = write-float(b, 1.0, 7);
+    try _ = write(b, "\n");
+    try _ = write-float(b, -1.0, 7);
+    try _ = write(b, "\n");
+    try _ = write-float(b, 3.141592653589793, 7);
+    try _ = write(b, "\n");
+    try _ = write-float(b, 1e-40, 7);
+    try _ = write(b, "\n");
+    try _ = write-float(b, 1e+38, 7);
+    try _ = write(b, "\n");
+    try _ = write-float(b, -1e+38, 7);
+    try _ = write(b, "\n");
+    try _ = write-float(b, 1.17549435e-38, 7);
+    try _ = write(b, "\n");
+    try _ = write-float(b, 1.40129846e-45, 7);
+    try _ = write(b, "\n");
+    try _ = write-float(b, -1.40129846e-45, 7);
+    try _ = write(b, "\n");
+    try _ = write-float-line(b, -3.141592, 7);
+    try _ = write-float-line(b, 0.0, 7);
+    try _ = write-float-line(b, -0.0, 7);
+    try _ = write-float-line(b, 1.0, 7);
+    try _ = write-float-line(b, -1.0, 7);
+    try _ = write-float-line(b, 3.141592653589793, 7);
+    try _ = write-float-line(b, 1e-40, 7);
+    try _ = write-float-line(b, 1e+38, 7);
+    try _ = write-float-line(b, -1e+38, 7);
+    try _ = write-float-line(b, 1.17549435e-38, 7);
+    try _ = write-float-line(b, 1.40129846e-45, 7);
+    try _ = write-float-line(b, -1.40129846e-45, 7);
+    flush(b)
+  };
+  Unit
 }

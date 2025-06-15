@@ -1,23 +1,37 @@
 import {
   this.bool {bool},
   this.buffer {buffer},
+  this.either {Right, region},
+  this.system {system},
   this.text,
   this.text.buffer {write, write-line},
-  this.unit {unit},
+  this.unit {Unit, unit},
 }
 
-define write-bool(k: &buffer, x: bool): unit {
+define _write-bool(k: &buffer, x: bool, r: region): system(unit) {
   if x {
+    try _ = r;
     write(k, "True")
   } else {
+    try _ = r;
     write(k, "False")
   }
 }
 
-define write-bool-line(k: &buffer, x: bool): unit {
+inline write-bool(k: &buffer, x: bool): system(unit) {
+  _write-bool(k, x, Right(Unit))
+}
+
+define _write-bool-line(k: &buffer, x: bool, r: region): system(unit) {
   if x {
-    write-line(k, "True");
+    try _ = r;
+    write-line(k, "True")
   } else {
+    try _ = r;
     write-line(k, "False")
   }
+}
+
+inline write-bool-line(k: &buffer, x: bool): system(unit) {
+  _write-bool-line(k, x, Right(Unit))
 }

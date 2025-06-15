@@ -1,29 +1,62 @@
 import {
+  this.bool,
+  this.either {Right, region},
   this.file.descriptor {descriptor, stdout},
+  this.system {report-system-error, system},
+  this.text,
+  this.text.io {print},
   this.unit {Unit, unit},
 }
 
 foreign {
-  neut_core_v0_51_write_int64(int32, int64): void,
-  neut_core_v0_51_write_int64_nl(int32, int64): void,
+  neut_core_v0_51_write_int64(int32, int64): int,
+  neut_core_v0_51_write_int64_nl(int32, int64): int,
 }
 
-define write-int(d: descriptor, x: int): unit {
+define _write-int(d: descriptor, x: int, r: region): system(unit) {
   let d' = magic cast(descriptor, int32, d);
-  let _ = magic external neut_core_v0_51_write_int64(d', x);
-  Unit
+  let result = magic external neut_core_v0_51_write_int64(d', x);
+  if lt-int(result, 0) {
+    try _ = r;
+    report-system-error()
+  } else {
+    try _ = r;
+    Right(Unit)
+  }
 }
 
-define write-int-line(d: descriptor, x: int): unit {
+inline write-int(d: descriptor, x: int): system(unit) {
+  _write-int(d, x, Right(Unit))
+}
+
+define _write-int-line(d: descriptor, x: int, r: region): system(unit) {
   let d' = magic cast(descriptor, int32, d);
-  let _ = magic external neut_core_v0_51_write_int64_nl(d', x);
-  Unit
+  let result = magic external neut_core_v0_51_write_int64_nl(d', x);
+  if lt-int(result, 0) {
+    try _ = r;
+    report-system-error()
+  } else {
+    try _ = r;
+    Right(Unit)
+  }
+}
+
+inline write-int-line(d: descriptor, x: int): system(unit) {
+  _write-int-line(d, x, Right(Unit))
 }
 
 define print-int(x: int): unit {
-  write-int(stdout, x)
+  let _ = write-int(stdout, x);
+  Unit
 }
 
 define print-int-line(x: int): unit {
-  write-int-line(stdout, x)
+  let _ = write-int-line(stdout, x);
+  Unit
+}
+
+define zen(): unit {
+  print-int(1234);
+  print("\n");
+  print-int-line(123)
 }

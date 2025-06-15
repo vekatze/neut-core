@@ -3,7 +3,7 @@ import {
   this.c-int {C-Int, c-int, eq-c-int},
   this.c-string {c-string, from-c-string, to-c-string},
   this.control {discard},
-  this.either {Right, none},
+  this.either {Right, none, region},
   this.list {Cons, list},
   this.magic,
   this.memory {load-int, load-pointer},
@@ -19,17 +19,19 @@ foreign {
   setenv(pointer, pointer, c-int): c-int,
 }
 
-define get-env(name: &text): ?text {
+define get-env(name: &text, r: region): ?text {
   let c-str = _get-content-pointer(name);
   let tmp = magic external getenv(c-str);
   if eq-int(magic cast(pointer, int, tmp), 0) {
+    try _ = r;
     none
   } else {
+    try _ = r;
     Right(from-c-string(this.magic.cast(pointer, &c-string, tmp)))
   }
 }
 
-define set-env(name: &text, value: &text, overwrite: bool): system(unit) {
+define set-env(name: &text, value: &text, overwrite: bool, r: region): system(unit) {
   let name-c-str = to-c-string(name);
   let value-c-str = to-c-string(value);
   let flag =
@@ -47,8 +49,10 @@ define set-env(name: &text, value: &text, overwrite: bool): system(unit) {
   discard(name-c-str);
   discard(value-c-str);
   if eq-c-int(result, 0) {
+    try _ = r;
     Right(Unit)
   } else {
+    try _ = r;
     report-system-error()
   }
 }

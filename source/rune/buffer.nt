@@ -1,34 +1,57 @@
 import {
   this.buffer {_write, buffer, flush, make-buffer},
   this.control {nop},
+  this.either {Left, Right, region},
   this.file.descriptor {stdout},
   this.rune {store-rune},
+  this.system {system},
+  this.text,
+  this.text.io {print-line},
   this.unit {Unit, unit},
 }
 
-define write-rune(k: &buffer, x: rune): unit {
+define _write-rune(k: &buffer, x: rune, r: region): system(unit) {
   let buffer-ptr = magic alloca(int32, 1);
   let size = store-rune(x, buffer-ptr);
-  let _ = _write(k, buffer-ptr, size);
+  let result = _write(k, buffer-ptr, size, r);
   nop();
-  Unit
+  result
 }
 
-define write-rune-line(k: &buffer, x: rune): unit {
-  write-rune(k, x);
-  write-rune(k, `\n`);
+inline write-rune(k: &buffer, x: rune): system(unit) {
+  _write-rune(k, x, Right(Unit))
+}
+
+define _write-rune-line(k: &buffer, x: rune, r: region): system(unit) {
+  try _ = r;
+  try _ = write-rune(k, x);
+  try _ = write-rune(k, `\n`);
+  Right(Unit)
+}
+
+inline write-rune-line(k: &buffer, x: rune): system(unit) {
+  _write-rune-line(k, x, Right(Unit))
 }
 
 define zen(): unit {
   let !k = make-buffer(stdout, 4);
   pin k = !k;
-  write-rune(k, `a`);
-  write-rune(k, `b`);
-  write-rune(k, `あ`);
-  write-rune-line(k, `α`);
-  write-rune(k, `a`);
-  write-rune(k, `b`);
-  write-rune(k, `あ`);
-  write-rune-line(k, `α`);
-  flush(k);
+  let test: system(unit) = {
+    try _ = write-rune(k, `a`);
+    try _ = write-rune(k, `b`);
+    try _ = write-rune(k, `あ`);
+    try _ = write-rune-line(k, `α`);
+    try _ = write-rune(k, `a`);
+    try _ = write-rune(k, `b`);
+    try _ = write-rune(k, `あ`);
+    try _ = write-rune-line(k, `α`);
+    try _ = flush(k);
+    Right(Unit)
+  };
+  match test {
+  | Left(_) =>
+    print-line("left");
+  | Right(_) =>
+    print-line("right");
+  }
 }

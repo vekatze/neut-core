@@ -1,14 +1,14 @@
 import {
   this.bool,
   this.box,
-  this.either {Right, none},
+  this.either {Right, none, region},
   this.list {Cons, Nil, append, list},
   this.ord {Ord, ord},
   this.ordering {EQ, GT, LT},
   this.pair {Pair, pair},
   this.text,
   this.trick {panic},
-  this.unit,
+  this.unit {Unit},
 }
 
 // size balanced tree
@@ -204,21 +204,27 @@ define insert<k, v>(L: &ord(k), d: dictionary(k, v), key-X: k, val-X: v): dictio
   }
 }
 
-define lookup<k, v>(L: &ord(k), d: &dictionary(k, v), needle: &k): ?&v {
+define _lookup<k, v>(L: &ord(k), d: &dictionary(k, v), needle: &k, reg: region): ?&v {
   tie Ord of {compare} = L;
   case d {
   | Tip =>
+    try _ = reg;
     none
   | Bin(_, k, x, l, r) =>
     match compare(needle, k) {
     | LT =>
-      lookup(L, l, needle)
+      _lookup(L, l, needle, reg)
     | GT =>
-      lookup(L, r, needle)
+      _lookup(L, r, needle, reg)
     | EQ =>
+      try _ = reg;
       Right(x)
     }
   }
+}
+
+inline lookup<k, v>(L: &ord(k), d: &dictionary(k, v), needle: &k): ?&v {
+  _lookup(L, d, needle, Right(Unit))
 }
 
 data _view(k, a) {

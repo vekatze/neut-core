@@ -1,7 +1,7 @@
 import {
   this.bool {False, True, and, bool, or},
   this.box,
-  this.either {Left, Right, either, none},
+  this.either {Left, Right, either, none, region},
   this.monoid {Monoid, monoid},
   this.ord {Ord, ord},
   this.ordering {GT, LT},
@@ -193,7 +193,7 @@ inline for-N<a>(xs: &list(a), f: (&a) -> unit): unit {
 }
 
 define append<a>(xs: list(a), ys: list(a)): list(a) {
-  fold-right(xs, ys, exact Cons)
+  fold-right(xs, ys, Cons)
 }
 
 define concat<a>(xss: list(list(a))): list(a) {
@@ -269,7 +269,7 @@ inline zip-with-N<a, b, c>(xs: &list(a), ys: &list(b), !f: (&a, &b) -> c): list(
 }
 
 define zip<a, b>(xs: list(a), ys: list(b)): list(pair(a, b)) {
-  zip-with(xs, ys, exact Pair)
+  zip-with(xs, ys, Pair)
 }
 
 define zip-N<a, b>(xs: &list(a), ys: &list(b)): list(pair(&a, &b)) {
@@ -298,11 +298,13 @@ define partition<a, b>(xs: list(either(a, b))): pair(list(a), list(b)) {
   })
 }
 
-define uncons<a>(xs: list(a)): ?pair(a, list(a)) {
+define uncons<a>(xs: list(a), r: region): ?pair(a, list(a)) {
   match xs {
   | Nil =>
+    try _ = r;
     none
   | Cons(y, ys) =>
+    try _ = r;
     Right(Pair(y, ys))
   }
 }

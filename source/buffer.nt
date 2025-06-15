@@ -2,10 +2,12 @@ import {
   this.binary.io,
   this.bool,
   this.c-size {C-Size},
+  this.either {Right, region},
   this.external {free, malloc},
   this.file.descriptor {descriptor},
   this.memory {load-int, store-int},
   this.pointer {shift},
+  this.system {system},
   this.unit {Unit, unit},
   this.word,
 }
@@ -88,39 +90,47 @@ inline _get-next-content-pointer(b: &buffer): pointer {
   shift(content-pointer, current-size)
 }
 
-define flush(b: &buffer): unit {
+define _flush(b: &buffer, r: region): system(unit) {
   let descriptor = _get-descriptor(b);
   let current-size = _get-current-size(b);
   let content-pointer = _get-content-pointer(b);
-  let _ = this.binary.io._write-loop(descriptor, content-pointer, current-size);
-  _set-current-size(b, 0)
+  try _ = this.binary.io._write-loop(descriptor, content-pointer, current-size, r);
+  Right(_set-current-size(b, 0))
 }
 
-define _write(b: &buffer, content-pointer: pointer, content-length: int): unit {
+inline flush(b: &buffer): system(unit) {
+  _flush(b, Right(Unit))
+}
+
+define _write(b: &buffer, content-pointer: pointer, content-length: int, r: region): system(unit) {
   let capacity = _get-capacity(b);
   let loop =
-    define _buffer-write-loop(current-buffer-size: int, source-pointer: pointer, remaining: int): unit {
+    define _buffer-write-loop(
+      current-buffer-size: int,
+      source-pointer: pointer,
+      remaining: int,
+      r: region,
+    ): system(unit) {
       let new-buffer-size = add-int(current-buffer-size, remaining);
       if le-int(new-buffer-size, capacity) {
         let next-content-pointer = _get-next-content-pointer(b);
         _memcpy(next-content-pointer, source-pointer, remaining);
-        _set-current-size(b, new-buffer-size)
+        try _ = r;
+        Right(_set-current-size(b, new-buffer-size))
       } else {
         let written-size = sub-int(capacity, current-buffer-size);
         let next-content-pointer = _get-next-content-pointer(b);
         _memcpy(next-content-pointer, source-pointer, written-size);
         _set-current-size(b, capacity);
-        flush(b);
+        try _ = r;
+        try _ = flush(b);
         _buffer-write-loop(
           0,
           shift(source-pointer, written-size),
           sub-int(remaining, written-size),
+          Right(Unit),
         )
       }
     };
-  loop(
-    _get-current-size(b),
-    content-pointer,
-    content-length,
-  )
+  loop(_get-current-size(b), content-pointer, content-length, r)
 }

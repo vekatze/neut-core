@@ -1,6 +1,6 @@
 import {
   this.bool {False, True, bool},
-  this.unit {Unit},
+  this.unit {Unit, unit},
 }
 
 data either(a, b) {
@@ -75,6 +75,32 @@ inline none<a>: ?a {
   Left(Unit)
 }
 
+inline right-unit<a>: either(a, unit) {
+  Right(Unit)
+}
+
+// define test(): unit {
+//   let _: either(unit, unit) = right-unit;
+//   Unit
+// }
+// define test2<r := right-unit>(): unit {
+//   let _: either(unit, unit) = r;
+//   Unit
+// }
+// // data foo(a) {
+// // | Foo(a)
+// // }
+// define foo<a: type>(x: a): a {
+//   x
+// }
+// define test3<r: unit := foo(Unit)>(): unit {
+//   // try _ = r;
+//   Unit
+// }
+// define test4(): either(unit, unit) {
+//   let _ = test3();
+//   Right(Unit)
+// }
 define to-option<a, b>(v: either(a, b)): ?b {
   match v {
   | Right(r) =>
@@ -82,4 +108,8 @@ define to-option<a, b>(v: either(a, b)): ?b {
   | Left(_) =>
     none
   }
+}
+
+inline region<a>: type {
+  either(a, unit)
 }

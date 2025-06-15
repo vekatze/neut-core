@@ -1,6 +1,6 @@
 import {
   this.bool,
-  this.either {Right},
+  this.either {Right, region},
   this.external,
   this.file.descriptor {descriptor},
   this.file.flag {flag},
@@ -11,7 +11,7 @@ import {
   this.unit {Unit, unit},
 }
 
-define open(path: &text, xs: list(flag), ms: list(mode)): system(descriptor) {
+define _open(path: &text, xs: list(flag), ms: list(mode), r: region): system(descriptor) {
   pin path' = this.text.append(path, "\0");
   let actual-path-string = _get-content-pointer(path');
   let fd =
@@ -21,17 +21,29 @@ define open(path: &text, xs: list(flag), ms: list(mode)): system(descriptor) {
       this.file.mode.interpret(ms),
     );
   if lt-int32(magic cast(descriptor, int32, fd), 0) {
+    try _ = r;
     report-system-error()
   } else {
+    try _ = r;
     Right(fd)
   }
 }
 
-define close(f: descriptor): system(unit) {
+inline open(path: &text, xs: list(flag), ms: list(mode)): system(descriptor) {
+  _open(path, xs, ms, Right(Unit))
+}
+
+define _close(f: descriptor, r: region): system(unit) {
   let result = this.external.close(f);
   if eq-int(result, 0) {
+    try _ = r;
     Right(Unit)
   } else {
+    try _ = r;
     report-system-error()
   }
+}
+
+inline close(f: descriptor): system(unit) {
+  _close(f, Right(Unit))
 }

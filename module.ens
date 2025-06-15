@@ -29,7 +29,7 @@
     box [],
     cell ["cell"],
     channel ["channel"],
-    either ["Left", "Right", "either", "none"],
+    either ["Left", "Right", "either", "none", "rho"],
     eq ["Eq", "eq"],
     list ["Cons", "Nil", "list"],
     ord ["Ord", "ord"],

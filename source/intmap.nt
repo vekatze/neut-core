@@ -1,7 +1,7 @@
 import {
   this.bool {bool},
   this.box,
-  this.either {Right, none},
+  this.either {Right, none, rho},
   this.list {append, list},
   this.pair {Pair, pair},
   this.unit,
@@ -104,21 +104,24 @@ define insert<a>(t: intmap(a), k: _Key, x: a): intmap(a) {
   }
 }
 
-define lookup<a>(t: &intmap(a), k: _Key): ?&a {
+define lookup<a, r := rho>(t: &intmap(a), k: _Key): ?&a {
   case t {
   | Nil =>
+    try _ = r;
     none
   | Tip(kx, x) =>
     if eq-int(k, *kx) {
+      try _ = r;
       Right(x)
     } else {
+      try _ = r;
       none
     }
-  | Bin(_, m, l, r) =>
+  | Bin(_, m, left, right) =>
     if _zero(k, *m) {
-      lookup(l, k)
+      lookup<a, r>(left, k)
     } else {
-      lookup(r, k)
+      lookup<a, r>(right, k)
     }
   }
 }

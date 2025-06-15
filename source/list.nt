@@ -309,19 +309,21 @@ define uncons<a, r := rho>(xs: list(a)): ?pair(a, list(a)) {
   }
 }
 
-define unsnoc<a>(xs: list(a)): ?pair(list(a), a) {
+define unsnoc<a, r := rho>(xs: list(a)): ?pair(list(a), a) {
   let f =
-    define _unsnoc(xs: list(a), acc: list(a)): ?pair(list(a), a) {
+    define _unsnoc(r: ?unit, xs: list(a), acc: list(a)): ?pair(list(a), a) {
       match xs {
       | Nil =>
+        try _ = r;
         Left(Unit)
       | Cons(y, Nil) =>
+        try _ = r;
         Right(Pair(reverse(acc), y))
       | Cons(y, ys) =>
-        _unsnoc(ys, Cons(y, acc))
+        _unsnoc(r, ys, Cons(y, acc))
       }
     };
-  f(xs, [])
+  f(r, xs, [])
 }
 
 define all(xs: list(bool)): bool {
@@ -341,21 +343,23 @@ define range(from: int, to: int): list(int) {
   }
 }
 
-inline find<a>(xs: &list(a), !pred: (&a) -> bool): ?&a {
+inline find<a, r := rho>(xs: &list(a), pred: &(&a) -> bool): ?&a {
   let f =
-    define self(ys: &list(a)): ?&a {
+    define self(r: ?unit, ys: &list(a)): ?&a {
       case ys {
       | Nil =>
+        try _ = r;
         none
       | Cons(z, zs) =>
-        if !pred(z) {
+        if pred(z) {
+          try _ = r;
           Right(z)
         } else {
-          self(zs)
+          self(r, zs)
         }
       }
     };
-  f(xs)
+  f(r, xs)
 }
 
 inline filter<a>(xs: list(a), !pred: (&a) -> bool): list(a) {
@@ -394,13 +398,15 @@ inline sum<a>(as-monoid: monoid(a), xs: list(a)): a {
   })
 }
 
-inline minimum<a>(as-ord: ord(a)): (list(a)) -> ?a {
+inline minimum<a, r := rho>(as-ord: ord(a)): (list(a)) -> ?a {
   function (xs) {
     let Ord of {compare} = as-ord;
     match xs {
     | Nil =>
+      try _ = r;
       none
     | Cons(y, ys) =>
+      try _ = r;
       Right(fold-left(y, ys, function (acc, y) {
         let order on acc, y = compare(acc, y);
         match order {
@@ -414,7 +420,7 @@ inline minimum<a>(as-ord: ord(a)): (list(a)) -> ?a {
   }
 }
 
-inline maximum<a>(as-ord: ord(a)): (list(a)) -> ?a {
+inline maximum<a, r := rho>(as-ord: ord(a)): (list(a)) -> ?a {
   function (xs) {
     let Ord of {compare := !compare} = as-ord;
     let helper =
@@ -434,8 +440,10 @@ inline maximum<a>(as-ord: ord(a)): (list(a)) -> ?a {
       };
     match xs {
     | Nil =>
+      try _ = r;
       none
     | Cons(y, ys) =>
+      try _ = r;
       Right(helper(y, ys))
     }
   }
@@ -546,15 +554,17 @@ define is-empty<a>(xs: &list(a)): bool {
   }
 }
 
-define nth<a>(xs: &list(a), n: int): ?a {
+define nth<a, r := rho>(xs: &list(a), n: int): ?a {
   case xs {
   | Nil =>
+    try _ = r;
     none
   | Cons(y, ys) =>
     if le-int(n, 0) {
+      try _ = r;
       Right(*y)
     } else {
-      nth(ys, sub-int(n, 1))
+      nth<a, r>(ys, sub-int(n, 1))
     }
   }
 }

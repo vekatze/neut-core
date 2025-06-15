@@ -3,7 +3,7 @@ import {
   this.box,
   this.c-size {C-Size},
   this.control {grow, loop},
-  this.either {Left, Right, either, from-right, none},
+  this.either {Left, Right, either, from-right, none, rho},
   this.external {free, malloc, realloc},
   this.function {compose},
   this.int {abs-int, max-int, min-int},
@@ -244,26 +244,30 @@ define push-back<a>(xs: vector(a), x: a): vector(a) {
   }
 }
 
-inline pop-front<a>(xs: vector(a)): ?pair(a, vector(a)) {
+define pop-front<a, r := rho>(xs: vector(a)): ?pair(a, vector(a)) {
   let len on xs = length(xs);
   if eq-int(len, 0) {
+    try _ = r;
     none
   } else {
     let first-value-pointer on xs = _get-element-pointer(xs, 0);
     let first-value = cast(int, a, load-int(first-value-pointer));
     let _ on xs = _shift-from(xs, 1);
+    try _ = r;
     Right(Pair(first-value, xs))
   }
 }
 
-inline pop-back<a>(xs: vector(a)): ?pair(vector(a), a) {
+define pop-back<a, r := rho>(xs: vector(a)): ?pair(vector(a), a) {
   let len on xs = length(xs);
   if eq-int(len, 0) {
+    try _ = r;
     none
   } else {
     let last-value-pointer on xs = _get-element-pointer(xs, sub-int(len, 1));
     let last-value = cast(int, a, load-int(last-value-pointer));
     let _ on xs = _shift-to(xs, -1);
+    try _ = r;
     Right(Pair(xs, last-value))
   }
 }
@@ -273,10 +277,12 @@ inline _access<a>(xs: &vector(a), i: int): &a {
   cast(int, &a, load-int(element-pointer))
 }
 
-inline access<a>(xs: &vector(a), i: int): ?&a {
+define access<a, r := rho>(xs: &vector(a), i: int): ?&a {
   if and(le-int(0, i), lt-int(i, length(xs))) {
+    try _ = r;
     Right(_access(xs, i))
   } else {
+    try _ = r;
     none
   }
 }

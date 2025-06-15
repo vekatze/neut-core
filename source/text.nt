@@ -696,41 +696,45 @@ inline any(t: &text, !pred: (rune) -> bool): bool {
   f(0)
 }
 
-define find(t: &text, !pred: (rune) -> bool): ?int {
+define find<r := rho>(t: &text, !pred: (rune) -> bool): ?int {
   let len = text-byte-length(t);
   let f =
-    define self(byte-index: int, index: int): ?int {
+    define self(r: ?unit, byte-index: int, index: int): ?int {
       if ge-int(byte-index, len) {
+        try _ = r;
         none
       } else {
         let ch = _get-rune(t, byte-index);
         if !pred(ch) {
+          try _ = r;
           Right(index)
         } else {
           let char-len = this.rune.size(ch);
-          self(add-int(byte-index, char-len), add-int(index, 1))
+          self(r, add-int(byte-index, char-len), add-int(index, 1))
         }
       }
     };
-  f(0, 0)
+  f(r, 0, 0)
 }
 
-define find-end(t: &text, !pred: (rune) -> bool): ?int {
+define find-end<r := rho>(t: &text, !pred: (rune) -> bool): ?int {
   let len = text-byte-length(t);
   let f =
-    define self(t: &text, byte-index: int, index: int): ?int {
+    define self(r: ?unit, t: &text, byte-index: int, index: int): ?int {
       if lt-int(byte-index, 0) {
+        try _ = r;
         none
       } else {
         let rune-size = _get-rune-size-end(t, byte-index);
         let rune-head-byte-index = sub-int(byte-index, sub-int(rune-size, 1));
         let ch = _get-rune(t, rune-head-byte-index);
         if !pred(ch) {
+          try _ = r;
           Right(index)
         } else {
-          self(t, sub-int(byte-index, rune-size), add-int(index, 1))
+          self(r, t, sub-int(byte-index, rune-size), add-int(index, 1))
         }
       }
     };
-  f(t, sub-int(len, 1), 0)
+  f(r, t, sub-int(len, 1), 0)
 }

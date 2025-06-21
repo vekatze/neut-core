@@ -12,6 +12,7 @@ import {
   this.random {random-float32, random-int},
   this.ref {_make-ref, ref},
   this.text {lines, text, unlines},
+  this.text.eq {eq-text},
   this.text.io {print, print-line},
   this.unit {Unit, unit},
 }
@@ -107,6 +108,13 @@ define item: int {
 }
 
 define zen(): unit {
+  let t1 = "hello";
+  let t2 = "helloaoeu";
+  if eq-text(t1, t2) {
+    print("true\n")
+  } else {
+    print("false\n")
+  };
   pin xs = [*"foo", *"bar", *"buz"];
   pin yo = this.text.intercalate-N(xs, ", yo, ");
   print-line(yo);

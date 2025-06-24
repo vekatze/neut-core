@@ -9,6 +9,7 @@ import {
   this.magic {cast},
   this.memory {load-int, load-int8, store-int, store-int8},
   this.pointer {shift},
+  this.reify {Binary, type-tag-to-int},
   this.unit {Unit, unit},
   this.word,
 }
@@ -41,6 +42,7 @@ resource binary {
     _copy-binary(source-pointer', shift(target-pointer, u2), length);
     target-pointer
   },
+  type-tag-to-int(Binary),
 }
 
 define binary-length(xs: &binary): int {

@@ -1,7 +1,7 @@
 import {
   this.bool {True, bool},
   this.box {axiom-T},
-  this.cell {_make-cell, extract, mutate},
+  this.cell {_make-cell, cell, extract, mutate},
   this.control {discard},
   this.either {Left, Right, either},
   this.float.io {print-float-line},
@@ -11,10 +11,13 @@ import {
   this.pair {Pair, pair},
   this.random {random-float32, random-int},
   this.ref {_make-ref, ref},
+  this.reify {Algebraic, Binary, Enum, Function, Int32, Int64, Noema, Opaque, Type, Vector, get-type-tag},
+  this.rune,
   this.text {lines, text, unlines},
   this.text.eq {eq-text},
   this.text.io {print, print-line},
   this.unit {Unit, unit},
+  this.vector {vector},
 }
 
 define with-cell(i: int): int {
@@ -107,7 +110,55 @@ define item: int {
   10
 }
 
+define print-type-tag(a: type): unit {
+  match get-type-tag(a) {
+  | Opaque =>
+    print("opaque\n")
+  | Type =>
+    print("type\n");
+  | Function =>
+    print("function\n");
+  | Algebraic =>
+    print("algebraic\n");
+  | Noema =>
+    print("noema\n");
+  | Enum =>
+    print("enum\n");
+    // | Immediate =>
+    //   print("immediate\n");
+  | Binary =>
+    print("binary\n");
+  | Vector =>
+    print("vector\n");
+  | Int32 =>
+    print("int32\n");
+  | Int64 =>
+    print("int64\n");
+  | _ =>
+    print("other\n")
+  }
+}
+
 define zen(): unit {
+  print-type-tag(cell(unit));
+  print-type-tag(type);
+  print-type-tag(() -> unit);
+  print-type-tag(list(list(unit)));
+  print-type-tag(&vector(unit));
+  print-type-tag(bool);
+  print-type-tag(int);
+  print-type-tag(int32);
+  print-type-tag(text);
+  print-type-tag(vector(unit));
+  pin t = this.text.singleton(`あ`);
+  print-line(t);
+  match this.rune.from-int(0xfffff) {
+  | Right(v) =>
+    pin t = this.text.singleton(v);
+    print-line(t)
+  | Left(_) =>
+    print-line("left")
+  };
   let t1 = "hello";
   let t2 = "helloaoeu";
   if eq-text(t1, t2) {

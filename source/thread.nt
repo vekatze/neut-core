@@ -6,8 +6,9 @@ import {
   this.external {free, malloc, thread-create, thread-exit, thread-join},
   this.foreign {THREAD_SIZE},
   this.magic {cast},
-  this.memory {load-int, load-int1, load-pointer, store-int, store-int1},
+  this.memory {load-int, load-int8, load-pointer, store-int, store-int8},
   this.pointer {shift},
+  this.reify {Opaque, type-tag-to-int},
   this.unit {Unit, unit},
   this.word,
 }
@@ -48,9 +49,10 @@ resource _thread-inner {
     store-int(cast(type, int, elem-type), shift(new-addr, u));
     let cloned-value: elem-type = _embody(elem-type, elem-value);
     store-int(cast(elem-type, int, cloned-value), shift(new-addr, u2));
-    store-int1(1, shift(new-addr, u3));
+    store-int8(1, shift(new-addr, u3));
     new-addr
   },
+  type-tag-to-int(Opaque),
 }
 
 // `thread` must be defined by `define` (and not by `data`) so that
@@ -74,12 +76,12 @@ define _await-and-write-result(addr: pointer): unit {
   let u2 = mul-int(u, 2);
   let u3 = mul-int(u, 3);
   let finished-flag-ptr = shift(addr, u3);
-  let finished-flag = load-int1(finished-flag-ptr);
-  if eq-int1(finished-flag, 0) {
+  let finished-flag = load-int8(finished-flag-ptr);
+  if eq-int8(finished-flag, 0) {
     let thread-id = load-pointer(addr);
     let value-ptr = shift(addr, u2);
     thread-join(thread-id, value-ptr);
-    store-int1(1, finished-flag-ptr)
+    store-int8(1, finished-flag-ptr)
   } else {
     Unit
   }
@@ -115,6 +117,6 @@ define detach(a: type, f: () -> a): thread(a) {
   store-int(thread-id, ptr);
   store-int(cast(type, int, a), shift(ptr, u));
   store-int(0, shift(ptr, u2));
-  store-int1(0, shift(ptr, u3));
+  store-int8(0, shift(ptr, u3));
   cast(pointer, thread(a), ptr)
 }

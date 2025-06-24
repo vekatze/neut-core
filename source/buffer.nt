@@ -7,6 +7,7 @@ import {
   this.file.descriptor {descriptor},
   this.memory {load-int, store-int},
   this.pointer {shift},
+  this.reify {Opaque, type-tag-to-int},
   this.system {system},
   this.unit {Unit, unit},
   this.word,
@@ -39,6 +40,7 @@ resource _buffer-internal {
     _memcpy(new-pointer, source-pointer, pointer-size);
     new-pointer
   },
+  type-tag-to-int(Opaque),
 }
 
 data buffer {

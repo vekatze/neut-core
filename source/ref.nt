@@ -6,6 +6,7 @@ import {
   this.memory {load-int, store-int},
   this.pair {Pair, pair},
   this.pointer {shift},
+  this.reify {Opaque, type-tag-to-int},
   this.unit {Unit, unit},
   this.word,
 }
@@ -45,6 +46,7 @@ resource _ref {
     let val-clone: a = _get-clone(a, val);
     cast(ref(a), pointer, _make(a, val-clone))
   },
+  type-tag-to-int(Opaque),
 }
 
 inline _make-ref<a>(initial-value: a): ref(a) {

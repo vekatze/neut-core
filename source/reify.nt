@@ -1,0 +1,35 @@
+import {
+  this.unit {Unit},
+}
+
+data type-tag {
+| Opaque
+| Type
+| Function
+| Algebraic
+| Noema
+| Enum
+| Int1
+| Int2
+| Int4
+| Int8
+| Int16
+| Int32
+| Int64
+| Float16
+| Float32
+| Float64
+| Pointer
+| Null
+| Rune
+| Binary
+| Vector
+}
+
+define type-tag-to-int(x: type-tag): int {
+  magic cast(type-tag, int, x)
+}
+
+define get-type-tag(a: type): type-tag {
+  magic call-type(a, 2, Unit)
+}

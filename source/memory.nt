@@ -15,20 +15,12 @@ inline store-int32(value: int32, p: pointer): unit {
   magic store(int32, value, p)
 }
 
-inline store-int24(value: int24, p: pointer): unit {
-  magic store(int24, value, p)
-}
-
 inline store-int16(value: int16, p: pointer): unit {
   magic store(int16, value, p)
 }
 
 inline store-int8(value: int8, p: pointer): unit {
   magic store(int8, value, p)
-}
-
-inline store-int1(value: int1, p: pointer): unit {
-  magic store(int1, value, p)
 }
 
 inline store-float(value: float, p: pointer): unit {
@@ -61,14 +53,6 @@ inline load-int8(p: pointer): int8 {
 
 inline load-int16(p: pointer): int16 {
   magic load(int16, p)
-}
-
-inline load-int24(p: pointer): int24 {
-  magic load(int24, p)
-}
-
-inline load-int1(p: pointer): int1 {
-  magic load(int1, p)
 }
 
 inline load-float(p: pointer): float {

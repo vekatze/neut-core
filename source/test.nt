@@ -1,23 +1,26 @@
 import {
   this.bool {True, bool},
   this.box {axiom-T},
-  this.cell {_make-cell, cell, extract, mutate},
+  this.cell {_make-cell, extract, mutate},
   this.control {discard},
+  this.debug {vet},
   this.either {Left, Right, either},
   this.float.io {print-float-line},
   this.int {power-int},
   this.int.io {print-int-line},
-  this.list {for-each, length, list, partition},
+  this.list {Cons, Nil, for-each, length, list, partition},
   this.pair {Pair, pair},
   this.random {random-float32, random-int},
   this.ref {_make-ref, ref},
-  this.reify {Algebraic, Binary, Enum, Function, Int32, Int64, Noema, Opaque, Type, Vector, get-type-tag},
+  this.reify {
+    get-cons-size,
+  },
   this.rune,
   this.text {lines, text, unlines},
   this.text.eq {eq-text},
   this.text.io {print, print-line},
   this.unit {Unit, unit},
-  this.vector {vector},
+  this.vector {for-N, push-back, vector},
 }
 
 define with-cell(i: int): int {
@@ -110,46 +113,43 @@ define item: int {
   10
 }
 
-define print-type-tag(a: type): unit {
-  match get-type-tag(a) {
-  | Opaque =>
-    print("opaque\n")
-  | Type =>
-    print("type\n");
-  | Function =>
-    print("function\n");
-  | Algebraic =>
-    print("algebraic\n");
-  | Noema =>
-    print("noema\n");
-  | Enum =>
-    print("enum\n");
-    // | Immediate =>
-    //   print("immediate\n");
-  | Binary =>
-    print("binary\n");
-  | Vector =>
-    print("vector\n");
-  | Int32 =>
-    print("int32\n");
-  | Int64 =>
-    print("int64\n");
-  | _ =>
-    print("other\n")
-  }
+define print-cons-size(a: type, discriminant: int): unit {
+  let size = get-cons-size(a, discriminant);
+  print-int-line(size)
+}
+
+data wrap {
+| Wrap(int)
+}
+
+define make-type(_: list(int)): type {
+  print-line("hello");
+  unit
 }
 
 define zen(): unit {
-  print-type-tag(cell(unit));
-  print-type-tag(type);
-  print-type-tag(() -> unit);
-  print-type-tag(list(list(unit)));
-  print-type-tag(&vector(unit));
-  print-type-tag(bool);
-  print-type-tag(int);
-  print-type-tag(int32);
-  print-type-tag(text);
-  print-type-tag(vector(unit));
+  vet("hello");
+  pin xs: list(float) = Cons(10.38777, Cons(-2.38423, Nil));
+  vet(xs);
+  pin ys = Cons(`a`, Cons(`あ`, Nil));
+  vet(ys);
+  print("---\n");
+  pin v = 10;
+  vet<int>(v);
+  pin sample: either(unit, _) = Right(Pair(Unit, True));
+  vet(sample);
+  vet("hello");
+  let xs: vector(text) = this.vector.make(8);
+  let xs = push-back(xs, *"hello");
+  pin xs = push-back(xs, *"Lorem ipsum");
+  vet(xs);
+  let xs: vector(&text) = this.vector.make(8);
+  let xs = push-back(xs, "hello");
+  pin xs = push-back(xs, "Lorem ipsum");
+  vet(xs);
+  for-N(xs, function (x, _) {
+    vet(*x);
+  });
   pin t = this.text.singleton(`あ`);
   print-line(t);
   match this.rune.from-int(0xfffff) {
@@ -208,7 +208,7 @@ define zen(): unit {
   };
   pin val = extract(c);
   print("extracted: ");
-  print-line(val);
+  vet(val);
   pin yo: pair(int, bool) = Pair(3, True);
   let tmp = *yo;
   let Pair(_, _) = tmp;
@@ -263,7 +263,7 @@ define zen(): unit {
   print("rune-as-int: ");
   print-int-line(len);
   print("hello, world\n");
-  print-line("yo");
+  vet("yo");
   use-id();
 }
 

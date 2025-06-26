@@ -33,3 +33,7 @@ define type-tag-to-int(x: type-tag): int {
 define get-type-tag(a: type): type-tag {
   magic call-type(a, 2, Unit)
 }
+
+define get-cons-size(a: type, discriminant: int): int {
+  magic call-type(a, 3, discriminant)
+}

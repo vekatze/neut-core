@@ -29,6 +29,7 @@
     box [],
     cell ["cell"],
     channel ["channel"],
+    debug ["vet"],
     either ["Left", "Right", "either", "none", "rho"],
     eq ["Eq", "eq"],
     list ["Cons", "Nil", "list"],

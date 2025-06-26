@@ -1,0 +1,183 @@
+import {
+  this.bool,
+  this.control {loop},
+  this.float.io {print-float},
+  this.int.io {print-int},
+  this.magic,
+  this.memory {load-int},
+  this.pointer {shift},
+  this.reify {
+    Algebraic,
+    Binary,
+    Enum,
+    Float16,
+    Float32,
+    Float64,
+    Int1,
+    Int16,
+    Int2,
+    Int32,
+    Int4,
+    Int64,
+    Int8,
+    Null,
+    Pointer,
+    Rune,
+    Vector,
+    get-cons-size,
+    get-type-tag,
+  },
+  this.rune.io {print-rune},
+  this.text {text},
+  this.text.io {print},
+  this.unit {unit},
+  this.vector {vector},
+  this.word,
+}
+
+foreign {
+  llvm.memcpy.p0.p0.i64(pointer, pointer, int64, int1): void,
+}
+
+nominal {
+  _vet<a>(x: &a): unit,
+}
+
+define _vet-vector(a: type, xs: &vector(a)): unit {
+  let len = this.vector.length(xs);
+  this.vector.for-N(xs, function (x: &a, i: int): unit {
+    _vet(x);
+    when ne-int(add-int(i, 1), len) {
+      print(", ");
+    }
+  });
+}
+
+define _constructor-loop(
+  a: type,
+  x: &a,
+  cons-name-handler: (&text) -> unit,
+  cons-args-handler: (i: int, size: int, t: type, x: &t) -> unit,
+): unit {
+  let ptr = this.magic.cast(&a, pointer, x);
+  let discriminant = load-int(ptr);
+  let size = get-cons-size(a, discriminant);
+  let type-ptr = magic alloca(int64, add-int(size, 2)); // +2 is for data-arg-num and const-like
+  let u = this.word.size;
+  let _ = magic external llvm.memcpy.p0.p0.i64(type-ptr, ptr, mul-int(u, size), 0);
+  magic call-type(a, 4, type-ptr);
+  let cons-name = magic cast(int, &text, load-int(type-ptr));
+  cons-name-handler(cons-name);
+  let data-arg-num = load-int(shift(type-ptr, mul-int(u, size)));
+  let loop-size = sub-int(size, add-int(1, data-arg-num));
+  loop(loop-size, function (cursor) {
+    let i = add-int(cursor, add-int(1, data-arg-num));
+    let t = this.magic.cast(int, type, load-int(shift(type-ptr, mul-int(u, i))));
+    let v = load-int(shift(ptr, mul-int(u, i)));
+    cons-args-handler(cursor, loop-size, t, this.magic.cast(int, &t, v));
+  });
+}
+
+define _green(): unit {
+  print("\u{1b}[32m")
+}
+
+define _blue(): unit {
+  print("\u{1b}[34m")
+}
+
+define _yellow(): unit {
+  print("\u{1b}[33m")
+}
+
+define _bold(): unit {
+  print("\u{1b}[1m")
+}
+
+define _reset(): unit {
+  print("\u{1b}[0m")
+}
+
+define _print-constructor(x: &text): unit {
+  _blue();
+  _bold();
+  print(x);
+  _reset();
+}
+
+define _vet<a>(x: &a): unit {
+  match get-type-tag(a) {
+  | Algebraic =>
+    _constructor-loop(a, x, _print-constructor, function (i, size, t, x) {
+      if eq-int(i, 0) {
+        print("(");
+      } else {
+        print(" ");
+      };
+      _vet<t>(x);
+      if eq-int(add-int(i, 1), size) {
+        print(")");
+      } else {
+        print(",")
+      }
+    });
+  | Enum =>
+    let discriminant = this.magic.cast(&a, int, x);
+    let cons-name: &text = magic call-type(a, 4, discriminant);
+    _bold();
+    _blue();
+    print(cons-name);
+    _reset();
+  | Int1 =>
+    print-int(sext-int1-int(magic cast(&a, int1, x)));
+  | Int2 =>
+    print-int(sext-int2-int(magic cast(&a, int2, x)));
+  | Int4 =>
+    print-int(sext-int4-int(magic cast(&a, int4, x)));
+  | Int8 =>
+    print-int(sext-int8-int(magic cast(&a, int8, x)));
+  | Int16 =>
+    print-int(sext-int16-int(magic cast(&a, int16, x)));
+  | Int32 =>
+    print-int(sext-int32-int(magic cast(&a, int32, x)));
+  | Int64 =>
+    print-int(magic cast(&a, int, x));
+  | Float16 =>
+    print-float(fpext-float16-float(magic cast(&a, float16, x)), 6);
+  | Float32 =>
+    print-float(fpext-float32-float(magic cast(&a, float32, x)), 6);
+  | Float64 =>
+    print-float(magic cast(&a, float, x), 6);
+  | Pointer =>
+    print-int(magic cast(&a, int, x));
+  | Null =>
+    print("null");
+  | Rune =>
+    _yellow();
+    print("`");
+    print-rune(magic cast(&a, rune, x));
+    print("`");
+    _reset();
+  | Binary =>
+    _yellow();
+    print("\"");
+    print(magic cast(&a, &text, x));
+    print("\"");
+    _reset();
+  | Vector =>
+    let elem-type = magic cast(int, type, load-int(shift(magic cast(&a, pointer, x), mul-int(this.word.size, 3))));
+    let vec: &vector(elem-type) = magic cast(&a, &vector(elem-type), x);
+    print("[");
+    _vet-vector(elem-type, vec);
+    print("]");
+  | _ =>
+    _yellow();
+    print("_");
+    _reset();
+  }
+}
+
+define vet<a>(x: &a): unit {
+  _vet(x);
+  print("\n");
+}

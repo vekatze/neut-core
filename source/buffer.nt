@@ -7,8 +7,8 @@ import {
   this.file.descriptor {descriptor},
   this.memory {load-int, store-int},
   this.pointer {shift},
-  this.reify {Opaque, type-tag-to-int},
   this.system {system},
+  this.type-tag {Opaque, type-tag-to-int},
   this.unit {Unit, unit},
   this.word,
 }

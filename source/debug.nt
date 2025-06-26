@@ -6,7 +6,10 @@ import {
   this.magic,
   this.memory {load-int},
   this.pointer {shift},
-  this.reify {
+  this.rune.io {print-rune},
+  this.text {text},
+  this.text.io {print},
+  this.type-tag {
     Algebraic,
     Binary,
     Enum,
@@ -27,9 +30,6 @@ import {
     get-cons-size,
     get-type-tag,
   },
-  this.rune.io {print-rune},
-  this.text {text},
-  this.text.io {print},
   this.unit {unit},
   this.vector {vector},
   this.word,

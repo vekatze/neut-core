@@ -22,7 +22,7 @@ import {
   this.pair {Pair},
   this.pointer {shift},
   this.queue {dequeue, empty, enqueue, queue},
-  this.reify {Opaque, type-tag-to-int},
+  this.type-tag {Opaque, type-tag-to-int},
   this.unit {unit},
   this.word,
 }

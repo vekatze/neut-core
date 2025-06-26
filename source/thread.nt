@@ -8,7 +8,7 @@ import {
   this.magic {cast},
   this.memory {load-int, load-int8, load-pointer, store-int, store-int8},
   this.pointer {shift},
-  this.reify {Opaque, type-tag-to-int},
+  this.type-tag {Opaque, type-tag-to-int},
   this.unit {Unit, unit},
   this.word,
 }

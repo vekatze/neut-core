@@ -9,7 +9,7 @@ import {
   this.magic {cast},
   this.memory {load-int, load-int8, store-int, store-int8},
   this.pointer {shift},
-  this.reify {Binary, type-tag-to-int},
+  this.type-tag {Binary, type-tag-to-int},
   this.unit {Unit, unit},
   this.word,
 }

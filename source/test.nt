@@ -12,13 +12,13 @@ import {
   this.pair {Pair, pair},
   this.random {random-float32, random-int},
   this.ref {_make-ref, ref},
-  this.reify {
-    get-cons-size,
-  },
   this.rune,
   this.text {lines, text, unlines},
   this.text.eq {eq-text},
   this.text.io {print, print-line},
+  this.type-tag {
+    get-cons-size,
+  },
   this.unit {Unit, unit},
   this.vector {for-N, push-back, vector},
 }

@@ -14,10 +14,10 @@ import {
   this.memory {load-int, load-pointer, store-int, store-pointer},
   this.pair {Pair, pair},
   this.pointer {shift},
-  this.reify {Vector, type-tag-to-int},
   this.text {replicate, text},
   this.text.io {print, print-line},
   this.trick,
+  this.type-tag {Vector, type-tag-to-int},
   this.unit {Unit, unit},
   this.word,
 }

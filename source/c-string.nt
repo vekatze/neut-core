@@ -4,8 +4,8 @@ import {
   this.magic {cast},
   this.memory {store-int8},
   this.pointer {shift},
-  this.reify {Opaque, type-tag-to-int},
   this.text {_get-content-pointer, text, text-byte-length},
+  this.type-tag {Opaque, type-tag-to-int},
   this.unit,
   this.word,
 }

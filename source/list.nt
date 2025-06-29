@@ -564,7 +564,7 @@ define nth<a, r := rho>(xs: &list(a), n: int): ?a {
       try _ = r;
       Right(*y)
     } else {
-      nth<a, r>(ys, sub-int(n, 1))
+      nth(ys, sub-int(n, 1))
     }
   }
 }

@@ -213,9 +213,9 @@ define lookup<k, v, reg := rho>(L: &ord(k), d: &dictionary(k, v), needle: &k): ?
   | Bin(_, key, x, l, r) =>
     match compare(needle, key) {
     | LT =>
-      lookup<k, v, reg>(L, l, needle)
+      lookup(L, l, needle)
     | GT =>
-      lookup<k, v, reg>(L, r, needle)
+      lookup(L, r, needle)
     | EQ =>
       try _ = reg;
       Right(x)

@@ -81,7 +81,6 @@ data fo {
 
 define use-id(): unit {
   let _ = some-func(20);
-  let _ = some-func<1, 3>(20);
   let _ = some-func of {y := 20};
   let _ = some-func of {x := 1, y := 20};
   let _ = some-func of {x := 1, y := 20, z := 3};
@@ -134,8 +133,8 @@ define zen(): unit {
   pin ys = Cons(`a`, Cons(`あ`, Nil));
   vet(ys);
   print("---\n");
-  pin v = 10;
-  vet<int>(v);
+  pin v: int = 10;
+  vet(v);
   pin sample: either(unit, _) = Right(Pair(Unit, True));
   vet(sample);
   vet("hello");
@@ -286,12 +285,4 @@ define my-func<a: type>(
   some-value: a,
 ): a {
   some-value
-}
-
-define my-id(a: type, x: a): a {
-  x
-}
-
-define id-id(a: type, x: a): a {
-  my-id((a: type, x: a) -> a, my-id)(a, x)
 }

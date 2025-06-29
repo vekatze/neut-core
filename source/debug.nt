@@ -108,13 +108,13 @@ define _print-constructor(x: &text): unit {
 define _vet<a>(x: &a): unit {
   match get-type-tag(a) {
   | Algebraic =>
-    _constructor-loop(a, x, _print-constructor, function (i, size, t, x) {
+    _constructor-loop(a, x, _print-constructor, function (i: int, size: int, t: type, x: &t) {
       if eq-int(i, 0) {
         print("(");
       } else {
         print(" ");
       };
-      _vet<t>(x);
+      _vet(x);
       if eq-int(add-int(i, 1), size) {
         print(")");
       } else {

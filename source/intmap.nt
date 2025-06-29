@@ -119,9 +119,9 @@ define lookup<a, r := rho>(t: &intmap(a), k: _Key): ?&a {
     }
   | Bin(_, m, left, right) =>
     if _zero(k, *m) {
-      lookup<a, r>(left, k)
+      lookup(left, k)
     } else {
-      lookup<a, r>(right, k)
+      lookup(right, k)
     }
   }
 }

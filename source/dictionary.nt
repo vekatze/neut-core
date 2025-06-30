@@ -302,7 +302,7 @@ inline from-list<k, v>(_ord: &ord(k), kvs: list(pair(k, v))): dictionary(k, v) {
 define to-list<k, v>(d: dictionary(k, v)): list(pair(k, v)) {
   match d {
   | Tip =>
-    []
+    Nil
   | Bin(_, k, v, d1, d2) =>
     let xs = to-list(d1);
     let ys = to-list(d2);

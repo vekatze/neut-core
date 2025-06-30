@@ -1,11 +1,11 @@
 import {
-  this.list {append, list},
+  this.list {Nil, append, list},
   this.monoid {Monoid, monoid},
 }
 
 inline as-monoid<a>(): monoid(list(a)) {
   Monoid of {
-    e := [],
+    e := Nil,
     op := {
       function (x, y) {
         append(x, y)

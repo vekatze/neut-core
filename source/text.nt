@@ -24,7 +24,7 @@ define create(xs: list(int8)): text {
 }
 
 define empty(): text {
-  create([])
+  create(Nil)
 }
 
 inline to-binary(x: &text): &binary {
@@ -259,7 +259,7 @@ define split(haystack: &text, needle: &text): list(text) {
       }
     };
   if eq-int(needle-len, 0) {
-    []
+    Nil
   } else {
     f(0, 0)
   }
@@ -314,7 +314,7 @@ define _unpack(ptr: pointer, len: int, index: int, acc: list(rune)): list(rune) 
 define unpack(t: &text): list(rune) {
   let ptr = _get-content-pointer(t);
   let len = text-byte-length(t);
-  _unpack(ptr, len, 0, [])
+  _unpack(ptr, len, 0, Nil)
 }
 
 define _char-list-length(xs: &list(rune), acc: int): int {
@@ -493,7 +493,7 @@ inline take-while-N(t: &text, !pred: (rune) -> bool): text {
         }
       }
     };
-  pin cs = f(0, []);
+  pin cs = f(0, Nil);
   pack(cs)
 }
 

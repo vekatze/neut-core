@@ -181,7 +181,7 @@ inline from-list<v>(kvs: list(pair(int, v))): intmap(v) {
 define to-list<v>(kvs: intmap(v)): list(pair(int, v)) {
   match kvs {
   | Nil =>
-    []
+    this.list.Nil
   | Tip(k, v) =>
     [Pair(k, v)]
   | Bin(_, _, d1, d2) =>

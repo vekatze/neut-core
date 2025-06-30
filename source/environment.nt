@@ -4,7 +4,7 @@ import {
   this.c-string {c-string, from-c-string, to-c-string},
   this.control {discard},
   this.either {Right, none, rho},
-  this.list {Cons, list},
+  this.list {Cons, Nil, list},
   this.magic,
   this.memory {load-int, load-pointer},
   this.pointer {shift},
@@ -70,7 +70,7 @@ define get-argv(): list(text) {
   let f =
     define get-argv-helper(i: int): list(text) {
       if eq-int(i, argc) {
-        []
+        Nil
       } else {
         let rest = get-argv-helper(add-int(i, 1));
         let str-ptr-ptr = shift(argv, mul-int(i, u));

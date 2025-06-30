@@ -103,7 +103,7 @@ inline fold-right-N<elem-type, result-type>(
 define intercalate<a>(xs: list(a), !sep: a): list(a) {
   match xs {
   | Nil =>
-    []
+    Nil
   | Cons(y, Nil) =>
     [y]
   | Cons(y, Cons(z, ys)) =>
@@ -136,7 +136,7 @@ inline for-each<a, b>(xs: list(a), !f: (a) -> b): list(b) {
         Cons(!f(y), loop(ys, acc))
       }
     };
-  helper(xs, [])
+  helper(xs, Nil)
 }
 
 inline for-each-N<a, b>(xs: &list(a), !f: (&a) -> b): list(b) {
@@ -149,7 +149,7 @@ inline for-each-N<a, b>(xs: &list(a), !f: (&a) -> b): list(b) {
         Cons(!f(y), loop(ys, acc))
       }
     };
-  helper(xs, [])
+  helper(xs, Nil)
 }
 
 inline for-each-E<a, e, b>(xs: list(a), !f: (a) -> either(e, b)): either(e, list(b)) {
@@ -197,11 +197,11 @@ define append<a>(xs: list(a), ys: list(a)): list(a) {
 }
 
 define concat<a>(xss: list(list(a))): list(a) {
-  fold-left([], xss, exact append)
+  fold-left(Nil, xss, exact append)
 }
 
 define reverse<a>(xs: list(a)): list(a) {
-  fold-left([], xs, function (acc, x) {
+  fold-left(Nil, xs, function (acc, x) {
     Cons(x, acc)
   })
 }
@@ -229,7 +229,7 @@ inline iterate-E<e, a>(count: int, !f: (int) -> either(e, a)): either(e, list(a)
         self(Cons(v, acc), add-int(cursor, 1))
       }
     };
-  helper([], 0)
+  helper(Nil, 0)
 }
 
 define length<a>(xs: &list(a)): int {
@@ -279,7 +279,7 @@ define zip-N<a, b>(xs: &list(a), ys: &list(b)): list(pair(&a, &b)) {
 }
 
 define unzip<a, b>(xs: list(pair(a, b))): pair(list(a), list(b)) {
-  fold-right(xs, Pair([], []), function (x, acc) {
+  fold-right(xs, Pair(Nil, Nil), function (x, acc) {
     let Pair(l, r) = x;
     let Pair(rest-l, rest-r) = acc;
     Pair(Cons(l, rest-l), Cons(r, rest-r))
@@ -287,7 +287,7 @@ define unzip<a, b>(xs: list(pair(a, b))): pair(list(a), list(b)) {
 }
 
 define partition<a, b>(xs: list(either(a, b))): pair(list(a), list(b)) {
-  fold-right(xs, Pair([], []), function (elem, acc) {
+  fold-right(xs, Pair(Nil, Nil), function (elem, acc) {
     let Pair(ls, rs) = acc;
     match elem {
     | Left(l) =>
@@ -323,7 +323,7 @@ define unsnoc<a, r := rho>(xs: list(a)): ?pair(list(a), a) {
         _unsnoc(r, ys, Cons(y, acc))
       }
     };
-  f(r, xs, [])
+  f(r, xs, Nil)
 }
 
 define all(xs: list(bool)): bool {
@@ -381,7 +381,7 @@ inline filter<a>(xs: list(a), !pred: (&a) -> bool): list(a) {
 }
 
 define filter-some<a>(xs: list(?a)): list(a) {
-  fold-right(xs, [], function (x, acc) {
+  fold-right(xs, Nil, function (x, acc) {
     match x {
     | Right(v) =>
       Cons(v, acc)
@@ -451,7 +451,7 @@ inline maximum<a, r := rho>(as-ord: ord(a)): (list(a)) -> ?a {
 
 define take<a>(xs: list(a), n: int): list(a) {
   if le-int(n, 0) {
-    []
+    Nil
   } else {
     match xs {
     | Nil =>
@@ -464,7 +464,7 @@ define take<a>(xs: list(a), n: int): list(a) {
 
 define take-N<a>(xs: &list(a), n: int): list(a) {
   if le-int(n, 0) {
-    []
+    Nil
   } else {
     case xs {
     | Nil =>
@@ -528,11 +528,11 @@ define _split-N<a>(xs: &list(a), n: int, head-acc: list(a)): pair(list(a), list(
 }
 
 define split<a>(xs: list(a), n: int): pair(list(a), list(a)) {
-  _split(xs, n, [])
+  _split(xs, n, Nil)
 }
 
 define split-N<a>(xs: &list(a), n: int): pair(list(a), list(a)) {
-  _split-N(xs, n, [])
+  _split-N(xs, n, Nil)
 }
 
 define product<a, b>(xs: list(a), ys: list(b)): list(pair(a, b)) {
@@ -573,15 +573,15 @@ inline span<a>(xs: list(a), !pred: (&a) -> bool): pair(list(a), list(a)) {
   let f =
     define self(xs: list(a)): pair(list(a), list(a)) {
       match xs {
-      | [] =>
-        Pair([], [])
+      | Nil =>
+        Pair(Nil, Nil)
       | Cons(y, ys) =>
         let cond on y = !pred(y);
         if cond {
           let Pair(former, latter) = self(ys);
           Pair(Cons(y, former), latter)
         } else {
-          Pair([], Cons(y, ys))
+          Pair(Nil, Cons(y, ys))
         }
       }
     };
@@ -592,14 +592,14 @@ inline span-N<a>(xs: &list(a), !pred: (&a) -> bool): pair(list(a), list(a)) {
   let f =
     define self(xs: &list(a)): pair(list(a), list(a)) {
       case xs {
-      | [] =>
-        Pair([], [])
+      | Nil =>
+        Pair(Nil, Nil)
       | Cons(y, ys) =>
         if !pred(y) {
           let Pair(former, latter) = self(ys);
           Pair(Cons(*y, former), latter)
         } else {
-          Pair([], Cons(*y, *ys))
+          Pair(Nil, Cons(*y, *ys))
         }
       }
     };
@@ -610,14 +610,14 @@ inline take-while<a>(xs: list(a), !pred: (&a) -> bool): list(a) {
   let f =
     define self(xs: list(a)): list(a) {
       match xs {
-      | [] =>
-        []
+      | Nil =>
+        Nil
       | Cons(y, ys) =>
         let cond on y = !pred(y);
         if cond {
           Cons(y, self(ys))
         } else {
-          []
+          Nil
         }
       }
     };
@@ -628,13 +628,13 @@ inline take-while-N<a>(xs: &list(a), !pred: (&a) -> bool): list(a) {
   let f =
     define self(xs: &list(a)): list(a) {
       case xs {
-      | [] =>
-        []
+      | Nil =>
+        Nil
       | Cons(y, ys) =>
         if !pred(y) {
           Cons(*y, self(ys))
         } else {
-          []
+          Nil
         }
       }
     };
@@ -645,8 +645,8 @@ inline drop-while<a>(xs: list(a), !pred: (&a) -> bool): list(a) {
   let f =
     define self(xs: list(a)): list(a) {
       match xs {
-      | [] =>
-        []
+      | Nil =>
+        Nil
       | Cons(y, ys) =>
         let cond on y = !pred(y);
         if cond {
@@ -663,8 +663,8 @@ inline drop-while-N<a>(xs: &list(a), !pred: (&a) -> bool): list(a) {
   let f =
     define self(xs: &list(a)): list(a) {
       case xs {
-      | [] =>
-        []
+      | Nil =>
+        Nil
       | Cons(y, ys) =>
         if !pred(y) {
           self(ys)

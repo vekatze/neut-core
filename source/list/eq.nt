@@ -62,5 +62,5 @@ define nub<a>(e: &eq(a), xs: list(a)): list(a) {
         }
       }
     };
-  f(xs, [])
+  f(xs, Nil)
 }

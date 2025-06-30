@@ -12,7 +12,7 @@ data queue(a: type) {
 }
 
 inline empty<a>: queue(a) {
-  Queue([], [])
+  Queue(Nil, Nil)
 }
 
 define dequeue<a>(q: queue(a)): ?pair(a, queue(a)) {
@@ -23,7 +23,7 @@ define dequeue<a>(q: queue(a)): ?pair(a, queue(a)) {
   | Cons(l, ls-rest), rs =>
     Right(Pair(l, Queue(ls-rest, rs)))
   | Nil, rs =>
-    dequeue(Queue(rs, []))
+    dequeue(Queue(rs, Nil))
   }
 }
 
@@ -43,7 +43,7 @@ define size<a>(q: &queue(a)): int {
 
 define is-empty<a>(q: &queue(a)): bool {
   case q {
-  | Queue([], []) =>
+  | Queue(Nil, Nil) =>
     True
   | _ =>
     False

@@ -150,14 +150,19 @@ define _copy-vector-content(
   }
 }
 
+define _free-vector<a>(xs: &vector(a)): unit {
+  let xs = cast(&vector(a), &vector(pointer), xs);
+  free(_get-buffer-ptr(xs));
+  free(cast(&vector(pointer), pointer, xs));
+}
+
 // (capacity: int, from: int, to: int, elem-type: type, ptr-to-buffer: pointer)
 resource _vector-internal {
   function (xs: &vector(pointer)) {
     let len = length(xs);
     let elem-type = _get-elem-type(xs);
     _discard-vector-content(xs, elem-type, 0, len);
-    free(_get-buffer-ptr(xs));
-    free(cast(&vector(pointer), pointer, xs))
+    _free-vector(xs);
   },
   function (xs: &vector(pointer)) {
     let capacity = get-capacity(xs);
@@ -304,8 +309,7 @@ inline fold-left<elem-type, result-type>(
     define loop(cursor: int, acc: result-type, xs: vector(elem-type)): result-type {
       if eq-int(cursor, sz) {
         let xs = cast(vector(elem-type), &vector(pointer), xs);
-        free(_get-buffer-ptr(xs));
-        free(cast(&vector(pointer), pointer, xs));
+        _free-vector(xs);
         acc
       } else {
         let element-ptr on xs = _get-element-pointer(xs, cursor);
@@ -382,8 +386,7 @@ inline fold-right<elem-type, result-type>(
     define loop(cursor: int, acc: result-type, xs: vector(elem-type)): result-type {
       if eq-int(cursor, sz) {
         let xs = cast(vector(elem-type), &vector(pointer), xs);
-        free(_get-buffer-ptr(xs));
-        free(cast(&vector(pointer), pointer, xs));
+        _free-vector(xs);
         acc
       } else {
         let element-ptr on xs = _get-element-pointer(xs, cursor);
@@ -755,6 +758,12 @@ define intercalate<a>(xs: vector(a), !sep: a): vector(a) {
       };
     helper(xs, sub-int(len, 1))
   }
+}
+
+define append<a>(xs: vector(a), ys: vector(a)): vector(a) {
+  this.vector.fold-left(xs, ys, function (acc, y, _) {
+    push-back(acc, y)
+  })
 }
 
 define lift-vector<a>(xs: vector(a), _: (a) -> meta a): meta vector(a) {

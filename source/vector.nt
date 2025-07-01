@@ -294,6 +294,29 @@ define access<a, r := rho>(xs: &vector(a), i: int): ?&a {
   }
 }
 
+inline fold-left<elem-type, result-type>(
+  acc: result-type,
+  xs: vector(elem-type),
+  !consumer: (result-type, elem-type, int) -> result-type,
+): result-type {
+  let sz on xs = length(xs);
+  let helper =
+    define loop(cursor: int, acc: result-type, xs: vector(elem-type)): result-type {
+      if eq-int(cursor, sz) {
+        let xs = cast(vector(elem-type), &vector(pointer), xs);
+        free(_get-buffer-ptr(xs));
+        free(cast(&vector(pointer), pointer, xs));
+        acc
+      } else {
+        let element-ptr on xs = _get-element-pointer(xs, cursor);
+        let old-value = cast(int, elem-type, load-int(element-ptr));
+        let new-value = !consumer(acc, old-value, cursor);
+        loop(add-int(cursor, 1), new-value, xs)
+      }
+    };
+  helper(0, acc, xs)
+}
+
 inline fold-left-N<elem-type, result-type>(
   acc: result-type,
   xs: &vector(elem-type),
@@ -344,6 +367,46 @@ inline fold-left-EN<e, elem-type, result-type>(
         let y = _access(xs, cursor);
         try v = !consumer(acc, y, cursor);
         loop(add-int(cursor, 1), v, xs)
+      }
+    };
+  helper(0, acc, xs)
+}
+
+inline fold-right<elem-type, result-type>(
+  acc: result-type,
+  xs: vector(elem-type),
+  !consumer: (elem-type, result-type, int) -> result-type,
+): result-type {
+  let sz on xs = length(xs);
+  let helper =
+    define loop(cursor: int, acc: result-type, xs: vector(elem-type)): result-type {
+      if eq-int(cursor, sz) {
+        let xs = cast(vector(elem-type), &vector(pointer), xs);
+        free(_get-buffer-ptr(xs));
+        free(cast(&vector(pointer), pointer, xs));
+        acc
+      } else {
+        let element-ptr on xs = _get-element-pointer(xs, cursor);
+        let old-value = cast(int, elem-type, load-int(element-ptr));
+        !consumer(old-value, loop(add-int(cursor, 1), acc, xs), cursor)
+      }
+    };
+  helper(0, acc, xs)
+}
+
+inline fold-right-N<elem-type, result-type>(
+  acc: result-type,
+  xs: &vector(elem-type),
+  !consumer: (&elem-type, result-type, int) -> result-type,
+): result-type {
+  let sz = length(xs);
+  let helper =
+    define loop(cursor: int, acc: result-type, xs: &vector(elem-type)): result-type {
+      if eq-int(cursor, sz) {
+        acc
+      } else {
+        let old-value = _access(xs, cursor);
+        !consumer(old-value, loop(add-int(cursor, 1), acc, xs), cursor)
       }
     };
   helper(0, acc, xs)

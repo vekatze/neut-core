@@ -274,6 +274,11 @@ define pop-back<a, r := rho>(xs: vector(a)): ?pair(vector(a), a) {
   }
 }
 
+define singleton<a>(x: a): vector(a) {
+  let v = make(1);
+  push-back(v, x)
+}
+
 inline _access<a>(xs: &vector(a), i: int): &a {
   let element-pointer = _get-element-pointer(xs, i);
   cast(int, &a, load-int(element-pointer))

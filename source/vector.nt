@@ -664,6 +664,36 @@ define drop-while-end<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
   }
 }
 
+define intercalate<a>(xs: vector(a), !sep: a): vector(a) {
+  let len on xs = length(xs);
+  if eq-int(len, 0) {
+    xs
+  } else-if eq-int(len, 1) {
+    xs
+  } else {
+    let xs = _extend-back(xs);
+    let new-length = sub-int(mul-int(2, len), 1);
+    let helper =
+      define self(xs: vector(a), index: int): vector(a) {
+        if le-int(index, 0) {
+          let from on xs = _get-from(xs);
+          let to = add-int(from, new-length);
+          let _ on xs = _set-to(xs, to);
+          xs
+        } else {
+          let swap-i = index;
+          let swap-j = mul-int(2, index);
+          let sep-index = sub-int(swap-j, 1);
+          let xs = _swap(xs, swap-i, swap-j);
+          let value-ptr on xs = _get-element-pointer(xs, sep-index);
+          store-int(cast(a, int, !sep), value-ptr);
+          self(xs, sub-int(index, 1))
+        }
+      };
+    helper(xs, sub-int(len, 1))
+  }
+}
+
 define lift-vector<a>(xs: vector(a), _: (a) -> meta a): meta vector(a) {
   magic cast(vector(a), meta vector(a), xs)
   // admissible:

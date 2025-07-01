@@ -14,6 +14,10 @@ data list(a: type) {
 | Cons(a, list(a))
 }
 
+inline singleton<a>(x: a): list(a) {
+  Cons(x, Nil)
+}
+
 // folds are optimized into loops
 inline fold-left<elem-type, result-type>(
   acc: result-type,
@@ -105,7 +109,7 @@ define intercalate<a>(xs: list(a), !sep: a): list(a) {
   | Nil =>
     Nil
   | Cons(y, Nil) =>
-    [y]
+    Cons(y, Nil)
   | Cons(y, Cons(z, ys)) =>
     Cons(y, Cons(!sep, intercalate(Cons(z, ys), !sep)))
   }

@@ -1,5 +1,5 @@
 import {
-  this.bool {False, True, and, bool, not},
+  this.bool {False, True, and, bool, not, or},
   this.box,
   this.c-size {C-Size},
   this.control {grow, loop},
@@ -846,6 +846,18 @@ define partition<a, b>(xs: vector(either(a, b))): pair(vector(a), vector(b)) {
     | Right(r) =>
       Pair(ls, push-front(rs, r))
     }
+  })
+}
+
+define all(xs: &vector(bool)): bool {
+  this.vector.fold-left-N(True, xs, function (b1, b2, _) {
+    and(b1, *b2)
+  })
+}
+
+define any(xs: &vector(bool)): bool {
+  this.vector.fold-left-N(True, xs, function (b1, b2, _) {
+    or(b1, *b2)
   })
 }
 

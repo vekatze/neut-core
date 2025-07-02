@@ -861,6 +861,30 @@ define any(xs: &vector(bool)): bool {
   })
 }
 
+inline filter<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
+  let len on xs = length(xs);
+  let helper =
+    define loop(num-of-new-elems: int, cursor: int, xs: vector(a)): vector(a) {
+      if eq-int(cursor, len) {
+        take(xs, num-of-new-elems)
+      } else {
+        let val on xs = !pred(_access(xs, cursor));
+        if val {
+          let xs =
+            if eq-int(num-of-new-elems, cursor) {
+              xs
+            } else {
+              _swap(xs, num-of-new-elems, cursor)
+            };
+          loop(add-int(num-of-new-elems, 1), add-int(cursor, 1), xs)
+        } else {
+          loop(num-of-new-elems, add-int(cursor, 1), xs)
+        }
+      }
+    };
+  helper(0, 0, xs)
+}
+
 define lift-vector<a>(xs: vector(a), _: (a) -> meta a): meta vector(a) {
   magic cast(vector(a), meta vector(a), xs)
   // admissible:

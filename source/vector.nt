@@ -818,6 +818,12 @@ define product<a, b>(xs: vector(a), ys: vector(b)): vector(pair(a, b)) {
   concat(xyss)
 }
 
+define zip<a, b>(xs: vector(a), ys: vector(b)): vector(pair(a, b)) {
+  zip-with(xs, ys, function (x, y, _) {
+    Pair(x, y)
+  })
+}
+
 define lift-vector<a>(xs: vector(a), _: (a) -> meta a): meta vector(a) {
   magic cast(vector(a), meta vector(a), xs)
   // admissible:

@@ -496,12 +496,36 @@ define for-each-vertical<a, b>(xs: vector(a), col-size: int, !f: (a, int) -> b):
   cast(vector(a), vector(b), store-values(xs, 0))
 }
 
+inline zip-with<a, b, c>(xs: vector(a), ys: vector(b), !f: (a, b, int) -> c): vector(c) {
+  let len1 on xs = length(xs);
+  let len2 on ys = length(ys);
+  let len = min-int(len1, len2);
+  let result = make(len);
+  let helper =
+    define loop(acc: vector(c), cursor: int, xs: vector(a), ys: vector(b)): vector(c) {
+      if eq-int(cursor, len) {
+        let xs = cast(vector(a), &vector(pointer), xs);
+        let ys = cast(vector(b), &vector(pointer), ys);
+        _free-vector(xs);
+        _free-vector(ys);
+        acc
+      } else {
+        let x-ptr on xs = _get-element-pointer(xs, cursor);
+        let y-ptr on ys = _get-element-pointer(ys, cursor);
+        let x = cast(int, a, load-int(x-ptr));
+        let y = cast(int, b, load-int(y-ptr));
+        let z = !f(x, y, cursor);
+        let acc = push-back(acc, z);
+        loop(acc, add-int(cursor, 1), xs, ys)
+      }
+    };
+  helper(result, 0, xs, ys)
+}
+
 inline zip-with-N<a, b, c>(xs: &vector(a), ys: &vector(b), f: (&a, &b, int) -> c): vector(c) {
   let len1 = length(xs);
   let len2 = length(ys);
-  let min-func = minimum(as-ord);
-  let len-or-none = min-func([len1, len2]);
-  let len = from-right(len-or-none, 0);
+  let len = min-int(len1, len2);
   let result = make(len);
   grow(result, len, function (acc, i) {
     let val1 = _access(xs, i);

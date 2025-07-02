@@ -834,6 +834,21 @@ define unzip<a, b>(ps: vector(pair(a, b))): pair(vector(a), vector(b)) {
   })
 }
 
+define partition<a, b>(xs: vector(either(a, b))): pair(vector(a), vector(b)) {
+  let len on xs = length(xs);
+  let vec-l = make(len);
+  let vec-r = make(len);
+  this.vector.fold-right(xs, Pair(vec-l, vec-r), function (elem, acc, _) {
+    let Pair(ls, rs) = acc;
+    match elem {
+    | Left(l) =>
+      Pair(push-front(ls, l), rs)
+    | Right(r) =>
+      Pair(ls, push-front(rs, r))
+    }
+  })
+}
+
 define lift-vector<a>(xs: vector(a), _: (a) -> meta a): meta vector(a) {
   magic cast(vector(a), meta vector(a), xs)
   // admissible:

@@ -3,13 +3,12 @@ import {
   this.box,
   this.c-size {C-Size},
   this.control {grow, loop},
-  this.either {Left, Right, either, from-right, none, rho},
+  this.either {Left, Right, either, none, rho},
   this.external {free, malloc, realloc},
   this.function {compose},
   this.int {abs-int, max-int, min-int},
   this.int.io {print-int-line},
-  this.int.ord {as-ord},
-  this.list {Cons, Nil, list, minimum},
+  this.list {Cons, Nil, list},
   this.magic {cast},
   this.memory {load-int, load-pointer, store-int, store-pointer},
   this.pair {Pair, pair},
@@ -377,8 +376,8 @@ inline fold-left-EN<e, elem-type, result-type>(
 }
 
 inline fold-right<elem-type, result-type>(
-  acc: result-type,
   xs: vector(elem-type),
+  acc: result-type,
   !consumer: (elem-type, result-type, int) -> result-type,
 ): result-type {
   let sz on xs = length(xs);
@@ -398,8 +397,8 @@ inline fold-right<elem-type, result-type>(
 }
 
 inline fold-right-N<elem-type, result-type>(
-  acc: result-type,
   xs: &vector(elem-type),
+  acc: result-type,
   !consumer: (&elem-type, result-type, int) -> result-type,
 ): result-type {
   let sz = length(xs);
@@ -821,6 +820,17 @@ define product<a, b>(xs: vector(a), ys: vector(b)): vector(pair(a, b)) {
 define zip<a, b>(xs: vector(a), ys: vector(b)): vector(pair(a, b)) {
   zip-with(xs, ys, function (x, y, _) {
     Pair(x, y)
+  })
+}
+
+define unzip<a, b>(ps: vector(pair(a, b))): pair(vector(a), vector(b)) {
+  let len on ps = length(ps);
+  let vec-l = make(len);
+  let vec-r = make(len);
+  this.vector.fold-right(ps, Pair(vec-l, vec-r), function (p, acc, _) {
+    let Pair(l, r) = p;
+    let Pair(rest-l, rest-r) = acc;
+    Pair(push-front(rest-l, l), push-front(rest-r, r))
   })
 }
 

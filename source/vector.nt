@@ -766,6 +766,24 @@ define append<a>(xs: vector(a), ys: vector(a)): vector(a) {
   })
 }
 
+define concat<a>(xss: vector(vector(a))): vector(a) {
+  let xss-size on xss = length(xss);
+  let get-size =
+    define loop(yss: &vector(vector(a)), index: int, acc: int): int {
+      if eq-int(index, xss-size) {
+        acc
+      } else {
+        let ys = _access(yss, index);
+        let acc = add-int(acc, length(ys));
+        loop(yss, add-int(index, 1), acc)
+      }
+    };
+  let size on xss = get-size(xss, 0, 0);
+  this.vector.fold-left(make(size), xss, function (acc, ys, _) {
+    append(acc, ys)
+  })
+}
+
 define lift-vector<a>(xs: vector(a), _: (a) -> meta a): meta vector(a) {
   magic cast(vector(a), meta vector(a), xs)
   // admissible:

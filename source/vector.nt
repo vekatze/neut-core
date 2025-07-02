@@ -784,6 +784,16 @@ define concat<a>(xss: vector(vector(a))): vector(a) {
   })
 }
 
+define product<a, b>(xs: vector(a), ys: vector(b)): vector(pair(a, b)) {
+  let xyss =
+    for-each(xs, function (x, _) {
+      for-each(ys, function (y, _) {
+        Pair(x, y)
+      })
+    });
+  concat(xyss)
+}
+
 define lift-vector<a>(xs: vector(a), _: (a) -> meta a): meta vector(a) {
   magic cast(vector(a), meta vector(a), xs)
   // admissible:

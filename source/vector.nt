@@ -868,8 +868,46 @@ inline filter<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
       if eq-int(cursor, len) {
         take(xs, num-of-new-elems)
       } else {
-        let val on xs = !pred(_access(xs, cursor));
-        if val {
+        let pred-is-true on xs = !pred(_access(xs, cursor));
+        if pred-is-true {
+          let xs =
+            if eq-int(num-of-new-elems, cursor) {
+              xs
+            } else {
+              _swap(xs, num-of-new-elems, cursor)
+            };
+          loop(add-int(num-of-new-elems, 1), add-int(cursor, 1), xs)
+        } else {
+          loop(num-of-new-elems, add-int(cursor, 1), xs)
+        }
+      }
+    };
+  helper(0, 0, xs)
+}
+
+define filter-some<a>(xs: vector(?a)): vector(a) {
+  let len on xs = length(xs);
+  let helper =
+    define loop(num-of-new-elems: int, cursor: int, xs: vector(?a)): vector(a) {
+      if eq-int(cursor, len) {
+        let from on xs = _get-from(xs);
+        let to = add-int(from, num-of-new-elems);
+        let _ on xs = _set-to(xs, to);
+        let _ on xs = _set-elem-type(xs, a);
+        cast(vector(?a), vector(a), xs)
+      } else {
+        let found-some on xs = {
+          let value-ptr = _get-element-pointer(xs, cursor);
+          match cast(&?a, ?a, _access(xs, cursor)) {
+          | Right(v) =>
+            store-int(cast(a, int, v), value-ptr);
+            True
+          | Left(Unit) =>
+            store-int(0, value-ptr);
+            False
+          }
+        };
+        if found-some {
           let xs =
             if eq-int(num-of-new-elems, cursor) {
               xs

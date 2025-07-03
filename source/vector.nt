@@ -971,6 +971,19 @@ inline span<a>(xs: vector(a), !pred: (&a) -> bool): pair(vector(a), vector(a)) {
   }
 }
 
+// right-open interval
+define range(from: int, to: int): vector(int) {
+  if ge-int(from, to) {
+    make(0)
+  } else {
+    let size = sub-int(to, from);
+    let xs = make(size);
+    grow(xs, size, function (acc, i) {
+      push-back(acc, add-int(i, from))
+    })
+  }
+}
+
 define lift-vector<a>(xs: vector(a), _: (a) -> meta a): meta vector(a) {
   magic cast(vector(a), meta vector(a), xs)
   // admissible:

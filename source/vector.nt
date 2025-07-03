@@ -681,7 +681,7 @@ define delete<a>(xs: vector(a), index: int): vector(a) {
   }
 }
 
-define find<a>(xs: &vector(a), !pred: (&a) -> bool): int {
+define find-index<a>(xs: &vector(a), !pred: (&a) -> bool): int {
   let len = length(xs);
   let f =
     define self(index: int): int {
@@ -699,7 +699,7 @@ define find<a>(xs: &vector(a), !pred: (&a) -> bool): int {
   f(0)
 }
 
-define find-end<a>(xs: &vector(a), !pred: (&a) -> bool): int {
+define find-index-end<a>(xs: &vector(a), !pred: (&a) -> bool): int {
   let len = length(xs);
   let f =
     define self(index: int): int {
@@ -718,7 +718,7 @@ define find-end<a>(xs: &vector(a), !pred: (&a) -> bool): int {
 }
 
 define take-while<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
-  let pivot-index on xs = find(xs, compose(not, !pred));
+  let pivot-index on xs = find-index(xs, compose(not, !pred));
   if lt-int(pivot-index, 0) {
     xs
   } else {
@@ -727,7 +727,7 @@ define take-while<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
 }
 
 define drop-while<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
-  let pivot-index on xs = find(xs, compose(not, !pred));
+  let pivot-index on xs = find-index(xs, compose(not, !pred));
   if lt-int(pivot-index, 0) {
     make(1)
   } else {
@@ -736,7 +736,7 @@ define drop-while<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
 }
 
 define take-while-end<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
-  let pivot-index on xs = find-end(xs, compose(not, !pred));
+  let pivot-index on xs = find-index-end(xs, compose(not, !pred));
   if lt-int(pivot-index, 0) {
     xs
   } else {
@@ -745,7 +745,7 @@ define take-while-end<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
 }
 
 define drop-while-end<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
-  let pivot-index on xs = find-end(xs, compose(not, !pred));
+  let pivot-index on xs = find-index-end(xs, compose(not, !pred));
   if lt-int(pivot-index, 0) {
     make(0)
   } else {

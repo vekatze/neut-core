@@ -635,6 +635,22 @@ define drop<a>(xs: vector(a), n: int): vector(a) {
   xs
 }
 
+define split<a>(xs: vector(a), n: int): pair(vector(a), vector(a)) {
+  let xs = cast(vector(a), &vector(a), xs);
+  let len = length(xs);
+  let ys = make(len);
+  let n = max-int(0, n);
+  let ys =
+    grow(ys, sub-int(len, n), function (acc, i) {
+      let v = this.vector._access(xs, add-int(i, n));
+      push-back(acc, cast(&a, a, v))
+    });
+  let from = _get-from(xs);
+  let to = _get-to(xs);
+  _set-to(xs, min-int(to, add-int(from, n)));
+  Pair(cast(&vector(a), vector(a), xs), ys)
+}
+
 define slice<a>(xs: vector(a), from: int, to: int): vector(a) {
   let ys = drop(xs, from);
   take(ys, sub-int(to, from))

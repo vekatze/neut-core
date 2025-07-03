@@ -923,6 +923,26 @@ define filter-some<a>(xs: vector(?a)): vector(a) {
   helper(0, 0, xs)
 }
 
+inline find<a, r := rho>(xs: &vector(a), !pred: (&a) -> bool): ?&a {
+  let len = length(xs);
+  let f =
+    define self(r: ?unit, index: int): ?&a {
+      if ge-int(index, len) {
+        try _ = r;
+        none
+      } else {
+        let value = _access(xs, index);
+        if !pred(value) {
+          try _ = r;
+          Right(value)
+        } else {
+          self(r, add-int(index, 1))
+        }
+      }
+    };
+  f(r, 0)
+}
+
 define lift-vector<a>(xs: vector(a), _: (a) -> meta a): meta vector(a) {
   magic cast(vector(a), meta vector(a), xs)
   // admissible:
@@ -937,6 +957,24 @@ define lift-vector<a>(xs: vector(a), _: (a) -> meta a): meta vector(a) {
 }
 
 define zen(): unit {
+  // find
+  let xs = this.vector.make(5);
+  let xs = push-back(xs, 1);
+  let xs = push-back(xs, 2);
+  let xs = push-back(xs, 3);
+  let xs = push-back(xs, 4);
+  pin xs = push-back(xs, 5);
+  let item =
+    find(xs, function (x) {
+      eq-int(*x, -1)
+    });
+  match item {
+  | Left(_) =>
+    print-line("left")
+  | Right(x) =>
+    print-line("right");
+    print-int-line(*x);
+  };
   let xs: vector(text) = make(0);
   let xs = push-back(xs, *"b");
   let xs = push-front(xs, *"a");

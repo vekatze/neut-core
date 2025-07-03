@@ -959,6 +959,18 @@ inline find<a, r := rho>(xs: &vector(a), !pred: (&a) -> bool): ?&a {
   f(r, 0)
 }
 
+inline span<a>(xs: vector(a), !pred: (&a) -> bool): pair(vector(a), vector(a)) {
+  let i on xs =
+    find-index(xs, function (x) {
+      not(!pred(x))
+    });
+  if lt-int(i, 0) {
+    Pair(xs, make(0))
+  } else {
+    split(xs, i)
+  }
+}
+
 define lift-vector<a>(xs: vector(a), _: (a) -> meta a): meta vector(a) {
   magic cast(vector(a), meta vector(a), xs)
   // admissible:

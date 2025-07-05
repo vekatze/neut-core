@@ -23,3 +23,16 @@ inline uncurry<a, b, c>(f: (a) -> (b) -> c): (a, b) -> c {
     f(x)(y)
   }
 }
+
+rule-left chain {
+  function <a, b, c>(f: (a) -> b, g: (b) -> c): (a) -> c {
+    function (x) {
+      g(f(x))
+    }
+  },
+  function <a>() {
+    function (x: a) {
+      x
+    }
+  },
+}

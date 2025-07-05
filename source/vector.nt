@@ -278,6 +278,13 @@ define pop-back<a, r := rho>(xs: vector(a)): ?pair(vector(a), a) {
   }
 }
 
+rule-left Vector {
+  push-back,
+  function <a>(): vector(a) {
+    this.vector.make(3)
+  },
+}
+
 define singleton<a>(x: a): vector(a) {
   let v = make(1);
   push-back(v, x)
@@ -800,7 +807,7 @@ define intercalate<a>(xs: vector(a), !sep: a): vector(a) {
 }
 
 define append<a>(xs: vector(a), ys: vector(a)): vector(a) {
-  this.vector.fold-left(xs, ys, function (acc, y, _) {
+  fold-left(xs, ys, function (acc, y, _) {
     push-back(acc, y)
   })
 }
@@ -818,7 +825,7 @@ define concat<a>(xss: vector(vector(a))): vector(a) {
       }
     };
   let size on xss = get-size(xss, 0, 0);
-  this.vector.fold-left(make(size), xss, function (acc, ys, _) {
+  fold-left(make(size), xss, function (acc, ys, _) {
     append(acc, ys)
   })
 }
@@ -843,7 +850,7 @@ define unzip<a, b>(ps: vector(pair(a, b))): pair(vector(a), vector(b)) {
   let len on ps = length(ps);
   let vec-l = make(len);
   let vec-r = make(len);
-  this.vector.fold-right(ps, Pair(vec-l, vec-r), function (p, acc, _) {
+  fold-right(ps, Pair(vec-l, vec-r), function (p, acc, _) {
     let Pair(l, r) = p;
     let Pair(rest-l, rest-r) = acc;
     Pair(push-front(rest-l, l), push-front(rest-r, r))
@@ -854,7 +861,7 @@ define partition<a, b>(xs: vector(either(a, b))): pair(vector(a), vector(b)) {
   let len on xs = length(xs);
   let vec-l = make(len);
   let vec-r = make(len);
-  this.vector.fold-right(xs, Pair(vec-l, vec-r), function (elem, acc, _) {
+  fold-right(xs, Pair(vec-l, vec-r), function (elem, acc, _) {
     let Pair(ls, rs) = acc;
     match elem {
     | Left(l) =>
@@ -866,13 +873,13 @@ define partition<a, b>(xs: vector(either(a, b))): pair(vector(a), vector(b)) {
 }
 
 define all(xs: &vector(bool)): bool {
-  this.vector.fold-left-N(True, xs, function (b1, b2, _) {
+  fold-left-N(True, xs, function (b1, b2, _) {
     and(b1, *b2)
   })
 }
 
 define any(xs: &vector(bool)): bool {
-  this.vector.fold-left-N(True, xs, function (b1, b2, _) {
+  fold-left-N(True, xs, function (b1, b2, _) {
     or(b1, *b2)
   })
 }

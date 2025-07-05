@@ -1,5 +1,5 @@
 import {
-  this.bool {and, bool, or},
+  this.bool {and, any, bool},
   this.box,
   this.list {Cons, List, concat, list},
   this.rune {size-by-head-byte},
@@ -16,7 +16,7 @@ import {
 
 // returns true iff `ch` is a C0 control character, a delete, a backslash, or a double quote
 define _is-1-byte-escaped-character(ch: int8): bool {
-  fold-left<or>[
+  any[
     and(ule-int8(0, ch), ule-int8(ch, 0x1f)),
     eq-int8(ch, 0x22),
     eq-int8(ch, 0x5c),

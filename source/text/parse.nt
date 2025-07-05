@@ -1,5 +1,5 @@
 import {
-  this.bool {and, bool, or},
+  this.bool {and, any, bool},
   this.box,
   this.either {Left, Right, either},
   this.int.parse {parse-hex},
@@ -20,7 +20,7 @@ import {
 }
 
 define _is-lower-hex-digit(r: rune): bool {
-  fold-left<or>[
+  any[
     and(le-rune(`0`, r), le-rune(r, `9`)),
     and(le-rune(`a`, r), le-rune(r, `f`)),
   ]

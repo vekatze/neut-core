@@ -156,7 +156,7 @@ define spawn<r := rho>(
     try _ = _dup2(error-writer, stderr);
     let Process-Spec of {process, args} = ps;
     let raw-args = this.list.for-each(Cons(process, args), _get-content-pointer);
-    let cmd-args = _make-argv(this.list.append(raw-args, [null-pointer]));
+    let cmd-args = _make-argv(this.list.append(raw-args, List[null-pointer]));
     let cmd = _get-content-pointer(process);
     let _ = magic external execvp(cmd, cmd-args);
     report-system-error()
@@ -193,7 +193,7 @@ define zen(): unit {
   let cmd =
     Process-Spec of {
       process := "sh",
-      args := ["-c", "ls /"],
+      args := List["-c", "ls /"],
       input := "",
     };
   match spawn(cmd, 1024, 1024) {

@@ -43,7 +43,7 @@ define _new(a: type, q: queue(a)): channel(a) {
   let mutex-size = from-c-size(THREAD_MUTEX_SIZE);
   let cond-size = from-c-size(THREAD_COND_SIZE);
   let u = this.word.size;
-  let ptr = malloc(C-Size(sum-int([u, mutex-size, cond-size, u])));
+  let ptr = malloc(C-Size(sum-int(List[u, mutex-size, cond-size, u])));
   store-int(cast(queue(a), int, q), ptr);
   let _ = thread-mutex-init(shift(ptr, u));
   thread-cond-init(shift(ptr, add-int(u, mutex-size)));

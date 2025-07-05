@@ -1,6 +1,6 @@
 import {
   this.c-int {c-int, or-c-int},
-  this.list {fold-left, list},
+  this.list {list},
 }
 
 data mode {
@@ -39,17 +39,17 @@ define interpret-mode(flag: mode): c-int {
 }
 
 define interpret(xs: list(mode)): c-int {
-  fold-left(0, xs, function (acc, x) {
+  this.list.fold-left(0, xs, function (acc, x) {
     or-c-int(acc, interpret-mode(x))
   })
 }
 
 inline default-file-mode: list(mode) {
   // 644
-  [Owner-R, Owner-W, Group-R, Other-R]
+  List[Owner-R, Owner-W, Group-R, Other-R]
 }
 
 inline default-directory-mode: list(mode) {
   // 755
-  [Owner-R, Owner-W, Owner-X, Group-R, Group-X, Other-R, Other-X]
+  List[Owner-R, Owner-W, Owner-X, Group-R, Group-X, Other-R, Other-X]
 }

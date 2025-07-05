@@ -1,7 +1,7 @@
 import {
-  this.bool {and, bool},
+  this.bool {and, bool, or},
   this.box,
-  this.list {Cons, any, concat, list},
+  this.list {Cons, concat, list},
   this.rune {size-by-head-byte},
   this.show {Show, show},
   this.text {
@@ -16,12 +16,12 @@ import {
 
 // returns true iff `ch` is a C0 control character, a delete, a backslash, or a double quote
 define _is-1-byte-escaped-character(ch: int8): bool {
-  any([
+  fold-left<or>[
     and(ule-int8(0, ch), ule-int8(ch, 0x1f)),
     eq-int8(ch, 0x22),
     eq-int8(ch, 0x5c),
     eq-int8(ch, 0x7f),
-  ])
+  ]
 }
 
 define _get-escaped-character-1(ch: int8): &text {
@@ -186,7 +186,7 @@ define _escape(t: &text, len: int, pivot: int, cursor: int): list(text) {
     };
   let index = add-int(pivot, cursor);
   if ge-int(index, len) {
-    [_drop-N(t, pivot)]
+    List[_drop-N(t, pivot)]
   } else {
     let head-char = _get-byte(t, index);
     let char-len = size-by-head-byte(head-char);
@@ -220,7 +220,7 @@ define _escape(t: &text, len: int, pivot: int, cursor: int): list(text) {
 define quote-text(t: text): text {
   pin t = t;
   let len = text-byte-length(t);
-  join(concat([[*"\""], _escape(t, len, 0, 0), [*"\""]]))
+  join(concat(List[List[*"\""], _escape(t, len, 0, 0), List[*"\""]]))
 }
 
 define show-text(t: text): text {
@@ -229,7 +229,7 @@ define show-text(t: text): text {
 
 define show-text-N(t: &text): text {
   let len = text-byte-length(t);
-  join(concat([[*"\""], _escape(t, len, 0, 0), [*"\""]]))
+  join(concat(List[List[*"\""], _escape(t, len, 0, 0), List[*"\""]]))
 }
 
 inline as-show: show(text) {

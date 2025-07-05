@@ -1050,7 +1050,7 @@ define zen(): unit {
   // let _ = !xs;
   // let _ = !xs;
   pin xs = !xs;
-  let ys: vector(int) = from-list(to-list(from-list([1, 2, 3, 4, 5])));
+  let ys: vector(int) = from-list(to-list(from-list(List[1, 2, 3, 4, 5])));
   pin ys = ys;
   let zs =
     zip-with-N(xs, ys, function (x, y, _) {

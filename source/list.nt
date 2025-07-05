@@ -197,15 +197,15 @@ inline for-N<a>(xs: &list(a), f: (&a) -> unit): unit {
 }
 
 define append<a>(xs: list(a), ys: list(a)): list(a) {
-  fold-right(xs, ys, Cons)
+  this.list.fold-right(xs, ys, Cons)
 }
 
 define concat<a>(xss: list(list(a))): list(a) {
-  fold-left(Nil, xss, exact append)
+  this.list.fold-left(Nil, xss, exact append)
 }
 
 define reverse<a>(xs: list(a)): list(a) {
-  fold-left(Nil, xs, function (acc, x) {
+  this.list.fold-left(Nil, xs, function (acc, x) {
     Cons(x, acc)
   })
 }
@@ -283,7 +283,7 @@ define zip-N<a, b>(xs: &list(a), ys: &list(b)): list(pair(&a, &b)) {
 }
 
 define unzip<a, b>(xs: list(pair(a, b))): pair(list(a), list(b)) {
-  fold-right(xs, Pair(Nil, Nil), function (x, acc) {
+  this.list.fold-right(xs, Pair(Nil, Nil), function (x, acc) {
     let Pair(l, r) = x;
     let Pair(rest-l, rest-r) = acc;
     Pair(Cons(l, rest-l), Cons(r, rest-r))
@@ -291,7 +291,7 @@ define unzip<a, b>(xs: list(pair(a, b))): pair(list(a), list(b)) {
 }
 
 define partition<a, b>(xs: list(either(a, b))): pair(list(a), list(b)) {
-  fold-right(xs, Pair(Nil, Nil), function (elem, acc) {
+  this.list.fold-right(xs, Pair(Nil, Nil), function (elem, acc) {
     let Pair(ls, rs) = acc;
     match elem {
     | Left(l) =>
@@ -331,11 +331,11 @@ define unsnoc<a, r := rho>(xs: list(a)): ?pair(list(a), a) {
 }
 
 define all(xs: list(bool)): bool {
-  fold-left(True, xs, and)
+  this.list.fold-left(True, xs, and)
 }
 
 define any(xs: list(bool)): bool {
-  fold-left(False, xs, or)
+  this.list.fold-left(False, xs, or)
 }
 
 // right-open interval
@@ -385,7 +385,7 @@ inline filter<a>(xs: list(a), !pred: (&a) -> bool): list(a) {
 }
 
 define filter-some<a>(xs: list(?a)): list(a) {
-  fold-right(xs, Nil, function (x, acc) {
+  this.list.fold-right(xs, Nil, function (x, acc) {
     match x {
     | Right(v) =>
       Cons(v, acc)
@@ -397,7 +397,7 @@ define filter-some<a>(xs: list(?a)): list(a) {
 
 inline sum<a>(as-monoid: monoid(a), xs: list(a)): a {
   let Monoid of {e, op} = as-monoid;
-  fold-left(e, xs, function (acc, x) {
+  this.list.fold-left(e, xs, function (acc, x) {
     op(acc, x)
   })
 }
@@ -411,7 +411,7 @@ inline minimum<a, r := rho>(as-ord: ord(a)): (list(a)) -> ?a {
       none
     | Cons(y, ys) =>
       try _ = r;
-      Right(fold-left(y, ys, function (acc, y) {
+      Right(this.list.fold-left(y, ys, function (acc, y) {
         let order on acc, y = compare(acc, y);
         match order {
         | LT =>

@@ -1,7 +1,7 @@
 import {
   this.c-int {c-int, or-c-int},
   this.foreign {O_APPEND, O_CREAT, O_RDONLY, O_RDWR, O_WRONLY},
-  this.list {fold-left, list},
+  this.list {list},
 }
 
 data flag {
@@ -28,19 +28,19 @@ define _interpret-flag(flag: flag): c-int {
 }
 
 define interpret(xs: list(flag)): c-int {
-  fold-left(0, xs, function (acc, x) {
+  this.list.fold-left(0, xs, function (acc, x) {
     or-c-int(acc, _interpret-flag(x))
   })
 }
 
 inline for-r: list(flag) {
-  [R]
+  List[R]
 }
 
 inline for-rw: list(flag) {
-  [RW, Create]
+  List[RW, Create]
 }
 
 inline for-rw-append: list(flag) {
-  [RW, Create, Append]
+  List[RW, Create, Append]
 }

@@ -200,25 +200,25 @@ define singleton(value: rune): text {
   match s {
   | 1 =>
     let piece-0 = trunc-int32-int8(value);
-    create([piece-0])
+    create(List[piece-0])
   | 2 =>
     let piece-0 = trunc-int32-int8(lshr-int32(and-int32(0b_1111_1111_0000_0000, value), 8));
     let piece-1 = trunc-int32-int8(lshr-int32(and-int32(0b_0000_0000_1111_1111, value), 0));
-    create([piece-0, piece-1])
+    create(List[piece-0, piece-1])
   | 3 =>
     let piece-0 = trunc-int32-int8(lshr-int32(and-int32(0b_1111_1111_0000_0000_0000_0000, value), 16));
     let piece-1 = trunc-int32-int8(lshr-int32(and-int32(0b_0000_0000_1111_1111_0000_0000, value), 8));
     let piece-2 = trunc-int32-int8(lshr-int32(and-int32(0b_0000_0000_0000_0000_1111_1111, value), 0));
-    create([piece-0, piece-1, piece-2])
+    create(List[piece-0, piece-1, piece-2])
   | 4 =>
     let piece-0 = trunc-int32-int8(lshr-int32(and-int32(0b_1111_1111_0000_0000_0000_0000_0000_0000, value), 24));
     let piece-1 = trunc-int32-int8(lshr-int32(and-int32(0b_0000_0000_1111_1111_0000_0000_0000_0000, value), 16));
     let piece-2 = trunc-int32-int8(lshr-int32(and-int32(0b_0000_0000_0000_0000_1111_1111_0000_0000, value), 8));
     let piece-3 = trunc-int32-int8(lshr-int32(and-int32(0b_0000_0000_0000_0000_0000_0000_1111_1111, value), 0));
-    create([piece-0, piece-1, piece-2, piece-3])
+    create(List[piece-0, piece-1, piece-2, piece-3])
   | _ =>
     // U+FFFE Noncharacter
-    create([0xef, 0xbf, 0xbe])
+    create(List[0xef, 0xbf, 0xbe])
   }
 }
 
@@ -245,7 +245,7 @@ define split(haystack: &text, needle: &text): list(text) {
     define loop(pivot: int, cursor: int): list(text) {
       let rem-len = sub-int(len, add-int(pivot, cursor));
       if lt-int(rem-len, needle-len) {
-        [_drop-N(haystack, pivot)]
+        List[_drop-N(haystack, pivot)]
       } else {
         let current-ptr = shift(haystack-ptr, add-int(pivot, cursor));
         if _match-text-content(current-ptr, needle-ptr, needle-len) {

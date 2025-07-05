@@ -183,7 +183,7 @@ define to-list<v>(kvs: intmap(v)): list(pair(int, v)) {
   | Nil =>
     this.list.Nil
   | Tip(k, v) =>
-    [Pair(k, v)]
+    List[Pair(k, v)]
   | Bin(_, _, d1, d2) =>
     let xs = to-list(d1);
     let ys = to-list(d2);

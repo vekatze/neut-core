@@ -1,9 +1,9 @@
 import {
-  this.bool {and, bool},
+  this.bool {and, bool, or},
   this.box,
   this.either {Left, Right, either},
   this.int.parse {parse-hex},
-  this.list {Cons, Nil, any, concat, for-each-E, for-each-EN, intercalate, list},
+  this.list {Cons, Nil, concat, for-each-E, for-each-EN, intercalate, list},
   this.pair {Pair},
   this.rune,
   this.rune.eq {eq-rune},
@@ -20,12 +20,10 @@ import {
 }
 
 define _is-lower-hex-digit(r: rune): bool {
-  any(
-    [
-      and(le-rune(`0`, r), le-rune(r, `9`)),
-      and(le-rune(`a`, r), le-rune(r, `f`)),
-    ],
-  )
+  fold-left<or>[
+    and(le-rune(`0`, r), le-rune(r, `9`)),
+    and(le-rune(`a`, r), le-rune(r, `f`)),
+  ]
 }
 
 data error {
@@ -38,23 +36,23 @@ define _read-char(r: rune, t: text): either(error, text) {
     if eq-rune(r, r') {
       Right(rest)
     } else {
-      Left(Parse-Error(format("Expected `{}`, but got: `{}`", [singleton(r), singleton(r')])))
+      Left(Parse-Error(format("Expected `{}`, but got: `{}`", List[singleton(r), singleton(r')])))
     }
   | Left(_) =>
-    Left(Parse-Error(format("Expected `{}`, but got: end of text", [singleton(r)])))
+    Left(Parse-Error(format("Expected `{}`, but got: end of text", List[singleton(r)])))
   }
 }
 
 define _read-unicode-scalar-value(t: &text): either(error, rune) {
   match parse-hex(t) {
   | Left(_) =>
-    Left(Parse-Error(format("Could not parse `{}` as a hexadecimal integer", [*t])))
+    Left(Parse-Error(format("Could not parse `{}` as a hexadecimal integer", List[*t])))
   | Right(v) =>
     match this.rune.from-int(v) {
     | Right(r) =>
       Right(r)
     | Left(_) =>
-      Left(Parse-Error(format("The value `{}` is outside the Unicode codespace", [*t])))
+      Left(Parse-Error(format("The value `{}` is outside the Unicode codespace", List[*t])))
     }
   }
 }
@@ -62,22 +60,22 @@ define _read-unicode-scalar-value(t: &text): either(error, rune) {
 define _unquote-text(t: text): either(error, list(text)) {
   match this.text.uncons(t) {
   | Left(_) =>
-    Right([*"\\"])
+    Right(List[*"\\"])
   | Right(Pair(c, rest)) =>
     if eq-rune(c, `0`) {
-      Right([*"\u{0}", rest])
+      Right(List[*"\u{0}", rest])
     } else-if eq-rune(c, `t`) {
-      Right([*"\u{9}", rest])
+      Right(List[*"\u{9}", rest])
     } else-if eq-rune(c, `n`) {
-      Right([*"\u{a}", rest])
+      Right(List[*"\u{a}", rest])
     } else-if eq-rune(c, `r`) {
-      Right([*"\u{d}", rest])
+      Right(List[*"\u{d}", rest])
     } else-if eq-rune(c, `"`) {
-      Right([*"\u{22}", rest])
+      Right(List[*"\u{22}", rest])
     } else-if eq-rune(c, `\\`) {
-      Right([*"\u{5c}", rest])
+      Right(List[*"\u{5c}", rest])
     } else-if eq-rune(c, `\``) {
-      Right([*"\u{60}", rest])
+      Right(List[*"\u{60}", rest])
     } else-if eq-rune(c, `u`) {
       try rest' = _read-char(`{`, rest);
       let hex-text on rest' = take-while-N(rest', _is-lower-hex-digit);
@@ -86,9 +84,9 @@ define _unquote-text(t: text): either(error, list(text)) {
       let rest'' = drop(rest', scalar-value-text-len);
       try rest''' = _read-char(`}`, rest'');
       try r = _read-unicode-scalar-value(hex-text);
-      Right([singleton(r), rest'''])
+      Right(List[singleton(r), rest'''])
     } else {
-      Left(Parse-Error(format("Unknown escape sequence: \\{}", [singleton(c)])))
+      Left(Parse-Error(format("Unknown escape sequence: \\{}", List[singleton(c)])))
     }
   }
 }
@@ -107,5 +105,5 @@ define _parse-text-fragment(t: &text): either(error, list(text)) {
 define parse-text(t: &text): either(error, text) {
   pin ts = split(t, "\\\\");
   try tss = for-each-EN(ts, _parse-text-fragment);
-  Right(this.text.join(this.list.concat(intercalate(tss, [*"\\"]))))
+  Right(this.text.join(this.list.concat(intercalate(tss, List[*"\\"]))))
 }

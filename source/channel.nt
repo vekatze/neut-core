@@ -16,7 +16,7 @@ import {
   },
   this.foreign {THREAD_COND_SIZE, THREAD_MUTEX_SIZE},
   this.int {sum-int},
-  this.list,
+  this.list {List},
   this.magic {cast},
   this.memory {load-int, store-int},
   this.pair {Pair},

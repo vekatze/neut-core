@@ -1,7 +1,7 @@
 import {
   this.c-int {c-int, or-c-int},
   this.foreign {O_APPEND, O_CREAT, O_RDONLY, O_RDWR, O_WRONLY},
-  this.list {list},
+  this.list {List, list},
 }
 
 data flag {

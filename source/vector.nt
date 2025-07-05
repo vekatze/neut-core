@@ -8,7 +8,7 @@ import {
   this.function {compose},
   this.int {abs-int, max-int, min-int},
   this.int.io {print-int-line},
-  this.list {Cons, Nil, list},
+  this.list {Cons, List, Nil, list},
   this.magic {cast},
   this.memory {load-int, load-pointer, store-int, store-pointer},
   this.pair {Pair, pair},

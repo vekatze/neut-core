@@ -5,7 +5,7 @@ import {
   this.c-size {C-Size, c-size},
   this.either {Right, none, rho},
   this.external {malloc},
-  this.list {Cons, Nil, list, reverse},
+  this.list {Cons, List, Nil, list, reverse},
   this.magic,
   this.memory {load-int, load-int8, store-int},
   this.pair {Pair, pair},

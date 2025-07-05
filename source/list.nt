@@ -14,6 +14,15 @@ data list(a: type) {
 | Cons(a, list(a))
 }
 
+variadic-right List {
+  function <a>(x: a, acc: list(a)): list(a) {
+    Cons(x, acc)
+  },
+  function <a>(): list(a) {
+    Nil
+  },
+}
+
 inline singleton<a>(x: a): list(a) {
   Cons(x, Nil)
 }

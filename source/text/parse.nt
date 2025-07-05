@@ -3,7 +3,7 @@ import {
   this.box,
   this.either {Left, Right, either},
   this.int.parse {parse-hex},
-  this.list {Cons, Nil, concat, for-each-E, for-each-EN, intercalate, list},
+  this.list {Cons, List, Nil, concat, for-each-E, for-each-EN, intercalate, list},
   this.pair {Pair},
   this.rune,
   this.rune.eq {eq-rune},

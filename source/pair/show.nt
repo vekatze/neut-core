@@ -1,6 +1,6 @@
 import {
   this.box,
-  this.list,
+  this.list {List},
   this.pair {Pair, pair},
   this.show {Show, show},
   this.text {intercalate, join},

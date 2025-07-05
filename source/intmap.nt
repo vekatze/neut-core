@@ -2,7 +2,7 @@ import {
   this.bool {bool},
   this.box,
   this.either {Right, none, rho},
-  this.list {append, list},
+  this.list {List, append, list},
   this.pair {Pair, pair},
   this.unit,
   this.word,

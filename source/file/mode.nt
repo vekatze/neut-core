@@ -1,6 +1,6 @@
 import {
   this.c-int {c-int, or-c-int},
-  this.list {list},
+  this.list {List, list},
 }
 
 data mode {

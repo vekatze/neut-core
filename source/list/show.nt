@@ -1,6 +1,6 @@
 import {
   this.box,
-  this.list {for-each, for-each-N, list},
+  this.list {List, for-each, for-each-N, list},
   this.show {Show, show},
   this.text {intercalate, join},
 }

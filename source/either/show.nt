@@ -1,6 +1,6 @@
 import {
   this.either {Left, Right, either},
-  this.list,
+  this.list {List},
   this.show {Show, show},
   this.text {format},
 }

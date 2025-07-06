@@ -25,14 +25,17 @@ inline uncurry<a, b, c>(f: (a) -> (b) -> c): (a, b) -> c {
 }
 
 rule-left chain {
-  function <a, b, c>(f: (a) -> b, g: (b) -> c): (a) -> c {
-    function (x) {
-      g(f(x))
-    }
-  },
-  function <a>() {
-    function (x: a) {
+  function leaf<a>(_: int) {
+    function (x: a): a {
       x
     }
+  },
+  function node-left<a, b, c>(acc: (a) -> b, g: (b) -> c): (a) -> c {
+    function (x: a): c {
+      g(acc(x))
+    }
+  },
+  function root<a>(x: a): a {
+    x
   },
 }

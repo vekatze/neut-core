@@ -8,7 +8,7 @@ import {
   this.float.io {print-float-line},
   this.int {power-int},
   this.int.io {print-int-line},
-  this.list {Cons, Nil, for-each, length, list, partition},
+  this.list {Cons, List, Nil, for-each, length, list, partition},
   this.pair {Pair, pair},
   this.random {random-float32, random-int},
   this.ref {_make-ref, ref},
@@ -20,7 +20,7 @@ import {
     get-cons-size,
   },
   this.unit {Unit, unit},
-  this.vector {for-N, product, push-back, vector},
+  this.vector {Vector, for-N, product, push-back, vector},
 }
 
 define with-cell(i: int): int {
@@ -126,9 +126,20 @@ define make-type(_: list(int)): type {
   unit
 }
 
+define increment(x: int): int {
+  add-int(x, 1)
+}
+
+define is-even(x: int): bool {
+  eq-int(rem-int(x, 2), 0)
+}
+
 define zen(): unit {
+  // let tmp = Cons(True, Cons(is-even, Nil));
+  // let xs = List[True, is-even];
+  pin myVec = Vector[True, False, True, True];
+  vet(myVec);
   // range
-  let foo: vector(int) = fold-left<push-back>[this.vector.make(3), 1, 2, 3, 4, 5];
   pin xs = this.vector.range(1, 100);
   vet(xs);
   // span
@@ -154,236 +165,236 @@ define zen(): unit {
   let xs = push-back(xs, Left(True));
   pin item = this.vector.split(xs, 2);
   vet(item);
-  // // filter-some
-  // let xs: vector(either(unit, int)) = this.vector.make(5);
-  // let xs = push-back(xs, Right(1));
-  // let xs = push-back(xs, Left(Unit));
-  // let xs = push-back(xs, Left(Unit));
-  // let xs = push-back(xs, Right(10));
-  // let xs = push-back(xs, Right(42));
-  // let xs = push-back(xs, Left(Unit));
-  // pin result = this.vector.filter-some(xs);
-  // vet(result);
-  // // filter
-  // let xs = this.vector.make(5);
-  // let xs = push-back(xs, 1);
-  // let xs = push-back(xs, 2);
-  // let xs = push-back(xs, 3);
-  // let xs = push-back(xs, 4);
-  // let xs = push-back(xs, 5);
-  // pin xs =
-  //   this.vector.filter(xs, function (x) {
-  //     ge-int(*x, 3)
-  //   });
-  // vet(xs);
-  // // partition
-  // let xs: vector(either(bool, int)) = this.vector.make(5);
-  // let xs = push-back(xs, Right(1));
-  // let xs = push-back(xs, Left(True));
-  // let xs = push-back(xs, Left(False));
-  // let xs = push-back(xs, Right(10));
-  // let xs = push-back(xs, Right(42));
-  // let xs = push-back(xs, Left(True));
-  // pin result = this.vector.partition(xs);
-  // vet(result);
-  // // zip-with
-  // let xs = this.vector.make(5);
-  // let xs = push-back(xs, 1);
-  // let !xs = push-back(xs, 2);
-  // let ys = this.vector.make(5);
-  // let ys = push-back(ys, 3);
-  // let ys = push-back(ys, 4);
-  // let !ys = push-back(ys, 5);
-  // let zs = this.vector.zip(!xs, !ys);
-  // pin result = this.vector.unzip(zs);
-  // vet(result);
-  // pin zs =
-  //   this.vector.zip-with(!xs, !ys, function (x, y, _) {
-  //     add-int(x, y)
-  //   });
-  // vet(zs);
-  // // product
-  // let xs = this.vector.make(5);
-  // let xs = push-back(xs, *"a");
-  // let xs = push-back(xs, *"b");
-  // let !xs = push-back(xs, *"c");
-  // pin xss = product(!xs, !xs);
-  // vet(xss);
-  // // nested vector
-  // let !foo = *"text";
-  // let _ = !foo;
-  // let _ = !foo;
-  // let xs = this.vector.make(5);
-  // let xs = push-back(xs, *"a");
-  // let xs = push-back(xs, *"b");
-  // let ys = this.vector.make(5);
-  // let ys = push-back(ys, *"c");
-  // let ys = push-back(ys, *"d");
-  // let zs = this.vector.make(5);
-  // let zs = push-back(zs, *"e");
-  // let zs = push-back(zs, *"f");
-  // let outer = this.vector.make(5);
-  // let outer = push-back(outer, xs);
-  // let outer = push-back(outer, ys);
-  // let outer = push-back(outer, zs);
-  // let _ on outer = vet(outer);
-  // pin new-outer = this.vector.concat(outer);
-  // vet(new-outer);
-  // let xs = this.vector.make(5);
-  // let xs = push-back(xs, *"a");
-  // let xs = push-back(xs, *"b");
-  // let xs = push-back(xs, *"c");
-  // let xs = push-back(xs, *"d");
-  // let !xs = push-back(xs, *"e");
-  // let ys = this.vector.intercalate(!xs, *"XXX");
-  // let zs = this.vector.append(!xs, ys);
-  // pin sample =
-  //   this.vector.fold-right(zs, *"test", function (acc, v, _) {
-  //     let tmp on acc, v = core.text.append(acc, v);
-  //     let _ = acc;
-  //     let _ = v;
-  //     tmp
-  //   });
-  // vet(sample);
-  // // let xs = push-back(xs, *"f");
-  // pin xs = this.vector.intercalate(!xs, *"XXX");
-  // vet(xs);
-  // vet("hello");
-  // pin xs: list(float) = Cons(10.38777, Cons(-2.38423, Nil));
-  // vet(xs);
-  // pin ys = Cons(`a`, Cons(`あ`, Nil));
-  // vet(ys);
-  // print("---\n");
-  // pin v: int = 10;
-  // vet(v);
-  // pin sample: either(unit, _) = Right(Pair(Unit, True));
-  // vet(sample);
-  // vet("hello");
-  // let xs: vector(text) = this.vector.make(8);
-  // let xs = push-back(xs, *"hello");
-  // pin xs = push-back(xs, *"Lorem ipsum");
-  // vet(xs);
-  // let xs: vector(&text) = this.vector.make(8);
-  // let xs = push-back(xs, "hello");
-  // pin xs = push-back(xs, "Lorem ipsum");
-  // vet(xs);
-  // for-N(xs, function (x, _) {
-  //   vet(*x);
-  // });
-  // pin t = this.text.singleton(`あ`);
-  // print-line(t);
-  // match this.rune.from-int(0xfffff) {
-  // | Right(v) =>
-  //   pin t = this.text.singleton(v);
-  //   print-line(t)
-  // | Left(_) =>
-  //   print-line("left")
+  // filter-some
+  let xs: vector(either(unit, int)) = this.vector.make(5);
+  let xs = push-back(xs, Right(1));
+  let xs = push-back(xs, Left(Unit));
+  let xs = push-back(xs, Left(Unit));
+  let xs = push-back(xs, Right(10));
+  let xs = push-back(xs, Right(42));
+  let xs = push-back(xs, Left(Unit));
+  pin result = this.vector.filter-some(xs);
+  vet(result);
+  // filter
+  let xs = this.vector.make(5);
+  let xs = push-back(xs, 1);
+  let xs = push-back(xs, 2);
+  let xs = push-back(xs, 3);
+  let xs = push-back(xs, 4);
+  let xs = push-back(xs, 5);
+  pin xs =
+    this.vector.filter(xs, function (x) {
+      ge-int(*x, 3)
+    });
+  vet(xs);
+  // partition
+  let xs: vector(either(bool, int)) = this.vector.make(5);
+  let xs = push-back(xs, Right(1));
+  let xs = push-back(xs, Left(True));
+  let xs = push-back(xs, Left(False));
+  let xs = push-back(xs, Right(10));
+  let xs = push-back(xs, Right(42));
+  let xs = push-back(xs, Left(True));
+  pin result = this.vector.partition(xs);
+  vet(result);
+  // zip-with
+  let xs = this.vector.make(5);
+  let xs = push-back(xs, 1);
+  let !xs = push-back(xs, 2);
+  let ys = this.vector.make(5);
+  let ys = push-back(ys, 3);
+  let ys = push-back(ys, 4);
+  let !ys = push-back(ys, 5);
+  let zs = this.vector.zip(!xs, !ys);
+  pin result = this.vector.unzip(zs);
+  vet(result);
+  pin zs =
+    this.vector.zip-with(!xs, !ys, function (x, y, _) {
+      add-int(x, y)
+    });
+  vet(zs);
+  // product
+  let xs = this.vector.make(5);
+  let xs = push-back(xs, *"a");
+  let xs = push-back(xs, *"b");
+  let !xs = push-back(xs, *"c");
+  pin xss = product(!xs, !xs);
+  vet(xss);
+  // nested vector
+  let !foo = *"text";
+  let _ = !foo;
+  let _ = !foo;
+  let xs = this.vector.make(5);
+  let xs = push-back(xs, *"a");
+  let xs = push-back(xs, *"b");
+  let ys = this.vector.make(5);
+  let ys = push-back(ys, *"c");
+  let ys = push-back(ys, *"d");
+  let zs = this.vector.make(5);
+  let zs = push-back(zs, *"e");
+  let zs = push-back(zs, *"f");
+  let outer = this.vector.make(5);
+  let outer = push-back(outer, xs);
+  let outer = push-back(outer, ys);
+  let outer = push-back(outer, zs);
+  let _ on outer = vet(outer);
+  pin new-outer = this.vector.concat(outer);
+  vet(new-outer);
+  let xs = this.vector.make(5);
+  let xs = push-back(xs, *"a");
+  let xs = push-back(xs, *"b");
+  let xs = push-back(xs, *"c");
+  let xs = push-back(xs, *"d");
+  let !xs = push-back(xs, *"e");
+  let ys = this.vector.intercalate(!xs, *"XXX");
+  let zs = this.vector.append(!xs, ys);
+  pin sample =
+    this.vector.fold-right(zs, *"test", function (acc, v, _) {
+      let tmp on acc, v = core.text.append(acc, v);
+      let _ = acc;
+      let _ = v;
+      tmp
+    });
+  vet(sample);
+  // let xs = push-back(xs, *"f");
+  pin xs = this.vector.intercalate(!xs, *"XXX");
+  vet(xs);
+  vet("hello");
+  pin xs: list(float) = Cons(10.38777, Cons(-2.38423, Nil));
+  vet(xs);
+  pin ys = Cons(`a`, Cons(`あ`, Nil));
+  vet(ys);
+  print("---\n");
+  pin v: int = 10;
+  vet(v);
+  pin sample: either(unit, _) = Right(Pair(Unit, True));
+  vet(sample);
+  vet("hello");
+  let xs: vector(text) = this.vector.make(8);
+  let xs = push-back(xs, *"hello");
+  pin xs = push-back(xs, *"Lorem ipsum");
+  vet(xs);
+  let xs: vector(&text) = this.vector.make(8);
+  let xs = push-back(xs, "hello");
+  pin xs = push-back(xs, "Lorem ipsum");
+  vet(xs);
+  for-N(xs, function (x, _) {
+    vet(*x);
+  });
+  pin t = this.text.singleton(`あ`);
+  print-line(t);
+  match this.rune.from-int(0xfffff) {
+  | Right(v) =>
+    pin t = this.text.singleton(v);
+    print-line(t)
+  | Left(_) =>
+    print-line("left")
+  };
+  let t1 = "hello";
+  let t2 = "helloaoeu";
+  if eq-text(t1, t2) {
+    print("true\n")
+  } else {
+    print("false\n")
+  };
+  pin xs = List[*"foo", *"bar", *"buz"];
+  pin yo = this.text.intercalate-N(xs, ", yo, ");
+  print-line(yo);
+  let t = "foo\nbar\nbuz";
+  pin yo = lines(t);
+  pin sometext' = unlines(yo);
+  print-line(sometext');
+  pin r: ref(int) = _make-ref(123);
+  this.ref.mutate(r, function (x) {
+    add-int(x, 10)
+  });
+  let value = this.ref.clone(r);
+  print("ref-value: ");
+  print-int-line(value);
+  let xs: list(either(int, bool)) = List[Left(3), Right(True), Left(2), Right(True), Left(134), Right(True)];
+  let Pair(ys, _) = partition(xs);
+  let _ =
+    for-each(ys, function (y) {
+      print("item: ");
+      print-int-line(y)
+    });
+  let !k = use-text("te");
+  let _ on !k = print-line(!k);
+  let _ on !k = print-line(!k);
+  let _ on !k = print-line(!k);
+  let _ on !k = print-line(!k);
+  let _ = !k;
+  let v = with-cell(3);
+  print("result of with-cell(3): ");
+  print-int-line(v);
+  let c = make-cell(*"hello");
+  let _ on c = {
+    let item = "test";
+    let _ =
+      mutate(c, function (_) {
+        let _ = item;
+        *"hello"
+      });
+    Unit;
+  };
+  pin val = extract(c);
+  print("extracted: ");
+  vet(val);
+  pin yo: pair(int, bool) = Pair(3, True);
+  let tmp = *yo;
+  let Pair(_, _) = tmp;
+  let val = random-float32(-5, 5);
+  print("random-float: ");
+  print-float-line(fpext-float32-float(val), 7);
+  print("value: ");
+  print-int-line(sext-int32-int(trunc-int-int32(-3234)));
+  let k: int = 2;
+  let val = power-int(k, 5);
+  print-int-line(val);
+  let foo = `x`;
+  use-rune(foo);
+  match foo {
+  | `a` =>
+    print("a\n")
+  | `b` =>
+    print("b\n")
+  | `あ` =>
+    print("lorem ipsum\n")
+  | _ =>
+    print("other\n")
+  };
+  let k: rune = `x`;
+  match k {
+  | `x` =>
+    print("test")
+  | _ =>
+    Unit
+  };
+  // let p: either(pair(rune, type), type) = Left(Pair(`x`, type));
+  // match p {
+  // | Right(_) =>
+  //   print("right\n")
+  // | Left(Pair(`a`, _)) =>
+  //   print("pair-a\n")
+  // | Left(Pair(`x`, _)) =>
+  //   print("pair-x\n")
+  // | Left(Pair(_, _)) =>
+  //   print("pair-x\n")
   // };
-  // let t1 = "hello";
-  // let t2 = "helloaoeu";
-  // if eq-text(t1, t2) {
-  //   print("true\n")
-  // } else {
-  //   print("false\n")
-  // };
-  // pin xs = [*"foo", *"bar", *"buz"];
-  // pin yo = this.text.intercalate-N(xs, ", yo, ");
-  // print-line(yo);
-  // let t = "foo\nbar\nbuz";
-  // pin yo = lines(t);
-  // pin sometext' = unlines(yo);
-  // print-line(sometext');
-  // pin r: ref(int) = _make-ref(123);
-  // this.ref.mutate(r, function (x) {
-  //   add-int(x, 10)
-  // });
-  // let value = this.ref.clone(r);
-  // print("ref-value: ");
-  // print-int-line(value);
-  // let xs: list(either(int, bool)) = [Left(3), Right(True), Left(2), Right(True), Left(134), Right(True)];
-  // let Pair(ys, _) = partition(xs);
-  // let _ =
-  //   for-each(ys, function (y) {
-  //     print("item: ");
-  //     print-int-line(y)
-  //   });
-  // let !k = use-text("te");
-  // let _ on !k = print-line(!k);
-  // let _ on !k = print-line(!k);
-  // let _ on !k = print-line(!k);
-  // let _ on !k = print-line(!k);
-  // let _ = !k;
-  // let v = with-cell(3);
-  // print("result of with-cell(3): ");
-  // print-int-line(v);
-  // let c = make-cell(*"hello");
-  // let _ on c = {
-  //   let item = "test";
-  //   let _ =
-  //     mutate(c, function (_) {
-  //       let _ = item;
-  //       *"hello"
-  //     });
-  //   Unit;
-  // };
-  // pin val = extract(c);
-  // print("extracted: ");
-  // vet(val);
-  // pin yo: pair(int, bool) = Pair(3, True);
-  // let tmp = *yo;
-  // let Pair(_, _) = tmp;
-  // let val = random-float32(-5, 5);
-  // print("random-float: ");
-  // print-float-line(fpext-float32-float(val), 7);
-  // print("value: ");
-  // print-int-line(sext-int32-int(trunc-int-int32(-3234)));
-  // let k: int = 2;
-  // let val = power-int(k, 5);
-  // print-int-line(val);
-  // let foo = `x`;
-  // use-rune(foo);
-  // match foo {
-  // | `a` =>
-  //   print("a\n")
-  // | `b` =>
-  //   print("b\n")
-  // | `あ` =>
-  //   print("lorem ipsum\n")
-  // | _ =>
-  //   print("other\n")
-  // };
-  // let k: rune = `x`;
-  // match k {
-  // | `x` =>
-  //   print("test")
-  // | _ =>
-  //   Unit
-  // };
-  // // let p: either(pair(rune, type), type) = Left(Pair(`x`, type));
-  // // match p {
-  // // | Right(_) =>
-  // //   print("right\n")
-  // // | Left(Pair(`a`, _)) =>
-  // //   print("pair-a\n")
-  // // | Left(Pair(`x`, _)) =>
-  // //   print("pair-x\n")
-  // // | Left(Pair(_, _)) =>
-  // //   print("pair-x\n")
-  // // };
-  // let !xs: list(int) = [1, 2, 3];
-  // letbox len on !xs = {
-  //   discard(*!xs);
-  //   box-int(length(!xs))
-  // };
-  // let _ = discard(!xs);
-  // let _ = discard(!xs);
-  // let _ = discard(!xs);
-  // print("len: ");
-  // print-int-line(len);
-  // print("rune-as-int: ");
-  // print-int-line(len);
-  // print("hello, world\n");
-  // vet("yo");
+  let !xs: list(int) = List[1, 2, 3];
+  letbox len on !xs = {
+    discard(*!xs);
+    box-int(length(!xs))
+  };
+  let _ = discard(!xs);
+  let _ = discard(!xs);
+  let _ = discard(!xs);
+  print("len: ");
+  print-int-line(len);
+  print("rune-as-int: ");
+  print-int-line(len);
+  print("hello, world\n");
+  vet("yo");
   use-id();
 }
 

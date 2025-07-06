@@ -1,0 +1,129 @@
+import {
+  this.box,
+  this.pair {Pair, pair},
+  this.text {text},
+  this.text.io {print-line},
+  this.unit {unit},
+}
+
+data doc {
+| Nil
+| Text(content: text, cont: doc)
+| Line(indentation: int, cont: doc)
+}
+
+define append(d1: doc, d2: doc): doc {
+  match d1 {
+  | Nil =>
+    d2
+  | Text(t, cont) =>
+    Text(t, append(cont, d2))
+  | Line(i, cont) =>
+    Line(i, append(cont, d2))
+  }
+}
+
+rule-left join {
+  function leaf(_: int): doc {
+    Nil
+  },
+  function node-left(acc: doc, d: doc): doc {
+    append(acc, d)
+  },
+  function root<a>(x: a): a {
+    x
+  },
+}
+
+define layout(d: doc): text {
+  match d {
+  | Nil =>
+    *""
+  | Text(t, cont) =>
+    pin t = t;
+    pin cont = layout(cont);
+    this.text.append(t, cont)
+  | Line(i, cont) =>
+    pin tmp = this.text.replicate(" ", i);
+    pin cont = layout(cont);
+    pin foo = this.text.append(tmp, cont);
+    this.text.append("\n", foo)
+  }
+}
+
+define nest(i: int, d: doc): doc {
+  match d {
+  | Nil =>
+    Nil
+  | Text(t, cont) =>
+    Text(t, nest(i, cont))
+  | Line(j, cont) =>
+    Line(add-int(i, j), nest(i, cont))
+  }
+}
+
+define atom(t: text): doc {
+  Text(t, Nil)
+}
+
+define newline: doc {
+  Line(0, Nil)
+}
+
+define nested(prefix: doc, body: doc, suffix: doc): doc {
+  join[
+    prefix,
+    nest(
+      2,
+      append(newline, body),
+    ),
+    newline,
+    suffix,
+  ]
+}
+
+define append-vertical(d1: doc, d2: doc): doc {
+  join[d1, newline, d2]
+}
+
+define in-paren(d: doc): doc {
+  nested(
+    atom(*"("),
+    d,
+    atom(*")"),
+  )
+}
+
+rule-right arguments {
+  function leaf(size: int): pair(int, doc) {
+    Pair(size, Nil)
+  },
+  function node-right(d: doc, acc: pair(int, doc)): pair(int, doc) {
+    let Pair(size, acc) = acc;
+    Pair(size, append-vertical(d, acc))
+  },
+  function root(x: pair(int, doc)): doc {
+    let Pair(_, x) = x;
+    in-paren(x)
+  },
+}
+
+define zen(): unit {
+  pin tmp =
+    layout(
+      join[
+        atom(*"Cons"),
+        in-paren(
+          join[
+            atom(*"Cons"),
+            arguments[
+              atom(*"my-item,"),
+              atom(*"sample,"),
+              atom(*"hogehoge,"),
+            ],
+          ],
+        ),
+      ],
+    );
+  print-line(tmp)
+}

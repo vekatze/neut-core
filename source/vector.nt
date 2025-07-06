@@ -279,9 +279,14 @@ define pop-back<a, r := rho>(xs: vector(a)): ?pair(vector(a), a) {
 }
 
 rule-left Vector {
-  push-back,
-  function <a>(): vector(a) {
-    this.vector.make(3)
+  function leaf<a>(size: int): vector(a) {
+    this.vector.make(size)
+  },
+  function node-left<a>(acc: vector(a), x: a): vector(a) {
+    push-back(acc, x)
+  },
+  function root<a>(x: a): a {
+    x
   },
 }
 

@@ -36,19 +36,25 @@ inline not(b: bool): bool {
 }
 
 rule-left any {
-  function (acc: bool, b: bool): bool {
+  function leaf(_: int): bool {
+    False
+  },
+  function node-left(acc: bool, b: bool): bool {
     or(acc, b)
   },
-  function (): bool {
-    False
+  function root<a>(x: a): a {
+    x
   },
 }
 
 rule-left all {
-  function (acc: bool, b: bool): bool {
+  function leaf(_: int): bool {
+    True
+  },
+  function node-left(acc: bool, b: bool): bool {
     and(acc, b)
   },
-  function (): bool {
-    True
+  function root<a>(x: a): a {
+    x
   },
 }

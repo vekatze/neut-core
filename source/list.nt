@@ -15,11 +15,14 @@ data list(a: type) {
 }
 
 rule-right List {
-  function <a>(x: a, acc: list(a)): list(a) {
+  function leaf<a>(_: int): list(a) {
+    Nil
+  },
+  function node-right<a>(x: a, acc: list(a)): list(a) {
     Cons(x, acc)
   },
-  function <a>(): list(a) {
-    Nil
+  function root<a>(x: a): a {
+    x
   },
 }
 

@@ -167,6 +167,7 @@ define _vet<a>(x: &a): unit {
   | Vector =>
     let elem-type = magic cast(int, type, load-int(shift(magic cast(&a, pointer, x), mul-int(this.word.size, 3))));
     let vec: &vector(elem-type) = magic cast(&a, &vector(elem-type), x);
+    _print-constructor("Vector");
     print("[");
     _vet-vector(elem-type, vec);
     print("]");

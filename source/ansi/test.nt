@@ -1,0 +1,291 @@
+import {
+  this.ansi {
+    Background,
+    Backward,
+    Black,
+    Blue,
+    Bold,
+    Color,
+    Color-16,
+    Color-256,
+    Color-RGB,
+    Cyan,
+    Dull,
+    Erase,
+    Faint,
+    Foreground,
+    From-Cursor,
+    Green,
+    Italic,
+    Line,
+    Magenta,
+    Move-Cursor,
+    Normal,
+    Red,
+    Set-Style,
+    To-Column,
+    To-Cursor,
+    Underline,
+    Vivid,
+    White,
+    Whole,
+    Yellow,
+    ansi-kit,
+    flush,
+    make-ansi-kit,
+    make-ansi-kit-unbuffered,
+    write,
+    write-code,
+  },
+  this.bool,
+  this.control {loop-E},
+  this.either {Right},
+  this.file.descriptor {stdout},
+  this.system {system},
+  this.text,
+  this.unit {Unit, unit},
+}
+
+define _write-space(k: &ansi-kit): system(unit) {
+  try _ = write(k, " ");
+  write-code(k, Set-Style(Normal))
+}
+
+define _write-X(k: &ansi-kit): system(unit) {
+  try _ = write(k, "X");
+  write-code(k, Set-Style(Normal))
+}
+
+define _write-XX(k: &ansi-kit): system(unit) {
+  try _ = write(k, "XX");
+  try _ = write-code(k, Set-Style(Normal));
+  write(k, " ")
+}
+
+define _test-color-foreground-dull(k: &ansi-kit): system(unit) {
+  try _ = write-code(k, Set-Style(Color(Foreground, Color-16(Dull, Black))));
+  try _ = _write-XX(k);
+  try _ = write-code(k, Set-Style(Color(Foreground, Color-16(Dull, Red))));
+  try _ = _write-XX(k);
+  try _ = write-code(k, Set-Style(Color(Foreground, Color-16(Dull, Green))));
+  try _ = _write-XX(k);
+  try _ = write-code(k, Set-Style(Color(Foreground, Color-16(Dull, Yellow))));
+  try _ = _write-XX(k);
+  try _ = write-code(k, Set-Style(Color(Foreground, Color-16(Dull, Blue))));
+  try _ = _write-XX(k);
+  try _ = write-code(k, Set-Style(Color(Foreground, Color-16(Dull, Magenta))));
+  try _ = _write-XX(k);
+  try _ = write-code(k, Set-Style(Color(Foreground, Color-16(Dull, Cyan))));
+  try _ = _write-XX(k);
+  try _ = write-code(k, Set-Style(Color(Foreground, Color-16(Dull, White))));
+  _write-XX(k)
+}
+
+define _test-color-background-dull(k: &ansi-kit): system(unit) {
+  try _ = write-code(k, Set-Style(Color(Background, Color-16(Dull, Black))));
+  try _ = _write-XX(k);
+  try _ = write-code(k, Set-Style(Color(Background, Color-16(Dull, Red))));
+  try _ = _write-XX(k);
+  try _ = write-code(k, Set-Style(Color(Background, Color-16(Dull, Green))));
+  try _ = _write-XX(k);
+  try _ = write-code(k, Set-Style(Color(Background, Color-16(Dull, Yellow))));
+  try _ = _write-XX(k);
+  try _ = write-code(k, Set-Style(Color(Background, Color-16(Dull, Blue))));
+  try _ = _write-XX(k);
+  try _ = write-code(k, Set-Style(Color(Background, Color-16(Dull, Magenta))));
+  try _ = _write-XX(k);
+  try _ = write-code(k, Set-Style(Color(Background, Color-16(Dull, Cyan))));
+  try _ = _write-XX(k);
+  try _ = write-code(k, Set-Style(Color(Background, Color-16(Dull, White))));
+  _write-XX(k)
+}
+
+define _test-color-foreground-vivid(k: &ansi-kit): system(unit) {
+  try _ = write-code(k, Set-Style(Color(Foreground, Color-16(Vivid, Black))));
+  try _ = _write-XX(k);
+  try _ = write-code(k, Set-Style(Color(Foreground, Color-16(Vivid, Red))));
+  try _ = _write-XX(k);
+  try _ = write-code(k, Set-Style(Color(Foreground, Color-16(Vivid, Green))));
+  try _ = _write-XX(k);
+  try _ = write-code(k, Set-Style(Color(Foreground, Color-16(Vivid, Yellow))));
+  try _ = _write-XX(k);
+  try _ = write-code(k, Set-Style(Color(Foreground, Color-16(Vivid, Blue))));
+  try _ = _write-XX(k);
+  try _ = write-code(k, Set-Style(Color(Foreground, Color-16(Vivid, Magenta))));
+  try _ = _write-XX(k);
+  try _ = write-code(k, Set-Style(Color(Foreground, Color-16(Vivid, Cyan))));
+  try _ = _write-XX(k);
+  try _ = write-code(k, Set-Style(Color(Foreground, Color-16(Vivid, White))));
+  _write-XX(k)
+}
+
+define _test-color-background-vivid(k: &ansi-kit): system(unit) {
+  try _ = write-code(k, Set-Style(Color(Background, Color-16(Vivid, Black))));
+  try _ = _write-XX(k);
+  try _ = write-code(k, Set-Style(Color(Background, Color-16(Vivid, Red))));
+  try _ = _write-XX(k);
+  try _ = write-code(k, Set-Style(Color(Background, Color-16(Vivid, Green))));
+  try _ = _write-XX(k);
+  try _ = write-code(k, Set-Style(Color(Background, Color-16(Vivid, Yellow))));
+  try _ = _write-XX(k);
+  try _ = write-code(k, Set-Style(Color(Background, Color-16(Vivid, Blue))));
+  try _ = _write-XX(k);
+  try _ = write-code(k, Set-Style(Color(Background, Color-16(Vivid, Magenta))));
+  try _ = _write-XX(k);
+  try _ = write-code(k, Set-Style(Color(Background, Color-16(Vivid, Cyan))));
+  try _ = _write-XX(k);
+  try _ = write-code(k, Set-Style(Color(Background, Color-16(Vivid, White))));
+  _write-XX(k)
+}
+
+define _test-256(k: &ansi-kit): system(unit) {
+  try _ =
+    loop-E(256, function (i) {
+      try _ = write-code(k, Set-Style(Color(Background, Color-256(trunc-int-int8(i)))));
+      try _ = _write-space(k);
+      if eq-int(rem-int(add-int(i, 1), 16), 0) {
+        write(k, "\n")
+      } else {
+        Right(Unit)
+      }
+    });
+  try _ = write(k, "\n");
+  flush(k)
+}
+
+define _test-rgb(k: &ansi-kit): system(unit) {
+  try _ = write-code(k, Set-Style(Color(Background, Color-RGB(255, 0, 0))));
+  try _ = _write-space(k);
+  try _ = write-code(k, Set-Style(Color(Background, Color-RGB(0, 255, 0))));
+  try _ = _write-space(k);
+  try _ = write-code(k, Set-Style(Color(Background, Color-RGB(0, 0, 255))));
+  try _ = _write-space(k);
+  try _ = write-code(k, Set-Style(Color(Background, Color-RGB(255, 255, 0))));
+  try _ = _write-space(k);
+  try _ = write-code(k, Set-Style(Color(Background, Color-RGB(255, 0, 255))));
+  try _ = _write-space(k);
+  try _ = write-code(k, Set-Style(Color(Background, Color-RGB(0, 255, 255))));
+  try _ = _write-space(k);
+  try _ = write-code(k, Set-Style(Color(Background, Color-RGB(255, 255, 255))));
+  try _ = _write-space(k);
+  try _ = write(k, "\n");
+  try _ = write-code(k, Set-Style(Color(Background, Color-RGB(128, 0, 0))));
+  try _ = _write-space(k);
+  try _ = write-code(k, Set-Style(Color(Background, Color-RGB(0, 128, 0))));
+  try _ = _write-space(k);
+  try _ = write-code(k, Set-Style(Color(Background, Color-RGB(0, 0, 128))));
+  try _ = _write-space(k);
+  try _ = write-code(k, Set-Style(Color(Background, Color-RGB(128, 128, 0))));
+  try _ = _write-space(k);
+  try _ = write-code(k, Set-Style(Color(Background, Color-RGB(128, 0, 128))));
+  try _ = _write-space(k);
+  try _ = write-code(k, Set-Style(Color(Background, Color-RGB(0, 128, 128))));
+  try _ = _write-space(k);
+  try _ = write-code(k, Set-Style(Color(Background, Color-RGB(128, 128, 128))));
+  try _ = _write-space(k);
+  try _ = write(k, "\n");
+  try _ = write-code(k, Set-Style(Color(Foreground, Color-RGB(255, 0, 0))));
+  try _ = _write-X(k);
+  try _ = write-code(k, Set-Style(Color(Foreground, Color-RGB(0, 255, 0))));
+  try _ = _write-X(k);
+  try _ = write-code(k, Set-Style(Color(Foreground, Color-RGB(0, 0, 255))));
+  try _ = _write-X(k);
+  try _ = write-code(k, Set-Style(Color(Foreground, Color-RGB(255, 255, 0))));
+  try _ = _write-X(k);
+  try _ = write-code(k, Set-Style(Color(Foreground, Color-RGB(255, 0, 255))));
+  try _ = _write-X(k);
+  try _ = write-code(k, Set-Style(Color(Foreground, Color-RGB(0, 255, 255))));
+  try _ = _write-X(k);
+  try _ = write-code(k, Set-Style(Color(Foreground, Color-RGB(255, 255, 255))));
+  try _ = _write-X(k);
+  try _ = write(k, "\n");
+  try _ = write-code(k, Set-Style(Color(Foreground, Color-RGB(128, 0, 0))));
+  try _ = _write-X(k);
+  try _ = write-code(k, Set-Style(Color(Foreground, Color-RGB(0, 128, 0))));
+  try _ = _write-X(k);
+  try _ = write-code(k, Set-Style(Color(Foreground, Color-RGB(0, 0, 128))));
+  try _ = _write-X(k);
+  try _ = write-code(k, Set-Style(Color(Foreground, Color-RGB(128, 128, 0))));
+  try _ = _write-X(k);
+  try _ = write-code(k, Set-Style(Color(Foreground, Color-RGB(128, 0, 128))));
+  try _ = _write-X(k);
+  try _ = write-code(k, Set-Style(Color(Foreground, Color-RGB(0, 128, 128))));
+  try _ = _write-X(k);
+  try _ = write-code(k, Set-Style(Color(Foreground, Color-RGB(128, 128, 128))));
+  try _ = _write-X(k);
+  try _ = write(k, "\n");
+  flush(k)
+}
+
+define _test-color(k: &ansi-kit): system(unit) {
+  try _ = write-code(k, Set-Style(Normal));
+  try _ = _write-XX(k);
+  try _ = write-code(k, Set-Style(Bold));
+  try _ = _write-XX(k);
+  try _ = write-code(k, Set-Style(Faint));
+  try _ = _write-XX(k);
+  try _ = write-code(k, Set-Style(Italic));
+  try _ = _write-XX(k);
+  try _ = write-code(k, Set-Style(Underline));
+  try _ = _write-XX(k);
+  try _ = write(k, "\n");
+  try _ = _test-color-foreground-dull(k);
+  try _ = write(k, "\n");
+  try _ = _test-color-background-dull(k);
+  try _ = write(k, "\n");
+  try _ = _test-color-foreground-vivid(k);
+  try _ = write(k, "\n");
+  try _ = _test-color-background-vivid(k);
+  try _ = write(k, "\n");
+  try _ = write(k, "123456789");
+  try _ = flush(k);
+  try _ = write-code(k, Erase(Line, Whole));
+  try _ = write-code(k, Move-Cursor(To-Column(0)));
+  try _ = write(k, "123456789");
+  try _ = write-code(k, Move-Cursor(Backward(5)));
+  try _ = flush(k);
+  try _ = write-code(k, Erase(Line, From-Cursor));
+  try _ = write(k, "\n");
+  try _ = write(k, "123456789");
+  try _ = write-code(k, Move-Cursor(Backward(5)));
+  try _ = flush(k);
+  try _ = write-code(k, Erase(Line, To-Cursor));
+  try _ = flush(k);
+  try _ = write(k, "\n");
+  try _ = write(k, "hello, world!\n");
+  flush(k)
+}
+
+define some-func(): system(unit) {
+  pin k = make-ansi-kit of {sink := stdout, capacity := 100};
+  // prints "error: " in bold red
+  try _ = write-code(k, Set-Style(Color(Foreground, Color-16(Vivid, Red))));
+  try _ = write-code(k, Set-Style(Bold));
+  try _ = write(k, "error: ");
+  try _ = write-code(k, Set-Style(Normal));
+  // prints "Lorem.." in plain text
+  try _ = write(k, "Lorem ipsum dolor sit amet, consectetur adipiscing elit.\n");
+  // prints "hint: " in bold blue
+  try _ = write-code(k, Set-Style(Color(Foreground, Color-16(Vivid, Blue))));
+  try _ = write-code(k, Set-Style(Bold));
+  try _ = write(k, "hint: ");
+  // prints "くらきより.." in plain text
+  try _ = write-code(k, Set-Style(Normal));
+  try _ = write(k, "くらきよりくらきみちにぞいりぬべきはるかにてらせやまのはのつき\n");
+  flush(k)
+}
+
+define zen(): unit {
+  pin k1 = make-ansi-kit of {sink := stdout, capacity := 100};
+  pin k2 = make-ansi-kit-unbuffered of {sink := stdout};
+  let _ = {
+    try _ = _test-256(k1);
+    try _ = _test-256(k2);
+    try _ = _test-rgb(k1);
+    try _ = _test-rgb(k2);
+    try _ = _test-color(k1);
+    try _ = _test-color(k2);
+    some-func()
+  };
+  Unit
+}

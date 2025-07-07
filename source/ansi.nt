@@ -1,0 +1,331 @@
+import {
+  this.box,
+  this.buffer {make-buffer},
+  this.either {Right, rho},
+  this.file.descriptor {descriptor},
+  this.int.buffer,
+  this.int.io,
+  this.system {system},
+  this.text {text},
+  this.text.buffer,
+  this.text.io,
+  this.unit {Unit, unit},
+}
+
+data color-intensity {
+| Dull
+| Vivid
+}
+
+data color-layer {
+| Foreground
+| Background
+}
+
+data color-ansi {
+| Black
+| Red
+| Green
+| Yellow
+| Blue
+| Magenta
+| Cyan
+| White
+}
+
+data color {
+| Color-16(color-intensity, color-ansi)
+| Color-256(int8)
+| Color-RGB(int8, int8, int8)
+}
+
+data span {
+| From-Cursor
+| To-Cursor
+| Whole
+}
+
+data style {
+| Normal
+| Bold
+| Faint
+| Italic
+| Underline
+| Color(color-layer, color)
+}
+
+data cursor-movement {
+| Up(int)
+| Down(int)
+| Forward(int)
+| Backward(int)
+| Up-Start(int)
+| Down-Start(int)
+| To-Column(int)
+| To(int, int)
+}
+
+data space {
+| Line
+| Screen
+}
+
+data command {
+| Set-Style(style)
+| Move-Cursor(cursor-movement)
+| Erase(space, span)
+}
+
+data ansi-kit {
+| _ANSI-Kit(
+    buffer: this.buffer.buffer,
+  )
+| _ANSI-Kit-Unbuffered(
+    sink: descriptor,
+  )
+}
+
+define flush<r := rho>(k: &ansi-kit): system(unit) {
+  case k {
+  | _ANSI-Kit of {buffer} =>
+    try _ = r;
+    core.buffer.flush(buffer)
+  | _ANSI-Kit-Unbuffered of {} =>
+    try _ = r;
+    Right(Unit)
+  }
+}
+
+define make-ansi-kit(sink: descriptor, capacity: int): ansi-kit {
+  let buffer = make-buffer(sink, capacity);
+  _ANSI-Kit of {buffer}
+}
+
+define make-ansi-kit-unbuffered(sink: descriptor): ansi-kit {
+  _ANSI-Kit-Unbuffered of {sink}
+}
+
+define write<r := rho>(k: &ansi-kit, t: &text): system(unit) {
+  try _ = r;
+  case k {
+  | _ANSI-Kit of {buffer} =>
+    this.text.buffer.write(buffer, t)
+  | _ANSI-Kit-Unbuffered of {sink} =>
+    let _ = this.text.io.write(*sink, t);
+    Right(Unit)
+  }
+}
+
+define write-line<r := rho>(k: &ansi-kit, t: &text): system(unit) {
+  try _ = r;
+  case k {
+  | _ANSI-Kit of {buffer} =>
+    core.text.buffer.write-line(buffer, t)
+  | _ANSI-Kit-Unbuffered of {sink} =>
+    let _ = core.text.io.write(*sink, t);
+    Right(Unit)
+  }
+}
+
+define write-int<r := rho>(k: &ansi-kit, x: int): system(unit) {
+  try _ = r;
+  case k {
+  | _ANSI-Kit of {buffer} =>
+    core.int.buffer.write-int(buffer, x)
+  | _ANSI-Kit-Unbuffered of {sink} =>
+    let _ = core.int.io.write-int(*sink, x);
+    Right(Unit)
+  }
+}
+
+inline write-code<r := rho>(k: &ansi-kit, c: command): system(unit) {
+  try _ = r;
+  match c {
+  | Set-Style(style) =>
+    match style {
+    | Normal =>
+      write(k, "\u{1b}[0m")
+    | Bold =>
+      write(k, "\u{1b}[1m")
+    | Faint =>
+      write(k, "\u{1b}[2m")
+    | Italic =>
+      write(k, "\u{1b}[3m")
+    | Underline =>
+      write(k, "\u{1b}[4m")
+    | Color(color-layer, color) =>
+      match color-layer {
+      | Foreground =>
+        match color {
+        | Color-16(color-intensity, color) =>
+          match color-intensity {
+          | Dull =>
+            match color {
+            | Black =>
+              write(k, "\u{1b}[30m")
+            | Red =>
+              write(k, "\u{1b}[31m")
+            | Green =>
+              write(k, "\u{1b}[32m")
+            | Yellow =>
+              write(k, "\u{1b}[33m")
+            | Blue =>
+              write(k, "\u{1b}[34m")
+            | Magenta =>
+              write(k, "\u{1b}[35m")
+            | Cyan =>
+              write(k, "\u{1b}[36m")
+            | White =>
+              write(k, "\u{1b}[37m")
+            }
+          | Vivid =>
+            match color {
+            | Black =>
+              write(k, "\u{1b}[90m")
+            | Red =>
+              write(k, "\u{1b}[91m")
+            | Green =>
+              write(k, "\u{1b}[92m")
+            | Yellow =>
+              write(k, "\u{1b}[93m")
+            | Blue =>
+              write(k, "\u{1b}[94m")
+            | Magenta =>
+              write(k, "\u{1b}[95m")
+            | Cyan =>
+              write(k, "\u{1b}[96m")
+            | White =>
+              write(k, "\u{1b}[97m")
+            }
+          }
+        | Color-256(value) =>
+          try _ = write(k, "\u{1b}[38;5;");
+          try _ = write-int(k, zext-int8-int(value));
+          write(k, "m")
+        | Color-RGB(r, g, b) =>
+          try _ = write(k, "\u{1b}[38;2;");
+          try _ = write-int(k, zext-int8-int(r));
+          try _ = write(k, ";");
+          try _ = write-int(k, zext-int8-int(g));
+          try _ = write(k, ";");
+          try _ = write-int(k, zext-int8-int(b));
+          write(k, "m")
+        }
+      | Background =>
+        match color {
+        | Color-16(color-intensity, color) =>
+          match color-intensity {
+          | Dull =>
+            match color {
+            | Black =>
+              write(k, "\u{1b}[40m")
+            | Red =>
+              write(k, "\u{1b}[41m")
+            | Green =>
+              write(k, "\u{1b}[42m")
+            | Yellow =>
+              write(k, "\u{1b}[43m")
+            | Blue =>
+              write(k, "\u{1b}[44m")
+            | Magenta =>
+              write(k, "\u{1b}[45m")
+            | Cyan =>
+              write(k, "\u{1b}[46m")
+            | White =>
+              write(k, "\u{1b}[47m")
+            }
+          | Vivid =>
+            match color {
+            | Black =>
+              write(k, "\u{1b}[100m")
+            | Red =>
+              write(k, "\u{1b}[101m")
+            | Green =>
+              write(k, "\u{1b}[102m")
+            | Yellow =>
+              write(k, "\u{1b}[103m")
+            | Blue =>
+              write(k, "\u{1b}[104m")
+            | Magenta =>
+              write(k, "\u{1b}[105m")
+            | Cyan =>
+              write(k, "\u{1b}[106m")
+            | White =>
+              write(k, "\u{1b}[107m")
+            }
+          }
+        | Color-256(value) =>
+          try _ = write(k, "\u{1b}[48;5;");
+          try _ = write-int(k, zext-int8-int(value));
+          write(k, "m")
+        | Color-RGB(r, g, b) =>
+          try _ = write(k, "\u{1b}[48;2;");
+          try _ = write-int(k, zext-int8-int(r));
+          try _ = write(k, ";");
+          try _ = write-int(k, zext-int8-int(g));
+          try _ = write(k, ";");
+          try _ = write-int(k, zext-int8-int(b));
+          write(k, "m")
+        }
+      }
+    }
+  | Move-Cursor(movement) =>
+    match movement {
+    | Up(offset) =>
+      try _ = write(k, "\u{1b}[");
+      try _ = write-int(k, offset);
+      write(k, "A")
+    | Down(offset) =>
+      try _ = write(k, "\u{1b}[");
+      try _ = write-int(k, offset);
+      write(k, "B")
+    | Forward(offset) =>
+      try _ = write(k, "\u{1b}[");
+      try _ = write-int(k, offset);
+      write(k, "C")
+    | Backward(offset) =>
+      try _ = write(k, "\u{1b}[");
+      try _ = write-int(k, offset);
+      write(k, "D")
+    | Up-Start(offset) =>
+      try _ = write(k, "\u{1b}[");
+      try _ = write-int(k, offset);
+      write(k, "E")
+    | Down-Start(offset) =>
+      try _ = write(k, "\u{1b}[");
+      try _ = write-int(k, offset);
+      write(k, "F")
+    | To-Column(column) =>
+      try _ = write(k, "\u{1b}[");
+      try _ = write-int(k, column);
+      write(k, "G")
+    | To(x, y) =>
+      try _ = write(k, "\u{1b}[");
+      try _ = write-int(k, x);
+      try _ = write(k, ";");
+      try _ = write-int(k, y);
+      write(k, "H")
+    }
+  | Erase(space, span) =>
+    match space {
+    | Line =>
+      match span {
+      | From-Cursor =>
+        write(k, "\u{1b}[0K")
+      | To-Cursor =>
+        write(k, "\u{1b}[1K")
+      | Whole =>
+        write(k, "\u{1b}[2K")
+      }
+    | Screen =>
+      match span {
+      | From-Cursor =>
+        write(k, "\u{1b}[0J")
+      | To-Cursor =>
+        write(k, "\u{1b}[1J")
+      | Whole =>
+        write(k, "\u{1b}[2J")
+      }
+    }
+  }
+}

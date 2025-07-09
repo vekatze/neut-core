@@ -24,7 +24,7 @@ inline uncurry<a, b, c>(f: (a) -> (b) -> c): (a, b) -> c {
   }
 }
 
-rule-left chain {
+rule-left pipeline {
   function leaf<a>(_: int) {
     function (x: a): a {
       x

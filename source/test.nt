@@ -3,16 +3,18 @@ import {
   this.box {axiom-T},
   this.cell {_make-cell, mutate},
   this.debug {vet},
+  this.either {Right, either},
   this.int.io {print-int-line},
-  this.list {list},
+  this.list {Cons, List, Nil, list},
+  this.pair {Pair},
   this.random {random-int},
   this.text {text},
   this.text.io {print, print-line},
   this.type-tag {
     get-cons-size,
   },
-  this.unit {unit},
-  this.vector {Vector},
+  this.unit {Unit, unit},
+  this.vector {Vector, product, push-back},
 }
 
 define with-cell(i: int): int {
@@ -131,9 +133,9 @@ define zen(): unit {
   // let xs = List[True, is-even];
   pin myVec = Vector[True, False, True, True];
   vet(myVec);
-  // // range
-  // pin xs = this.vector.range(1, 100);
-  // vet(xs);
+  // range
+  pin xs = this.vector.range(1, 10);
+  vet(xs);
   // // span
   // let xs: vector(int) = this.vector.make(5);
   // let xs = push-back(xs, 1);
@@ -206,12 +208,12 @@ define zen(): unit {
   //   });
   // vet(zs);
   // // product
-  // let xs = this.vector.make(5);
-  // let xs = push-back(xs, *"a");
-  // let xs = push-back(xs, *"b");
-  // let !xs = push-back(xs, *"c");
-  // pin xss = product(!xs, !xs);
-  // vet(xss);
+  let xs = this.vector.make(5);
+  let xs = push-back(xs, *"a");
+  let xs = push-back(xs, *"b");
+  let !xs = push-back(xs, *"c");
+  pin xss = product(!xs, !xs);
+  vet(xss);
   // // nested vector
   // let !foo = *"text";
   // let _ = !foo;
@@ -254,13 +256,13 @@ define zen(): unit {
   // vet("hello");
   // pin xs: list(float) = Cons(10.38777, Cons(-2.38423, Nil));
   // vet(xs);
-  // pin ys = Cons(`a`, Cons(`あ`, Nil));
-  // vet(ys);
+  pin ys = Cons(`a`, Cons(`あ`, Nil));
+  vet(ys);
   // print("---\n");
   // pin v: int = 10;
   // vet(v);
-  // pin sample: either(unit, _) = Right(Pair(Unit, True));
-  // vet(sample);
+  pin sample: either(unit, _) = Right(Pair(Unit, True));
+  vet(sample);
   // vet("hello");
   // let xs: vector(text) = this.vector.make(8);
   // let xs = push-back(xs, *"hello");
@@ -289,8 +291,10 @@ define zen(): unit {
   // } else {
   //   print("false\n")
   // };
-  // pin xs = List[*"foo", *"bar", *"buz"];
-  // pin yo = this.text.intercalate-N(xs, ", yo, ");
+  pin xs = List[*"foo", *"bar", *"buz"];
+  vet(xs);
+  pin yo = this.text.intercalate-N(xs, ", yo, ");
+  vet(yo);
   // print-line(yo);
   // let t = "foo\nbar\nbuz";
   // pin yo = lines(t);
@@ -388,6 +392,7 @@ define zen(): unit {
   // print("hello, world\n");
   // vet("yo");
   // use-id();
+  Unit
 }
 
 define main(): unit {

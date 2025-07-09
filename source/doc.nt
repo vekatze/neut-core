@@ -1,34 +1,130 @@
 import {
+  this.bool {False, True, and, bool},
   this.box,
-  this.pair {Pair, pair},
+  this.float.show,
+  this.int.show,
   this.text {text},
   this.text.io {print-line},
   this.unit {unit},
 }
 
+data chunk {
+| Chunk-Text(content: text)
+| Chunk-Text-N(content: &text)
+| Chunk-Int(content: int)
+| Chunk-Float(content: float, digits: int)
+| Chunk-Rune(content: rune)
+| Chunk-Style(content: &text)
+}
+
 data doc {
 | Nil
-| Text(content: text, cont: doc)
+| Chunk(content: chunk, cont: doc)
 | Line(indentation: int, cont: doc)
+| Group(content: doc)
 }
 
 define append(d1: doc, d2: doc): doc {
   match d1 {
   | Nil =>
     d2
-  | Text(t, cont) =>
-    Text(t, append(cont, d2))
+  | Chunk(c, cont) =>
+    Chunk(c, append(cont, d2))
   | Line(i, cont) =>
     Line(i, append(cont, d2))
+  | Group(d1') =>
+    Group(append(d1', d2))
   }
 }
 
-rule-left join {
+// define _union(d1: doc, d2: doc): doc {
+//   match d1 {
+//   | Nil =>
+//     d2
+//   | Chunk(c, cont) =>
+//     let cont' = _union(cont, d2);
+//     Chunk(c, cont')
+//   | Line(i, cont) =>
+//     let cont' = _union(cont, d2);
+//     Line(i, cont')
+//   | Union(d11, d12) =>
+//     Union(d11, Union(d12, d2))
+//   }
+// }
+// define _flatten(d: doc): doc {
+//   match d {
+//   | Nil =>
+//     Nil
+//   | Chunk(c, cont) =>
+//     Chunk(c, _flatten(cont))
+//   | Line(_, cont) =>
+//     Chunk(Chunk-Text-N(" "), _flatten(cont))
+//   | Union(d1, _) =>
+//     _flatten(d1)
+//   }
+// }
+// define group(!d: doc): doc {
+//   _union(_flatten(!d), !d)
+// }
+define length-chunk(c: &chunk): int {
+  case c {
+  | Chunk-Text(content) =>
+    core.text.length(content)
+  | Chunk-Text-N(content) =>
+    core.text.length(*content)
+  | Chunk-Int(content) =>
+    10
+  | Chunk-Float(content, digits) =>
+    8
+  | Chunk-Rune(_) =>
+    1
+  | Chunk-Style(_) =>
+    0
+  }
+}
+
+define fits(w: int, d: &doc): bool {
+  if lt-int(w, 0) {
+    False
+  } else {
+    case d {
+    | Nil =>
+      True
+    | Chunk(c, cont) =>
+      fits(sub-int(w, length-chunk(c)), cont)
+    | Line(_, _) =>
+      True
+    | Group(d) =>
+      False
+      // let b1 = fits(w, d1);
+      // let b2 = fits(w, d2);
+      // and(b1, b2)
+    }
+  }
+}
+
+define better(w: int, k: int, d1: doc, d2: doc): doc {
+  d2
+}
+
+// define best(w: int, k: int, d: doc): doc {
+//   match d {
+//   | Nil =>
+//     Nil
+//   | Chunk(c, cont) =>
+//     cont // todo
+//   | Line(i, cont) =>
+//     Line(i, best(w, k, cont))
+//   | Group(x, y) =>
+//     better(w, k, best(w, k, x), best(w, k, y))
+//   }
+// }
+rule-right join {
   function leaf(_: int): doc {
     Nil
   },
-  function node-left(acc: doc, d: doc): doc {
-    append(acc, d)
+  function node-left(d: doc, acc: doc): doc {
+    append(d, acc)
   },
   function root<a>(x: a): a {
     x
@@ -39,15 +135,38 @@ define layout(d: doc): text {
   match d {
   | Nil =>
     *""
-  | Text(t, cont) =>
-    pin t = t;
-    pin cont = layout(cont);
-    this.text.append(t, cont)
+  | Chunk(c, cont) =>
+    match c {
+    | Chunk-Text(t) =>
+      pin t = t;
+      pin cont = layout(cont);
+      this.text.append(t, cont)
+    | Chunk-Text-N(t) =>
+      pin cont = layout(cont);
+      this.text.append(t, cont)
+    | Chunk-Int(x) =>
+      pin t = this.int.show.show-int(x);
+      pin cont = layout(cont);
+      this.text.append(t, cont)
+    | Chunk-Float(x, digits) =>
+      pin t = this.float.show.show-float(x);
+      pin cont = layout(cont);
+      this.text.append(t, cont)
+    | Chunk-Rune(x) =>
+      pin t = this.text.singleton(x);
+      pin cont = layout(cont);
+      this.text.append(t, cont)
+    | Chunk-Style(t) =>
+      pin cont = layout(cont);
+      this.text.append(t, cont)
+    }
   | Line(i, cont) =>
     pin tmp = this.text.replicate(" ", i);
     pin cont = layout(cont);
     pin foo = this.text.append(tmp, cont);
     this.text.append("\n", foo)
+  | Group(d) =>
+    *"tmp"
   }
 }
 
@@ -55,19 +174,49 @@ define nest(i: int, d: doc): doc {
   match d {
   | Nil =>
     Nil
-  | Text(t, cont) =>
-    Text(t, nest(i, cont))
+  | Chunk(c, cont) =>
+    Chunk(c, nest(i, cont))
   | Line(j, cont) =>
     Line(add-int(i, j), nest(i, cont))
+  | Group(d) =>
+    Group(nest(i, d))
   }
 }
 
-define atom(t: text): doc {
-  Text(t, Nil)
+inline atom(t: text): doc {
+  Chunk(Chunk-Text(t), Nil)
 }
 
-define newline: doc {
+inline atom-N(t: &text): doc {
+  Chunk(Chunk-Text-N(t), Nil)
+}
+
+inline atom-int(x: int): doc {
+  Chunk(Chunk-Int(x), Nil)
+}
+
+inline atom-float(x: float, digits: int): doc {
+  Chunk(Chunk-Float(x, digits), Nil)
+}
+
+inline atom-rune(x: rune): doc {
+  Chunk(Chunk-Rune(x), Nil)
+}
+
+inline newline: doc {
   Line(0, Nil)
+}
+
+define ansi-reset: doc {
+  atom-N("\u{1b}[0m")
+}
+
+define ansi-bold: doc {
+  atom-N("\u{1b}[1m")
+}
+
+define ansi-blue: doc {
+  atom-N("\u{1b}[34m")
 }
 
 define nested(prefix: doc, body: doc, suffix: doc): doc {
@@ -94,16 +243,28 @@ define in-paren(d: doc): doc {
   )
 }
 
+data _arg {
+| _Arg(
+    size: int,
+    index: int,
+    item: doc,
+  )
+}
+
 rule-right arguments {
-  function leaf(size: int): pair(int, doc) {
-    Pair(size, Nil)
+  function leaf(size: int): _arg {
+    _Arg(size, sub-int(size, 1), Nil)
   },
-  function node-right(d: doc, acc: pair(int, doc)): pair(int, doc) {
-    let Pair(size, acc) = acc;
-    Pair(size, append-vertical(d, acc))
+  function node-right(d: doc, acc: _arg): _arg {
+    let _Arg(size, index, acc) = acc;
+    if eq-int(size, add-int(index, 1)) {
+      _Arg(size, sub-int(index, 1), append(d, acc))
+    } else {
+      _Arg(size, sub-int(index, 1), append-vertical(d, acc))
+    }
   },
-  function root(x: pair(int, doc)): doc {
-    let Pair(_, x) = x;
+  function root(x: _arg): doc {
+    let _Arg(_, _, x) = x;
     in-paren(x)
   },
 }
@@ -115,11 +276,14 @@ define zen(): unit {
         atom(*"Cons"),
         in-paren(
           join[
+            ansi-bold,
+            ansi-blue,
             atom(*"Cons"),
+            ansi-reset,
             arguments[
               atom(*"my-item,"),
               atom(*"sample,"),
-              atom(*"hogehoge,"),
+              atom(*"yo,"),
             ],
           ],
         ),

@@ -1,12 +1,25 @@
 import {
+  this.ansi {Blue, Yellow},
   this.bool,
-  this.control {loop},
-  this.float.io {print-float},
-  this.int.io {print-int},
+  this.control {grow},
+  this.doc {
+    Nil,
+    ansi-bold,
+    ansi-reset,
+    atom-N,
+    atom-float,
+    atom-int,
+    atom-rune,
+    doc,
+    join,
+    layout,
+    nested,
+    newline,
+  },
+  this.doc.ansi {ansi-fg},
   this.magic,
   this.memory {load-int},
   this.pointer {shift},
-  this.rune.io {print-rune},
   this.text {text},
   this.text.io {print},
   this.type-tag {
@@ -40,25 +53,26 @@ foreign {
 }
 
 nominal {
-  _vet<a>(x: &a): unit,
+  vet-doc<a>(x: &a): doc,
 }
 
-define _vet-vector(a: type, xs: &vector(a)): unit {
+define _vet-doc-vector(a: type, xs: &vector(a)): doc {
   let len = this.vector.length(xs);
-  this.vector.for-N(xs, function (x: &a, i: int): unit {
-    _vet(x);
-    when ne-int(add-int(i, 1), len) {
-      print(", ");
+  this.vector.fold-right-N(xs, Nil, function (x: &a, acc: doc, i: int): doc {
+    if eq-int(add-int(i, 1), len) {
+      join[vet-doc(x), atom-N(","), acc]
+    } else {
+      join[vet-doc(x), atom-N(","), newline, acc]
     }
-  });
+  })
 }
 
-define _constructor-loop(
+define _constructor-loop-doc(
   a: type,
   x: &a,
-  cons-name-handler: (&text) -> unit,
-  cons-args-handler: (i: int, size: int, t: type, x: &t) -> unit,
-): unit {
+  cons-name-handler: (&text) -> doc,
+  cons-args-handler: (i: int, size: int, t: type, x: &t) -> doc,
+): doc {
   let ptr = this.magic.cast(&a, pointer, x);
   let discriminant = load-int(ptr);
   let size = get-cons-size(a, discriminant);
@@ -67,15 +81,28 @@ define _constructor-loop(
   let _ = magic external llvm.memcpy.p0.p0.i64(type-ptr, ptr, mul-int(u, size), 0);
   magic call-type(a, 4, type-ptr);
   let cons-name = magic cast(int, &text, load-int(type-ptr));
-  cons-name-handler(cons-name);
+  let cons-name-doc = cons-name-handler(cons-name);
   let data-arg-num = load-int(shift(type-ptr, mul-int(u, size)));
   let loop-size = sub-int(size, add-int(1, data-arg-num));
-  loop(loop-size, function (cursor) {
-    let i = add-int(cursor, add-int(1, data-arg-num));
-    let t = this.magic.cast(int, type, load-int(shift(type-ptr, mul-int(u, i))));
-    let v = load-int(shift(ptr, mul-int(u, i)));
-    cons-args-handler(cursor, loop-size, t, this.magic.cast(int, &t, v));
-  });
+  let args-doc =
+    grow(Nil, loop-size, function (acc, cursor) {
+      let i = add-int(cursor, add-int(1, data-arg-num));
+      let t = this.magic.cast(int, type, load-int(shift(type-ptr, mul-int(u, i))));
+      let v = load-int(shift(ptr, mul-int(u, i)));
+      let cons-args-doc = cons-args-handler(cursor, loop-size, t, this.magic.cast(int, &t, v));
+      join[acc, cons-args-doc]
+    });
+  if gt-int(loop-size, 0) {
+    let prefix = join[cons-name-doc, atom-N("(")];
+    let suffix = atom-N(")");
+    nested(
+      prefix,
+      args-doc,
+      suffix,
+    )
+  } else {
+    cons-name-doc
+  }
 }
 
 define _green(): unit {
@@ -105,80 +132,97 @@ define _print-constructor(x: &text): unit {
   _reset();
 }
 
-define _vet<a>(x: &a): unit {
+define _constructor-doc(x: &text): doc {
+  join[
+    ansi-fg(Blue),
+    ansi-bold,
+    atom-N(x),
+    ansi-reset,
+  ]
+}
+
+define _literal-doc(d: doc): doc {
+  join[
+    ansi-fg(Yellow),
+    d,
+    ansi-reset,
+  ]
+}
+
+define vet-doc<a>(x: &a): doc {
   match get-type-tag(a) {
   | Algebraic =>
-    _constructor-loop(a, x, _print-constructor, function (i: int, size: int, t: type, x: &t) {
-      if eq-int(i, 0) {
-        print("(");
-      } else {
-        print(" ");
-      };
-      _vet(x);
-      if eq-int(add-int(i, 1), size) {
-        print(")");
-      } else {
-        print(",")
-      }
-    });
+    _constructor-loop-doc(a, x, _constructor-doc, function (i: int, _: int, t: type, x: &t) {
+      join[
+        if eq-int(i, 0) {
+          Nil
+        } else {
+          newline
+        },
+        vet-doc(x),
+        atom-N(","),
+      ]
+    })
   | Enum =>
     let discriminant = this.magic.cast(&a, int, x);
     let cons-name: &text = magic call-type(a, 4, discriminant);
-    _bold();
-    _blue();
-    print(cons-name);
-    _reset();
+    _constructor-doc(cons-name)
   | Int1 =>
-    print-int(sext-int1-int(magic cast(&a, int1, x)));
+    atom-int(sext-int1-int(magic cast(&a, int1, x)))
   | Int2 =>
-    print-int(sext-int2-int(magic cast(&a, int2, x)));
+    atom-int(sext-int2-int(magic cast(&a, int2, x)))
   | Int4 =>
-    print-int(sext-int4-int(magic cast(&a, int4, x)));
+    atom-int(sext-int4-int(magic cast(&a, int4, x)))
   | Int8 =>
-    print-int(sext-int8-int(magic cast(&a, int8, x)));
+    atom-int(sext-int8-int(magic cast(&a, int8, x)))
   | Int16 =>
-    print-int(sext-int16-int(magic cast(&a, int16, x)));
+    atom-int(sext-int16-int(magic cast(&a, int16, x)))
   | Int32 =>
-    print-int(sext-int32-int(magic cast(&a, int32, x)));
+    atom-int(sext-int32-int(magic cast(&a, int32, x)))
   | Int64 =>
-    print-int(magic cast(&a, int, x));
+    atom-int(magic cast(&a, int64, x))
   | Float16 =>
-    print-float(fpext-float16-float(magic cast(&a, float16, x)), 6);
+    atom-float(fpext-float16-float(magic cast(&a, float16, x)), 6)
   | Float32 =>
-    print-float(fpext-float32-float(magic cast(&a, float32, x)), 6);
+    atom-float(fpext-float32-float(magic cast(&a, float32, x)), 6)
   | Float64 =>
-    print-float(magic cast(&a, float, x), 6);
+    atom-float(magic cast(&a, float64, x), 6)
   | Pointer =>
-    print-int(magic cast(&a, int, x));
+    atom-int(magic cast(&a, int64, x))
   | Null =>
-    print("null");
+    atom-N("null")
   | Rune =>
-    _yellow();
-    print("`");
-    print-rune(magic cast(&a, rune, x));
-    print("`");
-    _reset();
+    _literal-doc(join[
+      atom-N("`"),
+      atom-rune(magic cast(&a, rune, x)),
+      atom-N("`"),
+    ])
   | Binary =>
-    _yellow();
-    print("\"");
-    print(magic cast(&a, &text, x));
-    print("\"");
-    _reset();
+    _literal-doc(join[
+      atom-N("\""),
+      atom-N(magic cast(&a, &text, x)),
+      atom-N("\""),
+    ])
   | Vector =>
     let elem-type = magic cast(int, type, load-int(shift(magic cast(&a, pointer, x), mul-int(this.word.size, 3))));
     let vec: &vector(elem-type) = magic cast(&a, &vector(elem-type), x);
-    _print-constructor("Vector");
-    print("[");
-    _vet-vector(elem-type, vec);
-    print("]");
+    let prefix = join[_constructor-doc("Vector"), atom-N("[")];
+    let suffix = atom-N("]");
+    nested(
+      prefix,
+      _vet-doc-vector(elem-type, vec),
+      suffix,
+    )
   | _ =>
-    _yellow();
-    print("_");
-    _reset();
+    _literal-doc(atom-N("_"))
+  | _ =>
+    Nil
   }
 }
 
 define vet<a>(x: &a): unit {
-  _vet(x);
+  let tmp = vet-doc(x);
+  pin item = layout(tmp);
+  print(item);
   print("\n");
 }

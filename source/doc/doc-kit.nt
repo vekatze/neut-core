@@ -1,0 +1,74 @@
+import {
+  this.ref {ref},
+  this.unit {unit},
+}
+
+data _mode {
+| _Horizontal
+| _Vertical
+}
+
+data _doc-kit {
+| _Doc-Kit(
+    width: int,
+    column-ref: ref(int),
+    indentation-ref: ref(int),
+    layout-mode-ref: ref(_mode),
+  )
+}
+
+define _set-mode(k: &_doc-kit, m: _mode): unit {
+  tie _Doc-Kit of {layout-mode-ref} = k;
+  this.ref.mutate(layout-mode-ref, function (_) {
+    m
+  });
+}
+
+define _get-mode(k: &_doc-kit): _mode {
+  tie _Doc-Kit of {layout-mode-ref} = k;
+  this.ref.clone(layout-mode-ref)
+}
+
+define _get-indentation(k: &_doc-kit): int {
+  tie _Doc-Kit of {indentation-ref} = k;
+  this.ref.clone(indentation-ref)
+}
+
+define _set-indentation(k: &_doc-kit, x: int): unit {
+  tie _Doc-Kit of {indentation-ref} = k;
+  this.ref.mutate(indentation-ref, function (_) {
+    x
+  });
+}
+
+define _shift-indentation(k: &_doc-kit, diff: int): unit {
+  let x = _get-indentation(k);
+  _set-indentation(k, add-int(x, diff));
+}
+
+define _get-column(k: &_doc-kit): int {
+  tie _Doc-Kit of {column-ref} = k;
+  this.ref.clone(column-ref)
+}
+
+define _set-column(k: &_doc-kit, x: int): unit {
+  tie _Doc-Kit of {column-ref} = k;
+  this.ref.mutate(column-ref, function (_) {
+    x
+  });
+}
+
+define _shift-column(k: &_doc-kit, diff: int): unit {
+  let x = _get-column(k);
+  _set-column(k, add-int(x, diff));
+}
+
+inline _with-local-mode<a>(k: &_doc-kit, local-mode: _mode, f: () -> a): a {
+  let i = _get-indentation(k);
+  let m = _get-mode(k);
+  _set-mode(k, local-mode);
+  let result = f();
+  _set-mode(k, m);
+  _set-indentation(k, i);
+  result
+}

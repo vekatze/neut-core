@@ -16,7 +16,7 @@ import {
     nested,
     newline,
   },
-  this.doc.ansi {ansi-fg},
+  this.doc.ansi-old {ansi-fg},
   this.magic,
   this.memory {load-int},
   this.pointer {shift},

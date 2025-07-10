@@ -1,5 +1,5 @@
 import {
-  this.bool {False, True, and, bool},
+  this.bool {False, True, bool},
   this.box,
   this.float.show,
   this.int.show,
@@ -37,88 +37,6 @@ define append(d1: doc, d2: doc): doc {
   }
 }
 
-// define _union(d1: doc, d2: doc): doc {
-//   match d1 {
-//   | Nil =>
-//     d2
-//   | Chunk(c, cont) =>
-//     let cont' = _union(cont, d2);
-//     Chunk(c, cont')
-//   | Line(i, cont) =>
-//     let cont' = _union(cont, d2);
-//     Line(i, cont')
-//   | Union(d11, d12) =>
-//     Union(d11, Union(d12, d2))
-//   }
-// }
-// define _flatten(d: doc): doc {
-//   match d {
-//   | Nil =>
-//     Nil
-//   | Chunk(c, cont) =>
-//     Chunk(c, _flatten(cont))
-//   | Line(_, cont) =>
-//     Chunk(Chunk-Text-N(" "), _flatten(cont))
-//   | Union(d1, _) =>
-//     _flatten(d1)
-//   }
-// }
-// define group(!d: doc): doc {
-//   _union(_flatten(!d), !d)
-// }
-define length-chunk(c: &chunk): int {
-  case c {
-  | Chunk-Text(content) =>
-    core.text.length(content)
-  | Chunk-Text-N(content) =>
-    core.text.length(*content)
-  | Chunk-Int(content) =>
-    10
-  | Chunk-Float(content, digits) =>
-    8
-  | Chunk-Rune(_) =>
-    1
-  | Chunk-Style(_) =>
-    0
-  }
-}
-
-define fits(w: int, d: &doc): bool {
-  if lt-int(w, 0) {
-    False
-  } else {
-    case d {
-    | Nil =>
-      True
-    | Chunk(c, cont) =>
-      fits(sub-int(w, length-chunk(c)), cont)
-    | Line(_, _) =>
-      True
-    | Group(d) =>
-      False
-      // let b1 = fits(w, d1);
-      // let b2 = fits(w, d2);
-      // and(b1, b2)
-    }
-  }
-}
-
-define better(w: int, k: int, d1: doc, d2: doc): doc {
-  d2
-}
-
-// define best(w: int, k: int, d: doc): doc {
-//   match d {
-//   | Nil =>
-//     Nil
-//   | Chunk(c, cont) =>
-//     cont // todo
-//   | Line(i, cont) =>
-//     Line(i, best(w, k, cont))
-//   | Group(x, y) =>
-//     better(w, k, best(w, k, x), best(w, k, y))
-//   }
-// }
 rule-right join {
   function leaf(_: int): doc {
     Nil
@@ -149,7 +67,7 @@ define layout(d: doc): text {
       pin cont = layout(cont);
       this.text.append(t, cont)
     | Chunk-Float(x, digits) =>
-      pin t = this.float.show.show-float(x);
+      pin t = this.float.show.show-float(x, digits);
       pin cont = layout(cont);
       this.text.append(t, cont)
     | Chunk-Rune(x) =>

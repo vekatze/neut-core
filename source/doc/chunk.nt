@@ -1,0 +1,90 @@
+import {
+  this.box,
+  this.doc.doc-kit {
+    _Horizontal,
+    _Vertical,
+    _doc-kit,
+    _get-indentation,
+    _get-mode,
+    _set-column,
+    _shift-column,
+  },
+  this.float.show {show-float},
+  this.int.show {show-int},
+  this.text {text},
+  this.text.io {print},
+  this.unit {unit},
+}
+
+data chunk {
+| Chunk-Empty
+| Chunk-Text(content: text)
+| Chunk-Text-N(content: &text)
+| Chunk-Style(content: text)
+| Chunk-Style-N(content: &text)
+| Chunk-Int(content: int)
+| Chunk-Float(content: float, decimals: int)
+| Chunk-Break(content: &text)
+}
+
+foreign {
+  neut_core_v0_51_int64_strlen(int): int,
+  neut_core_v0_51_double_strlen(float, int): int,
+}
+
+define size-chunk(c: &chunk): int {
+  case c {
+  | Chunk-Empty =>
+    0
+  | Chunk-Text(content) =>
+    core.text.length(content)
+  | Chunk-Text-N(content) =>
+    core.text.length(*content)
+  | Chunk-Style(_) =>
+    0
+  | Chunk-Style-N(_) =>
+    0
+  | Chunk-Int(x) =>
+    magic external neut_core_v0_51_int64_strlen(*x)
+  | Chunk-Float(x, decimals) =>
+    magic external neut_core_v0_51_double_strlen(*x, *decimals)
+  | Chunk-Break(t) =>
+    this.text.length(*t)
+  }
+}
+
+define _layout-chunk(k: &_doc-kit, c: &chunk): text {
+  case c {
+  | Chunk-Empty =>
+    *""
+  | Chunk-Text(t) =>
+    _shift-column(k, this.text.length(t));
+    *t
+  | Chunk-Text-N(t) =>
+    _shift-column(k, this.text.length(*t));
+    **t
+  | Chunk-Style(t) =>
+    *t
+  | Chunk-Style-N(t) =>
+    **t
+  | Chunk-Int(x) =>
+    show-int(*x)
+  | Chunk-Float(x, decimals) =>
+    show-float(*x, *decimals)
+  | Chunk-Break(t) =>
+    match _get-mode(k) {
+    | _Horizontal =>
+      _shift-column(k, this.text.length(*t));
+      **t
+    | _Vertical =>
+      pin tmp = this.text.replicate(" ", _get-indentation(k));
+      _set-column(k, _get-indentation(k));
+      this.text.append("\n", tmp)
+    }
+  }
+}
+
+define zen(): unit {
+  pin x = show-float(3.8, 20);
+  print(x);
+}

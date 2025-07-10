@@ -361,16 +361,14 @@ int64_t neut_core_v0_51_write_int64(int fd, int64_t v) {
   char buf[22];
   char *end = buf + sizeof(buf);
   int len = neut_core_v0_51_write_int64_core(end, v, 0);
-  return neut_core_v0_51_write_loop(fd, end-len, (size_t)len);
-  /* write(fd, end - len, (size_t)len); */
+  return neut_core_v0_51_write_loop(fd, end - len, (size_t)len);
 }
 
 int64_t neut_core_v0_51_write_int64_nl(int fd, int64_t v) {
   char buf[22];
   char *end = buf + sizeof(buf);
   int len = neut_core_v0_51_write_int64_core(end, v, 1);
-  return neut_core_v0_51_write_loop(fd, end-len, (size_t)len);
-  /* write(fd, end - len, (size_t)len); */
+  return neut_core_v0_51_write_loop(fd, end - len, (size_t)len);
 }
 
 size_t neut_core_v0_51_build_fixed_buf(char *buf, size_t cap, double value,
@@ -426,4 +424,37 @@ int64_t neut_core_v0_51_write_double_line(int fd, double value, int decimals) {
   }
 
   return neut_core_v0_51_write_loop(fd, buf, len);
+}
+
+ssize_t neut_core_v0_51_int64_strlen(int64_t v) {
+  uint64_t u = (v < 0) ? (uint64_t)(-v) : (uint64_t)v;
+  int len = 0;
+  if (u == 0) {
+    len = 1;
+  } else {
+    while (u) {
+      ++len;
+      u /= 10;
+    }
+  }
+  if (v < 0) {
+    ++len;
+  }
+  return len;
+}
+
+size_t neut_core_v0_51_double_strlen(double value, int decimals) {
+  if (decimals < 0) {
+    errno = EINVAL;
+    return 0;
+  }
+  if (decimals > 17) {
+    decimals = 17;
+  }
+  int n = snprintf(NULL, 0, "%.*f", decimals, value);
+  if (n < 0) {
+    errno = EOVERFLOW;
+    return 0;
+  }
+  return (size_t)n;
 }

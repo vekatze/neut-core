@@ -1,7 +1,9 @@
 import {
   this.c-int {add-c-int, c-int, from-c-int},
   this.c-size {C-Size},
-  this.external,
+  this.c-ssize {C-SSize},
+  this.external {malloc},
+  this.int.io {print-int-line},
   this.memory {store-int},
   this.pointer {null-pointer, shift},
   this.show {Show, show},
@@ -26,10 +28,25 @@ define _show(c-fmt: &text, x: float): text {
   magic cast(pointer, text, ptr)
 }
 
-define show-float(x: float): text {
-  _show("%lf", x)
+foreign {
+  neut_core_v0_51_build_fixed_buf(pointer, int, float, int, int): int,
+}
+
+define show-float(x: float, decimals: int): text {
+  let size = 80;
+  let add-newline = 0;
+  let text-ptr = malloc(C-Size(size));
+  let word-size = this.word.size;
+  let buffer-ptr = shift(text-ptr, mul-int(word-size, 2));
+  let len = magic external neut_core_v0_51_build_fixed_buf(buffer-ptr, size, x, decimals, add-newline);
+  print-int-line(len);
+  store-int(0, text-ptr);
+  store-int(len, shift(text-ptr, word-size));
+  magic cast(pointer, text, text-ptr)
 }
 
 inline as-show: show(float) {
-  Show(show-float)
+  Show(function (x) {
+    show-float(x, 6)
+  })
 }

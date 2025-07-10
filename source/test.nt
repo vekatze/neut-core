@@ -2,7 +2,7 @@ import {
   this.bool {False, True, bool},
   this.box {axiom-T},
   this.cell {_make-cell, mutate},
-  this.debug {vet},
+  this.debug {trace, vet},
   this.either {Right, either},
   this.int.io {print-int-line},
   this.list {Cons, List, Nil, list},
@@ -130,7 +130,6 @@ define is-even(x: int): bool {
 
 define zen(): unit {
   // let tmp = Cons(True, Cons(is-even, Nil));
-  // let xs = List[True, is-even];
   pin myVec = Vector[True, False, True, True];
   vet(myVec);
   // range
@@ -211,7 +210,7 @@ define zen(): unit {
   let xs = this.vector.make(5);
   let xs = push-back(xs, *"a");
   let xs = push-back(xs, *"b");
-  let !xs = push-back(xs, *"c");
+  let !xs = trace(push-back(xs, *"c"));
   pin xss = product(!xs, !xs);
   vet(xss);
   // // nested vector

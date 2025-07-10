@@ -210,3 +210,13 @@ define vet<a, ribbon-length := 32>(x: &a): unit {
   print(item);
   print("\n");
 }
+
+define trace<a>(x: a): a {
+  introspect build-mode {
+  | release =>
+    x
+  | default =>
+    let _ on x = vet(x);
+    x
+  }
+}

@@ -199,8 +199,6 @@ define vet-doc<a>(x: &a): doc {
     ))
   | _ =>
     _literal-doc(atom-N("_"))
-  | _ =>
-    empty
   }
 }
 

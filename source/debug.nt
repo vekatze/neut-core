@@ -3,20 +3,23 @@ import {
   this.bool,
   this.control {grow},
   this.doc {
-    Nil,
+    Chunk,
+    Group,
+    _nested-comma-seq,
     ansi-bold,
+    ansi-fg,
     ansi-reset,
     atom-N,
     atom-float,
     atom-int,
     atom-rune,
+    break,
     doc,
+    empty,
     join,
     layout,
-    nested,
-    newline,
   },
-  this.doc.ansi-old {ansi-fg},
+  this.doc.chunk {Chunk-Choose, Chunk-Empty, Chunk-Text-N},
   this.magic,
   this.memory {load-int},
   this.pointer {shift},
@@ -56,13 +59,17 @@ nominal {
   vet-doc<a>(x: &a): doc,
 }
 
+inline optional-trailing-comma: doc {
+  Chunk(Chunk-Choose(Chunk-Empty, Chunk-Text-N(",")))
+}
+
 define _vet-doc-vector(a: type, xs: &vector(a)): doc {
   let len = this.vector.length(xs);
-  this.vector.fold-right-N(xs, Nil, function (x: &a, acc: doc, i: int): doc {
+  this.vector.fold-right-N(xs, empty, function (x: &a, acc: doc, i: int): doc {
     if eq-int(add-int(i, 1), len) {
-      join[vet-doc(x), atom-N(","), acc]
+      join[vet-doc(x), acc]
     } else {
-      join[vet-doc(x), atom-N(","), newline, acc]
+      join[vet-doc(x), atom-N(","), break(" "), acc]
     }
   })
 }
@@ -85,7 +92,7 @@ define _constructor-loop-doc(
   let data-arg-num = load-int(shift(type-ptr, mul-int(u, size)));
   let loop-size = sub-int(size, add-int(1, data-arg-num));
   let args-doc =
-    grow(Nil, loop-size, function (acc, cursor) {
+    grow(empty, loop-size, function (acc, cursor) {
       let i = add-int(cursor, add-int(1, data-arg-num));
       let t = this.magic.cast(int, type, load-int(shift(type-ptr, mul-int(u, i))));
       let v = load-int(shift(ptr, mul-int(u, i)));
@@ -95,7 +102,7 @@ define _constructor-loop-doc(
   if gt-int(loop-size, 0) {
     let prefix = join[cons-name-doc, atom-N("(")];
     let suffix = atom-N(")");
-    nested(
+    _nested-comma-seq(
       prefix,
       args-doc,
       suffix,
@@ -103,33 +110,6 @@ define _constructor-loop-doc(
   } else {
     cons-name-doc
   }
-}
-
-define _green(): unit {
-  print("\u{1b}[32m")
-}
-
-define _blue(): unit {
-  print("\u{1b}[34m")
-}
-
-define _yellow(): unit {
-  print("\u{1b}[33m")
-}
-
-define _bold(): unit {
-  print("\u{1b}[1m")
-}
-
-define _reset(): unit {
-  print("\u{1b}[0m")
-}
-
-define _print-constructor(x: &text): unit {
-  _blue();
-  _bold();
-  print(x);
-  _reset();
 }
 
 define _constructor-doc(x: &text): doc {
@@ -152,17 +132,21 @@ define _literal-doc(d: doc): doc {
 define vet-doc<a>(x: &a): doc {
   match get-type-tag(a) {
   | Algebraic =>
-    _constructor-loop-doc(a, x, _constructor-doc, function (i: int, _: int, t: type, x: &t) {
+    Group(_constructor-loop-doc(a, x, _constructor-doc, function (i: int, len: int, t: type, x: &t) {
       join[
         if eq-int(i, 0) {
-          Nil
+          empty
         } else {
-          newline
+          break(" ")
         },
         vet-doc(x),
-        atom-N(","),
+        if eq-int(add-int(i, 1), len) {
+          empty
+        } else {
+          atom-N(",")
+        },
       ]
-    })
+    }))
   | Enum =>
     let discriminant = this.magic.cast(&a, int, x);
     let cons-name: &text = magic call-type(a, 4, discriminant);
@@ -208,21 +192,21 @@ define vet-doc<a>(x: &a): doc {
     let vec: &vector(elem-type) = magic cast(&a, &vector(elem-type), x);
     let prefix = join[_constructor-doc("Vector"), atom-N("[")];
     let suffix = atom-N("]");
-    nested(
+    Group(_nested-comma-seq(
       prefix,
       _vet-doc-vector(elem-type, vec),
       suffix,
-    )
+    ))
   | _ =>
     _literal-doc(atom-N("_"))
   | _ =>
-    Nil
+    empty
   }
 }
 
-define vet<a>(x: &a): unit {
-  let tmp = vet-doc(x);
-  pin item = layout(tmp);
+define vet<a, ribbon-length := 32>(x: &a): unit {
+  pin tmp = vet-doc(x);
+  pin item = layout(ribbon-length, tmp);
   print(item);
   print("\n");
 }

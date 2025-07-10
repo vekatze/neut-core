@@ -24,7 +24,10 @@ data chunk {
 | Chunk-Style-N(content: &text)
 | Chunk-Int(content: int)
 | Chunk-Float(content: float, decimals: int)
-| Chunk-Break(content: &text)
+| Chunk-Rune(content: rune)
+| Chunk-Line
+| Chunk-Join(left: chunk, right: chunk)
+| Chunk-Choose(horizontal-content: chunk, vertical-content: chunk)
 }
 
 foreign {
@@ -32,7 +35,7 @@ foreign {
   neut_core_v0_51_double_strlen(float, int): int,
 }
 
-define size-chunk(c: &chunk): int {
+define _size-chunk(c: &chunk): int {
   case c {
   | Chunk-Empty =>
     0
@@ -48,8 +51,14 @@ define size-chunk(c: &chunk): int {
     magic external neut_core_v0_51_int64_strlen(*x)
   | Chunk-Float(x, decimals) =>
     magic external neut_core_v0_51_double_strlen(*x, *decimals)
-  | Chunk-Break(t) =>
-    this.text.length(*t)
+  | Chunk-Rune(_) =>
+    1
+  | Chunk-Line =>
+    0
+  | Chunk-Join(c1, c2) =>
+    add-int(_size-chunk(c1), _size-chunk(c2))
+  | Chunk-Choose(c, _) =>
+    _size-chunk(c)
   }
 }
 
@@ -71,15 +80,22 @@ define _layout-chunk(k: &_doc-kit, c: &chunk): text {
     show-int(*x)
   | Chunk-Float(x, decimals) =>
     show-float(*x, *decimals)
-  | Chunk-Break(t) =>
+  | Chunk-Rune(r) =>
+    this.text.singleton(*r)
+  | Chunk-Line =>
+    pin tmp = this.text.replicate(" ", _get-indentation(k));
+    _set-column(k, _get-indentation(k));
+    this.text.append("\n", tmp)
+  | Chunk-Join(c1, c2) =>
+    pin t1 = _layout-chunk(k, c1);
+    pin t2 = _layout-chunk(k, c2);
+    this.text.append(t1, t2)
+  | Chunk-Choose(dh, dv) =>
     match _get-mode(k) {
     | _Horizontal =>
-      _shift-column(k, this.text.length(*t));
-      **t
+      _layout-chunk(k, dh)
     | _Vertical =>
-      pin tmp = this.text.replicate(" ", _get-indentation(k));
-      _set-column(k, _get-indentation(k));
-      this.text.append("\n", tmp)
+      _layout-chunk(k, dv)
     }
   }
 }

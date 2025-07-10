@@ -1,7 +1,6 @@
 import {
   this.c-int {add-c-int, c-int, from-c-int},
   this.c-size {C-Size},
-  this.c-ssize {C-SSize},
   this.external {malloc},
   this.int.io {print-int-line},
   this.memory {store-int},

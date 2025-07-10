@@ -1,211 +1,372 @@
 import {
-  this.bool {False, True, bool},
+  this.ansi {
+    Background,
+    Black,
+    Blue,
+    Bold,
+    Color,
+    Color-16,
+    Color-256,
+    Color-RGB,
+    Cyan,
+    Dull,
+    Faint,
+    Foreground,
+    Green,
+    Italic,
+    Magenta,
+    Normal,
+    Red,
+    Underline,
+    Vivid,
+    White,
+    Yellow,
+    color-ansi,
+    style,
+  },
+  this.bool,
   this.box,
-  this.float.show,
-  this.int.show,
+  this.doc.chunk {
+    Chunk-Choose,
+    Chunk-Empty,
+    Chunk-Float,
+    Chunk-Int,
+    Chunk-Join,
+    Chunk-Line,
+    Chunk-Rune,
+    Chunk-Style,
+    Chunk-Style-N,
+    Chunk-Text,
+    Chunk-Text-N,
+    _layout-chunk,
+    _size-chunk,
+    chunk,
+  },
+  this.doc.doc-kit {
+    _Doc-Kit,
+    _Horizontal,
+    _Vertical,
+    _doc-kit,
+    _get-column,
+    _get-indentation,
+    _shift-indentation,
+    _with-local-mode,
+  },
+  this.ref {_make-ref},
   this.text {text},
   this.text.io {print-line},
-  this.unit {unit},
-}
-
-data chunk {
-| Chunk-Text(content: text)
-| Chunk-Text-N(content: &text)
-| Chunk-Int(content: int)
-| Chunk-Float(content: float, digits: int)
-| Chunk-Rune(content: rune)
-| Chunk-Style(content: &text)
+  this.unit {Unit, unit},
 }
 
 data doc {
-| Nil
-| Chunk(content: chunk, cont: doc)
-| Line(indentation: int, cont: doc)
-| Group(content: doc)
+| Chunk(chunk)
+| Seq(doc, doc)
+| Nest(int, doc)
+| Group(doc)
 }
 
-define append(d1: doc, d2: doc): doc {
-  match d1 {
-  | Nil =>
-    d2
-  | Chunk(c, cont) =>
-    Chunk(c, append(cont, d2))
-  | Line(i, cont) =>
-    Line(i, append(cont, d2))
-  | Group(d1') =>
-    Group(append(d1', d2))
-  }
+inline empty: doc {
+  Chunk(Chunk-Empty)
+}
+
+inline atom(t: text): doc {
+  Chunk(Chunk-Text(t))
+}
+
+inline atom-N(t: &text): doc {
+  Chunk(Chunk-Text-N(t))
+}
+
+inline atom-style(t: text): doc {
+  Chunk(Chunk-Style(t))
+}
+
+inline atom-style-N(t: &text): doc {
+  Chunk(Chunk-Style-N(t))
+}
+
+inline atom-int(x: int): doc {
+  Chunk(Chunk-Int(x))
+}
+
+inline atom-float(x: float, decimals: int): doc {
+  Chunk(Chunk-Float(x, decimals))
+}
+
+inline atom-rune(x: rune): doc {
+  Chunk(Chunk-Rune(x))
+}
+
+inline break(t: &text): doc {
+  Chunk(Chunk-Choose(Chunk-Text-N(t), Chunk-Line))
 }
 
 rule-right join {
   function leaf(_: int): doc {
-    Nil
+    empty
   },
   function node-left(d: doc, acc: doc): doc {
-    append(d, acc)
+    Seq(d, acc)
   },
   function root<a>(x: a): a {
     x
   },
 }
 
-define layout(d: doc): text {
-  match d {
-  | Nil =>
-    *""
-  | Chunk(c, cont) =>
-    match c {
-    | Chunk-Text(t) =>
-      pin t = t;
-      pin cont = layout(cont);
-      this.text.append(t, cont)
-    | Chunk-Text-N(t) =>
-      pin cont = layout(cont);
-      this.text.append(t, cont)
-    | Chunk-Int(x) =>
-      pin t = this.int.show.show-int(x);
-      pin cont = layout(cont);
-      this.text.append(t, cont)
-    | Chunk-Float(x, digits) =>
-      pin t = this.float.show.show-float(x, digits);
-      pin cont = layout(cont);
-      this.text.append(t, cont)
-    | Chunk-Rune(x) =>
-      pin t = this.text.singleton(x);
-      pin cont = layout(cont);
-      this.text.append(t, cont)
-    | Chunk-Style(t) =>
-      pin cont = layout(cont);
-      this.text.append(t, cont)
-    }
-  | Line(i, cont) =>
-    pin tmp = this.text.replicate(" ", i);
-    pin cont = layout(cont);
-    pin foo = this.text.append(tmp, cont);
-    this.text.append("\n", foo)
-  | Group(d) =>
-    *"tmp"
-  }
-}
-
-define nest(i: int, d: doc): doc {
-  match d {
-  | Nil =>
-    Nil
-  | Chunk(c, cont) =>
-    Chunk(c, nest(i, cont))
-  | Line(j, cont) =>
-    Line(add-int(i, j), nest(i, cont))
-  | Group(d) =>
-    Group(nest(i, d))
-  }
-}
-
-inline atom(t: text): doc {
-  Chunk(Chunk-Text(t), Nil)
-}
-
-inline atom-N(t: &text): doc {
-  Chunk(Chunk-Text-N(t), Nil)
-}
-
-inline atom-int(x: int): doc {
-  Chunk(Chunk-Int(x), Nil)
-}
-
-inline atom-float(x: float, digits: int): doc {
-  Chunk(Chunk-Float(x, digits), Nil)
-}
-
-inline atom-rune(x: rune): doc {
-  Chunk(Chunk-Rune(x), Nil)
-}
-
 inline newline: doc {
-  Line(0, Nil)
+  Chunk(Chunk-Choose(Chunk-Text-N(""), Chunk-Line))
 }
 
-define ansi-reset: doc {
-  atom-N("\u{1b}[0m")
-}
-
-define ansi-bold: doc {
-  atom-N("\u{1b}[1m")
-}
-
-define ansi-blue: doc {
-  atom-N("\u{1b}[34m")
-}
-
-define nested(prefix: doc, body: doc, suffix: doc): doc {
+define _nested-comma-seq(prefix: doc, body: doc, suffix: doc): doc {
   join[
     prefix,
-    nest(
+    Nest(
       2,
-      append(newline, body),
+      join[
+        break(""),
+        Group(body),
+      ],
     ),
-    newline,
+    Chunk(Chunk-Choose(Chunk-Empty, Chunk-Join(Chunk-Text-N(","), Chunk-Line))),
     suffix,
   ]
 }
 
-define append-vertical(d1: doc, d2: doc): doc {
-  join[d1, newline, d2]
+define _size(target: &doc): int {
+  case target {
+  | Chunk(c) =>
+    _size-chunk(c)
+  | Seq(d1, d2) =>
+    let s1 = _size(d1);
+    let s2 = _size(d2);
+    add-int(s1, s2)
+  | Nest(_, cont) =>
+    _size(cont)
+  | Group(d) =>
+    _size(d)
+  }
 }
 
-define in-paren(d: doc): doc {
-  nested(
-    atom(*"("),
-    d,
-    atom(*")"),
-  )
-}
-
-data _arg {
-| _Arg(
-    size: int,
-    index: int,
-    item: doc,
-  )
-}
-
-rule-right arguments {
-  function leaf(size: int): _arg {
-    _Arg(size, sub-int(size, 1), Nil)
-  },
-  function node-right(d: doc, acc: _arg): _arg {
-    let _Arg(size, index, acc) = acc;
-    if eq-int(size, add-int(index, 1)) {
-      _Arg(size, sub-int(index, 1), append(d, acc))
-    } else {
-      _Arg(size, sub-int(index, 1), append-vertical(d, acc))
+inline ansi-doc(s: style): doc {
+  match s {
+  | Normal =>
+    atom-style-N("\u{1b}[0m")
+  | Bold =>
+    atom-style-N("\u{1b}[1m")
+  | Faint =>
+    atom-style-N("\u{1b}[2m")
+  | Italic =>
+    atom-style-N("\u{1b}[3m")
+  | Underline =>
+    atom-style-N("\u{1b}[4m")
+  | Color(color-layer, color) =>
+    match color-layer {
+    | Foreground =>
+      match color {
+      | Color-16(color-intensity, color) =>
+        match color-intensity {
+        | Dull =>
+          match color {
+          | Black =>
+            atom-style-N("\u{1b}[30m")
+          | Red =>
+            atom-style-N("\u{1b}[31m")
+          | Green =>
+            atom-style-N("\u{1b}[32m")
+          | Yellow =>
+            atom-style-N("\u{1b}[33m")
+          | Blue =>
+            atom-style-N("\u{1b}[34m")
+          | Magenta =>
+            atom-style-N("\u{1b}[35m")
+          | Cyan =>
+            atom-style-N("\u{1b}[36m")
+          | White =>
+            atom-style-N("\u{1b}[37m")
+          }
+        | Vivid =>
+          match color {
+          | Black =>
+            atom-style-N("\u{1b}[90m")
+          | Red =>
+            atom-style-N("\u{1b}[91m")
+          | Green =>
+            atom-style-N("\u{1b}[92m")
+          | Yellow =>
+            atom-style-N("\u{1b}[93m")
+          | Blue =>
+            atom-style-N("\u{1b}[94m")
+          | Magenta =>
+            atom-style-N("\u{1b}[95m")
+          | Cyan =>
+            atom-style-N("\u{1b}[96m")
+          | White =>
+            atom-style-N("\u{1b}[97m")
+          }
+        }
+      | Color-256(value) =>
+        join[
+          atom-style-N("\u{1b}[38;5;"),
+          atom-int(zext-int8-int(value)),
+          atom-style-N("m"),
+        ]
+      | Color-RGB(r, g, b) =>
+        join[
+          atom-style-N("\u{1b}[38;2;"),
+          atom-int(zext-int8-int(r)),
+          atom-style-N(";"),
+          atom-int(zext-int8-int(g)),
+          atom-style-N(";"),
+          atom-int(zext-int8-int(b)),
+          atom-style-N("m"),
+        ]
+      }
+    | Background =>
+      match color {
+      | Color-16(color-intensity, color) =>
+        match color-intensity {
+        | Dull =>
+          match color {
+          | Black =>
+            atom-style-N("\u{1b}[40m")
+          | Red =>
+            atom-style-N("\u{1b}[41m")
+          | Green =>
+            atom-style-N("\u{1b}[42m")
+          | Yellow =>
+            atom-style-N("\u{1b}[43m")
+          | Blue =>
+            atom-style-N("\u{1b}[44m")
+          | Magenta =>
+            atom-style-N("\u{1b}[45m")
+          | Cyan =>
+            atom-style-N("\u{1b}[46m")
+          | White =>
+            atom-style-N("\u{1b}[47m")
+          }
+        | Vivid =>
+          match color {
+          | Black =>
+            atom-style-N("\u{1b}[100m")
+          | Red =>
+            atom-style-N("\u{1b}[101m")
+          | Green =>
+            atom-style-N("\u{1b}[102m")
+          | Yellow =>
+            atom-style-N("\u{1b}[103m")
+          | Blue =>
+            atom-style-N("\u{1b}[104m")
+          | Magenta =>
+            atom-style-N("\u{1b}[105m")
+          | Cyan =>
+            atom-style-N("\u{1b}[106m")
+          | White =>
+            atom-style-N("\u{1b}[107m")
+          }
+        }
+      | Color-256(value) =>
+        join[
+          atom-style-N("\u{1b}[48;5;"),
+          atom-int(zext-int8-int(value)),
+          atom-style-N("m"),
+        ]
+      | Color-RGB(r, g, b) =>
+        join[
+          atom-style-N("\u{1b}[48;2;"),
+          atom-int(zext-int8-int(r)),
+          atom-style-N(";"),
+          atom-int(zext-int8-int(g)),
+          atom-style-N(";"),
+          atom-int(zext-int8-int(b)),
+          atom-style-N("m"),
+        ]
+      }
     }
-  },
-  function root(x: _arg): doc {
-    let _Arg(_, _, x) = x;
-    in-paren(x)
-  },
+  }
+}
+
+define ansi-fg(c: color-ansi): doc {
+  ansi-doc(Color(Foreground, Color-16(Vivid, c)))
+}
+
+define ansi-bg(c: color-ansi): doc {
+  ansi-doc(Color(Background, Color-16(Vivid, c)))
+}
+
+define ansi-bold: doc {
+  ansi-doc(Bold)
+}
+
+define ansi-reset: doc {
+  ansi-doc(Normal)
+}
+
+define _layout(k: &_doc-kit, target: &doc): text {
+  case target {
+  | Chunk(c) =>
+    _layout-chunk(k, c)
+  | Seq(d1, d2) =>
+    pin t1 = _layout(k, d1);
+    pin t2 = _layout(k, d2);
+    this.text.append(t1, t2)
+  | Nest(i, cont) =>
+    _shift-indentation(k, *i);
+    let result = _layout(k, cont);
+    _shift-indentation(k, mul-int(-1, *i));
+    result
+  | Group(d) =>
+    let s = _size(d);
+    tie _Doc-Kit of {width} = k;
+    let column = _get-column(k);
+    let indentation = _get-indentation(k);
+    let ribbon-width = add-int(sub-int(column, indentation), s);
+    let fits = lt-int(ribbon-width, *width);
+    if fits {
+      _with-local-mode(k, _Horizontal, function () {
+        _layout(k, d)
+      })
+    } else {
+      _with-local-mode(k, _Vertical, function () {
+        _layout(k, d)
+      })
+    }
+  }
+}
+
+define layout(max-ribbon-width: int, target: &doc): text {
+  let column-ref = _make-ref(0);
+  let indentation-ref = _make-ref(0);
+  let mode-ref = _make-ref(_Horizontal);
+  pin k = _Doc-Kit(max-ribbon-width, column-ref, indentation-ref, mode-ref);
+  _layout(k, target)
 }
 
 define zen(): unit {
-  pin tmp =
-    layout(
-      join[
-        atom(*"Cons"),
-        in-paren(
+  pin item =
+    Group(join[
+      ansi-fg(Blue),
+      atom(*"begin"),
+      ansi-reset,
+      Nest(2, join[
+        break(" "),
+        Group(
           join[
-            ansi-bold,
-            ansi-blue,
-            atom(*"Cons"),
+            ansi-fg(Yellow),
+            atom(*"print;"),
             ansi-reset,
-            arguments[
-              atom(*"my-item,"),
-              atom(*"sample,"),
-              atom(*"yo,"),
-            ],
+            break(" "),
+            atom(*"test;"),
+            break(" "),
+            atom(*"stmt;"),
           ],
         ),
-      ],
-    );
-  print-line(tmp)
+      ]),
+      break(" "),
+      ansi-fg(Blue),
+      atom(*"end"),
+      ansi-reset,
+    ]);
+  pin item = layout(10, item);
+  print-line(item);
+  Unit
 }

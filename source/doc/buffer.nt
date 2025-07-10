@@ -1,0 +1,61 @@
+import {
+  this.ansi {Blue, Yellow},
+  this.box,
+  this.buffer {buffer, flush, make-buffer},
+  this.doc {Group, Nest, ansi-fg, ansi-reset, atom, break, doc, join},
+  this.doc.show {show-doc},
+  this.either {Right, rho},
+  this.file.descriptor {stdout},
+  this.system {system},
+  this.text,
+  this.text.buffer,
+  this.unit {Unit, unit},
+}
+
+define write-doc<r := rho>(b: &buffer, x: &doc, ribbon-width: int): system(unit) {
+  pin tmp = show-doc(x, ribbon-width);
+  try _ = r;
+  this.text.buffer.write(b, tmp)
+}
+
+define write-doc-line<r := rho>(b: &buffer, x: &doc, ribbon-width: int): system(unit) {
+  pin tmp = show-doc(x, ribbon-width);
+  try _ = r;
+  this.text.buffer.write-line(b, tmp)
+}
+
+define zen(): unit {
+  pin item =
+    Group(join[
+      ansi-fg(Blue),
+      atom(*"begin"),
+      ansi-reset,
+      Nest(2, join[
+        break(" "),
+        Group(
+          join[
+            ansi-fg(Yellow),
+            atom(*"print;"),
+            ansi-reset,
+            break(" "),
+            atom(*"test;"),
+            break(" "),
+            atom(*"stmt;"),
+          ],
+        ),
+      ]),
+      break(" "),
+      ansi-fg(Blue),
+      atom(*"end"),
+      ansi-reset,
+    ]);
+  let !k = make-buffer(stdout, 4096);
+  pin k = !k;
+  let _: system(unit) = {
+    try _ = write-doc-line(k, item, 32);
+    try _ = write-doc-line(k, item, 16);
+    try _ = flush(k);
+    Right(Unit)
+  };
+  Unit
+}

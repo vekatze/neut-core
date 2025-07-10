@@ -1,0 +1,63 @@
+import {
+  this.ansi {Blue, Yellow},
+  this.box,
+  this.doc {Group, Nest, ansi-fg, ansi-reset, atom, break, doc, join},
+  this.doc.show {show-doc},
+  this.either {rho},
+  this.file.descriptor {descriptor, stdout},
+  this.system {system},
+  this.text,
+  this.text.io {write, write-line},
+  this.unit {Unit, unit},
+}
+
+define write-doc<r := rho>(d: descriptor, x: &doc, ribbon-width: int): system(unit) {
+  pin tmp = show-doc(x, ribbon-width);
+  try _ = r;
+  write(d, tmp)
+}
+
+define write-doc-line<r := rho>(d: descriptor, x: &doc, ribbon-width: int): system(unit) {
+  pin tmp = show-doc(x, ribbon-width);
+  try _ = r;
+  write-line(d, tmp)
+}
+
+define print-doc(x: &doc, ribbon-width: int): unit {
+  let _ = write-doc(stdout, x, ribbon-width);
+  Unit
+}
+
+define print-doc-line(x: &doc, ribbon-width: int): unit {
+  let _ = write-doc-line(stdout, x, ribbon-width);
+  Unit
+}
+
+define zen(): unit {
+  pin item =
+    Group(join[
+      ansi-fg(Blue),
+      atom(*"begin"),
+      ansi-reset,
+      Nest(2, join[
+        break(" "),
+        Group(
+          join[
+            ansi-fg(Yellow),
+            atom(*"print;"),
+            ansi-reset,
+            break(" "),
+            atom(*"test;"),
+            break(" "),
+            atom(*"stmt;"),
+          ],
+        ),
+      ]),
+      break(" "),
+      ansi-fg(Blue),
+      atom(*"end"),
+      ansi-reset,
+    ]);
+  print-doc-line(item, 20);
+  Unit
+}

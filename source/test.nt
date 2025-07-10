@@ -398,20 +398,3 @@ define zen(): unit {
 define main(): unit {
   zen();
 }
-
-define id<a>(x: a): a {
-  x
-}
-
-data config(a) {
-| Config(
-    x: a,
-    hoge: int,
-  )
-}
-
-define my-func<a: type>(
-  some-value: a,
-): a {
-  some-value
-}

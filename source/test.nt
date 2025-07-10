@@ -234,22 +234,22 @@ define zen(): unit {
   let _ = outer;
   // pin new-outer = this.vector.concat(outer);
   // vet(new-outer);
-  // let xs = this.vector.make(5);
-  // let xs = push-back(xs, *"a");
-  // let xs = push-back(xs, *"b");
-  // let xs = push-back(xs, *"c");
-  // let xs = push-back(xs, *"d");
-  // let !xs = push-back(xs, *"e");
-  // let ys = this.vector.intercalate(!xs, *"XXX");
-  // let zs = this.vector.append(!xs, ys);
-  // pin sample =
-  //   this.vector.fold-right(zs, *"test", function (acc, v, _) {
-  //     let tmp on acc, v = core.text.append(acc, v);
-  //     let _ = acc;
-  //     let _ = v;
-  //     tmp
-  //   });
-  // vet(sample);
+  let xs = this.vector.make(5);
+  let xs = push-back(xs, *"a");
+  let xs = push-back(xs, *"b");
+  let xs = push-back(xs, *"c");
+  let xs = push-back(xs, *"d");
+  let !xs = push-back(xs, *"e");
+  let ys = trace(this.vector.intercalate(!xs, *"XXX"));
+  let zs = trace(this.vector.append(!xs, ys));
+  pin sample =
+    this.vector.fold-right(zs, *"test", function (acc, v, _) {
+      let tmp on acc, v = core.text.append(acc, v);
+      let _ = acc;
+      let _ = v;
+      tmp
+    });
+  vet(sample);
   // // let xs = push-back(xs, *"f");
   // pin xs = this.vector.intercalate(!xs, *"XXX");
   // vet(xs);

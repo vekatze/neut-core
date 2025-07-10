@@ -17,9 +17,9 @@ import {
     doc,
     empty,
     join,
-    layout,
   },
   this.doc.chunk {Chunk-Choose, Chunk-Empty, Chunk-Text-N},
+  this.doc.show {show-doc},
   this.magic,
   this.memory {load-int},
   this.pointer {shift},
@@ -206,7 +206,7 @@ define vet-doc<a>(x: &a): doc {
 
 define vet<a, ribbon-length := 32>(x: &a): unit {
   pin tmp = vet-doc(x);
-  pin item = layout(ribbon-length, tmp);
+  pin item = show-doc(tmp, ribbon-length);
   print(item);
   print("\n");
 }

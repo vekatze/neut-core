@@ -24,8 +24,6 @@ import {
     color-ansi,
     style,
   },
-  this.bool,
-  this.box,
   this.doc.chunk {
     Chunk-Choose,
     Chunk-Empty,
@@ -38,24 +36,9 @@ import {
     Chunk-Style-N,
     Chunk-Text,
     Chunk-Text-N,
-    _layout-chunk,
-    _size-chunk,
     chunk,
   },
-  this.doc.doc-kit {
-    _Doc-Kit,
-    _Horizontal,
-    _Vertical,
-    _doc-kit,
-    _get-column,
-    _get-indentation,
-    _shift-indentation,
-    _with-local-mode,
-  },
-  this.ref {_make-ref},
   this.text {text},
-  this.text.io {print-line},
-  this.unit {Unit, unit},
 }
 
 data doc {
@@ -130,21 +113,6 @@ define _nested-comma-seq(prefix: doc, body: doc, suffix: doc): doc {
     Chunk(Chunk-Choose(Chunk-Empty, Chunk-Join(Chunk-Text-N(","), Chunk-Line))),
     suffix,
   ]
-}
-
-define _size(target: &doc): int {
-  case target {
-  | Chunk(c) =>
-    _size-chunk(c)
-  | Seq(d1, d2) =>
-    let s1 = _size(d1);
-    let s2 = _size(d2);
-    add-int(s1, s2)
-  | Nest(_, cont) =>
-    _size(cont)
-  | Group(d) =>
-    _size(d)
-  }
 }
 
 inline ansi-doc(s: style): doc {
@@ -299,74 +267,4 @@ define ansi-bold: doc {
 
 define ansi-reset: doc {
   ansi-doc(Normal)
-}
-
-define _layout(k: &_doc-kit, target: &doc): text {
-  case target {
-  | Chunk(c) =>
-    _layout-chunk(k, c)
-  | Seq(d1, d2) =>
-    pin t1 = _layout(k, d1);
-    pin t2 = _layout(k, d2);
-    this.text.append(t1, t2)
-  | Nest(i, cont) =>
-    _shift-indentation(k, *i);
-    let result = _layout(k, cont);
-    _shift-indentation(k, mul-int(-1, *i));
-    result
-  | Group(d) =>
-    let s = _size(d);
-    tie _Doc-Kit of {width} = k;
-    let column = _get-column(k);
-    let indentation = _get-indentation(k);
-    let ribbon-width = add-int(sub-int(column, indentation), s);
-    let fits = lt-int(ribbon-width, *width);
-    if fits {
-      _with-local-mode(k, _Horizontal, function () {
-        _layout(k, d)
-      })
-    } else {
-      _with-local-mode(k, _Vertical, function () {
-        _layout(k, d)
-      })
-    }
-  }
-}
-
-define layout(max-ribbon-width: int, target: &doc): text {
-  let column-ref = _make-ref(0);
-  let indentation-ref = _make-ref(0);
-  let mode-ref = _make-ref(_Horizontal);
-  pin k = _Doc-Kit(max-ribbon-width, column-ref, indentation-ref, mode-ref);
-  _layout(k, target)
-}
-
-define zen(): unit {
-  pin item =
-    Group(join[
-      ansi-fg(Blue),
-      atom(*"begin"),
-      ansi-reset,
-      Nest(2, join[
-        break(" "),
-        Group(
-          join[
-            ansi-fg(Yellow),
-            atom(*"print;"),
-            ansi-reset,
-            break(" "),
-            atom(*"test;"),
-            break(" "),
-            atom(*"stmt;"),
-          ],
-        ),
-      ]),
-      break(" "),
-      ansi-fg(Blue),
-      atom(*"end"),
-      ansi-reset,
-    ]);
-  pin item = layout(10, item);
-  print-line(item);
-  Unit
 }

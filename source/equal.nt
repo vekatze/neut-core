@@ -1,0 +1,161 @@
+import {
+  this.binary {binary},
+  this.binary.eq {eq-binary},
+  this.bool {False, True, bool},
+  this.control {grow},
+  this.magic,
+  this.memory {load-int},
+  this.pointer {shift},
+  this.rune.eq {eq-rune},
+  this.type-tag {
+    Algebraic,
+    Binary,
+    Enum,
+    Float16,
+    Float32,
+    Float64,
+    Int1,
+    Int16,
+    Int2,
+    Int32,
+    Int4,
+    Int64,
+    Int8,
+    Rune,
+    Vector,
+    get-cons-size,
+    get-type-tag,
+  },
+  this.unit,
+  this.vector {vector},
+  this.word,
+}
+
+nominal {
+  eq-data<a>(x: &a, y: &a): bool,
+}
+
+define _equal-vector(a: type, xs: &vector(a), ys: &vector(a)): bool {
+  let len-x = this.vector.length(xs);
+  let len-y = this.vector.length(ys);
+  if eq-int(len-x, len-y) {
+    this.vector.zip-fold(xs, ys, True, function (x: &a, y: &a, acc: bool, _: int): bool {
+      if acc {
+        eq-data(x, y)
+      } else {
+        False
+      }
+    })
+  } else {
+    False
+  }
+}
+
+foreign {
+  llvm.memcpy.p0.p0.i64(pointer, pointer, int64, int1): void,
+}
+
+define _equal-cons-args(
+  a: type,
+  x: &a,
+  y: &a,
+  cons-args-handler: (i: int, size: int, t: type, x: &t, y: &t) -> bool,
+): bool {
+  let ptr-x = this.magic.cast(&a, pointer, x);
+  let discriminant-x = load-int(ptr-x);
+  let ptr-y = this.magic.cast(&a, pointer, y);
+  let discriminant-y = load-int(ptr-y);
+  if ne-int(discriminant-x, discriminant-y) {
+    False
+  } else {
+    let size = get-cons-size(a, discriminant-x);
+    let type-ptr = magic alloca(int64, add-int(size, 2)); // +2 is for data-arg-num and const-like
+    let u = this.word.size;
+    let _ = magic external llvm.memcpy.p0.p0.i64(type-ptr, ptr-x, mul-int(u, size), 0);
+    magic call-type(a, 4, type-ptr);
+    let data-arg-num = load-int(shift(type-ptr, mul-int(u, size)));
+    let loop-size = sub-int(size, add-int(1, data-arg-num));
+    let args-bool =
+      grow(True, loop-size, function (acc: bool, cursor: int) {
+        if acc {
+          let i = add-int(cursor, add-int(1, data-arg-num));
+          let t = this.magic.cast(int, type, load-int(shift(type-ptr, mul-int(u, i))));
+          let vx = load-int(shift(ptr-x, mul-int(u, i)));
+          let vy = load-int(shift(ptr-y, mul-int(u, i)));
+          cons-args-handler(cursor, loop-size, t, this.magic.cast(int, &t, vx), this.magic.cast(int, &t, vy))
+        } else {
+          False
+        }
+      });
+    args-bool
+  }
+}
+
+// supports: ADT, enum, int, float, rune, binary, vector
+define eq-data<a>(x: &a, y: &a): bool {
+  match get-type-tag(a) {
+  | Algebraic =>
+    _equal-cons-args(a, x, y, function (_: int, _: int, t: type, x: &t, y: &t) {
+      eq-data(x, y)
+    })
+  | Enum =>
+    let discriminant-x = this.magic.cast(&a, int, x);
+    let discriminant-y = this.magic.cast(&a, int, y);
+    eq-int(discriminant-x, discriminant-y)
+  | Int1 =>
+    let x = this.magic.cast(&a, int1, x);
+    let y = this.magic.cast(&a, int1, y);
+    eq-int1(x, y)
+  | Int2 =>
+    let x = this.magic.cast(&a, int2, x);
+    let y = this.magic.cast(&a, int2, y);
+    eq-int2(x, y)
+  | Int4 =>
+    let x = this.magic.cast(&a, int4, x);
+    let y = this.magic.cast(&a, int4, y);
+    eq-int4(x, y)
+  | Int8 =>
+    let x = this.magic.cast(&a, int8, x);
+    let y = this.magic.cast(&a, int8, y);
+    eq-int8(x, y)
+  | Int16 =>
+    let x = this.magic.cast(&a, int16, x);
+    let y = this.magic.cast(&a, int16, y);
+    eq-int16(x, y)
+  | Int32 =>
+    let x = this.magic.cast(&a, int32, x);
+    let y = this.magic.cast(&a, int32, y);
+    eq-int32(x, y)
+  | Int64 =>
+    let x = this.magic.cast(&a, int64, x);
+    let y = this.magic.cast(&a, int64, y);
+    eq-int64(x, y)
+  | Float16 =>
+    let x = this.magic.cast(&a, float16, x);
+    let y = this.magic.cast(&a, float16, y);
+    eq-float16(x, y)
+  | Float32 =>
+    let x = this.magic.cast(&a, float32, x);
+    let y = this.magic.cast(&a, float32, y);
+    eq-float32(x, y)
+  | Float64 =>
+    let x = this.magic.cast(&a, float64, x);
+    let y = this.magic.cast(&a, float64, y);
+    eq-float64(x, y)
+  | Rune =>
+    let x = this.magic.cast(&a, rune, x);
+    let y = this.magic.cast(&a, rune, y);
+    eq-rune(x, y)
+  | Binary =>
+    let x = this.magic.cast(&a, &binary, x);
+    let y = this.magic.cast(&a, &binary, y);
+    eq-binary(x, y)
+  | Vector =>
+    let elem-type = magic cast(int, type, load-int(shift(magic cast(&a, pointer, x), mul-int(this.word.size, 3))));
+    let x: &vector(elem-type) = this.magic.cast(&a, &vector(elem-type), x);
+    let y: &vector(elem-type) = this.magic.cast(&a, &vector(elem-type), y);
+    _equal-vector(elem-type, x, y)
+  | _ =>
+    False
+  }
+}

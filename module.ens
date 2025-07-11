@@ -32,6 +32,7 @@
     debug ["trace", "vet"],
     either ["Left", "Right", "either", "none", "rho"],
     eq ["Eq", "eq"],
+    equal ["eq-data"],
     list ["Cons", "List", "Nil", "list"],
     ord ["Ord", "ord"],
     ordering ["EQ", "GT", "LT", "ordering"],

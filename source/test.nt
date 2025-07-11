@@ -4,6 +4,7 @@ import {
   this.cell {_make-cell, mutate},
   this.debug {trace, vet},
   this.either {Right, either},
+  this.equal {eq-data},
   this.int.io {print-int-line},
   this.list {Cons, List, Nil, list},
   this.pair {Pair},
@@ -263,6 +264,13 @@ define zen(): unit {
   // vet(v);
   pin sample: either(unit, _) = Right(Pair(Unit, True));
   vet(sample);
+  pin v1 = add-int(10, 201);
+  pin v2 = 30;
+  if eq-data(v1, v2) {
+    print-line("yo");
+  } else {
+    print-line("YO");
+  };
   // vet("hello");
   // let xs: vector(text) = this.vector.make(8);
   // let xs = push-back(xs, *"hello");
@@ -292,6 +300,12 @@ define zen(): unit {
   //   print("false\n")
   // };
   pin xs = List[*"foo", *"bar", *"buz"];
+  pin xs-mod = List[*"foo", *"bar", *"buzzz"];
+  if eq-data(xs, xs-mod) {
+    print-line("equal")
+  } else {
+    print-line("not-equal")
+  };
   vet(xs);
   pin yo = this.text.intercalate-N(xs, ", yo, ");
   vet(yo);

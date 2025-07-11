@@ -545,6 +545,17 @@ inline zip-with-N<a, b, c>(xs: &vector(a), ys: &vector(b), f: (&a, &b, int) -> c
   })
 }
 
+inline zip-fold<a, b, c>(xs: &vector(a), ys: &vector(b), base: c, f: (&a, &b, c, int) -> c): c {
+  let len1 = length(xs);
+  let len2 = length(ys);
+  let len = min-int(len1, len2);
+  grow(base, len, function (acc, i) {
+    let val1 = _access(xs, i);
+    let val2 = _access(ys, i);
+    f(val1, val2, acc, i)
+  })
+}
+
 define from-list<a>(base-list: list(a)): vector(a) {
   let len on base-list = this.list.length(base-list);
   this.list.fold-left(make(len), base-list, function (acc, x) {

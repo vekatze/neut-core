@@ -38,7 +38,6 @@ define show-float(x: float, decimals: int): text {
   let word-size = this.word.size;
   let buffer-ptr = shift(text-ptr, mul-int(word-size, 2));
   let len = magic external neut_core_v0_51_build_fixed_buf(buffer-ptr, size, x, decimals, add-newline);
-  print-int-line(len);
   store-int(0, text-ptr);
   store-int(len, shift(text-ptr, word-size));
   magic cast(pointer, text, text-ptr)

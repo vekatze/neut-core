@@ -1,0 +1,96 @@
+import {
+  this.ansi {Blue, Bold, Color, Color-16, Foreground, Normal, Set-Style, Vivid, command},
+  this.binary-builder {binary-builder, make-binary-builder},
+  this.text {_Text, text},
+  this.text.io {print-line},
+  this.unit {unit},
+}
+
+data text-builder {
+| _Text-Builder(binary-builder)
+}
+
+inline _to-binary-builder(b: text-builder): binary-builder {
+  let _Text-Builder(b) = b;
+  b
+}
+
+inline _to-binary-builder-N(b: &text-builder): &binary-builder {
+  tie _Text-Builder(b) = b;
+  b
+}
+
+define make-text-builder(size: int): text-builder {
+  _Text-Builder(make-binary-builder(size))
+}
+
+define extract(b: text-builder): text {
+  _Text(this.binary-builder.extract(_to-binary-builder(b)))
+}
+
+define append-int64-UTF8(b: &text-builder, x: int64): unit {
+  this.binary-builder.append-int64-UTF8(_to-binary-builder-N(b), x)
+}
+
+define append-int32-UTF8(b: &text-builder, x: int32): unit {
+  this.binary-builder.append-int32-UTF8(_to-binary-builder-N(b), x)
+}
+
+define append-int16-UTF8(b: &text-builder, x: int16): unit {
+  this.binary-builder.append-int16-UTF8(_to-binary-builder-N(b), x)
+}
+
+define append-int8-UTF8(b: &text-builder, x: int8): unit {
+  this.binary-builder.append-int8-UTF8(_to-binary-builder-N(b), x)
+}
+
+define append-float64-UTF8(b: &text-builder, x: float64): unit {
+  this.binary-builder.append-float64-UTF8(_to-binary-builder-N(b), x)
+}
+
+define append-float32-UTF8(b: &text-builder, x: float32): unit {
+  this.binary-builder.append-float32-UTF8(_to-binary-builder-N(b), x)
+}
+
+define append-float16-UTF8(b: &text-builder, x: float16): unit {
+  this.binary-builder.append-float16-UTF8(_to-binary-builder-N(b), x)
+}
+
+define append-text(b: &text-builder, x: &text): unit {
+  this.binary-builder.append-text(_to-binary-builder-N(b), x)
+}
+
+inline append-rune-UTF8(b: &text-builder, x: rune): unit {
+  this.binary-builder.append-rune-UTF8(_to-binary-builder-N(b), x)
+}
+
+inline append-ansi(b: &text-builder, x: command): unit {
+  this.binary-builder.append-ansi(_to-binary-builder-N(b), x)
+}
+
+define zen(): unit {
+  let b = make-text-builder(4);
+  let _ on b = {
+    // append-int32(b, 3);
+    // append-int32(b, 65535)
+    // append-int64(b, 3);
+    // append-int64(b, 4);
+    // append-int64(b, 5);
+    // append-int64(b, 6);
+    // append-int64(b, 7);
+    // append-int64(b, 8);
+    // append-int64(b, 9)
+    append-text(b, "xxx");
+    append-ansi(b, Set-Style(Bold));
+    append-ansi(b, Set-Style(Color(Foreground, Color-16(Vivid, Blue))));
+    append-text(b, "hello");
+    append-ansi(b, Set-Style(Normal));
+    append-rune-UTF8(b, `a`);
+    append-rune-UTF8(b, `α`);
+    append-rune-UTF8(b, `あ`);
+    append-int64-UTF8(b, 123);
+    append-text(b, "world")
+  };
+  pin result = extract(b);
+  print-line(result);
+}

@@ -1,0 +1,456 @@
+import {
+  this.ansi {
+    Background,
+    Backward,
+    Black,
+    Blue,
+    Bold,
+    Color,
+    Color-16,
+    Color-256,
+    Color-RGB,
+    Cyan,
+    Down,
+    Down-Start,
+    Dull,
+    Erase,
+    Faint,
+    Foreground,
+    Forward,
+    From-Cursor,
+    Green,
+    Italic,
+    Line,
+    Magenta,
+    Move-Cursor,
+    Normal,
+    Red,
+    Screen,
+    Set-Style,
+    To,
+    To-Column,
+    To-Cursor,
+    Underline,
+    Up,
+    Up-Start,
+    Vivid,
+    White,
+    Whole,
+    Yellow,
+    command,
+  },
+  this.binary {_get-content-pointer, allocate, binary, take},
+  this.bool {bool},
+  this.box,
+  this.c-int {c-int, from-c-int},
+  this.cell {cell, mutate},
+  this.control {discard},
+  this.memory {store-float, store-int, store-int16, store-int32, store-int8},
+  this.pointer {null-pointer, shift},
+  this.rune {store-rune, to-int32},
+  this.text {_Text, text},
+  this.text.io {print-line},
+  this.unit {unit},
+}
+
+foreign {
+  llvm.memcpy.p0.p0.i64(pointer, pointer, int64, int1): void,
+  snprintf(pointer, c-int, pointer): c-int,
+  sprintf(pointer, pointer): c-int,
+}
+
+data _binary-builder {
+| _Binary-Builder(
+    cursor: int,
+    content: binary,
+  )
+}
+
+inline binary-builder: type {
+  cell(_binary-builder)
+}
+
+define _extension-required-p(b: &binary-builder, new-size: int): bool {
+  core.cell.borrow(b, function (val) {
+    tie _Binary-Builder of {cursor, content} = val;
+    let current-len = core.binary.binary-length(content);
+    quote {gt-int(add-int(*cursor, new-size), current-len)}
+  })
+}
+
+define _extend(b: &binary-builder): unit {
+  mutate(b, function (x: _binary-builder) {
+    let _Binary-Builder of {cursor, content} = x;
+    let current-size on content = core.binary.binary-length(content);
+    let new-content = allocate(mul-int(current-size, 2));
+    let content-ptr on content = _get-content-pointer(content);
+    let new-content-ptr on new-content = _get-content-pointer(new-content);
+    let _ = magic external llvm.memcpy.p0.p0.i64(new-content-ptr, content-ptr, cursor, 0);
+    discard(content);
+    _Binary-Builder(cursor, new-content)
+  })
+}
+
+define _get-head-ptr(b: &binary-builder, fragment-size: int): pointer {
+  if _extension-required-p(b, fragment-size) {
+    _extend(b);
+    _get-head-ptr(b, fragment-size)
+  } else {
+    core.cell.borrow(b, function (val) {
+      tie _Binary-Builder of {cursor, content} = val;
+      quote {shift(core.binary._get-content-pointer(content), *cursor)}
+    })
+  }
+}
+
+define _proceed(b: &binary-builder, size: int): unit {
+  mutate(b, function (_b) {
+    let _Binary-Builder of {cursor, content} = _b;
+    _Binary-Builder of {cursor := add-int(cursor, size), content}
+  })
+}
+
+define extract(b: binary-builder): binary {
+  let _Binary-Builder of {cursor, content} = core.cell.extract(b);
+  take(content, cursor)
+}
+
+define make-binary-builder(size: int): binary-builder {
+  make-cell(
+    _Binary-Builder of {
+      cursor := 0,
+      content := allocate(size),
+    },
+  )
+}
+
+define append-int64(b: &binary-builder, x: int): unit {
+  let size = 8;
+  let content-head-ptr = _get-head-ptr(b, size);
+  store-int(x, content-head-ptr);
+  _proceed(b, size)
+}
+
+define append-int64-UTF8(b: &binary-builder, x: int64): unit {
+  let fmt = core.text._get-content-pointer("%ld\0");
+  let fragment-size = from-c-int(magic external snprintf(null-pointer, 0, fmt)(x: int64));
+  let content-head-ptr = _get-head-ptr(b, fragment-size);
+  let _ = magic external sprintf(content-head-ptr, fmt)(x: int64);
+  _proceed(b, fragment-size)
+}
+
+define append-int32(b: &binary-builder, x: int32): unit {
+  let size = 4;
+  let content-head-ptr = _get-head-ptr(b, size);
+  store-int32(x, content-head-ptr);
+  _proceed(b, size)
+}
+
+define append-int32-UTF8(b: &binary-builder, x: int32): unit {
+  append-int64-UTF8(b, zext-int32-int64(x))
+}
+
+define append-int16(b: &binary-builder, x: int16): unit {
+  let size = 2;
+  let content-head-ptr = _get-head-ptr(b, size);
+  store-int16(x, content-head-ptr);
+  _proceed(b, size)
+}
+
+define append-int16-UTF8(b: &binary-builder, x: int16): unit {
+  append-int64-UTF8(b, zext-int16-int64(x))
+}
+
+define append-int8(b: &binary-builder, x: int8): unit {
+  let size = 1;
+  let content-head-ptr = _get-head-ptr(b, size);
+  store-int8(x, content-head-ptr);
+  _proceed(b, size)
+}
+
+define append-int8-UTF8(b: &binary-builder, x: int8): unit {
+  append-int64-UTF8(b, zext-int8-int64(x))
+}
+
+define append-float64(b: &binary-builder, x: float): unit {
+  let size = 8;
+  let content-head-ptr = _get-head-ptr(b, size);
+  store-float(x, content-head-ptr);
+  _proceed(b, size)
+}
+
+define append-float64-UTF8(b: &binary-builder, x: float64): unit {
+  let fmt = core.text._get-content-pointer("%lf\0");
+  let fragment-size = from-c-int(magic external snprintf(null-pointer, 0, fmt)(x: float64));
+  let content-head-ptr = _get-head-ptr(b, fragment-size);
+  let _ = magic external sprintf(content-head-ptr, fmt)(x: float64);
+  _proceed(b, fragment-size)
+}
+
+define append-float32(b: &binary-builder, x: float32): unit {
+  let size = 4;
+  let content-head-ptr = _get-head-ptr(b, size);
+  magic store(float32, x, content-head-ptr);
+  _proceed(b, size)
+}
+
+define append-float32-UTF8(b: &binary-builder, x: float32): unit {
+  append-float64-UTF8(b, fpext-float32-float64(x))
+}
+
+define append-float16(b: &binary-builder, x: float16): unit {
+  let size = 2;
+  let content-head-ptr = _get-head-ptr(b, size);
+  magic store(float16, x, content-head-ptr);
+  _proceed(b, size)
+}
+
+define append-float16-UTF8(b: &binary-builder, x: float16): unit {
+  append-float64-UTF8(b, fpext-float16-float64(x))
+}
+
+define append-binary(b: &binary-builder, x: &binary): unit {
+  let text-ptr = core.binary._get-content-pointer(x);
+  let text-byte-len = core.binary.binary-length(x);
+  let content-head-ptr = _get-head-ptr(b, text-byte-len);
+  let _ = magic external llvm.memcpy.p0.p0.i64(content-head-ptr, text-ptr, text-byte-len, 0);
+  _proceed(b, text-byte-len)
+}
+
+define append-text(b: &binary-builder, x: &text): unit {
+  let text-ptr = core.text._get-content-pointer(x);
+  let text-byte-len = core.text.text-byte-length(x);
+  let content-head-ptr = _get-head-ptr(b, text-byte-len);
+  let _ = magic external llvm.memcpy.p0.p0.i64(content-head-ptr, text-ptr, text-byte-len, 0);
+  _proceed(b, text-byte-len)
+}
+
+define append-rune(b: &binary-builder, x: rune): unit {
+  append-int32(b, to-int32(x));
+}
+
+define append-rune-UTF8(b: &binary-builder, x: rune): unit {
+  let size = core.rune.size(x);
+  let content-head-ptr = _get-head-ptr(b, size);
+  let buffer-ptr = magic alloca(int32, 1);
+  let _ = store-rune(x, buffer-ptr);
+  let _ = magic external llvm.memcpy.p0.p0.i64(content-head-ptr, buffer-ptr, size, 0);
+  _proceed(b, size);
+}
+
+inline append-ansi(k: &binary-builder, c: command): unit {
+  match c {
+  | Set-Style(style) =>
+    match style {
+    | Normal =>
+      append-text(k, "\u{1b}[0m")
+    | Bold =>
+      append-text(k, "\u{1b}[1m")
+    | Faint =>
+      append-text(k, "\u{1b}[2m")
+    | Italic =>
+      append-text(k, "\u{1b}[3m")
+    | Underline =>
+      append-text(k, "\u{1b}[4m")
+    | Color(color-layer, color) =>
+      match color-layer {
+      | Foreground =>
+        match color {
+        | Color-16(color-intensity, color) =>
+          match color-intensity {
+          | Dull =>
+            match color {
+            | Black =>
+              append-text(k, "\u{1b}[30m")
+            | Red =>
+              append-text(k, "\u{1b}[31m")
+            | Green =>
+              append-text(k, "\u{1b}[32m")
+            | Yellow =>
+              append-text(k, "\u{1b}[33m")
+            | Blue =>
+              append-text(k, "\u{1b}[34m")
+            | Magenta =>
+              append-text(k, "\u{1b}[35m")
+            | Cyan =>
+              append-text(k, "\u{1b}[36m")
+            | White =>
+              append-text(k, "\u{1b}[37m")
+            }
+          | Vivid =>
+            match color {
+            | Black =>
+              append-text(k, "\u{1b}[90m")
+            | Red =>
+              append-text(k, "\u{1b}[91m")
+            | Green =>
+              append-text(k, "\u{1b}[92m")
+            | Yellow =>
+              append-text(k, "\u{1b}[93m")
+            | Blue =>
+              append-text(k, "\u{1b}[94m")
+            | Magenta =>
+              append-text(k, "\u{1b}[95m")
+            | Cyan =>
+              append-text(k, "\u{1b}[96m")
+            | White =>
+              append-text(k, "\u{1b}[97m")
+            }
+          }
+        | Color-256(value) =>
+          append-text(k, "\u{1b}[38;5;");
+          append-int64-UTF8(k, zext-int8-int(value));
+          append-text(k, "m")
+        | Color-RGB(r, g, b) =>
+          append-text(k, "\u{1b}[38;2;");
+          append-int64-UTF8(k, zext-int8-int(r));
+          append-text(k, ";");
+          append-int64-UTF8(k, zext-int8-int(g));
+          append-text(k, ";");
+          append-int64-UTF8(k, zext-int8-int(b));
+          append-text(k, "m");
+        }
+      | Background =>
+        match color {
+        | Color-16(color-intensity, color) =>
+          match color-intensity {
+          | Dull =>
+            match color {
+            | Black =>
+              append-text(k, "\u{1b}[40m")
+            | Red =>
+              append-text(k, "\u{1b}[41m")
+            | Green =>
+              append-text(k, "\u{1b}[42m")
+            | Yellow =>
+              append-text(k, "\u{1b}[43m")
+            | Blue =>
+              append-text(k, "\u{1b}[44m")
+            | Magenta =>
+              append-text(k, "\u{1b}[45m")
+            | Cyan =>
+              append-text(k, "\u{1b}[46m")
+            | White =>
+              append-text(k, "\u{1b}[47m")
+            }
+          | Vivid =>
+            match color {
+            | Black =>
+              append-text(k, "\u{1b}[100m")
+            | Red =>
+              append-text(k, "\u{1b}[101m")
+            | Green =>
+              append-text(k, "\u{1b}[102m")
+            | Yellow =>
+              append-text(k, "\u{1b}[103m")
+            | Blue =>
+              append-text(k, "\u{1b}[104m")
+            | Magenta =>
+              append-text(k, "\u{1b}[105m")
+            | Cyan =>
+              append-text(k, "\u{1b}[106m")
+            | White =>
+              append-text(k, "\u{1b}[107m")
+            }
+          }
+        | Color-256(value) =>
+          append-text(k, "\u{1b}[48;5;");
+          append-int64-UTF8(k, zext-int8-int(value));
+          append-text(k, "m");
+        | Color-RGB(r, g, b) =>
+          append-text(k, "\u{1b}[48;2;");
+          append-int64-UTF8(k, zext-int8-int(r));
+          append-text(k, ";");
+          append-int64-UTF8(k, zext-int8-int(g));
+          append-text(k, ";");
+          append-int64-UTF8(k, zext-int8-int(b));
+          append-text(k, "m");
+        }
+      }
+    }
+  | Move-Cursor(movement) =>
+    match movement {
+    | Up(offset) =>
+      append-text(k, "\u{1b}[");
+      append-int64-UTF8(k, offset);
+      append-text(k, "A");
+    | Down(offset) =>
+      append-text(k, "\u{1b}[");
+      append-int64-UTF8(k, offset);
+      append-text(k, "B");
+    | Forward(offset) =>
+      append-text(k, "\u{1b}[");
+      append-int64-UTF8(k, offset);
+      append-text(k, "C");
+    | Backward(offset) =>
+      append-text(k, "\u{1b}[");
+      append-int64-UTF8(k, offset);
+      append-text(k, "D");
+    | Up-Start(offset) =>
+      append-text(k, "\u{1b}[");
+      append-int64-UTF8(k, offset);
+      append-text(k, "E");
+    | Down-Start(offset) =>
+      append-text(k, "\u{1b}[");
+      append-int64-UTF8(k, offset);
+      append-text(k, "F");
+    | To-Column(column) =>
+      append-text(k, "\u{1b}[");
+      append-int64-UTF8(k, column);
+      append-text(k, "G");
+    | To(x, y) =>
+      append-text(k, "\u{1b}[");
+      append-int64-UTF8(k, x);
+      append-text(k, ";");
+      append-int64-UTF8(k, y);
+      append-text(k, "H");
+    }
+  | Erase(space, span) =>
+    match space {
+    | Line =>
+      match span {
+      | From-Cursor =>
+        append-text(k, "\u{1b}[0K")
+      | To-Cursor =>
+        append-text(k, "\u{1b}[1K")
+      | Whole =>
+        append-text(k, "\u{1b}[2K")
+      }
+    | Screen =>
+      match span {
+      | From-Cursor =>
+        append-text(k, "\u{1b}[0J")
+      | To-Cursor =>
+        append-text(k, "\u{1b}[1J")
+      | Whole =>
+        append-text(k, "\u{1b}[2J")
+      }
+    }
+  }
+}
+
+define zen(): unit {
+  let b = make-binary-builder(4);
+  let _ on b = {
+    // append-int32(b, 3);
+    // append-int32(b, 65535)
+    // append-int64(b, 3);
+    // append-int64(b, 4);
+    // append-int64(b, 5);
+    // append-int64(b, 6);
+    // append-int64(b, 7);
+    // append-int64(b, 8);
+    // append-int64(b, 9)
+    append-ansi(b, Set-Style(Bold));
+    append-ansi(b, Set-Style(Color(Foreground, Color-16(Vivid, Blue))));
+    append-text(b, "hello");
+    append-ansi(b, Set-Style(Normal));
+    append-rune-UTF8(b, `a`);
+    append-rune-UTF8(b, `α`);
+    append-rune-UTF8(b, `あ`);
+    append-int64-UTF8(b, 123);
+    append-text(b, "world")
+  };
+  pin result = _Text(extract(b));
+  print-line(result);
+}

@@ -14,7 +14,7 @@ import {
     _shift-indentation,
     _with-local-mode,
   },
-  this.ref {_make-ref},
+  this.ref {make-ref},
   this.text {text},
   this.text.io {print-line},
   this.unit {Unit, unit},
@@ -68,9 +68,9 @@ define _layout(k: &_doc-kit, target: &doc): text {
 }
 
 define show-doc(target: &doc, max-ribbon-width: int): text {
-  let column-ref = _make-ref(0);
-  let indentation-ref = _make-ref(0);
-  let mode-ref = _make-ref(_Horizontal);
+  let column-ref = make-ref(quote {0});
+  let indentation-ref = make-ref(quote {0});
+  let mode-ref = make-ref(quote {_Horizontal});
   pin k = _Doc-Kit(max-ribbon-width, column-ref, indentation-ref, mode-ref);
   _layout(k, target)
 }

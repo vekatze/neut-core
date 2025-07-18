@@ -1,18 +1,15 @@
 import {
-  this.box,
+  this.box {axiom-T},
   this.c-size {C-Size, from-c-size},
   this.external {
     free,
     malloc,
-    thread-cond-destroy,
-    thread-cond-init,
-    thread-cond-signal,
     thread-mutex-destroy,
     thread-mutex-init,
     thread-mutex-lock,
     thread-mutex-unlock,
   },
-  this.foreign {THREAD_COND_SIZE, THREAD_MUTEX_SIZE},
+  this.foreign {THREAD_MUTEX_SIZE},
   this.int {sum-int},
   this.list {List},
   this.magic {cast},
@@ -38,26 +35,21 @@ data cell(_: type) {
 
 define _new(a: type, val: a): cell(a) {
   let mutex-size = from-c-size(THREAD_MUTEX_SIZE);
-  let cond-size = from-c-size(THREAD_COND_SIZE);
   let u = this.word.size;
-  let ptr = malloc(C-Size(sum-int(List[u, mutex-size, cond-size, u])));
+  let ptr = malloc(C-Size(sum-int(List[u, mutex-size, u])));
   store-int(cast(a, int, val), ptr);
   let _ = thread-mutex-init(shift(ptr, u));
-  thread-cond-init(shift(ptr, add-int(u, mutex-size)));
-  store-int(cast(type, int, a), shift(ptr, add-int(u, add-int(mutex-size, cond-size))));
+  store-int(cast(type, int, a), shift(ptr, add-int(u, mutex-size)));
   cast(pointer, cell(a), ptr)
 }
 
-// (content, thread-mutex, thread-cond, type)
+// (content, thread-mutex, type)
 resource _cell {
   function (ch: pointer) {
     let u = this.word.size;
     let mutex-size = from-c-size(THREAD_MUTEX_SIZE);
-    let cond-size = from-c-size(THREAD_COND_SIZE);
-    let cond-offset = add-int(u, mutex-size);
-    let type-offset = add-int(u, add-int(mutex-size, cond-size));
+    let type-offset = add-int(u, mutex-size);
     let a = cast(int, type, load-int(shift(ch, type-offset)));
-    thread-cond-destroy(shift(ch, cond-offset));
     thread-mutex-destroy(shift(ch, u));
     let _: a = magic cast(int, a, load-int(ch));
     free(ch)
@@ -65,8 +57,7 @@ resource _cell {
   function (ch: pointer) {
     let u = this.word.size;
     let mutex-size = from-c-size(THREAD_MUTEX_SIZE);
-    let cond-size = from-c-size(THREAD_COND_SIZE);
-    let type-offset = add-int(u, add-int(mutex-size, cond-size));
+    let type-offset = add-int(u, mutex-size);
     let a = cast(int, type, load-int(shift(ch, type-offset)));
     let val: &a = cast(int, &a, load-int(ch));
     let val-clone: a = _get-clone(a, val);
@@ -75,26 +66,24 @@ resource _cell {
   type-tag-to-int(Opaque),
 }
 
-inline _make-cell<a>(initial-value: a): cell(a) {
-  _new(a, initial-value)
+inline make-cell<a>(initial-value: meta a): cell(a) {
+  _new(a, axiom-T(initial-value))
 }
 
-inline modify<a, b>(ch: &cell(a), f: (a) -> pair(a, b)): b {
+inline modify<a, b>(ch: &cell(a), f: (meta a) -> pair(meta a, b)): b {
   let ch = cast(&cell(a), pointer, ch);
   let u = this.word.size;
   let mutex-ptr = shift(ch, u);
   thread-mutex-lock(mutex-ptr);
   let val-base: int = load-int(ch);
-  let orig-val = cast(int, a, val-base);
+  let orig-val = cast(int, meta a, val-base);
   let Pair(new-val, result) = f(orig-val);
-  store-int(cast(a, int, new-val), ch);
-  let mutex-size = from-c-size(THREAD_MUTEX_SIZE);
-  thread-cond-signal(shift(ch, add-int(u, mutex-size)));
+  store-int(cast(meta a, int, new-val), ch);
   thread-mutex-unlock(mutex-ptr);
   result
 }
 
-inline mutate<a>(ch: &cell(a), f: (a) -> a): unit {
+inline mutate<a>(ch: &cell(a), f: (meta a) -> meta a): unit {
   modify(ch, function (x) {
     Pair(f(x), Unit)
   })
@@ -108,8 +97,6 @@ inline borrow<a, b>(ch: &cell(a), f: (&a) -> meta b): b {
   let val-base: int = load-int(ch);
   let val: &a = cast(int, &a, val-base);
   letbox-T result = f(val);
-  let mutex-size = from-c-size(THREAD_MUTEX_SIZE);
-  thread-cond-signal(shift(ch, add-int(u, mutex-size)));
   thread-mutex-unlock(mutex-ptr);
   result
 }
@@ -120,12 +107,11 @@ define clone<a>(ch: &cell(a)): a {
   })
 }
 
-define extract<a>(c: cell(a)): a {
+define extract<a>(c: cell(a)): meta a {
   let u = this.word.size;
   let ch = cast(cell(a), pointer, c);
-  let result = cast(int, a, load-int(ch));
+  let result = cast(int, meta a, load-int(ch));
   thread-mutex-destroy(shift(ch, u));
-  thread-cond-destroy(shift(ch, add-int(u, from-c-size(THREAD_MUTEX_SIZE))));
   this.external.free(ch);
   result
 }

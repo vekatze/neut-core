@@ -20,7 +20,7 @@ data _doc-kit {
 define _set-mode(k: &_doc-kit, m: _mode): unit {
   tie _Doc-Kit of {layout-mode-ref} = k;
   this.ref.mutate(layout-mode-ref, function (_) {
-    m
+    quote {m}
   });
 }
 
@@ -37,7 +37,7 @@ define _get-indentation(k: &_doc-kit): int {
 define _set-indentation(k: &_doc-kit, x: int): unit {
   tie _Doc-Kit of {indentation-ref} = k;
   this.ref.mutate(indentation-ref, function (_) {
-    x
+    quote {x}
   });
 }
 
@@ -54,7 +54,7 @@ define _get-column(k: &_doc-kit): int {
 define _set-column(k: &_doc-kit, x: int): unit {
   tie _Doc-Kit of {column-ref} = k;
   this.ref.mutate(column-ref, function (_) {
-    x
+    quote {x}
   });
 }
 

@@ -1,7 +1,7 @@
 import {
   this.bool {False, True, bool},
   this.box {axiom-T},
-  this.cell {_make-cell, mutate},
+  this.cell {make-cell, mutate},
   this.debug {trace, vet},
   this.either {Right, either},
   this.equal {eq-data},
@@ -19,24 +19,24 @@ import {
 }
 
 define with-cell(i: int): int {
-  let c = _make-cell(i);
+  let c = make-cell(quote {i});
   let _ on c =
     mutate(c, function (x) {
-      add-int(x, 1)
+      quote {add-int(axiom-T(x), 1)}
     });
   let _ on c =
     mutate(c, function (x) {
-      add-int(x, 1)
+      quote {add-int(axiom-T(x), 1)}
     });
   let _ on c =
     mutate(c, function (x) {
-      add-int(x, 1)
+      quote {add-int(axiom-T(x), 1)}
     });
   let _ on c =
     mutate(c, function (x) {
-      add-int(x, 21)
+      quote {add-int(axiom-T(x), 21)}
     });
-  this.cell.extract(c)
+  axiom-T(this.cell.extract(c))
 }
 
 define box-int(i: int): meta int {
@@ -334,9 +334,9 @@ define zen(): unit {
   // let _ on !k = print-line(!k);
   // let _ on !k = print-line(!k);
   // let _ = !k;
-  // let v = with-cell(3);
-  // print("result of with-cell(3): ");
-  // print-int-line(v);
+  let v = with-cell(3);
+  print("result of with-cell(3): ");
+  print-int-line(v);
   // let c = make-cell(*"hello");
   // let _ on c = {
   //   let item = "test";

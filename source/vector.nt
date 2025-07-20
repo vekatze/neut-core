@@ -1020,6 +1020,14 @@ define lift-vector<a>(xs: vector(a), _: (a) -> meta a): meta vector(a) {
   //   })
 }
 
+define meta-vector-out<a>(xs: vector(meta a)): meta vector(a) {
+  magic cast(_, _, xs)
+}
+
+define meta-vector-in<a>(xs: meta vector(a)): vector(meta a) {
+  magic cast(_, _, xs)
+}
+
 define zen(): unit {
   // find
   let xs = this.vector.make(5);

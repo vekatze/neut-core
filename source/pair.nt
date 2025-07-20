@@ -1,3 +1,7 @@
+import {
+  this.magic {cast},
+}
+
 data pair(a, b) {
 | Pair(left: a, right: b)
 }
@@ -25,4 +29,31 @@ define second-N<a, b>(p: &pair(a, b)): &b {
 define swap<a, b>(p: pair(a, b)): pair(b, a) {
   let Pair(x, y) = p;
   Pair(y, x)
+}
+
+inline meta-pair-in<a, b>(p: meta pair(a, b)): pair(meta a, meta b) {
+  // admissible:
+  //   let mx =
+  //     box {
+  //       letbox Pair(x, _) = !p;
+  //       x
+  //     };
+  //   let my =
+  //     box {
+  //       letbox Pair(_, y) = !p;
+  //       y
+  //     };
+  //   Pair(mx, my)
+  cast(_, _, p)
+}
+
+define meta-pair-out<a, b>(p: pair(meta a, meta b)): meta pair(a, b) {
+  // admissible:
+  //   let Pair(x, y) = p;
+  //   box {
+  //     letbox x = x;
+  //     letbox y = y;
+  //     Pair(x, y)
+  //   }
+  cast(_, _, p)
 }

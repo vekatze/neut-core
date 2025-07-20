@@ -1,16 +1,17 @@
 import {
-  this.bool {False, True, bool},
+  this.bool {True, bool},
   this.box {axiom-T},
   this.cell {make-cell, mutate},
   this.debug {trace, vet},
   this.either {Right, either},
   this.equal {eq-data},
   this.int.io {print-int-line},
-  this.list {Cons, List, Nil, list},
+  this.list {Cons, Nil, list},
   this.pair {Pair},
   this.random {random-int},
   this.text {text},
   this.text.io {print, print-line},
+  this.thread.pool {for-each-parallel},
   this.type-tag {
     get-cons-size,
   },
@@ -130,9 +131,14 @@ define is-even(x: int): bool {
 }
 
 define zen(): unit {
+  pin result =
+    for-each-parallel(5, Vector[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], function (x) {
+      quote {add-int(x, 10)}
+    });
+  vet(result);
   // let tmp = Cons(True, Cons(is-even, Nil));
-  pin myVec = Vector[True, False, True, True];
-  vet(myVec);
+  // pin myVec = Vector[True, False, True, True];
+  // vet(myVec);
   // range
   pin xs = this.vector.range(1, 10);
   vet(xs);
@@ -218,39 +224,39 @@ define zen(): unit {
   // let !foo = *"text";
   // let _ = !foo;
   // let _ = !foo;
-  let xs = this.vector.make(5);
-  let xs = push-back(xs, *"a");
-  let xs = push-back(xs, *"b");
-  let ys = this.vector.make(5);
-  let ys = push-back(ys, *"c");
-  let ys = push-back(ys, *"d");
-  let zs = this.vector.make(5);
-  let zs = push-back(zs, *"e");
-  let zs = push-back(zs, *"f");
-  let outer = this.vector.make(5);
-  let outer = push-back(outer, xs);
-  let outer = push-back(outer, ys);
-  let outer = push-back(outer, zs);
-  let _ on outer = vet(outer);
-  let _ = outer;
-  // pin new-outer = this.vector.concat(outer);
-  // vet(new-outer);
-  let xs = this.vector.make(5);
-  let xs = push-back(xs, *"a");
-  let xs = push-back(xs, *"b");
-  let xs = push-back(xs, *"c");
-  let xs = push-back(xs, *"d");
-  let !xs = push-back(xs, *"e");
-  let ys = trace(this.vector.intercalate(!xs, *"XXX"));
-  let zs = trace(this.vector.append(!xs, ys));
-  pin sample =
-    this.vector.fold-right(zs, *"test", function (acc, v, _) {
-      let tmp on acc, v = core.text.append(acc, v);
-      let _ = acc;
-      let _ = v;
-      tmp
-    });
-  vet(sample);
+  // let xs = this.vector.make(5);
+  // let xs = push-back(xs, *"a");
+  // let xs = push-back(xs, *"b");
+  // let ys = this.vector.make(5);
+  // let ys = push-back(ys, *"c");
+  // let ys = push-back(ys, *"d");
+  // let zs = this.vector.make(5);
+  // let zs = push-back(zs, *"e");
+  // let zs = push-back(zs, *"f");
+  // let outer = this.vector.make(5);
+  // let outer = push-back(outer, xs);
+  // let outer = push-back(outer, ys);
+  // let outer = push-back(outer, zs);
+  // let _ on outer = vet(outer);
+  // let _ = outer;
+  // // pin new-outer = this.vector.concat(outer);
+  // // vet(new-outer);
+  // let xs = this.vector.make(5);
+  // let xs = push-back(xs, *"a");
+  // let xs = push-back(xs, *"b");
+  // let xs = push-back(xs, *"c");
+  // let xs = push-back(xs, *"d");
+  // let !xs = push-back(xs, *"e");
+  // let ys = trace(this.vector.intercalate(!xs, *"XXX"));
+  // let zs = trace(this.vector.append(!xs, ys));
+  // pin sample =
+  //   this.vector.fold-right(zs, *"test", function (acc, v, _) {
+  //     let tmp on acc, v = core.text.append(acc, v);
+  //     let _ = acc;
+  //     let _ = v;
+  //     tmp
+  //   });
+  // vet(sample);
   // // let xs = push-back(xs, *"f");
   // pin xs = this.vector.intercalate(!xs, *"XXX");
   // vet(xs);
@@ -299,16 +305,16 @@ define zen(): unit {
   // } else {
   //   print("false\n")
   // };
-  pin xs = List[*"foo", *"bar", *"buz"];
-  pin xs-mod = List[*"foo", *"bar", *"buzzz"];
-  if eq-data(xs, xs-mod) {
-    print-line("equal")
-  } else {
-    print-line("not-equal")
-  };
-  vet(xs);
-  pin yo = this.text.intercalate-N(xs, ", yo, ");
-  vet(yo);
+  // pin xs = List[*"foo", *"bar", *"buz"];
+  // pin xs-mod = List[*"foo", *"bar", *"buzzz"];
+  // if eq-data(xs, xs-mod) {
+  //   print-line("equal")
+  // } else {
+  //   print-line("not-equal")
+  // };
+  // vet(xs);
+  // pin yo = this.text.intercalate-N(xs, ", yo, ");
+  // vet(yo);
   // print-line(yo);
   // let t = "foo\nbar\nbuz";
   // pin yo = lines(t);
@@ -334,9 +340,9 @@ define zen(): unit {
   // let _ on !k = print-line(!k);
   // let _ on !k = print-line(!k);
   // let _ = !k;
-  let v = with-cell(3);
-  print("result of with-cell(3): ");
-  print-int-line(v);
+  // let v = with-cell(3);
+  // print("result of with-cell(3): ");
+  // print-int-line(v);
   // let c = make-cell(*"hello");
   // let _ on c = {
   //   let item = "test";
@@ -412,3 +418,22 @@ define zen(): unit {
 define main(): unit {
   zen();
 }
+
+// define layer-test(): unit {
+//   // 0
+//   let ch: cell(?&list(int)) = make-cell(box {none});
+//   let xs: list(int) = List[1, 2, 3];
+//   // ch → xs
+//   letbox-T val on ch = {
+//     letbox-T result on xs = {
+//       mutate-2(ch, function (_) {
+//         Right(xs)
+//       });
+//       box {Unit}
+//     };
+//     discard(xs);
+//     box {Unit}
+//   };
+//   let ys = extract(ch);
+//   Unit
+// }

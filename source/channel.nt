@@ -102,7 +102,6 @@ define _receive-from-channel(a: type, ch: pointer, mutex-ptr: pointer): meta a {
   match dequeue(q) {
   | Right(Pair(v, q)) =>
     store-int(cast(queue(meta a), int, q), ch);
-    thread-mutex-unlock(mutex-ptr);
     v
   | Left(_) =>
     store-int(cast(queue(int), int, empty), ch);
@@ -119,5 +118,7 @@ define receive<a>(ch: &channel(a)): meta a {
   let u = this.word.size;
   let mutex-ptr = shift(ch, u);
   thread-mutex-lock(mutex-ptr);
-  _receive-from-channel(a, ch, mutex-ptr)
+  let result = _receive-from-channel(a, ch, mutex-ptr);
+  thread-mutex-unlock(mutex-ptr);
+  result
 }

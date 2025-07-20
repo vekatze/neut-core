@@ -31,6 +31,7 @@ foreign {
   neut_core_v0_51_parse_decimal(pointer, int, pointer): int,
   neut_core_v0_51_parse_hex(pointer, int, pointer): int,
   neut_core_v0_51_parse_double(pointer, int, pointer): int,
+  neut_core_v0_51_get_online_cpu_count(): int,
 }
 
 inline _is-not-zero(x: c-int): bool {
@@ -172,5 +173,11 @@ inline _parse_hex(num-text-ptr: pointer, len: int, result-ptr: pointer): int {
 inline _parse_double(num-text-ptr: pointer, len: int, result-ptr: pointer): int {
   magic opaque-value {
     magic external neut_core_v0_51_parse_double(num-text-ptr, len, result-ptr)
+  }
+}
+
+inline get-cpu-count(): int {
+  magic opaque-value {
+    magic external neut_core_v0_51_get_online_cpu_count()
   }
 }

@@ -458,3 +458,9 @@ size_t neut_core_v0_51_double_strlen(double value, int decimals) {
   }
   return (size_t)n;
 }
+
+__attribute__((always_inline)) int64_t
+neut_core_v0_51_get_online_cpu_count(void) {
+  int64_t n = (int64_t)sysconf(_SC_NPROCESSORS_ONLN);
+  return (n > 0) ? n : 1;
+}

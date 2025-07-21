@@ -25,10 +25,6 @@ import {
   this.word,
 }
 
-inline _get-clone(a: type, x: &a): a {
-  *x
-}
-
 nominal {
   _mvar: type,
 }

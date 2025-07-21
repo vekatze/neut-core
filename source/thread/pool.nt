@@ -8,24 +8,25 @@ import {
   this.magic {cast},
   this.pair {Pair, meta-pair-in},
   this.thread {thread},
+  this.thread.mvar {make-mvar, mvar},
   this.unit {Unit, unit},
   this.vector {Vector, for, for-each, meta-vector-in, meta-vector-out, push-back, vector},
 }
 
 data _task(a) {
 | _Finish
-| _Work(work: () -> meta a, result-channel: &channel(a))
+| _Work(work: () -> meta a, result-channel: &mvar(a))
 }
 
 data future(a) {
-| _Future(result-chan: &channel(a))
+| _Future(result-chan: &mvar(a))
 }
 
 data pool(a: type) {
 | _Pool(
     workers: vector(thread(unit)),
     tasks-ref: channel(_task(a)),
-    futures-ref: cell(vector(&channel(a))),
+    futures-ref: cell(vector(&mvar(a))),
   )
 }
 
@@ -41,7 +42,7 @@ define _close-pool<a>(k: pool(a)): unit {
   });
   let futures = axiom-T(this.cell.extract(futures-ref));
   for(futures, function (ch, _) {
-    let _ = cast(&channel(a), channel(a), ch);
+    let _ = cast(&mvar(a), mvar(a), ch);
     Unit
   });
   discard(tasks-ref);
@@ -59,7 +60,7 @@ define _setup-workers<a>(tasks-ref: &channel(_task(a)), size: int): vector(threa
           Unit
         | _Work(f, chan) =>
           let result = f();
-          send(chan, result);
+          this.thread.mvar.send(chan, result);
           worker();
         }
       },
@@ -81,11 +82,11 @@ inline with-thread-pool<a, b, e>(size: int, env: e, f: (p: &pool(a), env: meta e
 
 define detach-task<a>(k: &pool(a), f: () -> meta a): future(a) {
   tie _Pool of {tasks-ref, futures-ref} = k;
-  let result-chan = cast(channel(a), &channel(a), make-channel());
+  let result-chan = cast(mvar(a), &mvar(a), make-mvar(a));
   mutate(futures-ref, function (futures) {
     box {
       letbox futures = futures;
-      letbox result-chan = cast(&channel(a), meta &channel(a), result-chan);
+      letbox result-chan = cast(&mvar(a), meta &mvar(a), result-chan);
       push-back(futures, result-chan)
     }
   });
@@ -96,7 +97,7 @@ define detach-task<a>(k: &pool(a), f: () -> meta a): future(a) {
 
 define attach-task<a>(i: future(a)): meta a {
   let _Future(result-chan) = i;
-  receive(result-chan)
+  this.thread.mvar.receive(result-chan)
 }
 
 inline for-each-parallel<a, b>(worker-num: int, xs: vector(a), f: (a) -> b): vector(b) {

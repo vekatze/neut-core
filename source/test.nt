@@ -12,6 +12,7 @@ import {
   this.random {random-int},
   this.text {text},
   this.text.io {print, print-line},
+  this.thread.mvar {make-mvar, receive, send},
   this.thread.pool {for-each-parallel},
   this.type-tag {
     get-cons-size,
@@ -132,6 +133,17 @@ define is-even(x: int): bool {
 }
 
 define zen(): unit {
+  let !mv = make-mvar(text);
+  let _ = !mv;
+  let _ = !mv;
+  let _ = !mv;
+  let _ on !mv = {
+    send(!mv, quote {*"test"});
+    pin v = receive(!mv);
+    vet(v)
+  };
+  let _ = !mv;
+  let _ = !mv;
   pin count = get-cpu-count();
   vet(count);
   pin result =

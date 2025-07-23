@@ -616,27 +616,31 @@ inline drop-while-end-N(t: &text, !pred: (rune) -> bool): text {
 }
 
 define replicate(t: &text, n: int): text {
-  let base-len = text-byte-length(t);
-  let len = mul-int(n, base-len);
-  let u = this.word.size;
-  let u2 = mul-int(u, 2);
-  let new-text = malloc(C-Size(add-int(len, u2)));
-  store-int(0, new-text);
-  store-int(len, shift(new-text, u));
-  let content-ptr = shift(new-text, u2);
-  let loop =
-    define self(count: int, t: &text): unit {
-      if ge-int(count, n) {
-        Unit
-      } else {
-        let current-content-ptr = shift(content-ptr, mul-int(count, base-len));
-        let x-ptr = _get-content-pointer(t);
-        _copy-binary(x-ptr, current-content-ptr, base-len);
-        self(add-int(count, 1), t)
-      }
-    };
-  loop(0, t);
-  magic cast(pointer, text, new-text)
+  if le-int(n, 0) {
+    empty()
+  } else {
+    let base-len = text-byte-length(t);
+    let len = mul-int(n, base-len);
+    let u = this.word.size;
+    let u2 = mul-int(u, 2);
+    let new-text = malloc(C-Size(add-int(len, u2)));
+    store-int(0, new-text);
+    store-int(len, shift(new-text, u));
+    let content-ptr = shift(new-text, u2);
+    let loop =
+      define self(count: int, t: &text): unit {
+        if ge-int(count, n) {
+          Unit
+        } else {
+          let current-content-ptr = shift(content-ptr, mul-int(count, base-len));
+          let x-ptr = _get-content-pointer(t);
+          _copy-binary(x-ptr, current-content-ptr, base-len);
+          self(add-int(count, 1), t)
+        }
+      };
+    loop(0, t);
+    magic cast(pointer, text, new-text)
+  }
 }
 
 inline fold<a>(acc: a, t: &text, !f: (a, rune) -> a): a {

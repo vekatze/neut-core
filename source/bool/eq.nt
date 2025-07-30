@@ -1,5 +1,5 @@
 import {
-  this.bool {bool, not},
+  this.bool {False, True, bool, not},
   this.box,
   this.eq {Eq, eq},
 }
@@ -14,4 +14,15 @@ inline as-eq: eq(bool) {
       }
     },
   )
+}
+
+define eq-bool(b1: bool, b2: bool): bool {
+  match b1, b2 {
+  | True, True =>
+    True
+  | False, False =>
+    True
+  | _, _ =>
+    False
+  }
 }

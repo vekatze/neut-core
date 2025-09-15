@@ -360,6 +360,15 @@ define _get-rune(t: &text, index: int): rune {
   load-rune(ptr)
 }
 
+define get-first-rune<r := rho>(t: &text): ?rune {
+  try _ = r;
+  if gt-int(text-byte-length(t), 0) {
+    Right(_get-rune(t, 0))
+  } else {
+    none
+  }
+}
+
 define uncons<r := rho>(t: text): ?pair(rune, text) {
   let len on t = text-byte-length(t);
   if eq-int(len, 0) {

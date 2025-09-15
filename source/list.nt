@@ -208,6 +208,20 @@ inline for-N<a>(xs: &list(a), f: (&a) -> unit): unit {
   Unit
 }
 
+inline for-EN<a, e, b>(xs: &list(a), !f: (&a) -> either(e, b)): either(e, unit) {
+  let f =
+    define self(xs: &list(a)): either(e, unit) {
+      case xs {
+      | Nil =>
+        Right(Unit)
+      | Cons(y, ys) =>
+        try _ = !f(y);
+        self(ys)
+      }
+    };
+  f(xs)
+}
+
 define append<a>(xs: list(a), ys: list(a)): list(a) {
   fold-right(xs, ys, Cons)
 }

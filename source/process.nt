@@ -1,5 +1,6 @@
 import {
   this.bool {bool},
+  this.box,
   this.c-int {c-int, eq-c-int, from-c-int},
   this.c-pid {c-pid, eq-c-pid},
   this.c-size {C-Size},
@@ -121,9 +122,9 @@ define _fork<r := rho>(): system(c-pid) {
 
 data process-spec {
 | Process-Spec(
-    process: &text,
-    args: list(&text),
-    input: &text,
+    process: text,
+    args: list(text),
+    input: text,
   )
 }
 
@@ -155,9 +156,10 @@ define spawn<r := rho>(
     try _ = _dup2(out-writer, stdout);
     try _ = _dup2(error-writer, stderr);
     let Process-Spec of {process, args} = ps;
-    let raw-args = this.list.for-each(Cons(process, args), _get-content-pointer);
+    let cmd on process = _get-content-pointer(process);
+    pin tmp = Cons(process, args);
+    let raw-args = this.list.for-each-N(tmp, _get-content-pointer);
     let cmd-args = _make-argv(this.list.append(raw-args, List[null-pointer]));
-    let cmd = _get-content-pointer(process);
     let _ = magic external execvp(cmd, cmd-args);
     report-system-error()
   } else {
@@ -165,7 +167,8 @@ define spawn<r := rho>(
     try _ = close(out-writer);
     try _ = close(error-writer);
     let Process-Spec of {input} = ps;
-    try _ = write(in-writer, input);
+    try _ on input = write(in-writer, input);
+    let _ = input;
     try _ = close(in-writer);
     try stdout-text = read(out-reader, stdout-initial-buffer-size);
     try stderr-text = read(error-reader, stderr-initial-buffer-size);
@@ -192,9 +195,9 @@ define _print-process-result-status(st: process-result-status): unit {
 define zen(): unit {
   let cmd =
     Process-Spec of {
-      process := "sh",
-      args := List["-c", "ls /"],
-      input := "",
+      process := *"sh",
+      args := List[*"-c", *"ls /"],
+      input := *"",
     };
   match spawn(cmd, 1024, 1024) {
   | Right(result) =>

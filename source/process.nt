@@ -1,11 +1,13 @@
 import {
   this.bool {bool},
   this.box,
-  this.c-int {c-int, eq-c-int, from-c-int},
+  this.c-int {c-int, eq-c-int, from-c-int, lt-c-int},
   this.c-pid {c-pid, eq-c-pid},
   this.c-size {C-Size},
+  this.c-string {c-string, to-c-string},
+  this.control {discard},
   this.either {Left, Right, rho},
-  this.external {free, malloc},
+  this.external {exit, free, malloc},
   this.file {close},
   this.file.descriptor {descriptor, stderr, stdin, stdout},
   this.foreign {_wcoredump, _wexitstatus, _wifexited, _wifsignaled, _wifstopped, _wstopsig, _wtermsig},
@@ -15,9 +17,9 @@ import {
   this.memory {load-c-int, store-int},
   this.pair {Pair, pair},
   this.pointer {extract, null-pointer, shift},
-  this.system {report-system-error, system},
+  this.system {get-error-message, get-system-error, report-system-error, system},
   this.text {_get-content-pointer, text},
-  this.text.io {print, print-line, read, write},
+  this.text.io {print, read, write},
   this.unit {Unit, unit},
   this.word,
 }
@@ -28,6 +30,7 @@ foreign {
   waitpid(c-pid, pointer, c-int): c-pid,
   pipe(pointer): c-int,
   dup2(c-int, c-int): c-int,
+  chdir(pointer): c-int,
 }
 
 define __waitpid(pid: c-pid, status-ptr: pointer, option: c-int): c-pid {
@@ -124,6 +127,7 @@ data process-spec {
 | Process-Spec(
     process: text,
     args: list(text),
+    cwd: ?text,
     input: text,
   )
 }
@@ -134,6 +138,17 @@ data process-result {
     stdout-text: text,
     stderr-text: text,
   )
+}
+
+define _call(process: text, args: list(text), error-writer: descriptor): system(process-result) {
+  let cmd on process = _get-content-pointer(process);
+  pin tmp = Cons(process, args);
+  let raw-args = this.list.for-each-N(tmp, _get-content-pointer);
+  let cmd-args = _make-argv(this.list.append(raw-args, List[null-pointer]));
+  let v = magic external execvp(cmd, cmd-args);
+  pin message = get-error-message(get-system-error());
+  let _ = write(error-writer, message);
+  exit(v)
 }
 
 define spawn<r := rho>(
@@ -155,13 +170,24 @@ define spawn<r := rho>(
     try _ = _dup2(in-reader, stdin);
     try _ = _dup2(out-writer, stdout);
     try _ = _dup2(error-writer, stderr);
-    let Process-Spec of {process, args} = ps;
-    let cmd on process = _get-content-pointer(process);
-    pin tmp = Cons(process, args);
-    let raw-args = this.list.for-each-N(tmp, _get-content-pointer);
-    let cmd-args = _make-argv(this.list.append(raw-args, List[null-pointer]));
-    let _ = magic external execvp(cmd, cmd-args);
-    report-system-error()
+    let Process-Spec of {process, args, cwd} = ps;
+    match cwd {
+    | Left(_) =>
+      _call(process, args, error-writer)
+    | Right(dir) =>
+      let s on dir = to-c-string(dir);
+      discard(dir);
+      let result on s = magic external chdir(magic cast(&c-string, pointer, s));
+      let _ = s;
+      if lt-c-int(result, 0) {
+        let message = get-error-message(get-system-error());
+        let _ on message = write(stderr, message);
+        let _ = message;
+        exit(result)
+      } else {
+        _call(process, args, error-writer)
+      }
+    }
   } else {
     try _ = close(in-reader);
     try _ = close(out-writer);
@@ -196,19 +222,22 @@ define zen(): unit {
   let cmd =
     Process-Spec of {
       process := *"sh",
-      args := List[*"-c", *"ls /"],
+      args := List[*"-c", *"ls"],
+      cwd := Right(*"/etc"),
       input := *"",
     };
   match spawn(cmd, 1024, 1024) {
   | Right(result) =>
     let Process-Result of {stdout-text, stderr-text, status} = result;
+    print("stdout:\n");
     let _ on stdout-text = print(stdout-text);
+    print("\nstderr:\n");
     let _ on stderr-text = print(stderr-text);
+    print("\n");
     let _ = stdout-text;
     let _ = stderr-text;
     print("exit-code: ");
     _print-process-result-status(status);
-    print-line("success")
   | Left(e) =>
     print("fail: ");
     pin message = this.system.get-error-message(e);

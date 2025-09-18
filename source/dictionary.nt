@@ -223,6 +223,94 @@ define lookup<k, v, reg := rho>(L: &ord(k), d: &dictionary(k, v), needle: &k): ?
   }
 }
 
+define _lookup-LE-with-cand<k, v>(
+  L: &ord(k),
+  d: &dictionary(k, v),
+  needle: &k,
+  cand-k: &k,
+  cand-v: &v,
+): pair(&k, &v) {
+  case d {
+  | Tip =>
+    Pair(cand-k, cand-v)
+  | Bin(_, key, x, l, r) =>
+    tie Ord of {compare} = L;
+    match compare(needle, key) {
+    | GT =>
+      _lookup-LE-with-cand(L, r, needle, key, x)
+    | LT =>
+      _lookup-LE-with-cand(L, l, needle, cand-k, cand-v)
+    | _ =>
+      Pair(key, x)
+    }
+  }
+}
+
+define lookup-LE<k, v, reg := rho>(L: &ord(k), d: &dictionary(k, v), needle: &k): ?pair(&k, &v) {
+  tie Ord of {compare} = L;
+  case d {
+  | Tip =>
+    try _ = reg;
+    none
+  | Bin(_, key, x, l, r) =>
+    match compare(needle, key) {
+    | GT =>
+      try _ = reg;
+      Right(_lookup-LE-with-cand(L, r, needle, key, x))
+    | LT =>
+      try _ = reg;
+      lookup-LE(L, l, needle)
+    | _ =>
+      try _ = reg;
+      Right(Pair(key, x))
+    }
+  }
+}
+
+define _lookup-GE-with-cand<k, v>(
+  L: &ord(k),
+  d: &dictionary(k, v),
+  needle: &k,
+  cand-k: &k,
+  cand-v: &v,
+): pair(&k, &v) {
+  case d {
+  | Tip =>
+    Pair(cand-k, cand-v)
+  | Bin(_, key, x, l, r) =>
+    tie Ord of {compare} = L;
+    match compare(needle, key) {
+    | LT =>
+      _lookup-GE-with-cand(L, r, needle, key, x)
+    | GT =>
+      _lookup-GE-with-cand(L, l, needle, cand-k, cand-v)
+    | _ =>
+      Pair(key, x)
+    }
+  }
+}
+
+define lookup-GE<k, v, reg := rho>(L: &ord(k), d: &dictionary(k, v), needle: &k): ?pair(&k, &v) {
+  tie Ord of {compare} = L;
+  case d {
+  | Tip =>
+    try _ = reg;
+    none
+  | Bin(_, key, x, l, r) =>
+    match compare(needle, key) {
+    | LT =>
+      try _ = reg;
+      Right(_lookup-GE-with-cand(L, r, needle, key, x))
+    | GT =>
+      try _ = reg;
+      lookup-GE(L, l, needle)
+    | _ =>
+      try _ = reg;
+      Right(Pair(key, x))
+    }
+  }
+}
+
 data _view(k, a) {
 | _View(
     key: k,

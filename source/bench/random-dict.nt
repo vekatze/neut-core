@@ -1,29 +1,30 @@
 import {
   this.box,
   this.control {grow},
-  this.dictionary {dictionary, insert, lookup},
+  this.dictionary {dictionary, make-insert, make-lookup},
   this.either {Left, Right},
   this.int.io {print-int-line},
   this.int.ord,
-  this.ord {ord},
   this.random {random-int},
   this.unit {Unit, unit},
 }
 
-define make-big-dictionary(k: &ord(int)): dictionary(int, int) {
+define make-big-dictionary(): dictionary(int, int) {
+  let !insert = make-insert(this.int.ord.as-ord);
   grow(this.dictionary.empty, 700000, function (acc, _) {
     let key = random-int(1000000);
     let val = random-int(1000000);
-    insert(k, acc, key, val)
+    !insert(acc, key, val)
   })
 }
 
-define random-lookup-sum(k: &ord(int), d: &dictionary(int, int)): unit {
+define random-lookup-sum(d: &dictionary(int, int)): unit {
+  let !lookup = make-lookup(this.int.ord.as-ord);
   let rsum =
     grow(0, 700000, function (acc, _) {
       let key = random-int(1000000);
       let val on key =
-        match lookup(k, d, key) {
+        match !lookup(d, key) {
         | Left(_) =>
           0
         | Right(v) =>
@@ -36,9 +37,8 @@ define random-lookup-sum(k: &ord(int), d: &dictionary(int, int)): unit {
 }
 
 define main(): unit {
-  pin k = this.int.ord.as-ord;
-  let big-dictionary = make-big-dictionary(k);
-  let _ on big-dictionary = random-lookup-sum(k, big-dictionary);
+  let big-dictionary = make-big-dictionary();
+  let _ on big-dictionary = random-lookup-sum(big-dictionary);
   let _ = big-dictionary;
   Unit
 }

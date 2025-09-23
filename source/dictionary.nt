@@ -269,6 +269,26 @@ inline make-insert<k, v>(o: ord(k)): (dictionary(k, v), k, v) -> dictionary(k, v
   }
 }
 
+inline make-insert-with<k, v>(o: ord(k), !f: (v, v) -> v): (dictionary(k, v), k, v) -> dictionary(k, v) {
+  let Ord of {compare := !compare} = o;
+  define loop(d: dictionary(k, v), key-X: k, val-X: v): dictionary(k, v) {
+    match d {
+    | Tip =>
+      singleton(key-X, val-X)
+    | Bin(size, key-Y, val-Y, left, right) =>
+      let order on key-X, key-Y = !compare(key-X, key-Y);
+      match order {
+      | LT =>
+        _balance-L(key-Y, val-Y, loop(left, key-X, val-X), right)
+      | GT =>
+        _balance-R(key-Y, val-Y, left, loop(right, key-X, val-X))
+      | EQ =>
+        Bin(size, key-X, !f(val-X, val-Y), left, right)
+      }
+    }
+  }
+}
+
 inline make-lookup<k, v>(o: ord(k)): <reg := rho>(d: &dictionary(k, v), needle: &k) -> ?&v {
   let Ord of {compare := !compare} = o;
   define loop<reg := rho>(d: &dictionary(k, v), needle: &k): ?&v {
@@ -418,5 +438,27 @@ define to-list<k, v>(d: dictionary(k, v)): list(pair(k, v)) {
     let xs = to-list(d1);
     let ys = to-list(d2);
     append(xs, Cons(Pair(k, v), ys))
+  }
+}
+
+define keys<k, v>(d: &dictionary(k, v)): list(&k) {
+  case d {
+  | Tip =>
+    Nil
+  | Bin(_, k, _, d1, d2) =>
+    let xs = keys(d1);
+    let ys = keys(d2);
+    append(xs, Cons(k, ys))
+  }
+}
+
+define values<k, v>(d: &dictionary(k, v)): list(&v) {
+  case d {
+  | Tip =>
+    Nil
+  | Bin(_, _, v, d1, d2) =>
+    let xs = values(d1);
+    let ys = values(d2);
+    append(xs, Cons(v, ys))
   }
 }

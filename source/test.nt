@@ -2,6 +2,7 @@ import {
   this.bool {True, bool},
   this.box {axiom-T},
   this.cell {make-cell, mutate},
+  this.control {discard},
   this.debug {trace, vet},
   this.either {Right, either},
   this.equal {eq-data},
@@ -132,7 +133,22 @@ define is-even(x: int): bool {
   eq-int(rem-int(x, 2), 0)
 }
 
+inline loop<a>(xs: list(a)): list(a) {
+  match xs {
+  | Nil =>
+    Nil
+  | Cons(y, ys) =>
+    Cons(y, loop(ys))
+  }
+}
+
+// define use-loop<a>(xs: list(a)): list(a) {
+//   loop(xs)
+// }
 define zen(): unit {
+  // let xs = List[type, type];
+  // pin tmp = loop(xs);
+  // vet(tmp);
   let !mv = make-mvar(text);
   let _ = !mv;
   let _ = !mv;
@@ -430,6 +446,9 @@ define zen(): unit {
   Unit
 }
 
+// define exh(xs: list(int)): type {
+//   match xs {}
+// }
 define main(): unit {
   zen();
 }
@@ -451,4 +470,40 @@ define main(): unit {
 //   };
 //   let ys = extract(ch);
 //   Unit
+// }
+template foo(a): type {
+  foo(a)
+}
+
+define use-template(): unit {
+  // let t = foo(int);
+  Unit
+}
+
+template identity(a: type): int {
+  magic get-cons-size(a)
+}
+
+// define make-identity(): (int) -> int {
+//   identity(int)
+// }
+define sample(): unit {
+  // let k = identity;
+  // discard(k);
+  let id-int = identity(list(int));
+  // let result = id-int(42);
+  Unit
+}
+
+data tele {
+| TNil
+| TCons(a: type, rest: (a) -> tele)
+}
+
+// define make-tele(): tele {
+//   TCons(int, function (_: int) {
+//     TCons(bool, function (_: bool) {
+//       TNil
+//     })
+//   })
 // }

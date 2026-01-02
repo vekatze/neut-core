@@ -190,7 +190,7 @@ data _view(k, a) {
 | _View(
     key: k,
     value: a,
-    dictionary: dictionary(k, a),
+    mdictionary: dictionary(k, a),
   )
 }
 
@@ -199,7 +199,7 @@ define _min-view-sure<a, b>(k: a, x: b, l: dictionary(a, b), r: dictionary(a, b)
   | Tip =>
     _View(k, x, r)
   | Bin(_, lk, lx, ll, lr) =>
-    let _View of {key, value, dictionary := l'} = _min-view-sure(lk, lx, ll, lr);
+    let _View of {key, value, mdictionary := l'} = _min-view-sure(lk, lx, ll, lr);
     _View(key, value, _balance-R(k, x, l', r))
   }
 }
@@ -209,7 +209,7 @@ define _max-view-sure<a, b>(k: a, x: b, l: dictionary(a, b), r: dictionary(a, b)
   | Tip =>
     _View(k, x, l)
   | Bin(_, rk, rx, rl, rr) =>
-    let _View of {key, value, dictionary := r'} = _max-view-sure(rk, rx, rl, rr);
+    let _View of {key, value, mdictionary := r'} = _max-view-sure(rk, rx, rl, rr);
     _View(key, value, _balance-L(k, x, l, r'))
   }
 }
@@ -222,10 +222,10 @@ inline _glue<k, v>(d1: dictionary(k, v), d2: dictionary(k, v)): dictionary(k, v)
     d1
   | Bin(ls, lk, lx, ll, lr), Bin(rs, rk, rx, rl, rr) =>
     if gt-int(ls, rs) {
-      let _View of {key, value, dictionary := l'} = _max-view-sure(lk, lx, ll, lr);
+      let _View of {key, value, mdictionary := l'} = _max-view-sure(lk, lx, ll, lr);
       _balance-R(key, value, l', Bin(rs, rk, rx, rl, rr))
     } else {
-      let _View of {key, value, dictionary := r'} = _min-view-sure(rk, rx, rl, rr);
+      let _View of {key, value, mdictionary := r'} = _min-view-sure(rk, rx, rl, rr);
       _balance-L(key, value, Bin(ls, lk, lx, ll, lr), r')
     }
   }
@@ -289,9 +289,9 @@ inline make-insert-with<k, v>(o: ord(k), !f: (v, v) -> v): (dictionary(k, v), k,
   }
 }
 
-inline make-lookup<k, v>(o: ord(k)): <reg := rho>(d: &dictionary(k, v), needle: &k) -> ?&v {
+inline make-lookup<k, v>(o: ord(k)): [reg := rho](d: &dictionary(k, v), needle: &k) -> ?&v {
   let Ord of {compare := !compare} = o;
-  define loop<reg := rho>(d: &dictionary(k, v), needle: &k): ?&v {
+  define loop[reg := rho](d: &dictionary(k, v), needle: &k): ?&v {
     case d {
     | Tip =>
       try _ = reg;
@@ -349,10 +349,10 @@ inline _make-lookup-LE-with-cand<k, v>(L: ord(k)): (&dictionary(k, v), &k, &k, &
   }
 }
 
-inline make-lookup-LE<k, v>(!o: ord(k)): <reg := rho>(&dictionary(k, v), &k) -> ?pair(&k, &v) {
+inline make-lookup-LE<k, v>(!o: ord(k)): [reg := rho](&dictionary(k, v), &k) -> ?pair(&k, &v) {
   let Ord of {compare := !compare} = !o;
   let !lookup-LE-with-cand = _make-lookup-LE-with-cand(!o);
-  define loop<reg := rho>(d: &dictionary(k, v), needle: &k): ?pair(&k, &v) {
+  define loop[reg := rho](d: &dictionary(k, v), needle: &k): ?pair(&k, &v) {
     case d {
     | Tip =>
       try _ = reg;
@@ -392,10 +392,10 @@ inline _make-lookup-GE-with-cand<k, v>(L: ord(k)): (&dictionary(k, v), &k, &k, &
   }
 }
 
-inline make-lookup-GE<k, v>(!o: ord(k)): <reg := rho>(&dictionary(k, v), &k) -> ?pair(&k, &v) {
+inline make-lookup-GE<k, v>(!o: ord(k)): [reg := rho](&dictionary(k, v), &k) -> ?pair(&k, &v) {
   let Ord of {compare := !compare} = !o;
   let !lookup-GE-with-cand = _make-lookup-GE-with-cand(!o);
-  define loop<reg := rho>(d: &dictionary(k, v), needle: &k): ?pair(&k, &v) {
+  define loop[reg := rho](d: &dictionary(k, v), needle: &k): ?pair(&k, &v) {
     case d {
     | Tip =>
       try _ = reg;

@@ -464,3 +464,22 @@ neut_core_v0_51_get_online_cpu_count(void) {
   int64_t n = (int64_t)sysconf(_SC_NPROCESSORS_ONLN);
   return (n > 0) ? n : 1;
 }
+
+// cf. e_machine in elf.h
+typedef enum {
+  ARCH_X86_64 = 62, // EM_X86_64
+  ARCH_AARCH64 = 183, // EM_AARCH64
+  ARCH_UNSUPPORTED = 0xffff,
+} arch_tag_t;
+
+#if defined(__x86_64__) || defined(_M_X64)
+#define ARCH_TAG ARCH_X86_64
+#elif defined(__aarch64__) || defined(_M_ARM64)
+#define ARCH_TAG ARCH_AARCH64
+#else
+#define ARCH_TAG ARCH_NONE
+#endif
+
+__attribute__((always_inline)) arch_tag_t neut_core_v0_51_get_arch_tag() {
+  return ARCH_TAG;
+}

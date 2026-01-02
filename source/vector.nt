@@ -250,7 +250,7 @@ define push-back<a>(xs: vector(a), x: a): vector(a) {
   }
 }
 
-define pop-front<a, r := rho>(xs: vector(a)): ?pair(a, vector(a)) {
+define pop-front<a>[r := rho](xs: vector(a)): ?pair(a, vector(a)) {
   let len on xs = length(xs);
   if eq-int(len, 0) {
     try _ = r;
@@ -264,7 +264,7 @@ define pop-front<a, r := rho>(xs: vector(a)): ?pair(a, vector(a)) {
   }
 }
 
-define pop-back<a, r := rho>(xs: vector(a)): ?pair(vector(a), a) {
+define pop-back<a>[r := rho](xs: vector(a)): ?pair(vector(a), a) {
   let len on xs = length(xs);
   if eq-int(len, 0) {
     try _ = r;
@@ -300,7 +300,7 @@ inline _access<a>(xs: &vector(a), i: int): &a {
   cast(int, &a, load-int(element-pointer))
 }
 
-define access<a, r := rho>(xs: &vector(a), i: int): ?&a {
+define access<a>[r := rho](xs: &vector(a), i: int): ?&a {
   if and(le-int(0, i), lt-int(i, length(xs))) {
     try _ = r;
     Right(_access(xs, i))
@@ -962,7 +962,7 @@ define filter-some<a>(xs: vector(?a)): vector(a) {
   helper(0, 0, xs)
 }
 
-inline find<a, r := rho>(xs: &vector(a), !pred: (&a) -> bool): ?&a {
+inline find<a>[r := rho](xs: &vector(a), !pred: (&a) -> bool): ?&a {
   let len = length(xs);
   let f =
     define self(r: ?unit, index: int): ?&a {

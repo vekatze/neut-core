@@ -13,7 +13,7 @@ foreign {
   neut_core_v0_51_write_int64_nl(int32, int64): int,
 }
 
-define write-int<r := rho>(d: descriptor, x: int): system(unit) {
+define write-int[r := rho](d: descriptor, x: int): system(unit) {
   let d' = magic cast(descriptor, int32, d);
   let result = magic external neut_core_v0_51_write_int64(d', x);
   if lt-int(result, 0) {
@@ -25,7 +25,7 @@ define write-int<r := rho>(d: descriptor, x: int): system(unit) {
   }
 }
 
-define write-int-line<r := rho>(d: descriptor, x: int): system(unit) {
+define write-int-line[r := rho](d: descriptor, x: int): system(unit) {
   let d' = magic cast(descriptor, int32, d);
   let result = magic external neut_core_v0_51_write_int64_nl(d', x);
   if lt-int(result, 0) {

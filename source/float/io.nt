@@ -13,7 +13,7 @@ foreign {
   neut_core_v0_51_write_double_line(int32, float, int): int,
 }
 
-define write-float<r := rho>(d: descriptor, x: float, decimals: int): system(unit) {
+define write-float[r := rho](d: descriptor, x: float, decimals: int): system(unit) {
   let d' = magic cast(descriptor, int32, d);
   let result = magic external neut_core_v0_51_write_double(d', x, decimals);
   if lt-int(result, 0) {
@@ -25,7 +25,7 @@ define write-float<r := rho>(d: descriptor, x: float, decimals: int): system(uni
   }
 }
 
-define write-float-line<r := rho>(d: descriptor, x: float, decimals: int): system(unit) {
+define write-float-line[r := rho](d: descriptor, x: float, decimals: int): system(unit) {
   let d' = magic cast(descriptor, int32, d);
   let result = magic external neut_core_v0_51_write_double_line(d', x, decimals);
   if lt-int(result, 0) {

@@ -19,7 +19,7 @@ foreign {
   setenv(pointer, pointer, c-int): c-int,
 }
 
-define get-env<r := rho>(name: &text): ?text {
+define get-env[r := rho](name: &text): ?text {
   let c-str = _get-content-pointer(name);
   let tmp = magic external getenv(c-str);
   if eq-int(magic cast(pointer, int, tmp), 0) {
@@ -31,7 +31,7 @@ define get-env<r := rho>(name: &text): ?text {
   }
 }
 
-define set-env<r := rho>(name: &text, value: &text, overwrite: bool): system(unit) {
+define set-env[r := rho](name: &text, value: &text, overwrite: bool): system(unit) {
   let name-c-str = to-c-string(name);
   let value-c-str = to-c-string(value);
   let flag =

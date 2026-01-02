@@ -338,7 +338,7 @@ define intercalate-N(xs: &list(binary), sep: &binary): binary {
   magic cast(pointer, binary, new-binary)
 }
 
-define find<r := rho>(xs: &binary, !pred: (int8) -> bool): ?int {
+define find[r := rho](xs: &binary, !pred: (int8) -> bool): ?int {
   let len = binary-length(xs);
   let f =
     define self(r: ?unit, index: int): ?int {
@@ -358,7 +358,7 @@ define find<r := rho>(xs: &binary, !pred: (int8) -> bool): ?int {
   f(r, 0)
 }
 
-define find-end<r := rho>(xs: &binary, !pred: (int8) -> bool): ?int {
+define find-end[r := rho](xs: &binary, !pred: (int8) -> bool): ?int {
   let len = binary-length(xs);
   let f =
     define self(r: ?unit, xs: &binary, index: int): ?int {

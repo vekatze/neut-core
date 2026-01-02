@@ -7,7 +7,7 @@ import {
   this.unit {Unit},
 }
 
-inline parse-float<r := rho>(t: &text): ?float {
+inline parse-float[r := rho](t: &text): ?float {
   let c-float-str = _get-content-pointer(t);
   let len = this.text.length(t);
   let result-ptr = magic alloca(float, 1);

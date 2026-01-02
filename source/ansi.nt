@@ -85,7 +85,7 @@ data ansi-kit {
   )
 }
 
-define flush<r := rho>(k: &ansi-kit): system(unit) {
+define flush[r := rho](k: &ansi-kit): system(unit) {
   case k {
   | _ANSI-Kit of {buffer} =>
     try _ = r;
@@ -105,7 +105,7 @@ define make-ansi-kit-unbuffered(sink: descriptor): ansi-kit {
   _ANSI-Kit-Unbuffered of {sink}
 }
 
-define write<r := rho>(k: &ansi-kit, t: &text): system(unit) {
+define write[r := rho](k: &ansi-kit, t: &text): system(unit) {
   try _ = r;
   case k {
   | _ANSI-Kit of {buffer} =>
@@ -116,7 +116,7 @@ define write<r := rho>(k: &ansi-kit, t: &text): system(unit) {
   }
 }
 
-define write-line<r := rho>(k: &ansi-kit, t: &text): system(unit) {
+define write-line[r := rho](k: &ansi-kit, t: &text): system(unit) {
   try _ = r;
   case k {
   | _ANSI-Kit of {buffer} =>
@@ -127,7 +127,7 @@ define write-line<r := rho>(k: &ansi-kit, t: &text): system(unit) {
   }
 }
 
-define write-int<r := rho>(k: &ansi-kit, x: int): system(unit) {
+define write-int[r := rho](k: &ansi-kit, x: int): system(unit) {
   try _ = r;
   case k {
   | _ANSI-Kit of {buffer} =>
@@ -138,7 +138,7 @@ define write-int<r := rho>(k: &ansi-kit, x: int): system(unit) {
   }
 }
 
-inline write-code<r := rho>(k: &ansi-kit, c: command): system(unit) {
+inline write-code[r := rho](k: &ansi-kit, c: command): system(unit) {
   try _ = r;
   match c {
   | Set-Style(style) =>

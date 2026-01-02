@@ -203,6 +203,11 @@ inline for<a>(xs: list(a), f: (a) -> unit): unit {
   Unit
 }
 
+inline for-E<e, a>(xs: list(a), f: (a) -> either(e, unit)): either(e, unit) {
+  try _ = for-each-E(xs, f);
+  Right(Unit)
+}
+
 inline for-N<a>(xs: &list(a), f: (&a) -> unit): unit {
   let _ = for-each-N(xs, f);
   Unit
@@ -328,7 +333,7 @@ define partition<a, b>(xs: list(either(a, b))): pair(list(a), list(b)) {
   })
 }
 
-define uncons<a, r := rho>(xs: list(a)): ?pair(a, list(a)) {
+define uncons<a>[r := rho](xs: list(a)): ?pair(a, list(a)) {
   match xs {
   | Nil =>
     try _ = r;
@@ -339,7 +344,7 @@ define uncons<a, r := rho>(xs: list(a)): ?pair(a, list(a)) {
   }
 }
 
-define unsnoc<a, r := rho>(xs: list(a)): ?pair(list(a), a) {
+define unsnoc<a>[r := rho](xs: list(a)): ?pair(list(a), a) {
   let f =
     define _unsnoc(r: ?unit, xs: list(a), acc: list(a)): ?pair(list(a), a) {
       match xs {
@@ -373,7 +378,7 @@ define range(from: int, to: int): list(int) {
   }
 }
 
-inline find<a, r := rho>(xs: &list(a), pred: &(&a) -> bool): ?&a {
+inline find<a>[r := rho](xs: &list(a), pred: &(&a) -> bool): ?&a {
   let f =
     define self(r: ?unit, ys: &list(a)): ?&a {
       case ys {
@@ -428,7 +433,7 @@ inline sum<a>(as-monoid: monoid(a), xs: list(a)): a {
   })
 }
 
-inline minimum<a, r := rho>(as-ord: ord(a)): (list(a)) -> ?a {
+inline minimum<a>[r := rho](as-ord: ord(a)): (list(a)) -> ?a {
   function (xs) {
     let Ord of {compare} = as-ord;
     match xs {
@@ -450,7 +455,7 @@ inline minimum<a, r := rho>(as-ord: ord(a)): (list(a)) -> ?a {
   }
 }
 
-inline maximum<a, r := rho>(as-ord: ord(a)): (list(a)) -> ?a {
+inline maximum<a>[r := rho](as-ord: ord(a)): (list(a)) -> ?a {
   function (xs) {
     let Ord of {compare := !compare} = as-ord;
     let helper =
@@ -584,7 +589,7 @@ define is-empty<a>(xs: &list(a)): bool {
   }
 }
 
-define nth<a, r := rho>(xs: &list(a), n: int): ?a {
+define nth<a>[r := rho](xs: &list(a), n: int): ?a {
   case xs {
   | Nil =>
     try _ = r;

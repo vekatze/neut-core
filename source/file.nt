@@ -11,7 +11,7 @@ import {
   this.unit {Unit, unit},
 }
 
-define open<r := rho>(path: &text, xs: list(flag), ms: list(mode)): system(descriptor) {
+define open[r := rho](path: &text, xs: list(flag), ms: list(mode)): system(descriptor) {
   pin path' = this.text.append(path, "\0");
   let actual-path-string = _get-content-pointer(path');
   let fd =
@@ -29,7 +29,7 @@ define open<r := rho>(path: &text, xs: list(flag), ms: list(mode)): system(descr
   }
 }
 
-define close<r := rho>(f: descriptor): system(unit) {
+define close[r := rho](f: descriptor): system(unit) {
   let result = this.external.close(f);
   if eq-int(result, 0) {
     try _ = r;

@@ -9,12 +9,12 @@ import {
   this.unit {Unit, unit},
 }
 
-define write<r := rho>(b: &buffer, content: &text): system(unit) {
+define write[r := rho](b: &buffer, content: &text): system(unit) {
   try _ = r;
   this.binary.buffer.write-binary(b, to-binary(content))
 }
 
-define write-line<r := rho>(b: &buffer, content: &text): system(unit) {
+define write-line[r := rho](b: &buffer, content: &text): system(unit) {
   try _ = r;
   try _ = write(b, content);
   write-rune(b, `\n`)

@@ -9,7 +9,7 @@ import {
   this.unit {Unit, unit},
 }
 
-define write-rune<r := rho>(k: descriptor, x: rune): system(unit) {
+define write-rune[r := rho](k: descriptor, x: rune): system(unit) {
   let s = this.rune.size(x);
   let buffer-ptr = magic alloca(int32, 1);
   let _ = store-rune(x, buffer-ptr);
@@ -19,7 +19,7 @@ define write-rune<r := rho>(k: descriptor, x: rune): system(unit) {
   result
 }
 
-define write-rune-line<r := rho>(k: descriptor, x: rune): system(unit) {
+define write-rune-line[r := rho](k: descriptor, x: rune): system(unit) {
   let s = this.rune.size(x);
   let buffer-ptr = magic alloca(int32, 2);
   let _ = store-rune(x, buffer-ptr);

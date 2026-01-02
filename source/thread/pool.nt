@@ -120,7 +120,7 @@ inline for-each-parallel<a, b>(worker-num: int, xs: vector(a), f: (a) -> b): vec
 define zen(): unit {
   pin result =
     for-each-parallel(5, Vector[1, 2, 3, 4, 5], function (x) {
-      quote {add-int(x, 10)}
+      lift {add-int(x, 10)}
     });
   vet(result);
 }

@@ -38,7 +38,7 @@ inline text-byte-length(t: &text): int {
 }
 
 define _get-content-pointer(t: &text): pointer {
-  let ptr = this.magic.cast(&text, pointer, t);
+  let ptr = this.magic.cast<&text, pointer>(t);
   let from = load-int(ptr);
   let u = this.word.size;
   shift(ptr, add-int(mul-int(u, 2), from))

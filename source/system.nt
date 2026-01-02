@@ -36,7 +36,7 @@ define get-error-message(e: system-error): text {
   match e {
   | OS-Error(i) =>
     let c-str = magic external strerror(i);
-    from-c-string(this.magic.cast(pointer, &c-string, c-str))
+    from-c-string(this.magic.cast<pointer, &c-string>(c-str))
   | Application-Error(message) =>
     message
   }

@@ -44,7 +44,7 @@ inline meta-pair-in<a, b>(p: meta pair(a, b)): pair(meta a, meta b) {
   //       y
   //     };
   //   Pair(mx, my)
-  cast(_, _, p)
+  cast<_, _>(p)
 }
 
 define meta-pair-out<a, b>(p: pair(meta a, meta b)): meta pair(a, b) {
@@ -55,5 +55,5 @@ define meta-pair-out<a, b>(p: pair(meta a, meta b)): meta pair(a, b) {
   //     letbox y = y;
   //     Pair(x, y)
   //   }
-  cast(_, _, p)
+  cast<_, _>(p)
 }

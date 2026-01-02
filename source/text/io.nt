@@ -46,7 +46,7 @@ define print-line(t: &text): unit {
 define read[r := rho](from: descriptor, initial-buffer-size: int): system(text) {
   try _ = r;
   try bin = this.binary.io.read(from, initial-buffer-size);
-  Right(this.magic.cast(binary, text, bin))
+  Right(this.magic.cast<binary, text>(bin))
 }
 
 define read-stdin[r := rho](initial-buffer-size: int): system(text) {

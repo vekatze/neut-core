@@ -63,7 +63,7 @@ define _read-inner(
   } else-if eq-int(bytes, 0) {
     this.memory.store-int(next-length, shift(base-ptr, u));
     try _ = r;
-    Right(this.magic.cast(pointer, binary, base-ptr))
+    Right(this.magic.cast<pointer, binary>(base-ptr))
   } else-if lt-int(bytes, readable-size) {
     _read-inner(data-source, base-ptr, next-length, buffer-size, r)
   } else {

@@ -13,7 +13,7 @@ import {
   this.word,
 }
 
-inline _embody(a: type, x: &a): a {
+inline _embody<a>(x: &a): a {
   *x
 }
 
@@ -31,8 +31,8 @@ nominal {
 resource _thread-inner {
   function (addr: pointer) {
     let u = this.word.size;
-    let elem-type = cast(int, type, load-int(shift(addr, u)));
-    let pr: thread(elem-type) = cast(pointer, thread(elem-type), addr);
+    let elem-type = cast<int, type>(load-int(shift(addr, u)));
+    let pr: thread(elem-type) = cast<pointer, thread(elem-type)>(addr);
     let _: elem-type = this.thread.attach(elem-type, pr);
     Unit
   },
@@ -42,13 +42,13 @@ resource _thread-inner {
     let u3 = mul-int(u, 3);
     _await-and-write-result(addr);
     let thread-id = load-int(addr);
-    let elem-type = cast(int, type, load-int(shift(addr, u)));
-    let elem-value: &elem-type = cast(int, &elem-type, load-int(shift(addr, u2)));
+    let elem-type = cast<int, type>(load-int(shift(addr, u)));
+    let elem-value: &elem-type = cast<int, &elem-type>(load-int(shift(addr, u2)));
     let new-addr = malloc(_thread-size());
     store-int(thread-id, new-addr);
-    store-int(cast(type, int, elem-type), shift(new-addr, u));
-    let cloned-value: elem-type = _embody(elem-type, elem-value);
-    store-int(cast(elem-type, int, cloned-value), shift(new-addr, u2));
+    store-int(cast<type, int>(elem-type), shift(new-addr, u));
+    let cloned-value: elem-type = _embody<elem-type>(elem-value);
+    store-int(cast<elem-type, int>(cloned-value), shift(new-addr, u2));
     store-int8(1, shift(new-addr, u3));
     new-addr
   },
@@ -62,13 +62,13 @@ define thread(_: type): type {
 }
 
 define attach(a: type, e: thread(a)): a {
-  let addr = cast(thread(a), pointer, e);
+  let addr = cast<thread(a), pointer>(e);
   _await-and-write-result(addr);
   let u = this.word.size;
   let value-ptr = shift(addr, mul-int(u, 2));
   let value = load-int(value-ptr);
   free(addr);
-  cast(int, a, value)
+  cast<int, a>(value)
 }
 
 define _await-and-write-result(addr: pointer): unit {
@@ -91,12 +91,12 @@ define _await-and-write-result(addr: pointer): unit {
 define detach(a: type, f: () -> a): thread(a) {
   let thread-func =
     function () {
-      thread-exit(cast(a, pointer, f()))
+      thread-exit(cast<a, pointer>(f()))
     };
   let u = this.word.size;
   let u2 = mul-int(u, 2);
   let u3 = mul-int(u, 3);
-  let closure = cast(() -> unit, pointer, thread-func);
+  let closure = cast<() -> unit, pointer>(thread-func);
   let closure-env = load-pointer(shift(closure, u));
   let closure-label = load-pointer(shift(closure, u2));
   free(closure);
@@ -115,8 +115,8 @@ define detach(a: type, f: () -> a): thread(a) {
   free(thread-id-pointer);
   let ptr = malloc(_thread-size());
   store-int(thread-id, ptr);
-  store-int(cast(type, int, a), shift(ptr, u));
+  store-int(cast<type, int>(a), shift(ptr, u));
   store-int(0, shift(ptr, u2));
   store-int8(0, shift(ptr, u3));
-  cast(pointer, thread(a), ptr)
+  cast<pointer, thread(a)>(ptr)
 }

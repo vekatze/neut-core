@@ -63,7 +63,7 @@ inline optional-trailing-comma: doc {
   Chunk(Chunk-Choose(Chunk-Empty, Chunk-Text-N(",")))
 }
 
-define _vet-doc-vector(a: type, xs: &vector(a)): doc {
+define _vet-doc-vector<a>(xs: &vector(a)): doc {
   let len = this.vector.length(xs);
   this.vector.fold-right-N(xs, empty, function (x: &a, acc: doc, i: int): doc {
     if eq-int(add-int(i, 1), len) {
@@ -80,7 +80,7 @@ define _constructor-loop-doc(
   cons-name-handler: (&text) -> doc,
   cons-args-handler: (i: int, size: int, t: type, x: &t) -> doc,
 ): doc {
-  let ptr = this.magic.cast(&a, pointer, x);
+  let ptr = this.magic.cast<&a, pointer>(x);
   let discriminant = load-int(ptr);
   let size = get-cons-size(a, discriminant);
   let type-ptr = magic alloca(int64, add-int(size, 2)); // +2 is for data-arg-num and const-like
@@ -94,9 +94,9 @@ define _constructor-loop-doc(
   let args-doc =
     grow(empty, loop-size, function (acc, cursor) {
       let i = add-int(cursor, add-int(1, data-arg-num));
-      let t = this.magic.cast(int, type, load-int(shift(type-ptr, mul-int(u, i))));
+      let t = this.magic.cast<int, type>(load-int(shift(type-ptr, mul-int(u, i))));
       let v = load-int(shift(ptr, mul-int(u, i)));
-      let cons-args-doc = cons-args-handler(cursor, loop-size, t, this.magic.cast(int, &t, v));
+      let cons-args-doc = cons-args-handler(cursor, loop-size, t, this.magic.cast<int, &t>(v));
       join[acc, cons-args-doc]
     });
   if gt-int(loop-size, 0) {
@@ -148,7 +148,7 @@ define vet-doc<a>(x: &a): doc {
       ]
     }))
   | Enum =>
-    let discriminant = this.magic.cast(&a, int, x);
+    let discriminant = this.magic.cast<&a, int>(x);
     let cons-name: &text = magic call-type(a, 4, discriminant);
     _constructor-doc(cons-name)
   | Int1 =>
@@ -194,7 +194,7 @@ define vet-doc<a>(x: &a): doc {
     let suffix = atom-N("]");
     Group(_nested-comma-seq(
       prefix,
-      _vet-doc-vector(elem-type, vec),
+      _vet-doc-vector<elem-type>(vec),
       suffix,
     ))
   | _ =>
@@ -202,7 +202,7 @@ define vet-doc<a>(x: &a): doc {
   }
 }
 
-define vet<a, ribbon-length := 32>(x: &a): unit {
+define vet<a>[ribbon-length := 32](x: &a): unit {
   pin tmp = vet-doc(x);
   pin item = show-doc(tmp, ribbon-length);
   print(item);

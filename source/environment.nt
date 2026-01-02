@@ -27,7 +27,7 @@ define get-env[r := rho](name: &text): ?text {
     none
   } else {
     try _ = r;
-    Right(from-c-string(this.magic.cast(pointer, &c-string, tmp)))
+    Right(from-c-string(this.magic.cast<pointer, &c-string>(tmp)))
   }
 }
 
@@ -75,7 +75,7 @@ define get-argv(): list(text) {
         let rest = get-argv-helper(add-int(i, 1));
         let str-ptr-ptr = shift(argv, mul-int(i, u));
         let str-ptr = load-int(str-ptr-ptr);
-        let t = from-c-string(this.magic.cast(int, &c-string, str-ptr));
+        let t = from-c-string(this.magic.cast<int, &c-string>(str-ptr));
         Cons(t, rest)
       }
     };

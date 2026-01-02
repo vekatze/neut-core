@@ -58,35 +58,29 @@ define use-rune(r: rune): unit {
   }
 }
 
-define some-func<x := 10, z := 30>(y: int): int {
-  add-int(add-int(x, y), z)
-}
-
-define some-func-2<x: int := 10, z: int := 30>(): int {
-  add-int(add-int(x, 10), z)
-}
-
-define some-func-3<x := 10, z := 30>(): int {
-  add-int(add-int(x, 10), z)
-}
-
-data some-item {
-| Item
-}
-
-data fo {
-| Fo
-}
-
-define use-id(): unit {
-  let _ = some-func(20);
-  let _ = some-func of {y := 20};
-  let _ = some-func of {x := 1, y := 20};
-  let _ = some-func of {x := 1, y := 20, z := 3};
-  let w = some-func of {y := 20};
-  print-int-line(w);
-}
-
+// define some-func<x := 10, z := 30>(y: int): int {
+//   add-int(add-int(x, y), z)
+// }
+// define some-func-2<x: int := 10, z: int := 30>(): int {
+//   add-int(add-int(x, 10), z)
+// }
+// define some-func-3<x := 10, z := 30>(): int {
+//   add-int(add-int(x, 10), z)
+// }
+// data some-item {
+// | Item
+// }
+// data fo {
+// | Fo
+// }
+// define use-id(): unit {
+//   let _ = some-func(20);
+//   let _ = some-func of {y := 20};
+//   let _ = some-func of {x := 1, y := 20};
+//   let _ = some-func of {x := 1, y := 20, z := 3};
+//   let w = some-func of {y := 20};
+//   print-int-line(w);
+// }
 define my-random-in-range(lower-bound: int32, upper-bound: int32): int {
   let range-size = sub-int32(upper-bound, lower-bound);
   print("range-size: ");
@@ -471,35 +465,30 @@ define main(): unit {
 //   let ys = extract(ch);
 //   Unit
 // }
-template foo(a): type {
-  foo(a)
-}
-
-define use-template(): unit {
-  // let t = foo(int);
-  Unit
-}
-
-template identity(a: type): int {
-  magic get-cons-size(a)
-}
-
-// define make-identity(): (int) -> int {
-//   identity(int)
+// template foo(a): type {
+//   foo(a)
 // }
-define sample(): unit {
-  // let k = identity;
-  // discard(k);
-  let id-int = identity(list(int));
-  // let result = id-int(42);
-  Unit
-}
-
-data tele {
-| TNil
-| TCons(a: type, rest: (a) -> tele)
-}
-
+// define use-template(): unit {
+//   // let t = foo(int);
+//   Unit
+// }
+// template identity(a: type): int {
+//   magic get-cons-size(a)
+// }
+// // define make-identity(): (int) -> int {
+// //   identity(int)
+// // }
+// define sample(): unit {
+//   // let k = identity;
+//   // discard(k);
+//   let id-int = identity(list(int));
+//   // let result = id-int(42);
+//   Unit
+// }
+// data tele {
+// | TNil
+// | TCons(a: type, rest: (a) -> tele)
+// }
 // define make-tele(): tele {
 //   TCons(int, function (_: int) {
 //     TCons(bool, function (_: bool) {

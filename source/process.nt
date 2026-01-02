@@ -91,8 +91,8 @@ define _create-pipe[r := rho](): system(pair(descriptor, descriptor)) {
     try _ = r;
     report-system-error()
   } else {
-    let reader = this.magic.cast(int32, descriptor, magic load(int32, ptr));
-    let writer = this.magic.cast(int32, descriptor, magic load(int32, shift(ptr, 4)));
+    let reader = this.magic.cast<int32, descriptor>(magic load(int32, ptr));
+    let writer = this.magic.cast<int32, descriptor>(magic load(int32, shift(ptr, 4)));
     try _ = r;
     free(ptr);
     Right(Pair(reader, writer))

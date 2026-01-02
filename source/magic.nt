@@ -1,3 +1,3 @@
-define cast(a: type, b: type, x: a): b {
+define cast<a, b>(x: a): b {
   magic cast(a, b, x)
 }

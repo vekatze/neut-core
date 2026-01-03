@@ -56,7 +56,7 @@ foreign {
 }
 
 nominal {
-  vet-doc<a>(x: &a): doc,
+  define vet-doc<a>(x: &a): doc,
 }
 
 inline optional-trailing-comma: doc {
@@ -74,19 +74,18 @@ define _vet-doc-vector<a>(xs: &vector(a)): doc {
   })
 }
 
-define _constructor-loop-doc(
-  a: type,
+define _constructor-loop-doc<a>(
   x: &a,
   cons-name-handler: (&text) -> doc,
-  cons-args-handler: (i: int, size: int, t: type, x: &t) -> doc,
+  cons-args-handler: <t>(i: int, size: int, x: &t) -> doc,
 ): doc {
   let ptr = this.magic.cast<&a, pointer>(x);
   let discriminant = load-int(ptr);
-  let size = get-cons-size(a, discriminant);
+  let size = get-cons-size(magic term-type(a), discriminant);
   let type-ptr = magic alloca(int64, add-int(size, 2)); // +2 is for data-arg-num and const-like
   let u = this.word.size;
   let _ = magic external llvm.memcpy.p0.p0.i64(type-ptr, ptr, mul-int(u, size), 0);
-  magic call-type(a, 4, type-ptr);
+  magic call-type(magic term-type(a), 4, type-ptr);
   let cons-name = magic cast(int, &text, load-int(type-ptr));
   let cons-name-doc = cons-name-handler(cons-name);
   let data-arg-num = load-int(shift(type-ptr, mul-int(u, size)));
@@ -94,9 +93,9 @@ define _constructor-loop-doc(
   let args-doc =
     grow(empty, loop-size, function (acc, cursor) {
       let i = add-int(cursor, add-int(1, data-arg-num));
-      let t = this.magic.cast<int, type>(load-int(shift(type-ptr, mul-int(u, i))));
+      let-type t = this.magic.cast<int, type>(load-int(shift(type-ptr, mul-int(u, i))));
       let v = load-int(shift(ptr, mul-int(u, i)));
-      let cons-args-doc = cons-args-handler(cursor, loop-size, t, this.magic.cast<int, &t>(v));
+      let cons-args-doc = cons-args-handler<t>(cursor, loop-size, this.magic.cast<int, &t>(v));
       join[acc, cons-args-doc]
     });
   if gt-int(loop-size, 0) {
@@ -130,9 +129,9 @@ define _literal-doc(d: doc): doc {
 }
 
 define vet-doc<a>(x: &a): doc {
-  match get-type-tag(a) {
+  match get-type-tag(magic term-type(a)) {
   | Algebraic =>
-    Group(_constructor-loop-doc(a, x, _constructor-doc, function (i: int, len: int, t: type, x: &t) {
+    Group(_constructor-loop-doc<a>(x, _constructor-doc, function <t>(i: int, len: int, x: &t) {
       join[
         if eq-int(i, 0) {
           empty
@@ -149,7 +148,7 @@ define vet-doc<a>(x: &a): doc {
     }))
   | Enum =>
     let discriminant = this.magic.cast<&a, int>(x);
-    let cons-name: &text = magic call-type(a, 4, discriminant);
+    let cons-name: &text = magic call-type(magic term-type(a), 4, discriminant);
     _constructor-doc(cons-name)
   | Int1 =>
     atom-int(sext-int1-int(magic cast(&a, int1, x)))
@@ -188,7 +187,7 @@ define vet-doc<a>(x: &a): doc {
       atom-N("\""),
     ])
   | Vector =>
-    let elem-type = magic cast(int, type, load-int(shift(magic cast(&a, pointer, x), mul-int(this.word.size, 3))));
+    let-type elem-type = magic cast(int, type, load-int(shift(magic cast(&a, pointer, x), mul-int(this.word.size, 3))));
     let vec: &vector(elem-type) = magic cast(&a, &vector(elem-type), x);
     let prefix = join[_constructor-doc("Vector"), atom-N("[")];
     let suffix = atom-N("]");

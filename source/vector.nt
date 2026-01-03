@@ -22,7 +22,7 @@ import {
 }
 
 nominal {
-  _vector-internal: type,
+  alias _vector-internal,
 }
 
 // (capacity: int, from: int, to: int, elem-type: type, ptr-to-buffer: pointer)
@@ -115,7 +115,7 @@ define make<a>(initial-capacity: int): vector(a) {
   store-int(abs-capacity, vector-ptr);
   store-int(initial-cursor, shift(vector-ptr, mul-int(word-size, 1)));
   store-int(initial-cursor, shift(vector-ptr, mul-int(word-size, 2)));
-  store-int(cast<type, int>(a), shift(vector-ptr, mul-int(word-size, 3)));
+  store-int(cast<type, int>(magic term-type(a)), shift(vector-ptr, mul-int(word-size, 3)));
   store-pointer(buffer-ptr, shift(vector-ptr, mul-int(word-size, 4)));
   magic cast(pointer, vector(a), vector-ptr)
 }
@@ -125,15 +125,17 @@ define _discard-vector-content<a>(xs: &vector(a), elem-type: type, index: int, l
     Unit
   } else {
     let element-ptr = _get-element-pointer(xs, index);
-    let _ = cast<int, elem-type>(load-int(element-ptr));
+    // let _ = cast<int, elem-type>(load-int(element-ptr));
+    let v = load-int(element-ptr);
+    magic call-type(elem-type, 0, v);
+    // let _ = cast<int, elem-type>(load-int(element-ptr));
     _discard-vector-content(xs, elem-type, add-int(index, 1), len)
   }
 }
 
-define _copy-vector-content(
+define _copy-vector-content<elem-type>(
   xs: &vector(pointer),
   ys: &vector(pointer),
-  elem-type: type,
   index: int,
   len: int,
 ): unit {
@@ -145,7 +147,7 @@ define _copy-vector-content(
     let original = cast<int, &elem-type>(load-int(source-ptr));
     let clone = *original;
     store-int(cast<elem-type, int>(clone), target-ptr);
-    _copy-vector-content(xs, ys, elem-type, add-int(index, 1), len)
+    _copy-vector-content<elem-type>(xs, ys, add-int(index, 1), len)
   }
 }
 
@@ -427,7 +429,7 @@ inline fold-right-N<elem-type, result-type>(
 }
 
 inline for-each<a, b>(xs: vector(a), !f: (a, int) -> b): vector(b) {
-  let _ on xs = _set-elem-type(xs, b);
+  let _ on xs = _set-elem-type(xs, magic term-type(b));
   let len on xs = length(xs);
   let update-values =
     define self(xs: vector(a), index: int): vector(a) {
@@ -479,7 +481,7 @@ define for-each-vertical<a, b>(xs: vector(a), col-size: int, !f: (a, int) -> b):
   assert "this.vector.for-each-vertical: col-size > 0" {
     gt-int(col-size, 0)
   };
-  let _ on xs = _set-elem-type(xs, b);
+  let _ on xs = _set-elem-type(xs, magic term-type(b));
   let vec-size on xs = length(xs);
   let store-values =
     define self(xs: vector(a), index: int): vector(a) {
@@ -932,7 +934,7 @@ define filter-some<a>(xs: vector(?a)): vector(a) {
         let from on xs = _get-from(xs);
         let to = add-int(from, num-of-new-elems);
         let _ on xs = _set-to(xs, to);
-        let _ on xs = _set-elem-type(xs, a);
+        let _ on xs = _set-elem-type(xs, magic term-type(a));
         cast<vector(?a), vector(a)>(xs)
       } else {
         let found-some on xs = {

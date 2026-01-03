@@ -51,8 +51,7 @@ define _close-pool<a>(k: pool(a)): unit {
 
 define _setup-workers<a>(tasks-ref: &channel(_task(a)), size: int): vector(thread(unit)) {
   grow(this.vector.make(8), max-int(size, 1), function (acc, _) {
-    push-back(acc, this.thread.detach(
-      unit,
+    push-back(acc, this.thread.detach<unit>(
       define worker(): unit {
         let v = axiom-T(receive(tasks-ref));
         match v {
@@ -82,7 +81,7 @@ inline with-thread-pool<a, b, e>(size: int, env: e, f: (p: &pool(a), env: meta e
 
 define detach-task<a>(k: &pool(a), f: () -> meta a): future(a) {
   tie _Pool of {tasks-ref, futures-ref} = k;
-  let result-chan = cast<mvar(a), &mvar(a)>(make-mvar(a));
+  let result-chan = cast<mvar(a), &mvar(a)>(make-mvar<a>());
   mutate(futures-ref, function (futures) {
     box {
       letbox futures = futures;

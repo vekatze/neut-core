@@ -26,7 +26,7 @@ import {
 }
 
 nominal {
-  _mvar: type,
+  alias _mvar,
 }
 
 data mvar(_: type) {
@@ -57,7 +57,7 @@ inline _get-info<a>(x: &mvar(a)): _mvar-info {
   _MVar-Info of {flag-ptr, value-ptr, mutex-ptr, readable-cond-ptr, writable-cond-ptr, type-ptr}
 }
 
-define _new(a: type): mvar(a) {
+define _new<a>(): mvar(a) {
   let mutex-size = from-c-size(THREAD_MUTEX_SIZE);
   let cond-size = from-c-size(THREAD_COND_SIZE);
   let u = this.word.size;
@@ -68,7 +68,7 @@ define _new(a: type): mvar(a) {
   let _ = thread-mutex-init(mutex-ptr);
   thread-cond-init(readable-cond-ptr);
   thread-cond-init(writable-cond-ptr);
-  store-int(cast<type, int>(a), type-ptr);
+  store-int(cast<type, int>(magic term-type(a)), type-ptr);
   cast<pointer, mvar(a)>(ptr)
 }
 
@@ -82,7 +82,7 @@ resource _mvar {
     thread-cond-destroy(writable-cond-ptr);
     thread-mutex-destroy(mutex-ptr);
     when eq-int(flag, 1) {
-      let a = cast<int, type>(load-int(type-ptr));
+      let-type a = cast<int, type>(load-int(type-ptr));
       let _: a = cast<int, a>(load-int(value-ptr));
       Unit
     };
@@ -91,14 +91,15 @@ resource _mvar {
   function (ptr: pointer) {
     let ch = cast<pointer, &mvar(unit)>(ptr);
     let _MVar-Info of {flag-ptr, value-ptr, type-ptr} = _get-info(ch);
-    let a = cast<int, type>(load-int(type-ptr));
+    let-type a = cast<int, type>(load-int(type-ptr));
     let flag = load-int(flag-ptr);
-    let base: &mvar(a) = cast<mvar(a), &mvar(a)>(_new(a));
+    let base: &mvar(a) = cast<mvar(a), &mvar(a)>(_new());
     if eq-int(flag, 0) {
       cast<&mvar(a), pointer>(base)
     } else {
-      let result: a = embody of {a, x := cast<int, &a>(load-int(value-ptr))};
-      let _MVar-Info of {value-ptr := new-value-ptr, flag-ptr := new-flag-ptr} = _get-info of {a, x := base};
+      // let result: a = embody of {a, x := cast<int, &a>(load-int(value-ptr))};
+      let result: a = embody<a>(cast<int, &a>(load-int(value-ptr)));
+      let _MVar-Info of {value-ptr := new-value-ptr, flag-ptr := new-flag-ptr} = _get-info<a>(base);
       store-int(1, new-flag-ptr);
       store-int(cast<a, int>(result), new-value-ptr);
       cast<&mvar(a), pointer>(base)
@@ -107,8 +108,8 @@ resource _mvar {
   type-tag-to-int(Opaque),
 }
 
-inline make-mvar(a: type): mvar(a) {
-  _new(a)
+inline make-mvar<a>(): mvar(a) {
+  _new<a>()
 }
 
 define send<a>(ch: &mvar(a), x: meta a): unit {

@@ -26,20 +26,20 @@ inline _get-clone<a>(x: &a): a {
 }
 
 nominal {
-  _cell: type,
+  alias _cell,
 }
 
 data cell(_: type) {
 | _Cell(_cell)
 }
 
-define _new(a: type, val: a): cell(a) {
+define _new<a>(val: a): cell(a) {
   let mutex-size = from-c-size(THREAD_MUTEX_SIZE);
   let u = this.word.size;
   let ptr = malloc(C-Size(sum-int(List[u, mutex-size, u])));
   store-int(cast<a, int>(val), ptr);
   let _ = thread-mutex-init(shift(ptr, u));
-  store-int(cast<type, int>(a), shift(ptr, add-int(u, mutex-size)));
+  store-int(cast<type, int>(magic term-type(a)), shift(ptr, add-int(u, mutex-size)));
   cast<pointer, cell(a)>(ptr)
 }
 
@@ -51,7 +51,7 @@ resource _cell {
     let type-offset = add-int(u, mutex-size);
     let a = cast<int, type>(load-int(shift(ch, type-offset)));
     thread-mutex-destroy(shift(ch, u));
-    let _: a = magic cast(int, a, load-int(ch));
+    magic call-type(a, 0, load-int(ch));
     free(ch)
   },
   function (ch: pointer) {
@@ -59,15 +59,14 @@ resource _cell {
     let mutex-size = from-c-size(THREAD_MUTEX_SIZE);
     let type-offset = add-int(u, mutex-size);
     let a = cast<int, type>(load-int(shift(ch, type-offset)));
-    let val: &a = cast<int, &a>(load-int(ch));
-    let val-clone: a = _get-clone<a>(val);
-    cast<cell(a), pointer>(_new(a, val-clone))
+    let val-clone = magic call-type(a, 1, load-int(ch));
+    _new(a, val-clone) // これができないと、newでval-cloneの型情報を埋め込めない？
   },
   type-tag-to-int(Opaque),
 }
 
 inline make-cell<a>(initial-value: meta a): cell(a) {
-  _new(a, axiom-T(initial-value))
+  _new<a>(axiom-T(initial-value))
 }
 
 inline modify<a, b>(ch: &cell(a), f: (meta a) -> pair(meta a, b)): b {

@@ -16,18 +16,18 @@ inline _get-clone<a>(x: &a): a {
 }
 
 nominal {
-  _ref: type,
+  alias _ref,
 }
 
 data ref(_: type) {
 | _Ref(_ref)
 }
 
-define _make(a: type, val: a): ref(a) {
+define _make<a>(val: a): ref(a) {
   let u = this.word.size;
   let ptr = this.external.malloc(C-Size(mul-int(this.word.size, 2)));
   store-int(cast<a, int>(val), ptr);
-  store-int(cast<type, int>(a), shift(ptr, u));
+  store-int(cast<type, int>(magic term-type(a)), shift(ptr, u));
   cast<pointer, ref(a)>(ptr)
 }
 
@@ -35,22 +35,22 @@ define _make(a: type, val: a): ref(a) {
 resource _ref {
   function (r: pointer) {
     let u = this.word.size;
-    let a = cast<int, type>(load-int(shift(r, u)));
+    let-type a = cast<int, type>(load-int(shift(r, u)));
     let _: a = magic cast(int, a, load-int(r));
     this.external.free(r)
   },
   function (r: pointer) {
     let u = this.word.size;
-    let a = cast<int, type>(load-int(shift(r, u)));
+    let-type a = cast<int, type>(load-int(shift(r, u)));
     let val: &a = cast<int, &a>(load-int(r));
     let val-clone: a = _get-clone<a>(val);
-    cast<ref(a), pointer>(_make(a, val-clone))
+    cast<ref(a), pointer>(_make<a>(val-clone))
   },
   type-tag-to-int(Opaque),
 }
 
 inline make-ref<a>(initial-value: meta a): ref(a) {
-  _make(a, axiom-T(initial-value))
+  _make<a>(axiom-T(initial-value))
 }
 
 inline modify<a, b>(r: &ref(a), f: (meta a) -> pair(meta a, b)): b {

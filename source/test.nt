@@ -5,7 +5,7 @@ import {
   this.control {discard},
   this.debug {trace, vet},
   this.either {Right, either},
-  this.equal {eq-data},
+  // this.equal {eq-data},
   this.foreign {get-cpu-count},
   this.int.io {print-int-line},
   this.list {Cons, Nil, list},
@@ -114,11 +114,10 @@ data wrap {
 | Wrap(int)
 }
 
-define make-type(_: list(int)): type {
-  print-line("hello");
-  unit
-}
-
+// define make-type(_: list(int)): type {
+//   print-line("hello");
+//   unit
+// }
 define increment(x: int): int {
   add-int(x, 1)
 }
@@ -143,7 +142,7 @@ define zen(): unit {
   // let xs = List[type, type];
   // pin tmp = loop(xs);
   // vet(tmp);
-  let !mv = make-mvar(text);
+  let !mv = make-mvar<text>();
   let _ = !mv;
   let _ = !mv;
   let _ = !mv;
@@ -297,11 +296,11 @@ define zen(): unit {
   vet(sample);
   pin v1 = add-int(10, 201);
   pin v2 = 30;
-  if eq-data(v1, v2) {
-    print-line("yo");
-  } else {
-    print-line("YO");
-  };
+  // if eq-data(v1, v2) {
+  //   print-line("yo");
+  // } else {
+  //   print-line("YO");
+  // };
   // vet("hello");
   // let xs: vector(text) = this.vector.make(8);
   // let xs = push-back(xs, *"hello");

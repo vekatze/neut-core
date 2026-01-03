@@ -1,4 +1,4 @@
-inline _c-offset: type {
+alias _c-offset {
   introspect architecture {
   | amd64 =>
     int64

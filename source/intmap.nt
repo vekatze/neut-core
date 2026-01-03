@@ -24,15 +24,15 @@ data intmap(a) {
   )
 }
 
-inline _Key: type {
+alias _Key {
   int
 }
 
-inline _Mask: type {
+alias _Mask {
   int
 }
 
-inline _Prefix: type {
+alias _Prefix {
   int
 }
 

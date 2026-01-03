@@ -7,7 +7,7 @@ import {
   this.text {text},
 }
 
-inline errno: type {
+alias errno {
   c-int
 }
 
@@ -16,7 +16,7 @@ data system-error {
 | Application-Error(text)
 }
 
-inline system(a: type): type {
+alias system(a) {
   either(system-error, a)
 }
 

@@ -2,7 +2,7 @@ import {
   this.bool {bool},
 }
 
-inline _c-ssize: type {
+alias _c-ssize {
   introspect architecture {
   | amd64 =>
     int64

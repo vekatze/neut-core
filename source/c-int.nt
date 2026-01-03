@@ -2,7 +2,7 @@ import {
   this.bool {bool},
 }
 
-inline _c-int: type {
+alias _c-int {
   introspect architecture {
   | amd64 =>
     int32

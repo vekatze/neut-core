@@ -71,14 +71,14 @@ define _equal-cons-args<a>(
     let type-ptr = magic alloca(int64, add-int(size, 2)); // +2 is for data-arg-num and const-like
     let u = this.word.size;
     let _ = magic external llvm.memcpy.p0.p0.i64(type-ptr, ptr-x, mul-int(u, size), 0);
-    magic call-type(magic term-type(a), 4, type-ptr);
+    magic call-type(veil {a}, 4, type-ptr);
     let data-arg-num = load-int(shift(type-ptr, mul-int(u, size)));
     let loop-size = sub-int(size, add-int(1, data-arg-num));
     let args-bool =
       grow(True, loop-size, function (acc: bool, cursor: int) {
         if acc {
           let i = add-int(cursor, add-int(1, data-arg-num));
-          let-type t = this.magic.cast<int, type>(load-int(shift(type-ptr, mul-int(u, i))));
+          letveil t = this.magic.cast<int, type>(load-int(shift(type-ptr, mul-int(u, i))));
           let vx = load-int(shift(ptr-x, mul-int(u, i)));
           let vy = load-int(shift(ptr-y, mul-int(u, i)));
           cons-args-handler<t>(cursor, loop-size, this.magic.cast<int, &t>(vx), this.magic.cast<int, &t>(vy))
@@ -150,7 +150,7 @@ define eq-data<a>(x: &a, y: &a): bool {
     let y = this.magic.cast<&a, &binary>(y);
     eq-binary(x, y)
   | Vector =>
-    let-type elem-type = magic cast(int, type, load-int(shift(magic cast(&a, pointer, x), mul-int(this.word.size, 3))));
+    letveil elem-type = magic cast(int, type, load-int(shift(magic cast(&a, pointer, x), mul-int(this.word.size, 3))));
     let x: &vector(elem-type) = this.magic.cast<&a, &vector(elem-type)>(x);
     let y: &vector(elem-type) = this.magic.cast<&a, &vector(elem-type)>(y);
     _equal-vector<elem-type>(x, y)

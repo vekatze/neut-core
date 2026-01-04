@@ -142,12 +142,12 @@ define zen(): unit {
   // let xs = List[type, type];
   // pin tmp = loop(xs);
   // vet(tmp);
-  let _ =
-    splice {
-      let k = magic get-cons-size(list(int));
-      let _ = Unit;
-      Unit
-    };
+  // let _ =
+  //   splice {
+  //     let k = magic get-cons-size(list(int));
+  //     let _ = Unit;
+  //     Unit
+  //   };
   let !mv = make-mvar<text>();
   let _ = !mv;
   let _ = !mv;

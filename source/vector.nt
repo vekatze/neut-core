@@ -115,7 +115,7 @@ define make<a>(initial-capacity: int): vector(a) {
   store-int(abs-capacity, vector-ptr);
   store-int(initial-cursor, shift(vector-ptr, mul-int(word-size, 1)));
   store-int(initial-cursor, shift(vector-ptr, mul-int(word-size, 2)));
-  store-int(cast<type, int>(magic term-type(a)), shift(vector-ptr, mul-int(word-size, 3)));
+  store-int(cast<type, int>(veil {a}), shift(vector-ptr, mul-int(word-size, 3)));
   store-pointer(buffer-ptr, shift(vector-ptr, mul-int(word-size, 4)));
   magic cast(pointer, vector(a), vector-ptr)
 }
@@ -168,13 +168,13 @@ resource _vector-internal {
   function (xs: &vector(pointer)) {
     let capacity = get-capacity(xs);
     let ys: &vector(pointer) = cast<vector(pointer), &vector(pointer)>(make(capacity));
-    let-type elem-type = _get-elem-type(xs);
+    letveil elem-type = _get-elem-type(xs);
     let from = _get-from(xs);
     let to = _get-to(xs);
     let len = length(xs);
     _set-from(ys, from);
     _set-to(ys, to);
-    _set-elem-type(ys, magic term-type(elem-type));
+    _set-elem-type(ys, veil {elem-type});
     _copy-vector-content<elem-type>(xs, ys, 0, len);
     ys
   },
@@ -429,7 +429,7 @@ inline fold-right-N<elem-type, result-type>(
 }
 
 inline for-each<a, b>(xs: vector(a), !f: (a, int) -> b): vector(b) {
-  let _ on xs = _set-elem-type(xs, magic term-type(b));
+  let _ on xs = _set-elem-type(xs, veil {b});
   let len on xs = length(xs);
   let update-values =
     define self(xs: vector(a), index: int): vector(a) {
@@ -481,7 +481,7 @@ define for-each-vertical<a, b>(xs: vector(a), col-size: int, !f: (a, int) -> b):
   assert "this.vector.for-each-vertical: col-size > 0" {
     gt-int(col-size, 0)
   };
-  let _ on xs = _set-elem-type(xs, magic term-type(b));
+  let _ on xs = _set-elem-type(xs, veil {b});
   let vec-size on xs = length(xs);
   let store-values =
     define self(xs: vector(a), index: int): vector(a) {
@@ -934,7 +934,7 @@ define filter-some<a>(xs: vector(?a)): vector(a) {
         let from on xs = _get-from(xs);
         let to = add-int(from, num-of-new-elems);
         let _ on xs = _set-to(xs, to);
-        let _ on xs = _set-elem-type(xs, magic term-type(a));
+        let _ on xs = _set-elem-type(xs, veil {a});
         cast<vector(?a), vector(a)>(xs)
       } else {
         let found-some on xs = {

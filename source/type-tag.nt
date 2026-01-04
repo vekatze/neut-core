@@ -31,9 +31,9 @@ define type-tag-to-int(x: type-tag): int {
 }
 
 define get-type-tag<a>(): type-tag {
-  magic call-type(magic term-type(a), 2, Unit)
+  magic call-type(veil {a}, 2, Unit)
 }
 
 define get-cons-size<a>(discriminant: int): int {
-  magic call-type(magic term-type(a), 3, discriminant)
+  magic call-type(veil {a}, 3, discriminant)
 }

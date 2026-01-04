@@ -39,7 +39,7 @@ define _new<a>(val: a): cell(a) {
   let ptr = malloc(C-Size(sum-int(List[u, mutex-size, u])));
   store-int(cast<a, int>(val), ptr);
   let _ = thread-mutex-init(shift(ptr, u));
-  store-int(cast<type, int>(magic term-type(a)), shift(ptr, add-int(u, mutex-size)));
+  store-int(cast<type, int>(veil {a}), shift(ptr, add-int(u, mutex-size)));
   cast<pointer, cell(a)>(ptr)
 }
 
@@ -58,8 +58,8 @@ resource _cell {
     let u = this.word.size;
     let mutex-size = from-c-size(THREAD_MUTEX_SIZE);
     let type-offset = add-int(u, mutex-size);
-    let-type a = cast<int, type>(load-int(shift(ch, type-offset)));
-    let val-clone = magic call-type(magic term-type(a), 1, load-int(ch));
+    letveil a = cast<int, type>(load-int(shift(ch, type-offset)));
+    let val-clone = magic call-type(veil {a}, 1, load-int(ch));
     cast<cell(a), pointer>(_new<a>(val-clone))
   },
   type-tag-to-int(Opaque),

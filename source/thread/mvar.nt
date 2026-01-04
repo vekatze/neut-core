@@ -68,7 +68,7 @@ define _new<a>(): mvar(a) {
   let _ = thread-mutex-init(mutex-ptr);
   thread-cond-init(readable-cond-ptr);
   thread-cond-init(writable-cond-ptr);
-  store-int(cast<type, int>(magic term-type(a)), type-ptr);
+  store-int(cast<type, int>(veil {a}), type-ptr);
   cast<pointer, mvar(a)>(ptr)
 }
 
@@ -82,7 +82,7 @@ resource _mvar {
     thread-cond-destroy(writable-cond-ptr);
     thread-mutex-destroy(mutex-ptr);
     when eq-int(flag, 1) {
-      let-type a = cast<int, type>(load-int(type-ptr));
+      letveil a = cast<int, type>(load-int(type-ptr));
       let _: a = cast<int, a>(load-int(value-ptr));
       Unit
     };
@@ -91,7 +91,7 @@ resource _mvar {
   function (ptr: pointer) {
     let ch = cast<pointer, &mvar(unit)>(ptr);
     let _MVar-Info of {flag-ptr, value-ptr, type-ptr} = _get-info(ch);
-    let-type a = cast<int, type>(load-int(type-ptr));
+    letveil a = cast<int, type>(load-int(type-ptr));
     let flag = load-int(flag-ptr);
     let base: &mvar(a) = cast<mvar(a), &mvar(a)>(_new());
     if eq-int(flag, 0) {

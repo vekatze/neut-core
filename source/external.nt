@@ -36,11 +36,11 @@ define exit<a>(status: c-int): a {
   | darwin =>
     let _ = magic external exit(status);
     // unreachable
-    magic cast(type, a, magic term-type(unit))
+    magic cast(type, a, veil {unit})
   | linux =>
     let _ = magic external exit(status);
     // unreachable
-    magic cast(type, a, magic term-type(unit))
+    magic cast(type, a, veil {unit})
   }
 }
 

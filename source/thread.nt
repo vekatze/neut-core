@@ -24,7 +24,7 @@ inline _thread-size(): c-size {
 
 nominal {
   define _await-and-write-result(addr: pointer): unit,
-  alias thread(_: type),
+  alias-opaque thread(_: type),
   define attach<a>(e: thread(a)): a,
 }
 
@@ -57,7 +57,7 @@ resource _thread-inner {
 
 // `thread` must be defined by `define` (and not by `data`) so that
 // `thread(a)` is considered to be possibly noetic
-alias thread(_: type) { // fixme: use alias-opaque
+alias-opaque thread(_: type) {
   _thread-inner
 }
 

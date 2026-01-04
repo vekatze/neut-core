@@ -58,9 +58,9 @@ resource _cell {
     let u = this.word.size;
     let mutex-size = from-c-size(THREAD_MUTEX_SIZE);
     let type-offset = add-int(u, mutex-size);
-    let a = cast<int, type>(load-int(shift(ch, type-offset)));
-    let val-clone = magic call-type(a, 1, load-int(ch));
-    _new(a, val-clone) // これができないと、newでval-cloneの型情報を埋め込めない？
+    let-type a = cast<int, type>(load-int(shift(ch, type-offset)));
+    let val-clone = magic call-type(magic term-type(a), 1, load-int(ch));
+    cast<cell(a), pointer>(_new<a>(val-clone))
   },
   type-tag-to-int(Opaque),
 }

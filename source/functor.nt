@@ -1,5 +1,5 @@
 data functor(!f: (type) -> type) {
 | Functor(
-    for-each: <a, b>(xs: !f(a), comp: (a) -> b) -> !f(b),
+    for-each: <a: _, b: _>(xs: !f(a), comp: (a) -> b) -> !f(b),
   )
 }

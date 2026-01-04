@@ -2,9 +2,9 @@ import {
   this.bool {True, bool},
   this.box {axiom-T},
   this.cell {make-cell, mutate},
-  this.control {discard},
   this.debug {trace, vet},
   this.either {Right, either},
+  this.equal {eq-data},
   // this.equal {eq-data},
   this.foreign {get-cpu-count},
   this.int.io {print-int-line},
@@ -105,8 +105,8 @@ define item: int {
   10
 }
 
-define print-cons-size(a: type, discriminant: int): unit {
-  let size = get-cons-size(a, discriminant);
+define print-cons-size<a>(discriminant: int): unit {
+  let size = get-cons-size<a>(discriminant);
   print-int-line(size)
 }
 
@@ -142,6 +142,12 @@ define zen(): unit {
   // let xs = List[type, type];
   // pin tmp = loop(xs);
   // vet(tmp);
+  let _ =
+    splice {
+      let k = magic get-cons-size(list(int));
+      let _ = Unit;
+      Unit
+    };
   let !mv = make-mvar<text>();
   let _ = !mv;
   let _ = !mv;
@@ -295,12 +301,12 @@ define zen(): unit {
   pin sample: either(unit, _) = Right(Pair(Unit, True));
   vet(sample);
   pin v1 = add-int(10, 201);
-  pin v2 = 30;
-  // if eq-data(v1, v2) {
-  //   print-line("yo");
-  // } else {
-  //   print-line("YO");
-  // };
+  pin v2 = add-int(10, 1);
+  if eq-data(v1, v2) {
+    print-line("yo");
+  } else {
+    print-line("YO");
+  };
   // vet("hello");
   // let xs: vector(text) = this.vector.make(8);
   // let xs = push-back(xs, *"hello");

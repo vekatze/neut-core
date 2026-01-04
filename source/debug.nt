@@ -81,7 +81,7 @@ define _constructor-loop-doc<a>(
 ): doc {
   let ptr = this.magic.cast<&a, pointer>(x);
   let discriminant = load-int(ptr);
-  let size = get-cons-size(magic term-type(a), discriminant);
+  let size = get-cons-size<a>(discriminant);
   let type-ptr = magic alloca(int64, add-int(size, 2)); // +2 is for data-arg-num and const-like
   let u = this.word.size;
   let _ = magic external llvm.memcpy.p0.p0.i64(type-ptr, ptr, mul-int(u, size), 0);
@@ -129,7 +129,7 @@ define _literal-doc(d: doc): doc {
 }
 
 define vet-doc<a>(x: &a): doc {
-  match get-type-tag(magic term-type(a)) {
+  match get-type-tag<a>() {
   | Algebraic =>
     Group(_constructor-loop-doc<a>(x, _constructor-doc, function <t>(i: int, len: int, x: &t) {
       join[

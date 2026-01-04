@@ -168,14 +168,14 @@ resource _vector-internal {
   function (xs: &vector(pointer)) {
     let capacity = get-capacity(xs);
     let ys: &vector(pointer) = cast<vector(pointer), &vector(pointer)>(make(capacity));
-    let elem-type = _get-elem-type(xs);
+    let-type elem-type = _get-elem-type(xs);
     let from = _get-from(xs);
     let to = _get-to(xs);
     let len = length(xs);
     _set-from(ys, from);
     _set-to(ys, to);
-    _set-elem-type(ys, elem-type);
-    _copy-vector-content(xs, ys, elem-type, 0, len);
+    _set-elem-type(ys, magic term-type(elem-type));
+    _copy-vector-content<elem-type>(xs, ys, 0, len);
     ys
   },
   type-tag-to-int(Vector),

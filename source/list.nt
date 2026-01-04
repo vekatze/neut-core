@@ -1,6 +1,6 @@
 import {
   this.bool {False, True, and, bool, or},
-  this.box,
+  this.box {embody},
   this.either {Left, Right, either, none, rho},
   this.monoid {Monoid, monoid},
   this.ord {Ord, ord},
@@ -495,6 +495,10 @@ define take<a>(xs: list(a), n: int): list(a) {
       Cons(y, take(ys, sub-int(n, 1)))
     }
   }
+}
+
+define take-N2<a>(xs: &list(a)): list(a) {
+  embody(xs)
 }
 
 define take-N<a>(xs: &list(a), n: int): list(a) {

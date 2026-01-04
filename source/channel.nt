@@ -62,7 +62,7 @@ resource _channel {
     let-type a = cast<int, type>(load-int(shift(ch, type-offset)));
     thread-cond-destroy(shift(ch, cond-offset));
     thread-mutex-destroy(shift(ch, u));
-    let _ = magic call-type(magic term-type(queue(a)), 0, load-int(ch));
+    magic call-type(magic term-type(queue(a)), 0, load-int(ch));
     free(ch)
   },
   function (ch: pointer) {

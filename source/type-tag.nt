@@ -24,6 +24,7 @@ data type-tag {
 | Rune
 | Binary
 | Vector
+| Wrapper
 }
 
 define type-tag-to-int(x: type-tag): int {

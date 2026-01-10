@@ -302,7 +302,7 @@ define zen(): unit {
   vet(sample);
   pin v1 = add-int(10, 201);
   pin v2 = add-int(10, 1);
-  if eq-data(v1, v2) {
+  if splice {eq-data(quote {v1}, quote {v2})} {
     print-line("yo");
   } else {
     print-line("YO");

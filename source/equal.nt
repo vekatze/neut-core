@@ -2,11 +2,15 @@ import {
   this.binary {binary},
   this.binary.eq {eq-binary},
   this.bool {False, True, bool},
-  this.control {grow},
+  this.bool.io {print-bool-line},
+  this.either {Left, Right},
+  this.list {Cons, List, Nil, list},
   this.magic,
-  this.memory {load-int},
+  this.memory {load-int, load-pointer},
+  this.pair {Pair},
   this.pointer {shift},
   this.rune.eq {eq-rune},
+  this.text {text},
   this.type-tag {
     Algebraic,
     Binary,
@@ -23,138 +27,232 @@ import {
     Int8,
     Rune,
     Vector,
-    get-cons-size,
-    get-type-tag,
+    Wrapper,
   },
-  this.unit,
+  this.unit {unit},
   this.vector {vector},
   this.word,
 }
 
-nominal {
-  define eq-data<a>(x: &a, y: &a): bool,
-}
-
-define _equal-vector<a>(xs: &vector(a), ys: &vector(a)): bool {
-  let len-x = this.vector.length(xs);
-  let len-y = this.vector.length(ys);
-  if eq-int(len-x, len-y) {
-    this.vector.zip-fold(xs, ys, True, function (x: &a, y: &a, acc: bool, _: int): bool {
-      if acc {
-        eq-data(x, y)
-      } else {
-        False
-      }
-    })
-  } else {
-    False
+macro-inline _macro-length<a>(xs: list(a)): int {
+  match xs {
+  | Nil =>
+    0
+  | Cons(_, ys) =>
+    add-int(1, _macro-length(ys))
   }
 }
 
-foreign {
-  llvm.memcpy.p0.p0.i64(pointer, pointer, int64, int1): void,
+macro-inline _join-text(t1: &text, t2: &text): &text {
+  let tmp = magic text-uncons(t1);
+  match tmp {
+  | Left(_) =>
+    t2
+  | Right(Pair(r, rest)) =>
+    magic text-cons(r, _join-text(rest, t2))
+  }
 }
 
-define _equal-cons-args<a>(
-  x: &a,
-  y: &a,
-  cons-args-handler: <t>(i: int, size: int, x: &t, y: &t) -> bool,
-): bool {
-  let ptr-x = this.magic.cast<&a, pointer>(x);
-  let discriminant-x = load-int(ptr-x);
-  let ptr-y = this.magic.cast<&a, pointer>(y);
-  let discriminant-y = load-int(ptr-y);
-  if ne-int(discriminant-x, discriminant-y) {
-    False
-  } else {
-    let size = get-cons-size<a>(discriminant-x);
-    let type-ptr = magic alloca(int64, add-int(size, 2)); // +2 is for data-arg-num and const-like
-    let u = this.word.size;
-    let _ = magic external llvm.memcpy.p0.p0.i64(type-ptr, ptr-x, mul-int(u, size), 0);
-    magic call-type(veil {a}, 4, type-ptr);
-    let data-arg-num = load-int(shift(type-ptr, mul-int(u, size)));
-    let loop-size = sub-int(size, add-int(1, data-arg-num));
-    let args-bool =
-      grow(True, loop-size, function (acc: bool, cursor: int) {
+nominal {
+  macro eq-data<a>(x: code &a, y: code &a): code bool,
+}
+
+macro-inline _equal-vector<a>(xs: code &vector(a), ys: code &vector(a)): code bool {
+  quote {
+    let len-x = this.vector.length(splice {xs});
+    let len-y = this.vector.length(splice {ys});
+    if eq-int(len-x, len-y) {
+      this.vector.zip-fold(splice {xs}, splice {ys}, True, function (x: &a, y: &a, acc: bool, _: int): bool {
         if acc {
-          let i = add-int(cursor, add-int(1, data-arg-num));
-          letveil t = this.magic.cast<int, type>(load-int(shift(type-ptr, mul-int(u, i))));
-          let vx = load-int(shift(ptr-x, mul-int(u, i)));
-          let vy = load-int(shift(ptr-y, mul-int(u, i)));
-          cons-args-handler<t>(cursor, loop-size, this.magic.cast<int, &t>(vx), this.magic.cast<int, &t>(vy))
+          splice {eq-data(quote {x}, quote {y})}
         } else {
           False
         }
-      });
-    args-bool
+      })
+    } else {
+      False
+    }
   }
 }
 
-// supports: ADT, enum, int, float, rune, binary, vector
-define eq-data<a>(x: &a, y: &a): bool {
-  match get-type-tag<a>() {
-  | Algebraic =>
-    _equal-cons-args<a>(x, y, function <t>(_: int, _: int, x: &t, y: &t) {
-      eq-data(x, y)
-    })
-  | Enum =>
-    let discriminant-x = this.magic.cast<&a, int>(x);
-    let discriminant-y = this.magic.cast<&a, int>(y);
-    eq-int(discriminant-x, discriminant-y)
-  | Int1 =>
-    let x = this.magic.cast<&a, int1>(x);
-    let y = this.magic.cast<&a, int1>(y);
-    eq-int1(x, y)
-  | Int2 =>
-    let x = this.magic.cast<&a, int2>(x);
-    let y = this.magic.cast<&a, int2>(y);
-    eq-int2(x, y)
-  | Int4 =>
-    let x = this.magic.cast<&a, int4>(x);
-    let y = this.magic.cast<&a, int4>(y);
-    eq-int4(x, y)
-  | Int8 =>
-    let x = this.magic.cast<&a, int8>(x);
-    let y = this.magic.cast<&a, int8>(y);
-    eq-int8(x, y)
-  | Int16 =>
-    let x = this.magic.cast<&a, int16>(x);
-    let y = this.magic.cast<&a, int16>(y);
-    eq-int16(x, y)
-  | Int32 =>
-    let x = this.magic.cast<&a, int32>(x);
-    let y = this.magic.cast<&a, int32>(y);
-    eq-int32(x, y)
-  | Int64 =>
-    let x = this.magic.cast<&a, int64>(x);
-    let y = this.magic.cast<&a, int64>(y);
-    eq-int64(x, y)
-  | Float16 =>
-    let x = this.magic.cast<&a, float16>(x);
-    let y = this.magic.cast<&a, float16>(y);
-    eq-float16(x, y)
-  | Float32 =>
-    let x = this.magic.cast<&a, float32>(x);
-    let y = this.magic.cast<&a, float32>(y);
-    eq-float32(x, y)
-  | Float64 =>
-    let x = this.magic.cast<&a, float64>(x);
-    let y = this.magic.cast<&a, float64>(y);
-    eq-float64(x, y)
-  | Rune =>
-    let x = this.magic.cast<&a, rune>(x);
-    let y = this.magic.cast<&a, rune>(y);
-    eq-rune(x, y)
-  | Binary =>
-    let x = this.magic.cast<&a, &binary>(x);
-    let y = this.magic.cast<&a, &binary>(y);
-    eq-binary(x, y)
-  | Vector =>
-    letveil elem-type = magic cast(int, type, load-int(shift(magic cast(&a, pointer, x), mul-int(this.word.size, 3))));
-    let x: &vector(elem-type) = this.magic.cast<&a, &vector(elem-type)>(x);
-    let y: &vector(elem-type) = this.magic.cast<&a, &vector(elem-type)>(y);
-    _equal-vector<elem-type>(x, y)
-  | _ =>
-    False
+inline _load-nth-element(data-arg-num: int, cursor: int, x: pointer): pointer {
+  let u = this.word.size;
+  let offset = mul-int(u, add-int(1, add-int(data-arg-num, cursor))); // x = (disc, data-args, cons-args)
+  let elem-ptr = shift(x, offset);
+  load-pointer(elem-ptr)
+}
+
+macro-inline _eq-data-adt-cons<a>(
+  cons-arg-types: list(type),
+  cursor: int,
+  x: code &a,
+  y: code &a,
+): code bool {
+  match cons-arg-types {
+  | Nil =>
+    quote {True}
+  | Cons(t, rest) =>
+    letveil t = t;
+    let data-arg-num = _macro-length(magic get-data-args(a));
+    quote {
+      let data-arg-num = splice {promote {data-arg-num}};
+      let low-cursor = splice {promote {cursor}};
+      let x-ptr = this.magic.cast<&a, pointer>(splice {x});
+      let y-ptr = this.magic.cast<&a, pointer>(splice {y});
+      let x-elem-ptr = this.magic.cast<pointer, &t>(_load-nth-element(data-arg-num, low-cursor, x-ptr));
+      let y-elem-ptr = this.magic.cast<pointer, &t>(_load-nth-element(data-arg-num, low-cursor, y-ptr));
+      let is-eq = splice {eq-data(quote {x-elem-ptr}, quote {y-elem-ptr})};
+      if is-eq {
+        splice {_eq-data-adt-cons(rest, add-int(cursor, 1), x, y)}
+      } else {
+        False
+      }
+    }
   }
+}
+
+macro-inline _eq-data-adt<a>(cons-index: int, cons-num: int, disc: code int, x: code &a, y: code &a): code bool {
+  if eq-int(cons-index, cons-num) {
+    quote {True}
+  } else {
+    let ts = magic get-constructor-arg-types(a, cons-index);
+    quote {
+      if eq-int(splice {promote {cons-index}}, splice {disc}) {
+        splice {_eq-data-adt-cons(ts, 0, x, y)}
+      } else {
+        splice {_eq-data-adt(add-int(cons-index, 1), cons-num, disc, x, y)}
+      }
+    }
+  }
+}
+
+macro eq-data<a>(x: code &a, y: code &a): code bool {
+  let k = magic get-type-tag(a);
+  match k {
+  | Algebraic =>
+    let num = magic get-cons-size(a);
+    quote {
+      let ptr-x = this.magic.cast<&a, pointer>(splice {x});
+      let ptr-y = this.magic.cast<&a, pointer>(splice {y});
+      let discriminant-x = load-int(ptr-x);
+      let discriminant-y = load-int(ptr-y);
+      if ne-int(discriminant-x, discriminant-y) {
+        False
+      } else {
+        splice {_eq-data-adt(0, num, quote {discriminant-x}, x, y)}
+      }
+    }
+  | Enum =>
+    quote {
+      let discriminant-x = this.magic.cast<&a, int>(splice {x});
+      let discriminant-y = this.magic.cast<&a, int>(splice {y});
+      eq-int(discriminant-x, discriminant-y)
+    }
+  | Int1 =>
+    quote {
+      let x = this.magic.cast<&a, int1>(splice {x});
+      let y = this.magic.cast<&a, int1>(splice {y});
+      eq-int1(x, y)
+    }
+  | Int2 =>
+    quote {
+      let x = this.magic.cast<&a, int2>(splice {x});
+      let y = this.magic.cast<&a, int2>(splice {y});
+      eq-int2(x, y)
+    }
+  | Int4 =>
+    quote {
+      let x = this.magic.cast<&a, int4>(splice {x});
+      let y = this.magic.cast<&a, int4>(splice {y});
+      eq-int4(x, y)
+    }
+  | Int8 =>
+    quote {
+      let x = this.magic.cast<&a, int8>(splice {x});
+      let y = this.magic.cast<&a, int8>(splice {y});
+      eq-int8(x, y)
+    }
+  | Int16 =>
+    quote {
+      let x = this.magic.cast<&a, int16>(splice {x});
+      let y = this.magic.cast<&a, int16>(splice {y});
+      eq-int16(x, y)
+    }
+  | Int32 =>
+    quote {
+      let x = this.magic.cast<&a, int32>(splice {x});
+      let y = this.magic.cast<&a, int32>(splice {y});
+      eq-int32(x, y)
+    }
+  | Int64 =>
+    quote {
+      let x = this.magic.cast<&a, int64>(splice {x});
+      let y = this.magic.cast<&a, int64>(splice {y});
+      eq-int64(x, y)
+    }
+  | Float16 =>
+    quote {
+      let x = this.magic.cast<&a, float16>(splice {x});
+      let y = this.magic.cast<&a, float16>(splice {y});
+      eq-float16(x, y)
+    }
+  | Float32 =>
+    quote {
+      let x = this.magic.cast<&a, float32>(splice {x});
+      let y = this.magic.cast<&a, float32>(splice {y});
+      eq-float32(x, y)
+    }
+  | Float64 =>
+    quote {
+      let x = this.magic.cast<&a, float64>(splice {x});
+      let y = this.magic.cast<&a, float64>(splice {y});
+      eq-float64(x, y)
+    }
+  | Rune =>
+    quote {
+      let x = this.magic.cast<&a, rune>(splice {x});
+      let y = this.magic.cast<&a, rune>(splice {y});
+      eq-rune(x, y)
+    }
+  | Binary =>
+    quote {
+      let x = this.magic.cast<&a, &binary>(splice {x});
+      let y = this.magic.cast<&a, &binary>(splice {y});
+      eq-binary(x, y)
+    }
+  | Vector =>
+    letveil t = magic get-vector-content-type(a);
+    quote {
+      let x: &vector(t) = this.magic.cast<&a, &vector(t)>(splice {x});
+      let y: &vector(t) = this.magic.cast<&a, &vector(t)>(splice {y});
+      splice {_equal-vector<t>(quote {x}, quote {y})}
+    }
+  | Wrapper =>
+    letveil t = magic get-wrapper-content-type(a);
+    quote {
+      let x: &t = this.magic.cast<&a, &t>(splice {x});
+      let y: &t = this.magic.cast<&a, &t>(splice {y});
+      splice {eq-data(quote {x}, quote {y})}
+    }
+  | _ =>
+    let t = magic show-type(a);
+    let message = _join-text("eq-data doesn't support: ", t);
+    magic compile-error(message)
+  }
+}
+
+define zen(): unit {
+  pin xs: vector(list(int)) = this.vector.Vector[List[], List[10, 20]];
+  pin ys: vector(list(int)) = this.vector.Vector[List[], List[10, 20]];
+  let foo = splice {eq-data(quote {xs}, quote {ys})};
+  // pin f: list((int) -> int) =
+  //   List[function (x) {
+  //     x
+  //   }];
+  // pin g: list((int) -> int) =
+  //   List[function (x) {
+  //     x
+  //   }];
+  // let foo = splice {eq-data(quote {f}, quote {g})};
+  print-bool-line(foo);
 }

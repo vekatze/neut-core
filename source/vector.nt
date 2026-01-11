@@ -1009,10 +1009,10 @@ define range(from: int, to: int): vector(int) {
   }
 }
 
-define lift-vector<a>(xs: vector(a), _: (a) -> meta a): meta vector(a) {
-  magic cast(vector(a), meta vector(a), xs)
+define lift-vector<a>(xs: vector(a), _: (a) -> +a): +vector(a) {
+  magic cast(vector(a), +vector(a), xs)
   // admissible:
-  //   let base: meta vector(a) = box {make(10)};
+  //   let base: +vector(a) = box {make(10)};
   //   this.list.fold-left(base, to-list(xs), function (acc, x) {
   //     box {
   //       letbox v = acc;
@@ -1022,11 +1022,11 @@ define lift-vector<a>(xs: vector(a), _: (a) -> meta a): meta vector(a) {
   //   })
 }
 
-define meta-vector-out<a>(xs: vector(meta a)): meta vector(a) {
+define meta-vector-out<a>(xs: vector(+a)): +vector(a) {
   magic cast(_, _, xs)
 }
 
-define meta-vector-in<a>(xs: meta vector(a)): vector(meta a) {
+define meta-vector-in<a>(xs: +vector(a)): vector(+a) {
   magic cast(_, _, xs)
 }
 

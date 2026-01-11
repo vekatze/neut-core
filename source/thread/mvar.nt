@@ -112,27 +112,27 @@ inline make-mvar<a>(): mvar(a) {
   _new<a>()
 }
 
-define send<a>(ch: &mvar(a), x: meta a): unit {
+define send<a>(ch: &mvar(a), x: +a): unit {
   let _MVar-Info of {flag-ptr, value-ptr, mutex-ptr, readable-cond-ptr, writable-cond-ptr} = _get-info(ch);
   thread-mutex-lock(mutex-ptr);
   let flag = load-int(flag-ptr);
   when eq-int(flag, 1) {
     thread-cond-wait(writable-cond-ptr, mutex-ptr);
   };
-  store-int(cast<meta a, int>(x), value-ptr);
+  store-int(cast<+a, int>(x), value-ptr);
   store-int(1, flag-ptr);
   thread-cond-signal(readable-cond-ptr);
   thread-mutex-unlock(mutex-ptr);
 }
 
-define receive<a>(ch: &mvar(a)): meta a {
+define receive<a>(ch: &mvar(a)): +a {
   let _MVar-Info of {flag-ptr, value-ptr, mutex-ptr, readable-cond-ptr, writable-cond-ptr} = _get-info(ch);
   thread-mutex-lock(mutex-ptr);
   let flag = load-int(flag-ptr);
   when eq-int(flag, 0) {
     thread-cond-wait(readable-cond-ptr, mutex-ptr);
   };
-  let result: meta a = cast<int, meta a>(load-int(value-ptr));
+  let result: +a = cast<int, +a>(load-int(value-ptr));
   store-int(0, flag-ptr);
   thread-cond-signal(writable-cond-ptr);
   thread-mutex-unlock(mutex-ptr);

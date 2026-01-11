@@ -31,7 +31,7 @@ define swap<a, b>(p: pair(a, b)): pair(b, a) {
   Pair(y, x)
 }
 
-inline meta-pair-in<a, b>(p: meta pair(a, b)): pair(meta a, meta b) {
+inline meta-pair-in<a, b>(p: +pair(a, b)): pair(+a, +b) {
   // admissible:
   //   let mx =
   //     box {
@@ -47,7 +47,7 @@ inline meta-pair-in<a, b>(p: meta pair(a, b)): pair(meta a, meta b) {
   cast<_, _>(p)
 }
 
-define meta-pair-out<a, b>(p: pair(meta a, meta b)): meta pair(a, b) {
+define meta-pair-out<a, b>(p: pair(+a, +b)): +pair(a, b) {
   // admissible:
   //   let Pair(x, y) = p;
   //   box {

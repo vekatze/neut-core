@@ -79,7 +79,7 @@ define _extension-required-p(b: &binary-builder, new-size: int): bool {
 }
 
 define _extend(b: &binary-builder): unit {
-  mutate(b, function (x: meta _binary-builder) {
+  mutate(b, function (x: +_binary-builder) {
     let _Binary-Builder of {cursor, content} = axiom-T(x);
     let current-size on content = core.binary.binary-length(content);
     let new-content = allocate(mul-int(current-size, 2));

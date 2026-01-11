@@ -49,25 +49,25 @@ resource _ref {
   type-tag-to-int(Opaque),
 }
 
-inline make-ref<a>(initial-value: meta a): ref(a) {
+inline make-ref<a>(initial-value: +a): ref(a) {
   _make<a>(axiom-T(initial-value))
 }
 
-inline modify<a, b>(r: &ref(a), f: (meta a) -> pair(meta a, b)): b {
+inline modify<a, b>(r: &ref(a), f: (+a) -> pair(+a, b)): b {
   let r = cast<&ref(a), pointer>(r);
-  let orig-val = cast<int, meta a>(load-int(r));
+  let orig-val = cast<int, +a>(load-int(r));
   let Pair(new-val, result) = f(orig-val);
-  store-int(cast<meta a, int>(new-val), r);
+  store-int(cast<+a, int>(new-val), r);
   result
 }
 
-inline mutate<a>(r: &ref(a), f: (meta a) -> meta a): unit {
+inline mutate<a>(r: &ref(a), f: (+a) -> +a): unit {
   modify(r, function (x) {
     Pair(f(x), Unit)
   })
 }
 
-inline borrow<a, b>(r: &ref(a), f: (&a) -> meta b): b {
+inline borrow<a, b>(r: &ref(a), f: (&a) -> +b): b {
   let r = cast<&ref(a), pointer>(r);
   let orig-val = cast<int, &a>(load-int(r));
   letbox-T result = f(orig-val);
@@ -75,14 +75,14 @@ inline borrow<a, b>(r: &ref(a), f: (&a) -> meta b): b {
 }
 
 inline clone<a>(r: &ref(a)): a {
-  modify(r, function (!val: meta a) {
+  modify(r, function (!val: +a) {
     Pair(!val, axiom-T(!val))
   })
 }
 
-define extract<a>(c: ref(a)): meta a {
+define extract<a>(c: ref(a)): +a {
   let r = cast<ref(a), pointer>(c);
-  let result = cast<int, meta a>(load-int(r));
+  let result = cast<int, +a>(load-int(r));
   this.external.free(r);
   result
 }

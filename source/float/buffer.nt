@@ -64,9 +64,9 @@ define zen(): unit {
     try _ = write(b, "\n");
     try _ = write-float(b, 1e-40, 7);
     try _ = write(b, "\n");
-    try _ = write-float(b, 1e+38, 7);
+    try _ = write-float(b, 1e38, 7);
     try _ = write(b, "\n");
-    try _ = write-float(b, -1e+38, 7);
+    try _ = write-float(b, -1e38, 7);
     try _ = write(b, "\n");
     try _ = write-float(b, 1.17549435e-38, 7);
     try _ = write(b, "\n");
@@ -81,8 +81,8 @@ define zen(): unit {
     try _ = write-float-line(b, -1.0, 7);
     try _ = write-float-line(b, 3.141592653589793, 7);
     try _ = write-float-line(b, 1e-40, 7);
-    try _ = write-float-line(b, 1e+38, 7);
-    try _ = write-float-line(b, -1e+38, 7);
+    try _ = write-float-line(b, 1e38, 7);
+    try _ = write-float-line(b, -1e38, 7);
     try _ = write-float-line(b, 1.17549435e-38, 7);
     try _ = write-float-line(b, 1.40129846e-45, 7);
     try _ = write-float-line(b, -1.40129846e-45, 7);

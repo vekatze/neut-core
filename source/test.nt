@@ -40,8 +40,8 @@ define with-cell(i: int): int {
   axiom-T(this.cell.extract(c))
 }
 
-define box-int(i: int): meta int {
-  magic cast(int, meta int, i)
+define box-int(i: int): +int {
+  magic cast(int, +int, i)
 }
 
 define use-rune(r: rune): unit {

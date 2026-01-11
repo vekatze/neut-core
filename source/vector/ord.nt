@@ -36,7 +36,7 @@ define _find-higher<a>(o: &ord(a), vs: &vector(a), boundary: int, to: int, pivot
   }
 }
 
-define vector-quicksort<a>(o: &ord(a), nes: &(a) -> meta a, xs: vector(a)): vector(a) {
+define vector-quicksort<a>(o: &ord(a), nes: &(a) -> +a, xs: vector(a)): vector(a) {
   let f =
     define outer-loop(vs: vector(a), from: int, to: int): vector(a) {
       if ge-int(from, to) {

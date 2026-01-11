@@ -1,7 +1,3 @@
-import {
-  this.unit {Unit},
-}
-
 data type-tag {
 | Opaque
 | Type
@@ -25,16 +21,9 @@ data type-tag {
 | Binary
 | Vector
 | Wrapper
+| Own
 }
 
 define type-tag-to-int(x: type-tag): int {
   magic cast(type-tag, int, x)
-}
-
-define get-type-tag<a>(): type-tag {
-  magic call-type(veil {a}, 2, Unit)
-}
-
-define get-cons-size<a>(discriminant: int): int {
-  magic call-type(veil {a}, 3, discriminant)
 }

@@ -1,9 +1,7 @@
 import {
   this.ansi {Blue, Yellow},
-  this.bool,
-  this.control {grow},
+  this.bool {True, bool},
   this.doc {
-    Chunk,
     Group,
     _nested-comma-seq,
     ansi-bold,
@@ -18,13 +16,15 @@ import {
     empty,
     join,
   },
-  this.doc.chunk {Chunk-Choose, Chunk-Empty, Chunk-Text-N},
   this.doc.show {show-doc},
+  this.either {Left, Right, either},
+  this.list {Cons, Nil, list},
   this.magic,
-  this.memory {load-int},
+  this.memory {load-int, load-pointer},
+  this.pair {Pair, pair},
   this.pointer {shift},
   this.text {text},
-  this.text.io {print},
+  this.text.io {print, print-line},
   this.type-tag {
     Algebraic,
     Binary,
@@ -39,76 +39,48 @@ import {
     Int4,
     Int64,
     Int8,
+    Noema,
     Null,
+    Own,
     Pointer,
     Rune,
     Vector,
-    get-cons-size,
-    get-type-tag,
+    Wrapper,
   },
-  this.unit {unit},
+  this.unit {Unit, unit},
   this.vector {vector},
   this.word,
 }
 
-foreign {
-  llvm.memcpy.p0.p0.i64(pointer, pointer, int64, int1): void,
+macro-inline _macro-length<a>(xs: list(a)): int {
+  match xs {
+  | Nil =>
+    0
+  | Cons(_, ys) =>
+    add-int(1, _macro-length(ys))
+  }
+}
+
+define _literal-doc(d: doc): doc {
+  join[
+    ansi-fg(Yellow),
+    d,
+    ansi-reset,
+  ]
+}
+
+macro-inline _join-text(t1: &text, t2: &text): &text {
+  let tmp = magic text-uncons(t1);
+  match tmp {
+  | Left(_) =>
+    t2
+  | Right(Pair(r, rest)) =>
+    magic text-cons(r, _join-text(rest, t2))
+  }
 }
 
 nominal {
-  define vet-doc<a>(x: &a): doc,
-}
-
-inline optional-trailing-comma: doc {
-  Chunk(Chunk-Choose(Chunk-Empty, Chunk-Text-N(",")))
-}
-
-define _vet-doc-vector<a>(xs: &vector(a)): doc {
-  let len = this.vector.length(xs);
-  this.vector.fold-right-N(xs, empty, function (x: &a, acc: doc, i: int): doc {
-    if eq-int(add-int(i, 1), len) {
-      join[vet-doc(x), acc]
-    } else {
-      join[vet-doc(x), atom-N(","), break(" "), acc]
-    }
-  })
-}
-
-define _constructor-loop-doc<a>(
-  x: &a,
-  cons-name-handler: (&text) -> doc,
-  cons-args-handler: <t>(i: int, size: int, x: &t) -> doc,
-): doc {
-  let ptr = this.magic.cast<&a, pointer>(x);
-  let discriminant = load-int(ptr);
-  let size = get-cons-size<a>(discriminant);
-  let type-ptr = magic alloca(int64, add-int(size, 2)); // +2 is for data-arg-num and const-like
-  let u = this.word.size;
-  let _ = magic external llvm.memcpy.p0.p0.i64(type-ptr, ptr, mul-int(u, size), 0);
-  magic call-type(veil {a}, 4, type-ptr);
-  let cons-name = magic cast(int, &text, load-int(type-ptr));
-  let cons-name-doc = cons-name-handler(cons-name);
-  let data-arg-num = load-int(shift(type-ptr, mul-int(u, size)));
-  let loop-size = sub-int(size, add-int(1, data-arg-num));
-  let args-doc =
-    grow(empty, loop-size, function (acc, cursor) {
-      let i = add-int(cursor, add-int(1, data-arg-num));
-      letveil t = this.magic.cast<int, type>(load-int(shift(type-ptr, mul-int(u, i))));
-      let v = load-int(shift(ptr, mul-int(u, i)));
-      let cons-args-doc = cons-args-handler<t>(cursor, loop-size, this.magic.cast<int, &t>(v));
-      join[acc, cons-args-doc]
-    });
-  if gt-int(loop-size, 0) {
-    let prefix = join[cons-name-doc, atom-N("(")];
-    let suffix = atom-N(")");
-    _nested-comma-seq(
-      prefix,
-      args-doc,
-      suffix,
-    )
-  } else {
-    cons-name-doc
-  }
+  macro vet-doc<a>(x: code &a): code doc,
 }
 
 define _constructor-doc(x: &text): doc {
@@ -120,100 +92,251 @@ define _constructor-doc(x: &text): doc {
   ]
 }
 
-define _literal-doc(d: doc): doc {
-  join[
-    ansi-fg(Yellow),
-    d,
-    ansi-reset,
-  ]
-}
-
-define vet-doc<a>(x: &a): doc {
-  match get-type-tag<a>() {
-  | Algebraic =>
-    Group(_constructor-loop-doc<a>(x, _constructor-doc, function <t>(i: int, len: int, x: &t) {
-      join[
-        if eq-int(i, 0) {
-          empty
-        } else {
-          break(" ")
-        },
-        vet-doc(x),
-        if eq-int(add-int(i, 1), len) {
-          empty
-        } else {
-          atom-N(",")
-        },
-      ]
-    }))
-  | Enum =>
-    let discriminant = this.magic.cast<&a, int>(x);
-    let cons-name: &text = magic call-type(veil {a}, 4, discriminant);
-    _constructor-doc(cons-name)
-  | Int1 =>
-    atom-int(sext-int1-int(magic cast(&a, int1, x)))
-  | Int2 =>
-    atom-int(sext-int2-int(magic cast(&a, int2, x)))
-  | Int4 =>
-    atom-int(sext-int4-int(magic cast(&a, int4, x)))
-  | Int8 =>
-    atom-int(sext-int8-int(magic cast(&a, int8, x)))
-  | Int16 =>
-    atom-int(sext-int16-int(magic cast(&a, int16, x)))
-  | Int32 =>
-    atom-int(sext-int32-int(magic cast(&a, int32, x)))
-  | Int64 =>
-    atom-int(magic cast(&a, int64, x))
-  | Float16 =>
-    atom-float(fpext-float16-float(magic cast(&a, float16, x)), 6)
-  | Float32 =>
-    atom-float(fpext-float32-float(magic cast(&a, float32, x)), 6)
-  | Float64 =>
-    atom-float(magic cast(&a, float64, x), 6)
-  | Pointer =>
-    atom-int(magic cast(&a, int64, x))
-  | Null =>
-    atom-N("null")
-  | Rune =>
-    _literal-doc(join[
-      atom-N("`"),
-      atom-rune(magic cast(&a, rune, x)),
-      atom-N("`"),
-    ])
-  | Binary =>
-    _literal-doc(join[
-      atom-N("\""),
-      atom-N(magic cast(&a, &text, x)),
-      atom-N("\""),
-    ])
-  | Vector =>
-    letveil elem-type = magic cast(int, type, load-int(shift(magic cast(&a, pointer, x), mul-int(this.word.size, 3))));
-    let vec: &vector(elem-type) = magic cast(&a, &vector(elem-type), x);
+macro-inline _vet-vector<a>(xs: code &vector(a)): code doc {
+  quote {
     let prefix = join[_constructor-doc("Vector"), atom-N("[")];
     let suffix = atom-N("]");
+    let len = this.vector.length(splice {xs});
+    let content =
+      this.vector.fold-right-N(splice {xs}, empty, function (x: &a, acc: doc, i: int): doc {
+        if eq-int(add-int(i, 1), len) {
+          join[splice {vet-doc(quote {x})}, acc]
+        } else {
+          join[splice {vet-doc(quote {x})}, atom-N(","), break(" "), acc]
+        }
+      });
     Group(_nested-comma-seq(
       prefix,
-      _vet-doc-vector<elem-type>(vec),
+      content,
       suffix,
     ))
-  | _ =>
-    _literal-doc(atom-N("_"))
   }
 }
 
-define vet<a>[ribbon-length := 32](x: &a): unit {
-  pin tmp = vet-doc(x);
-  pin item = show-doc(tmp, ribbon-length);
-  print(item);
-  print("\n");
+inline _load-nth-element(data-arg-num: int, cursor: int, x: pointer): pointer {
+  let u = this.word.size;
+  let offset = mul-int(u, add-int(1, add-int(data-arg-num, cursor))); // x = (disc, data-args, cons-args)
+  let elem-ptr = shift(x, offset);
+  load-pointer(elem-ptr)
 }
 
-define trace<a>(x: a): a {
+macro-inline _vet-adt-cons<a>(
+  cons-arg-types: list(type),
+  cursor: int,
+  x: code &a,
+): code doc {
+  match cons-arg-types {
+  | Nil =>
+    quote {empty}
+  | Cons(t, Nil) =>
+    let data-arg-num = _macro-length(magic get-data-args(a));
+    letveil t = t;
+    quote {
+      let data-arg-num = splice {promote {data-arg-num}};
+      let low-cursor = splice {promote {cursor}};
+      let x-ptr = this.magic.cast<&a, pointer>(splice {x});
+      let x-elem-ptr = this.magic.cast<pointer, &t>(_load-nth-element(data-arg-num, low-cursor, x-ptr));
+      splice {vet-doc<t>(quote {x-elem-ptr})}
+    }
+  | Cons(t, rest) =>
+    let d1 = {
+      let data-arg-num = _macro-length(magic get-data-args(a));
+      letveil t = t;
+      quote {
+        let data-arg-num = splice {promote {data-arg-num}};
+        let low-cursor = splice {promote {cursor}};
+        let x-ptr = this.magic.cast<&a, pointer>(splice {x});
+        let x-elem-ptr = this.magic.cast<pointer, &t>(_load-nth-element(data-arg-num, low-cursor, x-ptr));
+        splice {vet-doc<t>(quote {x-elem-ptr})}
+      }
+    };
+    let d2 = _vet-adt-cons(rest, add-int(cursor, 1), x);
+    quote {join[splice {d1}, atom-N(","), break(" "), splice {d2}]}
+  }
+}
+
+macro-inline _vet-adt<a>(cons-index: int, cons-num: int, disc: code int, x: code &a): code doc {
+  if eq-int(cons-index, cons-num) {
+    quote {empty} // unreachable
+  } else {
+    let ts = magic get-constructor-arg-types(a, cons-index);
+    quote {
+      if eq-int(splice {promote {cons-index}}, splice {disc}) {
+        splice {
+          let cons-name = magic get-cons-name(a, cons-index);
+          let is-const-like = magic get-cons-const-flag(a, cons-index);
+          let prefix =
+            if is-const-like {
+              quote {_constructor-doc(splice {promote {cons-name}})}
+            } else {
+              quote {join[_constructor-doc(splice {promote {cons-name}}), atom-N("(")]}
+            };
+          let suffix =
+            if is-const-like {
+              quote {empty}
+            } else {
+              quote {atom-N(")")}
+            };
+          quote {
+            Group(_nested-comma-seq(
+              splice {prefix},
+              splice {_vet-adt-cons(ts, 0, x)},
+              splice {suffix},
+            ))
+          }
+        }
+      } else {
+        splice {_vet-adt(add-int(cons-index, 1), cons-num, disc, x)}
+      }
+    }
+  }
+}
+
+macro-inline _vet-enum<a>(cons-index: int, cons-num: int, disc: code int, x: code &a): code doc {
+  if eq-int(cons-index, cons-num) {
+    quote {empty} // unreachable
+  } else {
+    quote {
+      if eq-int(splice {promote {cons-index}}, splice {disc}) {
+        splice {
+          let cons-name = magic get-cons-name(a, cons-index);
+          quote {_constructor-doc(splice {promote {cons-name}})}
+        }
+      } else {
+        splice {_vet-enum(add-int(cons-index, 1), cons-num, disc, x)}
+      }
+    }
+  }
+}
+
+macro vet-doc<a>(x: code &a): code doc {
+  let k = magic get-type-tag(a);
+  match k {
+  | Algebraic =>
+    let num = magic get-cons-size(a);
+    quote {
+      let ptr-x = this.magic.cast<&a, pointer>(splice {x});
+      let discriminant-x = load-int(ptr-x);
+      splice {_vet-adt(0, num, quote {discriminant-x}, x)}
+    }
+  | Enum =>
+    let num = magic get-cons-size(a);
+    quote {
+      let discriminant-x = this.magic.cast<&a, int>(splice {x});
+      splice {_vet-enum(0, num, quote {discriminant-x}, x)}
+    }
+  | Int1 =>
+    quote {atom-int(magic cast(int1, int64, magic cast(&a, int1, splice {x})))}
+  | Int2 =>
+    quote {atom-int(magic cast(int2, int64, magic cast(&a, int2, splice {x})))}
+  | Int4 =>
+    quote {atom-int(magic cast(int4, int64, magic cast(&a, int4, splice {x})))}
+  | Int8 =>
+    quote {atom-int(magic cast(int8, int64, magic cast(&a, int8, splice {x})))}
+  | Int16 =>
+    quote {atom-int(magic cast(int16, int64, magic cast(&a, int16, splice {x})))}
+  | Int32 =>
+    quote {atom-int(magic cast(int32, int64, magic cast(&a, int32, splice {x})))}
+  | Int64 =>
+    quote {atom-int(magic cast(&a, int64, splice {x}))}
+  | Float16 =>
+    quote {atom-float(magic cast(float16, float64, magic cast(&a, float16, splice {x})), 6)}
+  | Float32 =>
+    quote {atom-float(magic cast(float32, float64, magic cast(&a, float32, splice {x})), 6)}
+  | Float64 =>
+    quote {atom-float(magic cast(&a, float64, splice {x}), 6)}
+  | Null =>
+    quote {atom-N("null")}
+  | Rune =>
+    quote {
+      _literal-doc(join[
+        atom-N("`"),
+        atom-rune(magic cast(&a, rune, splice {x})),
+        atom-N("`"),
+      ])
+    }
+  | Binary =>
+    quote {
+      _literal-doc(join[
+        atom-N("\""),
+        atom-N(magic cast(&a, &text, splice {x})),
+        atom-N("\""),
+      ])
+    }
+  | Wrapper =>
+    letveil t = magic get-wrapper-content-type(a);
+    quote {
+      let x-unwrapped: &t = this.magic.cast<&a, &t>(splice {x});
+      splice {vet-doc<t>(quote {x-unwrapped})}
+    }
+  | Vector =>
+    letveil t = magic get-vector-content-type(a);
+    quote {
+      let x: &vector(t) = this.magic.cast<&a, &vector(t)>(splice {x});
+      splice {_vet-vector<t>(quote {x})}
+    }
+  | Noema =>
+    letveil t = magic get-noema-content-type(a);
+    quote {
+      let x-unwrapped: &t = this.magic.cast<&a, &t>(splice {x});
+      splice {vet-doc<t>(quote {x-unwrapped})}
+    }
+  | Own =>
+    letveil t = magic get-box-content-type(a);
+    quote {
+      let x-unwrapped: &t = this.magic.cast<&a, &t>(splice {x});
+      splice {vet-doc<t>(quote {x-unwrapped})}
+    }
+  | Pointer =>
+    quote {atom-int(magic cast(&a, int64, splice {x}))}
+  | _ =>
+    quote {_literal-doc(atom-N("_"))}
+  }
+}
+
+macro vet<a>[ribbon-length: code int := quote {50}](x: code &a): code unit {
+  quote {
+    pin tmp = splice {vet-doc(x)};
+    pin item = show-doc(tmp, splice {ribbon-length});
+    print(item);
+    print("\n");
+  }
+}
+
+macro trace<a>(x: code a): code a {
   introspect build-mode {
   | release =>
     x
   | default =>
-    let _ on x = vet(x);
-    x
+    quote {
+      let x = splice {x};
+      let _ on x = splice {vet(quote {x})};
+      x
+    }
   }
+}
+
+define zen(): unit {
+  pin xs: vector(pair(&text, &text)) = this.vector.Vector[Pair("a", "b"), Pair("c", "d")];
+  // pin ys: vector(list(int)) = this.vector.Vector[List[], List[10, 20]];
+  // let foo = splice {vet(quote {xs})};
+  print-line("before");
+  pin _: either(bool, list(float)) = Left(True);
+  // Right(List[10, 208.2, 3.14, 20, 10, 20, 10]);
+  // pin xs: vector(&text) = this.vector.Vector["foo", "bar", "buz", "hoge"];
+  // pin xs: either(unit, list(int)) = Left(Unit);
+  // pin sample: meta text = box {*"test"};
+  splice {vet(quote {xs})};
+  print-line("after");
+  // pin f: list((int) -> int) =
+  //   List[function (x) {
+  //     x
+  //   }];
+  // pin g: list((int) -> int) =
+  //   List[function (x) {
+  //     x
+  //   }];
+  // let foo = splice {vet(quote {f}, quote {g})};
+  // print-bool-line(foo);
+  Unit
 }

@@ -15,9 +15,6 @@ import {
   this.text.io {print, print-line},
   this.thread.mvar {make-mvar, receive, send},
   this.thread.pool {for-each-parallel},
-  this.type-tag {
-    get-cons-size,
-  },
   this.unit {Unit, unit},
   this.vector {Vector, product, push-back},
 }
@@ -105,11 +102,6 @@ define item: int {
   10
 }
 
-define print-cons-size<a>(discriminant: int): unit {
-  let size = get-cons-size<a>(discriminant);
-  print-int-line(size)
-}
-
 data wrap {
 | Wrap(int)
 }
@@ -155,23 +147,23 @@ define zen(): unit {
   let _ on !mv = {
     send(!mv, lift {*"test"});
     pin v = receive(!mv);
-    vet(v)
+    splice {vet(quote {v})}
   };
   let _ = !mv;
   let _ = !mv;
   pin count = get-cpu-count();
-  vet(count);
+  splice {vet(quote {count})};
   pin result =
     for-each-parallel(get-cpu-count(), Vector[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], function (x) {
       lift {add-int(x, 10)}
     });
-  vet(result);
+  splice {vet(quote {result})};
   // let tmp = Cons(True, Cons(is-even, Nil));
   // pin myVec = Vector[True, False, True, True];
   // vet(myVec);
   // range
   pin xs = this.vector.range(1, 10);
-  vet(xs);
+  splice {vet(quote {xs})};
   // // span
   // let xs: vector(int) = this.vector.make(5);
   // let xs = push-back(xs, 1);
@@ -247,9 +239,9 @@ define zen(): unit {
   let xs = this.vector.make(5);
   let xs = push-back(xs, *"a");
   let xs = push-back(xs, *"b");
-  let !xs = trace(push-back(xs, *"c"));
+  let !xs = splice {trace(quote {push-back(xs, *"c")})};
   pin xss = product(!xs, !xs);
-  vet(xss);
+  splice {vet(quote {xss})};
   // // nested vector
   // let !foo = *"text";
   // let _ = !foo;
@@ -294,12 +286,12 @@ define zen(): unit {
   // pin xs: list(float) = Cons(10.38777, Cons(-2.38423, Nil));
   // vet(xs);
   pin ys = Cons(`a`, Cons(`あ`, Nil));
-  vet(ys);
+  splice {vet(quote {ys})};
   // print("---\n");
   // pin v: int = 10;
   // vet(v);
   pin sample: either(unit, _) = Right(Pair(Unit, True));
-  vet(sample);
+  splice {vet(quote {sample})};
   pin v1 = add-int(10, 201);
   pin v2 = add-int(10, 1);
   if splice {eq-data(quote {v1}, quote {v2})} {

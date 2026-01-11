@@ -34,16 +34,16 @@ import {
   this.word,
 }
 
-macro-inline _macro-length<a>(xs: list(a)): int {
+meta-inline _meta-length<a>(xs: list(a)): int {
   match xs {
   | Nil =>
     0
   | Cons(_, ys) =>
-    add-int(1, _macro-length(ys))
+    add-int(1, _meta-length(ys))
   }
 }
 
-macro-inline _join-text(t1: &text, t2: &text): &text {
+meta-inline _join-text(t1: &text, t2: &text): &text {
   let tmp = magic text-uncons(t1);
   match tmp {
   | Left(_) =>
@@ -54,10 +54,10 @@ macro-inline _join-text(t1: &text, t2: &text): &text {
 }
 
 nominal {
-  macro eq-data<a>(x: '&a, y: '&a): 'bool,
+  meta eq-data<a>(x: '&a, y: '&a): 'bool,
 }
 
-macro-inline _equal-vector<a>(xs: '&vector(a), ys: '&vector(a)): 'bool {
+meta-inline _equal-vector<a>(xs: '&vector(a), ys: '&vector(a)): 'bool {
   quote {
     let len-x = this.vector.length(splice {xs});
     let len-y = this.vector.length(splice {ys});
@@ -82,7 +82,7 @@ inline _load-nth-element(data-arg-num: int, cursor: int, x: pointer): pointer {
   load-pointer(elem-ptr)
 }
 
-macro-inline _eq-data-adt-cons<a>(
+meta-inline _eq-data-adt-cons<a>(
   cons-arg-types: list(type),
   cursor: int,
   x: '&a,
@@ -93,7 +93,7 @@ macro-inline _eq-data-adt-cons<a>(
     quote {True}
   | Cons(t, rest) =>
     letveil t = t;
-    let data-arg-num = _macro-length(magic get-data-args(a));
+    let data-arg-num = _meta-length(magic get-data-args(a));
     quote {
       let data-arg-num = splice {promote {data-arg-num}};
       let low-cursor = splice {promote {cursor}};
@@ -111,7 +111,7 @@ macro-inline _eq-data-adt-cons<a>(
   }
 }
 
-macro-inline _eq-data-adt<a>(cons-index: int, cons-num: int, disc: 'int, x: '&a, y: '&a): 'bool {
+meta-inline _eq-data-adt<a>(cons-index: int, cons-num: int, disc: 'int, x: '&a, y: '&a): 'bool {
   if eq-int(cons-index, cons-num) {
     quote {True}
   } else {
@@ -126,7 +126,7 @@ macro-inline _eq-data-adt<a>(cons-index: int, cons-num: int, disc: 'int, x: '&a,
   }
 }
 
-macro eq-data<a>(x: '&a, y: '&a): 'bool {
+meta eq-data<a>(x: '&a, y: '&a): 'bool {
   let k = magic get-type-tag(a);
   match k {
   | Algebraic =>

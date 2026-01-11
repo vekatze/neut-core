@@ -52,12 +52,12 @@ import {
   this.word,
 }
 
-macro-inline _macro-length<a>(xs: list(a)): int {
+meta-inline _meta-length<a>(xs: list(a)): int {
   match xs {
   | Nil =>
     0
   | Cons(_, ys) =>
-    add-int(1, _macro-length(ys))
+    add-int(1, _meta-length(ys))
   }
 }
 
@@ -69,7 +69,7 @@ define _literal-doc(d: doc): doc {
   ]
 }
 
-macro-inline _join-text(t1: &text, t2: &text): &text {
+meta-inline _join-text(t1: &text, t2: &text): &text {
   let tmp = magic text-uncons(t1);
   match tmp {
   | Left(_) =>
@@ -80,7 +80,7 @@ macro-inline _join-text(t1: &text, t2: &text): &text {
 }
 
 nominal {
-  macro vet-doc<a>(x: '&a): 'doc,
+  meta vet-doc<a>(x: '&a): 'doc,
 }
 
 define _constructor-doc(x: &text): doc {
@@ -92,7 +92,7 @@ define _constructor-doc(x: &text): doc {
   ]
 }
 
-macro-inline _vet-vector<a>(xs: '&vector(a)): 'doc {
+meta-inline _vet-vector<a>(xs: '&vector(a)): 'doc {
   quote {
     let prefix = join[_constructor-doc("Vector"), atom-N("[")];
     let suffix = atom-N("]");
@@ -120,7 +120,7 @@ inline _load-nth-element(data-arg-num: int, cursor: int, x: pointer): pointer {
   load-pointer(elem-ptr)
 }
 
-macro-inline _vet-adt-cons<a>(
+meta-inline _vet-adt-cons<a>(
   cons-arg-types: list(type),
   cursor: int,
   x: '&a,
@@ -129,7 +129,7 @@ macro-inline _vet-adt-cons<a>(
   | Nil =>
     quote {empty}
   | Cons(t, Nil) =>
-    let data-arg-num = _macro-length(magic get-data-args(a));
+    let data-arg-num = _meta-length(magic get-data-args(a));
     letveil t = t;
     quote {
       let data-arg-num = splice {promote {data-arg-num}};
@@ -140,7 +140,7 @@ macro-inline _vet-adt-cons<a>(
     }
   | Cons(t, rest) =>
     let d1 = {
-      let data-arg-num = _macro-length(magic get-data-args(a));
+      let data-arg-num = _meta-length(magic get-data-args(a));
       letveil t = t;
       quote {
         let data-arg-num = splice {promote {data-arg-num}};
@@ -155,7 +155,7 @@ macro-inline _vet-adt-cons<a>(
   }
 }
 
-macro-inline _vet-adt<a>(cons-index: int, cons-num: int, disc: 'int, x: '&a): 'doc {
+meta-inline _vet-adt<a>(cons-index: int, cons-num: int, disc: 'int, x: '&a): 'doc {
   if eq-int(cons-index, cons-num) {
     quote {empty} // unreachable
   } else {
@@ -192,7 +192,7 @@ macro-inline _vet-adt<a>(cons-index: int, cons-num: int, disc: 'int, x: '&a): 'd
   }
 }
 
-macro-inline _vet-enum<a>(cons-index: int, cons-num: int, disc: 'int, x: '&a): 'doc {
+meta-inline _vet-enum<a>(cons-index: int, cons-num: int, disc: 'int, x: '&a): 'doc {
   if eq-int(cons-index, cons-num) {
     quote {empty} // unreachable
   } else {
@@ -209,7 +209,7 @@ macro-inline _vet-enum<a>(cons-index: int, cons-num: int, disc: 'int, x: '&a): '
   }
 }
 
-macro vet-doc<a>(x: '&a): 'doc {
+meta vet-doc<a>(x: '&a): 'doc {
   let k = magic get-type-tag(a);
   match k {
   | Algebraic =>
@@ -294,7 +294,7 @@ macro vet-doc<a>(x: '&a): 'doc {
   }
 }
 
-macro vet<a>[ribbon-length: 'int := quote {50}](x: '&a): 'unit {
+meta vet<a>[ribbon-length: 'int := quote {50}](x: '&a): 'unit {
   quote {
     pin tmp = splice {vet-doc(x)};
     pin item = show-doc(tmp, splice {ribbon-length});
@@ -303,7 +303,7 @@ macro vet<a>[ribbon-length: 'int := quote {50}](x: '&a): 'unit {
   }
 }
 
-macro trace<a>(x: 'a): 'a {
+meta trace<a>(x: 'a): 'a {
   introspect build-mode {
   | release =>
     x

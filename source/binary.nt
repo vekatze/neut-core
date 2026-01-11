@@ -38,8 +38,8 @@ resource binary {
     let target-pointer = malloc(C-Size(add-int(length, u2)));
     store-int(0, target-pointer);
     store-int(length, shift(target-pointer, u));
-    let source-pointer' = shift(source-pointer, add-int(u2, from));
-    _copy-binary(source-pointer', shift(target-pointer, u2), length);
+    let source-pointer = shift(source-pointer, add-int(u2, from));
+    _copy-binary(source-pointer, shift(target-pointer, u2), length);
     target-pointer
   },
   type-tag-to-int(Binary),
@@ -239,8 +239,8 @@ define drop-N(t: &binary, offset: int): binary {
   store-int(new-size, shift(new-ptr, this.word.size));
   let new-content-ptr = shift(new-ptr, mul-int(this.word.size, 2));
   let adjusted-offset = min-int(offset, orig-size);
-  let content-ptr' = shift(content-ptr, adjusted-offset);
-  _copy-binary(content-ptr', new-content-ptr, new-size);
+  let content-ptr = shift(content-ptr, adjusted-offset);
+  _copy-binary(content-ptr, new-content-ptr, new-size);
   cast<pointer, binary>(new-ptr)
 }
 

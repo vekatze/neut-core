@@ -20,10 +20,10 @@ define write[r := rho](f: descriptor, t: &text): system(unit) {
 }
 
 define write-line[r := rho](d: descriptor, t: &text): system(unit) {
-  let d' = magic cast(descriptor, int32, d);
+  let d = magic cast(descriptor, int32, d);
   let len = text-byte-length(t);
   let ptr = _get-content-pointer(t);
-  let result = magic external neut_core_v0_51_write_line(d', len, ptr);
+  let result = magic external neut_core_v0_51_write_line(d, len, ptr);
   if lt-int(result, 0) {
     try _ = r;
     report-system-error()

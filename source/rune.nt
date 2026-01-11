@@ -104,29 +104,29 @@ inline load-rune(address: pointer): rune {
     // 0xc0 = 1100 0000
     // 0xe0 = 1110 0000
     let x1 = load-int8(shift(address, 1));
-    let x0' = shl-int32(magic cast(int8, int32, x0), 8);
-    let x1' = shl-int32(magic cast(int8, int32, x1), 0);
-    unsafe-from-int32(or-int32(x0', x1'))
+    let x0 = shl-int32(magic cast(int8, int32, x0), 8);
+    let x1 = shl-int32(magic cast(int8, int32, x1), 0);
+    unsafe-from-int32(or-int32(x0, x1))
   } else-if eq-int8(and-int8(x0, 0xf0), 0xe0) {
     // 0xe0 = 1110 0000
     // 0xf0 = 1111 0000
     let x1 = load-int8(shift(address, 1));
     let x2 = load-int8(shift(address, 2));
-    let x0' = shl-int32(magic cast(int8, int32, x0), 16);
-    let x1' = shl-int32(magic cast(int8, int32, x1), 8);
-    let x2' = shl-int32(magic cast(int8, int32, x2), 0);
-    unsafe-from-int32(or-int32(or-int32(x0', x1'), x2'))
+    let x0 = shl-int32(magic cast(int8, int32, x0), 16);
+    let x1 = shl-int32(magic cast(int8, int32, x1), 8);
+    let x2 = shl-int32(magic cast(int8, int32, x2), 0);
+    unsafe-from-int32(or-int32(or-int32(x0, x1), x2))
   } else-if eq-int8(and-int8(x0, 0xf8), 0xf0) {
     // 0xf0 = 1111 0000
     // 0xf8 = 1111 1000
     let x1 = load-int8(shift(address, 1));
     let x2 = load-int8(shift(address, 2));
     let x3 = load-int8(shift(address, 3));
-    let x0' = shl-int32(magic cast(int8, int32, x0), 24);
-    let x1' = shl-int32(magic cast(int8, int32, x1), 16);
-    let x2' = shl-int32(magic cast(int8, int32, x2), 8);
-    let x3' = shl-int32(magic cast(int8, int32, x3), 0);
-    unsafe-from-int32(or-int32(or-int32(or-int32(x0', x1'), x2'), x3'))
+    let x0 = shl-int32(magic cast(int8, int32, x0), 24);
+    let x1 = shl-int32(magic cast(int8, int32, x1), 16);
+    let x2 = shl-int32(magic cast(int8, int32, x2), 8);
+    let x3 = shl-int32(magic cast(int8, int32, x3), 0);
+    unsafe-from-int32(or-int32(or-int32(or-int32(x0, x1), x2), x3))
   } else {
     // unicode invalid char (or panic?)
     unsafe-from-int32(0xefbfbe)
@@ -144,8 +144,8 @@ define from-int[r := rho](value: int): ?rune {
       let mask-1 = 0b_0000_0000_0011_1111;
       let value-0 = and-int(mask-0, value);
       let value-1 = and-int(mask-1, value);
-      let value-0' = shl-int(value-0, 2);
-      Right(magic cast(int, rune, or-int(or-int(mask-X, value-0'), value-1)))
+      let value-0 = shl-int(value-0, 2);
+      Right(magic cast(int, rune, or-int(or-int(mask-X, value-0), value-1)))
     } else-if le-int(value, 0xffff) {
       let mask-X = 0b_1110_0000_1000_0000_1000_0000;
       let mask-0 = 0b_0000_0000_1111_0000_0000_0000;
@@ -154,9 +154,9 @@ define from-int[r := rho](value: int): ?rune {
       let value-0 = and-int(mask-0, value);
       let value-1 = and-int(mask-1, value);
       let value-2 = and-int(mask-2, value);
-      let value-0' = shl-int(value-0, 4);
-      let value-1' = shl-int(value-1, 2);
-      Right(magic cast(int, rune, or-int(or-int(or-int(mask-X, value-0'), value-1'), value-2)))
+      let value-0 = shl-int(value-0, 4);
+      let value-1 = shl-int(value-1, 2);
+      Right(magic cast(int, rune, or-int(or-int(or-int(mask-X, value-0), value-1), value-2)))
     } else-if le-int(value, 0x10ffff) {
       let mask-X = 0b_1111_0000_1000_0000_1000_0000_1000_0000;
       let mask-0 = 0b_0000_0000_0001_1100_0000_0000_0000_0000;
@@ -167,15 +167,15 @@ define from-int[r := rho](value: int): ?rune {
       let value-1 = and-int(mask-1, value);
       let value-2 = and-int(mask-2, value);
       let value-3 = and-int(mask-3, value);
-      let value-0' = shl-int(value-0, 6);
-      let value-1' = shl-int(value-1, 4);
-      let value-2' = shl-int(value-2, 2);
+      let value-0 = shl-int(value-0, 6);
+      let value-1 = shl-int(value-1, 4);
+      let value-2 = shl-int(value-2, 2);
       Right(
         magic cast(
           int,
           rune,
           or-int(
-            or-int(or-int(or-int(mask-X, value-0'), value-1'), value-2'),
+            or-int(or-int(or-int(mask-X, value-0), value-1), value-2),
             value-3,
           ),
         ),

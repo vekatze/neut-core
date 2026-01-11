@@ -45,13 +45,13 @@ define _get-content-pointer(t: &text): pointer {
 }
 
 define join(xs: list(text)): text {
-  let xs' = magic cast(list(text), list(binary), xs);
-  _Text(this.binary.join(xs'))
+  let xs = magic cast(list(text), list(binary), xs);
+  _Text(this.binary.join(xs))
 }
 
 define join-N(xs: &list(text)): text {
-  let xs' = magic cast(&list(text), &list(binary), xs);
-  _Text(this.binary.join-N(xs'))
+  let xs = magic cast(&list(text), &list(binary), xs);
+  _Text(this.binary.join-N(xs))
 }
 
 define append(t1: &text, t2: &text): text {
@@ -161,8 +161,8 @@ define intercalate(xs: list(text), sep: text): text {
 }
 
 define intercalate-N(xs: &list(text), sep: &text): text {
-  let xs' = magic cast(&list(text), &list(binary), xs);
-  _Text(this.binary.intercalate-N(xs', to-binary(sep)))
+  let xs = magic cast(&list(text), &list(binary), xs);
+  _Text(this.binary.intercalate-N(xs, to-binary(sep)))
 }
 
 define _get-byte(t: &text, index: int): int8 {
@@ -284,12 +284,12 @@ define _alternate<a>(xs: list(a), ys: list(a)): list(a) {
   match xs, ys {
   | Nil, _ =>
     Nil
-  | Cons(x', Nil), _ =>
-    Cons(x', Nil)
-  | Cons(x1, Cons(x2, xs')), Nil =>
-    Cons(x1, Cons(x2, xs'))
-  | Cons(x1, Cons(x2, xs')), Cons(y', ys') =>
-    Cons(x1, Cons(y', _alternate(Cons(x2, xs'), ys')))
+  | Cons(x, Nil), _ =>
+    Cons(x, Nil)
+  | Cons(x1, Cons(x2, xs)), Nil =>
+    Cons(x1, Cons(x2, xs))
+  | Cons(x1, Cons(x2, xs)), Cons(y, ys) =>
+    Cons(x1, Cons(y, _alternate(Cons(x2, xs), ys)))
   }
 }
 

@@ -12,8 +12,8 @@ import {
 }
 
 define open[r := rho](path: &text, xs: list(flag), ms: list(mode)): system(descriptor) {
-  pin path' = this.text.append(path, "\0");
-  let actual-path-string = _get-content-pointer(path');
+  pin path = this.text.append(path, "\0");
+  let actual-path-string = _get-content-pointer(path);
   let fd =
     this.external.open(
       actual-path-string,

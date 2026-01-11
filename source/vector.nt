@@ -247,8 +247,8 @@ define push-back<a>(xs: vector(a), x: a): vector(a) {
     let _ on xs = _shift-to(xs, 1);
     xs
   } else {
-    let xs' = _extend-back(xs);
-    push-back(xs', x)
+    let xs = _extend-back(xs);
+    push-back(xs, x)
   }
 }
 

@@ -24,21 +24,21 @@ inline as-eq: eq(text) {
 }
 
 define eq-prefix(haystack: &text, needle: &text): bool {
-  tie _Text(haystack') = haystack;
-  tie _Text(needle') = needle;
-  this.binary.eq.eq-prefix(haystack', needle')
+  tie _Text(haystack) = haystack;
+  tie _Text(needle) = needle;
+  this.binary.eq.eq-prefix(haystack, needle)
 }
 
 define eq-suffix(haystack: &text, needle: &text): bool {
-  tie _Text(haystack') = haystack;
-  tie _Text(needle') = needle;
-  this.binary.eq.eq-suffix(haystack', needle')
+  tie _Text(haystack) = haystack;
+  tie _Text(needle) = needle;
+  this.binary.eq.eq-suffix(haystack, needle)
 }
 
 define eq-infix(haystack: &text, needle: &text): bool {
-  tie _Text(haystack') = haystack;
-  tie _Text(needle') = needle;
-  this.binary.eq.eq-infix(haystack', needle')
+  tie _Text(haystack) = haystack;
+  tie _Text(needle) = needle;
+  this.binary.eq.eq-infix(haystack, needle)
 }
 
 define strip-prefix[r := rho](haystack: &text, needle: &text): ?text {

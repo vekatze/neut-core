@@ -137,8 +137,8 @@ define alternate<a>(xs: list(a), ys: list(a)): list(a) {
     xs
   | Nil, ys =>
     ys
-  | Cons(x', xs'), Cons(y', ys') =>
-    Cons(x', Cons(y', alternate(xs', ys')))
+  | Cons(x, xs), Cons(y, ys) =>
+    Cons(x, Cons(y, alternate(xs, ys)))
   }
 }
 
@@ -281,8 +281,8 @@ inline zip-with<a, b, c>(xs: list(a), ys: list(b), !f: (a, b) -> c): list(c) {
         Nil
       | _, Nil =>
         Nil
-      | Cons(x, xs'), Cons(y, ys') =>
-        Cons(!f(x, y), loop(xs', ys'))
+      | Cons(x, xs), Cons(y, ys) =>
+        Cons(!f(x, y), loop(xs, ys))
       }
     };
   k(xs, ys)
@@ -296,8 +296,8 @@ inline zip-with-N<a, b, c>(xs: &list(a), ys: &list(b), !f: (&a, &b) -> c): list(
         Nil
       | _, Nil =>
         Nil
-      | Cons(x, xs'), Cons(y, ys') =>
-        Cons(!f(x, y), loop(xs', ys'))
+      | Cons(x, xs), Cons(y, ys) =>
+        Cons(!f(x, y), loop(xs, ys))
       }
     };
   k(xs, ys)

@@ -54,10 +54,10 @@ macro-inline _join-text(t1: &text, t2: &text): &text {
 }
 
 nominal {
-  macro eq-data<a>(x: code &a, y: code &a): code bool,
+  macro eq-data<a>(x: '&a, y: '&a): 'bool,
 }
 
-macro-inline _equal-vector<a>(xs: code &vector(a), ys: code &vector(a)): code bool {
+macro-inline _equal-vector<a>(xs: '&vector(a), ys: '&vector(a)): 'bool {
   quote {
     let len-x = this.vector.length(splice {xs});
     let len-y = this.vector.length(splice {ys});
@@ -85,9 +85,9 @@ inline _load-nth-element(data-arg-num: int, cursor: int, x: pointer): pointer {
 macro-inline _eq-data-adt-cons<a>(
   cons-arg-types: list(type),
   cursor: int,
-  x: code &a,
-  y: code &a,
-): code bool {
+  x: '&a,
+  y: '&a,
+): 'bool {
   match cons-arg-types {
   | Nil =>
     quote {True}
@@ -111,7 +111,7 @@ macro-inline _eq-data-adt-cons<a>(
   }
 }
 
-macro-inline _eq-data-adt<a>(cons-index: int, cons-num: int, disc: code int, x: code &a, y: code &a): code bool {
+macro-inline _eq-data-adt<a>(cons-index: int, cons-num: int, disc: 'int, x: '&a, y: '&a): 'bool {
   if eq-int(cons-index, cons-num) {
     quote {True}
   } else {
@@ -126,7 +126,7 @@ macro-inline _eq-data-adt<a>(cons-index: int, cons-num: int, disc: code int, x: 
   }
 }
 
-macro eq-data<a>(x: code &a, y: code &a): code bool {
+macro eq-data<a>(x: '&a, y: '&a): 'bool {
   let k = magic get-type-tag(a);
   match k {
   | Algebraic =>

@@ -1,14 +1,14 @@
 inline axiom-K<a, b>(f: +(a) -> b, x: +a): +b {
   box {
-    letbox f' = f;
-    letbox x' = x;
-    f'(x')
+    letbox f = f;
+    letbox x = x;
+    f(x)
   }
 }
 
 inline axiom-T<a>(x: +a): a {
-  letbox-T x' = x;
-  x'
+  letbox-T x = x;
+  x
 }
 
 inline embody<a>(x: &a): a {

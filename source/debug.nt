@@ -80,7 +80,7 @@ macro-inline _join-text(t1: &text, t2: &text): &text {
 }
 
 nominal {
-  macro vet-doc<a>(x: code &a): code doc,
+  macro vet-doc<a>(x: '&a): 'doc,
 }
 
 define _constructor-doc(x: &text): doc {
@@ -92,7 +92,7 @@ define _constructor-doc(x: &text): doc {
   ]
 }
 
-macro-inline _vet-vector<a>(xs: code &vector(a)): code doc {
+macro-inline _vet-vector<a>(xs: '&vector(a)): 'doc {
   quote {
     let prefix = join[_constructor-doc("Vector"), atom-N("[")];
     let suffix = atom-N("]");
@@ -123,8 +123,8 @@ inline _load-nth-element(data-arg-num: int, cursor: int, x: pointer): pointer {
 macro-inline _vet-adt-cons<a>(
   cons-arg-types: list(type),
   cursor: int,
-  x: code &a,
-): code doc {
+  x: '&a,
+): 'doc {
   match cons-arg-types {
   | Nil =>
     quote {empty}
@@ -155,7 +155,7 @@ macro-inline _vet-adt-cons<a>(
   }
 }
 
-macro-inline _vet-adt<a>(cons-index: int, cons-num: int, disc: code int, x: code &a): code doc {
+macro-inline _vet-adt<a>(cons-index: int, cons-num: int, disc: 'int, x: '&a): 'doc {
   if eq-int(cons-index, cons-num) {
     quote {empty} // unreachable
   } else {
@@ -192,7 +192,7 @@ macro-inline _vet-adt<a>(cons-index: int, cons-num: int, disc: code int, x: code
   }
 }
 
-macro-inline _vet-enum<a>(cons-index: int, cons-num: int, disc: code int, x: code &a): code doc {
+macro-inline _vet-enum<a>(cons-index: int, cons-num: int, disc: 'int, x: '&a): 'doc {
   if eq-int(cons-index, cons-num) {
     quote {empty} // unreachable
   } else {
@@ -209,7 +209,7 @@ macro-inline _vet-enum<a>(cons-index: int, cons-num: int, disc: code int, x: cod
   }
 }
 
-macro vet-doc<a>(x: code &a): code doc {
+macro vet-doc<a>(x: '&a): 'doc {
   let k = magic get-type-tag(a);
   match k {
   | Algebraic =>
@@ -294,7 +294,7 @@ macro vet-doc<a>(x: code &a): code doc {
   }
 }
 
-macro vet<a>[ribbon-length: code int := quote {50}](x: code &a): code unit {
+macro vet<a>[ribbon-length: 'int := quote {50}](x: '&a): 'unit {
   quote {
     pin tmp = splice {vet-doc(x)};
     pin item = show-doc(tmp, splice {ribbon-length});
@@ -303,7 +303,7 @@ macro vet<a>[ribbon-length: code int := quote {50}](x: code &a): code unit {
   }
 }
 
-macro trace<a>(x: code a): code a {
+macro trace<a>(x: 'a): 'a {
   introspect build-mode {
   | release =>
     x

@@ -32,11 +32,11 @@ data error {
 
 define _read-char(r: rune, t: text): either(error, text) {
   match this.text.uncons(t) {
-  | Right(Pair(r', rest)) =>
-    if eq-rune(r, r') {
+  | Right(Pair(r-found, rest)) =>
+    if eq-rune(r, r-found) {
       Right(rest)
     } else {
-      Left(Parse-Error(format("Expected `{}`, but got: `{}`", List[singleton(r), singleton(r')])))
+      Left(Parse-Error(format("Expected `{}`, but got: `{}`", List[singleton(r), singleton(r-found)])))
     }
   | Left(_) =>
     Left(Parse-Error(format("Expected `{}`, but got: end of text", List[singleton(r)])))
@@ -77,14 +77,14 @@ define _unquote-text(t: text): either(error, list(text)) {
     } else-if eq-rune(c, `\``) {
       Right(List[*"\u{60}", rest])
     } else-if eq-rune(c, `u`) {
-      try rest' = _read-char(`{`, rest);
-      let hex-text on rest' = take-while-N(rest', _is-lower-hex-digit);
+      try rest = _read-char(`{`, rest);
+      let hex-text on rest = take-while-N(rest, _is-lower-hex-digit);
       pin hex-text = hex-text;
       let scalar-value-text-len = length(hex-text);
-      let rest'' = drop(rest', scalar-value-text-len);
-      try rest''' = _read-char(`}`, rest'');
+      let rest = drop(rest, scalar-value-text-len);
+      try rest = _read-char(`}`, rest);
       try r = _read-unicode-scalar-value(hex-text);
-      Right(List[singleton(r), rest'''])
+      Right(List[singleton(r), rest])
     } else {
       Left(Parse-Error(format("Unknown escape sequence: \\{}", List[singleton(c)])))
     }
@@ -96,9 +96,9 @@ define _parse-text-fragment(t: &text): either(error, list(text)) {
   | Nil =>
     // unreachable
     Left(Parse-Error(*"(core).text.parse._parse-text-fragment"))
-  | Cons(t', ts') =>
-    try fragment-lists = for-each-E(ts', _unquote-text);
-    Right(Cons(t', concat(fragment-lists)))
+  | Cons(t, ts) =>
+    try fragment-lists = for-each-E(ts, _unquote-text);
+    Right(Cons(t, concat(fragment-lists)))
   }
 }
 

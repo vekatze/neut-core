@@ -61,8 +61,8 @@ define eq-suffix(haystack: &binary, needle: &binary): bool {
   } else {
     let ptr1 = _get-content-pointer(needle);
     let ptr2 = _get-content-pointer(haystack);
-    let ptr2' = shift(ptr2, sub-int(len-haystack, len-needle));
-    _eq-binary(ptr1, ptr2', len-needle)
+    let ptr2-shifted = shift(ptr2, sub-int(len-haystack, len-needle));
+    _eq-binary(ptr1, ptr2-shifted, len-needle)
   }
 }
 
@@ -72,8 +72,8 @@ define _eq-infix(index: int, len1: int, len2: int, needle: &binary, haystack: &b
   } else {
     let ptr1 = _get-content-pointer(needle);
     let ptr2 = _get-content-pointer(haystack);
-    let ptr2' = shift(ptr2, index);
-    if _eq-binary(ptr1, ptr2', len1) {
+    let ptr2-shifted = shift(ptr2, index);
+    if _eq-binary(ptr1, ptr2-shifted, len1) {
       True
     } else {
       _eq-infix(add-int(index, 1), len1, len2, needle, haystack)

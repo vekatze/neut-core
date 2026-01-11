@@ -25,7 +25,7 @@ inline as-ord<a, b>(f: ord(a), g: ord(b)): ord(pair(a, b)) {
   }
 }
 
-inline as-ord'<a, b>(f: ord(a), g: ord(b)): ord(pair(a, b)) {
+inline as-ord-right-biased<a, b>(f: ord(a), g: ord(b)): ord(pair(a, b)) {
   let Ord of {compare := compare-f} = f;
   let Ord of {compare := compare-g} = g;
   Ord of {

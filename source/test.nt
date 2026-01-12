@@ -147,27 +147,24 @@ define zen(): unit {
   let _ on !mv = {
     send(!mv, lift {*"test"});
     pin v = receive(!mv);
-    // unquote {vet(quote {v})}
-    #vet(v);
+    vet::(v);
   };
   let _ = !mv;
   let _ = !mv;
   pin count = get-cpu-count();
-  // unquote {vet(quote {count})};
-  #vet(count);
+  vet::(count);
   pin result =
     for-each-parallel(get-cpu-count(), Vector[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], function (x) {
       lift {add-int(x, 10)}
     });
-  // unquote {vet(quote {result})};
-  #vet(result);
+  vet::(result);
   // let tmp = Cons(True, Cons(is-even, Nil));
   // pin myVec = Vector[True, False, True, True];
   // vet(myVec);
   // range
   pin xs = this.vector.range(1, 10);
   // unquote {vet(quote {xs})};
-  #vet(xs);
+  vet::(xs);
   // // span
   // let xs: vector(int) = this.vector.make(5);
   // let xs = push-back(xs, 1);
@@ -244,10 +241,10 @@ define zen(): unit {
   let xs = push-back(xs, *"a");
   let xs = push-back(xs, *"b");
   // let !xs = unquote {trace(quote {push-back(xs, *"c")})};
-  let !xs = #trace(push-back(xs, *"c"));
+  let !xs = trace::(push-back(xs, *"c"));
   pin xss = product(!xs, !xs);
   // unquote {vet(quote {xss})};
-  #vet(xss);
+  vet::(xss);
   // // nested vector
   // let !foo = *"text";
   // let _ = !foo;
@@ -292,18 +289,18 @@ define zen(): unit {
   // pin xs: list(float) = Cons(10.38777, Cons(-2.38423, Nil));
   // vet(xs);
   pin ys = Cons(`a`, Cons(`あ`, Nil));
-  #vet(ys);
+  vet::(ys);
   // unquote {vet(quote {ys})};
   // print("---\n");
   // pin v: int = 10;
   // vet(v);
   pin sample: either(unit, _) = Right(Pair(Unit, True));
-  #vet(sample);
+  vet::(sample);
   // unquote {vet(quote {sample})};
   pin v1 = add-int(10, 201);
   pin v2 = add-int(10, 1);
   // if unquote {eq-data(quote {v1}, quote {v2})}
-  if #eq-data(v1, v2) {
+  if eq-data::(v1, v2) {
     print-line("yo");
   } else {
     print-line("YO");

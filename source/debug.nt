@@ -328,7 +328,8 @@ define zen(): unit {
   // run vet(xs);
   // vet[xs];
   // pin sample: meta text = box {*"test"};
-  unquote {vet(quote {xs})};
+  // unquote {vet(quote {xs})};
+  #vet(xs);
   print-line("after");
   // pin f: list((int) -> int) =
   //   List[function (x) {

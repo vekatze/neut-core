@@ -96,13 +96,13 @@ inline-meta _vet-vector<a>(xs: '&vector(a)): 'doc {
   quote {
     let prefix = join[_constructor-doc("Vector"), atom-N("[")];
     let suffix = atom-N("]");
-    let len = this.vector.length(splice {xs});
+    let len = this.vector.length(unquote {xs});
     let content =
-      this.vector.fold-right-N(splice {xs}, empty, function (x: &a, acc: doc, i: int): doc {
+      this.vector.fold-right-N(unquote {xs}, empty, function (x: &a, acc: doc, i: int): doc {
         if eq-int(add-int(i, 1), len) {
-          join[splice {vet-doc(quote {x})}, acc]
+          join[unquote {vet-doc(quote {x})}, acc]
         } else {
-          join[splice {vet-doc(quote {x})}, atom-N(","), break(" "), acc]
+          join[unquote {vet-doc(quote {x})}, atom-N(","), break(" "), acc]
         }
       });
     Group(_nested-comma-seq(
@@ -132,26 +132,26 @@ inline-meta _vet-adt-cons<a>(
     let data-arg-num = _meta-length(magic get-data-args(a));
     letveil t = t;
     quote {
-      let data-arg-num = splice {promote {data-arg-num}};
-      let low-cursor = splice {promote {cursor}};
-      let x-ptr = this.magic.cast<&a, pointer>(splice {x});
+      let data-arg-num = unquote {promote {data-arg-num}};
+      let low-cursor = unquote {promote {cursor}};
+      let x-ptr = this.magic.cast<&a, pointer>(unquote {x});
       let x-elem-ptr = this.magic.cast<pointer, &t>(_load-nth-element(data-arg-num, low-cursor, x-ptr));
-      splice {vet-doc<t>(quote {x-elem-ptr})}
+      unquote {vet-doc<t>(quote {x-elem-ptr})}
     }
   | Cons(t, rest) =>
     let d1 = {
       let data-arg-num = _meta-length(magic get-data-args(a));
       letveil t = t;
       quote {
-        let data-arg-num = splice {promote {data-arg-num}};
-        let low-cursor = splice {promote {cursor}};
-        let x-ptr = this.magic.cast<&a, pointer>(splice {x});
+        let data-arg-num = unquote {promote {data-arg-num}};
+        let low-cursor = unquote {promote {cursor}};
+        let x-ptr = this.magic.cast<&a, pointer>(unquote {x});
         let x-elem-ptr = this.magic.cast<pointer, &t>(_load-nth-element(data-arg-num, low-cursor, x-ptr));
-        splice {vet-doc<t>(quote {x-elem-ptr})}
+        unquote {vet-doc<t>(quote {x-elem-ptr})}
       }
     };
     let d2 = _vet-adt-cons(rest, add-int(cursor, 1), x);
-    quote {join[splice {d1}, atom-N(","), break(" "), splice {d2}]}
+    quote {join[unquote {d1}, atom-N(","), break(" "), unquote {d2}]}
   }
 }
 
@@ -161,15 +161,15 @@ inline-meta _vet-adt<a>(cons-index: int, cons-num: int, disc: 'int, x: '&a): 'do
   } else {
     let ts = magic get-constructor-arg-types(a, cons-index);
     quote {
-      if eq-int(splice {promote {cons-index}}, splice {disc}) {
-        splice {
+      if eq-int(unquote {promote {cons-index}}, unquote {disc}) {
+        unquote {
           let cons-name = magic get-cons-name(a, cons-index);
           let is-const-like = magic get-cons-const-flag(a, cons-index);
           let prefix =
             if is-const-like {
-              quote {_constructor-doc(splice {promote {cons-name}})}
+              quote {_constructor-doc(unquote {promote {cons-name}})}
             } else {
-              quote {join[_constructor-doc(splice {promote {cons-name}}), atom-N("(")]}
+              quote {join[_constructor-doc(unquote {promote {cons-name}}), atom-N("(")]}
             };
           let suffix =
             if is-const-like {
@@ -179,14 +179,14 @@ inline-meta _vet-adt<a>(cons-index: int, cons-num: int, disc: 'int, x: '&a): 'do
             };
           quote {
             Group(_nested-comma-seq(
-              splice {prefix},
-              splice {_vet-adt-cons(ts, 0, x)},
-              splice {suffix},
+              unquote {prefix},
+              unquote {_vet-adt-cons(ts, 0, x)},
+              unquote {suffix},
             ))
           }
         }
       } else {
-        splice {_vet-adt(add-int(cons-index, 1), cons-num, disc, x)}
+        unquote {_vet-adt(add-int(cons-index, 1), cons-num, disc, x)}
       }
     }
   }
@@ -197,13 +197,13 @@ inline-meta _vet-enum<a>(cons-index: int, cons-num: int, disc: 'int, x: '&a): 'd
     quote {empty} // unreachable
   } else {
     quote {
-      if eq-int(splice {promote {cons-index}}, splice {disc}) {
-        splice {
+      if eq-int(unquote {promote {cons-index}}, unquote {disc}) {
+        unquote {
           let cons-name = magic get-cons-name(a, cons-index);
-          quote {_constructor-doc(splice {promote {cons-name}})}
+          quote {_constructor-doc(unquote {promote {cons-name}})}
         }
       } else {
-        splice {_vet-enum(add-int(cons-index, 1), cons-num, disc, x)}
+        unquote {_vet-enum(add-int(cons-index, 1), cons-num, disc, x)}
       }
     }
   }
@@ -215,43 +215,43 @@ define-meta vet-doc<a>(x: '&a): 'doc {
   | Algebraic =>
     let num = magic get-cons-size(a);
     quote {
-      let ptr-x = this.magic.cast<&a, pointer>(splice {x});
+      let ptr-x = this.magic.cast<&a, pointer>(unquote {x});
       let discriminant-x = load-int(ptr-x);
-      splice {_vet-adt(0, num, quote {discriminant-x}, x)}
+      unquote {_vet-adt(0, num, quote {discriminant-x}, x)}
     }
   | Enum =>
     let num = magic get-cons-size(a);
     quote {
-      let discriminant-x = this.magic.cast<&a, int>(splice {x});
-      splice {_vet-enum(0, num, quote {discriminant-x}, x)}
+      let discriminant-x = this.magic.cast<&a, int>(unquote {x});
+      unquote {_vet-enum(0, num, quote {discriminant-x}, x)}
     }
   | Int1 =>
-    quote {atom-int(magic cast(int1, int64, magic cast(&a, int1, splice {x})))}
+    quote {atom-int(magic cast(int1, int64, magic cast(&a, int1, unquote {x})))}
   | Int2 =>
-    quote {atom-int(magic cast(int2, int64, magic cast(&a, int2, splice {x})))}
+    quote {atom-int(magic cast(int2, int64, magic cast(&a, int2, unquote {x})))}
   | Int4 =>
-    quote {atom-int(magic cast(int4, int64, magic cast(&a, int4, splice {x})))}
+    quote {atom-int(magic cast(int4, int64, magic cast(&a, int4, unquote {x})))}
   | Int8 =>
-    quote {atom-int(magic cast(int8, int64, magic cast(&a, int8, splice {x})))}
+    quote {atom-int(magic cast(int8, int64, magic cast(&a, int8, unquote {x})))}
   | Int16 =>
-    quote {atom-int(magic cast(int16, int64, magic cast(&a, int16, splice {x})))}
+    quote {atom-int(magic cast(int16, int64, magic cast(&a, int16, unquote {x})))}
   | Int32 =>
-    quote {atom-int(magic cast(int32, int64, magic cast(&a, int32, splice {x})))}
+    quote {atom-int(magic cast(int32, int64, magic cast(&a, int32, unquote {x})))}
   | Int64 =>
-    quote {atom-int(magic cast(&a, int64, splice {x}))}
+    quote {atom-int(magic cast(&a, int64, unquote {x}))}
   | Float16 =>
-    quote {atom-float(magic cast(float16, float64, magic cast(&a, float16, splice {x})), 6)}
+    quote {atom-float(magic cast(float16, float64, magic cast(&a, float16, unquote {x})), 6)}
   | Float32 =>
-    quote {atom-float(magic cast(float32, float64, magic cast(&a, float32, splice {x})), 6)}
+    quote {atom-float(magic cast(float32, float64, magic cast(&a, float32, unquote {x})), 6)}
   | Float64 =>
-    quote {atom-float(magic cast(&a, float64, splice {x}), 6)}
+    quote {atom-float(magic cast(&a, float64, unquote {x}), 6)}
   | Null =>
     quote {atom-N("null")}
   | Rune =>
     quote {
       _literal-doc(join[
         atom-N("`"),
-        atom-rune(magic cast(&a, rune, splice {x})),
+        atom-rune(magic cast(&a, rune, unquote {x})),
         atom-N("`"),
       ])
     }
@@ -259,36 +259,36 @@ define-meta vet-doc<a>(x: '&a): 'doc {
     quote {
       _literal-doc(join[
         atom-N("\""),
-        atom-N(magic cast(&a, &text, splice {x})),
+        atom-N(magic cast(&a, &text, unquote {x})),
         atom-N("\""),
       ])
     }
   | Wrapper =>
     letveil t = magic get-wrapper-content-type(a);
     quote {
-      let x-unwrapped: &t = this.magic.cast<&a, &t>(splice {x});
-      splice {vet-doc<t>(quote {x-unwrapped})}
+      let x-unwrapped: &t = this.magic.cast<&a, &t>(unquote {x});
+      unquote {vet-doc<t>(quote {x-unwrapped})}
     }
   | Vector =>
     letveil t = magic get-vector-content-type(a);
     quote {
-      let x: &vector(t) = this.magic.cast<&a, &vector(t)>(splice {x});
-      splice {_vet-vector<t>(quote {x})}
+      let x: &vector(t) = this.magic.cast<&a, &vector(t)>(unquote {x});
+      unquote {_vet-vector<t>(quote {x})}
     }
   | Noema =>
     letveil t = magic get-noema-content-type(a);
     quote {
-      let x-unwrapped: &t = this.magic.cast<&a, &t>(splice {x});
-      splice {vet-doc<t>(quote {x-unwrapped})}
+      let x-unwrapped: &t = this.magic.cast<&a, &t>(unquote {x});
+      unquote {vet-doc<t>(quote {x-unwrapped})}
     }
   | Own =>
     letveil t = magic get-box-content-type(a);
     quote {
-      let x-unwrapped: &t = this.magic.cast<&a, &t>(splice {x});
-      splice {vet-doc<t>(quote {x-unwrapped})}
+      let x-unwrapped: &t = this.magic.cast<&a, &t>(unquote {x});
+      unquote {vet-doc<t>(quote {x-unwrapped})}
     }
   | Pointer =>
-    quote {atom-int(magic cast(&a, int64, splice {x}))}
+    quote {atom-int(magic cast(&a, int64, unquote {x}))}
   | _ =>
     quote {_literal-doc(atom-N("_"))}
   }
@@ -296,8 +296,8 @@ define-meta vet-doc<a>(x: '&a): 'doc {
 
 define-meta vet<a>[ribbon-length: 'int := quote {50}](x: '&a): 'unit {
   quote {
-    pin tmp = splice {vet-doc(x)};
-    pin item = show-doc(tmp, splice {ribbon-length});
+    pin tmp = unquote {vet-doc(x)};
+    pin item = show-doc(tmp, unquote {ribbon-length});
     print(item);
     print("\n");
   }
@@ -309,8 +309,8 @@ define-meta trace<a>(x: 'a): 'a {
     x
   | default =>
     quote {
-      let x = splice {x};
-      let _ on x = splice {vet(quote {x})};
+      let x = unquote {x};
+      let _ on x = unquote {vet(quote {x})};
       x
     }
   }
@@ -319,7 +319,7 @@ define-meta trace<a>(x: 'a): 'a {
 define zen(): unit {
   pin xs: vector(pair(&text, &text)) = this.vector.Vector[Pair("a", "b"), Pair("c", "d")];
   // pin ys: vector(list(int)) = this.vector.Vector[List[], List[10, 20]];
-  // let foo = splice {vet(quote {xs})};
+  // let foo = unquote {vet(quote {xs})};
   print-line("before");
   pin _: either(bool, list(float)) = Left(True);
   // Right(List[10, 208.2, 3.14, 20, 10, 20, 10]);
@@ -328,7 +328,7 @@ define zen(): unit {
   // run vet(xs);
   // vet[xs];
   // pin sample: meta text = box {*"test"};
-  splice {vet(quote {xs})};
+  unquote {vet(quote {xs})};
   print-line("after");
   // pin f: list((int) -> int) =
   //   List[function (x) {
@@ -338,7 +338,7 @@ define zen(): unit {
   //   List[function (x) {
   //     x
   //   }];
-  // let foo = splice {vet(quote {f}, quote {g})};
+  // let foo = unquote {vet(quote {f}, quote {g})};
   // print-bool-line(foo);
   Unit
 }

@@ -59,12 +59,12 @@ nominal {
 
 inline-meta _equal-vector<a>(xs: '&vector(a), ys: '&vector(a)): 'bool {
   quote {
-    let len-x = this.vector.length(splice {xs});
-    let len-y = this.vector.length(splice {ys});
+    let len-x = this.vector.length(unquote {xs});
+    let len-y = this.vector.length(unquote {ys});
     if eq-int(len-x, len-y) {
-      this.vector.zip-fold(splice {xs}, splice {ys}, True, function (x: &a, y: &a, acc: bool, _: int): bool {
+      this.vector.zip-fold(unquote {xs}, unquote {ys}, True, function (x: &a, y: &a, acc: bool, _: int): bool {
         if acc {
-          splice {eq-data(quote {x}, quote {y})}
+          unquote {eq-data(quote {x}, quote {y})}
         } else {
           False
         }
@@ -95,15 +95,15 @@ inline-meta _eq-data-adt-cons<a>(
     letveil t = t;
     let data-arg-num = _meta-length(magic get-data-args(a));
     quote {
-      let data-arg-num = splice {promote {data-arg-num}};
-      let low-cursor = splice {promote {cursor}};
-      let x-ptr = this.magic.cast<&a, pointer>(splice {x});
-      let y-ptr = this.magic.cast<&a, pointer>(splice {y});
+      let data-arg-num = unquote {promote {data-arg-num}};
+      let low-cursor = unquote {promote {cursor}};
+      let x-ptr = this.magic.cast<&a, pointer>(unquote {x});
+      let y-ptr = this.magic.cast<&a, pointer>(unquote {y});
       let x-elem-ptr = this.magic.cast<pointer, &t>(_load-nth-element(data-arg-num, low-cursor, x-ptr));
       let y-elem-ptr = this.magic.cast<pointer, &t>(_load-nth-element(data-arg-num, low-cursor, y-ptr));
-      let is-eq = splice {eq-data(quote {x-elem-ptr}, quote {y-elem-ptr})};
+      let is-eq = unquote {eq-data(quote {x-elem-ptr}, quote {y-elem-ptr})};
       if is-eq {
-        splice {_eq-data-adt-cons(rest, add-int(cursor, 1), x, y)}
+        unquote {_eq-data-adt-cons(rest, add-int(cursor, 1), x, y)}
       } else {
         False
       }
@@ -117,10 +117,10 @@ inline-meta _eq-data-adt<a>(cons-index: int, cons-num: int, disc: 'int, x: '&a, 
   } else {
     let ts = magic get-constructor-arg-types(a, cons-index);
     quote {
-      if eq-int(splice {promote {cons-index}}, splice {disc}) {
-        splice {_eq-data-adt-cons(ts, 0, x, y)}
+      if eq-int(unquote {promote {cons-index}}, unquote {disc}) {
+        unquote {_eq-data-adt-cons(ts, 0, x, y)}
       } else {
-        splice {_eq-data-adt(add-int(cons-index, 1), cons-num, disc, x, y)}
+        unquote {_eq-data-adt(add-int(cons-index, 1), cons-num, disc, x, y)}
       }
     }
   }
@@ -132,107 +132,107 @@ define-meta eq-data<a>(x: '&a, y: '&a): 'bool {
   | Algebraic =>
     let num = magic get-cons-size(a);
     quote {
-      let ptr-x = this.magic.cast<&a, pointer>(splice {x});
-      let ptr-y = this.magic.cast<&a, pointer>(splice {y});
+      let ptr-x = this.magic.cast<&a, pointer>(unquote {x});
+      let ptr-y = this.magic.cast<&a, pointer>(unquote {y});
       let discriminant-x = load-int(ptr-x);
       let discriminant-y = load-int(ptr-y);
       if ne-int(discriminant-x, discriminant-y) {
         False
       } else {
-        splice {_eq-data-adt(0, num, quote {discriminant-x}, x, y)}
+        unquote {_eq-data-adt(0, num, quote {discriminant-x}, x, y)}
       }
     }
   | Enum =>
     quote {
-      let discriminant-x = this.magic.cast<&a, int>(splice {x});
-      let discriminant-y = this.magic.cast<&a, int>(splice {y});
+      let discriminant-x = this.magic.cast<&a, int>(unquote {x});
+      let discriminant-y = this.magic.cast<&a, int>(unquote {y});
       eq-int(discriminant-x, discriminant-y)
     }
   | Int1 =>
     quote {
-      let x = this.magic.cast<&a, int1>(splice {x});
-      let y = this.magic.cast<&a, int1>(splice {y});
+      let x = this.magic.cast<&a, int1>(unquote {x});
+      let y = this.magic.cast<&a, int1>(unquote {y});
       eq-int1(x, y)
     }
   | Int2 =>
     quote {
-      let x = this.magic.cast<&a, int2>(splice {x});
-      let y = this.magic.cast<&a, int2>(splice {y});
+      let x = this.magic.cast<&a, int2>(unquote {x});
+      let y = this.magic.cast<&a, int2>(unquote {y});
       eq-int2(x, y)
     }
   | Int4 =>
     quote {
-      let x = this.magic.cast<&a, int4>(splice {x});
-      let y = this.magic.cast<&a, int4>(splice {y});
+      let x = this.magic.cast<&a, int4>(unquote {x});
+      let y = this.magic.cast<&a, int4>(unquote {y});
       eq-int4(x, y)
     }
   | Int8 =>
     quote {
-      let x = this.magic.cast<&a, int8>(splice {x});
-      let y = this.magic.cast<&a, int8>(splice {y});
+      let x = this.magic.cast<&a, int8>(unquote {x});
+      let y = this.magic.cast<&a, int8>(unquote {y});
       eq-int8(x, y)
     }
   | Int16 =>
     quote {
-      let x = this.magic.cast<&a, int16>(splice {x});
-      let y = this.magic.cast<&a, int16>(splice {y});
+      let x = this.magic.cast<&a, int16>(unquote {x});
+      let y = this.magic.cast<&a, int16>(unquote {y});
       eq-int16(x, y)
     }
   | Int32 =>
     quote {
-      let x = this.magic.cast<&a, int32>(splice {x});
-      let y = this.magic.cast<&a, int32>(splice {y});
+      let x = this.magic.cast<&a, int32>(unquote {x});
+      let y = this.magic.cast<&a, int32>(unquote {y});
       eq-int32(x, y)
     }
   | Int64 =>
     quote {
-      let x = this.magic.cast<&a, int64>(splice {x});
-      let y = this.magic.cast<&a, int64>(splice {y});
+      let x = this.magic.cast<&a, int64>(unquote {x});
+      let y = this.magic.cast<&a, int64>(unquote {y});
       eq-int64(x, y)
     }
   | Float16 =>
     quote {
-      let x = this.magic.cast<&a, float16>(splice {x});
-      let y = this.magic.cast<&a, float16>(splice {y});
+      let x = this.magic.cast<&a, float16>(unquote {x});
+      let y = this.magic.cast<&a, float16>(unquote {y});
       eq-float16(x, y)
     }
   | Float32 =>
     quote {
-      let x = this.magic.cast<&a, float32>(splice {x});
-      let y = this.magic.cast<&a, float32>(splice {y});
+      let x = this.magic.cast<&a, float32>(unquote {x});
+      let y = this.magic.cast<&a, float32>(unquote {y});
       eq-float32(x, y)
     }
   | Float64 =>
     quote {
-      let x = this.magic.cast<&a, float64>(splice {x});
-      let y = this.magic.cast<&a, float64>(splice {y});
+      let x = this.magic.cast<&a, float64>(unquote {x});
+      let y = this.magic.cast<&a, float64>(unquote {y});
       eq-float64(x, y)
     }
   | Rune =>
     quote {
-      let x = this.magic.cast<&a, rune>(splice {x});
-      let y = this.magic.cast<&a, rune>(splice {y});
+      let x = this.magic.cast<&a, rune>(unquote {x});
+      let y = this.magic.cast<&a, rune>(unquote {y});
       eq-rune(x, y)
     }
   | Binary =>
     quote {
-      let x = this.magic.cast<&a, &binary>(splice {x});
-      let y = this.magic.cast<&a, &binary>(splice {y});
+      let x = this.magic.cast<&a, &binary>(unquote {x});
+      let y = this.magic.cast<&a, &binary>(unquote {y});
       eq-binary(x, y)
     }
   | Vector =>
     letveil t = magic get-vector-content-type(a);
     quote {
-      let x: &vector(t) = this.magic.cast<&a, &vector(t)>(splice {x});
-      let y: &vector(t) = this.magic.cast<&a, &vector(t)>(splice {y});
-      splice {_equal-vector<t>(quote {x}, quote {y})}
+      let x: &vector(t) = this.magic.cast<&a, &vector(t)>(unquote {x});
+      let y: &vector(t) = this.magic.cast<&a, &vector(t)>(unquote {y});
+      unquote {_equal-vector<t>(quote {x}, quote {y})}
     }
   | Wrapper =>
     letveil t = magic get-wrapper-content-type(a);
     quote {
-      let x: &t = this.magic.cast<&a, &t>(splice {x});
-      let y: &t = this.magic.cast<&a, &t>(splice {y});
-      splice {eq-data(quote {x}, quote {y})}
+      let x: &t = this.magic.cast<&a, &t>(unquote {x});
+      let y: &t = this.magic.cast<&a, &t>(unquote {y});
+      unquote {eq-data(quote {x}, quote {y})}
     }
   | _ =>
     let t = magic show-type(a);
@@ -244,7 +244,7 @@ define-meta eq-data<a>(x: '&a, y: '&a): 'bool {
 define zen(): unit {
   pin xs: vector(list(int)) = this.vector.Vector[List[], List[10, 20]];
   pin ys: vector(list(int)) = this.vector.Vector[List[], List[10, 20]];
-  let foo = splice {eq-data(quote {xs}, quote {ys})};
+  let foo = unquote {eq-data(quote {xs}, quote {ys})};
   // pin f: list((int) -> int) =
   //   List[function (x) {
   //     x
@@ -253,6 +253,6 @@ define zen(): unit {
   //   List[function (x) {
   //     x
   //   }];
-  // let foo = splice {eq-data(quote {f}, quote {g})};
+  // let foo = unquote {eq-data(quote {f}, quote {g})};
   print-bool-line(foo);
 }

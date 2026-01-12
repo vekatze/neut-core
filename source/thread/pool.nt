@@ -121,5 +121,5 @@ define zen(): unit {
     for-each-parallel(5, Vector[1, 2, 3, 4, 5], function (x) {
       lift {add-int(x, 10)}
     });
-  splice {vet(quote {result})};
+  unquote {vet(quote {result})};
 }

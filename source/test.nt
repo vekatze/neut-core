@@ -135,7 +135,7 @@ define zen(): unit {
   // pin tmp = loop(xs);
   // vet(tmp);
   // let _ =
-  //   splice {
+  //   unquote {
   //     let k = magic get-cons-size(list(int));
   //     let _ = Unit;
   //     Unit
@@ -147,23 +147,23 @@ define zen(): unit {
   let _ on !mv = {
     send(!mv, lift {*"test"});
     pin v = receive(!mv);
-    splice {vet(quote {v})}
+    unquote {vet(quote {v})}
   };
   let _ = !mv;
   let _ = !mv;
   pin count = get-cpu-count();
-  splice {vet(quote {count})};
+  unquote {vet(quote {count})};
   pin result =
     for-each-parallel(get-cpu-count(), Vector[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], function (x) {
       lift {add-int(x, 10)}
     });
-  splice {vet(quote {result})};
+  unquote {vet(quote {result})};
   // let tmp = Cons(True, Cons(is-even, Nil));
   // pin myVec = Vector[True, False, True, True];
   // vet(myVec);
   // range
   pin xs = this.vector.range(1, 10);
-  splice {vet(quote {xs})};
+  unquote {vet(quote {xs})};
   // // span
   // let xs: vector(int) = this.vector.make(5);
   // let xs = push-back(xs, 1);
@@ -239,9 +239,9 @@ define zen(): unit {
   let xs = this.vector.make(5);
   let xs = push-back(xs, *"a");
   let xs = push-back(xs, *"b");
-  let !xs = splice {trace(quote {push-back(xs, *"c")})};
+  let !xs = unquote {trace(quote {push-back(xs, *"c")})};
   pin xss = product(!xs, !xs);
-  splice {vet(quote {xss})};
+  unquote {vet(quote {xss})};
   // // nested vector
   // let !foo = *"text";
   // let _ = !foo;
@@ -286,15 +286,15 @@ define zen(): unit {
   // pin xs: list(float) = Cons(10.38777, Cons(-2.38423, Nil));
   // vet(xs);
   pin ys = Cons(`a`, Cons(`あ`, Nil));
-  splice {vet(quote {ys})};
+  unquote {vet(quote {ys})};
   // print("---\n");
   // pin v: int = 10;
   // vet(v);
   pin sample: either(unit, _) = Right(Pair(Unit, True));
-  splice {vet(quote {sample})};
+  unquote {vet(quote {sample})};
   pin v1 = add-int(10, 201);
   pin v2 = add-int(10, 1);
-  if splice {eq-data(quote {v1}, quote {v2})} {
+  if unquote {eq-data(quote {v1}, quote {v2})} {
     print-line("yo");
   } else {
     print-line("YO");

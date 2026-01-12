@@ -13,7 +13,7 @@ foreign {
   neut_core_v0_51_build_fixed_buf(pointer, int, float, int, int): int,
 }
 
-define write-float[r := rho](b: &buffer, x: float, decimals: int): system(unit) {
+define write-float(b: &buffer, x: float, decimals: int)[r := rho]: system(unit) {
   let size = 64;
   let add-newline = 0;
   let buffer-ptr = magic alloca(int, size);
@@ -26,7 +26,7 @@ define write-float[r := rho](b: &buffer, x: float, decimals: int): system(unit) 
   }
 }
 
-define write-float-line[r := rho](b: &buffer, x: float, decimals: int): system(unit) {
+define write-float-line(b: &buffer, x: float, decimals: int)[r := rho]: system(unit) {
   let size = 65;
   let add-newline = 1;
   let buffer-ptr = magic alloca(int, size);

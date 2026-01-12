@@ -104,7 +104,7 @@ define insert<a>(t: intmap(a), k: _Key, x: a): intmap(a) {
   }
 }
 
-define lookup<a>[r := rho](t: &intmap(a), k: _Key): ?&a {
+define lookup<a>(t: &intmap(a), k: _Key)[r := rho]: ?&a {
   case t {
   | Nil =>
     try _ = r;

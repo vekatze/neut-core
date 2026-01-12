@@ -41,7 +41,7 @@ define eq-infix(haystack: &text, needle: &text): bool {
   this.binary.eq.eq-infix(haystack, needle)
 }
 
-define strip-prefix[r := rho](haystack: &text, needle: &text): ?text {
+define strip-prefix(haystack: &text, needle: &text)[r := rho]: ?text {
   if eq-prefix(haystack, needle) {
     let needle-len = text-byte-length(needle);
     try _ = r;
@@ -52,7 +52,7 @@ define strip-prefix[r := rho](haystack: &text, needle: &text): ?text {
   }
 }
 
-define strip-suffix[r := rho](haystack: &text, needle: &text): ?text {
+define strip-suffix(haystack: &text, needle: &text)[r := rho]: ?text {
   if eq-suffix(haystack, needle) {
     let new-haystack-len = sub-int(text-byte-length(haystack), text-byte-length(needle));
     try _ = r;

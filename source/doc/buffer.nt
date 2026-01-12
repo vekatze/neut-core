@@ -12,13 +12,13 @@ import {
   this.unit {Unit, unit},
 }
 
-define write-doc[r := rho](b: &buffer, x: &doc, ribbon-width: int): system(unit) {
+define write-doc(b: &buffer, x: &doc, ribbon-width: int)[r := rho]: system(unit) {
   pin tmp = show-doc(x, ribbon-width);
   try _ = r;
   this.text.buffer.write(b, tmp)
 }
 
-define write-doc-line[r := rho](b: &buffer, x: &doc, ribbon-width: int): system(unit) {
+define write-doc-line(b: &buffer, x: &doc, ribbon-width: int)[r := rho]: system(unit) {
   pin tmp = show-doc(x, ribbon-width);
   try _ = r;
   this.text.buffer.write-line(b, tmp)

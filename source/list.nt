@@ -333,7 +333,7 @@ define partition<a, b>(xs: list(either(a, b))): pair(list(a), list(b)) {
   })
 }
 
-define uncons<a>[r := rho](xs: list(a)): ?pair(a, list(a)) {
+define uncons<a>(xs: list(a))[r := rho]: ?pair(a, list(a)) {
   match xs {
   | Nil =>
     try _ = r;
@@ -344,7 +344,7 @@ define uncons<a>[r := rho](xs: list(a)): ?pair(a, list(a)) {
   }
 }
 
-define unsnoc<a>[r := rho](xs: list(a)): ?pair(list(a), a) {
+define unsnoc<a>(xs: list(a))[r := rho]: ?pair(list(a), a) {
   let f =
     define _unsnoc(r: ?unit, xs: list(a), acc: list(a)): ?pair(list(a), a) {
       match xs {
@@ -378,7 +378,7 @@ define range(from: int, to: int): list(int) {
   }
 }
 
-inline find<a>[r := rho](xs: &list(a), pred: &(&a) -> bool): ?&a {
+inline find<a>(xs: &list(a), pred: &(&a) -> bool)[r := rho]: ?&a {
   let f =
     define self(r: ?unit, ys: &list(a)): ?&a {
       case ys {
@@ -433,7 +433,7 @@ inline sum<a>(as-monoid: monoid(a), xs: list(a)): a {
   })
 }
 
-inline minimum<a>[r := rho](as-ord: ord(a)): (list(a)) -> ?a {
+inline minimum<a>(as-ord: ord(a))[r := rho]: (list(a)) -> ?a {
   function (xs) {
     let Ord of {compare} = as-ord;
     match xs {
@@ -455,7 +455,7 @@ inline minimum<a>[r := rho](as-ord: ord(a)): (list(a)) -> ?a {
   }
 }
 
-inline maximum<a>[r := rho](as-ord: ord(a)): (list(a)) -> ?a {
+inline maximum<a>(as-ord: ord(a))[r := rho]: (list(a)) -> ?a {
   function (xs) {
     let Ord of {compare := !compare} = as-ord;
     let helper =
@@ -593,7 +593,7 @@ define is-empty<a>(xs: &list(a)): bool {
   }
 }
 
-define nth<a>[r := rho](xs: &list(a), n: int): ?a {
+define nth<a>(xs: &list(a), n: int)[r := rho]: ?a {
   case xs {
   | Nil =>
     try _ = r;

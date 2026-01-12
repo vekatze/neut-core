@@ -14,7 +14,7 @@ foreign {
   neut_core_v0_51_write_int64_core(pointer, int, int32): int,
 }
 
-define write-int[r := rho](b: &buffer, x: int): system(unit) {
+define write-int(b: &buffer, x: int)[r := rho]: system(unit) {
   let buffer-ptr = magic alloca(int, 22);
   let buf-end = shift(buffer-ptr, 22);
   let len = magic external neut_core_v0_51_write_int64_core(buf-end, x, 0);
@@ -24,7 +24,7 @@ define write-int[r := rho](b: &buffer, x: int): system(unit) {
   result
 }
 
-define write-int-line[r := rho](b: &buffer, x: int): system(unit) {
+define write-int-line(b: &buffer, x: int)[r := rho]: system(unit) {
   let buffer-ptr = magic alloca(int, 22);
   let buf-end = shift(buffer-ptr, 22);
   let len = magic external neut_core_v0_51_write_int64_core(buf-end, x, 1);

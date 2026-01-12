@@ -289,9 +289,9 @@ inline make-insert-with<k, v>(o: ord(k), !f: (v, v) -> v): (dictionary(k, v), k,
   }
 }
 
-inline make-lookup<k, v>(o: ord(k)): [reg := rho](d: &dictionary(k, v), needle: &k) -> ?&v {
+inline make-lookup<k, v>(o: ord(k)): (d: &dictionary(k, v), needle: &k)[reg := rho] -> ?&v {
   let Ord of {compare := !compare} = o;
-  define loop[reg := rho](d: &dictionary(k, v), needle: &k): ?&v {
+  define loop(d: &dictionary(k, v), needle: &k)[reg := rho]: ?&v {
     case d {
     | Tip =>
       try _ = reg;
@@ -349,10 +349,10 @@ inline _make-lookup-LE-with-cand<k, v>(L: ord(k)): (&dictionary(k, v), &k, &k, &
   }
 }
 
-inline make-lookup-LE<k, v>(!o: ord(k)): [reg := rho](&dictionary(k, v), &k) -> ?pair(&k, &v) {
+inline make-lookup-LE<k, v>(!o: ord(k)): (&dictionary(k, v), &k)[reg := rho] -> ?pair(&k, &v) {
   let Ord of {compare := !compare} = !o;
   let !lookup-LE-with-cand = _make-lookup-LE-with-cand(!o);
-  define loop[reg := rho](d: &dictionary(k, v), needle: &k): ?pair(&k, &v) {
+  define loop(d: &dictionary(k, v), needle: &k)[reg := rho]: ?pair(&k, &v) {
     case d {
     | Tip =>
       try _ = reg;
@@ -392,10 +392,10 @@ inline _make-lookup-GE-with-cand<k, v>(L: ord(k)): (&dictionary(k, v), &k, &k, &
   }
 }
 
-inline make-lookup-GE<k, v>(!o: ord(k)): [reg := rho](&dictionary(k, v), &k) -> ?pair(&k, &v) {
+inline make-lookup-GE<k, v>(!o: ord(k)): (&dictionary(k, v), &k)[reg := rho] -> ?pair(&k, &v) {
   let Ord of {compare := !compare} = !o;
   let !lookup-GE-with-cand = _make-lookup-GE-with-cand(!o);
-  define loop[reg := rho](d: &dictionary(k, v), needle: &k): ?pair(&k, &v) {
+  define loop(d: &dictionary(k, v), needle: &k)[reg := rho]: ?pair(&k, &v) {
     case d {
     | Tip =>
       try _ = reg;

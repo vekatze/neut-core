@@ -7,7 +7,7 @@ import {
   this.unit {Unit},
 }
 
-define parse-binary[r := rho](t: &text): ?int {
+define parse-binary(t: &text)[r := rho]: ?int {
   let c-int-str = _get-content-pointer(t);
   let len = this.text.length(t);
   let result-ptr = magic alloca(int, 1);
@@ -22,7 +22,7 @@ define parse-binary[r := rho](t: &text): ?int {
   }
 }
 
-define parse-int[r := rho](t: &text): ?int {
+define parse-int(t: &text)[r := rho]: ?int {
   let c-int-str = _get-content-pointer(t);
   let len = this.text.length(t);
   let result-ptr = magic alloca(int, 1);
@@ -37,7 +37,7 @@ define parse-int[r := rho](t: &text): ?int {
   }
 }
 
-define parse-hex[r := rho](t: &text): ?int {
+define parse-hex(t: &text)[r := rho]: ?int {
   let c-int-str = _get-content-pointer(t);
   let len = this.text.length(t);
   let result-ptr = magic alloca(int, 1);

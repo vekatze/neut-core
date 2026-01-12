@@ -294,7 +294,7 @@ define-meta vet-doc<a>(x: '&a): 'doc {
   }
 }
 
-define-meta vet<a>[ribbon-length: 'int := quote {50}](x: '&a): 'unit {
+define-meta vet<a>(x: '&a)[ribbon-length: 'int := quote {50}]: 'unit {
   quote {
     pin tmp = unquote {vet-doc(x)};
     pin item = show-doc(tmp, unquote {ribbon-length});

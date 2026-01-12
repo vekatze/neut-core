@@ -11,13 +11,13 @@ import {
   this.unit {Unit, unit},
 }
 
-define write-doc[r := rho](d: descriptor, x: &doc, ribbon-width: int): system(unit) {
+define write-doc(d: descriptor, x: &doc, ribbon-width: int)[r := rho]: system(unit) {
   pin tmp = show-doc(x, ribbon-width);
   try _ = r;
   write(d, tmp)
 }
 
-define write-doc-line[r := rho](d: descriptor, x: &doc, ribbon-width: int): system(unit) {
+define write-doc-line(d: descriptor, x: &doc, ribbon-width: int)[r := rho]: system(unit) {
   pin tmp = show-doc(x, ribbon-width);
   try _ = r;
   write-line(d, tmp)

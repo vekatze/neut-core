@@ -360,7 +360,7 @@ define _get-rune(t: &text, index: int): rune {
   load-rune(ptr)
 }
 
-define get-first-rune[r := rho](t: &text): ?rune {
+define get-first-rune(t: &text)[r := rho]: ?rune {
   try _ = r;
   if gt-int(text-byte-length(t), 0) {
     Right(_get-rune(t, 0))
@@ -369,7 +369,7 @@ define get-first-rune[r := rho](t: &text): ?rune {
   }
 }
 
-define uncons[r := rho](t: text): ?pair(rune, text) {
+define uncons(t: text)[r := rho]: ?pair(rune, text) {
   let len on t = text-byte-length(t);
   if eq-int(len, 0) {
     try _ = r;
@@ -707,7 +707,7 @@ inline any(t: &text, !pred: (rune) -> bool): bool {
   f(0)
 }
 
-define find[r := rho](t: &text, !pred: (rune) -> bool): ?int {
+define find(t: &text, !pred: (rune) -> bool)[r := rho]: ?int {
   let len = text-byte-length(t);
   let f =
     define self(r: ?unit, byte-index: int, index: int): ?int {
@@ -728,7 +728,7 @@ define find[r := rho](t: &text, !pred: (rune) -> bool): ?int {
   f(r, 0, 0)
 }
 
-define find-end[r := rho](t: &text, !pred: (rune) -> bool): ?int {
+define find-end(t: &text, !pred: (rune) -> bool)[r := rho]: ?int {
   let len = text-byte-length(t);
   let f =
     define self(r: ?unit, t: &text, byte-index: int, index: int): ?int {

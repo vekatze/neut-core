@@ -8,7 +8,7 @@ import {
   this.unit {Unit, unit},
 }
 
-define write-binary[r := rho](b: &buffer, content: &binary): system(unit) {
+define write-binary(b: &buffer, content: &binary)[r := rho]: system(unit) {
   _write(
     b,
     this.binary._get-content-pointer(content),

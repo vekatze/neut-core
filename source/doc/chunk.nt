@@ -31,8 +31,8 @@ data chunk {
 }
 
 foreign {
-  neut_core_v0_51_int64_strlen(int): int,
-  neut_core_v0_51_double_strlen(float, int): int,
+  neut_core_v0_52_int64_strlen(int): int,
+  neut_core_v0_52_double_strlen(float, int): int,
 }
 
 define _size-chunk(c: &chunk): int {
@@ -48,9 +48,9 @@ define _size-chunk(c: &chunk): int {
   | Chunk-Style-N(_) =>
     0
   | Chunk-Int(x) =>
-    magic external neut_core_v0_51_int64_strlen(*x)
+    magic external neut_core_v0_52_int64_strlen(*x)
   | Chunk-Float(x, decimals) =>
-    magic external neut_core_v0_51_double_strlen(*x, *decimals)
+    magic external neut_core_v0_52_double_strlen(*x, *decimals)
   | Chunk-Rune(_) =>
     1
   | Chunk-Line =>

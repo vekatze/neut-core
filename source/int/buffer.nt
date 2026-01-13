@@ -11,13 +11,13 @@ import {
 }
 
 foreign {
-  neut_core_v0_51_write_int64_core(pointer, int, int32): int,
+  neut_core_v0_52_write_int64_core(pointer, int, int32): int,
 }
 
 define write-int(b: &buffer, x: int)[r := rho]: system(unit) {
   let buffer-ptr = magic alloca(int, 22);
   let buf-end = shift(buffer-ptr, 22);
-  let len = magic external neut_core_v0_51_write_int64_core(buf-end, x, 0);
+  let len = magic external neut_core_v0_52_write_int64_core(buf-end, x, 0);
   let result = this.buffer._write(b, shift(buf-end, mul-int(-1, len)), len, r);
   // avoid tail-calling
   nop();
@@ -27,7 +27,7 @@ define write-int(b: &buffer, x: int)[r := rho]: system(unit) {
 define write-int-line(b: &buffer, x: int)[r := rho]: system(unit) {
   let buffer-ptr = magic alloca(int, 22);
   let buf-end = shift(buffer-ptr, 22);
-  let len = magic external neut_core_v0_51_write_int64_core(buf-end, x, 1);
+  let len = magic external neut_core_v0_52_write_int64_core(buf-end, x, 1);
   let result = this.buffer._write(b, shift(buf-end, mul-int(-1, len)), len, r);
   // avoid tail-calling
   nop();

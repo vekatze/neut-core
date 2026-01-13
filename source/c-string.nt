@@ -13,7 +13,7 @@ import {
 foreign {
   strlen(pointer): int,
   llvm.memcpy.p0.p0.i64(pointer, pointer, int64, int1): void,
-  neut_core_v0_51_arch(): pointer,
+  neut_core_v0_52_arch(): pointer,
 }
 
 nominal {

@@ -9,13 +9,13 @@ import {
 }
 
 foreign {
-  neut_core_v0_51_write_int64(int32, int64): int,
-  neut_core_v0_51_write_int64_nl(int32, int64): int,
+  neut_core_v0_52_write_int64(int32, int64): int,
+  neut_core_v0_52_write_int64_nl(int32, int64): int,
 }
 
 define write-int(d: descriptor, x: int)[r := rho]: system(unit) {
   let d = magic cast(descriptor, int32, d);
-  let result = magic external neut_core_v0_51_write_int64(d, x);
+  let result = magic external neut_core_v0_52_write_int64(d, x);
   if lt-int(result, 0) {
     try _ = r;
     report-system-error()
@@ -27,7 +27,7 @@ define write-int(d: descriptor, x: int)[r := rho]: system(unit) {
 
 define write-int-line(d: descriptor, x: int)[r := rho]: system(unit) {
   let d = magic cast(descriptor, int32, d);
-  let result = magic external neut_core_v0_51_write_int64_nl(d, x);
+  let result = magic external neut_core_v0_52_write_int64_nl(d, x);
   if lt-int(result, 0) {
     try _ = r;
     report-system-error()

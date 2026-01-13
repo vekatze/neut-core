@@ -11,92 +11,92 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-__attribute__((always_inline)) int neut_core_v0_51_wifexited(int stat) {
+__attribute__((always_inline)) int neut_core_v0_52_wifexited(int stat) {
   return WIFEXITED(stat);
 }
 
-__attribute__((always_inline)) int neut_core_v0_51_wifsignaled(int stat) {
+__attribute__((always_inline)) int neut_core_v0_52_wifsignaled(int stat) {
   return WIFSIGNALED(stat);
 }
 
-__attribute__((always_inline)) int neut_core_v0_51_wifstopped(int stat) {
+__attribute__((always_inline)) int neut_core_v0_52_wifstopped(int stat) {
   return WIFSTOPPED(stat);
 }
 
-__attribute__((always_inline)) int neut_core_v0_51_wexitstatus(int stat) {
+__attribute__((always_inline)) int neut_core_v0_52_wexitstatus(int stat) {
   return WEXITSTATUS(stat);
 }
 
-__attribute__((always_inline)) int neut_core_v0_51_wtermsig(int stat) {
+__attribute__((always_inline)) int neut_core_v0_52_wtermsig(int stat) {
   return WTERMSIG(stat);
 }
 
-__attribute__((always_inline)) int neut_core_v0_51_wcoredump(int stat) {
+__attribute__((always_inline)) int neut_core_v0_52_wcoredump(int stat) {
   return WCOREDUMP(stat);
 }
 
-__attribute__((always_inline)) int neut_core_v0_51_wstopsig(int stat) {
+__attribute__((always_inline)) int neut_core_v0_52_wstopsig(int stat) {
   return WSTOPSIG(stat);
 }
 
-__attribute__((always_inline)) size_t neut_core_v0_51_word_size() {
+__attribute__((always_inline)) size_t neut_core_v0_52_word_size() {
   return sizeof(void *);
 }
 
-__attribute__((always_inline)) int neut_core_v0_51_O_RDONLY() {
+__attribute__((always_inline)) int neut_core_v0_52_O_RDONLY() {
   return O_RDONLY;
 }
 
-__attribute__((always_inline)) int neut_core_v0_51_O_WRONLY() {
+__attribute__((always_inline)) int neut_core_v0_52_O_WRONLY() {
   return O_WRONLY;
 }
 
-__attribute__((always_inline)) int neut_core_v0_51_O_RDWR() { return O_RDWR; }
+__attribute__((always_inline)) int neut_core_v0_52_O_RDWR() { return O_RDWR; }
 
-__attribute__((always_inline)) int neut_core_v0_51_O_CREAT() { return O_CREAT; }
+__attribute__((always_inline)) int neut_core_v0_52_O_CREAT() { return O_CREAT; }
 
-__attribute__((always_inline)) int neut_core_v0_51_O_APPEND() {
+__attribute__((always_inline)) int neut_core_v0_52_O_APPEND() {
   return O_APPEND;
 }
 
-__attribute__((always_inline)) int neut_core_v0_51_SEEK_SET() {
+__attribute__((always_inline)) int neut_core_v0_52_SEEK_SET() {
   return SEEK_SET;
 }
 
-__attribute__((always_inline)) int neut_core_v0_51_SEEK_CUR() {
+__attribute__((always_inline)) int neut_core_v0_52_SEEK_CUR() {
   return SEEK_CUR;
 }
 
-__attribute__((always_inline)) int neut_core_v0_51_SEEK_END() {
+__attribute__((always_inline)) int neut_core_v0_52_SEEK_END() {
   return SEEK_END;
 }
 
-__attribute__((always_inline)) size_t neut_core_v0_51_thread_size() {
+__attribute__((always_inline)) size_t neut_core_v0_52_thread_size() {
   return sizeof(pthread_t);
 }
 
-__attribute__((always_inline)) size_t neut_core_v0_51_thread_mutex_size() {
+__attribute__((always_inline)) size_t neut_core_v0_52_thread_mutex_size() {
   return sizeof(pthread_mutex_t);
 }
 
-__attribute__((always_inline)) size_t neut_core_v0_51_thread_cond_size() {
+__attribute__((always_inline)) size_t neut_core_v0_52_thread_cond_size() {
   return sizeof(pthread_cond_t);
 }
 
-__attribute__((always_inline)) int neut_core_v0_51_errno() { return errno; }
+__attribute__((always_inline)) int neut_core_v0_52_errno() { return errno; }
 
-__attribute__((always_inline)) uint32_t neut_core_v0_51_UINT32_MAX() {
+__attribute__((always_inline)) uint32_t neut_core_v0_52_UINT32_MAX() {
   return UINT32_MAX;
 }
 
-int neut_core_v0_51_sleep(double duration) {
+int neut_core_v0_52_sleep(double duration) {
   struct timespec ts;
   ts.tv_sec = (time_t)duration;
   ts.tv_nsec = (long)((duration - ts.tv_sec) * 1e9);
   return nanosleep(&ts, NULL);
 }
 
-int64_t neut_core_v0_51_parse_binary(const char *str, int64_t length,
+int64_t neut_core_v0_52_parse_binary(const char *str, int64_t length,
                                      int64_t *out_value) {
   int64_t result = 0;
   int64_t i = 0;
@@ -137,7 +137,7 @@ int64_t neut_core_v0_51_parse_binary(const char *str, int64_t length,
   }
 }
 
-int64_t neut_core_v0_51_parse_decimal(const char *str, int64_t length,
+int64_t neut_core_v0_52_parse_decimal(const char *str, int64_t length,
                                       int64_t *out_value) {
   int64_t result = 0;
   int64_t i = 0;
@@ -175,7 +175,7 @@ int64_t neut_core_v0_51_parse_decimal(const char *str, int64_t length,
   }
 }
 
-int64_t neut_core_v0_51_parse_hex(const char *str, int64_t length,
+int64_t neut_core_v0_52_parse_hex(const char *str, int64_t length,
                                   int64_t *out_value) {
   int64_t result = 0;
   int64_t i = 0;
@@ -224,7 +224,7 @@ int64_t neut_core_v0_51_parse_hex(const char *str, int64_t length,
   }
 }
 
-int64_t neut_core_v0_51_parse_double(const char *str, int64_t length,
+int64_t neut_core_v0_52_parse_double(const char *str, int64_t length,
                                      double *out_value) {
   double result = 0.0;
   int64_t i = 0;
@@ -311,7 +311,7 @@ int64_t neut_core_v0_51_parse_double(const char *str, int64_t length,
   }
 }
 
-int64_t neut_core_v0_51_write_loop(int fd, const char *buf, size_t len) {
+int64_t neut_core_v0_52_write_loop(int fd, const char *buf, size_t len) {
   size_t off = 0;
   while (off < len) {
     ssize_t w = write(fd, buf + off, len - off);
@@ -326,13 +326,13 @@ int64_t neut_core_v0_51_write_loop(int fd, const char *buf, size_t len) {
   return (int64_t)len;
 }
 
-ssize_t neut_core_v0_51_write_line(int fd, size_t len, const char *s) {
+ssize_t neut_core_v0_52_write_line(int fd, size_t len, const char *s) {
   struct iovec iov[2] = {{.iov_base = (void *)s, .iov_len = len},
                          {.iov_base = (void *)"\n", .iov_len = 1}};
   return writev(fd, iov, 2);
 }
 
-int neut_core_v0_51_write_int64_core(char *buf_end, int64_t v, int add_nl) {
+int neut_core_v0_52_write_int64_core(char *buf_end, int64_t v, int add_nl) {
   char *p = buf_end;
   if (add_nl) {
     *--p = '\n';
@@ -357,21 +357,21 @@ int neut_core_v0_51_write_int64_core(char *buf_end, int64_t v, int add_nl) {
   return (int)(buf_end - p);
 }
 
-int64_t neut_core_v0_51_write_int64(int fd, int64_t v) {
+int64_t neut_core_v0_52_write_int64(int fd, int64_t v) {
   char buf[22];
   char *end = buf + sizeof(buf);
-  int len = neut_core_v0_51_write_int64_core(end, v, 0);
-  return neut_core_v0_51_write_loop(fd, end - len, (size_t)len);
+  int len = neut_core_v0_52_write_int64_core(end, v, 0);
+  return neut_core_v0_52_write_loop(fd, end - len, (size_t)len);
 }
 
-int64_t neut_core_v0_51_write_int64_nl(int fd, int64_t v) {
+int64_t neut_core_v0_52_write_int64_nl(int fd, int64_t v) {
   char buf[22];
   char *end = buf + sizeof(buf);
-  int len = neut_core_v0_51_write_int64_core(end, v, 1);
-  return neut_core_v0_51_write_loop(fd, end - len, (size_t)len);
+  int len = neut_core_v0_52_write_int64_core(end, v, 1);
+  return neut_core_v0_52_write_loop(fd, end - len, (size_t)len);
 }
 
-size_t neut_core_v0_51_build_fixed_buf(char *buf, size_t cap, double value,
+size_t neut_core_v0_52_build_fixed_buf(char *buf, size_t cap, double value,
                                        int decimals, int add_nl) {
   if (decimals < 0) {
     errno = EINVAL;
@@ -404,29 +404,29 @@ size_t neut_core_v0_51_build_fixed_buf(char *buf, size_t cap, double value,
   return (size_t)n;
 }
 
-int64_t neut_core_v0_51_write_double(int fd, double value, int decimals) {
+int64_t neut_core_v0_52_write_double(int fd, double value, int decimals) {
   char buf[64];
   size_t len =
-      neut_core_v0_51_build_fixed_buf(buf, sizeof buf, value, decimals, 0);
+      neut_core_v0_52_build_fixed_buf(buf, sizeof buf, value, decimals, 0);
   if (!len) {
     return -1;
   }
 
-  return neut_core_v0_51_write_loop(fd, buf, len);
+  return neut_core_v0_52_write_loop(fd, buf, len);
 }
 
-int64_t neut_core_v0_51_write_double_line(int fd, double value, int decimals) {
+int64_t neut_core_v0_52_write_double_line(int fd, double value, int decimals) {
   char buf[65];
   size_t len =
-      neut_core_v0_51_build_fixed_buf(buf, sizeof buf, value, decimals, 1);
+      neut_core_v0_52_build_fixed_buf(buf, sizeof buf, value, decimals, 1);
   if (!len) {
     return -1;
   }
 
-  return neut_core_v0_51_write_loop(fd, buf, len);
+  return neut_core_v0_52_write_loop(fd, buf, len);
 }
 
-ssize_t neut_core_v0_51_int64_strlen(int64_t v) {
+ssize_t neut_core_v0_52_int64_strlen(int64_t v) {
   uint64_t u = (v < 0) ? (uint64_t)(-v) : (uint64_t)v;
   int len = 0;
   if (u == 0) {
@@ -443,7 +443,7 @@ ssize_t neut_core_v0_51_int64_strlen(int64_t v) {
   return len;
 }
 
-size_t neut_core_v0_51_double_strlen(double value, int decimals) {
+size_t neut_core_v0_52_double_strlen(double value, int decimals) {
   if (decimals < 0) {
     errno = EINVAL;
     return 0;
@@ -460,7 +460,7 @@ size_t neut_core_v0_51_double_strlen(double value, int decimals) {
 }
 
 __attribute__((always_inline)) int64_t
-neut_core_v0_51_get_online_cpu_count(void) {
+neut_core_v0_52_get_online_cpu_count(void) {
   int64_t n = (int64_t)sysconf(_SC_NPROCESSORS_ONLN);
   return (n > 0) ? n : 1;
 }
@@ -480,6 +480,6 @@ typedef enum {
 #define ARCH_TAG ARCH_NONE
 #endif
 
-__attribute__((always_inline)) arch_tag_t neut_core_v0_51_get_arch_tag() {
+__attribute__((always_inline)) arch_tag_t neut_core_v0_52_get_arch_tag() {
   return ARCH_TAG;
 }

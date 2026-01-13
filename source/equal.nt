@@ -244,7 +244,7 @@ define-meta eq-data<a>(x: '&a, y: '&a): 'bool {
 define zen(): unit {
   pin xs: vector(list(int)) = this.vector.Vector[List[], List[10, 20]];
   pin ys: vector(list(int)) = this.vector.Vector[List[], List[10, 20]];
-  let foo = unquote {eq-data(quote {xs}, quote {ys})};
+  let foo = eq-data::(xs, ys);
   // pin f: list((int) -> int) =
   //   List[function (x) {
   //     x

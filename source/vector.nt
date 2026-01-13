@@ -16,7 +16,6 @@ import {
   this.text {replicate, text},
   this.text.io {print, print-line},
   this.trick,
-  this.type-tag {Vector, type-tag-to-int},
   this.unit {Unit, unit},
   this.word,
 }
@@ -178,7 +177,6 @@ resource _vector-internal {
     _copy-vector-content<elem-type>(xs, ys, 0, len);
     ys
   },
-  type-tag-to-int(Vector),
 }
 
 foreign {

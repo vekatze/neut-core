@@ -8,7 +8,6 @@ import {
   this.magic {cast},
   this.memory {load-int, load-int8, load-pointer, store-int, store-int8},
   this.pointer {shift},
-  this.type-tag {Opaque, type-tag-to-int},
   this.unit {Unit, unit},
   this.word,
 }
@@ -52,7 +51,6 @@ resource _thread-inner {
     store-int8(1, shift(new-addr, u3));
     new-addr
   },
-  type-tag-to-int(Opaque),
 }
 
 // `thread` must be defined by `define` (and not by `data`) so that

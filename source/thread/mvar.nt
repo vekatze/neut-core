@@ -20,7 +20,6 @@ import {
   this.magic {cast},
   this.memory {load-int, store-int},
   this.pointer {shift},
-  this.type-tag {Opaque, type-tag-to-int},
   this.unit {Unit, unit},
   this.word,
 }
@@ -105,7 +104,6 @@ resource _mvar {
       cast<&mvar(a), pointer>(base)
     }
   },
-  type-tag-to-int(Opaque),
 }
 
 inline make-mvar<a>(): mvar(a) {

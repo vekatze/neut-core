@@ -5,7 +5,6 @@ import {
   this.memory {store-int8},
   this.pointer {shift},
   this.text {_get-content-pointer, text, text-byte-length},
-  this.type-tag {Opaque, type-tag-to-int},
   this.unit,
   this.word,
 }
@@ -35,7 +34,6 @@ resource c-string {
     let _ = magic external llvm.memcpy.p0.p0.i64(new-ptr, ptr, len, 0);
     new-ptr
   },
-  type-tag-to-int(Opaque),
 }
 
 define length-c-string(s: &c-string): int {

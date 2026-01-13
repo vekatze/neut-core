@@ -22,7 +22,6 @@ import {
   this.pair {Pair},
   this.pointer {shift},
   this.queue {dequeue, empty, enqueue, queue},
-  this.type-tag {Opaque, type-tag-to-int},
   this.unit {unit},
   this.word,
 }
@@ -75,7 +74,6 @@ resource _channel {
     let q-clone: queue(a) = _get-clone<queue(a)>(q);
     cast<channel(a), pointer>(_new<a>(q-clone))
   },
-  type-tag-to-int(Opaque),
 }
 
 inline make-channel<a>(): channel(a) {

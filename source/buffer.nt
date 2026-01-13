@@ -8,7 +8,6 @@ import {
   this.memory {load-int, store-int},
   this.pointer {shift},
   this.system {system},
-  this.type-tag {Opaque, type-tag-to-int},
   this.unit {Unit, unit},
   this.word,
 }
@@ -40,7 +39,6 @@ resource _buffer-internal {
     _memcpy(new-pointer, source-pointer, pointer-size);
     new-pointer
   },
-  type-tag-to-int(Opaque),
 }
 
 data buffer {

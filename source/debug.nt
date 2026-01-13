@@ -28,6 +28,7 @@ import {
   this.type-tag {
     Algebraic,
     Binary,
+    Box-T,
     Enum,
     Float16,
     Float32,
@@ -41,7 +42,6 @@ import {
     Int8,
     Noema,
     Null,
-    Own,
     Pointer,
     Rune,
     Vector,
@@ -281,7 +281,7 @@ define-meta vet-doc<a>(x: '&a): 'doc {
       let x-unwrapped: &t = this.magic.cast<&a, &t>(unquote {x});
       unquote {vet-doc<t>(quote {x-unwrapped})}
     }
-  | Own =>
+  | Box-T =>
     letveil t = magic get-box-content-type(a);
     quote {
       let x-unwrapped: &t = this.magic.cast<&a, &t>(unquote {x});

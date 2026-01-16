@@ -30,7 +30,7 @@ nominal {
 resource _thread-inner {
   function (addr: pointer) {
     let u = this.word.size;
-    letveil elem-type = cast<int, type>(load-int(shift(addr, u)));
+    unpack-type elem-type = cast<int, type>(load-int(shift(addr, u)));
     let pr: thread(elem-type) = cast<pointer, thread(elem-type)>(addr);
     let _: elem-type = this.thread.attach<elem-type>(pr);
     Unit
@@ -41,11 +41,11 @@ resource _thread-inner {
     let u3 = mul-int(u, 3);
     _await-and-write-result(addr);
     let thread-id = load-int(addr);
-    letveil elem-type = cast<int, type>(load-int(shift(addr, u)));
+    unpack-type elem-type = cast<int, type>(load-int(shift(addr, u)));
     let elem-value: &elem-type = cast<int, &elem-type>(load-int(shift(addr, u2)));
     let new-addr = malloc(_thread-size());
     store-int(thread-id, new-addr);
-    store-int(cast<type, int>(veil {elem-type}), shift(new-addr, u));
+    store-int(cast<type, int>(pack-type {elem-type}), shift(new-addr, u));
     let cloned-value: elem-type = _embody<elem-type>(elem-value);
     store-int(cast<elem-type, int>(cloned-value), shift(new-addr, u2));
     store-int8(1, shift(new-addr, u3));
@@ -113,7 +113,7 @@ define detach<a>(f: () -> a): thread(a) {
   free(thread-id-pointer);
   let ptr = malloc(_thread-size());
   store-int(thread-id, ptr);
-  store-int(cast<type, int>(veil {a}), shift(ptr, u));
+  store-int(cast<type, int>(pack-type {a}), shift(ptr, u));
   store-int(0, shift(ptr, u2));
   store-int8(0, shift(ptr, u3));
   cast<pointer, thread(a)>(ptr)

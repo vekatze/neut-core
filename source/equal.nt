@@ -92,7 +92,7 @@ inline-meta _eq-data-adt-cons<a>(
   | Nil =>
     quote {True}
   | Cons(t, rest) =>
-    letveil t = t;
+    unpack-type t = t;
     let data-arg-num = _meta-length(magic get-data-args(a));
     quote {
       let data-arg-num = unquote {promote {data-arg-num}};
@@ -221,14 +221,14 @@ define-meta eq-data<a>(x: '&a, y: '&a): 'bool {
       eq-binary(x, y)
     }
   | Vector =>
-    letveil t = magic get-vector-content-type(a);
+    unpack-type t = magic get-vector-content-type(a);
     quote {
       let x: &vector(t) = this.magic.cast<&a, &vector(t)>(unquote {x});
       let y: &vector(t) = this.magic.cast<&a, &vector(t)>(unquote {y});
       unquote {_equal-vector<t>(quote {x}, quote {y})}
     }
   | Wrapper =>
-    letveil t = magic get-wrapper-content-type(a);
+    unpack-type t = magic get-wrapper-content-type(a);
     quote {
       let x: &t = this.magic.cast<&a, &t>(unquote {x});
       let y: &t = this.magic.cast<&a, &t>(unquote {y});

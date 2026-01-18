@@ -31,7 +31,7 @@ inline _get-clone<a>(x: &a): a {
 }
 
 nominal {
-  alias _channel,
+  resource _channel,
 }
 
 data channel(_: type) {

@@ -21,7 +21,7 @@ import {
 }
 
 nominal {
-  alias _vector-internal,
+  resource _vector-internal,
 }
 
 // (capacity: int, from: int, to: int, elem-type: type, ptr-to-buffer: pointer)

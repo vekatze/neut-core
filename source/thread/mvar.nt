@@ -25,7 +25,7 @@ import {
 }
 
 nominal {
-  alias _mvar,
+  resource _mvar,
 }
 
 data mvar(_: type) {

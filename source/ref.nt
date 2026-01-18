@@ -15,7 +15,7 @@ inline _get-clone<a>(x: &a): a {
 }
 
 nominal {
-  alias _ref,
+  resource _ref,
 }
 
 data ref(_: type) {

@@ -25,7 +25,7 @@ inline _get-clone<a>(x: &a): a {
 }
 
 nominal {
-  alias _cell,
+  resource _cell,
 }
 
 data cell(_: type) {

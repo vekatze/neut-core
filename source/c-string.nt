@@ -16,7 +16,7 @@ foreign {
 }
 
 nominal {
-  alias c-string,
+  resource c-string,
 }
 
 define _length-c-string(s: pointer): int {

@@ -14,7 +14,7 @@ define make-big-dictionary(): dictionary(int, int) {
   grow(this.dictionary.empty, 700000, function (acc, _) {
     let key = random-int(1000000);
     let val = random-int(1000000);
-    !insert(acc, key, val)
+    insert(acc, key, val)
   })
 }
 
@@ -24,7 +24,7 @@ define random-lookup-sum(d: &dictionary(int, int)): unit {
     grow(0, 700000, function (acc, _) {
       let key = random-int(1000000);
       let val on key =
-        match !lookup(d, key) {
+        match lookup(d, key) {
         | Left(_) =>
           0
         | Right(v) =>

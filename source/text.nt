@@ -475,7 +475,7 @@ inline take-while(t: text, !pred: (rune) -> bool): text {
         take(t, index)
       } else {
         let ch on t = _get-rune(t, index);
-        if !pred(ch) {
+        if pred(ch) {
           let char-len = this.rune.size(ch);
           self(t, add-int(index, char-len))
         } else {
@@ -494,7 +494,7 @@ inline take-while-N(t: &text, !pred: (rune) -> bool): text {
         this.list.reverse(acc)
       } else {
         let ch = _get-rune(t, index);
-        if !pred(ch) {
+        if pred(ch) {
           let char-len = this.rune.size(ch);
           self(add-int(index, char-len), Cons(ch, acc))
         } else {
@@ -516,7 +516,7 @@ inline take-while-end(t: text, !pred: (rune) -> bool): text {
         let rune-size on t = _get-rune-size-end(t, index);
         let rune-head-index = sub-int(index, sub-int(rune-size, 1));
         let ch on t = _get-rune(t, rune-head-index);
-        if !pred(ch) {
+        if pred(ch) {
           self(t, sub-int(index, rune-size))
         } else {
           _drop(t, add-int(index, 1))
@@ -536,7 +536,7 @@ inline take-while-end-N(t: &text, !pred: (rune) -> bool): text {
         let rune-size = _get-rune-size-end(t, index);
         let rune-head-index = sub-int(index, sub-int(rune-size, 1));
         let ch = _get-rune(t, rune-head-index);
-        if !pred(ch) {
+        if pred(ch) {
           self(t, sub-int(index, rune-size))
         } else {
           _drop-N(t, add-int(index, 1))
@@ -554,7 +554,7 @@ inline drop-while(t: text, !pred: (rune) -> bool): text {
         empty()
       } else {
         let ch on t = _get-rune(t, 0);
-        let cond = !pred(ch);
+        let cond = pred(ch);
         if cond {
           self(drop(t, 1))
         } else {
@@ -573,7 +573,7 @@ inline drop-while-N(t: &text, !pred: (rune) -> bool): text {
         empty()
       } else {
         let ch = _get-rune(t, index);
-        if !pred(ch) {
+        if pred(ch) {
           let char-len = this.rune.size(ch);
           self(add-int(index, char-len))
         } else {
@@ -594,7 +594,7 @@ inline drop-while-end(t: text, !pred: (rune) -> bool): text {
         let rune-size on t = _get-rune-size-end(t, index);
         let rune-head-index = sub-int(index, sub-int(rune-size, 1));
         let ch on t = _get-rune(t, rune-head-index);
-        if !pred(ch) {
+        if pred(ch) {
           self(t, sub-int(index, rune-size))
         } else {
           _take(t, add-int(index, 1))
@@ -614,7 +614,7 @@ inline drop-while-end-N(t: &text, !pred: (rune) -> bool): text {
         let rune-size = _get-rune-size-end(t, index);
         let rune-head-index = sub-int(index, sub-int(rune-size, 1));
         let ch = _get-rune(t, rune-head-index);
-        if !pred(ch) {
+        if pred(ch) {
           self(t, sub-int(index, rune-size))
         } else {
           _take-N(t, add-int(index, 1))
@@ -661,7 +661,7 @@ inline fold<a>(acc: a, t: &text, !f: (a, rune) -> a): a {
       } else {
         let ch = _get-rune(t, index);
         let char-len = this.rune.size(ch);
-        self(add-int(index, char-len), !f(acc, ch))
+        self(add-int(index, char-len), f(acc, ch))
       }
     };
   f(0, acc)
@@ -675,7 +675,7 @@ inline all(t: &text, !pred: (rune) -> bool): bool {
         True
       } else {
         let ch = _get-rune(t, index);
-        let cond = !pred(ch);
+        let cond = pred(ch);
         if cond {
           let char-len = this.rune.size(ch);
           self(add-int(index, char-len))
@@ -695,7 +695,7 @@ inline any(t: &text, !pred: (rune) -> bool): bool {
         False
       } else {
         let ch = _get-rune(t, index);
-        let cond = !pred(ch);
+        let cond = pred(ch);
         if cond {
           True
         } else {
@@ -716,7 +716,7 @@ define find(t: &text, !pred: (rune) -> bool)[r := rho]: ?int {
         none
       } else {
         let ch = _get-rune(t, byte-index);
-        if !pred(ch) {
+        if pred(ch) {
           try _ = r;
           Right(index)
         } else {
@@ -739,7 +739,7 @@ define find-end(t: &text, !pred: (rune) -> bool)[r := rho]: ?int {
         let rune-size = _get-rune-size-end(t, byte-index);
         let rune-head-byte-index = sub-int(byte-index, sub-int(rune-size, 1));
         let ch = _get-rune(t, rune-head-byte-index);
-        if !pred(ch) {
+        if pred(ch) {
           try _ = r;
           Right(index)
         } else {

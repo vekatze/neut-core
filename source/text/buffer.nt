@@ -22,7 +22,7 @@ define write-line(b: &buffer, content: &text)[r := rho]: system(unit) {
 
 define zen(): unit {
   let !k = make-buffer(stdout, 4096);
-  pin k = !k;
+  pin k = k;
   let _: system(unit) = {
     try _ = write-line(k, "hello!");
     try _ = write-line(k, "hello!");

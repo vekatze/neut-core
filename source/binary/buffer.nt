@@ -19,9 +19,9 @@ define write-binary(b: &buffer, content: &binary)[r := rho]: system(unit) {
 
 define zen(): unit {
   let !k = make-buffer(stdout, 0);
-  let _ = !k;
-  let _ = !k;
-  pin k = !k;
+  let _ = k;
+  let _ = k;
+  pin k = k;
   let _: system(unit) = {
     try _ = write-binary(k, to-binary("hello\n"));
     try _ = write-binary(k, to-binary("hello\n"));

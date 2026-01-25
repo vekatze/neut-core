@@ -18,7 +18,7 @@ inline as-eq<a>(f: eq(a)): eq(list(a)) {
         | Cons(_, _), Nil =>
           False
         | Cons(x, xs), Cons(y, ys) =>
-          if !eq(x, y) {
+          if eq(x, y) {
             self(xs, ys)
           } else {
             False
@@ -53,12 +53,12 @@ define nub<a>(e: &eq(a), xs: list(a)): list(a) {
       match xs {
       | Nil =>
         Nil
-      | Cons(!y, ys) =>
-        let already-found-p on acc, !y = member(e, acc, !y);
+      | Cons(y, ys) =>
+        let already-found-p on acc, !y = member(e, acc, y);
         if already-found-p {
           nub(ys, acc)
         } else {
-          Cons(!y, nub(ys, Cons(!y, acc)))
+          Cons(y, nub(ys, Cons(y, acc)))
         }
       }
     };

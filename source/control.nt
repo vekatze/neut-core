@@ -11,7 +11,7 @@ inline loop(count: int, !f: (int) -> unit): unit {
       | True =>
         Unit
       | False =>
-        !f(cursor);
+        f(cursor);
         self(add-int(cursor, 1))
       }
     };
@@ -25,7 +25,7 @@ inline loop-E<e>(count: int, !f: (int) -> either(e, unit)): either(e, unit) {
       | True =>
         Right(Unit)
       | False =>
-        try _ = !f(cursor);
+        try _ = f(cursor);
         self(add-int(cursor, 1))
       }
     };
@@ -38,7 +38,7 @@ inline grow<a>(seed: a, iteration: int, !step: (a, int) -> a): a {
       if ge-int(current, iteration) {
         acc
       } else {
-        self(!step(acc, current), add-int(current, 1))
+        self(step(acc, current), add-int(current, 1))
       }
     };
   helper(seed, 0)
@@ -50,7 +50,7 @@ inline grow-E<e, a>(seed: a, iteration: int, !step: (a, int) -> either(e, a)): e
       if ge-int(current, iteration) {
         Right(acc)
       } else {
-        try tmp = !step(acc, current);
+        try tmp = step(acc, current);
         self(tmp, add-int(current, 1))
       }
     };

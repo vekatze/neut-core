@@ -192,8 +192,8 @@ define append(t1: &binary, t2: &binary): binary {
       }
     };
   let str-pointer = shift(new-binary, u2);
-  !store-values(str-pointer, shift(content1, from1), 0, len1);
-  !store-values(shift(str-pointer, len1), shift(content2, from2), 0, len2);
+  store-values(str-pointer, shift(content1, from1), 0, len1);
+  store-values(shift(str-pointer, len1), shift(content2, from2), 0, len2);
   cast<pointer, binary>(new-binary)
 }
 
@@ -345,7 +345,7 @@ define find(xs: &binary, !pred: (int8) -> bool)[r := rho]: ?int {
         none
       } else {
         let ch = binary-access(xs, index);
-        if !pred(ch) {
+        if pred(ch) {
           try _ = r;
           Right(index)
         } else {
@@ -365,7 +365,7 @@ define find-end(xs: &binary, !pred: (int8) -> bool)[r := rho]: ?int {
         none
       } else {
         let ch = binary-access(xs, index);
-        if !pred(ch) {
+        if pred(ch) {
           try _ = r;
           Right(sub-int(len, add-int(index, 1)))
         } else {

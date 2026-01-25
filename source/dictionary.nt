@@ -105,7 +105,7 @@ inline _balance-L<a, b>(k: a, x: b, l: dictionary(a, b), r: dictionary(a, b)): d
           let !lk = lk;
           let !lx = lx;
           let !tip = panic("failure in (core).dictionary._balance-L");
-          Bin(ls, !lk, !lx, Bin(ls, !lk, !lx, !tip, !tip), Bin(ls, !lk, !lx, !tip, !tip))
+          Bin(ls, lk, lx, Bin(ls, lk, lx, tip, tip), Bin(ls, lk, lx, tip, tip))
         }
       } else {
         let s-new = add-int(1, add-int(ls, rs));
@@ -174,7 +174,7 @@ inline _balance-R<a, b>(k: a, x: b, l: dictionary(a, b), r: dictionary(a, b)): d
           let !rk = rk;
           let !rx = rx;
           let !tip = panic("failure in (core).dictionary._balance-L");
-          Bin(rs, !rk, !rx, Bin(rs, !rk, !rx, !tip, !tip), Bin(rs, !rk, !rx, !tip, !tip))
+          Bin(rs, rk, rx, Bin(rs, rk, rx, tip, tip), Bin(rs, rk, rx, tip, tip))
         }
       } else {
         let s-new = add-int(1, add-int(ls, rs));
@@ -256,7 +256,7 @@ inline make-insert<k, v>(o: ord(k)): (dictionary(k, v), k, v) -> dictionary(k, v
     | Tip =>
       singleton(key-X, val-X)
     | Bin(size, key-Y, val-Y, left, right) =>
-      let order on key-X, key-Y = !compare(key-X, key-Y);
+      let order on key-X, key-Y = compare(key-X, key-Y);
       match order {
       | LT =>
         _balance-L(key-Y, val-Y, loop(left, key-X, val-X), right)
@@ -276,14 +276,14 @@ inline make-insert-with<k, v>(o: ord(k), !f: (v, v) -> v): (dictionary(k, v), k,
     | Tip =>
       singleton(key-X, val-X)
     | Bin(size, key-Y, val-Y, left, right) =>
-      let order on key-X, key-Y = !compare(key-X, key-Y);
+      let order on key-X, key-Y = compare(key-X, key-Y);
       match order {
       | LT =>
         _balance-L(key-Y, val-Y, loop(left, key-X, val-X), right)
       | GT =>
         _balance-R(key-Y, val-Y, left, loop(right, key-X, val-X))
       | EQ =>
-        Bin(size, key-X, !f(val-X, val-Y), left, right)
+        Bin(size, key-X, f(val-X, val-Y), left, right)
       }
     }
   }
@@ -297,7 +297,7 @@ inline make-lookup<k, v>(o: ord(k)): (d: &dictionary(k, v), needle: &k)[reg := r
       try _ = reg;
       none
     | Bin(_, key, x, l, r) =>
-      match !compare(needle, key) {
+      match compare(needle, key) {
       | LT =>
         loop(l, needle)
       | GT =>
@@ -317,7 +317,7 @@ inline make-delete<k, v>(o: ord(k)): (d: dictionary(k, v), needle: k) -> diction
     | Tip =>
       Tip
     | Bin(_, kx, x, l, r) =>
-      let order on needle, kx = !compare(needle, kx);
+      let order on needle, kx = compare(needle, kx);
       match order {
       | LT =>
         _balance-R(kx, x, loop(l, needle), r)
@@ -337,7 +337,7 @@ inline _make-lookup-LE-with-cand<k, v>(L: ord(k)): (&dictionary(k, v), &k, &k, &
     | Tip =>
       Pair(cand-k, cand-v)
     | Bin(_, key, x, l, r) =>
-      match !compare(needle, key) {
+      match compare(needle, key) {
       | GT =>
         loop(r, needle, key, x)
       | LT =>
@@ -350,18 +350,18 @@ inline _make-lookup-LE-with-cand<k, v>(L: ord(k)): (&dictionary(k, v), &k, &k, &
 }
 
 inline make-lookup-LE<k, v>(!o: ord(k)): (&dictionary(k, v), &k)[reg := rho] -> ?pair(&k, &v) {
-  let Ord of {compare := !compare} = !o;
-  let !lookup-LE-with-cand = _make-lookup-LE-with-cand(!o);
+  let Ord of {compare := !compare} = o;
+  let !lookup-LE-with-cand = _make-lookup-LE-with-cand(o);
   define loop(d: &dictionary(k, v), needle: &k)[reg := rho]: ?pair(&k, &v) {
     case d {
     | Tip =>
       try _ = reg;
       none
     | Bin(_, key, x, l, r) =>
-      match !compare(needle, key) {
+      match compare(needle, key) {
       | GT =>
         try _ = reg;
-        Right(!lookup-LE-with-cand(r, needle, key, x))
+        Right(lookup-LE-with-cand(r, needle, key, x))
       | LT =>
         try _ = reg;
         loop(l, needle)
@@ -380,7 +380,7 @@ inline _make-lookup-GE-with-cand<k, v>(L: ord(k)): (&dictionary(k, v), &k, &k, &
     | Tip =>
       Pair(cand-k, cand-v)
     | Bin(_, key, x, l, r) =>
-      match !compare(needle, key) {
+      match compare(needle, key) {
       | GT =>
         loop(r, needle, cand-k, cand-v)
       | LT =>
@@ -393,21 +393,21 @@ inline _make-lookup-GE-with-cand<k, v>(L: ord(k)): (&dictionary(k, v), &k, &k, &
 }
 
 inline make-lookup-GE<k, v>(!o: ord(k)): (&dictionary(k, v), &k)[reg := rho] -> ?pair(&k, &v) {
-  let Ord of {compare := !compare} = !o;
-  let !lookup-GE-with-cand = _make-lookup-GE-with-cand(!o);
+  let Ord of {compare := !compare} = o;
+  let !lookup-GE-with-cand = _make-lookup-GE-with-cand(o);
   define loop(d: &dictionary(k, v), needle: &k)[reg := rho]: ?pair(&k, &v) {
     case d {
     | Tip =>
       try _ = reg;
       none
     | Bin(_, key, x, l, r) =>
-      match !compare(needle, key) {
+      match compare(needle, key) {
       | GT =>
         try _ = reg;
         loop(l, needle)
       | LT =>
         try _ = reg;
-        Right(!lookup-GE-with-cand(r, needle, key, x))
+        Right(lookup-GE-with-cand(r, needle, key, x))
       | _ =>
         try _ = reg;
         Right(Pair(key, x))
@@ -424,7 +424,7 @@ inline from-list<k, v>(_ord: ord(k), kvs: list(pair(k, v))): dictionary(k, v) {
       | Nil =>
         acc
       | Cons(Pair(k, v), rest) =>
-        self(rest, !insert(acc, k, v))
+        self(rest, insert(acc, k, v))
       }
     };
   f(kvs, Tip)

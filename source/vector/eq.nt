@@ -21,7 +21,7 @@ inline as-eq<a>(class: eq(a)): eq(vector(a)) {
               } else {
                 let x = _access(xs, i);
                 let y = _access(xs, i);
-                if !equal(x, y) {
+                if equal(x, y) {
                   loop(add-int(i, 1))
                 } else {
                   False

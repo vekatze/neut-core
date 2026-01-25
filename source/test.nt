@@ -5,11 +5,10 @@ import {
   this.debug {trace, vet},
   this.either {Right, either},
   this.equal {eq-data},
-  // this.equal {eq-data},
   this.foreign {get-cpu-count},
   this.int.io {print-int-line},
   this.list {Cons, Nil, list},
-  this.pair {Pair},
+  this.pair {Pair, pair},
   this.random {random-int},
   this.text {text},
   this.text.io {print, print-line},
@@ -127,6 +126,10 @@ inline loop<a>(xs: list(a)): list(a) {
   }
 }
 
+define make-pair<a>(!x: a): pair(a, a) {
+  Pair(x, x)
+}
+
 // define use-loop<a>(xs: list(a)): list(a) {
 //   loop(xs)
 // }
@@ -141,16 +144,16 @@ define zen(): unit {
   //     Unit
   //   };
   let !mv = make-mvar<text>();
-  let _ = !mv;
-  let _ = !mv;
-  let _ = !mv;
+  let _ = mv;
+  let _ = mv;
+  let _ = mv;
   let _ on !mv = {
-    send(!mv, lift {*"test"});
-    pin v = receive(!mv);
+    send(mv, lift {*"test"});
+    pin v = receive(mv);
     vet::(v);
   };
-  let _ = !mv;
-  let _ = !mv;
+  let _ = mv;
+  let _ = mv;
   pin count = get-cpu-count();
   vet::(count);
   pin result =
@@ -242,7 +245,7 @@ define zen(): unit {
   let xs = push-back(xs, *"b");
   // let !xs = unquote {trace(quote {push-back(xs, *"c")})};
   let !xs = trace::(push-back(xs, *"c"));
-  pin xss = product(!xs, !xs);
+  pin xss = product(xs, xs);
   // unquote {vet(quote {xss})};
   vet::(xss);
   // // nested vector

@@ -69,7 +69,7 @@ inline-meta _meta-for-each<a, b>(xs: list(a), !f: (a) -> b): list(b) {
   | Nil =>
     Nil
   | Cons(y, ys) =>
-    Cons(!f(y), _meta-for-each(ys, !f))
+    Cons(f(y), _meta-for-each(ys, f))
   }
 }
 

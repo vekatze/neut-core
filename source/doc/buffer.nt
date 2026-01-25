@@ -50,7 +50,7 @@ define zen(): unit {
       ansi-reset,
     ]);
   let !k = make-buffer(stdout, 4096);
-  pin k = !k;
+  pin k = k;
   let _: system(unit) = {
     try _ = write-doc-line(k, item, 32);
     try _ = write-doc-line(k, item, 16);

@@ -42,7 +42,7 @@ inline fold-left<elem-type, result-type>(
       | Nil =>
         acc
       | Cons(y, ys) =>
-        loop(!consumer(acc, y), ys)
+        loop(consumer(acc, y), ys)
       }
     };
   helper(acc, xs)
@@ -59,7 +59,7 @@ inline fold-left-N<elem-type, result-type>(
       | Nil =>
         acc
       | Cons(y, ys) =>
-        loop(!consumer(acc, y), ys)
+        loop(consumer(acc, y), ys)
       }
     };
   helper(acc, xs)
@@ -76,7 +76,7 @@ inline fold-left-with-index<elem-type, result-type>(
       | Nil =>
         acc
       | Cons(y, ys) =>
-        loop(!consumer(acc, y, i), ys, add-int(i, 1))
+        loop(consumer(acc, y, i), ys, add-int(i, 1))
       }
     };
   helper(acc, xs, 0)
@@ -93,7 +93,7 @@ inline fold-right<elem-type, result-type>(
       | Nil =>
         acc
       | Cons(y, ys) =>
-        !consumer(y, loop(ys, acc))
+        consumer(y, loop(ys, acc))
       }
     };
   helper(xs, acc)
@@ -110,7 +110,7 @@ inline fold-right-N<elem-type, result-type>(
       | Nil =>
         acc
       | Cons(y, ys) =>
-        !consumer(y, loop(ys, acc))
+        consumer(y, loop(ys, acc))
       }
     };
   helper(xs, acc)
@@ -123,7 +123,7 @@ define intercalate<a>(xs: list(a), !sep: a): list(a) {
   | Cons(y, Nil) =>
     Cons(y, Nil)
   | Cons(y, Cons(z, ys)) =>
-    Cons(y, Cons(!sep, intercalate(Cons(z, ys), !sep)))
+    Cons(y, Cons(sep, intercalate(Cons(z, ys), sep)))
   }
 }
 
@@ -149,7 +149,7 @@ inline for-each<a, b>(xs: list(a), !f: (a) -> b): list(b) {
       | Nil =>
         acc
       | Cons(y, ys) =>
-        Cons(!f(y), loop(ys, acc))
+        Cons(f(y), loop(ys, acc))
       }
     };
   helper(xs, Nil)
@@ -162,7 +162,7 @@ inline for-each-N<a, b>(xs: &list(a), !f: (&a) -> b): list(b) {
       | Nil =>
         acc
       | Cons(y, ys) =>
-        Cons(!f(y), loop(ys, acc))
+        Cons(f(y), loop(ys, acc))
       }
     };
   helper(xs, Nil)
@@ -175,7 +175,7 @@ inline for-each-E<a, e, b>(xs: list(a), !f: (a) -> either(e, b)): either(e, list
       | Nil =>
         Right(Nil)
       | Cons(y, ys) =>
-        try z = !f(y);
+        try z = f(y);
         try zs = self(ys);
         Right(Cons(z, zs))
       }
@@ -190,7 +190,7 @@ inline for-each-EN<a, e, b>(xs: &list(a), !f: (&a) -> either(e, b)): either(e, l
       | Nil =>
         Right(Nil)
       | Cons(y, ys) =>
-        try z = !f(y);
+        try z = f(y);
         try zs = self(ys);
         Right(Cons(z, zs))
       }
@@ -220,7 +220,7 @@ inline for-EN<a, e, b>(xs: &list(a), !f: (&a) -> either(e, b)): either(e, unit) 
       | Nil =>
         Right(Unit)
       | Cons(y, ys) =>
-        try _ = !f(y);
+        try _ = f(y);
         self(ys)
       }
     };
@@ -247,7 +247,7 @@ inline iterate<a>(count: int, !f: (int) -> a): list(a) {
       if ge-int(cursor, count) {
         Nil
       } else {
-        Cons(!f(cursor), self(add-int(cursor, 1)))
+        Cons(f(cursor), self(add-int(cursor, 1)))
       }
     };
   helper(0)
@@ -260,7 +260,7 @@ inline iterate-E<e, a>(count: int, !f: (int) -> either(e, a)): either(e, list(a)
       | True =>
         Right(reverse(acc))
       | False =>
-        try v = !f(cursor);
+        try v = f(cursor);
         self(Cons(v, acc), add-int(cursor, 1))
       }
     };
@@ -282,7 +282,7 @@ inline zip-with<a, b, c>(xs: list(a), ys: list(b), !f: (a, b) -> c): list(c) {
       | _, Nil =>
         Nil
       | Cons(x, xs), Cons(y, ys) =>
-        Cons(!f(x, y), loop(xs, ys))
+        Cons(f(x, y), loop(xs, ys))
       }
     };
   k(xs, ys)
@@ -297,7 +297,7 @@ inline zip-with-N<a, b, c>(xs: &list(a), ys: &list(b), !f: (&a, &b) -> c): list(
       | _, Nil =>
         Nil
       | Cons(x, xs), Cons(y, ys) =>
-        Cons(!f(x, y), loop(xs, ys))
+        Cons(f(x, y), loop(xs, ys))
       }
     };
   k(xs, ys)
@@ -404,7 +404,7 @@ inline filter<a>(xs: list(a), !pred: (&a) -> bool): list(a) {
       | Nil =>
         Nil
       | Cons(y, ys) =>
-        let b on y = !pred(y);
+        let b on y = pred(y);
         if b {
           Cons(y, self(ys))
         } else {
@@ -464,7 +464,7 @@ inline maximum<a>(as-ord: ord(a))[r := rho]: (list(a)) -> ?a {
         | Nil =>
           cand
         | Cons(z, zs) =>
-          let order on cand, z = !compare(cand, z);
+          let order on cand, z = compare(cand, z);
           match order {
           | GT =>
             self(cand, zs)
@@ -615,7 +615,7 @@ inline span<a>(xs: list(a), !pred: (&a) -> bool): pair(list(a), list(a)) {
       | Nil =>
         Pair(Nil, Nil)
       | Cons(y, ys) =>
-        let cond on y = !pred(y);
+        let cond on y = pred(y);
         if cond {
           let Pair(former, latter) = self(ys);
           Pair(Cons(y, former), latter)
@@ -634,7 +634,7 @@ inline span-N<a>(xs: &list(a), !pred: (&a) -> bool): pair(list(a), list(a)) {
       | Nil =>
         Pair(Nil, Nil)
       | Cons(y, ys) =>
-        if !pred(y) {
+        if pred(y) {
           let Pair(former, latter) = self(ys);
           Pair(Cons(*y, former), latter)
         } else {
@@ -652,7 +652,7 @@ inline take-while<a>(xs: list(a), !pred: (&a) -> bool): list(a) {
       | Nil =>
         Nil
       | Cons(y, ys) =>
-        let cond on y = !pred(y);
+        let cond on y = pred(y);
         if cond {
           Cons(y, self(ys))
         } else {
@@ -670,7 +670,7 @@ inline take-while-N<a>(xs: &list(a), !pred: (&a) -> bool): list(a) {
       | Nil =>
         Nil
       | Cons(y, ys) =>
-        if !pred(y) {
+        if pred(y) {
           Cons(*y, self(ys))
         } else {
           Nil
@@ -687,7 +687,7 @@ inline drop-while<a>(xs: list(a), !pred: (&a) -> bool): list(a) {
       | Nil =>
         Nil
       | Cons(y, ys) =>
-        let cond on y = !pred(y);
+        let cond on y = pred(y);
         if cond {
           self(ys)
         } else {
@@ -705,7 +705,7 @@ inline drop-while-N<a>(xs: &list(a), !pred: (&a) -> bool): list(a) {
       | Nil =>
         Nil
       | Cons(y, ys) =>
-        if !pred(y) {
+        if pred(y) {
           self(ys)
         } else {
           Cons(*y, *ys)

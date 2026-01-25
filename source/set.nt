@@ -22,7 +22,7 @@ inline make-insert<a>(k: ord(a)): (s: set(a), x: a) -> set(a) {
   let !insert = this.dictionary.make-insert(k);
   define _(s: set(a), x: a): set(a) {
     let _Set(s) = s;
-    _Set(!insert(s, x, Unit))
+    _Set(insert(s, x, Unit))
   }
 }
 
@@ -30,7 +30,7 @@ inline make-delete<a>(k: ord(a)): (s: set(a), x: a) -> set(a) {
   let !delete = this.dictionary.make-delete(k);
   define _(s: set(a), x: a): set(a) {
     let _Set(s) = s;
-    _Set(!delete(s, x))
+    _Set(delete(s, x))
   }
 }
 
@@ -38,7 +38,7 @@ inline make-member<a>(k: ord(a)): (s: &set(a), x: &a) -> bool {
   let !lookup = this.dictionary.make-lookup(k);
   define _(s: &set(a), x: &a): bool {
     tie _Set(s) = s;
-    match !lookup(s, x) {
+    match lookup(s, x) {
     | Right(_) =>
       True
     | Left(_) =>

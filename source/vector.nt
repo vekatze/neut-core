@@ -325,7 +325,7 @@ inline fold-left<elem-type, result-type>(
       } else {
         let element-ptr on xs = _get-element-pointer(xs, cursor);
         let old-value = cast<int, elem-type>(load-int(element-ptr));
-        let new-value = !consumer(acc, old-value, cursor);
+        let new-value = consumer(acc, old-value, cursor);
         loop(add-int(cursor, 1), new-value, xs)
       }
     };
@@ -344,7 +344,7 @@ inline fold-left-N<elem-type, result-type>(
         acc
       } else {
         let y = _access(xs, cursor);
-        loop(add-int(cursor, 1), !consumer(acc, y, cursor), xs)
+        loop(add-int(cursor, 1), consumer(acc, y, cursor), xs)
       }
     };
   helper(0, acc, xs)
@@ -362,7 +362,7 @@ inline fold-left-reverse-N<elem-type, result-type>(
         acc
       } else {
         let y = this.vector._access(xs, cursor);
-        loop(sub-int(cursor, 1), !consumer(acc, y, cursor), xs)
+        loop(sub-int(cursor, 1), consumer(acc, y, cursor), xs)
       }
     };
   helper(sub-int(sz, 1), acc, xs)
@@ -380,7 +380,7 @@ inline fold-left-EN<e, elem-type, result-type>(
         Right(acc)
       } else {
         let y = _access(xs, cursor);
-        try v = !consumer(acc, y, cursor);
+        try v = consumer(acc, y, cursor);
         loop(add-int(cursor, 1), v, xs)
       }
     };
@@ -402,7 +402,7 @@ inline fold-right<elem-type, result-type>(
       } else {
         let element-ptr on xs = _get-element-pointer(xs, cursor);
         let old-value = cast<int, elem-type>(load-int(element-ptr));
-        !consumer(old-value, loop(add-int(cursor, 1), acc, xs), cursor)
+        consumer(old-value, loop(add-int(cursor, 1), acc, xs), cursor)
       }
     };
   helper(0, acc, xs)
@@ -420,7 +420,7 @@ inline fold-right-N<elem-type, result-type>(
         acc
       } else {
         let old-value = _access(xs, cursor);
-        !consumer(old-value, loop(add-int(cursor, 1), acc, xs), cursor)
+        consumer(old-value, loop(add-int(cursor, 1), acc, xs), cursor)
       }
     };
   helper(0, acc, xs)
@@ -436,7 +436,7 @@ inline for-each<a, b>(xs: vector(a), !f: (a, int) -> b): vector(b) {
       } else {
         let element-ptr on xs = _get-element-pointer(xs, index);
         let old-value = cast<int, a>(load-int(element-ptr));
-        let new-element-ptr = cast<b, int>(!f(old-value, index));
+        let new-element-ptr = cast<b, int>(f(old-value, index));
         store-int(new-element-ptr, element-ptr);
         self(xs, add-int(index, 1))
       }
@@ -462,7 +462,7 @@ inline for<a>(xs: vector(a), !f: (a, int) -> unit): unit {
       } else {
         let element-ptr on xs = _get-element-pointer(xs, index);
         let old-value = cast<int, a>(load-int(element-ptr));
-        !f(old-value, index);
+        f(old-value, index);
         self(xs, add-int(index, 1))
       }
     };
@@ -488,7 +488,7 @@ define for-each-vertical<a, b>(xs: vector(a), col-size: int, !f: (a, int) -> b):
       } else {
         let value-ptr on xs = _get-element-pointer(xs, index);
         let old-value = cast<int, a>(load-int(value-ptr));
-        let new-value-ptr = cast<b, int>(!f(old-value, index));
+        let new-value-ptr = cast<b, int>(f(old-value, index));
         store-int(new-value-ptr, value-ptr);
         let next-index-cand = add-int(index, col-size);
         if lt-int(next-index-cand, vec-size) {
@@ -525,7 +525,7 @@ inline zip-with<a, b, c>(xs: vector(a), ys: vector(b), !f: (a, b, int) -> c): ve
         let y-ptr on ys = _get-element-pointer(ys, cursor);
         let x = cast<int, a>(load-int(x-ptr));
         let y = cast<int, b>(load-int(y-ptr));
-        let z = !f(x, y, cursor);
+        let z = f(x, y, cursor);
         let acc = push-back(acc, z);
         loop(acc, add-int(cursor, 1), xs, ys)
       }
@@ -728,7 +728,7 @@ inline find-index<a>(xs: &vector(a), !pred: (&a) -> bool): int {
         -1
       } else {
         let value = _access(xs, index);
-        if !pred(value) {
+        if pred(value) {
           index
         } else {
           self(add-int(index, 1))
@@ -746,7 +746,7 @@ inline find-index-end<a>(xs: &vector(a), !pred: (&a) -> bool): int {
         -1
       } else {
         let value = _access(xs, index);
-        if !pred(value) {
+        if pred(value) {
           index
         } else {
           self(sub-int(index, 1))
@@ -757,7 +757,7 @@ inline find-index-end<a>(xs: &vector(a), !pred: (&a) -> bool): int {
 }
 
 inline take-while<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
-  let pivot-index on xs = find-index(xs, compose(not, !pred));
+  let pivot-index on xs = find-index(xs, compose(not, pred));
   if lt-int(pivot-index, 0) {
     xs
   } else {
@@ -766,7 +766,7 @@ inline take-while<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
 }
 
 inline drop-while<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
-  let pivot-index on xs = find-index(xs, compose(not, !pred));
+  let pivot-index on xs = find-index(xs, compose(not, pred));
   if lt-int(pivot-index, 0) {
     make(1)
   } else {
@@ -775,7 +775,7 @@ inline drop-while<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
 }
 
 inline take-while-end<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
-  let pivot-index on xs = find-index-end(xs, compose(not, !pred));
+  let pivot-index on xs = find-index-end(xs, compose(not, pred));
   if lt-int(pivot-index, 0) {
     xs
   } else {
@@ -784,7 +784,7 @@ inline take-while-end<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
 }
 
 inline drop-while-end<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
-  let pivot-index on xs = find-index-end(xs, compose(not, !pred));
+  let pivot-index on xs = find-index-end(xs, compose(not, pred));
   if lt-int(pivot-index, 0) {
     make(0)
   } else {
@@ -814,7 +814,7 @@ define intercalate<a>(xs: vector(a), !sep: a): vector(a) {
           let sep-index = sub-int(swap-j, 1);
           let xs = _swap(xs, swap-i, swap-j);
           let value-ptr on xs = _get-element-pointer(xs, sep-index);
-          store-int(cast<a, int>(!sep), value-ptr);
+          store-int(cast<a, int>(sep), value-ptr);
           self(xs, sub-int(index, 1))
         }
       };
@@ -907,7 +907,7 @@ inline filter<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
       if eq-int(cursor, len) {
         take(xs, num-of-new-elems)
       } else {
-        let pred-is-true on xs = !pred(_access(xs, cursor));
+        let pred-is-true on xs = pred(_access(xs, cursor));
         if pred-is-true {
           let xs =
             if eq-int(num-of-new-elems, cursor) {
@@ -971,7 +971,7 @@ inline find<a>(xs: &vector(a), !pred: (&a) -> bool)[r := rho]: ?&a {
         none
       } else {
         let value = _access(xs, index);
-        if !pred(value) {
+        if pred(value) {
           try _ = r;
           Right(value)
         } else {
@@ -985,7 +985,7 @@ inline find<a>(xs: &vector(a), !pred: (&a) -> bool)[r := rho]: ?&a {
 inline span<a>(xs: vector(a), !pred: (&a) -> bool): pair(vector(a), vector(a)) {
   let i on xs =
     find-index(xs, function (x) {
-      not(!pred(x))
+      not(pred(x))
     });
   if lt-int(i, 0) {
     Pair(xs, make(0))
@@ -1052,24 +1052,24 @@ define zen(): unit {
   let xs = push-front(xs, *"a");
   let xs = push-front(xs, *"c");
   let !xs = drop(xs, 2);
-  let _ = !xs;
-  let _ = !xs;
-  let _ = !xs;
-  let xs = push-front(!xs, *"d");
+  let _ = xs;
+  let _ = xs;
+  let _ = xs;
+  let xs = push-front(xs, *"d");
   let xs = push-back(xs, *"e");
   let xs = push-front(xs, *"f");
   let xs = push-back(xs, *"g");
   let xs = push-front(xs, *"h");
   let !xs = xs;
   // let !xs = drop(xs, 3);
-  let _ = !xs;
-  // let !xs = drop(!xs, 3);
-  let _ = !xs;
-  let _ = !xs;
-  let _ = push-front(!xs, *"foo");
-  let _ = !xs;
-  let _ = !xs;
-  let _ = !xs;
+  let _ = xs;
+  // let xs = drop(xs, 3);
+  let _ = xs;
+  let _ = xs;
+  let _ = push-front(xs, *"foo");
+  let _ = xs;
+  let _ = xs;
+  let _ = xs;
   // let xs = push-back(xs, 7);
   // let xs = push-back(xs, 8);
   // let xs = push-back(xs, 9);
@@ -1080,7 +1080,8 @@ define zen(): unit {
   // let _ = !xs;
   // let _ = !xs;
   // let _ = !xs;
-  pin xs = !xs;
+  let xs-clone = xs;
+  pin xs = xs;
   let ys: vector(int) = from-list(to-list(from-list(List[1, 2, 3, 4, 5])));
   pin ys = ys;
   let zs =
@@ -1088,30 +1089,30 @@ define zen(): unit {
       replicate(x, *y)
     });
   let !zs = delete(reverse(zs), 100);
-  let _ = !zs;
-  let _ = !zs;
-  match pop-back(!zs) {
+  let _ = zs;
+  let _ = zs;
+  match pop-back(zs) {
   | Left(_) =>
     print("left\n")
   | Right(Pair(!rest, z)) =>
-    let _ = !rest;
-    let _ = !rest;
-    let len on !rest = length(!rest);
-    let _ = !rest;
+    let _ = rest;
+    let _ = rest;
+    let len on rest = length(rest);
+    let _ = rest;
     print("right. last-elem = ");
     let _ on z = print-line(z);
     let _ = z;
     print("len = ");
     print-int-line(len)
   };
-  pin zs = !zs;
+  pin zs = zs;
   for(*zs, function (x, _) {
     pin x = x;
     print(x);
     print(", ")
   });
   print("\n----\n");
-  for(!xs, function (x, _) {
+  for(xs-clone, function (x, _) {
     pin x = x;
     print(x);
     print(", ")

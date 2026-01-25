@@ -74,7 +74,7 @@ inline borrow<a, b>(r: &ref(a), f: (&a) -> +b): b {
 
 inline clone<a>(r: &ref(a)): a {
   modify(r, function (!val: +a) {
-    Pair(!val, axiom-T(!val))
+    Pair(val, axiom-T(val))
   })
 }
 

@@ -1,6 +1,7 @@
 import {
   this.ansi {Blue, Yellow},
   this.bool {True, bool},
+  this.box,
   this.doc {
     Group,
     _nested-comma-seq,
@@ -25,10 +26,11 @@ import {
   this.pointer {shift},
   this.text {text},
   this.text.io {print, print-line},
-  this.type-tag {
+  this.type-value {
     Algebraic,
     Binary,
     Box-T,
+    Constructor,
     Enum,
     Float16,
     Float32,
@@ -46,6 +48,7 @@ import {
     Rune,
     Vector,
     Wrapper,
+    constructor,
   },
   this.unit {Unit, unit},
   this.vector {vector},
@@ -59,6 +62,20 @@ inline-meta _meta-length<a>(xs: list(a)): int {
   | Cons(_, ys) =>
     add-int(1, _meta-length(ys))
   }
+}
+
+inline-meta _meta-for-each<a, b>(xs: list(a), !f: (a) -> b): list(b) {
+  match xs {
+  | Nil =>
+    Nil
+  | Cons(y, ys) =>
+    Cons(!f(y), _meta-for-each(ys, !f))
+  }
+}
+
+inline-meta _meta-snd<a, b>(p: pair(a, b)): b {
+  let Pair(_, y) = p;
+  y
 }
 
 define _literal-doc(d: doc): doc {
@@ -123,13 +140,13 @@ inline _load-nth-element(data-arg-num: int, cursor: int, x: pointer): pointer {
 inline-meta _vet-adt-cons<a>(
   cons-arg-types: list(type),
   cursor: int,
+  data-arg-num: int,
   x: '&a,
 ): 'doc {
   match cons-arg-types {
   | Nil =>
     quote {empty}
   | Cons(t, Nil) =>
-    let data-arg-num = _meta-length(magic get-data-args(a));
     unpack-type t = t;
     quote {
       let data-arg-num = unquote {promote {data-arg-num}};
@@ -140,7 +157,6 @@ inline-meta _vet-adt-cons<a>(
     }
   | Cons(t, rest) =>
     let d1 = {
-      let data-arg-num = _meta-length(magic get-data-args(a));
       unpack-type t = t;
       quote {
         let data-arg-num = unquote {promote {data-arg-num}};
@@ -150,21 +166,20 @@ inline-meta _vet-adt-cons<a>(
         unquote {vet-doc<t>(quote {x-elem-ptr})}
       }
     };
-    let d2 = _vet-adt-cons(rest, add-int(cursor, 1), x);
+    let d2 = _vet-adt-cons(rest, add-int(cursor, 1), data-arg-num, x);
     quote {join[unquote {d1}, atom-N(","), break(" "), unquote {d2}]}
   }
 }
 
-inline-meta _vet-adt<a>(cons-index: int, cons-num: int, disc: 'int, x: '&a): 'doc {
-  if eq-int(cons-index, cons-num) {
-    quote {empty} // unreachable
-  } else {
-    let ts = magic get-constructor-arg-types(a, cons-index);
+inline-meta _vet-adt<a>(constructors: list(constructor), cons-index: int, data-arg-num: int, disc: 'int, x: '&a): 'doc {
+  match constructors {
+  | Nil =>
+    quote {empty}
+  | Cons(Constructor(cons-name, is-const-like, xts), rest) =>
+    let ts = _meta-for-each(xts, exact _meta-snd);
     quote {
       if eq-int(unquote {promote {cons-index}}, unquote {disc}) {
         unquote {
-          let cons-name = magic get-cons-name(a, cons-index);
-          let is-const-like = magic get-cons-const-flag(a, cons-index);
           let prefix =
             if is-const-like {
               quote {_constructor-doc(unquote {promote {cons-name}})}
@@ -180,50 +195,47 @@ inline-meta _vet-adt<a>(cons-index: int, cons-num: int, disc: 'int, x: '&a): 'do
           quote {
             Group(_nested-comma-seq(
               unquote {prefix},
-              unquote {_vet-adt-cons(ts, 0, x)},
+              unquote {_vet-adt-cons(ts, 0, data-arg-num, x)},
               unquote {suffix},
             ))
           }
         }
       } else {
-        unquote {_vet-adt(add-int(cons-index, 1), cons-num, disc, x)}
+        unquote {_vet-adt(rest, add-int(cons-index, 1), data-arg-num, disc, x)}
       }
     }
   }
 }
 
-inline-meta _vet-enum<a>(cons-index: int, cons-num: int, disc: 'int, x: '&a): 'doc {
-  if eq-int(cons-index, cons-num) {
-    quote {empty} // unreachable
-  } else {
+inline-meta _vet-enum<a>(cons-index: int, names: list(&text), disc: 'int, x: '&a): 'doc {
+  match names {
+  | Nil =>
+    quote {empty}
+  | Cons(name, rest) =>
     quote {
       if eq-int(unquote {promote {cons-index}}, unquote {disc}) {
-        unquote {
-          let cons-name = magic get-cons-name(a, cons-index);
-          quote {_constructor-doc(unquote {promote {cons-name}})}
-        }
+        unquote {quote {_constructor-doc(unquote {promote {name}})}}
       } else {
-        unquote {_vet-enum(add-int(cons-index, 1), cons-num, disc, x)}
+        unquote {_vet-enum(add-int(cons-index, 1), rest, disc, x)}
       }
     }
   }
 }
 
 define-meta vet-doc<a>(x: '&a): 'doc {
-  let k = magic get-type-tag(a);
+  let k = magic inspect-type(a);
   match k {
-  | Algebraic =>
-    let num = magic get-cons-size(a);
+  | Algebraic(_, data-args, cons-info) =>
+    let data-arg-num = _meta-length(data-args);
     quote {
       let ptr-x = this.magic.cast<&a, pointer>(unquote {x});
       let discriminant-x = load-int(ptr-x);
-      unquote {_vet-adt(0, num, quote {discriminant-x}, x)}
+      unquote {_vet-adt(cons-info, 0, data-arg-num, quote {discriminant-x}, x)}
     }
-  | Enum =>
-    let num = magic get-cons-size(a);
+  | Enum(names) =>
     quote {
       let discriminant-x = this.magic.cast<&a, int>(unquote {x});
-      unquote {_vet-enum(0, num, quote {discriminant-x}, x)}
+      unquote {_vet-enum(0, names, quote {discriminant-x}, x)}
     }
   | Int1 =>
     quote {atom-int(magic cast(int1, int64, magic cast(&a, int1, unquote {x})))}
@@ -263,26 +275,26 @@ define-meta vet-doc<a>(x: '&a): 'doc {
         atom-N("\""),
       ])
     }
-  | Wrapper =>
-    unpack-type t = magic get-wrapper-content-type(a);
+  | Wrapper(t) =>
+    unpack-type t = t;
     quote {
       let x-unwrapped: &t = this.magic.cast<&a, &t>(unquote {x});
       unquote {vet-doc<t>(quote {x-unwrapped})}
     }
-  | Vector =>
-    unpack-type t = magic get-vector-content-type(a);
+  | Vector(t) =>
+    unpack-type t = t;
     quote {
       let x: &vector(t) = this.magic.cast<&a, &vector(t)>(unquote {x});
       unquote {_vet-vector<t>(quote {x})}
     }
-  | Noema =>
-    unpack-type t = magic get-noema-content-type(a);
+  | Noema(t) =>
+    unpack-type t = t;
     quote {
       let x-unwrapped: &t = this.magic.cast<&a, &t>(unquote {x});
       unquote {vet-doc<t>(quote {x-unwrapped})}
     }
-  | Box-T =>
-    unpack-type t = magic get-box-content-type(a);
+  | Box-T(t) =>
+    unpack-type t = t;
     quote {
       let x-unwrapped: &t = this.magic.cast<&a, &t>(unquote {x});
       unquote {vet-doc<t>(quote {x-unwrapped})}
@@ -317,11 +329,12 @@ define-meta trace<a>(x: 'a): 'a {
 }
 
 define zen(): unit {
-  pin xs: vector(pair(&text, &text)) = this.vector.Vector[Pair("a", "b"), Pair("c", "d")];
+  pin xs: vector(pair(&text, +text)) = this.vector.Vector[Pair("a", box {*"b"}), Pair("c", box {*"d"})];
   // pin ys: vector(list(int)) = this.vector.Vector[List[], List[10, 20]];
   // let foo = unquote {vet(quote {xs})};
   print-line("before");
-  pin _: either(bool, list(float)) = Left(True);
+  pin k: either(bool, list(float)) = Left(True);
+  vet::(k);
   // Right(List[10, 208.2, 3.14, 20, 10, 20, 10]);
   // pin xs: vector(&text) = this.vector.Vector["foo", "bar", "buz", "hoge"];
   // pin xs: either(unit, list(int)) = Left(Unit);

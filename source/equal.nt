@@ -7,13 +7,14 @@ import {
   this.list {Cons, List, Nil, list},
   this.magic,
   this.memory {load-int, load-pointer},
-  this.pair {Pair},
+  this.pair {Pair, pair},
   this.pointer {shift},
   this.rune.eq {eq-rune},
   this.text {text},
-  this.type-tag {
+  this.type-value {
     Algebraic,
     Binary,
+    Constructor,
     Enum,
     Float16,
     Float32,
@@ -28,6 +29,7 @@ import {
     Rune,
     Vector,
     Wrapper,
+    constructor,
   },
   this.unit {unit},
   this.vector {vector},
@@ -41,6 +43,20 @@ inline-meta _meta-length<a>(xs: list(a)): int {
   | Cons(_, ys) =>
     add-int(1, _meta-length(ys))
   }
+}
+
+inline-meta _meta-for-each<a, b>(xs: list(a), !f: (a) -> b): list(b) {
+  match xs {
+  | Nil =>
+    Nil
+  | Cons(y, ys) =>
+    Cons(!f(y), _meta-for-each(ys, !f))
+  }
+}
+
+inline-meta _meta-snd<a, b>(p: pair(a, b)): b {
+  let Pair(_, y) = p;
+  y
 }
 
 inline-meta _join-text(t1: &text, t2: &text): &text {
@@ -84,6 +100,7 @@ inline _load-nth-element(data-arg-num: int, cursor: int, x: pointer): pointer {
 
 inline-meta _eq-data-adt-cons<a>(
   cons-arg-types: list(type),
+  data-arg-num: int,
   cursor: int,
   x: '&a,
   y: '&a,
@@ -93,17 +110,16 @@ inline-meta _eq-data-adt-cons<a>(
     quote {True}
   | Cons(t, rest) =>
     unpack-type t = t;
-    let data-arg-num = _meta-length(magic get-data-args(a));
     quote {
-      let data-arg-num = unquote {promote {data-arg-num}};
+      let data-arg-num-inner = unquote {promote {data-arg-num}};
       let low-cursor = unquote {promote {cursor}};
       let x-ptr = this.magic.cast<&a, pointer>(unquote {x});
       let y-ptr = this.magic.cast<&a, pointer>(unquote {y});
-      let x-elem-ptr = this.magic.cast<pointer, &t>(_load-nth-element(data-arg-num, low-cursor, x-ptr));
-      let y-elem-ptr = this.magic.cast<pointer, &t>(_load-nth-element(data-arg-num, low-cursor, y-ptr));
+      let x-elem-ptr = this.magic.cast<pointer, &t>(_load-nth-element(data-arg-num-inner, low-cursor, x-ptr));
+      let y-elem-ptr = this.magic.cast<pointer, &t>(_load-nth-element(data-arg-num-inner, low-cursor, y-ptr));
       let is-eq = unquote {eq-data(quote {x-elem-ptr}, quote {y-elem-ptr})};
       if is-eq {
-        unquote {_eq-data-adt-cons(rest, add-int(cursor, 1), x, y)}
+        unquote {_eq-data-adt-cons(rest, data-arg-num, add-int(cursor, 1), x, y)}
       } else {
         False
       }
@@ -111,26 +127,34 @@ inline-meta _eq-data-adt-cons<a>(
   }
 }
 
-inline-meta _eq-data-adt<a>(cons-index: int, cons-num: int, disc: 'int, x: '&a, y: '&a): 'bool {
-  if eq-int(cons-index, cons-num) {
+inline-meta _eq-data-adt<a>(
+  constructors: list(constructor),
+  cons-index: int,
+  data-arg-num: int,
+  disc: 'int,
+  x: '&a,
+  y: '&a,
+): 'bool {
+  match constructors {
+  | Nil =>
     quote {True}
-  } else {
-    let ts = magic get-constructor-arg-types(a, cons-index);
+  | Cons(Constructor(_, _, xts), rest) =>
+    let ts = _meta-for-each(xts, exact _meta-snd);
     quote {
       if eq-int(unquote {promote {cons-index}}, unquote {disc}) {
-        unquote {_eq-data-adt-cons(ts, 0, x, y)}
+        unquote {_eq-data-adt-cons(ts, data-arg-num, 0, x, y)}
       } else {
-        unquote {_eq-data-adt(add-int(cons-index, 1), cons-num, disc, x, y)}
+        unquote {_eq-data-adt(rest, add-int(cons-index, 1), data-arg-num, disc, x, y)}
       }
     }
   }
 }
 
 define-meta eq-data<a>(x: '&a, y: '&a): 'bool {
-  let k = magic get-type-tag(a);
+  let k = magic inspect-type(a);
   match k {
-  | Algebraic =>
-    let num = magic get-cons-size(a);
+  | Algebraic(_, data-args, cons-info) =>
+    let data-arg-num = _meta-length(data-args);
     quote {
       let ptr-x = this.magic.cast<&a, pointer>(unquote {x});
       let ptr-y = this.magic.cast<&a, pointer>(unquote {y});
@@ -139,10 +163,10 @@ define-meta eq-data<a>(x: '&a, y: '&a): 'bool {
       if ne-int(discriminant-x, discriminant-y) {
         False
       } else {
-        unquote {_eq-data-adt(0, num, quote {discriminant-x}, x, y)}
+        unquote {_eq-data-adt(cons-info, 0, data-arg-num, quote {discriminant-x}, x, y)}
       }
     }
-  | Enum =>
+  | Enum(_) =>
     quote {
       let discriminant-x = this.magic.cast<&a, int>(unquote {x});
       let discriminant-y = this.magic.cast<&a, int>(unquote {y});
@@ -220,15 +244,15 @@ define-meta eq-data<a>(x: '&a, y: '&a): 'bool {
       let y = this.magic.cast<&a, &binary>(unquote {y});
       eq-binary(x, y)
     }
-  | Vector =>
-    unpack-type t = magic get-vector-content-type(a);
+  | Vector(t) =>
+    unpack-type t = t;
     quote {
       let x: &vector(t) = this.magic.cast<&a, &vector(t)>(unquote {x});
       let y: &vector(t) = this.magic.cast<&a, &vector(t)>(unquote {y});
       unquote {_equal-vector<t>(quote {x}, quote {y})}
     }
-  | Wrapper =>
-    unpack-type t = magic get-wrapper-content-type(a);
+  | Wrapper(t) =>
+    unpack-type t = t;
     quote {
       let x: &t = this.magic.cast<&a, &t>(unquote {x});
       let y: &t = this.magic.cast<&a, &t>(unquote {y});

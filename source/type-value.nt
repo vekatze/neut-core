@@ -1,0 +1,36 @@
+import {
+  this.bool {bool},
+  this.list {list},
+  this.pair {pair},
+  this.text {text},
+}
+
+data constructor {
+| Constructor(&text, bool, list(pair(&text, type)))
+}
+
+data type-value {
+| Opaque
+| Type
+| Function
+| Algebraic(data-name: &text, data-param-types: list(type), constructors: list(constructor))
+| Noema(type)
+| Enum(constructors: list(&text))
+| Int1
+| Int2
+| Int4
+| Int8
+| Int16
+| Int32
+| Int64
+| Float16
+| Float32
+| Float64
+| Pointer
+| Null
+| Rune
+| Binary
+| Vector(type)
+| Wrapper(type)
+| Box-T(type)
+}

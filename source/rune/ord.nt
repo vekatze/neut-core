@@ -31,7 +31,7 @@ define ge-rune(r1: rune, r2: rune): bool {
 }
 
 inline as-ord: ord(rune) {
-  Ord of {
+  Ord{
     compare := {
       function (x, y) {
         if gt-rune(*x, *y) {

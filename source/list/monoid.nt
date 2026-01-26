@@ -4,7 +4,7 @@ import {
 }
 
 inline as-monoid<a>(): monoid(list(a)) {
-  Monoid of {
+  Monoid{
     e := Nil,
     op := {
       function (x, y) {

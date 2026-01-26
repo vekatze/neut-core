@@ -72,7 +72,7 @@ alias binary-builder {
 
 define _extension-required-p(b: &binary-builder, new-size: int): bool {
   core.cell.borrow(b, function (val) {
-    tie _Binary-Builder of {cursor, content} = val;
+    tie _Binary-Builder{cursor, content} = val;
     let current-len = core.binary.binary-length(content);
     lift {gt-int(add-int(*cursor, new-size), current-len)}
   })
@@ -80,7 +80,7 @@ define _extension-required-p(b: &binary-builder, new-size: int): bool {
 
 define _extend(b: &binary-builder): unit {
   mutate(b, function (x: +_binary-builder) {
-    let _Binary-Builder of {cursor, content} = axiom-T(x);
+    let _Binary-Builder{cursor, content} = axiom-T(x);
     let current-size on content = core.binary.binary-length(content);
     let new-content = allocate(mul-int(current-size, 2));
     let content-ptr on content = _get-content-pointer(content);
@@ -97,7 +97,7 @@ define _get-head-ptr(b: &binary-builder, fragment-size: int): pointer {
     _get-head-ptr(b, fragment-size)
   } else {
     core.cell.borrow(b, function (val) {
-      tie _Binary-Builder of {cursor, content} = val;
+      tie _Binary-Builder{cursor, content} = val;
       lift {shift(core.binary._get-content-pointer(content), *cursor)}
     })
   }
@@ -105,20 +105,20 @@ define _get-head-ptr(b: &binary-builder, fragment-size: int): pointer {
 
 define _proceed(b: &binary-builder, size: int): unit {
   mutate(b, function (_b) {
-    let _Binary-Builder of {cursor, content} = axiom-T(_b);
-    lift {_Binary-Builder of {cursor := add-int(cursor, size), content}}
+    let _Binary-Builder{cursor, content} = axiom-T(_b);
+    lift {_Binary-Builder{cursor := add-int(cursor, size), content}}
   })
 }
 
 define extract(b: binary-builder): binary {
-  let _Binary-Builder of {cursor, content} = axiom-T(core.cell.extract(b));
+  let _Binary-Builder{cursor, content} = axiom-T(core.cell.extract(b));
   take(content, cursor)
 }
 
 define make-binary-builder(size: int): binary-builder {
   make-cell(
     lift {
-      _Binary-Builder of {
+      _Binary-Builder{
         cursor := 0,
         content := allocate(size),
       }

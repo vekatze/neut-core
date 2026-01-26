@@ -102,7 +102,7 @@ define _get-escaped-character-1(ch: int8): &text {
   }
 }
 
-// returns true iff `ch` is the lower 8 bits of a C1 control character
+// returns true iff `ch` is the lower 8 bits a C1 control character
 define _is-2-byte-escaped-character(ch: int8): bool {
   and(ule-int8(0x80, ch), ule-int8(ch, 0x9f))
 }

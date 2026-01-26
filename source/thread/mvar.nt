@@ -53,7 +53,7 @@ inline _get-info<a>(x: &mvar(a)): _mvar-info {
   let mutex-ptr = shift(value-ptr, u);
   let readable-cond-ptr = shift(mutex-ptr, mutex-size);
   let writable-cond-ptr = shift(readable-cond-ptr, cond-size);
-  _MVar-Info of {flag-ptr, value-ptr, mutex-ptr, readable-cond-ptr, writable-cond-ptr, type-ptr}
+  _MVar-Info{flag-ptr, value-ptr, mutex-ptr, readable-cond-ptr, writable-cond-ptr, type-ptr}
 }
 
 define _new<a>(): mvar(a) {
@@ -62,7 +62,7 @@ define _new<a>(): mvar(a) {
   let u = this.word.size;
   let ptr = malloc(C-Size(sum-int(List[u, u, mutex-size, cond-size, cond-size, u])));
   let ch = cast<pointer, &mvar(a)>(ptr);
-  let _MVar-Info of {flag-ptr, mutex-ptr, readable-cond-ptr, writable-cond-ptr, type-ptr} = _get-info(ch);
+  let _MVar-Info{flag-ptr, mutex-ptr, readable-cond-ptr, writable-cond-ptr, type-ptr} = _get-info(ch);
   store-int(0, flag-ptr);
   let _ = thread-mutex-init(mutex-ptr);
   thread-cond-init(readable-cond-ptr);
@@ -75,7 +75,7 @@ define _new<a>(): mvar(a) {
 resource _mvar {
   function (ptr: pointer) {
     let ch = cast<pointer, &mvar(unit)>(ptr);
-    let _MVar-Info of {flag-ptr, value-ptr, mutex-ptr, readable-cond-ptr, writable-cond-ptr, type-ptr} = _get-info(ch);
+    let _MVar-Info{flag-ptr, value-ptr, mutex-ptr, readable-cond-ptr, writable-cond-ptr, type-ptr} = _get-info(ch);
     let flag = load-int(flag-ptr);
     thread-cond-destroy(readable-cond-ptr);
     thread-cond-destroy(writable-cond-ptr);
@@ -89,16 +89,15 @@ resource _mvar {
   },
   function (ptr: pointer) {
     let ch = cast<pointer, &mvar(unit)>(ptr);
-    let _MVar-Info of {flag-ptr, value-ptr, type-ptr} = _get-info(ch);
+    let _MVar-Info{flag-ptr, value-ptr, type-ptr} = _get-info(ch);
     unpack-type a = cast<int, type>(load-int(type-ptr));
     let flag = load-int(flag-ptr);
     let base: &mvar(a) = cast<mvar(a), &mvar(a)>(_new());
     if eq-int(flag, 0) {
       cast<&mvar(a), pointer>(base)
     } else {
-      // let result: a = embody of {a, x := cast<int, &a>(load-int(value-ptr))};
       let result: a = embody<a>(cast<int, &a>(load-int(value-ptr)));
-      let _MVar-Info of {value-ptr := new-value-ptr, flag-ptr := new-flag-ptr} = _get-info<a>(base);
+      let _MVar-Info{value-ptr := new-value-ptr, flag-ptr := new-flag-ptr} = _get-info<a>(base);
       store-int(1, new-flag-ptr);
       store-int(cast<a, int>(result), new-value-ptr);
       cast<&mvar(a), pointer>(base)
@@ -111,7 +110,7 @@ inline make-mvar<a>(): mvar(a) {
 }
 
 define send<a>(ch: &mvar(a), x: +a): unit {
-  let _MVar-Info of {flag-ptr, value-ptr, mutex-ptr, readable-cond-ptr, writable-cond-ptr} = _get-info(ch);
+  let _MVar-Info{flag-ptr, value-ptr, mutex-ptr, readable-cond-ptr, writable-cond-ptr} = _get-info(ch);
   thread-mutex-lock(mutex-ptr);
   let flag = load-int(flag-ptr);
   when eq-int(flag, 1) {
@@ -124,7 +123,7 @@ define send<a>(ch: &mvar(a), x: +a): unit {
 }
 
 define receive<a>(ch: &mvar(a)): +a {
-  let _MVar-Info of {flag-ptr, value-ptr, mutex-ptr, readable-cond-ptr, writable-cond-ptr} = _get-info(ch);
+  let _MVar-Info{flag-ptr, value-ptr, mutex-ptr, readable-cond-ptr, writable-cond-ptr} = _get-info(ch);
   thread-mutex-lock(mutex-ptr);
   let flag = load-int(flag-ptr);
   when eq-int(flag, 0) {

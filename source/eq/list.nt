@@ -9,7 +9,7 @@ define elem<a>(e: &eq(a), xs: &list(a), x: &a): bool {
   | Nil =>
     False
   | Cons(y, ys) =>
-    tie Eq of {equal} = e;
+    tie Eq{equal} = e;
     if equal(x, y) {
       True
     } else {

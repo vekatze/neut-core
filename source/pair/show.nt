@@ -7,12 +7,12 @@ import {
 }
 
 inline as-show<a, b>(s1: show(a), s2: show(b)): show(pair(a, b)) {
-  Show of {
+  Show{
     show := {
       function (p) {
         let Pair(x, y) = p;
-        let Show of {show := show1} = s1;
-        let Show of {show := show2} = s2;
+        let Show{show := show1} = s1;
+        let Show{show := show2} = s2;
         join(List[
           *"(",
           intercalate(List[show1(x), show2(y)], *", "),

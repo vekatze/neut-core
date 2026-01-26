@@ -11,10 +11,10 @@ data eq(a) {
 }
 
 inline from-ord<a>(o: ord(a)): eq(a) {
-  Eq of {
+  Eq{
     equal := {
       function (x, y) {
-        let Ord of {compare} = o;
+        let Ord{compare} = o;
         match compare(x, y) {
         | EQ =>
           True

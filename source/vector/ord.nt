@@ -11,7 +11,7 @@ define _find-lower<a>(o: &ord(a), vs: &vector(a), from: int, to: int, pivot: &a)
     -1
   } else {
     let v = this.vector._access(vs, from);
-    tie Ord of {compare} = o;
+    tie Ord{compare} = o;
     match compare(v, pivot) {
     | LT =>
       _find-lower(o, vs, add-int(from, 1), to, pivot)
@@ -26,7 +26,7 @@ define _find-higher<a>(o: &ord(a), vs: &vector(a), boundary: int, to: int, pivot
     -1
   } else {
     let v = this.vector._access(vs, to);
-    tie Ord of {compare} = o;
+    tie Ord{compare} = o;
     match compare(v, pivot) {
     | LT =>
       to

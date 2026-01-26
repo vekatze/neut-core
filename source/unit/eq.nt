@@ -5,7 +5,7 @@ import {
 }
 
 inline as-eq: eq(unit) {
-  Eq of {
+  Eq{
     equal := {
       function (x1, x2) {
         case x1, x2 {

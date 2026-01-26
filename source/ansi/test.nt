@@ -257,7 +257,7 @@ define _test-color(k: &ansi-kit): system(unit) {
 }
 
 define some-func(): system(unit) {
-  pin k = make-ansi-kit of {sink := stdout, capacity := 100};
+  pin k = make-ansi-kit{sink := stdout, capacity := 100};
   // prints "error: " in bold red
   try _ = write-code(k, Set-Style(Color(Foreground, Color-16(Vivid, Red))));
   try _ = write-code(k, Set-Style(Bold));
@@ -276,8 +276,8 @@ define some-func(): system(unit) {
 }
 
 define zen(): unit {
-  pin k1 = make-ansi-kit of {sink := stdout, capacity := 100};
-  pin k2 = make-ansi-kit-unbuffered of {sink := stdout};
+  pin k1 = make-ansi-kit{sink := stdout, capacity := 100};
+  pin k2 = make-ansi-kit-unbuffered{sink := stdout};
   let _ = {
     try _ = _test-256(k1);
     try _ = _test-256(k2);

@@ -20,7 +20,7 @@ define ne-text(t1: &text, t2: &text): bool {
 }
 
 inline as-eq: eq(text) {
-  Eq of {equal := eq-text}
+  Eq{equal := eq-text}
 }
 
 define eq-prefix(haystack: &text, needle: &text): bool {

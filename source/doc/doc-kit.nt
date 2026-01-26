@@ -18,24 +18,24 @@ data _doc-kit {
 }
 
 define _set-mode(k: &_doc-kit, m: _mode): unit {
-  tie _Doc-Kit of {layout-mode-ref} = k;
+  tie _Doc-Kit{layout-mode-ref} = k;
   this.ref.mutate(layout-mode-ref, function (_) {
     lift {m}
   });
 }
 
 define _get-mode(k: &_doc-kit): _mode {
-  tie _Doc-Kit of {layout-mode-ref} = k;
+  tie _Doc-Kit{layout-mode-ref} = k;
   this.ref.clone(layout-mode-ref)
 }
 
 define _get-indentation(k: &_doc-kit): int {
-  tie _Doc-Kit of {indentation-ref} = k;
+  tie _Doc-Kit{indentation-ref} = k;
   this.ref.clone(indentation-ref)
 }
 
 define _set-indentation(k: &_doc-kit, x: int): unit {
-  tie _Doc-Kit of {indentation-ref} = k;
+  tie _Doc-Kit{indentation-ref} = k;
   this.ref.mutate(indentation-ref, function (_) {
     lift {x}
   });
@@ -47,12 +47,12 @@ define _shift-indentation(k: &_doc-kit, diff: int): unit {
 }
 
 define _get-column(k: &_doc-kit): int {
-  tie _Doc-Kit of {column-ref} = k;
+  tie _Doc-Kit{column-ref} = k;
   this.ref.clone(column-ref)
 }
 
 define _set-column(k: &_doc-kit, x: int): unit {
-  tie _Doc-Kit of {column-ref} = k;
+  tie _Doc-Kit{column-ref} = k;
   this.ref.mutate(column-ref, function (_) {
     lift {x}
   });

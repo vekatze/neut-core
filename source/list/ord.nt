@@ -5,7 +5,7 @@ import {
 }
 
 inline as-ord<a>(!o: ord(a)): ord(list(a)) {
-  Ord of {
+  Ord{
     compare := {
       define self(xs, ys) {
         case xs, ys {
@@ -16,7 +16,7 @@ inline as-ord<a>(!o: ord(a)): ord(list(a)) {
         | Cons(_, _), Nil =>
           GT
         | Cons(x, xs), Cons(y, ys) =>
-          let Ord of {compare} = o;
+          let Ord{compare} = o;
           match compare(x, y) {
           | LT =>
             LT

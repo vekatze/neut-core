@@ -39,7 +39,7 @@ inline cmp-binary(xs1: &binary, xs2: &binary): ordering {
   pin len1 = binary-length(xs1);
   pin len2 = binary-length(xs2);
   let fallback-value = {
-    let Ord of {compare} = this.int.ord.as-ord;
+    let Ord{compare} = this.int.ord.as-ord;
     compare(len1, len2)
   };
   let ptr1 = _get-content-pointer(xs1);
@@ -85,7 +85,7 @@ define ge-binary(t1: &binary, t2: &binary): bool {
 }
 
 inline as-ord: ord(binary) {
-  Ord of {
+  Ord{
     compare := {
       function (x, y) {
         cmp-binary(x, y)

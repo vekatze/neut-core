@@ -31,7 +31,7 @@ data pool(a: type) {
 }
 
 define _close-pool<a>(k: pool(a)): unit {
-  let _Pool of {workers, tasks-ref, futures-ref} = k;
+  let _Pool{workers, tasks-ref, futures-ref} = k;
   let size on workers = this.vector.length(workers);
   let _ on tasks-ref =
     loop(size, function (_) {
@@ -72,7 +72,7 @@ inline with-thread-pool<a, b, e>(size: int, env: e, f: (p: &pool(a), env: +e) ->
   let futures-ref = make-cell(box {this.vector.make(8)});
   let workers = _setup-workers(tasks-ref, size);
   let tasks-ref = cast<&channel(_task(a)), channel(_task(a))>(tasks-ref);
-  let p = _Pool of {workers, tasks-ref, futures-ref};
+  let p = _Pool{workers, tasks-ref, futures-ref};
   let p = cast<pool(a), &pool(a)>(p);
   let result = f(p, cast<e, +e>(env));
   _close-pool(cast<&pool(a), pool(a)>(p));
@@ -80,7 +80,7 @@ inline with-thread-pool<a, b, e>(size: int, env: e, f: (p: &pool(a), env: +e) ->
 }
 
 define detach-task<a>(k: &pool(a), f: () -> +a): future(a) {
-  tie _Pool of {tasks-ref, futures-ref} = k;
+  tie _Pool{tasks-ref, futures-ref} = k;
   let result-chan = cast<mvar(a), &mvar(a)>(make-mvar<a>());
   mutate(futures-ref, function (futures) {
     box {

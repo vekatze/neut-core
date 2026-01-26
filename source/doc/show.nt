@@ -50,7 +50,7 @@ define _layout(k: &_doc-kit, target: &doc): text {
     result
   | Group(d) =>
     let s = _size(d);
-    tie _Doc-Kit of {width} = k;
+    tie _Doc-Kit{width} = k;
     let column = _get-column(k);
     let indentation = _get-indentation(k);
     let ribbon-width = add-int(sub-int(column, indentation), s);

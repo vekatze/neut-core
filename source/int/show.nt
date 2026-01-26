@@ -34,7 +34,7 @@ inline as-show: show(int) {
 }
 
 define show-int(x: int): text {
-  let Show of {show} = as-show;
+  let Show{show} = as-show;
   show(x)
 }
 

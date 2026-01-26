@@ -71,10 +71,10 @@ define use-rune(r: rune): unit {
 // }
 // define use-id(): unit {
 //   let _ = some-func(20);
-//   let _ = some-func of {y := 20};
-//   let _ = some-func of {x := 1, y := 20};
-//   let _ = some-func of {x := 1, y := 20, z := 3};
-//   let w = some-func of {y := 20};
+//   let _ = some-func {y := 20};
+//   let _ = some-func {x := 1, y := 20};
+//   let _ = some-func {x := 1, y := 20, z := 3};
+//   let w = some-func {y := 20};
 //   print-int-line(w);
 // }
 define my-random-in-range(lower-bound: int32, upper-bound: int32): int {
@@ -372,7 +372,7 @@ define zen(): unit {
   // let _ on !k = print-line(!k);
   // let _ = !k;
   // let v = with-cell(3);
-  // print("result of with-cell(3): ");
+  // print("result with-cell(3): ");
   // print-int-line(v);
   // let c = make-cell(*"hello");
   // let _ on c = {

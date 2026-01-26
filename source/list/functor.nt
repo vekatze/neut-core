@@ -4,5 +4,5 @@ import {
 }
 
 inline as-functor: functor(list) {
-  Functor of {for-each}
+  Functor{for-each}
 }

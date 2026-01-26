@@ -27,7 +27,7 @@ inline size<k, v>(d: &dictionary(k, v)): int {
   case d {
   | Tip =>
     0
-  | Bin of {size} =>
+  | Bin{size} =>
     *size
   }
 }
@@ -37,7 +37,7 @@ inline empty<k, v>: dictionary(k, v) {
 }
 
 inline singleton<k, v>(key: k, value: v): dictionary(k, v) {
-  Bin of {size := 1, left := Tip, right := Tip, key, value}
+  Bin{size := 1, left := Tip, right := Tip, key, value}
 }
 
 inline _delta: int {
@@ -199,7 +199,7 @@ define _min-view-sure<a, b>(k: a, x: b, l: dictionary(a, b), r: dictionary(a, b)
   | Tip =>
     _View(k, x, r)
   | Bin(_, lk, lx, ll, lr) =>
-    let _View of {key, value, mdictionary := l-new} = _min-view-sure(lk, lx, ll, lr);
+    let _View{key, value, mdictionary := l-new} = _min-view-sure(lk, lx, ll, lr);
     _View(key, value, _balance-R(k, x, l-new, r))
   }
 }
@@ -209,7 +209,7 @@ define _max-view-sure<a, b>(k: a, x: b, l: dictionary(a, b), r: dictionary(a, b)
   | Tip =>
     _View(k, x, l)
   | Bin(_, rk, rx, rl, rr) =>
-    let _View of {key, value, mdictionary := r-new} = _max-view-sure(rk, rx, rl, rr);
+    let _View{key, value, mdictionary := r-new} = _max-view-sure(rk, rx, rl, rr);
     _View(key, value, _balance-L(k, x, l, r-new))
   }
 }
@@ -222,17 +222,17 @@ inline _glue<k, v>(d1: dictionary(k, v), d2: dictionary(k, v)): dictionary(k, v)
     d1
   | Bin(ls, lk, lx, ll, lr), Bin(rs, rk, rx, rl, rr) =>
     if gt-int(ls, rs) {
-      let _View of {key, value, mdictionary := l-new} = _max-view-sure(lk, lx, ll, lr);
+      let _View{key, value, mdictionary := l-new} = _max-view-sure(lk, lx, ll, lr);
       _balance-R(key, value, l-new, Bin(rs, rk, rx, rl, rr))
     } else {
-      let _View of {key, value, mdictionary := r-new} = _min-view-sure(rk, rx, rl, rr);
+      let _View{key, value, mdictionary := r-new} = _min-view-sure(rk, rx, rl, rr);
       _balance-L(key, value, Bin(ls, lk, lx, ll, lr), r-new)
     }
   }
 }
 
 define delete<k, v>(L: &ord(k), d: dictionary(k, v), needle: k): dictionary(k, v) {
-  tie Ord of {compare} = L;
+  tie Ord{compare} = L;
   match d {
   | Tip =>
     Tip
@@ -250,7 +250,7 @@ define delete<k, v>(L: &ord(k), d: dictionary(k, v), needle: k): dictionary(k, v
 }
 
 inline make-insert<k, v>(o: ord(k)): (dictionary(k, v), k, v) -> dictionary(k, v) {
-  let Ord of {compare := !compare} = o;
+  let Ord{compare := !compare} = o;
   define loop(d: dictionary(k, v), key-X: k, val-X: v): dictionary(k, v) {
     match d {
     | Tip =>
@@ -270,7 +270,7 @@ inline make-insert<k, v>(o: ord(k)): (dictionary(k, v), k, v) -> dictionary(k, v
 }
 
 inline make-insert-with<k, v>(o: ord(k), !f: (v, v) -> v): (dictionary(k, v), k, v) -> dictionary(k, v) {
-  let Ord of {compare := !compare} = o;
+  let Ord{compare := !compare} = o;
   define loop(d: dictionary(k, v), key-X: k, val-X: v): dictionary(k, v) {
     match d {
     | Tip =>
@@ -290,7 +290,7 @@ inline make-insert-with<k, v>(o: ord(k), !f: (v, v) -> v): (dictionary(k, v), k,
 }
 
 inline make-lookup<k, v>(o: ord(k)): (d: &dictionary(k, v), needle: &k)[reg := rho] -> ?&v {
-  let Ord of {compare := !compare} = o;
+  let Ord{compare := !compare} = o;
   define loop(d: &dictionary(k, v), needle: &k)[reg := rho]: ?&v {
     case d {
     | Tip =>
@@ -311,7 +311,7 @@ inline make-lookup<k, v>(o: ord(k)): (d: &dictionary(k, v), needle: &k)[reg := r
 }
 
 inline make-delete<k, v>(o: ord(k)): (d: dictionary(k, v), needle: k) -> dictionary(k, v) {
-  let Ord of {compare := !compare} = o;
+  let Ord{compare := !compare} = o;
   define loop(d: dictionary(k, v), needle: k): dictionary(k, v) {
     match d {
     | Tip =>
@@ -331,7 +331,7 @@ inline make-delete<k, v>(o: ord(k)): (d: dictionary(k, v), needle: k) -> diction
 }
 
 inline _make-lookup-LE-with-cand<k, v>(L: ord(k)): (&dictionary(k, v), &k, &k, &v) -> pair(&k, &v) {
-  let Ord of {compare := !compare} = L;
+  let Ord{compare := !compare} = L;
   define loop(d: &dictionary(k, v), needle: &k, cand-k: &k, cand-v: &v): pair(&k, &v) {
     case d {
     | Tip =>
@@ -350,7 +350,7 @@ inline _make-lookup-LE-with-cand<k, v>(L: ord(k)): (&dictionary(k, v), &k, &k, &
 }
 
 inline make-lookup-LE<k, v>(!o: ord(k)): (&dictionary(k, v), &k)[reg := rho] -> ?pair(&k, &v) {
-  let Ord of {compare := !compare} = o;
+  let Ord{compare := !compare} = o;
   let !lookup-LE-with-cand = _make-lookup-LE-with-cand(o);
   define loop(d: &dictionary(k, v), needle: &k)[reg := rho]: ?pair(&k, &v) {
     case d {
@@ -374,7 +374,7 @@ inline make-lookup-LE<k, v>(!o: ord(k)): (&dictionary(k, v), &k)[reg := rho] -> 
 }
 
 inline _make-lookup-GE-with-cand<k, v>(L: ord(k)): (&dictionary(k, v), &k, &k, &v) -> pair(&k, &v) {
-  let Ord of {compare := !compare} = L;
+  let Ord{compare := !compare} = L;
   define loop(d: &dictionary(k, v), needle: &k, cand-k: &k, cand-v: &v): pair(&k, &v) {
     case d {
     | Tip =>
@@ -393,7 +393,7 @@ inline _make-lookup-GE-with-cand<k, v>(L: ord(k)): (&dictionary(k, v), &k, &k, &
 }
 
 inline make-lookup-GE<k, v>(!o: ord(k)): (&dictionary(k, v), &k)[reg := rho] -> ?pair(&k, &v) {
-  let Ord of {compare := !compare} = o;
+  let Ord{compare := !compare} = o;
   let !lookup-GE-with-cand = _make-lookup-GE-with-cand(o);
   define loop(d: &dictionary(k, v), needle: &k)[reg := rho]: ?pair(&k, &v) {
     case d {

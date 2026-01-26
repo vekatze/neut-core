@@ -32,7 +32,7 @@ define ne-binary(t1: &binary, t2: &binary): bool {
 }
 
 inline as-eq: eq(binary) {
-  Eq of {equal := eq-binary}
+  Eq{equal := eq-binary}
 }
 
 // eq-prefix("foobar", "foo") => True

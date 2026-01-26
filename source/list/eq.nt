@@ -6,8 +6,8 @@ import {
 }
 
 inline as-eq<a>(f: eq(a)): eq(list(a)) {
-  let Eq of {equal := !eq} = f;
-  Eq of {
+  let Eq{equal := !eq} = f;
+  Eq{
     equal := {
       define self(xs, ys) {
         case xs, ys {
@@ -38,7 +38,7 @@ define member<a>(e: &eq(a), xs: &list(a), value: &a): bool {
   | Nil =>
     False
   | Cons(y, ys) =>
-    tie Eq of {equal} = e;
+    tie Eq{equal} = e;
     if equal(value, y) {
       True
     } else {

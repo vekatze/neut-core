@@ -12,7 +12,7 @@ define show-rune(ch: rune): text {
   result
 }
 
-inline as-show: show(rune) {
+constant as-show: show(rune) {
   Show{
     show := show-rune,
   }

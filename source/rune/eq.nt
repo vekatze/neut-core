@@ -17,7 +17,7 @@ define ne-rune(r1: rune, r2: rune): bool {
   ne-int32(r1, r2)
 }
 
-inline as-eq: eq(rune) {
+constant as-eq: eq(rune) {
   Eq{
     equal := {
       function (x, y) {

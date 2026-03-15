@@ -4,7 +4,7 @@ import {
   this.unit {Unit, unit},
 }
 
-inline as-ord: ord(unit) {
+constant as-ord: ord(unit) {
   Ord{
     compare := {
       function (x1, x2) {

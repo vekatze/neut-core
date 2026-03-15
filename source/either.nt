@@ -71,11 +71,11 @@ define swap<a, b>(v: either(a, b)): either(b, a) {
   }
 }
 
-inline none<a>: ?a {
+constant none<a>: ?a {
   Left(Unit)
 }
 
-inline rho<a>: either(a, unit) {
+constant rho<a>: either(a, unit) {
   Right(Unit)
 }
 

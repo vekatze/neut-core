@@ -33,14 +33,14 @@ define interpret(xs: list(flag)): c-int {
   })
 }
 
-inline for-r: list(flag) {
+constant for-r: list(flag) {
   List[R]
 }
 
-inline for-rw: list(flag) {
+constant for-rw: list(flag) {
   List[RW, Create]
 }
 
-inline for-rw-append: list(flag) {
+constant for-rw-append: list(flag) {
   List[RW, Create, Append]
 }

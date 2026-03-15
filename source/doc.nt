@@ -48,7 +48,7 @@ data doc {
 | Group(doc)
 }
 
-inline empty: doc {
+constant empty: doc {
   Chunk(Chunk-Empty)
 }
 
@@ -96,7 +96,7 @@ rule-right join {
   },
 }
 
-inline newline: doc {
+constant newline: doc {
   Chunk(Chunk-Choose(Chunk-Text-N(""), Chunk-Line))
 }
 

@@ -32,7 +32,7 @@ inline size<k, v>(d: &dictionary(k, v)): int {
   }
 }
 
-inline empty<k, v>: dictionary(k, v) {
+constant empty<k, v>: dictionary(k, v) {
   Tip
 }
 
@@ -40,11 +40,11 @@ inline singleton<k, v>(key: k, value: v): dictionary(k, v) {
   Bin{size := 1, left := Tip, right := Tip, key, value}
 }
 
-inline _delta: int {
+constant _delta: int {
   3
 }
 
-inline _ratio: int {
+constant _ratio: int {
   2
 }
 

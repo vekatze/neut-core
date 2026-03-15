@@ -36,7 +36,7 @@ alias _Prefix {
   int
 }
 
-inline empty<a>: intmap(a) {
+constant empty<a>: intmap(a) {
   Nil
 }
 

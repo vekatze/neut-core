@@ -5,7 +5,7 @@ import {
   this.text {text},
 }
 
-inline as-show: show(bool) {
+constant as-show: show(bool) {
   Show(function (b) {
     if b {
       *"True"

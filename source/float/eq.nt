@@ -3,6 +3,6 @@ import {
   this.float.ord {as-ord},
 }
 
-inline as-eq: eq(float) {
+constant as-eq: eq(float) {
   from-ord(as-ord)
 }

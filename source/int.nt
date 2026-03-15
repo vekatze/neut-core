@@ -54,10 +54,10 @@ define power-int(a: int, b: int): int {
   f(a, b, 1)
 }
 
-inline int-max: int {
+constant int-max: int {
   9_223_372_036_854_775_807
 }
 
-inline int-min: int {
+constant int-min: int {
   -9_223_372_036_854_775_808
 }

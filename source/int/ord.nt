@@ -5,7 +5,7 @@ import {
   this.ordering {EQ, GT, LT},
 }
 
-inline as-ord: ord(int) {
+constant as-ord: ord(int) {
   Ord{
     compare := {
       function (x, y) {
@@ -21,7 +21,7 @@ inline as-ord: ord(int) {
   }
 }
 
-inline as-ord-int8: ord(int8) {
+constant as-ord-int8: ord(int8) {
   Ord{
     compare := {
       function (x, y) {

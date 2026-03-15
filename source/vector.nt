@@ -185,7 +185,7 @@ foreign {
   llvm.memcpy.p0.p0.i64(pointer, pointer, int64, int1): void,
 }
 
-inline _extend-factor: int {
+constant _extend-factor: int {
   2
 }
 

@@ -4,7 +4,7 @@ import {
   this.text.show {_escape},
 }
 
-define show-rune(ch: rune): text {
+define show-rune(ch: rune) -> text {
   let base = this.text.singleton(ch);
   let len on base = text-byte-length(base);
   let result on base = join(_escape(base, len, 0, 0));

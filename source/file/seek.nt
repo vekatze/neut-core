@@ -10,7 +10,7 @@ data seek {
 | END
 }
 
-define interpret(s: seek): c-int {
+define interpret(s: seek) -> c-int {
   match s {
   | SET =>
     SEEK_SET

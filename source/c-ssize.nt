@@ -15,7 +15,7 @@ data c-ssize {
 | C-SSize(_c-ssize)
 }
 
-inline from-c-ssize(x: c-ssize): int {
+inline from-c-ssize(x: c-ssize) -> int {
   let C-SSize(x) = x;
   introspect architecture {
   | amd64 =>
@@ -25,7 +25,7 @@ inline from-c-ssize(x: c-ssize): int {
   }
 }
 
-inline add-c-ssize(x: c-ssize, y: c-ssize): c-ssize {
+inline add-c-ssize(x: c-ssize, y: c-ssize) -> c-ssize {
   let C-SSize(x) = x;
   let C-SSize(y) = y;
   introspect architecture {
@@ -36,7 +36,7 @@ inline add-c-ssize(x: c-ssize, y: c-ssize): c-ssize {
   }
 }
 
-inline mul-c-ssize(x: c-ssize, y: c-ssize): c-ssize {
+inline mul-c-ssize(x: c-ssize, y: c-ssize) -> c-ssize {
   let C-SSize(x) = x;
   let C-SSize(y) = y;
   introspect architecture {
@@ -47,7 +47,7 @@ inline mul-c-ssize(x: c-ssize, y: c-ssize): c-ssize {
   }
 }
 
-inline lt-c-ssize(x: c-ssize, y: c-ssize): bool {
+inline lt-c-ssize(x: c-ssize, y: c-ssize) -> bool {
   let C-SSize(x) = x;
   let C-SSize(y) = y;
   introspect architecture {
@@ -58,7 +58,7 @@ inline lt-c-ssize(x: c-ssize, y: c-ssize): bool {
   }
 }
 
-inline eq-c-ssize(x: c-ssize, y: c-ssize): bool {
+inline eq-c-ssize(x: c-ssize, y: c-ssize) -> bool {
   let C-SSize(x) = x;
   let C-SSize(y) = y;
   introspect architecture {

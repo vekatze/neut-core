@@ -8,7 +8,7 @@ import {
   this.unit {Unit, unit},
 }
 
-define write-binary(b: &buffer, content: &binary)[r := rho]: system(unit) {
+define write-binary(b: &buffer, content: &binary)[r := rho] -> system(unit) {
   _write(
     b,
     this.binary._get-content-pointer(content),
@@ -17,7 +17,7 @@ define write-binary(b: &buffer, content: &binary)[r := rho]: system(unit) {
   )
 }
 
-define zen(): unit {
+define zen() -> unit {
   let !k = make-buffer(stdout, 0);
   let _ = k;
   let _ = k;

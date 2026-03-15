@@ -35,7 +35,7 @@ foreign {
   neut_core_v0_52_double_strlen(float, int): int,
 }
 
-define _size-chunk(c: &chunk): int {
+define _size-chunk(c: &chunk) -> int {
   case c {
   | Chunk-Empty =>
     0
@@ -62,7 +62,7 @@ define _size-chunk(c: &chunk): int {
   }
 }
 
-define _layout-chunk(k: &_doc-kit, c: &chunk): text {
+define _layout-chunk(k: &_doc-kit, c: &chunk) -> text {
   case c {
   | Chunk-Empty =>
     *""
@@ -100,7 +100,7 @@ define _layout-chunk(k: &_doc-kit, c: &chunk): text {
   }
 }
 
-define zen(): unit {
+define zen() -> unit {
   pin x = show-float(3.8, 20);
   print(x);
 }

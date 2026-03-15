@@ -18,7 +18,7 @@ import {
   this.vector {Vector, product, push-back},
 }
 
-define with-cell(i: int): int {
+define with-cell(i: int) -> int {
   let c = make-cell(lift {i});
   let _ on c =
     mutate(c, function (x) {
@@ -39,11 +39,11 @@ define with-cell(i: int): int {
   axiom-T(this.cell.extract(c))
 }
 
-define box-int(i: int): +int {
+define box-int(i: int) -> +int {
   magic cast(int, +int, i)
 }
 
-define use-rune(r: rune): unit {
+define use-rune(r: rune) -> unit {
   match r {
   | `a` =>
     print("found a\n")
@@ -77,7 +77,7 @@ define use-rune(r: rune): unit {
 //   let w = some-func {y := 20};
 //   print-int-line(w);
 // }
-define my-random-in-range(lower-bound: int32, upper-bound: int32): int {
+define my-random-in-range(lower-bound: int32, upper-bound: int32) -> int {
   let range-size = sub-int32(upper-bound, lower-bound);
   print("range-size: ");
   print-int-line(sext-int32-int(range-size));
@@ -89,7 +89,7 @@ define my-random-in-range(lower-bound: int32, upper-bound: int32): int {
   add-int(value, sext-int32-int(lower-bound))
 }
 
-define use-text(x: &text): text {
+define use-text(x: &text) -> text {
   axiom-T(box x {x})
 }
 
@@ -109,15 +109,15 @@ data wrap {
 //   print-line("hello");
 //   unit
 // }
-define increment(x: int): int {
+define increment(x: int) -> int {
   add-int(x, 1)
 }
 
-define is-even(x: int): bool {
+define is-even(x: int) -> bool {
   eq-int(rem-int(x, 2), 0)
 }
 
-inline loop<a>(xs: list(a)): list(a) {
+inline loop<a>(xs: list(a)) -> list(a) {
   match xs {
   | Nil =>
     Nil
@@ -126,11 +126,11 @@ inline loop<a>(xs: list(a)): list(a) {
   }
 }
 
-define make-pair<a>(!x: a): pair(a, a) {
+define make-pair<a>(!x: a) -> pair(a, a) {
   Pair(x, x)
 }
 
-define-meta sample<a>(): 'int {
+define-meta sample<a>() -> 'int {
   let b = magic eq-type(list(int), a);
   if b {
     quote {10}
@@ -144,9 +144,9 @@ data my-sample(a, b) {
 | Sample2(x: int, b)
 }
 
-define my-naive-loop-func(x: int): either(int, bool) {
+define my-naive-loop-func(x: int) -> either(int, bool) {
   let inner =
-    define loop(n: int): either(int, bool) {
+    define loop(n: int) -> either(int, bool) {
       if eq-int(n, 0) {
         Right(True)
       } else {
@@ -156,21 +156,21 @@ define my-naive-loop-func(x: int): either(int, bool) {
   inner(x)
 }
 
-script text-by-dest(x: &text): text {
+script text-by-dest(x: &text) -> text {
   let result = append(x, "test");
   result
 }
 
-define noetic-apply(f: &(int) -> bool): bool {
+define noetic-apply(f: &(int) -> bool) -> bool {
   let g = *f;
   g(1234)
 }
 
-define f<a, b>(g: (a) ->> b, x: a): b {
+define f<a, b>(g: (a) ->> b, x: a) -> b {
   g(x)
 }
 
-script my-either-func(x: int): either(int, bool) {
+script my-either-func(x: int) -> either(int, bool) {
   if eq-int(x, 0) {
     Left(x)
   } else {
@@ -178,9 +178,9 @@ script my-either-func(x: int): either(int, bool) {
   }
 }
 
-script my-loop-func(x: int): either(int, bool) {
+script my-loop-func(x: int) -> either(int, bool) {
   let inner =
-    script loop(n: int): either(int, bool) {
+    script loop(n: int) -> either(int, bool) {
       if eq-int(n, 0) {
         Right(True)
       } else {
@@ -190,16 +190,16 @@ script my-loop-func(x: int): either(int, bool) {
   inner(x)
 }
 
-script my-func(x: int): int {
+script my-func(x: int) -> int {
   let y = 30;
   add-int(x, y)
 }
 
-define use-my-func(): int {
+define use-my-func() -> int {
   my-func(20)
 }
 
-define zen(): unit {
+define zen() -> unit {
   pin val = text-by-dest("hello");
   print-line(val);
   pin v = my-loop-func(3);
@@ -523,7 +523,7 @@ define zen(): unit {
 // define exh(xs: list(int)): type {
 //   match xs {}
 // }
-define main(): unit {
+define main() -> unit {
   zen();
 }
 

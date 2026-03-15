@@ -15,11 +15,11 @@ constant as-show: show(bool) {
   })
 }
 
-define show(b: bool): text {
+define show(b: bool) -> text {
   let Show{show} = as-show;
   show(b)
 }
 
-define show-bool(b: bool): text {
+define show-bool(b: bool) -> text {
   this.bool.show.show(b)
 }

@@ -36,7 +36,7 @@ import {
   this.word,
 }
 
-inline-meta _meta-length<a>(xs: list(a)): int {
+inline-meta _meta-length<a>(xs: list(a)) -> int {
   match xs {
   | Nil =>
     0
@@ -45,7 +45,7 @@ inline-meta _meta-length<a>(xs: list(a)): int {
   }
 }
 
-inline-meta _meta-for-each<a, b>(xs: list(a), !f: (a) -> b): list(b) {
+inline-meta _meta-for-each<a, b>(xs: list(a), !f: (a) -> b) -> list(b) {
   match xs {
   | Nil =>
     Nil
@@ -54,12 +54,12 @@ inline-meta _meta-for-each<a, b>(xs: list(a), !f: (a) -> b): list(b) {
   }
 }
 
-inline-meta _meta-snd<a, b>(p: pair(a, b)): b {
+inline-meta _meta-snd<a, b>(p: pair(a, b)) -> b {
   let Pair(_, y) = p;
   y
 }
 
-inline-meta _join-text(t1: &text, t2: &text): &text {
+inline-meta _join-text(t1: &text, t2: &text) -> &text {
   let tmp = magic text-uncons(t1);
   match tmp {
   | Left(_) =>
@@ -70,15 +70,15 @@ inline-meta _join-text(t1: &text, t2: &text): &text {
 }
 
 nominal {
-  define-meta eq-data<a>(x: '&a, y: '&a): 'bool,
+  define-meta eq-data<a>(x: '&a, y: '&a) -> 'bool,
 }
 
-inline-meta _equal-vector<a>(xs: '&vector(a), ys: '&vector(a)): 'bool {
+inline-meta _equal-vector<a>(xs: '&vector(a), ys: '&vector(a)) -> 'bool {
   quote {
     let len-x = this.vector.length(unquote {xs});
     let len-y = this.vector.length(unquote {ys});
     if eq-int(len-x, len-y) {
-      this.vector.zip-fold(unquote {xs}, unquote {ys}, True, function (x: &a, y: &a, acc: bool, _: int): bool {
+      this.vector.zip-fold(unquote {xs}, unquote {ys}, True, function (x: &a, y: &a, acc: bool, _: int) -> bool {
         if acc {
           unquote {eq-data(quote {x}, quote {y})}
         } else {
@@ -91,7 +91,7 @@ inline-meta _equal-vector<a>(xs: '&vector(a), ys: '&vector(a)): 'bool {
   }
 }
 
-inline _load-nth-element(data-arg-num: int, cursor: int, x: pointer): pointer {
+inline _load-nth-element(data-arg-num: int, cursor: int, x: pointer) -> pointer {
   let u = this.word.size;
   let offset = mul-int(u, add-int(1, add-int(data-arg-num, cursor))); // x = (disc, data-args, cons-args)
   let elem-ptr = shift(x, offset);
@@ -104,7 +104,8 @@ inline-meta _eq-data-adt-cons<a>(
   cursor: int,
   x: '&a,
   y: '&a,
-): 'bool {
+)->
+'bool {
   match cons-arg-types {
   | Nil =>
     quote {True}
@@ -134,7 +135,8 @@ inline-meta _eq-data-adt<a>(
   disc: 'int,
   x: '&a,
   y: '&a,
-): 'bool {
+)->
+'bool {
   match constructors {
   | Nil =>
     quote {True}
@@ -150,7 +152,7 @@ inline-meta _eq-data-adt<a>(
   }
 }
 
-define-meta eq-data<a>(x: '&a, y: '&a): 'bool {
+define-meta eq-data<a>(x: '&a, y: '&a) -> 'bool {
   let k = magic inspect-type(a);
   match k {
   | Algebraic(_, data-args, cons-info) =>
@@ -265,7 +267,7 @@ define-meta eq-data<a>(x: '&a, y: '&a): 'bool {
   }
 }
 
-define zen(): unit {
+define zen() -> unit {
   pin xs: vector(list(int)) = this.vector.Vector[List[], List[10, 20]];
   pin ys: vector(list(int)) = this.vector.Vector[List[], List[10, 20]];
   let foo = eq-data::(xs, ys);

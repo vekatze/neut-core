@@ -8,7 +8,7 @@ import {
   this.unit {Unit, unit},
 }
 
-define write-bool(k: descriptor, x: bool)[r := rho]: system(unit) {
+define write-bool(k: descriptor, x: bool)[r := rho] -> system(unit) {
   if x {
     try _ = r;
     write(k, "True")
@@ -18,7 +18,7 @@ define write-bool(k: descriptor, x: bool)[r := rho]: system(unit) {
   }
 }
 
-define write-bool-line(k: descriptor, x: bool)[r := rho]: system(unit) {
+define write-bool-line(k: descriptor, x: bool)[r := rho] -> system(unit) {
   if x {
     try _ = r;
     write-line(k, "True")
@@ -28,12 +28,12 @@ define write-bool-line(k: descriptor, x: bool)[r := rho]: system(unit) {
   }
 }
 
-define print-bool(x: bool): unit {
+define print-bool(x: bool) -> unit {
   let _ = write-bool(stdout, x);
   Unit
 }
 
-define print-bool-line(x: bool): unit {
+define print-bool-line(x: bool) -> unit {
   let _ = write-bool-line(stdout, x);
   Unit
 }

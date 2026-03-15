@@ -11,29 +11,29 @@ import {
   this.unit {Unit, unit},
 }
 
-define write-doc(d: descriptor, x: &doc, ribbon-width: int)[r := rho]: system(unit) {
+define write-doc(d: descriptor, x: &doc, ribbon-width: int)[r := rho] -> system(unit) {
   pin tmp = show-doc(x, ribbon-width);
   try _ = r;
   write(d, tmp)
 }
 
-define write-doc-line(d: descriptor, x: &doc, ribbon-width: int)[r := rho]: system(unit) {
+define write-doc-line(d: descriptor, x: &doc, ribbon-width: int)[r := rho] -> system(unit) {
   pin tmp = show-doc(x, ribbon-width);
   try _ = r;
   write-line(d, tmp)
 }
 
-define print-doc(x: &doc, ribbon-width: int): unit {
+define print-doc(x: &doc, ribbon-width: int) -> unit {
   let _ = write-doc(stdout, x, ribbon-width);
   Unit
 }
 
-define print-doc-line(x: &doc, ribbon-width: int): unit {
+define print-doc-line(x: &doc, ribbon-width: int) -> unit {
   let _ = write-doc-line(stdout, x, ribbon-width);
   Unit
 }
 
-define zen(): unit {
+define zen() -> unit {
   pin item =
     Group(join[
       ansi-fg(Blue),

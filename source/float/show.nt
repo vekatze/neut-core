@@ -15,7 +15,7 @@ foreign {
   sprintf(pointer, pointer): c-int,
 }
 
-define _show(c-fmt: &text, x: float): text {
+define _show(c-fmt: &text, x: float) -> text {
   let fmt = _get-content-pointer(c-fmt);
   let size = magic external snprintf(null-pointer, 0, fmt)(x: float);
   let ptr = this.external.malloc(C-Size(add-int(from-c-int(add-c-int(size, 1)), mul-int(this.word.size, 2))));
@@ -30,7 +30,7 @@ foreign {
   neut_core_v0_52_build_fixed_buf(pointer, int, float, int, int): int,
 }
 
-define show-float(x: float, decimals: int): text {
+define show-float(x: float, decimals: int) -> text {
   let size = 80;
   let add-newline = 0;
   let text-ptr = malloc(C-Size(size));

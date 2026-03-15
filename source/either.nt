@@ -8,7 +8,7 @@ data either(a, b) {
 | Right(b)
 }
 
-define is-left<a, b>(v: &either(a, b)): bool {
+define is-left<a, b>(v: &either(a, b)) -> bool {
   case v {
   | Left(_) =>
     True
@@ -17,7 +17,7 @@ define is-left<a, b>(v: &either(a, b)): bool {
   }
 }
 
-define is-right<a, b>(v: &either(a, b)): bool {
+define is-right<a, b>(v: &either(a, b)) -> bool {
   case v {
   | Left(_) =>
     False
@@ -26,7 +26,7 @@ define is-right<a, b>(v: &either(a, b)): bool {
   }
 }
 
-define from-right<a, b>(lr: either(a, b), fallback: b): b {
+define from-right<a, b>(lr: either(a, b), fallback: b) -> b {
   match lr {
   | Right(r) =>
     r
@@ -35,7 +35,7 @@ define from-right<a, b>(lr: either(a, b), fallback: b): b {
   }
 }
 
-define from-left<a, b>(lr: either(a, b), fallback: a): a {
+define from-left<a, b>(lr: either(a, b), fallback: a) -> a {
   match lr {
   | Right(_) =>
     fallback
@@ -44,7 +44,7 @@ define from-left<a, b>(lr: either(a, b), fallback: a): a {
   }
 }
 
-inline map-right<a, b, c>(v: either(a, b), f: (b) -> c): either(a, c) {
+inline map-right<a, b, c>(v: either(a, b), f: (b) -> c) -> either(a, c) {
   match v {
   | Left(l) =>
     Left(l)
@@ -53,7 +53,7 @@ inline map-right<a, b, c>(v: either(a, b), f: (b) -> c): either(a, c) {
   }
 }
 
-inline map-left<a, b, c>(v: either(a, b), f: (a) -> c): either(c, b) {
+inline map-left<a, b, c>(v: either(a, b), f: (a) -> c) -> either(c, b) {
   match v {
   | Left(l) =>
     Left(f(l))
@@ -62,7 +62,7 @@ inline map-left<a, b, c>(v: either(a, b), f: (a) -> c): either(c, b) {
   }
 }
 
-define swap<a, b>(v: either(a, b)): either(b, a) {
+define swap<a, b>(v: either(a, b)) -> either(b, a) {
   match v {
   | Left(l) =>
     Right(l)
@@ -79,7 +79,7 @@ constant rho<a>: either(a, unit) {
   Right(Unit)
 }
 
-define to-option<a, b>(v: either(a, b)): ?b {
+define to-option<a, b>(v: either(a, b)) -> ?b {
   match v {
   | Right(r) =>
     Right(r)

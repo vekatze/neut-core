@@ -43,7 +43,7 @@ data _mvar-info {
   )
 }
 
-inline _get-info<a>(x: &mvar(a)): _mvar-info {
+inline _get-info<a>(x: &mvar(a)) -> _mvar-info {
   let mutex-size = from-c-size(THREAD_MUTEX_SIZE);
   let cond-size = from-c-size(THREAD_COND_SIZE);
   let u = this.word.size;
@@ -56,7 +56,7 @@ inline _get-info<a>(x: &mvar(a)): _mvar-info {
   _MVar-Info{flag-ptr, value-ptr, mutex-ptr, readable-cond-ptr, writable-cond-ptr, type-ptr}
 }
 
-define _new<a>(): mvar(a) {
+define _new<a>() -> mvar(a) {
   let mutex-size = from-c-size(THREAD_MUTEX_SIZE);
   let cond-size = from-c-size(THREAD_COND_SIZE);
   let u = this.word.size;
@@ -106,11 +106,11 @@ resource _mvar {
   },
 }
 
-inline make-mvar<a>(): mvar(a) {
+inline make-mvar<a>() -> mvar(a) {
   _new<a>()
 }
 
-define send<a>(ch: &mvar(a), x: +a): unit {
+define send<a>(ch: &mvar(a), x: +a) -> unit {
   let _MVar-Info{flag-ptr, value-ptr, mutex-ptr, readable-cond-ptr, writable-cond-ptr} = _get-info(ch);
   thread-mutex-lock(mutex-ptr);
   let flag = load-int(flag-ptr);
@@ -123,7 +123,7 @@ define send<a>(ch: &mvar(a), x: +a): unit {
   thread-mutex-unlock(mutex-ptr);
 }
 
-define receive<a>(ch: &mvar(a)): +a {
+define receive<a>(ch: &mvar(a)) -> +a {
   let _MVar-Info{flag-ptr, value-ptr, mutex-ptr, readable-cond-ptr, writable-cond-ptr} = _get-info(ch);
   thread-mutex-lock(mutex-ptr);
   let flag = load-int(flag-ptr);

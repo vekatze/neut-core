@@ -4,7 +4,7 @@ import {
   this.pair {Pair, pair},
 }
 
-inline as-ord<a, b>(f: ord(a), g: ord(b)): ord(pair(a, b)) {
+inline as-ord<a, b>(f: ord(a), g: ord(b)) -> ord(pair(a, b)) {
   let Ord{compare := compare-f} = f;
   let Ord{compare := compare-g} = g;
   Ord{
@@ -25,7 +25,7 @@ inline as-ord<a, b>(f: ord(a), g: ord(b)): ord(pair(a, b)) {
   }
 }
 
-inline as-ord-right-biased<a, b>(f: ord(a), g: ord(b)): ord(pair(a, b)) {
+inline as-ord-right-biased<a, b>(f: ord(a), g: ord(b)) -> ord(pair(a, b)) {
   let Ord{compare := compare-f} = f;
   let Ord{compare := compare-g} = g;
   Ord{

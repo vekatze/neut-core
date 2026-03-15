@@ -15,7 +15,7 @@ data c-pid {
 | C-PID(_c-pid)
 }
 
-inline eq-c-pid(x: c-pid, y: c-pid): bool {
+inline eq-c-pid(x: c-pid, y: c-pid) -> bool {
   let C-PID(x) = x;
   let C-PID(y) = y;
   introspect architecture {

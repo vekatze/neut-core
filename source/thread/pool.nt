@@ -30,7 +30,7 @@ data pool(a: type) {
   )
 }
 
-define _close-pool<a>(k: pool(a)): unit {
+define _close-pool<a>(k: pool(a)) -> unit {
   let _Pool{workers, tasks-ref, futures-ref} = k;
   let size on workers = this.vector.length(workers);
   let _ on tasks-ref =
@@ -49,10 +49,10 @@ define _close-pool<a>(k: pool(a)): unit {
   Unit
 }
 
-define _setup-workers<a>(tasks-ref: &channel(_task(a)), size: int): vector(thread(unit)) {
+define _setup-workers<a>(tasks-ref: &channel(_task(a)), size: int) -> vector(thread(unit)) {
   grow(this.vector.make(8), max-int(size, 1), function (acc, _) {
     push-back(acc, this.thread.detach<unit>(
-      define worker(): unit {
+      define worker() -> unit {
         let v = axiom-T(receive(tasks-ref));
         match v {
         | _Finish =>
@@ -67,7 +67,7 @@ define _setup-workers<a>(tasks-ref: &channel(_task(a)), size: int): vector(threa
   })
 }
 
-inline with-thread-pool<a, b, e>(size: int, env: e, f: (p: &pool(a), env: +e) -> +b): b {
+inline with-thread-pool<a, b, e>(size: int, env: e, f: (p: &pool(a), env: +e) -> +b) -> b {
   let tasks-ref = cast<channel(_task(a)), &channel(_task(a))>(make-channel());
   let futures-ref = make-cell(box {this.vector.make(8)});
   let workers = _setup-workers(tasks-ref, size);
@@ -79,7 +79,7 @@ inline with-thread-pool<a, b, e>(size: int, env: e, f: (p: &pool(a), env: +e) ->
   axiom-T(result)
 }
 
-define detach-task<a>(k: &pool(a), f: () -> +a): future(a) {
+define detach-task<a>(k: &pool(a), f: () -> +a) -> future(a) {
   tie _Pool{tasks-ref, futures-ref} = k;
   let result-chan = cast<mvar(a), &mvar(a)>(make-mvar<a>());
   mutate(futures-ref, function (futures) {
@@ -94,12 +94,12 @@ define detach-task<a>(k: &pool(a), f: () -> +a): future(a) {
   _Future(result-chan)
 }
 
-define attach-task<a>(i: future(a)): +a {
+define attach-task<a>(i: future(a)) -> +a {
   let _Future(result-chan) = i;
   this.thread.mvar.receive(result-chan)
 }
 
-inline for-each-parallel<a, b>(worker-num: int, xs: vector(a), f: (a) -> b): vector(b) {
+inline for-each-parallel<a, b>(worker-num: int, xs: vector(a), f: (a) -> b) -> vector(b) {
   with-thread-pool(worker-num, Pair(xs, f), function (p, env) {
     let Pair(xs, f) = meta-pair-in(env);
     let fs =
@@ -116,7 +116,7 @@ inline for-each-parallel<a, b>(worker-num: int, xs: vector(a), f: (a) -> b): vec
   })
 }
 
-define zen(): unit {
+define zen() -> unit {
   pin result =
     for-each-parallel(5, Vector[1, 2, 3, 4, 5], function (x) {
       lift {add-int(x, 10)}

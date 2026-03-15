@@ -52,46 +52,46 @@ constant empty: doc {
   Chunk(Chunk-Empty)
 }
 
-inline atom(t: text): doc {
+inline atom(t: text) -> doc {
   Chunk(Chunk-Text(t))
 }
 
-inline atom-N(t: &text): doc {
+inline atom-N(t: &text) -> doc {
   Chunk(Chunk-Text-N(t))
 }
 
-inline atom-style(t: text): doc {
+inline atom-style(t: text) -> doc {
   Chunk(Chunk-Style(t))
 }
 
-inline atom-style-N(t: &text): doc {
+inline atom-style-N(t: &text) -> doc {
   Chunk(Chunk-Style-N(t))
 }
 
-inline atom-int(x: int): doc {
+inline atom-int(x: int) -> doc {
   Chunk(Chunk-Int(x))
 }
 
-inline atom-float(x: float, decimals: int): doc {
+inline atom-float(x: float, decimals: int) -> doc {
   Chunk(Chunk-Float(x, decimals))
 }
 
-inline atom-rune(x: rune): doc {
+inline atom-rune(x: rune) -> doc {
   Chunk(Chunk-Rune(x))
 }
 
-inline break(t: &text): doc {
+inline break(t: &text) -> doc {
   Chunk(Chunk-Choose(Chunk-Text-N(t), Chunk-Line))
 }
 
 rule-right join {
-  function leaf(_: int): doc {
+  function leaf(_: int) -> doc {
     empty
   },
-  function node-left(d: doc, acc: doc): doc {
+  function node-left(d: doc, acc: doc) -> doc {
     Seq(d, acc)
   },
-  function root<a>(x: a): a {
+  function root<a>(x: a) -> a {
     x
   },
 }
@@ -100,7 +100,7 @@ constant newline: doc {
   Chunk(Chunk-Choose(Chunk-Text-N(""), Chunk-Line))
 }
 
-define _nested-comma-seq(prefix: doc, body: doc, suffix: doc): doc {
+define _nested-comma-seq(prefix: doc, body: doc, suffix: doc) -> doc {
   join[
     prefix,
     Nest(
@@ -115,7 +115,7 @@ define _nested-comma-seq(prefix: doc, body: doc, suffix: doc): doc {
   ]
 }
 
-inline ansi-doc(s: style): doc {
+inline ansi-doc(s: style) -> doc {
   match s {
   | Normal =>
     atom-style-N("\u{1b}[0m")
@@ -253,11 +253,11 @@ inline ansi-doc(s: style): doc {
   }
 }
 
-define ansi-fg(c: color-ansi): doc {
+define ansi-fg(c: color-ansi) -> doc {
   ansi-doc(Color(Foreground, Color-16(Vivid, c)))
 }
 
-define ansi-bg(c: color-ansi): doc {
+define ansi-bg(c: color-ansi) -> doc {
   ansi-doc(Color(Background, Color-16(Vivid, c)))
 }
 

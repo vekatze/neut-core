@@ -10,12 +10,12 @@ foreign {
   memcmp(pointer, pointer, c-size): int,
 }
 
-define _eq-binary(ptr1: pointer, ptr2: pointer, len: int): bool {
+define _eq-binary(ptr1: pointer, ptr2: pointer, len: int) -> bool {
   let result = magic external memcmp(ptr1, ptr2, C-Size(len));
   eq-int(result, 0)
 }
 
-define eq-binary(t1: &binary, t2: &binary): bool {
+define eq-binary(t1: &binary, t2: &binary) -> bool {
   let len1 = binary-length(t1);
   let len2 = binary-length(t2);
   if ne-int(len1, len2) {
@@ -27,7 +27,7 @@ define eq-binary(t1: &binary, t2: &binary): bool {
   }
 }
 
-define ne-binary(t1: &binary, t2: &binary): bool {
+define ne-binary(t1: &binary, t2: &binary) -> bool {
   not(eq-binary(t1, t2))
 }
 
@@ -38,7 +38,7 @@ constant as-eq: eq(binary) {
 // eq-prefix("foobar", "foo") => True
 // eq-prefix("foobar", "") => True
 // eq-prefix("foobar", "bar") => False
-define eq-prefix(haystack: &binary, needle: &binary): bool {
+define eq-prefix(haystack: &binary, needle: &binary) -> bool {
   let len-haystack = binary-length(haystack);
   let len-needle = binary-length(needle);
   if lt-int(len-haystack, len-needle) {
@@ -53,7 +53,7 @@ define eq-prefix(haystack: &binary, needle: &binary): bool {
 // eq-suffix("foobar", "bar") => True
 // eq-suffix("foobar", "") => True
 // eq-suffix("foobar", "foo") => False
-define eq-suffix(haystack: &binary, needle: &binary): bool {
+define eq-suffix(haystack: &binary, needle: &binary) -> bool {
   let len-haystack = binary-length(haystack);
   let len-needle = binary-length(needle);
   if lt-int(len-haystack, len-needle) {
@@ -66,7 +66,7 @@ define eq-suffix(haystack: &binary, needle: &binary): bool {
   }
 }
 
-define _eq-infix(index: int, len1: int, len2: int, needle: &binary, haystack: &binary): bool {
+define _eq-infix(index: int, len1: int, len2: int, needle: &binary, haystack: &binary) -> bool {
   if lt-int(len2, add-int(index, len1)) {
     False
   } else {
@@ -85,7 +85,7 @@ define _eq-infix(index: int, len1: int, len2: int, needle: &binary, haystack: &b
 // eq-infix("foobar", "") => True
 // eq-infix("foobar", "fo") => True
 // eq-infix("foobar", "fb") => False
-define eq-infix(haystack: &binary, needle: &binary): bool {
+define eq-infix(haystack: &binary, needle: &binary) -> bool {
   let len-haystack = binary-length(haystack);
   let len-needle = binary-length(needle);
   _eq-infix(0, len-needle, len-haystack, needle, haystack)

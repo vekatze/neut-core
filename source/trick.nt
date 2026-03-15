@@ -6,12 +6,12 @@ import {
   this.unit {Unit, unit},
 }
 
-define panic<a>(t: &text): a {
+define panic<a>(t: &text) -> a {
   print(t);
   exit(1)
 }
 
-inline _assert(message: &text, check: () -> bool): unit {
+inline _assert(message: &text, check: () -> bool) -> unit {
   introspect build-mode {
   | release =>
     let _ = check;

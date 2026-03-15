@@ -34,39 +34,39 @@ foreign {
   neut_core_v0_52_get_online_cpu_count(): int,
 }
 
-inline _is-not-zero(x: c-int): bool {
+inline _is-not-zero(x: c-int) -> bool {
   ne-c-int(x, 0)
 }
 
-define get-errno(): c-int {
+define get-errno() -> c-int {
   magic external neut_core_v0_52_errno()
 }
 
-define _wifexited(ptr: c-int): bool {
+define _wifexited(ptr: c-int) -> bool {
   _is-not-zero(magic external neut_core_v0_52_wifexited(ptr))
 }
 
-define _wifsignaled(ptr: c-int): bool {
+define _wifsignaled(ptr: c-int) -> bool {
   _is-not-zero(magic external neut_core_v0_52_wifsignaled(ptr))
 }
 
-define _wifstopped(ptr: c-int): bool {
+define _wifstopped(ptr: c-int) -> bool {
   _is-not-zero(magic external neut_core_v0_52_wifstopped(ptr))
 }
 
-define _wexitstatus(ptr: c-int): c-int {
+define _wexitstatus(ptr: c-int) -> c-int {
   magic external neut_core_v0_52_wexitstatus(ptr)
 }
 
-define _wtermsig(ptr: c-int): c-int {
+define _wtermsig(ptr: c-int) -> c-int {
   magic external neut_core_v0_52_wtermsig(ptr)
 }
 
-define _wcoredump(ptr: c-int): bool {
+define _wcoredump(ptr: c-int) -> bool {
   _is-not-zero(magic external neut_core_v0_52_wcoredump(ptr))
 }
 
-define _wstopsig(ptr: c-int): c-int {
+define _wstopsig(ptr: c-int) -> c-int {
   magic external neut_core_v0_52_wstopsig(ptr)
 }
 
@@ -148,35 +148,35 @@ constant UINT32_MAX: int32 {
   }
 }
 
-inline sleep(duration: float64): int {
+inline sleep(duration: float64) -> int {
   magic external neut_core_v0_52_sleep(duration)
 }
 
-inline _parse_binary(num-text-ptr: pointer, len: int, result-ptr: pointer): int {
+inline _parse_binary(num-text-ptr: pointer, len: int, result-ptr: pointer) -> int {
   magic opaque-value {
     magic external neut_core_v0_52_parse_binary(num-text-ptr, len, result-ptr)
   }
 }
 
-inline _parse_decimal(num-text-ptr: pointer, len: int, result-ptr: pointer): int {
+inline _parse_decimal(num-text-ptr: pointer, len: int, result-ptr: pointer) -> int {
   magic opaque-value {
     magic external neut_core_v0_52_parse_decimal(num-text-ptr, len, result-ptr)
   }
 }
 
-inline _parse_hex(num-text-ptr: pointer, len: int, result-ptr: pointer): int {
+inline _parse_hex(num-text-ptr: pointer, len: int, result-ptr: pointer) -> int {
   magic opaque-value {
     magic external neut_core_v0_52_parse_hex(num-text-ptr, len, result-ptr)
   }
 }
 
-inline _parse_double(num-text-ptr: pointer, len: int, result-ptr: pointer): int {
+inline _parse_double(num-text-ptr: pointer, len: int, result-ptr: pointer) -> int {
   magic opaque-value {
     magic external neut_core_v0_52_parse_double(num-text-ptr, len, result-ptr)
   }
 }
 
-inline get-cpu-count(): int {
+inline get-cpu-count() -> int {
   magic opaque-value {
     magic external neut_core_v0_52_get_online_cpu_count()
   }

@@ -19,7 +19,7 @@ import {
   },
 }
 
-define _is-lower-hex-digit(r: rune): bool {
+define _is-lower-hex-digit(r: rune) -> bool {
   any[
     and(le-rune(`0`, r), le-rune(r, `9`)),
     and(le-rune(`a`, r), le-rune(r, `f`)),
@@ -30,7 +30,7 @@ data error {
 | Parse-Error(text)
 }
 
-define _read-char(r: rune, t: text): either(error, text) {
+define _read-char(r: rune, t: text) -> either(error, text) {
   match this.text.uncons(t) {
   | Right(Pair(r-found, rest)) =>
     if eq-rune(r, r-found) {
@@ -43,7 +43,7 @@ define _read-char(r: rune, t: text): either(error, text) {
   }
 }
 
-define _read-unicode-scalar-value(t: &text): either(error, rune) {
+define _read-unicode-scalar-value(t: &text) -> either(error, rune) {
   match parse-hex(t) {
   | Left(_) =>
     Left(Parse-Error(format("Could not parse `{}` as a hexadecimal integer", List[*t])))
@@ -57,7 +57,7 @@ define _read-unicode-scalar-value(t: &text): either(error, rune) {
   }
 }
 
-define _unquote-text(t: text): either(error, list(text)) {
+define _unquote-text(t: text) -> either(error, list(text)) {
   match this.text.uncons(t) {
   | Left(_) =>
     Right(List[*"\\"])
@@ -91,7 +91,7 @@ define _unquote-text(t: text): either(error, list(text)) {
   }
 }
 
-define _parse-text-fragment(t: &text): either(error, list(text)) {
+define _parse-text-fragment(t: &text) -> either(error, list(text)) {
   match split(t, "\\") {
   | Nil =>
     // unreachable
@@ -102,7 +102,7 @@ define _parse-text-fragment(t: &text): either(error, list(text)) {
   }
 }
 
-define parse-text(t: &text): either(error, text) {
+define parse-text(t: &text) -> either(error, text) {
   pin ts = split(t, "\\\\");
   try tss = for-each-EN(ts, _parse-text-fragment);
   Right(this.text.join(this.list.concat(intercalate(tss, List[*"\\"]))))

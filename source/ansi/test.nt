@@ -46,23 +46,23 @@ import {
   this.unit {Unit, unit},
 }
 
-define _write-space(k: &ansi-kit): system(unit) {
+define _write-space(k: &ansi-kit) -> system(unit) {
   try _ = write(k, " ");
   write-code(k, Set-Style(Normal))
 }
 
-define _write-X(k: &ansi-kit): system(unit) {
+define _write-X(k: &ansi-kit) -> system(unit) {
   try _ = write(k, "X");
   write-code(k, Set-Style(Normal))
 }
 
-define _write-XX(k: &ansi-kit): system(unit) {
+define _write-XX(k: &ansi-kit) -> system(unit) {
   try _ = write(k, "XX");
   try _ = write-code(k, Set-Style(Normal));
   write(k, " ")
 }
 
-define _test-color-foreground-dull(k: &ansi-kit): system(unit) {
+define _test-color-foreground-dull(k: &ansi-kit) -> system(unit) {
   try _ = write-code(k, Set-Style(Color(Foreground, Color-16(Dull, Black))));
   try _ = _write-XX(k);
   try _ = write-code(k, Set-Style(Color(Foreground, Color-16(Dull, Red))));
@@ -81,7 +81,7 @@ define _test-color-foreground-dull(k: &ansi-kit): system(unit) {
   _write-XX(k)
 }
 
-define _test-color-background-dull(k: &ansi-kit): system(unit) {
+define _test-color-background-dull(k: &ansi-kit) -> system(unit) {
   try _ = write-code(k, Set-Style(Color(Background, Color-16(Dull, Black))));
   try _ = _write-XX(k);
   try _ = write-code(k, Set-Style(Color(Background, Color-16(Dull, Red))));
@@ -100,7 +100,7 @@ define _test-color-background-dull(k: &ansi-kit): system(unit) {
   _write-XX(k)
 }
 
-define _test-color-foreground-vivid(k: &ansi-kit): system(unit) {
+define _test-color-foreground-vivid(k: &ansi-kit) -> system(unit) {
   try _ = write-code(k, Set-Style(Color(Foreground, Color-16(Vivid, Black))));
   try _ = _write-XX(k);
   try _ = write-code(k, Set-Style(Color(Foreground, Color-16(Vivid, Red))));
@@ -119,7 +119,7 @@ define _test-color-foreground-vivid(k: &ansi-kit): system(unit) {
   _write-XX(k)
 }
 
-define _test-color-background-vivid(k: &ansi-kit): system(unit) {
+define _test-color-background-vivid(k: &ansi-kit) -> system(unit) {
   try _ = write-code(k, Set-Style(Color(Background, Color-16(Vivid, Black))));
   try _ = _write-XX(k);
   try _ = write-code(k, Set-Style(Color(Background, Color-16(Vivid, Red))));
@@ -138,7 +138,7 @@ define _test-color-background-vivid(k: &ansi-kit): system(unit) {
   _write-XX(k)
 }
 
-define _test-256(k: &ansi-kit): system(unit) {
+define _test-256(k: &ansi-kit) -> system(unit) {
   try _ =
     loop-E(256, function (i) {
       try _ = write-code(k, Set-Style(Color(Background, Color-256(trunc-int-int8(i)))));
@@ -153,7 +153,7 @@ define _test-256(k: &ansi-kit): system(unit) {
   flush(k)
 }
 
-define _test-rgb(k: &ansi-kit): system(unit) {
+define _test-rgb(k: &ansi-kit) -> system(unit) {
   try _ = write-code(k, Set-Style(Color(Background, Color-RGB(255, 0, 0))));
   try _ = _write-space(k);
   try _ = write-code(k, Set-Style(Color(Background, Color-RGB(0, 255, 0))));
@@ -217,7 +217,7 @@ define _test-rgb(k: &ansi-kit): system(unit) {
   flush(k)
 }
 
-define _test-color(k: &ansi-kit): system(unit) {
+define _test-color(k: &ansi-kit) -> system(unit) {
   try _ = write-code(k, Set-Style(Normal));
   try _ = _write-XX(k);
   try _ = write-code(k, Set-Style(Bold));
@@ -256,7 +256,7 @@ define _test-color(k: &ansi-kit): system(unit) {
   flush(k)
 }
 
-define some-func(): system(unit) {
+define some-func() -> system(unit) {
   pin k = make-ansi-kit{sink := stdout, capacity := 100};
   // prints "error: " in bold red
   try _ = write-code(k, Set-Style(Color(Foreground, Color-16(Vivid, Red))));
@@ -275,7 +275,7 @@ define some-func(): system(unit) {
   flush(k)
 }
 
-define zen(): unit {
+define zen() -> unit {
   pin k1 = make-ansi-kit{sink := stdout, capacity := 100};
   pin k2 = make-ansi-kit-unbuffered{sink := stdout};
   let _ = {

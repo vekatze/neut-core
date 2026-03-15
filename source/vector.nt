@@ -29,83 +29,83 @@ alias-opaque vector(_: type) {
   _vector-internal
 }
 
-inline get-capacity<a>(xs: &vector(a)): int {
+inline get-capacity<a>(xs: &vector(a)) -> int {
   let vector-ptr = cast<&vector(a), pointer>(xs);
   load-int(vector-ptr)
 }
 
-inline _get-from<a>(xs: &vector(a)): int {
+inline _get-from<a>(xs: &vector(a)) -> int {
   let vector-ptr = cast<&vector(a), pointer>(xs);
   load-int(shift(vector-ptr, this.word.size))
 }
 
-inline _get-to<a>(xs: &vector(a)): int {
+inline _get-to<a>(xs: &vector(a)) -> int {
   let vector-ptr = cast<&vector(a), pointer>(xs);
   load-int(shift(vector-ptr, mul-int(this.word.size, 2)))
 }
 
-inline _get-elem-type<a>(xs: &vector(a)): type {
+inline _get-elem-type<a>(xs: &vector(a)) -> type {
   let vector-ptr = cast<&vector(a), pointer>(xs);
   cast<int, type>(load-int(shift(vector-ptr, mul-int(this.word.size, 3))))
 }
 
-inline _set-elem-type<a>(xs: &vector(a), b: type): unit {
+inline _set-elem-type<a>(xs: &vector(a), b: type) -> unit {
   let vector-ptr = cast<&vector(a), pointer>(xs);
   store-int(cast<type, int>(b), shift(vector-ptr, mul-int(this.word.size, 3)))
 }
 
-inline _get-buffer-ptr<a>(xs: &vector(a)): pointer {
+inline _get-buffer-ptr<a>(xs: &vector(a)) -> pointer {
   let vector-ptr = cast<&vector(a), pointer>(xs);
   load-pointer(shift(vector-ptr, mul-int(this.word.size, 4)))
 }
 
-define _set-buffer-ptr<a>(xs: &vector(a), buffer-ptr: pointer): unit {
+define _set-buffer-ptr<a>(xs: &vector(a), buffer-ptr: pointer) -> unit {
   let vector-ptr = cast<&vector(a), pointer>(xs);
   store-pointer(buffer-ptr, shift(vector-ptr, mul-int(this.word.size, 4)))
 }
 
-define _set-capacity<a>(xs: &vector(a), capacity: int): unit {
+define _set-capacity<a>(xs: &vector(a), capacity: int) -> unit {
   let vector-ptr = cast<&vector(a), pointer>(xs);
   store-int(capacity, vector-ptr)
 }
 
-define _get-element-pointer<a>(xs: &vector(a), index: int): pointer {
+define _get-element-pointer<a>(xs: &vector(a), index: int) -> pointer {
   let from = _get-from(xs);
   let buffer-ptr = _get-buffer-ptr(xs);
   shift(buffer-ptr, mul-int(this.word.size, add-int(from, index)))
 }
 
-define length<a>(xs: &vector(a)): int {
+define length<a>(xs: &vector(a)) -> int {
   let from = _get-from(xs);
   let to = _get-to(xs);
   sub-int(to, from)
 }
 
-inline _shift-from<a>(xs: &vector(a), offset: int): unit {
+inline _shift-from<a>(xs: &vector(a), offset: int) -> unit {
   let vector-ptr = cast<&vector(a), pointer>(xs);
   let from-ptr = shift(vector-ptr, mul-int(this.word.size, 1));
   let current-value = load-int(from-ptr);
   store-int(add-int(current-value, offset), from-ptr)
 }
 
-inline _shift-to<a>(xs: &vector(a), offset: int): unit {
+inline _shift-to<a>(xs: &vector(a), offset: int) -> unit {
   let vector-ptr = cast<&vector(a), pointer>(xs);
   let to-ptr = shift(vector-ptr, mul-int(this.word.size, 2));
   let current-value = load-int(to-ptr);
   store-int(add-int(current-value, offset), to-ptr)
 }
 
-inline _set-from<a>(xs: &vector(a), from: int): unit {
+inline _set-from<a>(xs: &vector(a), from: int) -> unit {
   let vector-ptr = cast<&vector(a), pointer>(xs);
   store-int(from, shift(vector-ptr, this.word.size))
 }
 
-inline _set-to<a>(xs: &vector(a), to: int): unit {
+inline _set-to<a>(xs: &vector(a), to: int) -> unit {
   let vector-ptr = cast<&vector(a), pointer>(xs);
   store-int(to, shift(vector-ptr, mul-int(this.word.size, 2)))
 }
 
-define make<a>(initial-capacity: int): vector(a) {
+define make<a>(initial-capacity: int) -> vector(a) {
   let abs-capacity = abs-int(initial-capacity);
   let word-size = this.word.size;
   let vector-ptr = malloc(C-Size(mul-int(word-size, 5)));
@@ -119,7 +119,7 @@ define make<a>(initial-capacity: int): vector(a) {
   magic cast(pointer, vector(a), vector-ptr)
 }
 
-define _discard-vector-content<a>(xs: &vector(a), elem-type: type, index: int, len: int): unit {
+define _discard-vector-content<a>(xs: &vector(a), elem-type: type, index: int, len: int) -> unit {
   if eq-int(index, len) {
     Unit
   } else {
@@ -137,7 +137,8 @@ define _copy-vector-content<elem-type>(
   ys: &vector(pointer),
   index: int,
   len: int,
-): unit {
+)->
+unit {
   if eq-int(index, len) {
     Unit
   } else {
@@ -150,7 +151,7 @@ define _copy-vector-content<elem-type>(
   }
 }
 
-define _free-vector<a>(xs: &vector(a)): unit {
+define _free-vector<a>(xs: &vector(a)) -> unit {
   let xs = cast<&vector(a), &vector(pointer)>(xs);
   free(_get-buffer-ptr(xs));
   free(cast<&vector(pointer), pointer>(xs));
@@ -189,7 +190,7 @@ constant _extend-factor: int {
   2
 }
 
-define _extend-front<a>(xs: vector(a)): vector(a) {
+define _extend-front<a>(xs: vector(a)) -> vector(a) {
   let current-capacity on xs = max-int(get-capacity(xs), 1);
   let new-capacity = mul-int(current-capacity, _extend-factor);
   let buffer-ptr on xs = _get-buffer-ptr(xs);
@@ -211,7 +212,7 @@ define _extend-front<a>(xs: vector(a)): vector(a) {
   xs
 }
 
-define _extend-back<a>(xs: vector(a)): vector(a) {
+define _extend-back<a>(xs: vector(a)) -> vector(a) {
   let current-capacity on xs = max-int(get-capacity(xs), 1);
   let new-capacity = mul-int(current-capacity, _extend-factor);
   let buffer-ptr on xs = _get-buffer-ptr(xs);
@@ -223,7 +224,7 @@ define _extend-back<a>(xs: vector(a)): vector(a) {
   xs
 }
 
-define push-front<a>(xs: vector(a), x: a): vector(a) {
+define push-front<a>(xs: vector(a), x: a) -> vector(a) {
   let from on xs = _get-from(xs);
   if gt-int(from, 0) {
     let new-element-ptr on xs = _get-element-pointer(xs, -1);
@@ -236,7 +237,7 @@ define push-front<a>(xs: vector(a), x: a): vector(a) {
   }
 }
 
-define push-back<a>(xs: vector(a), x: a): vector(a) {
+define push-back<a>(xs: vector(a), x: a) -> vector(a) {
   let capacity on xs = get-capacity(xs);
   let to on xs = _get-to(xs);
   if lt-int(to, capacity) {
@@ -251,7 +252,7 @@ define push-back<a>(xs: vector(a), x: a): vector(a) {
   }
 }
 
-define pop-front<a>(xs: vector(a))[r := rho]: ?pair(a, vector(a)) {
+define pop-front<a>(xs: vector(a))[r := rho] -> ?pair(a, vector(a)) {
   let len on xs = length(xs);
   if eq-int(len, 0) {
     try _ = r;
@@ -265,7 +266,7 @@ define pop-front<a>(xs: vector(a))[r := rho]: ?pair(a, vector(a)) {
   }
 }
 
-define pop-back<a>(xs: vector(a))[r := rho]: ?pair(vector(a), a) {
+define pop-back<a>(xs: vector(a))[r := rho] -> ?pair(vector(a), a) {
   let len on xs = length(xs);
   if eq-int(len, 0) {
     try _ = r;
@@ -280,28 +281,28 @@ define pop-back<a>(xs: vector(a))[r := rho]: ?pair(vector(a), a) {
 }
 
 rule-left Vector {
-  function leaf<a>(size: int): vector(a) {
+  function leaf<a>(size: int) -> vector(a) {
     this.vector.make(size)
   },
-  function node-left<a>(acc: vector(a), x: a): vector(a) {
+  function node-left<a>(acc: vector(a), x: a) -> vector(a) {
     push-back(acc, x)
   },
-  function root<a>(x: a): a {
+  function root<a>(x: a) -> a {
     x
   },
 }
 
-define singleton<a>(x: a): vector(a) {
+define singleton<a>(x: a) -> vector(a) {
   let v = make(1);
   push-back(v, x)
 }
 
-inline _access<a>(xs: &vector(a), i: int): &a {
+inline _access<a>(xs: &vector(a), i: int) -> &a {
   let element-pointer = _get-element-pointer(xs, i);
   cast<int, &a>(load-int(element-pointer))
 }
 
-define access<a>(xs: &vector(a), i: int)[r := rho]: ?&a {
+define access<a>(xs: &vector(a), i: int)[r := rho] -> ?&a {
   if and(le-int(0, i), lt-int(i, length(xs))) {
     try _ = r;
     Right(_access(xs, i))
@@ -315,10 +316,11 @@ inline fold-left<elem-type, result-type>(
   acc: result-type,
   xs: vector(elem-type),
   !consumer: (result-type, elem-type, int) -> result-type,
-): result-type {
+)->
+result-type {
   let sz on xs = length(xs);
   let helper =
-    define loop(cursor: int, acc: result-type, xs: vector(elem-type)): result-type {
+    define loop(cursor: int, acc: result-type, xs: vector(elem-type)) -> result-type {
       if eq-int(cursor, sz) {
         let xs = cast<vector(elem-type), &vector(pointer)>(xs);
         _free-vector(xs);
@@ -337,10 +339,11 @@ inline fold-left-N<elem-type, result-type>(
   acc: result-type,
   xs: &vector(elem-type),
   !consumer: (result-type, &elem-type, int) -> result-type,
-): result-type {
+)->
+result-type {
   let sz = length(xs);
   let helper =
-    define loop(cursor: int, acc, xs): result-type {
+    define loop(cursor: int, acc, xs) -> result-type {
       if eq-int(cursor, sz) {
         acc
       } else {
@@ -355,10 +358,11 @@ inline fold-left-reverse-N<elem-type, result-type>(
   acc: result-type,
   xs: &vector(elem-type),
   !consumer: (result-type, &elem-type, int) -> result-type,
-): result-type {
+)->
+result-type {
   let sz = length(xs);
   let helper =
-    define loop(cursor: int, acc: result-type, xs: &vector(elem-type)): result-type {
+    define loop(cursor: int, acc: result-type, xs: &vector(elem-type)) -> result-type {
       if lt-int(cursor, 0) {
         acc
       } else {
@@ -373,10 +377,11 @@ inline fold-left-EN<e, elem-type, result-type>(
   acc: result-type,
   xs: &vector(elem-type),
   !consumer: (result-type, &elem-type, int) -> either(e, result-type),
-): either(e, result-type) {
+)->
+either(e, result-type) {
   let sz = length(xs);
   let helper =
-    define loop(cursor: int, acc, xs): either(e, result-type) {
+    define loop(cursor: int, acc, xs) -> either(e, result-type) {
       if eq-int(cursor, sz) {
         Right(acc)
       } else {
@@ -392,10 +397,11 @@ inline fold-right<elem-type, result-type>(
   xs: vector(elem-type),
   acc: result-type,
   !consumer: (elem-type, result-type, int) -> result-type,
-): result-type {
+)->
+result-type {
   let sz on xs = length(xs);
   let helper =
-    define loop(cursor: int, acc: result-type, xs: vector(elem-type)): result-type {
+    define loop(cursor: int, acc: result-type, xs: vector(elem-type)) -> result-type {
       if eq-int(cursor, sz) {
         let xs = cast<vector(elem-type), &vector(pointer)>(xs);
         _free-vector(xs);
@@ -413,10 +419,11 @@ inline fold-right-N<elem-type, result-type>(
   xs: &vector(elem-type),
   acc: result-type,
   !consumer: (&elem-type, result-type, int) -> result-type,
-): result-type {
+)->
+result-type {
   let sz = length(xs);
   let helper =
-    define loop(cursor: int, acc: result-type, xs: &vector(elem-type)): result-type {
+    define loop(cursor: int, acc: result-type, xs: &vector(elem-type)) -> result-type {
       if eq-int(cursor, sz) {
         acc
       } else {
@@ -427,11 +434,11 @@ inline fold-right-N<elem-type, result-type>(
   helper(0, acc, xs)
 }
 
-inline for-each<a, b>(xs: vector(a), !f: (a, int) -> b): vector(b) {
+inline for-each<a, b>(xs: vector(a), !f: (a, int) -> b) -> vector(b) {
   let _ on xs = _set-elem-type(xs, pack-type {b});
   let len on xs = length(xs);
   let update-values =
-    define self(xs: vector(a), index: int): vector(a) {
+    define self(xs: vector(a), index: int) -> vector(a) {
       if ge-int(index, len) {
         xs
       } else {
@@ -445,17 +452,17 @@ inline for-each<a, b>(xs: vector(a), !f: (a, int) -> b): vector(b) {
   cast<vector(a), vector(b)>(update-values(xs, 0))
 }
 
-inline for-each-N<a, b>(xs: &vector(a), f: (&a, int) -> b): vector(b) {
+inline for-each-N<a, b>(xs: &vector(a), f: (&a, int) -> b) -> vector(b) {
   let capacity = get-capacity(xs);
   fold-left-N(make(capacity), xs, function (acc, x, i) {
     push-back(acc, f(x, i))
   })
 }
 
-inline for<a>(xs: vector(a), !f: (a, int) -> unit): unit {
+inline for<a>(xs: vector(a), !f: (a, int) -> unit) -> unit {
   let len on xs = length(xs);
   let loop =
-    define self(xs: vector(a), index: int): unit {
+    define self(xs: vector(a), index: int) -> unit {
       if ge-int(index, len) {
         let buffer-ptr on xs = _get-buffer-ptr(xs);
         free(buffer-ptr);
@@ -470,20 +477,20 @@ inline for<a>(xs: vector(a), !f: (a, int) -> unit): unit {
   loop(xs, 0)
 }
 
-inline for-N<a>(xs: &vector(a), f: (&a, int) -> unit): unit {
+inline for-N<a>(xs: &vector(a), f: (&a, int) -> unit) -> unit {
   fold-left-N(Unit, xs, function (_, x, i) {
     f(x, i)
   })
 }
 
-define for-each-vertical<a, b>(xs: vector(a), col-size: int, !f: (a, int) -> b): vector(b) {
+define for-each-vertical<a, b>(xs: vector(a), col-size: int, !f: (a, int) -> b) -> vector(b) {
   assert "this.vector.for-each-vertical: col-size > 0" {
     gt-int(col-size, 0)
   };
   let _ on xs = _set-elem-type(xs, pack-type {b});
   let vec-size on xs = length(xs);
   let store-values =
-    define self(xs: vector(a), index: int): vector(a) {
+    define self(xs: vector(a), index: int) -> vector(a) {
       if ge-int(index, vec-size) {
         xs
       } else {
@@ -508,13 +515,13 @@ define for-each-vertical<a, b>(xs: vector(a), col-size: int, !f: (a, int) -> b):
   cast<vector(a), vector(b)>(store-values(xs, 0))
 }
 
-inline zip-with<a, b, c>(xs: vector(a), ys: vector(b), !f: (a, b, int) -> c): vector(c) {
+inline zip-with<a, b, c>(xs: vector(a), ys: vector(b), !f: (a, b, int) -> c) -> vector(c) {
   let len1 on xs = length(xs);
   let len2 on ys = length(ys);
   let len = min-int(len1, len2);
   let result = make(len);
   let helper =
-    define loop(acc: vector(c), cursor: int, xs: vector(a), ys: vector(b)): vector(c) {
+    define loop(acc: vector(c), cursor: int, xs: vector(a), ys: vector(b)) -> vector(c) {
       if eq-int(cursor, len) {
         let xs = cast<vector(a), &vector(pointer)>(xs);
         let ys = cast<vector(b), &vector(pointer)>(ys);
@@ -534,7 +541,7 @@ inline zip-with<a, b, c>(xs: vector(a), ys: vector(b), !f: (a, b, int) -> c): ve
   helper(result, 0, xs, ys)
 }
 
-inline zip-with-N<a, b, c>(xs: &vector(a), ys: &vector(b), f: (&a, &b, int) -> c): vector(c) {
+inline zip-with-N<a, b, c>(xs: &vector(a), ys: &vector(b), f: (&a, &b, int) -> c) -> vector(c) {
   let len1 = length(xs);
   let len2 = length(ys);
   let len = min-int(len1, len2);
@@ -546,7 +553,7 @@ inline zip-with-N<a, b, c>(xs: &vector(a), ys: &vector(b), f: (&a, &b, int) -> c
   })
 }
 
-inline zip-fold<a, b, c>(xs: &vector(a), ys: &vector(b), base: c, f: (&a, &b, c, int) -> c): c {
+inline zip-fold<a, b, c>(xs: &vector(a), ys: &vector(b), base: c, f: (&a, &b, c, int) -> c) -> c {
   let len1 = length(xs);
   let len2 = length(ys);
   let len = min-int(len1, len2);
@@ -557,17 +564,17 @@ inline zip-fold<a, b, c>(xs: &vector(a), ys: &vector(b), base: c, f: (&a, &b, c,
   })
 }
 
-define from-list<a>(base-list: list(a)): vector(a) {
+define from-list<a>(base-list: list(a)) -> vector(a) {
   let len on base-list = this.list.length(base-list);
   this.list.fold-left(make(len), base-list, function (acc, x) {
     push-back(acc, x)
   })
 }
 
-define to-list<a>(xs: vector(a)): list(a) {
+define to-list<a>(xs: vector(a)) -> list(a) {
   let len on xs = length(xs);
   let loop =
-    define self(xs: vector(a), index: int): list(a) {
+    define self(xs: vector(a), index: int) -> list(a) {
       if ge-int(index, len) {
         let buffer-ptr on xs = _get-buffer-ptr(xs);
         let vector-ptr = cast<vector(a), pointer>(xs);
@@ -583,7 +590,7 @@ define to-list<a>(xs: vector(a)): list(a) {
   loop(xs, 0)
 }
 
-define exchange<a>(xs: vector(a), index: int, value: a): either(vector(a), pair(a, vector(a))) {
+define exchange<a>(xs: vector(a), index: int, value: a) -> either(vector(a), pair(a, vector(a))) {
   let len on xs = length(xs);
   if and(le-int(0, index), lt-int(index, len)) {
     let value-ptr on xs = _get-element-pointer(xs, index);
@@ -595,7 +602,7 @@ define exchange<a>(xs: vector(a), index: int, value: a): either(vector(a), pair(
   }
 }
 
-define _swap<a>(xs: vector(a), i: int, j: int): vector(a) {
+define _swap<a>(xs: vector(a), i: int, j: int) -> vector(a) {
   let value-i-ptr on xs = _get-element-pointer(xs, i);
   let value-j-ptr on xs = _get-element-pointer(xs, j);
   let value-i = load-int(value-i-ptr);
@@ -605,7 +612,7 @@ define _swap<a>(xs: vector(a), i: int, j: int): vector(a) {
   xs
 }
 
-define swap<a>(xs: vector(a), i: int, j: int): vector(a) {
+define swap<a>(xs: vector(a), i: int, j: int) -> vector(a) {
   let len on xs = length(xs);
   let b1 = and(le-int(0, i), lt-int(i, len));
   let b2 = and(le-int(0, j), lt-int(j, len));
@@ -616,10 +623,10 @@ define swap<a>(xs: vector(a), i: int, j: int): vector(a) {
   }
 }
 
-define reverse<a>(xs: vector(a)): vector(a) {
+define reverse<a>(xs: vector(a)) -> vector(a) {
   let len on xs = length(xs);
   let f =
-    define self(xs: vector(a), left: int, right: int): vector(a) {
+    define self(xs: vector(a), left: int, right: int) -> vector(a) {
       if ge-int(left, right) {
         xs
       } else {
@@ -630,7 +637,7 @@ define reverse<a>(xs: vector(a)): vector(a) {
   f(xs, 0, sub-int(len, 1))
 }
 
-define take<a>(xs: vector(a), n: int): vector(a) {
+define take<a>(xs: vector(a), n: int) -> vector(a) {
   let _ on xs = {
     let len = length(xs);
     let n = max-int(0, n);
@@ -646,7 +653,7 @@ define take<a>(xs: vector(a), n: int): vector(a) {
   xs
 }
 
-define drop<a>(xs: vector(a), n: int): vector(a) {
+define drop<a>(xs: vector(a), n: int) -> vector(a) {
   let _ on xs = {
     let n = min-int(max-int(0, n), length(xs));
     loop(n, function (i) {
@@ -659,7 +666,7 @@ define drop<a>(xs: vector(a), n: int): vector(a) {
   xs
 }
 
-define split<a>(xs: vector(a), n: int): pair(vector(a), vector(a)) {
+define split<a>(xs: vector(a), n: int) -> pair(vector(a), vector(a)) {
   let xs = cast<vector(a), &vector(a)>(xs);
   let len = length(xs);
   let ys = make(len);
@@ -675,22 +682,22 @@ define split<a>(xs: vector(a), n: int): pair(vector(a), vector(a)) {
   Pair(cast<&vector(a), vector(a)>(xs), ys)
 }
 
-define slice<a>(xs: vector(a), from: int, to: int): vector(a) {
+define slice<a>(xs: vector(a), from: int, to: int) -> vector(a) {
   let ys = drop(xs, from);
   take(ys, sub-int(to, from))
 }
 
-define take-end<a>(xs: vector(a), n: int): vector(a) {
+define take-end<a>(xs: vector(a), n: int) -> vector(a) {
   let len on xs = length(xs);
   drop(xs, sub-int(len, n))
 }
 
-define drop-end<a>(xs: vector(a), n: int): vector(a) {
+define drop-end<a>(xs: vector(a), n: int) -> vector(a) {
   let len on xs = length(xs);
   take(xs, sub-int(len, n))
 }
 
-define delete<a>(xs: vector(a), index: int): vector(a) {
+define delete<a>(xs: vector(a), index: int) -> vector(a) {
   let len on xs = length(xs);
   if eq-int(0, index) {
     drop(xs, 1)
@@ -721,10 +728,10 @@ define delete<a>(xs: vector(a), index: int): vector(a) {
   }
 }
 
-inline find-index<a>(xs: &vector(a), !pred: (&a) -> bool): int {
+inline find-index<a>(xs: &vector(a), !pred: (&a) -> bool) -> int {
   let len = length(xs);
   let f =
-    define self(index: int): int {
+    define self(index: int) -> int {
       if ge-int(index, len) {
         -1
       } else {
@@ -739,10 +746,10 @@ inline find-index<a>(xs: &vector(a), !pred: (&a) -> bool): int {
   f(0)
 }
 
-inline find-index-end<a>(xs: &vector(a), !pred: (&a) -> bool): int {
+inline find-index-end<a>(xs: &vector(a), !pred: (&a) -> bool) -> int {
   let len = length(xs);
   let f =
-    define self(index: int): int {
+    define self(index: int) -> int {
       if lt-int(index, 0) {
         -1
       } else {
@@ -757,7 +764,7 @@ inline find-index-end<a>(xs: &vector(a), !pred: (&a) -> bool): int {
   f(sub-int(len, 1))
 }
 
-inline take-while<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
+inline take-while<a>(xs: vector(a), !pred: (&a) -> bool) -> vector(a) {
   let pivot-index on xs = find-index(xs, compose(not, pred));
   if lt-int(pivot-index, 0) {
     xs
@@ -766,7 +773,7 @@ inline take-while<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
   }
 }
 
-inline drop-while<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
+inline drop-while<a>(xs: vector(a), !pred: (&a) -> bool) -> vector(a) {
   let pivot-index on xs = find-index(xs, compose(not, pred));
   if lt-int(pivot-index, 0) {
     make(1)
@@ -775,7 +782,7 @@ inline drop-while<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
   }
 }
 
-inline take-while-end<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
+inline take-while-end<a>(xs: vector(a), !pred: (&a) -> bool) -> vector(a) {
   let pivot-index on xs = find-index-end(xs, compose(not, pred));
   if lt-int(pivot-index, 0) {
     xs
@@ -784,7 +791,7 @@ inline take-while-end<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
   }
 }
 
-inline drop-while-end<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
+inline drop-while-end<a>(xs: vector(a), !pred: (&a) -> bool) -> vector(a) {
   let pivot-index on xs = find-index-end(xs, compose(not, pred));
   if lt-int(pivot-index, 0) {
     make(0)
@@ -793,7 +800,7 @@ inline drop-while-end<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
   }
 }
 
-define intercalate<a>(xs: vector(a), !sep: a): vector(a) {
+define intercalate<a>(xs: vector(a), !sep: a) -> vector(a) {
   let len on xs = length(xs);
   if eq-int(len, 0) {
     xs
@@ -803,7 +810,7 @@ define intercalate<a>(xs: vector(a), !sep: a): vector(a) {
     let xs = _extend-back(xs);
     let new-length = sub-int(mul-int(2, len), 1);
     let helper =
-      define self(xs: vector(a), index: int): vector(a) {
+      define self(xs: vector(a), index: int) -> vector(a) {
         if le-int(index, 0) {
           let from on xs = _get-from(xs);
           let to = add-int(from, new-length);
@@ -823,16 +830,16 @@ define intercalate<a>(xs: vector(a), !sep: a): vector(a) {
   }
 }
 
-define append<a>(xs: vector(a), ys: vector(a)): vector(a) {
+define append<a>(xs: vector(a), ys: vector(a)) -> vector(a) {
   fold-left(xs, ys, function (acc, y, _) {
     push-back(acc, y)
   })
 }
 
-define concat<a>(xss: vector(vector(a))): vector(a) {
+define concat<a>(xss: vector(vector(a))) -> vector(a) {
   let xss-size on xss = length(xss);
   let get-size =
-    define loop(yss: &vector(vector(a)), index: int, acc: int): int {
+    define loop(yss: &vector(vector(a)), index: int, acc: int) -> int {
       if eq-int(index, xss-size) {
         acc
       } else {
@@ -847,7 +854,7 @@ define concat<a>(xss: vector(vector(a))): vector(a) {
   })
 }
 
-define product<a, b>(xs: vector(a), ys: vector(b)): vector(pair(a, b)) {
+define product<a, b>(xs: vector(a), ys: vector(b)) -> vector(pair(a, b)) {
   let xyss =
     for-each(xs, function (x, _) {
       for-each(ys, function (y, _) {
@@ -857,13 +864,13 @@ define product<a, b>(xs: vector(a), ys: vector(b)): vector(pair(a, b)) {
   concat(xyss)
 }
 
-define zip<a, b>(xs: vector(a), ys: vector(b)): vector(pair(a, b)) {
+define zip<a, b>(xs: vector(a), ys: vector(b)) -> vector(pair(a, b)) {
   zip-with(xs, ys, function (x, y, _) {
     Pair(x, y)
   })
 }
 
-define unzip<a, b>(ps: vector(pair(a, b))): pair(vector(a), vector(b)) {
+define unzip<a, b>(ps: vector(pair(a, b))) -> pair(vector(a), vector(b)) {
   let len on ps = length(ps);
   let vec-l = make(len);
   let vec-r = make(len);
@@ -874,7 +881,7 @@ define unzip<a, b>(ps: vector(pair(a, b))): pair(vector(a), vector(b)) {
   })
 }
 
-define partition<a, b>(xs: vector(either(a, b))): pair(vector(a), vector(b)) {
+define partition<a, b>(xs: vector(either(a, b))) -> pair(vector(a), vector(b)) {
   let len on xs = length(xs);
   let vec-l = make(len);
   let vec-r = make(len);
@@ -889,22 +896,22 @@ define partition<a, b>(xs: vector(either(a, b))): pair(vector(a), vector(b)) {
   })
 }
 
-define all(xs: &vector(bool)): bool {
+define all(xs: &vector(bool)) -> bool {
   fold-left-N(True, xs, function (b1, b2, _) {
     and(b1, *b2)
   })
 }
 
-define any(xs: &vector(bool)): bool {
+define any(xs: &vector(bool)) -> bool {
   fold-left-N(True, xs, function (b1, b2, _) {
     or(b1, *b2)
   })
 }
 
-inline filter<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
+inline filter<a>(xs: vector(a), !pred: (&a) -> bool) -> vector(a) {
   let len on xs = length(xs);
   let helper =
-    define loop(num-of-new-elems: int, cursor: int, xs: vector(a)): vector(a) {
+    define loop(num-of-new-elems: int, cursor: int, xs: vector(a)) -> vector(a) {
       if eq-int(cursor, len) {
         take(xs, num-of-new-elems)
       } else {
@@ -925,10 +932,10 @@ inline filter<a>(xs: vector(a), !pred: (&a) -> bool): vector(a) {
   helper(0, 0, xs)
 }
 
-define filter-some<a>(xs: vector(?a)): vector(a) {
+define filter-some<a>(xs: vector(?a)) -> vector(a) {
   let len on xs = length(xs);
   let helper =
-    define loop(num-of-new-elems: int, cursor: int, xs: vector(?a)): vector(a) {
+    define loop(num-of-new-elems: int, cursor: int, xs: vector(?a)) -> vector(a) {
       if eq-int(cursor, len) {
         let from on xs = _get-from(xs);
         let to = add-int(from, num-of-new-elems);
@@ -963,10 +970,10 @@ define filter-some<a>(xs: vector(?a)): vector(a) {
   helper(0, 0, xs)
 }
 
-inline find<a>(xs: &vector(a), !pred: (&a) -> bool)[r := rho]: ?&a {
+inline find<a>(xs: &vector(a), !pred: (&a) -> bool)[r := rho] -> ?&a {
   let len = length(xs);
   let f =
-    define self(r: ?unit, index: int): ?&a {
+    define self(r: ?unit, index: int) -> ?&a {
       if ge-int(index, len) {
         try _ = r;
         none
@@ -983,7 +990,7 @@ inline find<a>(xs: &vector(a), !pred: (&a) -> bool)[r := rho]: ?&a {
   f(r, 0)
 }
 
-inline span<a>(xs: vector(a), !pred: (&a) -> bool): pair(vector(a), vector(a)) {
+inline span<a>(xs: vector(a), !pred: (&a) -> bool) -> pair(vector(a), vector(a)) {
   let i on xs =
     find-index(xs, function (x) {
       not(pred(x))
@@ -996,7 +1003,7 @@ inline span<a>(xs: vector(a), !pred: (&a) -> bool): pair(vector(a), vector(a)) {
 }
 
 // right-open interval
-define range(from: int, to: int): vector(int) {
+define range(from: int, to: int) -> vector(int) {
   if ge-int(from, to) {
     make(0)
   } else {
@@ -1008,7 +1015,7 @@ define range(from: int, to: int): vector(int) {
   }
 }
 
-define lift-vector<a>(xs: vector(a), _: (a) -> +a): +vector(a) {
+define lift-vector<a>(xs: vector(a), _: (a) -> +a) -> +vector(a) {
   magic cast(vector(a), +vector(a), xs)
   // admissible:
   //   let base: +vector(a) = box {make(10)};
@@ -1021,15 +1028,15 @@ define lift-vector<a>(xs: vector(a), _: (a) -> +a): +vector(a) {
   //   })
 }
 
-define meta-vector-out<a>(xs: vector(+a)): +vector(a) {
+define meta-vector-out<a>(xs: vector(+a)) -> +vector(a) {
   magic cast(_, _, xs)
 }
 
-define meta-vector-in<a>(xs: +vector(a)): vector(+a) {
+define meta-vector-in<a>(xs: +vector(a)) -> vector(+a) {
   magic cast(_, _, xs)
 }
 
-define zen(): unit {
+define zen() -> unit {
   // find
   let xs = this.vector.make(5);
   let xs = push-back(xs, 1);

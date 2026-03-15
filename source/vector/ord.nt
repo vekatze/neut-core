@@ -6,7 +6,7 @@ import {
   this.vector {_swap, vector},
 }
 
-define _find-lower<a>(o: &ord(a), vs: &vector(a), from: int, to: int, pivot: &a): int {
+define _find-lower<a>(o: &ord(a), vs: &vector(a), from: int, to: int, pivot: &a) -> int {
   if ge-int(from, to) {
     -1
   } else {
@@ -21,7 +21,7 @@ define _find-lower<a>(o: &ord(a), vs: &vector(a), from: int, to: int, pivot: &a)
   }
 }
 
-define _find-higher<a>(o: &ord(a), vs: &vector(a), boundary: int, to: int, pivot: &a): int {
+define _find-higher<a>(o: &ord(a), vs: &vector(a), boundary: int, to: int, pivot: &a) -> int {
   if le-int(to, boundary) {
     -1
   } else {
@@ -36,9 +36,9 @@ define _find-higher<a>(o: &ord(a), vs: &vector(a), boundary: int, to: int, pivot
   }
 }
 
-define vector-quicksort<a>(o: &ord(a), nes: &(a) -> +a, xs: vector(a)): vector(a) {
+define vector-quicksort<a>(o: &ord(a), nes: &(a) -> +a, xs: vector(a)) -> vector(a) {
   let f =
-    define outer-loop(vs: vector(a), from: int, to: int): vector(a) {
+    define outer-loop(vs: vector(a), from: int, to: int) -> vector(a) {
       if ge-int(from, to) {
         vs
       } else {
@@ -51,7 +51,8 @@ define vector-quicksort<a>(o: &ord(a), nes: &(a) -> +a, xs: vector(a)): vector(a
             current-to: int,
             pivot: a,
             boundary: int,
-          ): vector(a) {
+          )->
+          vector(a) {
             let lower on vs, pivot = _find-lower(o, vs, current-from, boundary, pivot);
             let higher on vs, pivot = _find-higher(o, vs, boundary, current-to, pivot);
             match lt-int(lower, 0), lt-int(higher, 0) {

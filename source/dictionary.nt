@@ -23,7 +23,7 @@ data dictionary(k, v) {
   )
 }
 
-inline size<k, v>(d: &dictionary(k, v)): int {
+inline size<k, v>(d: &dictionary(k, v)) -> int {
   case d {
   | Tip =>
     0
@@ -36,7 +36,7 @@ constant empty<k, v>: dictionary(k, v) {
   Tip
 }
 
-inline singleton<k, v>(key: k, value: v): dictionary(k, v) {
+inline singleton<k, v>(key: k, value: v) -> dictionary(k, v) {
   Bin{size := 1, left := Tip, right := Tip, key, value}
 }
 
@@ -48,7 +48,7 @@ constant _ratio: int {
   2
 }
 
-inline _balance-L<a, b>(k: a, x: b, l: dictionary(a, b), r: dictionary(a, b)): dictionary(a, b) {
+inline _balance-L<a, b>(k: a, x: b, l: dictionary(a, b), r: dictionary(a, b)) -> dictionary(a, b) {
   match r {
   | Tip =>
     match l {
@@ -117,7 +117,7 @@ inline _balance-L<a, b>(k: a, x: b, l: dictionary(a, b), r: dictionary(a, b)): d
   }
 }
 
-inline _balance-R<a, b>(k: a, x: b, l: dictionary(a, b), r: dictionary(a, b)): dictionary(a, b) {
+inline _balance-R<a, b>(k: a, x: b, l: dictionary(a, b), r: dictionary(a, b)) -> dictionary(a, b) {
   match l {
   | Tip =>
     match r {
@@ -194,7 +194,7 @@ data _view(k, a) {
   )
 }
 
-define _min-view-sure<a, b>(k: a, x: b, l: dictionary(a, b), r: dictionary(a, b)): _view(a, b) {
+define _min-view-sure<a, b>(k: a, x: b, l: dictionary(a, b), r: dictionary(a, b)) -> _view(a, b) {
   match l {
   | Tip =>
     _View(k, x, r)
@@ -204,7 +204,7 @@ define _min-view-sure<a, b>(k: a, x: b, l: dictionary(a, b), r: dictionary(a, b)
   }
 }
 
-define _max-view-sure<a, b>(k: a, x: b, l: dictionary(a, b), r: dictionary(a, b)): _view(a, b) {
+define _max-view-sure<a, b>(k: a, x: b, l: dictionary(a, b), r: dictionary(a, b)) -> _view(a, b) {
   match r {
   | Tip =>
     _View(k, x, l)
@@ -214,7 +214,7 @@ define _max-view-sure<a, b>(k: a, x: b, l: dictionary(a, b), r: dictionary(a, b)
   }
 }
 
-inline _glue<k, v>(d1: dictionary(k, v), d2: dictionary(k, v)): dictionary(k, v) {
+inline _glue<k, v>(d1: dictionary(k, v), d2: dictionary(k, v)) -> dictionary(k, v) {
   match d1, d2 {
   | Tip, d2 =>
     d2
@@ -231,7 +231,7 @@ inline _glue<k, v>(d1: dictionary(k, v), d2: dictionary(k, v)): dictionary(k, v)
   }
 }
 
-define delete<k, v>(L: &ord(k), d: dictionary(k, v), needle: k): dictionary(k, v) {
+define delete<k, v>(L: &ord(k), d: dictionary(k, v), needle: k) -> dictionary(k, v) {
   tie Ord{compare} = L;
   match d {
   | Tip =>
@@ -249,9 +249,9 @@ define delete<k, v>(L: &ord(k), d: dictionary(k, v), needle: k): dictionary(k, v
   }
 }
 
-inline make-insert<k, v>(o: ord(k)): (dictionary(k, v), k, v) -> dictionary(k, v) {
+inline make-insert<k, v>(o: ord(k)) -> (dictionary(k, v), k, v) -> dictionary(k, v) {
   let Ord{compare := !compare} = o;
-  define loop(d: dictionary(k, v), key-X: k, val-X: v): dictionary(k, v) {
+  define loop(d: dictionary(k, v), key-X: k, val-X: v) -> dictionary(k, v) {
     match d {
     | Tip =>
       singleton(key-X, val-X)
@@ -269,9 +269,9 @@ inline make-insert<k, v>(o: ord(k)): (dictionary(k, v), k, v) -> dictionary(k, v
   }
 }
 
-inline make-insert-with<k, v>(o: ord(k), !f: (v, v) -> v): (dictionary(k, v), k, v) -> dictionary(k, v) {
+inline make-insert-with<k, v>(o: ord(k), !f: (v, v) -> v) -> (dictionary(k, v), k, v) -> dictionary(k, v) {
   let Ord{compare := !compare} = o;
-  define loop(d: dictionary(k, v), key-X: k, val-X: v): dictionary(k, v) {
+  define loop(d: dictionary(k, v), key-X: k, val-X: v) -> dictionary(k, v) {
     match d {
     | Tip =>
       singleton(key-X, val-X)
@@ -289,9 +289,9 @@ inline make-insert-with<k, v>(o: ord(k), !f: (v, v) -> v): (dictionary(k, v), k,
   }
 }
 
-inline make-lookup<k, v>(o: ord(k)): (d: &dictionary(k, v), needle: &k)[reg := rho] -> ?&v {
+inline make-lookup<k, v>(o: ord(k)) -> (d: &dictionary(k, v), needle: &k)[reg := rho] -> ?&v {
   let Ord{compare := !compare} = o;
-  define loop(d: &dictionary(k, v), needle: &k)[reg := rho]: ?&v {
+  define loop(d: &dictionary(k, v), needle: &k)[reg := rho] -> ?&v {
     case d {
     | Tip =>
       try _ = reg;
@@ -310,9 +310,9 @@ inline make-lookup<k, v>(o: ord(k)): (d: &dictionary(k, v), needle: &k)[reg := r
   }
 }
 
-inline make-delete<k, v>(o: ord(k)): (d: dictionary(k, v), needle: k) -> dictionary(k, v) {
+inline make-delete<k, v>(o: ord(k)) -> (d: dictionary(k, v), needle: k) -> dictionary(k, v) {
   let Ord{compare := !compare} = o;
-  define loop(d: dictionary(k, v), needle: k): dictionary(k, v) {
+  define loop(d: dictionary(k, v), needle: k) -> dictionary(k, v) {
     match d {
     | Tip =>
       Tip
@@ -330,9 +330,9 @@ inline make-delete<k, v>(o: ord(k)): (d: dictionary(k, v), needle: k) -> diction
   }
 }
 
-inline _make-lookup-LE-with-cand<k, v>(L: ord(k)): (&dictionary(k, v), &k, &k, &v) -> pair(&k, &v) {
+inline _make-lookup-LE-with-cand<k, v>(L: ord(k)) -> (&dictionary(k, v), &k, &k, &v) -> pair(&k, &v) {
   let Ord{compare := !compare} = L;
-  define loop(d: &dictionary(k, v), needle: &k, cand-k: &k, cand-v: &v): pair(&k, &v) {
+  define loop(d: &dictionary(k, v), needle: &k, cand-k: &k, cand-v: &v) -> pair(&k, &v) {
     case d {
     | Tip =>
       Pair(cand-k, cand-v)
@@ -349,10 +349,10 @@ inline _make-lookup-LE-with-cand<k, v>(L: ord(k)): (&dictionary(k, v), &k, &k, &
   }
 }
 
-inline make-lookup-LE<k, v>(!o: ord(k)): (&dictionary(k, v), &k)[reg := rho] -> ?pair(&k, &v) {
+inline make-lookup-LE<k, v>(!o: ord(k)) -> (&dictionary(k, v), &k)[reg := rho] -> ?pair(&k, &v) {
   let Ord{compare := !compare} = o;
   let !lookup-LE-with-cand = _make-lookup-LE-with-cand(o);
-  define loop(d: &dictionary(k, v), needle: &k)[reg := rho]: ?pair(&k, &v) {
+  define loop(d: &dictionary(k, v), needle: &k)[reg := rho] -> ?pair(&k, &v) {
     case d {
     | Tip =>
       try _ = reg;
@@ -373,9 +373,9 @@ inline make-lookup-LE<k, v>(!o: ord(k)): (&dictionary(k, v), &k)[reg := rho] -> 
   }
 }
 
-inline _make-lookup-GE-with-cand<k, v>(L: ord(k)): (&dictionary(k, v), &k, &k, &v) -> pair(&k, &v) {
+inline _make-lookup-GE-with-cand<k, v>(L: ord(k)) -> (&dictionary(k, v), &k, &k, &v) -> pair(&k, &v) {
   let Ord{compare := !compare} = L;
-  define loop(d: &dictionary(k, v), needle: &k, cand-k: &k, cand-v: &v): pair(&k, &v) {
+  define loop(d: &dictionary(k, v), needle: &k, cand-k: &k, cand-v: &v) -> pair(&k, &v) {
     case d {
     | Tip =>
       Pair(cand-k, cand-v)
@@ -392,10 +392,10 @@ inline _make-lookup-GE-with-cand<k, v>(L: ord(k)): (&dictionary(k, v), &k, &k, &
   }
 }
 
-inline make-lookup-GE<k, v>(!o: ord(k)): (&dictionary(k, v), &k)[reg := rho] -> ?pair(&k, &v) {
+inline make-lookup-GE<k, v>(!o: ord(k)) -> (&dictionary(k, v), &k)[reg := rho] -> ?pair(&k, &v) {
   let Ord{compare := !compare} = o;
   let !lookup-GE-with-cand = _make-lookup-GE-with-cand(o);
-  define loop(d: &dictionary(k, v), needle: &k)[reg := rho]: ?pair(&k, &v) {
+  define loop(d: &dictionary(k, v), needle: &k)[reg := rho] -> ?pair(&k, &v) {
     case d {
     | Tip =>
       try _ = reg;
@@ -416,10 +416,10 @@ inline make-lookup-GE<k, v>(!o: ord(k)): (&dictionary(k, v), &k)[reg := rho] -> 
   }
 }
 
-inline from-list<k, v>(_ord: ord(k), kvs: list(pair(k, v))): dictionary(k, v) {
+inline from-list<k, v>(_ord: ord(k), kvs: list(pair(k, v))) -> dictionary(k, v) {
   let !insert = make-insert(_ord);
   let f =
-    define self(kvs: list(pair(k, v)), acc: dictionary(k, v)): dictionary(k, v) {
+    define self(kvs: list(pair(k, v)), acc: dictionary(k, v)) -> dictionary(k, v) {
       match kvs {
       | Nil =>
         acc
@@ -430,7 +430,7 @@ inline from-list<k, v>(_ord: ord(k), kvs: list(pair(k, v))): dictionary(k, v) {
   f(kvs, Tip)
 }
 
-define to-list<k, v>(d: dictionary(k, v)): list(pair(k, v)) {
+define to-list<k, v>(d: dictionary(k, v)) -> list(pair(k, v)) {
   match d {
   | Tip =>
     Nil
@@ -441,7 +441,7 @@ define to-list<k, v>(d: dictionary(k, v)): list(pair(k, v)) {
   }
 }
 
-define keys<k, v>(d: &dictionary(k, v)): list(&k) {
+define keys<k, v>(d: &dictionary(k, v)) -> list(&k) {
   case d {
   | Tip =>
     Nil
@@ -452,7 +452,7 @@ define keys<k, v>(d: &dictionary(k, v)): list(&k) {
   }
 }
 
-define values<k, v>(d: &dictionary(k, v)): list(&v) {
+define values<k, v>(d: &dictionary(k, v)) -> list(&v) {
   case d {
   | Tip =>
     Nil

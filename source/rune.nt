@@ -6,19 +6,19 @@ import {
   this.unit {Unit},
 }
 
-define to-int32(r: rune): int32 {
+define to-int32(r: rune) -> int32 {
   magic cast(rune, int32, r)
 }
 
-define to-int(r: rune): int {
+define to-int(r: rune) -> int {
   zext-int32-int(to-int32(r))
 }
 
-define unsafe-from-int32(r: int32): rune {
+define unsafe-from-int32(r: int32) -> rune {
   magic cast(int32, rune, r)
 }
 
-define size(c: rune): int {
+define size(c: rune) -> int {
   let c = to-int32(c);
   if and(ule-int32(0x00, c), ule-int32(c, 0x7f)) {
     1
@@ -33,7 +33,7 @@ define size(c: rune): int {
   }
 }
 
-define size-by-head-byte(head-byte: int8): int {
+define size-by-head-byte(head-byte: int8) -> int {
   if eq-int8(and-int8(head-byte, 0x80), 0x00) {
     // 0x00 = 0000 0000
     // 0x80 = 1000 0000
@@ -56,7 +56,7 @@ define size-by-head-byte(head-byte: int8): int {
   }
 }
 
-define store-rune(value: rune, address: pointer): int {
+define store-rune(value: rune, address: pointer) -> int {
   let s = size(value);
   let value = to-int32(value);
   match s {
@@ -94,7 +94,7 @@ define store-rune(value: rune, address: pointer): int {
   }
 }
 
-inline load-rune(address: pointer): rune {
+inline load-rune(address: pointer) -> rune {
   let x0 = load-int8(address);
   if eq-int8(and-int8(x0, 0x80), 0x00) {
     // 0x00 = 0000 0000
@@ -133,7 +133,7 @@ inline load-rune(address: pointer): rune {
   }
 }
 
-define from-int(value: int)[r := rho]: ?rune {
+define from-int(value: int)[r := rho] -> ?rune {
   try _ = r;
   if le-int(0, value) {
     if le-int(value, 0x80) {

@@ -10,7 +10,7 @@ import {
   this.word,
 }
 
-inline _get-clone<a>(x: &a): a {
+inline _get-clone<a>(x: &a) -> a {
   *x
 }
 
@@ -22,7 +22,7 @@ data ref(_: type) {
 | _Ref(_ref)
 }
 
-define _make<a>(val: a): ref(a) {
+define _make<a>(val: a) -> ref(a) {
   let u = this.word.size;
   let ptr = this.external.malloc(C-Size(mul-int(this.word.size, 2)));
   store-int(cast<a, int>(val), ptr);
@@ -48,11 +48,11 @@ resource _ref {
   },
 }
 
-inline make-ref<a>(initial-value: +a): ref(a) {
+inline make-ref<a>(initial-value: +a) -> ref(a) {
   _make<a>(axiom-T(initial-value))
 }
 
-inline modify<a, b>(r: &ref(a), f: (+a) -> pair(+a, b)): b {
+inline modify<a, b>(r: &ref(a), f: (+a) -> pair(+a, b)) -> b {
   let r = cast<&ref(a), pointer>(r);
   let orig-val = cast<int, +a>(load-int(r));
   let Pair(new-val, result) = f(orig-val);
@@ -60,26 +60,26 @@ inline modify<a, b>(r: &ref(a), f: (+a) -> pair(+a, b)): b {
   result
 }
 
-inline mutate<a>(r: &ref(a), f: (+a) -> +a): unit {
+inline mutate<a>(r: &ref(a), f: (+a) -> +a) -> unit {
   modify(r, function (x) {
     Pair(f(x), Unit)
   })
 }
 
-inline borrow<a, b>(r: &ref(a), f: (&a) -> +b): b {
+inline borrow<a, b>(r: &ref(a), f: (&a) -> +b) -> b {
   let r = cast<&ref(a), pointer>(r);
   let orig-val = cast<int, &a>(load-int(r));
   letbox-T result = f(orig-val);
   result
 }
 
-inline clone<a>(r: &ref(a)): a {
+inline clone<a>(r: &ref(a)) -> a {
   modify(r, function (!val: +a) {
     Pair(val, axiom-T(val))
   })
 }
 
-define extract<a>(c: ref(a)): +a {
+define extract<a>(c: ref(a)) -> +a {
   let r = cast<ref(a), pointer>(c);
   let result = cast<int, +a>(load-int(r));
   this.external.free(r);

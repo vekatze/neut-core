@@ -6,7 +6,7 @@ import {
   this.text {intercalate, join},
 }
 
-inline as-show<a, b>(s1: show(a), s2: show(b)): show(pair(a, b)) {
+inline as-show<a, b>(s1: show(a), s2: show(b)) -> show(pair(a, b)) {
   Show{
     show := {
       function (p) {

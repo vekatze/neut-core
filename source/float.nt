@@ -18,74 +18,74 @@ foreign {
   llvm.trunc.f64(float): float,
 }
 
-define sqrt(x: float): float {
+define sqrt(x: float) -> float {
   magic external llvm.sqrt.f64(x)
 }
 
-define exp(x: float): float {
+define exp(x: float) -> float {
   magic external llvm.exp.f64(x)
 }
 
-define exp2(x: float): float {
+define exp2(x: float) -> float {
   magic external llvm.exp2.f64(x)
 }
 
-define exp10(x: float): float {
+define exp10(x: float) -> float {
   magic external llvm.exp10.f64(x)
 }
 
-define sin(x: float): float {
+define sin(x: float) -> float {
   magic external llvm.sin.f64(x)
 }
 
-define cos(x: float): float {
+define cos(x: float) -> float {
   magic external llvm.cos.f64(x)
 }
 
-define log(x: float): float {
+define log(x: float) -> float {
   magic external llvm.log.f64(x)
 }
 
-define log2(x: float): float {
+define log2(x: float) -> float {
   magic external llvm.log2.f64(x)
 }
 
-define log10(x: float): float {
+define log10(x: float) -> float {
   magic external llvm.log10.f64(x)
 }
 
-define fma(x: float, y: float, z: float): float {
+define fma(x: float, y: float, z: float) -> float {
   magic external llvm.fma.f64(x, y, z)
 }
 
-define abs-float(x: float): float {
+define abs-float(x: float) -> float {
   magic external llvm.fabs.f64(x)
 }
 
-define min-float(x: float, y: float): float {
+define min-float(x: float, y: float) -> float {
   magic external llvm.minnum.f64(x, y)
 }
 
-define max-float(x: float, y: float): float {
+define max-float(x: float, y: float) -> float {
   magic external llvm.maxnum.f64(x, y)
 }
 
-define power-float(x: float, y: float): float {
+define power-float(x: float, y: float) -> float {
   magic external llvm.pow.f64(x, y)
 }
 
-define floor(x: float): float {
+define floor(x: float) -> float {
   magic external llvm.floor.f64(x)
 }
 
-define ceil(x: float): float {
+define ceil(x: float) -> float {
   magic external llvm.ceil.f64(x)
 }
 
-define trunc(x: float): float {
+define trunc(x: float) -> float {
   magic external llvm.trunc.f64(x)
 }
 
-define sigmoid(x: float): float {
+define sigmoid(x: float) -> float {
   div-float(1, add-float(1, exp(mul-float(-1, x))))
 }

@@ -10,65 +10,65 @@ data text-builder {
 | _Text-Builder(binary-builder)
 }
 
-inline _to-binary-builder(b: text-builder): binary-builder {
+inline _to-binary-builder(b: text-builder) -> binary-builder {
   let _Text-Builder(b) = b;
   b
 }
 
-inline _to-binary-builder-N(b: &text-builder): &binary-builder {
+inline _to-binary-builder-N(b: &text-builder) -> &binary-builder {
   tie _Text-Builder(b) = b;
   b
 }
 
-define make-text-builder(size: int): text-builder {
+define make-text-builder(size: int) -> text-builder {
   _Text-Builder(make-binary-builder(size))
 }
 
-define extract(b: text-builder): text {
+define extract(b: text-builder) -> text {
   _Text(this.binary-builder.extract(_to-binary-builder(b)))
 }
 
-define append-int64-UTF8(b: &text-builder, x: int64): unit {
+define append-int64-UTF8(b: &text-builder, x: int64) -> unit {
   this.binary-builder.append-int64-UTF8(_to-binary-builder-N(b), x)
 }
 
-define append-int32-UTF8(b: &text-builder, x: int32): unit {
+define append-int32-UTF8(b: &text-builder, x: int32) -> unit {
   this.binary-builder.append-int32-UTF8(_to-binary-builder-N(b), x)
 }
 
-define append-int16-UTF8(b: &text-builder, x: int16): unit {
+define append-int16-UTF8(b: &text-builder, x: int16) -> unit {
   this.binary-builder.append-int16-UTF8(_to-binary-builder-N(b), x)
 }
 
-define append-int8-UTF8(b: &text-builder, x: int8): unit {
+define append-int8-UTF8(b: &text-builder, x: int8) -> unit {
   this.binary-builder.append-int8-UTF8(_to-binary-builder-N(b), x)
 }
 
-define append-float64-UTF8(b: &text-builder, x: float64): unit {
+define append-float64-UTF8(b: &text-builder, x: float64) -> unit {
   this.binary-builder.append-float64-UTF8(_to-binary-builder-N(b), x)
 }
 
-define append-float32-UTF8(b: &text-builder, x: float32): unit {
+define append-float32-UTF8(b: &text-builder, x: float32) -> unit {
   this.binary-builder.append-float32-UTF8(_to-binary-builder-N(b), x)
 }
 
-define append-float16-UTF8(b: &text-builder, x: float16): unit {
+define append-float16-UTF8(b: &text-builder, x: float16) -> unit {
   this.binary-builder.append-float16-UTF8(_to-binary-builder-N(b), x)
 }
 
-define append-text(b: &text-builder, x: &text): unit {
+define append-text(b: &text-builder, x: &text) -> unit {
   this.binary-builder.append-text(_to-binary-builder-N(b), x)
 }
 
-inline append-rune-UTF8(b: &text-builder, x: rune): unit {
+inline append-rune-UTF8(b: &text-builder, x: rune) -> unit {
   this.binary-builder.append-rune-UTF8(_to-binary-builder-N(b), x)
 }
 
-inline append-ansi(b: &text-builder, x: command): unit {
+inline append-ansi(b: &text-builder, x: command) -> unit {
   this.binary-builder.append-ansi(_to-binary-builder-N(b), x)
 }
 
-define zen(): unit {
+define zen() -> unit {
   let b = make-text-builder(4);
   let _ on b = {
     // append-int32(b, 3);

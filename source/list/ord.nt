@@ -4,10 +4,10 @@ import {
   this.ordering {EQ, GT, LT, ordering},
 }
 
-inline as-ord<a>(!o: ord(a)): ord(list(a)) {
+inline as-ord<a>(!o: ord(a)) -> ord(list(a)) {
   Ord{
     compare := {
-      define self(xs, ys): ordering {
+      define self(xs, ys) -> ordering {
         case xs, ys {
         | Nil, Nil =>
           EQ

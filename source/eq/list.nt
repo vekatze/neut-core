@@ -4,7 +4,7 @@ import {
   this.list {Cons, Nil, list},
 }
 
-define elem<a>(e: &eq(a), xs: &list(a), x: &a): bool {
+define elem<a>(e: &eq(a), xs: &list(a), x: &a) -> bool {
   case xs {
   | Nil =>
     False

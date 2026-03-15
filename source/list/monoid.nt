@@ -3,7 +3,7 @@ import {
   this.monoid {Monoid, monoid},
 }
 
-inline as-monoid<a>(): monoid(list(a)) {
+inline as-monoid<a>() -> monoid(list(a)) {
   Monoid{
     e := Nil,
     op := {

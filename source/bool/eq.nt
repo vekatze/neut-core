@@ -16,7 +16,7 @@ constant as-eq: eq(bool) {
   )
 }
 
-define eq-bool(b1: bool, b2: bool): bool {
+define eq-bool(b1: bool, b2: bool) -> bool {
   match b1, b2 {
   | True, True =>
     True

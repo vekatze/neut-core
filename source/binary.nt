@@ -17,7 +17,7 @@ foreign {
   llvm.memcpy.p0.p0.i64(pointer, pointer, int64, int1): void,
 }
 
-inline _copy-binary(source-pointer: pointer, target-pointer: pointer, len: int): unit {
+inline _copy-binary(source-pointer: pointer, target-pointer: pointer, len: int) -> unit {
   let _ = magic external llvm.memcpy.p0.p0.i64(target-pointer, source-pointer, len, 0);
   Unit
 }
@@ -44,7 +44,7 @@ resource binary {
   },
 }
 
-define binary-length(xs: &binary): int {
+define binary-length(xs: &binary) -> int {
   let source-pointer = magic cast(&binary, pointer, xs);
   let u = this.word.size;
   let from = load-int(source-pointer);
@@ -52,7 +52,7 @@ define binary-length(xs: &binary): int {
   sub-int(to, from)
 }
 
-define allocate(len: int): binary {
+define allocate(len: int) -> binary {
   let u = this.word.size;
   let u2 = mul-int(u, 2);
   let base-pointer = malloc(C-Size(add-int(len, u2)));
@@ -60,7 +60,7 @@ define allocate(len: int): binary {
   store-int(len, shift(base-pointer, u));
   let content-pointer = shift(base-pointer, u2);
   let store-values =
-    define self(index: int): unit {
+    define self(index: int) -> unit {
       if ge-int(index, len) {
         Unit
       } else {
@@ -72,7 +72,7 @@ define allocate(len: int): binary {
   cast<pointer, binary>(base-pointer)
 }
 
-define binary-new(xs: list(int8)): binary {
+define binary-new(xs: list(int8)) -> binary {
   let len on xs = length(xs);
   let u = this.word.size;
   let u2 = mul-int(u, 2);
@@ -81,7 +81,7 @@ define binary-new(xs: list(int8)): binary {
   store-int(len, shift(base-pointer, u));
   let content-pointer = shift(base-pointer, u2);
   let store-values =
-    define self(values: list(int8), index: int): unit {
+    define self(values: list(int8), index: int) -> unit {
       match values {
       | Nil =>
         Unit
@@ -94,21 +94,21 @@ define binary-new(xs: list(int8)): binary {
   cast<pointer, binary>(base-pointer)
 }
 
-define binary-access(xs: &binary, i: int): int8 {
+define binary-access(xs: &binary, i: int) -> int8 {
   let ptr = cast<&binary, pointer>(xs);
   let u = this.word.size;
   let u2 = mul-int(u, 2);
   load-int8(shift(ptr, add-int(u2, i)))
 }
 
-define _get-content-pointer(t: &binary): pointer {
+define _get-content-pointer(t: &binary) -> pointer {
   let ptr = cast<&binary, pointer>(t);
   let from = load-int(ptr);
   let u = this.word.size;
   shift(ptr, add-int(mul-int(u, 2), from))
 }
 
-define join(xs: list(binary)): binary {
+define join(xs: list(binary)) -> binary {
   let len on xs =
     fold-left-N(0, xs, function (acc, x) {
       add-int(acc, binary-length(x))
@@ -120,7 +120,7 @@ define join(xs: list(binary)): binary {
   store-int(len, shift(new-binary, u));
   let content-ptr = shift(new-binary, u2);
   let loop =
-    define self(offset: int, xs: list(binary)): unit {
+    define self(offset: int, xs: list(binary)) -> unit {
       match xs {
       | Nil =>
         Unit
@@ -137,7 +137,7 @@ define join(xs: list(binary)): binary {
   magic cast(pointer, binary, new-binary)
 }
 
-define join-N(xs: &list(binary)): binary {
+define join-N(xs: &list(binary)) -> binary {
   let len =
     fold-left-N(0, xs, function (acc, x) {
       add-int(acc, binary-length(x))
@@ -149,7 +149,7 @@ define join-N(xs: &list(binary)): binary {
   store-int(len, shift(new-binary, u));
   let content-ptr = shift(new-binary, u2);
   let loop =
-    define self(offset: int, xs: &list(binary)): unit {
+    define self(offset: int, xs: &list(binary)) -> unit {
       case xs {
       | Nil =>
         Unit
@@ -165,7 +165,7 @@ define join-N(xs: &list(binary)): binary {
   magic cast(pointer, binary, new-binary)
 }
 
-define append(t1: &binary, t2: &binary): binary {
+define append(t1: &binary, t2: &binary) -> binary {
   let p1 = cast<&binary, pointer>(t1);
   let p2 = cast<&binary, pointer>(t2);
   let from1 = load-int(p1);
@@ -183,7 +183,7 @@ define append(t1: &binary, t2: &binary): binary {
   store-int(0, new-binary);
   store-int(new-len, shift(new-binary, u));
   let !store-values =
-    define store-values(target-pointer: pointer, content-array: pointer, current-index: int, array-length: int): unit {
+    define store-values(target-pointer: pointer, content-array: pointer, current-index: int, array-length: int) -> unit {
       if eq-int(current-index, array-length) {
         Unit
       } else {
@@ -199,7 +199,7 @@ define append(t1: &binary, t2: &binary): binary {
 }
 
 // O(1)
-define drop(t: binary, offset: int): binary {
+define drop(t: binary, offset: int) -> binary {
   let offset = max-int(0, offset);
   let _ on t = {
     let ptr = cast<&binary, pointer>(t);
@@ -212,7 +212,7 @@ define drop(t: binary, offset: int): binary {
 }
 
 // O(1)
-define take(t: binary, offset: int): binary {
+define take(t: binary, offset: int) -> binary {
   let offset = max-int(0, offset);
   let _ on t = {
     let ptr = cast<&binary, pointer>(t);
@@ -225,11 +225,11 @@ define take(t: binary, offset: int): binary {
 }
 
 // O(1)
-define slice(t: binary, start: int, size: int): binary {
+define slice(t: binary, start: int, size: int) -> binary {
   take(drop(t, start), size)
 }
 
-define drop-N(t: &binary, offset: int): binary {
+define drop-N(t: &binary, offset: int) -> binary {
   let content-ptr = _get-content-pointer(t);
   let orig-size = binary-length(t);
   let new-size = max-int(0, sub-int(orig-size, offset));
@@ -243,7 +243,7 @@ define drop-N(t: &binary, offset: int): binary {
   cast<pointer, binary>(new-ptr)
 }
 
-define take-N(t: &binary, offset: int): binary {
+define take-N(t: &binary, offset: int) -> binary {
   let ptr = cast<&binary, pointer>(t);
   let to = load-int(shift(ptr, this.word.size));
   let new-size = min-int(to, offset);
@@ -256,7 +256,7 @@ define take-N(t: &binary, offset: int): binary {
   cast<pointer, binary>(new-ptr)
 }
 
-define slice-N(t: &binary, start: int, size: int): binary {
+define slice-N(t: &binary, start: int, size: int) -> binary {
   let start = max-int(start, 0);
   let size = max-int(size, 0);
   let ptr = cast<&binary, pointer>(t);
@@ -272,31 +272,31 @@ define slice-N(t: &binary, start: int, size: int): binary {
   cast<pointer, binary>(new-ptr)
 }
 
-define take-end(t: binary, offset: int): binary {
+define take-end(t: binary, offset: int) -> binary {
   let len on t = binary-length(t);
   drop(t, sub-int(len, offset))
 }
 
-define take-end-N(t: &binary, offset: int): binary {
+define take-end-N(t: &binary, offset: int) -> binary {
   let len = binary-length(t);
   drop-N(t, sub-int(len, offset))
 }
 
-define drop-end(t: binary, offset: int): binary {
+define drop-end(t: binary, offset: int) -> binary {
   let len on t = binary-length(t);
   take(t, sub-int(len, offset))
 }
 
-define drop-end-N(t: &binary, offset: int): binary {
+define drop-end-N(t: &binary, offset: int) -> binary {
   let len = binary-length(t);
   take-N(t, sub-int(len, offset))
 }
 
-define intercalate(xs: list(binary), sep: binary): binary {
+define intercalate(xs: list(binary), sep: binary) -> binary {
   join(this.list.intercalate(xs, sep))
 }
 
-define intercalate-N(xs: &list(binary), sep: &binary): binary {
+define intercalate-N(xs: &list(binary), sep: &binary) -> binary {
   let base-len =
     fold-left-N(0, xs, function (acc, x) {
       add-int(acc, binary-length(x))
@@ -311,7 +311,7 @@ define intercalate-N(xs: &list(binary), sep: &binary): binary {
   store-int(len, shift(new-binary, u));
   let content-ptr = shift(new-binary, u2);
   let loop =
-    define self(offset: int, xs: &list(binary)): unit {
+    define self(offset: int, xs: &list(binary)) -> unit {
       case xs {
       | Nil =>
         Unit
@@ -337,10 +337,10 @@ define intercalate-N(xs: &list(binary), sep: &binary): binary {
   magic cast(pointer, binary, new-binary)
 }
 
-define find(xs: &binary, !pred: (int8) -> bool)[r := rho]: ?int {
+define find(xs: &binary, !pred: (int8) -> bool)[r := rho] -> ?int {
   let len = binary-length(xs);
   let f =
-    define self(r: ?unit, index: int): ?int {
+    define self(r: ?unit, index: int) -> ?int {
       if ge-int(index, len) {
         try _ = r;
         none
@@ -357,10 +357,10 @@ define find(xs: &binary, !pred: (int8) -> bool)[r := rho]: ?int {
   f(r, 0)
 }
 
-define find-end(xs: &binary, !pred: (int8) -> bool)[r := rho]: ?int {
+define find-end(xs: &binary, !pred: (int8) -> bool)[r := rho] -> ?int {
   let len = binary-length(xs);
   let f =
-    define self(r: ?unit, xs: &binary, index: int): ?int {
+    define self(r: ?unit, xs: &binary, index: int) -> ?int {
       if lt-int(index, 0) {
         try _ = r;
         none

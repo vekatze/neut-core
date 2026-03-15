@@ -19,7 +19,7 @@ foreign {
   setenv(pointer, pointer, c-int): c-int,
 }
 
-define get-env(name: &text)[r := rho]: ?text {
+define get-env(name: &text)[r := rho] -> ?text {
   let c-str = _get-content-pointer(name);
   let tmp = magic external getenv(c-str);
   if eq-int(magic cast(pointer, int, tmp), 0) {
@@ -31,7 +31,7 @@ define get-env(name: &text)[r := rho]: ?text {
   }
 }
 
-define set-env(name: &text, value: &text, overwrite: bool)[r := rho]: system(unit) {
+define set-env(name: &text, value: &text, overwrite: bool)[r := rho] -> system(unit) {
   let name-c-str = to-c-string(name);
   let value-c-str = to-c-string(value);
   let flag =
@@ -57,18 +57,18 @@ define set-env(name: &text, value: &text, overwrite: bool)[r := rho]: system(uni
   }
 }
 
-define get-argc(): int {
+define get-argc() -> int {
   let argc-ptr = magic global("neut-unsafe-argc", pointer);
   load-int(argc-ptr)
 }
 
-define get-argv(): list(text) {
+define get-argv() -> list(text) {
   let argc = get-argc();
   let argv-ptr = magic global("neut-unsafe-argv", pointer);
   let argv = load-pointer(argv-ptr);
   let u = this.word.size;
   let f =
-    define get-argv-helper(i: int): list(text) {
+    define get-argv-helper(i: int) -> list(text) {
       if eq-int(i, argc) {
         Nil
       } else {

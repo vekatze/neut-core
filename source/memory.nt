@@ -3,70 +3,70 @@ import {
   this.unit {unit},
 }
 
-inline store-pointer(value: pointer, p: pointer): unit {
+inline store-pointer(value: pointer, p: pointer) -> unit {
   magic store(pointer, value, p)
 }
 
-inline store-int(value: int, p: pointer): unit {
+inline store-int(value: int, p: pointer) -> unit {
   magic store(int, value, p)
 }
 
-inline store-int32(value: int32, p: pointer): unit {
+inline store-int32(value: int32, p: pointer) -> unit {
   magic store(int32, value, p)
 }
 
-inline store-int16(value: int16, p: pointer): unit {
+inline store-int16(value: int16, p: pointer) -> unit {
   magic store(int16, value, p)
 }
 
-inline store-int8(value: int8, p: pointer): unit {
+inline store-int8(value: int8, p: pointer) -> unit {
   magic store(int8, value, p)
 }
 
-inline store-float(value: float, p: pointer): unit {
+inline store-float(value: float, p: pointer) -> unit {
   magic store(float, value, p)
 }
 
-inline store-float32(value: float32, p: pointer): unit {
+inline store-float32(value: float32, p: pointer) -> unit {
   magic store(float32, value, p)
 }
 
-inline store-float16(value: float16, p: pointer): unit {
+inline store-float16(value: float16, p: pointer) -> unit {
   magic store(float16, value, p)
 }
 
-inline load-pointer(p: pointer): pointer {
+inline load-pointer(p: pointer) -> pointer {
   magic load(pointer, p)
 }
 
-inline load-int(p: pointer): int {
+inline load-int(p: pointer) -> int {
   magic load(int, p)
 }
 
-inline load-int32(p: pointer): int32 {
+inline load-int32(p: pointer) -> int32 {
   magic load(int32, p)
 }
 
-inline load-int8(p: pointer): int8 {
+inline load-int8(p: pointer) -> int8 {
   magic load(int8, p)
 }
 
-inline load-int16(p: pointer): int16 {
+inline load-int16(p: pointer) -> int16 {
   magic load(int16, p)
 }
 
-inline load-float(p: pointer): float {
+inline load-float(p: pointer) -> float {
   magic load(float, p)
 }
 
-inline load-float32(p: pointer): float32 {
+inline load-float32(p: pointer) -> float32 {
   magic load(float32, p)
 }
 
-inline load-float16(p: pointer): float16 {
+inline load-float16(p: pointer) -> float16 {
   magic load(float16, p)
 }
 
-inline load-c-int(p: pointer): c-int {
+inline load-c-int(p: pointer) -> c-int {
   magic load(c-int, p)
 }

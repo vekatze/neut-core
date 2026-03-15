@@ -4,7 +4,7 @@ import {
   this.pair {Pair, pair},
 }
 
-inline as-eq<a, b>(f: eq(a), g: eq(b)): eq(pair(a, b)) {
+inline as-eq<a, b>(f: eq(a), g: eq(b)) -> eq(pair(a, b)) {
   let Eq{equal := equal-f} = f;
   let Eq{equal := equal-g} = g;
   Eq{

@@ -6,7 +6,7 @@ foreign {
   arc4random_uniform(int32): int32,
 }
 
-define random-int32(ubound: int32): int32 {
+define random-int32(ubound: int32) -> int32 {
   introspect operating-system {
   | darwin =>
     magic external arc4random_uniform(ubound)
@@ -16,21 +16,21 @@ define random-int32(ubound: int32): int32 {
   }
 }
 
-define random-in-range-int32(lower-bound: int32, upper-bound: int32): int32 {
+define random-in-range-int32(lower-bound: int32, upper-bound: int32) -> int32 {
   let range-size = add-int32(sub-int32(upper-bound, lower-bound), 1);
   let value = random-int32(range-size);
   add-int32(value, lower-bound)
 }
 
-define random-int(ubound: int32): int {
+define random-int(ubound: int32) -> int {
   zext-int32-int(random-int32(ubound))
 }
 
-define random-in-range-int(lower-bound: int32, upper-bound: int32): int {
+define random-in-range-int(lower-bound: int32, upper-bound: int32) -> int {
   sext-int32-int(random-in-range-int32(lower-bound, upper-bound))
 }
 
-define random-float32(min: float32, max: float32): float32 {
+define random-float32(min: float32, max: float32) -> float32 {
   let numerator = random-int32(UINT32_MAX);
   let denominator = UINT32_MAX;
   add-float32(
@@ -42,7 +42,7 @@ define random-float32(min: float32, max: float32): float32 {
   )
 }
 
-define random-float(min: float, max: float): float {
+define random-float(min: float, max: float) -> float {
   let numerator = random-int32(UINT32_MAX);
   let denominator = UINT32_MAX;
   add-float(

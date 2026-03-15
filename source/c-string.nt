@@ -19,7 +19,7 @@ nominal {
   resource c-string,
 }
 
-define _length-c-string(s: pointer): int {
+define _length-c-string(s: pointer) -> int {
   magic external strlen(s)
 }
 
@@ -37,11 +37,11 @@ resource c-string {
   },
 }
 
-define length-c-string(s: &c-string): int {
+define length-c-string(s: &c-string) -> int {
   _length-c-string(magic cast(&c-string, pointer, s))
 }
 
-define to-c-string(t: &text): c-string {
+define to-c-string(t: &text) -> c-string {
   let len = text-byte-length(t);
   let new-ptr = malloc(C-Size(add-int(len, 1)));
   let src-ptr = _get-content-pointer(t);
@@ -50,7 +50,7 @@ define to-c-string(t: &text): c-string {
   cast<pointer, c-string>(new-ptr)
 }
 
-define from-c-string(s: &c-string): text {
+define from-c-string(s: &c-string) -> text {
   let u = this.word.size;
   let u2 = mul-int(u, 2);
   let len = length-c-string(s);

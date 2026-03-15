@@ -3,16 +3,16 @@ import {
   this.c-int {c-int},
 }
 
-inline shift(p: pointer, offset: int): pointer {
+inline shift(p: pointer, offset: int) -> pointer {
   let addr = magic cast(pointer, int, p);
   magic cast(int, pointer, add-int(addr, offset))
 }
 
-define extract(p: pointer): int {
+define extract(p: pointer) -> int {
   magic cast(pointer, int, p)
 }
 
-inline from-c-int(x: c-int): pointer {
+inline from-c-int(x: c-int) -> pointer {
   magic cast(c-int, pointer, x)
 }
 
@@ -22,6 +22,6 @@ constant null-pointer: pointer {
   }
 }
 
-inline is-null-pointer(p: pointer): bool {
+inline is-null-pointer(p: pointer) -> bool {
   eq-int(magic cast(pointer, int, p), 0)
 }

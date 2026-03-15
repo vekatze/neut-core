@@ -55,7 +55,7 @@ import {
   this.word,
 }
 
-inline-meta _meta-length<a>(xs: list(a)): int {
+inline-meta _meta-length<a>(xs: list(a)) -> int {
   match xs {
   | Nil =>
     0
@@ -64,7 +64,7 @@ inline-meta _meta-length<a>(xs: list(a)): int {
   }
 }
 
-inline-meta _meta-for-each<a, b>(xs: list(a), !f: (a) -> b): list(b) {
+inline-meta _meta-for-each<a, b>(xs: list(a), !f: (a) -> b) -> list(b) {
   match xs {
   | Nil =>
     Nil
@@ -73,12 +73,12 @@ inline-meta _meta-for-each<a, b>(xs: list(a), !f: (a) -> b): list(b) {
   }
 }
 
-inline-meta _meta-snd<a, b>(p: pair(a, b)): b {
+inline-meta _meta-snd<a, b>(p: pair(a, b)) -> b {
   let Pair(_, y) = p;
   y
 }
 
-define _literal-doc(d: doc): doc {
+define _literal-doc(d: doc) -> doc {
   join[
     ansi-fg(Yellow),
     d,
@@ -86,7 +86,7 @@ define _literal-doc(d: doc): doc {
   ]
 }
 
-inline-meta _join-text(t1: &text, t2: &text): &text {
+inline-meta _join-text(t1: &text, t2: &text) -> &text {
   let tmp = magic text-uncons(t1);
   match tmp {
   | Left(_) =>
@@ -97,10 +97,10 @@ inline-meta _join-text(t1: &text, t2: &text): &text {
 }
 
 nominal {
-  define-meta vet-doc<a>(x: '&a): 'doc,
+  define-meta vet-doc<a>(x: '&a) -> 'doc,
 }
 
-define _constructor-doc(x: &text): doc {
+define _constructor-doc(x: &text) -> doc {
   join[
     ansi-fg(Blue),
     ansi-bold,
@@ -109,13 +109,13 @@ define _constructor-doc(x: &text): doc {
   ]
 }
 
-inline-meta _vet-vector<a>(xs: '&vector(a)): 'doc {
+inline-meta _vet-vector<a>(xs: '&vector(a)) -> 'doc {
   quote {
     let prefix = join[_constructor-doc("Vector"), atom-N("[")];
     let suffix = atom-N("]");
     let len = this.vector.length(unquote {xs});
     let content =
-      this.vector.fold-right-N(unquote {xs}, empty, function (x: &a, acc: doc, i: int): doc {
+      this.vector.fold-right-N(unquote {xs}, empty, function (x: &a, acc: doc, i: int) -> doc {
         if eq-int(add-int(i, 1), len) {
           join[unquote {vet-doc(quote {x})}, acc]
         } else {
@@ -130,7 +130,7 @@ inline-meta _vet-vector<a>(xs: '&vector(a)): 'doc {
   }
 }
 
-inline _load-nth-element(data-arg-num: int, cursor: int, x: pointer): pointer {
+inline _load-nth-element(data-arg-num: int, cursor: int, x: pointer) -> pointer {
   let u = this.word.size;
   let offset = mul-int(u, add-int(1, add-int(data-arg-num, cursor))); // x = (disc, data-args, cons-args)
   let elem-ptr = shift(x, offset);
@@ -142,7 +142,8 @@ inline-meta _vet-adt-cons<a>(
   cursor: int,
   data-arg-num: int,
   x: '&a,
-): 'doc {
+)->
+'doc {
   match cons-arg-types {
   | Nil =>
     quote {empty}
@@ -171,7 +172,7 @@ inline-meta _vet-adt-cons<a>(
   }
 }
 
-inline-meta _vet-adt<a>(constructors: list(constructor), cons-index: int, data-arg-num: int, disc: 'int, x: '&a): 'doc {
+inline-meta _vet-adt<a>(constructors: list(constructor), cons-index: int, data-arg-num: int, disc: 'int, x: '&a) -> 'doc {
   match constructors {
   | Nil =>
     quote {empty}
@@ -207,7 +208,7 @@ inline-meta _vet-adt<a>(constructors: list(constructor), cons-index: int, data-a
   }
 }
 
-inline-meta _vet-enum<a>(cons-index: int, names: list(&text), disc: 'int, x: '&a): 'doc {
+inline-meta _vet-enum<a>(cons-index: int, names: list(&text), disc: 'int, x: '&a) -> 'doc {
   match names {
   | Nil =>
     quote {empty}
@@ -222,7 +223,7 @@ inline-meta _vet-enum<a>(cons-index: int, names: list(&text), disc: 'int, x: '&a
   }
 }
 
-define-meta vet-doc<a>(x: '&a): 'doc {
+define-meta vet-doc<a>(x: '&a) -> 'doc {
   let k = magic inspect-type(a);
   match k {
   | Algebraic(_, data-args, cons-info) =>
@@ -306,7 +307,7 @@ define-meta vet-doc<a>(x: '&a): 'doc {
   }
 }
 
-define-meta vet<a>(x: '&a)[ribbon-length: 'int := quote {50}]: 'unit {
+define-meta vet<a>(x: '&a)[ribbon-length: 'int := quote {50}] -> 'unit {
   quote {
     pin tmp = unquote {vet-doc(x)};
     pin item = show-doc(tmp, unquote {ribbon-length});
@@ -315,7 +316,7 @@ define-meta vet<a>(x: '&a)[ribbon-length: 'int := quote {50}]: 'unit {
   }
 }
 
-define-meta trace<a>(x: 'a): 'a {
+define-meta trace<a>(x: 'a) -> 'a {
   introspect build-mode {
   | release =>
     x
@@ -328,7 +329,7 @@ define-meta trace<a>(x: 'a): 'a {
   }
 }
 
-define zen(): unit {
+define zen() -> unit {
   pin xs: vector(pair(&text, +text)) = this.vector.Vector[Pair("a", box {*"b"}), Pair("c", box {*"d"})];
   // pin ys: vector(list(int)) = this.vector.Vector[List[], List[10, 20]];
   // let foo = unquote {vet(quote {xs})};

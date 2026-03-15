@@ -20,7 +20,7 @@ import {
   this.word,
 }
 
-inline _get-clone<a>(x: &a): a {
+inline _get-clone<a>(x: &a) -> a {
   *x
 }
 
@@ -32,7 +32,7 @@ data cell(_: type) {
 | _Cell(_cell)
 }
 
-define _new<a>(val: a): cell(a) {
+define _new<a>(val: a) -> cell(a) {
   let mutex-size = from-c-size(THREAD_MUTEX_SIZE);
   let u = this.word.size;
   let ptr = malloc(C-Size(sum-int(List[u, mutex-size, u])));
@@ -64,11 +64,11 @@ resource _cell {
   },
 }
 
-inline make-cell<a>(initial-value: +a): cell(a) {
+inline make-cell<a>(initial-value: +a) -> cell(a) {
   _new<a>(axiom-T(initial-value))
 }
 
-inline modify<a, b>(ch: &cell(a), f: (+a) -> pair(+a, b)): b {
+inline modify<a, b>(ch: &cell(a), f: (+a) -> pair(+a, b)) -> b {
   let ch = cast<&cell(a), pointer>(ch);
   let u = this.word.size;
   let mutex-ptr = shift(ch, u);
@@ -81,13 +81,13 @@ inline modify<a, b>(ch: &cell(a), f: (+a) -> pair(+a, b)): b {
   result
 }
 
-inline mutate<a>(ch: &cell(a), f: (+a) -> +a): unit {
+inline mutate<a>(ch: &cell(a), f: (+a) -> +a) -> unit {
   modify(ch, function (x) {
     Pair(f(x), Unit)
   })
 }
 
-inline borrow<a, b>(ch: &cell(a), f: (&a) -> +b): b {
+inline borrow<a, b>(ch: &cell(a), f: (&a) -> +b) -> b {
   let ch = cast<&cell(a), pointer>(ch);
   let u = this.word.size;
   let mutex-ptr = shift(ch, u);
@@ -99,13 +99,13 @@ inline borrow<a, b>(ch: &cell(a), f: (&a) -> +b): b {
   result
 }
 
-define clone<a>(ch: &cell(a)): a {
+define clone<a>(ch: &cell(a)) -> a {
   borrow(ch, function (val: &a) {
     box val {val}
   })
 }
 
-define extract<a>(c: cell(a)): +a {
+define extract<a>(c: cell(a)) -> +a {
   let u = this.word.size;
   let ch = cast<cell(a), pointer>(c);
   let result = cast<int, +a>(load-int(ch));

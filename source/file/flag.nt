@@ -12,7 +12,7 @@ data flag {
 | Create
 }
 
-define _interpret-flag(flag: flag): c-int {
+define _interpret-flag(flag: flag) -> c-int {
   match flag {
   | R =>
     O_RDONLY
@@ -27,7 +27,7 @@ define _interpret-flag(flag: flag): c-int {
   }
 }
 
-define interpret(xs: list(flag)): c-int {
+define interpret(xs: list(flag)) -> c-int {
   this.list.fold-left(0, xs, function (acc, x) {
     or-c-int(acc, _interpret-flag(x))
   })

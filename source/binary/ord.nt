@@ -10,7 +10,7 @@ import {
   this.pointer {shift},
 }
 
-define _cmp-int8(x: int8, y: int8): ordering {
+define _cmp-int8(x: int8, y: int8) -> ordering {
   if gt-int8(x, y) {
     GT
   } else-if lt-int8(x, y) {
@@ -20,9 +20,9 @@ define _cmp-int8(x: int8, y: int8): ordering {
   }
 }
 
-inline cmp-binary(xs1: &binary, xs2: &binary): ordering {
+inline cmp-binary(xs1: &binary, xs2: &binary) -> ordering {
   let f =
-    define self(ptr1: pointer, ptr2: pointer, index: int, len: int, fallback: ordering): ordering {
+    define self(ptr1: pointer, ptr2: pointer, index: int, len: int, fallback: ordering) -> ordering {
       if eq-int(index, len) {
         fallback
       } else {
@@ -48,7 +48,7 @@ inline cmp-binary(xs1: &binary, xs2: &binary): ordering {
   f(ptr1, ptr2, 0, min-len, fallback-value)
 }
 
-define lt-binary(t1: &binary, t2: &binary): bool {
+define lt-binary(t1: &binary, t2: &binary) -> bool {
   match cmp-binary(t1, t2) {
   | LT =>
     True
@@ -57,7 +57,7 @@ define lt-binary(t1: &binary, t2: &binary): bool {
   }
 }
 
-define le-binary(t1: &binary, t2: &binary): bool {
+define le-binary(t1: &binary, t2: &binary) -> bool {
   match cmp-binary(t1, t2) {
   | GT =>
     False
@@ -66,7 +66,7 @@ define le-binary(t1: &binary, t2: &binary): bool {
   }
 }
 
-define gt-binary(t1: &binary, t2: &binary): bool {
+define gt-binary(t1: &binary, t2: &binary) -> bool {
   match cmp-binary(t1, t2) {
   | GT =>
     True
@@ -75,7 +75,7 @@ define gt-binary(t1: &binary, t2: &binary): bool {
   }
 }
 
-define ge-binary(t1: &binary, t2: &binary): bool {
+define ge-binary(t1: &binary, t2: &binary) -> bool {
   match cmp-binary(t1, t2) {
   | LT =>
     False

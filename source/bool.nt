@@ -3,7 +3,7 @@ data bool {
 | True
 }
 
-inline and(b1: bool, b2: bool): bool {
+inline and(b1: bool, b2: bool) -> bool {
   if b1 {
     if b2 {
       True
@@ -15,7 +15,7 @@ inline and(b1: bool, b2: bool): bool {
   }
 }
 
-inline or(b1: bool, b2: bool): bool {
+inline or(b1: bool, b2: bool) -> bool {
   if b1 {
     True
   } else {
@@ -27,7 +27,7 @@ inline or(b1: bool, b2: bool): bool {
   }
 }
 
-inline not(b: bool): bool {
+inline not(b: bool) -> bool {
   if b {
     False
   } else {
@@ -36,25 +36,25 @@ inline not(b: bool): bool {
 }
 
 rule-left any {
-  function leaf(_: int): bool {
+  function leaf(_: int) -> bool {
     False
   },
-  function node-left(acc: bool, b: bool): bool {
+  function node-left(acc: bool, b: bool) -> bool {
     or(acc, b)
   },
-  function root<a>(x: a): a {
+  function root<a>(x: a) -> a {
     x
   },
 }
 
 rule-left all {
-  function leaf(_: int): bool {
+  function leaf(_: int) -> bool {
     True
   },
-  function node-left(acc: bool, b: bool): bool {
+  function node-left(acc: bool, b: bool) -> bool {
     and(acc, b)
   },
-  function root<a>(x: a): a {
+  function root<a>(x: a) -> a {
     x
   },
 }

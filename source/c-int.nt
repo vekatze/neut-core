@@ -15,7 +15,7 @@ data c-int {
 | C-Int(int32)
 }
 
-inline add-c-int(x: c-int, y: c-int): c-int {
+inline add-c-int(x: c-int, y: c-int) -> c-int {
   let C-Int(x) = x;
   let C-Int(y) = y;
   introspect architecture {
@@ -26,7 +26,7 @@ inline add-c-int(x: c-int, y: c-int): c-int {
   }
 }
 
-inline sub-c-int(x: c-int, y: c-int): c-int {
+inline sub-c-int(x: c-int, y: c-int) -> c-int {
   let C-Int(x) = x;
   let C-Int(y) = y;
   introspect architecture {
@@ -37,7 +37,7 @@ inline sub-c-int(x: c-int, y: c-int): c-int {
   }
 }
 
-inline mul-c-int(x: c-int, y: c-int): c-int {
+inline mul-c-int(x: c-int, y: c-int) -> c-int {
   let C-Int(x) = x;
   let C-Int(y) = y;
   introspect architecture {
@@ -48,7 +48,7 @@ inline mul-c-int(x: c-int, y: c-int): c-int {
   }
 }
 
-inline div-c-int(x: c-int, y: c-int): c-int {
+inline div-c-int(x: c-int, y: c-int) -> c-int {
   let C-Int(x) = x;
   let C-Int(y) = y;
   introspect architecture {
@@ -59,7 +59,7 @@ inline div-c-int(x: c-int, y: c-int): c-int {
   }
 }
 
-inline and-c-int(x: c-int, y: c-int): c-int {
+inline and-c-int(x: c-int, y: c-int) -> c-int {
   let C-Int(x) = x;
   let C-Int(y) = y;
   introspect architecture {
@@ -70,7 +70,7 @@ inline and-c-int(x: c-int, y: c-int): c-int {
   }
 }
 
-inline or-c-int(x: c-int, y: c-int): c-int {
+inline or-c-int(x: c-int, y: c-int) -> c-int {
   let C-Int(x) = x;
   let C-Int(y) = y;
   introspect architecture {
@@ -81,7 +81,7 @@ inline or-c-int(x: c-int, y: c-int): c-int {
   }
 }
 
-inline xor-c-int(x: c-int, y: c-int): c-int {
+inline xor-c-int(x: c-int, y: c-int) -> c-int {
   let C-Int(x) = x;
   let C-Int(y) = y;
   introspect architecture {
@@ -92,7 +92,7 @@ inline xor-c-int(x: c-int, y: c-int): c-int {
   }
 }
 
-inline eq-c-int(x: c-int, y: c-int): bool {
+inline eq-c-int(x: c-int, y: c-int) -> bool {
   let C-Int(x) = x;
   let C-Int(y) = y;
   introspect architecture {
@@ -103,7 +103,7 @@ inline eq-c-int(x: c-int, y: c-int): bool {
   }
 }
 
-inline ne-c-int(x: c-int, y: c-int): bool {
+inline ne-c-int(x: c-int, y: c-int) -> bool {
   let C-Int(x) = x;
   let C-Int(y) = y;
   introspect architecture {
@@ -114,7 +114,7 @@ inline ne-c-int(x: c-int, y: c-int): bool {
   }
 }
 
-inline lt-c-int(x: c-int, y: c-int): bool {
+inline lt-c-int(x: c-int, y: c-int) -> bool {
   let C-Int(x) = x;
   let C-Int(y) = y;
   introspect architecture {
@@ -125,7 +125,7 @@ inline lt-c-int(x: c-int, y: c-int): bool {
   }
 }
 
-inline le-c-int(x: c-int, y: c-int): bool {
+inline le-c-int(x: c-int, y: c-int) -> bool {
   let C-Int(x) = x;
   let C-Int(y) = y;
   introspect architecture {
@@ -136,7 +136,7 @@ inline le-c-int(x: c-int, y: c-int): bool {
   }
 }
 
-inline gt-c-int(x: c-int, y: c-int): bool {
+inline gt-c-int(x: c-int, y: c-int) -> bool {
   let C-Int(x) = x;
   let C-Int(y) = y;
   introspect architecture {
@@ -147,7 +147,7 @@ inline gt-c-int(x: c-int, y: c-int): bool {
   }
 }
 
-inline ge-c-int(x: c-int, y: c-int): bool {
+inline ge-c-int(x: c-int, y: c-int) -> bool {
   let C-Int(x) = x;
   let C-Int(y) = y;
   introspect architecture {
@@ -158,7 +158,7 @@ inline ge-c-int(x: c-int, y: c-int): bool {
   }
 }
 
-inline from-c-int(x: c-int): int {
+inline from-c-int(x: c-int) -> int {
   let C-Int(x) = x;
   introspect architecture {
   | amd64 =>

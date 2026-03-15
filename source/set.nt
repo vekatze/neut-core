@@ -14,29 +14,29 @@ constant empty<a>: set(a) {
   _Set(this.dictionary.empty)
 }
 
-define singleton<a>(x: a): set(a) {
+define singleton<a>(x: a) -> set(a) {
   _Set(this.dictionary.singleton(x, Unit))
 }
 
-inline make-insert<a>(k: ord(a)): (s: set(a), x: a) -> set(a) {
+inline make-insert<a>(k: ord(a)) -> (s: set(a), x: a) -> set(a) {
   let !insert = this.dictionary.make-insert(k);
-  define _(s: set(a), x: a): set(a) {
+  define _(s: set(a), x: a) -> set(a) {
     let _Set(s) = s;
     _Set(insert(s, x, Unit))
   }
 }
 
-inline make-delete<a>(k: ord(a)): (s: set(a), x: a) -> set(a) {
+inline make-delete<a>(k: ord(a)) -> (s: set(a), x: a) -> set(a) {
   let !delete = this.dictionary.make-delete(k);
-  define _(s: set(a), x: a): set(a) {
+  define _(s: set(a), x: a) -> set(a) {
     let _Set(s) = s;
     _Set(delete(s, x))
   }
 }
 
-inline make-member<a>(k: ord(a)): (s: &set(a), x: &a) -> bool {
+inline make-member<a>(k: ord(a)) -> (s: &set(a), x: &a) -> bool {
   let !lookup = this.dictionary.make-lookup(k);
-  define _(s: &set(a), x: &a): bool {
+  define _(s: &set(a), x: &a) -> bool {
     tie _Set(s) = s;
     match lookup(s, x) {
     | Right(_) =>

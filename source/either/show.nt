@@ -5,7 +5,7 @@ import {
   this.text {format},
 }
 
-inline as-show<a, b>(s1: show(a), s2: show(b)): show(either(a, b)) {
+inline as-show<a, b>(s1: show(a), s2: show(b)) -> show(either(a, b)) {
   Show(function (val) {
     match val {
     | Left(x) =>

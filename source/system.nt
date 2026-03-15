@@ -20,11 +20,11 @@ alias system(a) {
   either(system-error, a)
 }
 
-inline get-system-error(): system-error {
+inline get-system-error() -> system-error {
   OS-Error(get-errno())
 }
 
-inline report-system-error<a>(): system(a) {
+inline report-system-error<a>() -> system(a) {
   Left(get-system-error())
 }
 
@@ -32,7 +32,7 @@ foreign {
   strerror(errno): pointer,
 }
 
-define get-error-message(e: system-error): text {
+define get-error-message(e: system-error) -> text {
   match e {
   | OS-Error(i) =>
     let c-str = magic external strerror(i);

@@ -5,11 +5,11 @@ import {
   this.list {Cons, Nil, list},
 }
 
-inline as-eq<a>(f: eq(a)): eq(list(a)) {
+inline as-eq<a>(f: eq(a)) -> eq(list(a)) {
   let Eq{equal := !eq} = f;
   Eq{
     equal := {
-      define self(xs, ys): bool {
+      define self(xs, ys) -> bool {
         case xs, ys {
         | Nil, Nil =>
           True
@@ -29,11 +29,11 @@ inline as-eq<a>(f: eq(a)): eq(list(a)) {
   }
 }
 
-define _nop-copy<a>(x: &&a): &a {
+define _nop-copy<a>(x: &&a) -> &a {
   *x
 }
 
-define member<a>(e: &eq(a), xs: &list(a), value: &a): bool {
+define member<a>(e: &eq(a), xs: &list(a), value: &a) -> bool {
   case xs {
   | Nil =>
     False
@@ -47,9 +47,9 @@ define member<a>(e: &eq(a), xs: &list(a), value: &a): bool {
   }
 }
 
-define nub<a>(e: &eq(a), xs: list(a)): list(a) {
+define nub<a>(e: &eq(a), xs: list(a)) -> list(a) {
   let f =
-    define nub(xs: list(a), acc: list(a)): list(a) {
+    define nub(xs: list(a), acc: list(a)) -> list(a) {
       match xs {
       | Nil =>
         Nil

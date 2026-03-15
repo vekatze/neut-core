@@ -40,27 +40,27 @@ constant empty<a>: intmap(a) {
   Nil
 }
 
-inline singleton<a>(k: int, x: a): intmap(a) {
+inline singleton<a>(k: int, x: a) -> intmap(a) {
   Tip(k, x)
 }
 
-inline _mask-w(i: int, m: int): int {
+inline _mask-w(i: int, m: int) -> int {
   and-int(i, xor-int(mul-int(-1, m), m))
 }
 
-inline _mask(key: _Key, mask: _Mask): int {
+inline _mask(key: _Key, mask: _Mask) -> int {
   _mask-w(key, mask)
 }
 
-inline _zero(i: _Key, m: _Mask): bool {
+inline _zero(i: _Key, m: _Mask) -> bool {
   eq-int(0, and-int(i, m))
 }
 
-inline _nomatch(i: _Key, p: _Prefix, m: _Mask): bool {
+inline _nomatch(i: _Key, p: _Prefix, m: _Mask) -> bool {
   ne-int(_mask(i, m), p)
 }
 
-inline _link-with-mask<a>(m: _Mask, p1: _Prefix, t1: intmap(a), t2: intmap(a)): intmap(a) {
+inline _link-with-mask<a>(m: _Mask, p1: _Prefix, t1: intmap(a), t2: intmap(a)) -> intmap(a) {
   let p = _mask(p1, m);
   if _zero(p1, m) {
     Bin(p, m, t1, t2)
@@ -70,20 +70,20 @@ inline _link-with-mask<a>(m: _Mask, p1: _Prefix, t1: intmap(a), t2: intmap(a)): 
 }
 
 // from `Utils.Containers.Internal.BitUtil`
-inline _highest-bit-mask(w: int): int {
+inline _highest-bit-mask(w: int) -> int {
   let size-in-bits = mul-int(this.word.size, 8);
   shl-int(1, sub-int(sub-int(size-in-bits, 1), magic external llvm.ctlz.i64(w)))
 }
 
-inline _branch-mask(p1: _Prefix, p2: _Prefix): _Mask {
+inline _branch-mask(p1: _Prefix, p2: _Prefix) -> _Mask {
   _highest-bit-mask(xor-int(p1, p2))
 }
 
-inline _link<a>(p1: _Prefix, t1: intmap(a), p2: _Prefix, t2: intmap(a)): intmap(a) {
+inline _link<a>(p1: _Prefix, t1: intmap(a), p2: _Prefix, t2: intmap(a)) -> intmap(a) {
   _link-with-mask(_branch-mask(p1, p2), p1, t1, t2)
 }
 
-define insert<a>(t: intmap(a), k: _Key, x: a): intmap(a) {
+define insert<a>(t: intmap(a), k: _Key, x: a) -> intmap(a) {
   match t {
   | Nil =>
     Tip(k, x)
@@ -104,7 +104,7 @@ define insert<a>(t: intmap(a), k: _Key, x: a): intmap(a) {
   }
 }
 
-define lookup<a>(t: &intmap(a), k: _Key)[r := rho]: ?&a {
+define lookup<a>(t: &intmap(a), k: _Key)[r := rho] -> ?&a {
   case t {
   | Nil =>
     try _ = r;
@@ -126,7 +126,7 @@ define lookup<a>(t: &intmap(a), k: _Key)[r := rho]: ?&a {
   }
 }
 
-inline _bin-check-left<a>(p: _Prefix, m: _Mask, l: intmap(a), r: intmap(a)): intmap(a) {
+inline _bin-check-left<a>(p: _Prefix, m: _Mask, l: intmap(a), r: intmap(a)) -> intmap(a) {
   match l {
   | Nil =>
     r
@@ -135,7 +135,7 @@ inline _bin-check-left<a>(p: _Prefix, m: _Mask, l: intmap(a), r: intmap(a)): int
   }
 }
 
-inline _bin-check-right<a>(p: _Prefix, m: _Mask, l: intmap(a), r: intmap(a)): intmap(a) {
+inline _bin-check-right<a>(p: _Prefix, m: _Mask, l: intmap(a), r: intmap(a)) -> intmap(a) {
   match r {
   | Nil =>
     l
@@ -144,7 +144,7 @@ inline _bin-check-right<a>(p: _Prefix, m: _Mask, l: intmap(a), r: intmap(a)): in
   }
 }
 
-define delete<a>(t: intmap(a), k: _Key): intmap(a) {
+define delete<a>(t: intmap(a), k: _Key) -> intmap(a) {
   match t {
   | Nil =>
     Nil
@@ -165,9 +165,9 @@ define delete<a>(t: intmap(a), k: _Key): intmap(a) {
   }
 }
 
-inline from-list<v>(kvs: list(pair(int, v))): intmap(v) {
+inline from-list<v>(kvs: list(pair(int, v))) -> intmap(v) {
   let f =
-    define self(kvs: list(pair(int, v)), acc: intmap(v)): intmap(v) {
+    define self(kvs: list(pair(int, v)), acc: intmap(v)) -> intmap(v) {
       match kvs {
       | this.list.Nil =>
         acc
@@ -178,7 +178,7 @@ inline from-list<v>(kvs: list(pair(int, v))): intmap(v) {
   f(kvs, Nil)
 }
 
-define to-list<v>(kvs: intmap(v)): list(pair(int, v)) {
+define to-list<v>(kvs: intmap(v)) -> list(pair(int, v)) {
   match kvs {
   | Nil =>
     this.list.Nil

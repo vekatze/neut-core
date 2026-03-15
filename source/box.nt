@@ -1,4 +1,4 @@
-inline axiom-K<a, b>(f: +(a) -> b, x: +a): +b {
+inline axiom-K<a, b>(f: +(a) -> b, x: +a) -> +b {
   box {
     letbox f = f;
     letbox x = x;
@@ -6,11 +6,11 @@ inline axiom-K<a, b>(f: +(a) -> b, x: +a): +b {
   }
 }
 
-inline axiom-T<a>(x: +a): a {
+inline axiom-T<a>(x: +a) -> a {
   letbox-T x = x;
   x
 }
 
-inline embody<a>(x: &a): a {
+inline embody<a>(x: &a) -> a {
   axiom-T(box x {x})
 }

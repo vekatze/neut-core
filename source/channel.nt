@@ -26,7 +26,7 @@ import {
   this.word,
 }
 
-inline _get-clone<a>(x: &a): a {
+inline _get-clone<a>(x: &a) -> a {
   *x
 }
 
@@ -38,7 +38,7 @@ data channel(_: type) {
 | _Channel(_channel)
 }
 
-define _new<a>(q: queue(a)): channel(a) {
+define _new<a>(q: queue(a)) -> channel(a) {
   let mutex-size = from-c-size(THREAD_MUTEX_SIZE);
   let cond-size = from-c-size(THREAD_COND_SIZE);
   let u = this.word.size;
@@ -77,11 +77,11 @@ resource _channel {
   },
 }
 
-inline make-channel<a>(): channel(a) {
+inline make-channel<a>() -> channel(a) {
   _new<a>(empty)
 }
 
-define send<a>(ch: &channel(a), x: +a): unit {
+define send<a>(ch: &channel(a), x: +a) -> unit {
   let ch = cast<&channel(a), pointer>(ch);
   let u = this.word.size;
   let mutex-ptr = shift(ch, u);
@@ -96,7 +96,7 @@ define send<a>(ch: &channel(a), x: +a): unit {
   thread-mutex-unlock(mutex-ptr)
 }
 
-define _receive-from-channel<a>(ch: pointer, mutex-ptr: pointer): +a {
+define _receive-from-channel<a>(ch: pointer, mutex-ptr: pointer) -> +a {
   let q: queue(+a) = cast<int, queue(+a)>(load-int(ch));
   match dequeue(q) {
   | Right(Pair(v, q)) =>
@@ -112,7 +112,7 @@ define _receive-from-channel<a>(ch: pointer, mutex-ptr: pointer): +a {
   }
 }
 
-define receive<a>(ch: &channel(a)): +a {
+define receive<a>(ch: &channel(a)) -> +a {
   let ch = cast<&channel(a), pointer>(ch);
   let u = this.word.size;
   let mutex-ptr = shift(ch, u);

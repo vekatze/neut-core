@@ -3,9 +3,9 @@ import {
   this.list {Cons, Nil, list},
 }
 
-define sum-int(xs: list(int)): int {
+define sum-int(xs: list(int)) -> int {
   let f =
-    define loop(ys: list(int), acc: int): int {
+    define loop(ys: list(int), acc: int) -> int {
       match ys {
       | Nil =>
         acc
@@ -16,7 +16,7 @@ define sum-int(xs: list(int)): int {
   f(xs, 0)
 }
 
-define min-int(x: int, y: int): int {
+define min-int(x: int, y: int) -> int {
   if lt-int(x, y) {
     x
   } else {
@@ -24,7 +24,7 @@ define min-int(x: int, y: int): int {
   }
 }
 
-define max-int(x: int, y: int): int {
+define max-int(x: int, y: int) -> int {
   if lt-int(x, y) {
     y
   } else {
@@ -32,7 +32,7 @@ define max-int(x: int, y: int): int {
   }
 }
 
-define abs-int(x: int): int {
+define abs-int(x: int) -> int {
   if lt-int(x, 0) {
     mul-int(-1, x)
   } else {
@@ -40,9 +40,9 @@ define abs-int(x: int): int {
   }
 }
 
-define power-int(a: int, b: int): int {
+define power-int(a: int, b: int) -> int {
   let f =
-    define _power(a: int, b: int, result: int): int {
+    define _power(a: int, b: int, result: int) -> int {
       if le-int(b, 0) {
         result
       } else-if eq-int(rem-int(b, 2), 0) {

@@ -21,7 +21,7 @@ inline _memcpy(target-pointer: pointer, source-pointer: pointer, len: int): unit
   Unit
 }
 
-inline _get-pointer-size-from-capacity(capacity: int) {
+inline _get-pointer-size-from-capacity(capacity: int): int {
   let u = this.word.size;
   add-int(capacity, mul-int(u, 3))
 }

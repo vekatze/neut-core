@@ -9,7 +9,7 @@ inline as-eq<a>(f: eq(a)): eq(list(a)) {
   let Eq{equal := !eq} = f;
   Eq{
     equal := {
-      define self(xs, ys) {
+      define self(xs, ys): bool {
         case xs, ys {
         | Nil, Nil =>
           True

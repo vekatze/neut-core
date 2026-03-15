@@ -261,10 +261,10 @@ define ansi-bg(c: color-ansi): doc {
   ansi-doc(Color(Background, Color-16(Vivid, c)))
 }
 
-define ansi-bold: doc {
+constant ansi-bold: doc {
   ansi-doc(Bold)
 }
 
-define ansi-reset: doc {
+constant ansi-reset: doc {
   ansi-doc(Normal)
 }

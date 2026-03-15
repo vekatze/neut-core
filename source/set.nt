@@ -10,7 +10,7 @@ data set(a) {
 | _Set(dictionary(a, unit))
 }
 
-define empty<a>: set(a) {
+constant empty<a>: set(a) {
   _Set(this.dictionary.empty)
 }
 

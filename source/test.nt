@@ -97,7 +97,7 @@ data pack(a) {
 | Pack(a)
 }
 
-define item: int {
+constant item: int {
   10
 }
 

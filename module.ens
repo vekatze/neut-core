@@ -46,6 +46,7 @@
     text.ord ["lt-text", "le-text", "gt-text", "ge-text"],
     thread ["thread"],
     trick [],
+    type-value [],
     unit ["Unit", "unit"],
     vector ["Vector", "vector"]
   },

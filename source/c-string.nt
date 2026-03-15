@@ -25,6 +25,7 @@ define _length-c-string(s: pointer): int {
 
 // null-terminated string
 resource c-string {
+  -1,
   function (ptr: pointer) {
     free(ptr)
   },

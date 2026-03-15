@@ -52,6 +52,7 @@ define _new<a>(q: queue(a)): channel(a) {
 
 // (queue, thread-mutex, thread-cond)
 resource _channel {
+  -1,
   function (ch: pointer) {
     let u = this.word.size;
     let mutex-size = from-c-size(THREAD_MUTEX_SIZE);

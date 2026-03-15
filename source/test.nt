@@ -3,14 +3,14 @@ import {
   this.box {axiom-T},
   this.cell {make-cell, mutate},
   this.debug {trace, vet},
-  this.either {Right, either},
+  this.either {Left, Right, either},
   this.equal {eq-data},
   this.foreign {get-cpu-count},
   this.int.io {print-int-line},
   this.list {Cons, Nil, list},
   this.pair {Pair, pair},
   this.random {random-int},
-  this.text {text},
+  this.text {append, text},
   this.text.io {print, print-line},
   this.thread.mvar {make-mvar, receive, send},
   this.thread.pool {for-each-parallel},
@@ -130,10 +130,84 @@ define make-pair<a>(!x: a): pair(a, a) {
   Pair(x, x)
 }
 
-// define use-loop<a>(xs: list(a)): list(a) {
-//   loop(xs)
-// }
+define-meta sample<a>(): 'int {
+  let b = magic eq-type(list(int), a);
+  if b {
+    quote {10}
+  } else {
+    quote {20}
+  }
+}
+
+data my-sample(a, b) {
+| Sample(a)
+| Sample2(x: int, b)
+}
+
+define my-naive-loop-func(x: int): either(int, bool) {
+  let inner =
+    define loop(n: int): either(int, bool) {
+      if eq-int(n, 0) {
+        Right(True)
+      } else {
+        loop(sub-int(n, 1))
+      }
+    };
+  inner(x)
+}
+
+script text-by-dest(x: &text): text {
+  let result = append(x, "test");
+  result
+}
+
+define noetic-apply(f: &(int) -> bool): bool {
+  let g = *f;
+  g(1234)
+}
+
+define f<a, b>(g: (a) ->> b, x: a): b {
+  g(x)
+}
+
+script my-either-func(x: int): either(int, bool) {
+  if eq-int(x, 0) {
+    Left(x)
+  } else {
+    Left(42)
+  }
+}
+
+script my-loop-func(x: int): either(int, bool) {
+  let inner =
+    script loop(n: int): either(int, bool) {
+      if eq-int(n, 0) {
+        Right(True)
+      } else {
+        loop(sub-int(n, 1))
+      }
+    };
+  inner(x)
+}
+
+script my-func(x: int): int {
+  let y = 30;
+  add-int(x, y)
+}
+
+define use-my-func(): int {
+  my-func(20)
+}
+
 define zen(): unit {
+  pin val = text-by-dest("hello");
+  print-line(val);
+  pin v = my-loop-func(3);
+  vet::(v);
+  let result = my-func(20);
+  print-int-line(result);
+  let x = sample<bool>::();
+  print-int-line(x);
   // let xs = List[type, type];
   // pin tmp = loop(xs);
   // vet(tmp);

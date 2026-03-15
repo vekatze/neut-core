@@ -32,6 +32,7 @@ define _make<a>(val: a): ref(a) {
 
 // (content, type)
 resource _ref {
+  -1,
   function (r: pointer) {
     let u = this.word.size;
     unpack-type a = cast<int, type>(load-int(shift(r, u)));

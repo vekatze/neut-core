@@ -28,6 +28,7 @@ nominal {
 }
 
 resource _thread-inner {
+  -1,
   function (addr: pointer) {
     let u = this.word.size;
     unpack-type elem-type = cast<int, type>(load-int(shift(addr, u)));

@@ -28,6 +28,7 @@ inline _get-pointer-size-from-capacity(capacity: int) {
 
 // internal representation: (current-size, capacity, descriptor, byte-0, byte-1, ..., byte-n)
 resource _buffer-internal {
+  -1,
   function (x: pointer) {
     free(x)
   },

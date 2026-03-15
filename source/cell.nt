@@ -44,6 +44,7 @@ define _new<a>(val: a): cell(a) {
 
 // (content, thread-mutex, type)
 resource _cell {
+  -1,
   function (ch: pointer) {
     let u = this.word.size;
     let mutex-size = from-c-size(THREAD_MUTEX_SIZE);

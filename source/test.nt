@@ -156,7 +156,7 @@ define my-naive-loop-func(x: int) -> either(int, bool) {
   inner(x)
 }
 
-script text-by-dest(x: &text) -> text {
+define text-by-dest(x: &text) ->> text {
   let result = append(x, "test");
   result
 }
@@ -170,7 +170,7 @@ define f<a, b>(g: (a) ->> b, x: a) -> b {
   g(x)
 }
 
-script my-either-func(x: int) -> either(int, bool) {
+define my-either-func(x: int) ->> either(int, bool) {
   if eq-int(x, 0) {
     Left(x)
   } else {
@@ -178,9 +178,9 @@ script my-either-func(x: int) -> either(int, bool) {
   }
 }
 
-script my-loop-func(x: int) -> either(int, bool) {
+define my-loop-func(x: int) ->> either(int, bool) {
   let inner =
-    script loop(n: int) -> either(int, bool) {
+    define loop(n: int) ->> either(int, bool) {
       if eq-int(n, 0) {
         Right(True)
       } else {
@@ -190,7 +190,7 @@ script my-loop-func(x: int) -> either(int, bool) {
   inner(x)
 }
 
-script my-func(x: int) -> int {
+define my-func(x: int) ->> int {
   let y = 30;
   add-int(x, y)
 }

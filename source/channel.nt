@@ -52,7 +52,6 @@ define _new<a>(q: queue(a)) -> channel(a) {
 
 // (queue, thread-mutex, thread-cond)
 resource _channel {
-  -1,
   function (ch: pointer) {
     let u = this.word.size;
     let mutex-size = from-c-size(THREAD_MUTEX_SIZE);
@@ -75,6 +74,7 @@ resource _channel {
     let q-clone: queue(a) = _get-clone<queue(a)>(q);
     cast<channel(a), pointer>(_new<a>(q-clone))
   },
+  -1,
 }
 
 inline make-channel<a>() -> channel(a) {

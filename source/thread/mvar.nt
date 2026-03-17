@@ -73,7 +73,6 @@ define _new<a>() -> mvar(a) {
 
 // (flag, type, value, mutex, readable-cond, writable-cond)
 resource _mvar {
-  -1,
   function (ptr: pointer) {
     let ch = cast<pointer, &mvar(unit)>(ptr);
     let _MVar-Info{flag-ptr, value-ptr, mutex-ptr, readable-cond-ptr, writable-cond-ptr, type-ptr} = _get-info(ch);
@@ -104,6 +103,7 @@ resource _mvar {
       cast<&mvar(a), pointer>(base)
     }
   },
+  -1,
 }
 
 inline make-mvar<a>() -> mvar(a) {

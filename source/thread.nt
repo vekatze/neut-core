@@ -28,7 +28,6 @@ nominal {
 }
 
 resource _thread-inner {
-  -1,
   function (addr: pointer) {
     let u = this.word.size;
     unpack-type elem-type = cast<int, type>(load-int(shift(addr, u)));
@@ -52,6 +51,7 @@ resource _thread-inner {
     store-int8(1, shift(new-addr, u3));
     new-addr
   },
+  -1,
 }
 
 // `thread` must be defined by `define` (and not by `data`) so that

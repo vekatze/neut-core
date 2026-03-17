@@ -44,7 +44,6 @@ define _new<a>(val: a) -> cell(a) {
 
 // (content, thread-mutex, type)
 resource _cell {
-  -1,
   function (ch: pointer) {
     let u = this.word.size;
     let mutex-size = from-c-size(THREAD_MUTEX_SIZE);
@@ -62,6 +61,7 @@ resource _cell {
     let val-clone = magic call-type(pack-type {a}, 1, load-int(ch));
     cast<cell(a), pointer>(_new<a>(val-clone))
   },
+  -1,
 }
 
 inline make-cell<a>(initial-value: +a) -> cell(a) {

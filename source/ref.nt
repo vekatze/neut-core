@@ -32,7 +32,6 @@ define _make<a>(val: a) -> ref(a) {
 
 // (content, type)
 resource _ref {
-  -1,
   function (r: pointer) {
     let u = this.word.size;
     unpack-type a = cast<int, type>(load-int(shift(r, u)));
@@ -46,6 +45,7 @@ resource _ref {
     let val-clone: a = _get-clone<a>(val);
     cast<ref(a), pointer>(_make<a>(val-clone))
   },
+  -1,
 }
 
 inline make-ref<a>(initial-value: +a) -> ref(a) {

@@ -25,7 +25,6 @@ inline _copy-binary(source-pointer: pointer, target-pointer: pointer, len: int) 
 // int8-array
 // internal representation: (head-index, last-index, byte-0, byte-1, ..., byte-n)
 resource binary {
-  -1,
   function (x: pointer) {
     free(x)
   },
@@ -42,6 +41,7 @@ resource binary {
     _copy-binary(source-pointer, shift(target-pointer, u2), length);
     target-pointer
   },
+  -1,
 }
 
 define binary-length(xs: &binary) -> int {

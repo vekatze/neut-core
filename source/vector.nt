@@ -159,7 +159,6 @@ define _free-vector<a>(xs: &vector(a)) -> unit {
 
 // (capacity: int, from: int, to: int, elem-type: type, ptr-to-buffer: pointer)
 resource _vector-internal {
-  -1,
   function (xs: &vector(pointer)) {
     let len = length(xs);
     let elem-type = _get-elem-type(xs);
@@ -179,6 +178,7 @@ resource _vector-internal {
     _copy-vector-content<elem-type>(xs, ys, 0, len);
     ys
   },
+  -1,
 }
 
 foreign {

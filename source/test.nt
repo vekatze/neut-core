@@ -170,7 +170,7 @@ define f<a, b>(g: (a) ->> b, x: a) -> b {
   g(x)
 }
 
-define my-either-func(x: int) ->> either(int, bool) {
+inline my-either-func(x: int) ->> either(int, bool) {
   if eq-int(x, 0) {
     Left(x)
   } else {
@@ -178,7 +178,7 @@ define my-either-func(x: int) ->> either(int, bool) {
   }
 }
 
-define my-loop-func(x: int) ->> either(int, bool) {
+inline my-loop-func(x: int) ->> either(int, bool) {
   let inner =
     define loop(n: int) ->> either(int, bool) {
       if eq-int(n, 0) {
@@ -188,6 +188,35 @@ define my-loop-func(x: int) ->> either(int, bool) {
       }
     };
   inner(x)
+}
+
+define joker-tail-list(xs: list(int), acc: int) ->> int {
+  match xs {
+  | Nil =>
+    acc
+  | Cons(y, ys) =>
+    joker-tail-list(ys, add-int(y, acc))
+  }
+}
+
+define fo() ->> unit {
+  Unit
+}
+
+define joker-tail(x: int, acc: int) ->> int {
+  if eq-int(x, 0) {
+    acc
+  } else {
+    joker-tail(sub-int(x, 1), add-int(x, acc))
+  }
+}
+
+define use-script<a>(!x: a) -> a {
+  let f =
+    define _() ->> a {
+      x
+    };
+  f()
 }
 
 define my-func(x: int) ->> int {
@@ -576,3 +605,18 @@ define main() -> unit {
 //     })
 //   })
 // }
+define dep-id<t>(x: t) ->> t {
+  x
+}
+
+define use-dep-id<a>(!x: a) -> a {
+  dep-id(x)
+}
+
+define foo(x: int, acc: int) -> int {
+  if eq-int(x, 0) {
+    acc
+  } else {
+    foo(sub-int(x, 1), add-int(x, acc))
+  }
+}

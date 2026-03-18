@@ -1,7 +1,7 @@
 import {
   this.binary.eq {eq-binary, ne-binary},
   this.bool {bool},
-  this.either {Right, none, rho},
+  this.either {Right, none},
   this.eq {Eq, eq},
   this.text {_Text, _drop-N, _take-N, text, text-byte-length},
   this.unit,
@@ -41,24 +41,20 @@ define eq-infix(haystack: &text, needle: &text) -> bool {
   this.binary.eq.eq-infix(haystack, needle)
 }
 
-define strip-prefix(haystack: &text, needle: &text)[r := rho] -> ?text {
+define strip-prefix(haystack: &text, needle: &text) ->> ?text {
   if eq-prefix(haystack, needle) {
     let needle-len = text-byte-length(needle);
-    try _ = r;
     Right(_drop-N(haystack, needle-len))
   } else {
-    try _ = r;
     none
   }
 }
 
-define strip-suffix(haystack: &text, needle: &text)[r := rho] -> ?text {
+define strip-suffix(haystack: &text, needle: &text) ->> ?text {
   if eq-suffix(haystack, needle) {
     let new-haystack-len = sub-int(text-byte-length(haystack), text-byte-length(needle));
-    try _ = r;
     Right(_take-N(haystack, new-haystack-len))
   } else {
-    try _ = r;
     none
   }
 }

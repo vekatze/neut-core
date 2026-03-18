@@ -1,7 +1,6 @@
 import {
   this.binary.io {_write-loop},
   this.control {nop},
-  this.either {rho},
   this.file.descriptor {descriptor, stdout},
   this.pointer {shift},
   this.rune {store-rune},
@@ -9,22 +8,22 @@ import {
   this.unit {Unit, unit},
 }
 
-define write-rune(k: descriptor, x: rune)[r := rho] -> system(unit) {
+define write-rune(k: descriptor, x: rune) ->> system(unit) {
   let s = this.rune.size(x);
   let buffer-ptr = magic alloca(int32, 1);
   let _ = store-rune(x, buffer-ptr);
-  let result = _write-loop(k, buffer-ptr, s, r);
+  let result = _write-loop(k, buffer-ptr, s);
   // avoid tail-calling `_write-loop` (which relies on `alloca`)
   nop();
   result
 }
 
-define write-rune-line(k: descriptor, x: rune)[r := rho] -> system(unit) {
+define write-rune-line(k: descriptor, x: rune) ->> system(unit) {
   let s = this.rune.size(x);
   let buffer-ptr = magic alloca(int32, 2);
   let _ = store-rune(x, buffer-ptr);
   let _ = store-rune(`\n`, shift(buffer-ptr, s));
-  let result = _write-loop(k, buffer-ptr, add-int(s, 1), r);
+  let result = _write-loop(k, buffer-ptr, add-int(s, 1));
   // avoid tail-calling
   nop();
   result

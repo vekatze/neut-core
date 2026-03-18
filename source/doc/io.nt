@@ -3,7 +3,6 @@ import {
   this.box,
   this.doc {Group, Nest, ansi-fg, ansi-reset, atom, break, doc, join},
   this.doc.show {show-doc},
-  this.either {rho},
   this.file.descriptor {descriptor, stdout},
   this.system {system},
   this.text,
@@ -11,15 +10,13 @@ import {
   this.unit {Unit, unit},
 }
 
-define write-doc(d: descriptor, x: &doc, ribbon-width: int)[r := rho] -> system(unit) {
+define write-doc(d: descriptor, x: &doc, ribbon-width: int) ->> system(unit) {
   pin tmp = show-doc(x, ribbon-width);
-  try _ = r;
   write(d, tmp)
 }
 
-define write-doc-line(d: descriptor, x: &doc, ribbon-width: int)[r := rho] -> system(unit) {
+define write-doc-line(d: descriptor, x: &doc, ribbon-width: int) ->> system(unit) {
   pin tmp = show-doc(x, ribbon-width);
-  try _ = r;
   write-line(d, tmp)
 }
 

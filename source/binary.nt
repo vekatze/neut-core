@@ -2,7 +2,7 @@ import {
   this.bool {bool},
   this.c-size {C-Size},
   this.control {discard},
-  this.either {Right, none, rho},
+  this.either {Right, none},
   this.external {free, malloc},
   this.int {max-int, min-int},
   this.list {Cons, Nil, fold-left-N, length, list},
@@ -337,42 +337,38 @@ define intercalate-N(xs: &list(binary), sep: &binary) -> binary {
   magic cast(pointer, binary, new-binary)
 }
 
-define find(xs: &binary, !pred: (int8) -> bool)[r := rho] -> ?int {
+define find(xs: &binary, !pred: (int8) -> bool) ->> ?int {
   let len = binary-length(xs);
   let f =
-    define self(r: ?unit, index: int) -> ?int {
+    define self(index: int) ->> ?int {
       if ge-int(index, len) {
-        try _ = r;
         none
       } else {
         let ch = binary-access(xs, index);
         if pred(ch) {
-          try _ = r;
           Right(index)
         } else {
-          self(r, add-int(index, 1))
+          self(add-int(index, 1))
         }
       }
     };
-  f(r, 0)
+  f(0)
 }
 
-define find-end(xs: &binary, !pred: (int8) -> bool)[r := rho] -> ?int {
+define find-end(xs: &binary, !pred: (int8) -> bool) ->> ?int {
   let len = binary-length(xs);
   let f =
-    define self(r: ?unit, xs: &binary, index: int) -> ?int {
+    define self(xs: &binary, index: int) ->> ?int {
       if lt-int(index, 0) {
-        try _ = r;
         none
       } else {
         let ch = binary-access(xs, index);
         if pred(ch) {
-          try _ = r;
           Right(sub-int(len, add-int(index, 1)))
         } else {
-          self(r, xs, sub-int(index, 1))
+          self(xs, sub-int(index, 1))
         }
       }
     };
-  f(r, xs, sub-int(len, 1))
+  f(xs, sub-int(len, 1))
 }

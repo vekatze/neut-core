@@ -1,6 +1,6 @@
 import {
   this.bool,
-  this.either {Right, rho},
+  this.either {Left, Right},
   this.file.descriptor {descriptor, stdout},
   this.system {report-system-error, system},
   this.text,
@@ -13,38 +13,42 @@ foreign {
   neut_core_v0_52_write_int64_nl(int32, int64): int,
 }
 
-define write-int(d: descriptor, x: int)[r := rho] -> system(unit) {
+define write-int(d: descriptor, x: int) ->> system(unit) {
   let d = magic cast(descriptor, int32, d);
   let result = magic external neut_core_v0_52_write_int64(d, x);
   if lt-int(result, 0) {
-    try _ = r;
     report-system-error()
   } else {
-    try _ = r;
     Right(Unit)
   }
 }
 
-define write-int-line(d: descriptor, x: int)[r := rho] -> system(unit) {
+define write-int-line(d: descriptor, x: int) ->> system(unit) {
   let d = magic cast(descriptor, int32, d);
   let result = magic external neut_core_v0_52_write_int64_nl(d, x);
   if lt-int(result, 0) {
-    try _ = r;
     report-system-error()
   } else {
-    try _ = r;
     Right(Unit)
   }
 }
 
 define print-int(x: int) -> unit {
-  let _ = write-int(stdout, x);
-  Unit
+  match write-int(stdout, x) {
+  | Left(_) =>
+    Unit
+  | Right(_) =>
+    Unit
+  }
 }
 
 define print-int-line(x: int) -> unit {
-  let _ = write-int-line(stdout, x);
-  Unit
+  match write-int-line(stdout, x) {
+  | Left(_) =>
+    Unit
+  | Right(_) =>
+    Unit
+  }
 }
 
 define zen() -> unit {

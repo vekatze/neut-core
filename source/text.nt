@@ -3,7 +3,7 @@ import {
   this.bool {False, True, bool},
   this.box,
   this.c-size {C-Size, c-size},
-  this.either {Right, none, rho},
+  this.either {Right, none},
   this.external {malloc},
   this.list {Cons, List, Nil, list, reverse},
   this.magic,
@@ -360,8 +360,7 @@ define _get-rune(t: &text, index: int) -> rune {
   load-rune(ptr)
 }
 
-define get-first-rune(t: &text)[r := rho] -> ?rune {
-  try _ = r;
+define get-first-rune(t: &text) ->> ?rune {
   if gt-int(text-byte-length(t), 0) {
     Right(_get-rune(t, 0))
   } else {
@@ -369,16 +368,14 @@ define get-first-rune(t: &text)[r := rho] -> ?rune {
   }
 }
 
-define uncons(t: text)[r := rho] -> ?pair(rune, text) {
+define uncons(t: text) ->> ?pair(rune, text) {
   let len on t = text-byte-length(t);
   if eq-int(len, 0) {
-    try _ = r;
     none
   } else {
     let ch on t = _get-rune(t, 0);
     let char-len = this.rune.size(ch);
     let t = _drop(t, char-len);
-    try _ = r;
     Right(Pair(ch, t))
   }
 }
@@ -707,45 +704,41 @@ inline any(t: &text, !pred: (rune) -> bool) -> bool {
   f(0)
 }
 
-define find(t: &text, !pred: (rune) -> bool)[r := rho] -> ?int {
+define find(t: &text, !pred: (rune) -> bool) ->> ?int {
   let len = text-byte-length(t);
   let f =
-    define self(r: ?unit, byte-index: int, index: int) -> ?int {
+    define self(byte-index: int, index: int) ->> ?int {
       if ge-int(byte-index, len) {
-        try _ = r;
         none
       } else {
         let ch = _get-rune(t, byte-index);
         if pred(ch) {
-          try _ = r;
           Right(index)
         } else {
           let char-len = this.rune.size(ch);
-          self(r, add-int(byte-index, char-len), add-int(index, 1))
+          self(add-int(byte-index, char-len), add-int(index, 1))
         }
       }
     };
-  f(r, 0, 0)
+  f(0, 0)
 }
 
-define find-end(t: &text, !pred: (rune) -> bool)[r := rho] -> ?int {
+define find-end(t: &text, !pred: (rune) -> bool) ->> ?int {
   let len = text-byte-length(t);
   let f =
-    define self(r: ?unit, t: &text, byte-index: int, index: int) -> ?int {
+    define self(t: &text, byte-index: int, index: int) ->> ?int {
       if lt-int(byte-index, 0) {
-        try _ = r;
         none
       } else {
         let rune-size = _get-rune-size-end(t, byte-index);
         let rune-head-byte-index = sub-int(byte-index, sub-int(rune-size, 1));
         let ch = _get-rune(t, rune-head-byte-index);
         if pred(ch) {
-          try _ = r;
           Right(index)
         } else {
-          self(r, t, sub-int(byte-index, rune-size), add-int(index, 1))
+          self(t, sub-int(byte-index, rune-size), add-int(index, 1))
         }
       }
     };
-  f(r, t, sub-int(len, 1), 0)
+  f(t, sub-int(len, 1), 0)
 }

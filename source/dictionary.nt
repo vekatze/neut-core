@@ -1,7 +1,7 @@
 import {
   this.bool,
   this.box,
-  this.either {Right, none, rho},
+  this.either {Right, none},
   this.list {Cons, Nil, append, list},
   this.ord {Ord, ord},
   this.ordering {EQ, GT, LT},
@@ -289,12 +289,11 @@ inline make-insert-with<k, v>(o: ord(k), !f: (v, v) -> v) -> (dictionary(k, v), 
   }
 }
 
-inline make-lookup<k, v>(o: ord(k)) -> (d: &dictionary(k, v), needle: &k)[reg := rho] -> ?&v {
+inline make-lookup<k, v>(o: ord(k)) -> (d: &dictionary(k, v), needle: &k) ->> ?&v {
   let Ord{compare := !compare} = o;
-  define loop(d: &dictionary(k, v), needle: &k)[reg := rho] -> ?&v {
+  define loop(d: &dictionary(k, v), needle: &k) ->> ?&v {
     case d {
     | Tip =>
-      try _ = reg;
       none
     | Bin(_, key, x, l, r) =>
       match compare(needle, key) {
@@ -303,7 +302,6 @@ inline make-lookup<k, v>(o: ord(k)) -> (d: &dictionary(k, v), needle: &k)[reg :=
       | GT =>
         loop(r, needle)
       | EQ =>
-        try _ = reg;
         Right(x)
       }
     }
@@ -349,24 +347,20 @@ inline _make-lookup-LE-with-cand<k, v>(L: ord(k)) -> (&dictionary(k, v), &k, &k,
   }
 }
 
-inline make-lookup-LE<k, v>(!o: ord(k)) -> (&dictionary(k, v), &k)[reg := rho] -> ?pair(&k, &v) {
+inline make-lookup-LE<k, v>(!o: ord(k)) -> (&dictionary(k, v), &k) ->> ?pair(&k, &v) {
   let Ord{compare := !compare} = o;
   let !lookup-LE-with-cand = _make-lookup-LE-with-cand(o);
-  define loop(d: &dictionary(k, v), needle: &k)[reg := rho] -> ?pair(&k, &v) {
+  define loop(d: &dictionary(k, v), needle: &k) ->> ?pair(&k, &v) {
     case d {
     | Tip =>
-      try _ = reg;
       none
     | Bin(_, key, x, l, r) =>
       match compare(needle, key) {
       | GT =>
-        try _ = reg;
         Right(lookup-LE-with-cand(r, needle, key, x))
       | LT =>
-        try _ = reg;
         loop(l, needle)
       | _ =>
-        try _ = reg;
         Right(Pair(key, x))
       }
     }
@@ -392,24 +386,20 @@ inline _make-lookup-GE-with-cand<k, v>(L: ord(k)) -> (&dictionary(k, v), &k, &k,
   }
 }
 
-inline make-lookup-GE<k, v>(!o: ord(k)) -> (&dictionary(k, v), &k)[reg := rho] -> ?pair(&k, &v) {
+inline make-lookup-GE<k, v>(!o: ord(k)) -> (&dictionary(k, v), &k) ->> ?pair(&k, &v) {
   let Ord{compare := !compare} = o;
   let !lookup-GE-with-cand = _make-lookup-GE-with-cand(o);
-  define loop(d: &dictionary(k, v), needle: &k)[reg := rho] -> ?pair(&k, &v) {
+  define loop(d: &dictionary(k, v), needle: &k) ->> ?pair(&k, &v) {
     case d {
     | Tip =>
-      try _ = reg;
       none
     | Bin(_, key, x, l, r) =>
       match compare(needle, key) {
       | GT =>
-        try _ = reg;
         loop(l, needle)
       | LT =>
-        try _ = reg;
         Right(lookup-GE-with-cand(r, needle, key, x))
       | _ =>
-        try _ = reg;
         Right(Pair(key, x))
       }
     }

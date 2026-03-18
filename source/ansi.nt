@@ -1,7 +1,7 @@
 import {
   this.box,
   this.buffer {make-buffer},
-  this.either {Right, rho},
+  this.either {Right},
   this.file.descriptor {descriptor},
   this.int.buffer,
   this.int.io,
@@ -85,13 +85,11 @@ data ansi-kit {
   )
 }
 
-define flush(k: &ansi-kit)[r := rho] -> system(unit) {
+define flush(k: &ansi-kit) ->> system(unit) {
   case k {
   | _ANSI-Kit{buffer} =>
-    try _ = r;
     core.buffer.flush(buffer)
   | _ANSI-Kit-Unbuffered{} =>
-    try _ = r;
     Right(Unit)
   }
 }
@@ -105,8 +103,7 @@ define make-ansi-kit-unbuffered(sink: descriptor) -> ansi-kit {
   _ANSI-Kit-Unbuffered{sink}
 }
 
-define write(k: &ansi-kit, t: &text)[r := rho] -> system(unit) {
-  try _ = r;
+define write(k: &ansi-kit, t: &text) ->> system(unit) {
   case k {
   | _ANSI-Kit{buffer} =>
     this.text.buffer.write(buffer, t)
@@ -116,8 +113,7 @@ define write(k: &ansi-kit, t: &text)[r := rho] -> system(unit) {
   }
 }
 
-define write-line(k: &ansi-kit, t: &text)[r := rho] -> system(unit) {
-  try _ = r;
+define write-line(k: &ansi-kit, t: &text) ->> system(unit) {
   case k {
   | _ANSI-Kit{buffer} =>
     core.text.buffer.write-line(buffer, t)
@@ -127,8 +123,7 @@ define write-line(k: &ansi-kit, t: &text)[r := rho] -> system(unit) {
   }
 }
 
-define write-int(k: &ansi-kit, x: int)[r := rho] -> system(unit) {
-  try _ = r;
+define write-int(k: &ansi-kit, x: int) ->> system(unit) {
   case k {
   | _ANSI-Kit{buffer} =>
     core.int.buffer.write-int(buffer, x)
@@ -138,8 +133,7 @@ define write-int(k: &ansi-kit, x: int)[r := rho] -> system(unit) {
   }
 }
 
-inline write-code(k: &ansi-kit, c: command)[r := rho] -> system(unit) {
-  try _ = r;
+inline write-code(k: &ansi-kit, c: command) ->> system(unit) {
   match c {
   | Set-Style(style) =>
     match style {

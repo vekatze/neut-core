@@ -6,7 +6,7 @@ import {
   this.c-size {C-Size},
   this.c-string {c-string, to-c-string},
   this.control {discard},
-  this.either {Left, Right, rho},
+  this.either {Left, Right},
   this.external {exit, free, malloc},
   this.file {close},
   this.file.descriptor {descriptor, stderr, stdin, stdout},
@@ -43,32 +43,27 @@ data process-result-status {
 | Stopped(stopsig: c-int)
 }
 
-define _waitpid(pid: c-pid)[r := rho] -> system(process-result-status) {
+define _waitpid(pid: c-pid) ->> system(process-result-status) {
   let status-ptr = malloc(C-Size(this.word.size));
   let result = __waitpid(pid, status-ptr, 0);
   if eq-c-pid(result, -1) {
     free(status-ptr);
-    try _ = r;
     report-system-error()
   } else {
     let stat-loc = load-c-int(status-ptr);
     free(status-ptr);
     if _wifexited(stat-loc) {
       let exit-status = _wexitstatus(stat-loc);
-      try _ = r;
       Right(Exited(exit-status))
     } else-if _wifsignaled(stat-loc) {
       let termsig = _wtermsig(stat-loc);
       let coredump = _wcoredump(stat-loc);
-      try _ = r;
       Right(Signaled(termsig, coredump))
     } else-if _wifstopped(stat-loc) {
       let stopsig = _wstopsig(stat-loc);
-      try _ = r;
       Right(Stopped(stopsig))
     } else {
       // unreachable
-      try _ = r;
       report-system-error()
     }
   }
@@ -83,42 +78,36 @@ define _make-argv(xs: list(pointer)) -> pointer {
   ptr
 }
 
-define _create-pipe()[r := rho] -> system(pair(descriptor, descriptor)) {
+define _create-pipe() ->> system(pair(descriptor, descriptor)) {
   let ptr = malloc(C-Size(mul-int(this.word.size, 2)));
   let result = magic external pipe(ptr);
   if eq-c-int(result, -1) {
     free(ptr);
-    try _ = r;
     report-system-error()
   } else {
     let reader = this.magic.cast<int32, descriptor>(magic load(int32, ptr));
     let writer = this.magic.cast<int32, descriptor>(magic load(int32, shift(ptr, 4)));
-    try _ = r;
     free(ptr);
     Right(Pair(reader, writer))
   }
 }
 
-define _dup2(fd1: descriptor, fd2: descriptor)[r := rho] -> system(unit) {
+define _dup2(fd1: descriptor, fd2: descriptor) ->> system(unit) {
   let fd1 = magic cast(descriptor, c-int, fd1);
   let fd2 = magic cast(descriptor, c-int, fd2);
   let result = magic external dup2(fd1, fd2);
   if eq-c-int(result, -1) {
-    try _ = r;
     report-system-error()
   } else {
-    try _ = r;
     Right(Unit)
   }
 }
 
-define _fork()[r := rho] -> system(c-pid) {
+define _fork() ->> system(c-pid) {
   let result = magic external fork();
   if eq-c-pid(result, -1) {
-    try _ = r;
     report-system-error()
   } else {
-    try _ = r;
     Right(result)
   }
 }
@@ -151,13 +140,7 @@ define _call(process: text, args: list(text), error-writer: descriptor) -> syste
   exit(v)
 }
 
-define spawn(
-  ps: process-spec,
-  stdout-initial-buffer-size: int,
-  stderr-initial-buffer-size: int,
-)[r := rho]->
-system(process-result) {
-  try _ = r;
+define spawn(ps: process-spec, stdout-initial-buffer-size: int, stderr-initial-buffer-size: int) ->> system(process-result) {
   try Pair(in-reader, in-writer) = _create-pipe();
   try Pair(out-reader, out-writer) = _create-pipe();
   try Pair(error-reader, error-writer) = _create-pipe();

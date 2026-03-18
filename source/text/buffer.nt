@@ -1,7 +1,7 @@
 import {
   this.binary.buffer,
   this.buffer {buffer, flush, make-buffer},
-  this.either {Right, rho},
+  this.either {Right},
   this.file.descriptor {stdout},
   this.rune.buffer {write-rune},
   this.system {system},
@@ -9,13 +9,11 @@ import {
   this.unit {Unit, unit},
 }
 
-define write(b: &buffer, content: &text)[r := rho] -> system(unit) {
-  try _ = r;
+define write(b: &buffer, content: &text) ->> system(unit) {
   this.binary.buffer.write-binary(b, to-binary(content))
 }
 
-define write-line(b: &buffer, content: &text)[r := rho] -> system(unit) {
-  try _ = r;
+define write-line(b: &buffer, content: &text) ->> system(unit) {
   try _ = write(b, content);
   write-rune(b, `\n`)
 }

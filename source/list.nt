@@ -1,7 +1,7 @@
 import {
   this.bool {False, True, and, bool, or},
   this.box {embody},
-  this.either {Left, Right, either, none, rho},
+  this.either {Left, Right, either, none},
   this.monoid {Monoid, monoid},
   this.ord {Ord, ord},
   this.ordering {GT, LT},
@@ -338,32 +338,28 @@ define partition<a, b>(xs: list(either(a, b))) -> pair(list(a), list(b)) {
   })
 }
 
-define uncons<a>(xs: list(a))[r := rho] -> ?pair(a, list(a)) {
+define uncons<a>(xs: list(a)) ->> ?pair(a, list(a)) {
   match xs {
   | Nil =>
-    try _ = r;
     none
   | Cons(y, ys) =>
-    try _ = r;
     Right(Pair(y, ys))
   }
 }
 
-define unsnoc<a>(xs: list(a))[r := rho] -> ?pair(list(a), a) {
+define unsnoc<a>(xs: list(a)) ->> ?pair(list(a), a) {
   let f =
-    define _unsnoc(r: ?unit, xs: list(a), acc: list(a)) -> ?pair(list(a), a) {
+    define _unsnoc(xs: list(a), acc: list(a)) ->> ?pair(list(a), a) {
       match xs {
       | Nil =>
-        try _ = r;
         Left(Unit)
       | Cons(y, Nil) =>
-        try _ = r;
         Right(Pair(reverse(acc), y))
       | Cons(y, ys) =>
-        _unsnoc(r, ys, Cons(y, acc))
+        _unsnoc(ys, Cons(y, acc))
       }
     };
-  f(r, xs, Nil)
+  f(xs, Nil)
 }
 
 define all(xs: list(bool)) -> bool {
@@ -383,23 +379,21 @@ define range(from: int, to: int) -> list(int) {
   }
 }
 
-inline find<a>(xs: &list(a), pred: &(&a) -> bool)[r := rho] -> ?&a {
+inline find<a>(xs: &list(a), pred: &(&a) -> bool) ->> ?&a {
   let f =
-    define self(r: ?unit, ys: &list(a)) -> ?&a {
+    define self(ys: &list(a)) ->> ?&a {
       case ys {
       | Nil =>
-        try _ = r;
         none
       | Cons(z, zs) =>
         if pred(z) {
-          try _ = r;
           Right(z)
         } else {
-          self(r, zs)
+          self(zs)
         }
       }
     };
-  f(r, xs)
+  f(xs)
 }
 
 inline filter<a>(xs: list(a), !pred: (&a) -> bool) -> list(a) {
@@ -438,15 +432,13 @@ inline sum<a>(as-monoid: monoid(a), xs: list(a)) -> a {
   })
 }
 
-inline minimum<a>(as-ord: ord(a))[r := rho] -> (list(a)) -> ?a {
+inline minimum<a>(as-ord: ord(a)) -> (list(a)) -> ?a {
   function (xs) {
     let Ord{compare} = as-ord;
     match xs {
     | Nil =>
-      try _ = r;
       none
     | Cons(y, ys) =>
-      try _ = r;
       Right(fold-left(y, ys, function (acc, y) {
         let order on acc, y = compare(acc, y);
         match order {
@@ -460,7 +452,7 @@ inline minimum<a>(as-ord: ord(a))[r := rho] -> (list(a)) -> ?a {
   }
 }
 
-inline maximum<a>(as-ord: ord(a))[r := rho] -> (list(a)) -> ?a {
+inline maximum<a>(as-ord: ord(a)) -> (list(a)) -> ?a {
   function (xs) {
     let Ord{compare := !compare} = as-ord;
     let helper =
@@ -480,10 +472,8 @@ inline maximum<a>(as-ord: ord(a))[r := rho] -> (list(a)) -> ?a {
       };
     match xs {
     | Nil =>
-      try _ = r;
       none
     | Cons(y, ys) =>
-      try _ = r;
       Right(helper(y, ys))
     }
   }
@@ -598,14 +588,12 @@ define is-empty<a>(xs: &list(a)) -> bool {
   }
 }
 
-define nth<a>(xs: &list(a), n: int)[r := rho] -> ?a {
+define nth<a>(xs: &list(a), n: int) -> ?a {
   case xs {
   | Nil =>
-    try _ = r;
     none
   | Cons(y, ys) =>
     if le-int(n, 0) {
-      try _ = r;
       Right(*y)
     } else {
       nth(ys, sub-int(n, 1))

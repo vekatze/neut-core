@@ -307,13 +307,17 @@ define-meta vet-doc<a>(x: '&a) -> 'doc {
   }
 }
 
-define-meta vet<a>(x: '&a)[ribbon-length: 'int := quote {50}] -> 'unit {
+define-meta vet-plus<a>(x: '&a, ribbon-length: 'int) -> 'unit {
   quote {
     pin tmp = unquote {vet-doc(x)};
     pin item = show-doc(tmp, unquote {ribbon-length});
     print(item);
     print("\n");
   }
+}
+
+define-meta vet<a>(x: '&a) -> 'unit {
+  vet-plus(x, quote {50})
 }
 
 define-meta trace<a>(x: 'a) -> 'a {

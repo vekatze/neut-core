@@ -30,7 +30,7 @@
     cell ["cell"],
     channel ["channel"],
     debug ["trace", "vet"],
-    either ["Left", "Right", "either", "none", "rho"],
+    either ["Left", "Right", "either", "none"],
     eq ["Eq", "eq"],
     equal ["eq-data"],
     list ["Cons", "List", "Nil", "list"],

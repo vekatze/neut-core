@@ -75,10 +75,6 @@ constant none<a>: ?a {
   Left(Unit)
 }
 
-constant rho<a>: either(a, unit) {
-  Right(Unit)
-}
-
 define to-option<a, b>(v: either(a, b)) -> ?b {
   match v {
   | Right(r) =>

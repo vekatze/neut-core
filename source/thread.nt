@@ -54,7 +54,7 @@ resource _thread-inner {
   -1,
 }
 
-// `thread` must be defined by `define` (and not by `data`) so that
+// `thread` must be defined by `alias-opaque` (and not by `data`) so that
 // `thread(a)` is considered to be possibly noetic
 alias-opaque thread(_: type) {
   _thread-inner

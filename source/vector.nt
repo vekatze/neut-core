@@ -25,8 +25,8 @@ nominal {
 }
 
 // (capacity: int, from: int, to: int, elem-type: type, ptr-to-buffer: pointer)
-alias-opaque vector(_: type) {
-  _vector-internal
+data vector(_: type) {
+| _Vector(_vector-internal)
 }
 
 inline get-capacity<a>(xs: &vector(a)) -> int {

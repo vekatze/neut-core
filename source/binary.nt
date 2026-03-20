@@ -25,10 +25,10 @@ inline _copy-binary(source-pointer: pointer, target-pointer: pointer, len: int) 
 // int8-array
 // internal representation: (head-index, last-index, byte-0, byte-1, ..., byte-n)
 resource binary {
-  function (x: pointer) {
+  (x: pointer) => {
     free(x)
   },
-  function (source-pointer: pointer) {
+  (source-pointer: pointer) => {
     let u = this.word.size;
     let u2 = mul-int(u, 2);
     let from = load-int(source-pointer);
@@ -110,7 +110,7 @@ define _get-content-pointer(t: &binary) -> pointer {
 
 define join(xs: list(binary)) -> binary {
   let len on xs =
-    fold-left-N(0, xs, function (acc, x) {
+    fold-left-N(0, xs, (acc, x) => {
       add-int(acc, binary-length(x))
     });
   let u = this.word.size;
@@ -139,7 +139,7 @@ define join(xs: list(binary)) -> binary {
 
 define join-N(xs: &list(binary)) -> binary {
   let len =
-    fold-left-N(0, xs, function (acc, x) {
+    fold-left-N(0, xs, (acc, x) => {
       add-int(acc, binary-length(x))
     });
   let u = this.word.size;
@@ -298,7 +298,7 @@ define intercalate(xs: list(binary), sep: binary) -> binary {
 
 define intercalate-N(xs: &list(binary), sep: &binary) -> binary {
   let base-len =
-    fold-left-N(0, xs, function (acc, x) {
+    fold-left-N(0, xs, (acc, x) => {
       add-int(acc, binary-length(x))
     });
   let xs-len = this.list.length(xs);

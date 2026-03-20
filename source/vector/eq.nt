@@ -5,10 +5,10 @@ import {
 }
 
 inline as-eq<a>(class: eq(a)) -> eq(vector(a)) {
-  let Eq{equal := !equal} = class;
-  Eq{
+  let Eq {equal := !equal} = class;
+  Eq {
     equal := {
-      function (xs, ys) {
+      (xs, ys) => {
         let len1 = length(xs);
         let len2 = length(ys);
         if ne-int(len1, len2) {

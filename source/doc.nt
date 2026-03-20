@@ -85,13 +85,13 @@ inline break(t: &text) -> doc {
 }
 
 rule-right join {
-  function leaf(_: int) -> doc {
+  inline leaf(_: int) -> doc {
     empty
   },
-  function node-left(d: doc, acc: doc) -> doc {
+  inline node-left(d: doc, acc: doc) -> doc {
     Seq(d, acc)
   },
-  function root<a>(x: a) -> a {
+  inline root<a>(x: a) -> a {
     x
   },
 }

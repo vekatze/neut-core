@@ -32,13 +32,13 @@ define _make<a>(val: a) -> ref(a) {
 
 // (content, type)
 resource _ref {
-  function (r: pointer) {
+  (r: pointer) => {
     let u = this.word.size;
     unpack-type a = cast<int, type>(load-int(shift(r, u)));
     let _: a = magic cast(int, a, load-int(r));
     this.external.free(r)
   },
-  function (r: pointer) {
+  (r: pointer) => {
     let u = this.word.size;
     unpack-type a = cast<int, type>(load-int(shift(r, u)));
     let val: &a = cast<int, &a>(load-int(r));
@@ -61,7 +61,7 @@ inline modify<a, b>(r: &ref(a), f: (+a) -> pair(+a, b)) -> b {
 }
 
 inline mutate<a>(r: &ref(a), f: (+a) -> +a) -> unit {
-  modify(r, function (x) {
+  modify(r, (x) => {
     Pair(f(x), Unit)
   })
 }
@@ -74,7 +74,7 @@ inline borrow<a, b>(r: &ref(a), f: (&a) -> +b) -> b {
 }
 
 inline clone<a>(r: &ref(a)) -> a {
-  modify(r, function (!val: +a) {
+  modify(r, (!val: +a) => {
     Pair(val, axiom-T(val))
   })
 }

@@ -6,7 +6,7 @@ import {
 }
 
 constant as-show: show(unit) {
-  Show(function (u) {
+  Show((u) => {
     match u {
     | Unit =>
       *"Unit"

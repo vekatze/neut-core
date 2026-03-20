@@ -31,9 +31,9 @@ define ge-rune(r1: rune, r2: rune) -> bool {
 }
 
 constant as-ord: ord(rune) {
-  Ord{
+  Ord {
     compare := {
-      function (x, y) {
+      (x, y) => {
         if gt-rune(*x, *y) {
           GT
         } else-if lt-rune(*x, *y) {

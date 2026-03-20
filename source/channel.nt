@@ -52,7 +52,7 @@ define _new<a>(q: queue(a)) -> channel(a) {
 
 // (queue, thread-mutex, thread-cond)
 resource _channel {
-  function (ch: pointer) {
+  (ch: pointer) => {
     let u = this.word.size;
     let mutex-size = from-c-size(THREAD_MUTEX_SIZE);
     let cond-size = from-c-size(THREAD_COND_SIZE);
@@ -64,7 +64,7 @@ resource _channel {
     magic call-type(pack-type {queue(a)}, 0, load-int(ch));
     free(ch)
   },
-  function (ch: pointer) {
+  (ch: pointer) => {
     let u = this.word.size;
     let mutex-size = from-c-size(THREAD_MUTEX_SIZE);
     let cond-size = from-c-size(THREAD_COND_SIZE);

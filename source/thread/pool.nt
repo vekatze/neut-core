@@ -31,17 +31,17 @@ data pool(a: type) {
 }
 
 define _close-pool<a>(k: pool(a)) -> unit {
-  let _Pool{workers, tasks-ref, futures-ref} = k;
+  let _Pool {workers, tasks-ref, futures-ref} = k;
   let size on workers = this.vector.length(workers);
   let _ on tasks-ref =
-    loop(size, function (_) {
+    loop(size, (_) => {
       send(tasks-ref, box {_Finish})
     });
-  for(workers, function (worker, _) {
+  for(workers, (worker, _) => {
     attach {worker};
   });
   let futures = axiom-T(this.cell.extract(futures-ref));
-  for(futures, function (ch, _) {
+  for(futures, (ch, _) => {
     let _ = cast<&mvar(a), mvar(a)>(ch);
     Unit
   });
@@ -50,7 +50,7 @@ define _close-pool<a>(k: pool(a)) -> unit {
 }
 
 define _setup-workers<a>(tasks-ref: &channel(_task(a)), size: int) -> vector(thread(unit)) {
-  grow(this.vector.make(8), max-int(size, 1), function (acc, _) {
+  grow(this.vector.make(8), max-int(size, 1), (acc, _) => {
     push-back(acc, this.thread.detach<unit>(
       define worker() -> unit {
         let v = axiom-T(receive(tasks-ref));
@@ -72,7 +72,7 @@ inline with-thread-pool<a, b, e>(size: int, env: e, f: (p: &pool(a), env: +e) ->
   let futures-ref = make-cell(box {this.vector.make(8)});
   let workers = _setup-workers(tasks-ref, size);
   let tasks-ref = cast<&channel(_task(a)), channel(_task(a))>(tasks-ref);
-  let p = _Pool{workers, tasks-ref, futures-ref};
+  let p = _Pool {workers, tasks-ref, futures-ref};
   let p = cast<pool(a), &pool(a)>(p);
   let result = f(p, cast<e, +e>(env));
   _close-pool(cast<&pool(a), pool(a)>(p));
@@ -80,9 +80,9 @@ inline with-thread-pool<a, b, e>(size: int, env: e, f: (p: &pool(a), env: +e) ->
 }
 
 define detach-task<a>(k: &pool(a), f: () -> +a) -> future(a) {
-  tie _Pool{tasks-ref, futures-ref} = k;
+  tie _Pool {tasks-ref, futures-ref} = k;
   let result-chan = cast<mvar(a), &mvar(a)>(make-mvar<a>());
-  mutate(futures-ref, function (futures) {
+  mutate(futures-ref, (futures) => {
     box {
       letbox futures = futures;
       letbox result-chan = cast<&mvar(a), +&mvar(a)>(result-chan);
@@ -100,16 +100,16 @@ define attach-task<a>(i: future(a)) -> +a {
 }
 
 inline for-each-parallel<a, b>(worker-num: int, xs: vector(a), f: (a) -> b) -> vector(b) {
-  with-thread-pool(worker-num, Pair(xs, f), function (p, env) {
+  with-thread-pool(worker-num, Pair(xs, f), (p, env) => {
     let Pair(xs, f) = meta-pair-in(env);
     let fs =
-      for-each(meta-vector-in(xs), function (x, _) {
-        detach-task(p, function () {
+      for-each(meta-vector-in(xs), (x, _) => {
+        detach-task(p, () => {
           axiom-K(f, x)
         })
       });
     let xs =
-      for-each(fs, function (fut, _) {
+      for-each(fs, (fut, _) => {
         attach-task(fut)
       });
     meta-vector-out(xs)
@@ -118,7 +118,7 @@ inline for-each-parallel<a, b>(worker-num: int, xs: vector(a), f: (a) -> b) -> v
 
 define zen() -> unit {
   pin result =
-    for-each-parallel(5, Vector[1, 2, 3, 4, 5], function (x) {
+    for-each-parallel(5, Vector[1, 2, 3, 4, 5], (x) => {
       lift {add-int(x, 10)}
     });
   unquote {vet(quote {result})};

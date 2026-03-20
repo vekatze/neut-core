@@ -28,10 +28,10 @@ inline _get-pointer-size-from-capacity(capacity: int) -> int {
 
 // internal representation: (current-size, capacity, descriptor, byte-0, byte-1, ..., byte-n)
 resource _buffer-internal {
-  function (x: pointer) {
+  (x: pointer) => {
     free(x)
   },
-  function (source-pointer: pointer) {
+  (source-pointer: pointer) => {
     let u = this.word.size;
     let capacity = load-int(shift(source-pointer, u));
     let pointer-size = _get-pointer-size-from-capacity(capacity);

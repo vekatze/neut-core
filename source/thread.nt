@@ -28,14 +28,14 @@ nominal {
 }
 
 resource _thread-inner {
-  function (addr: pointer) {
+  (addr: pointer) => {
     let u = this.word.size;
     unpack-type elem-type = cast<int, type>(load-int(shift(addr, u)));
     let pr: thread(elem-type) = cast<pointer, thread(elem-type)>(addr);
     let _: elem-type = this.thread.attach<elem-type>(pr);
     Unit
   },
-  function (addr: pointer) {
+  (addr: pointer) => {
     let u = this.word.size;
     let u2 = mul-int(u, 2);
     let u3 = mul-int(u, 3);
@@ -89,7 +89,7 @@ define _await-and-write-result(addr: pointer) -> unit {
 // (thread-id, result-type, result-value, finished-flag): thread(result-type)
 define detach<a>(f: () -> a) -> thread(a) {
   let thread-func =
-    function () {
+    () => {
       thread-exit(cast<a, pointer>(f()))
     };
   let u = this.word.size;

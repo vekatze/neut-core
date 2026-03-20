@@ -28,13 +28,13 @@ define _show(c-fmt: &text, x: int) -> text {
 }
 
 constant as-show: show(int) {
-  Show(function (x) {
+  Show((x) => {
     _show("%ld", x)
   })
 }
 
 define show-int(x: int) -> text {
-  let Show{show} = as-show;
+  let Show {show} = as-show;
   show(x)
 }
 

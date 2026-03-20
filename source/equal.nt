@@ -78,7 +78,7 @@ inline-meta _equal-vector<a>(xs: '&vector(a), ys: '&vector(a)) -> 'bool {
     let len-x = this.vector.length(unquote {xs});
     let len-y = this.vector.length(unquote {ys});
     if eq-int(len-x, len-y) {
-      this.vector.zip-fold(unquote {xs}, unquote {ys}, True, function (x: &a, y: &a, acc: bool, _: int) -> bool {
+      this.vector.zip-fold(unquote {xs}, unquote {ys}, True, (x: &a, y: &a, acc: bool, _: int) => {
         if acc {
           unquote {eq-data(quote {x}, quote {y})}
         } else {
@@ -104,8 +104,7 @@ inline-meta _eq-data-adt-cons<a>(
   cursor: int,
   x: '&a,
   y: '&a,
-)->
-'bool {
+) -> 'bool {
   match cons-arg-types {
   | Nil =>
     quote {True}
@@ -135,8 +134,7 @@ inline-meta _eq-data-adt<a>(
   disc: 'int,
   x: '&a,
   y: '&a,
-)->
-'bool {
+) -> 'bool {
   match constructors {
   | Nil =>
     quote {True}

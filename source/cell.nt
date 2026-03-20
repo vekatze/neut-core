@@ -44,7 +44,7 @@ define _new<a>(val: a) -> cell(a) {
 
 // (content, thread-mutex, type)
 resource _cell {
-  function (ch: pointer) {
+  (ch: pointer) => {
     let u = this.word.size;
     let mutex-size = from-c-size(THREAD_MUTEX_SIZE);
     let type-offset = add-int(u, mutex-size);
@@ -53,7 +53,7 @@ resource _cell {
     magic call-type(a, 0, load-int(ch));
     free(ch)
   },
-  function (ch: pointer) {
+  (ch: pointer) => {
     let u = this.word.size;
     let mutex-size = from-c-size(THREAD_MUTEX_SIZE);
     let type-offset = add-int(u, mutex-size);
@@ -82,7 +82,7 @@ inline modify<a, b>(ch: &cell(a), f: (+a) -> pair(+a, b)) -> b {
 }
 
 inline mutate<a>(ch: &cell(a), f: (+a) -> +a) -> unit {
-  modify(ch, function (x) {
+  modify(ch, (x) => {
     Pair(f(x), Unit)
   })
 }
@@ -100,7 +100,7 @@ inline borrow<a, b>(ch: &cell(a), f: (&a) -> +b) -> b {
 }
 
 define clone<a>(ch: &cell(a)) -> a {
-  borrow(ch, function (val: &a) {
+  borrow(ch, (val: &a) => {
     box val {val}
   })
 }

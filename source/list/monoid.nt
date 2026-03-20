@@ -4,10 +4,10 @@ import {
 }
 
 inline as-monoid<a>() -> monoid(list(a)) {
-  Monoid{
+  Monoid {
     e := Nil,
     op := {
-      function (x, y) {
+      (x, y) => {
         append(x, y)
       }
     },

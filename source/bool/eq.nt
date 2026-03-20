@@ -6,7 +6,7 @@ import {
 
 constant as-eq: eq(bool) {
   Eq(
-    function (b1, b2) {
+    (b1, b2) => {
       if *b1 {
         *b2
       } else {

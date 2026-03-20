@@ -13,7 +13,7 @@ define show-rune(ch: rune) -> text {
 }
 
 constant as-show: show(rune) {
-  Show{
+  Show {
     show := show-rune,
   }
 }

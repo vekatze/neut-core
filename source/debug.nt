@@ -115,7 +115,7 @@ inline-meta _vet-vector<a>(xs: '&vector(a)) -> 'doc {
     let suffix = atom-N("]");
     let len = this.vector.length(unquote {xs});
     let content =
-      this.vector.fold-right-N(unquote {xs}, empty, function (x: &a, acc: doc, i: int) -> doc {
+      this.vector.fold-right-N(unquote {xs}, empty, (x: &a, acc: doc, i: int) => {
         if eq-int(add-int(i, 1), len) {
           join[unquote {vet-doc(quote {x})}, acc]
         } else {
@@ -142,8 +142,7 @@ inline-meta _vet-adt-cons<a>(
   cursor: int,
   data-arg-num: int,
   x: '&a,
-)->
-'doc {
+) -> 'doc {
   match cons-arg-types {
   | Nil =>
     quote {empty}

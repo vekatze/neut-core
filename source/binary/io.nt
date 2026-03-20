@@ -48,8 +48,7 @@ define _read-inner(
   base-ptr: pointer,
   current-length: int,
   buffer-size: int,
-)->>
-system(binary) {
+) ->> system(binary) {
   let u = this.word.size;
   let content-ptr = shift(base-ptr, add-int(mul-int(u, 2), current-length));
   let readable-size = sub-int(buffer-size, current-length);

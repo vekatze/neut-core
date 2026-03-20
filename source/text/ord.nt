@@ -31,9 +31,9 @@ define ge-text(t1: &text, t2: &text) -> bool {
 }
 
 constant as-ord: ord(text) {
-  Ord{
+  Ord {
     compare := {
-      function (x, y) {
+      (x, y) => {
         if gt-text(x, y) {
           GT
         } else-if lt-text(x, y) {

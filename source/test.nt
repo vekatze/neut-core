@@ -21,19 +21,19 @@ import {
 define with-cell(i: int) -> int {
   let c = make-cell(lift {i});
   let _ on c =
-    mutate(c, function (x) {
+    mutate(c, (x) => {
       lift {add-int(axiom-T(x), 1)}
     });
   let _ on c =
-    mutate(c, function (x) {
+    mutate(c, (x) => {
       lift {add-int(axiom-T(x), 1)}
     });
   let _ on c =
-    mutate(c, function (x) {
+    mutate(c, (x) => {
       lift {add-int(axiom-T(x), 1)}
     });
   let _ on c =
-    mutate(c, function (x) {
+    mutate(c, (x) => {
       lift {add-int(axiom-T(x), 21)}
     });
   axiom-T(this.cell.extract(c))
@@ -228,7 +228,14 @@ define use-my-func() -> int {
   my-func(20)
 }
 
+define my-def-func<a>(t: a, x: int)[y: int := 42] -> pair(a, int) {
+  Pair(t, add-int(x, y))
+}
+
 define zen() -> unit {
+  let f = exact my-def-func;
+  pin v = f(True, 3);
+  vet::(v);
   pin val = text-by-dest("hello");
   print-line(val);
   pin v = my-loop-func(3);
@@ -260,7 +267,7 @@ define zen() -> unit {
   pin count = get-cpu-count();
   vet::(count);
   pin result =
-    for-each-parallel(get-cpu-count(), Vector[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], function (x) {
+    for-each-parallel(get-cpu-count(), Vector[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], (x) => {
       lift {add-int(x, 10)}
     });
   vet::(result);

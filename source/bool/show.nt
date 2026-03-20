@@ -6,7 +6,7 @@ import {
 }
 
 constant as-show: show(bool) {
-  Show(function (b) {
+  Show((b) => {
     if b {
       *"True"
     } else {
@@ -16,7 +16,7 @@ constant as-show: show(bool) {
 }
 
 define show(b: bool) -> text {
-  let Show{show} = as-show;
+  let Show {show} = as-show;
   show(b)
 }
 

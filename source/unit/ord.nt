@@ -5,9 +5,9 @@ import {
 }
 
 constant as-ord: ord(unit) {
-  Ord{
+  Ord {
     compare := {
-      function (x1, x2) {
+      (x1, x2) => {
         case x1, x2 {
         | Unit, Unit =>
           EQ

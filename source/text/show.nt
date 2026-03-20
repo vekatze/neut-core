@@ -181,7 +181,7 @@ define _get-escaped-character-2(ch: int8) -> &text {
 
 define _escape(t: &text, len: int, pivot: int, cursor: int) -> list(text) {
   let _next =
-    function () {
+    () => {
       _escape(t, len, pivot, add-int(cursor, 1))
     };
   let index = add-int(pivot, cursor);

@@ -28,7 +28,7 @@ define _interpret-flag(flag: flag) -> c-int {
 }
 
 define interpret(xs: list(flag)) -> c-int {
-  this.list.fold-left(0, xs, function (acc, x) {
+  this.list.fold-left(0, xs, (acc, x) => {
     or-c-int(acc, _interpret-flag(x))
   })
 }

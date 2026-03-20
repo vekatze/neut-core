@@ -18,9 +18,9 @@ define ne-rune(r1: rune, r2: rune) -> bool {
 }
 
 constant as-eq: eq(rune) {
-  Eq{
+  Eq {
     equal := {
-      function (x, y) {
+      (x, y) => {
         eq-rune(*x, *y)
       }
     },

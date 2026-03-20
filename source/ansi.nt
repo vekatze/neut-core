@@ -87,27 +87,27 @@ data ansi-kit {
 
 define flush(k: &ansi-kit) ->> system(unit) {
   case k {
-  | _ANSI-Kit{buffer} =>
+  | _ANSI-Kit {buffer} =>
     core.buffer.flush(buffer)
-  | _ANSI-Kit-Unbuffered{} =>
+  | _ANSI-Kit-Unbuffered {} =>
     Right(Unit)
   }
 }
 
 define make-ansi-kit(sink: descriptor, capacity: int) -> ansi-kit {
   let buffer = make-buffer(sink, capacity);
-  _ANSI-Kit{buffer}
+  _ANSI-Kit {buffer}
 }
 
 define make-ansi-kit-unbuffered(sink: descriptor) -> ansi-kit {
-  _ANSI-Kit-Unbuffered{sink}
+  _ANSI-Kit-Unbuffered {sink}
 }
 
 define write(k: &ansi-kit, t: &text) ->> system(unit) {
   case k {
-  | _ANSI-Kit{buffer} =>
+  | _ANSI-Kit {buffer} =>
     this.text.buffer.write(buffer, t)
-  | _ANSI-Kit-Unbuffered{sink} =>
+  | _ANSI-Kit-Unbuffered {sink} =>
     let _ = this.text.io.write(*sink, t);
     Right(Unit)
   }
@@ -115,9 +115,9 @@ define write(k: &ansi-kit, t: &text) ->> system(unit) {
 
 define write-line(k: &ansi-kit, t: &text) ->> system(unit) {
   case k {
-  | _ANSI-Kit{buffer} =>
+  | _ANSI-Kit {buffer} =>
     core.text.buffer.write-line(buffer, t)
-  | _ANSI-Kit-Unbuffered{sink} =>
+  | _ANSI-Kit-Unbuffered {sink} =>
     let _ = core.text.io.write(*sink, t);
     Right(Unit)
   }
@@ -125,9 +125,9 @@ define write-line(k: &ansi-kit, t: &text) ->> system(unit) {
 
 define write-int(k: &ansi-kit, x: int) ->> system(unit) {
   case k {
-  | _ANSI-Kit{buffer} =>
+  | _ANSI-Kit {buffer} =>
     core.int.buffer.write-int(buffer, x)
-  | _ANSI-Kit-Unbuffered{sink} =>
+  | _ANSI-Kit-Unbuffered {sink} =>
     let _ = core.int.io.write-int(*sink, x);
     Right(Unit)
   }

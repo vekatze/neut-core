@@ -6,7 +6,7 @@ import {
 }
 
 inline as-show<a>(s: show(a)) -> show(list(a)) {
-  Show(function (xs) {
+  Show((xs) => {
     let Show(f) = s;
     let ys = for-each(xs, f);
     join(List[*"[", intercalate(ys, *", "), *"]"])
@@ -14,7 +14,7 @@ inline as-show<a>(s: show(a)) -> show(list(a)) {
 }
 
 inline as-show-N<a>(s: show(&a)) -> show(&list(a)) {
-  Show(function (xs) {
+  Show((xs) => {
     let Show(f) = s;
     let ys = for-each-N(xs, f);
     join(List[*"[", intercalate(ys, *", "), *"]"])

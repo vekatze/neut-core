@@ -5,9 +5,9 @@ import {
 }
 
 constant as-eq: eq(unit) {
-  Eq{
+  Eq {
     equal := {
-      function (x1, x2) {
+      (x1, x2) => {
         case x1, x2 {
         | Unit, Unit =>
           True

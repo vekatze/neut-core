@@ -5,11 +5,11 @@ import {
 }
 
 inline as-ord<a, b>(f: ord(a), g: ord(b)) -> ord(pair(a, b)) {
-  let Ord{compare := compare-f} = f;
-  let Ord{compare := compare-g} = g;
-  Ord{
+  let Ord {compare := compare-f} = f;
+  let Ord {compare := compare-g} = g;
+  Ord {
     compare := {
-      function (p1, p2) {
+      (p1, p2) => {
         tie Pair(x1, y1) = p1;
         tie Pair(x2, y2) = p2;
         match compare-f(x1, x2) {
@@ -26,11 +26,11 @@ inline as-ord<a, b>(f: ord(a), g: ord(b)) -> ord(pair(a, b)) {
 }
 
 inline as-ord-right-biased<a, b>(f: ord(a), g: ord(b)) -> ord(pair(a, b)) {
-  let Ord{compare := compare-f} = f;
-  let Ord{compare := compare-g} = g;
-  Ord{
+  let Ord {compare := compare-f} = f;
+  let Ord {compare := compare-g} = g;
+  Ord {
     compare := {
-      function (p1, p2) {
+      (p1, p2) => {
         tie Pair(x1, y1) = p1;
         tie Pair(x2, y2) = p2;
         match compare-g(y1, y2) {

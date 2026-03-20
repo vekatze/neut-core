@@ -6,9 +6,9 @@ import {
 }
 
 constant as-ord: ord(int) {
-  Ord{
+  Ord {
     compare := {
-      function (x, y) {
+      (x, y) => {
         if gt-int(*x, *y) {
           GT
         } else-if lt-int(*x, *y) {
@@ -22,9 +22,9 @@ constant as-ord: ord(int) {
 }
 
 constant as-ord-int8: ord(int8) {
-  Ord{
+  Ord {
     compare := {
-      function (x, y) {
+      (x, y) => {
         if gt-int8(*x, *y) {
           GT
         } else-if lt-int8(*x, *y) {

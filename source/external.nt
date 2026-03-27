@@ -9,8 +9,6 @@ import {
 }
 
 foreign {
-  malloc(c-size): pointer,
-  free(pointer): void,
   exit(c-int): void,
   realloc(pointer, c-size): pointer,
   open(pointer, c-int): c-int,
@@ -44,33 +42,16 @@ define exit<a>(status: c-int) -> a {
   }
 }
 
-define malloc(size: c-size) -> pointer {
-  introspect operating-system {
-  | darwin =>
-    magic external malloc(size)
-  | linux =>
-    magic external malloc(size)
-  }
+inline malloc(size: c-size) -> pointer {
+  magic malloc(size)
 }
 
-define free(ptr: pointer) -> unit {
-  introspect operating-system {
-  | darwin =>
-    let _ = magic external free(ptr);
-    Unit
-  | linux =>
-    let _ = magic external free(ptr);
-    Unit
-  }
+inline free(ptr: pointer) -> unit {
+  magic free(ptr)
 }
 
-define realloc(ptr: pointer, size: c-size) -> pointer {
-  introspect operating-system {
-  | darwin =>
-    magic external realloc(ptr, size)
-  | linux =>
-    magic external realloc(ptr, size)
-  }
+inline realloc(ptr: pointer, size: c-size) -> pointer {
+  magic realloc(ptr, size)
 }
 
 define open(path-address: pointer, oflag: c-int, mode: c-int) -> descriptor {

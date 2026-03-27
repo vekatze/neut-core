@@ -3,7 +3,6 @@ import {
   this.c-size {C-Size, from-c-size},
   this.external {
     free,
-    malloc,
     thread-mutex-destroy,
     thread-mutex-init,
     thread-mutex-lock,
@@ -35,7 +34,7 @@ data cell(_: type) {
 define _new<a>(val: a) -> cell(a) {
   let mutex-size = from-c-size(THREAD_MUTEX_SIZE);
   let u = this.word.size;
-  let ptr = malloc(C-Size(sum-int(List[u, mutex-size, u])));
+  let ptr = magic malloc(C-Size(sum-int(List[u, mutex-size, u])));
   store-int(cast<a, int>(val), ptr);
   let _ = thread-mutex-init(shift(ptr, u));
   store-int(cast<type, int>(pack-type {a}), shift(ptr, add-int(u, mutex-size)));

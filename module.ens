@@ -27,6 +27,7 @@
   preset {
     bool ["False", "True", "and", "bool", "not", "or"],
     box [],
+    c-size [],
     cell ["cell"],
     channel ["channel"],
     debug ["trace", "vet"],

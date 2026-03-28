@@ -10,7 +10,6 @@ import {
 
 foreign {
   exit(c-int): void,
-  realloc(pointer, c-size): pointer,
   open(pointer, c-int): c-int,
   close(c-int): c-int,
   write(c-int, pointer, c-size): c-ssize,

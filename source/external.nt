@@ -53,6 +53,10 @@ inline realloc(ptr: pointer, size: c-size) -> pointer {
   magic realloc(ptr, size)
 }
 
+inline calloc(count: c-size, size: c-size) -> pointer {
+  magic calloc(count, size)
+}
+
 define open(path-address: pointer, oflag: c-int, mode: c-int) -> descriptor {
   introspect operating-system {
   | darwin =>

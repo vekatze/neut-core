@@ -1,3 +1,7 @@
 define cast<a, b>(x: a) -> b {
   magic cast(a, b, x)
 }
+
+inline cast-inline<a, b>(x: a) -> b {
+  magic cast(a, b, x)
+}

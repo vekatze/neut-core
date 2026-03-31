@@ -9,9 +9,7 @@ import {
     thread-mutex-unlock,
   },
   this.foreign {THREAD_MUTEX_SIZE},
-  this.int {sum-int},
-  this.list {List},
-  this.magic {cast},
+  this.magic {cast, cast-inline},
   this.memory {load-int, store-int},
   this.pair {Pair, pair},
   this.pointer {shift},
@@ -31,14 +29,14 @@ data cell(_: type) {
 | _Cell(_cell)
 }
 
-define _new<a>(val: a) -> cell(a) {
+inline _new<a>(val: a) -> cell(a) {
   let mutex-size = from-c-size(THREAD_MUTEX_SIZE);
   let u = this.word.size;
-  let ptr = magic malloc(C-Size(sum-int(List[u, mutex-size, u])));
+  let ptr = magic malloc(C-Size(add-int(u, add-int(mutex-size, u))));
   store-int(cast<a, int>(val), ptr);
   let _ = thread-mutex-init(shift(ptr, u));
   store-int(cast<type, int>(pack-type {a}), shift(ptr, add-int(u, mutex-size)));
-  cast<pointer, cell(a)>(ptr)
+  cast-inline<pointer, cell(a)>(ptr)
 }
 
 // (content, thread-mutex, type)
@@ -104,11 +102,14 @@ define clone<a>(ch: &cell(a)) -> a {
   })
 }
 
-define extract<a>(c: cell(a)) -> +a {
+inline extract<a>(c: cell(a)) -> +a {
   let u = this.word.size;
-  let ch = cast<cell(a), pointer>(c);
-  let result = cast<int, +a>(load-int(ch));
-  thread-mutex-destroy(shift(ch, u));
-  this.external.free(ch);
+  letbox-T result on c = {
+    let ch = cast<&cell(a), pointer>(c);
+    let result = cast<int, ++a>(load-int(ch));
+    thread-mutex-destroy(shift(ch, u));
+    result
+  };
+  this.external.free(cast-inline<cell(a), pointer>(c));
   result
 }

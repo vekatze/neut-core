@@ -1,4 +1,5 @@
 import {
+  this.binary,
   this.bool {True, bool},
   this.box {axiom-T},
   this.cell {make-cell, mutate},
@@ -10,12 +11,30 @@ import {
   this.list {Cons, Nil, list},
   this.pair {Pair, pair},
   this.random {random-int},
-  this.text {append, text},
+  this.ref {make-ref},
+  this.text {append, strip-prefix, strip-suffix, text},
   this.text.io {print, print-line},
   this.thread.mvar {make-mvar, receive, send},
   this.thread.pool {for-each-parallel},
   this.unit {Unit, unit},
   this.vector {Vector, product, push-back},
+}
+
+define choose(i: int) -> int {
+  if eq-int(i, 42) {
+    11
+  } else {
+    22
+  }
+}
+
+define with-ref(i: int) -> int {
+  let c = make-ref(lift {i});
+  let _ on c =
+    this.ref.mutate(c, (x) => {
+      lift {add-int(axiom-T(x), 1)}
+    });
+  axiom-T(this.ref.extract(c))
 }
 
 define with-cell(i: int) -> int {
@@ -89,6 +108,10 @@ define my-random-in-range(lower-bound: int32, upper-bound: int32) -> int {
   add-int(value, sext-int32-int(lower-bound))
 }
 
+define my-add-int(x: int, y: int32) -> int {
+  add-int(x, sext-int32-int(y))
+}
+
 define use-text(x: &text) -> text {
   axiom-T(box x {x})
 }
@@ -103,6 +126,19 @@ constant item: int {
 
 data wrap {
 | Wrap(int)
+}
+
+alias foo-t {
+  wrap
+}
+
+define use-wrap() -> foo-t {
+  let _ = Wrap(42);
+  Wrap(234)
+}
+
+define myfunc(x: foo-t) -> foo-t {
+  x
 }
 
 // define make-type(_: list(int)): type {
@@ -233,6 +269,16 @@ define my-def-func<a>(t: a, x: int)[y: int := 42] -> pair(a, int) {
 }
 
 define zen() -> unit {
+  let t1 = "abcde";
+  let t2 = "abcdef";
+  pin t3 = strip-prefix(t2, *t1);
+  print-line(t3);
+  let t1 = "abcあde";
+  let t2 = "de";
+  pin t3 = strip-suffix(t2, *t1);
+  print-line(t3);
+  let out = with-ref(123);
+  print-int-line(out);
   let f = exact my-def-func;
   pin v = f(True, 3);
   vet::(v);
@@ -627,3 +673,14 @@ define foo(x: int, acc: int) -> int {
     foo(sub-int(x, 1), add-int(x, acc))
   }
 }
+
+data test(name) {
+| Test(
+    name: name,
+  )
+}
+
+// define bug(x: test(unit)) -> unit {
+//   let Test(name) = x;
+//   name
+// }

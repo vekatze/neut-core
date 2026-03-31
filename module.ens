@@ -45,6 +45,7 @@
     string.io ["print"],
     string.ord ["lt-string", "le-string", "gt-string", "ge-string"],
     system [],
+    text ["text"],
     thread ["thread"],
     trick [],
     type-value [],

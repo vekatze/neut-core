@@ -11,12 +11,37 @@ import {
   this.pair {Pair, pair},
   this.random {random-int},
   this.ref {make-ref},
-  this.string {append, string, strip-prefix, strip-suffix},
+  this.string {append, from-text, string, strip-prefix, strip-suffix},
   this.string.io {print, print-line},
+  this.text {text},
   this.thread.mvar {make-mvar, receive, send},
   this.thread.pool {for-each-parallel},
   this.unit {Unit, unit},
   this.vector {Vector, product, push-back},
+}
+
+data adt-with-text {
+| CFoo
+| CBar(text)
+}
+
+data adt-with-string {
+| CFoo2
+| CBar2(&string)
+}
+
+define use-text(t: text) -> unit {
+  let t1 = t;
+  let t2 = t;
+  let v = static "Hello, world!\n";
+  print(from-text(v));
+  print-line(from-text(t));
+  print-line(from-text(t1));
+  print-line(from-text(t2));
+  let v on t = CBar(*t);
+  let _ = t;
+  let _ = v;
+  Unit
 }
 
 define choose(i: int) -> int {
@@ -268,6 +293,7 @@ define my-def-func<a>(t: a, x: int)[y: int := 42] -> pair(a, int) {
 }
 
 define zen() -> unit {
+  use-text(static "sample");
   let t1 = "abcde";
   let t2 = "abcdef";
   pin t3 = strip-prefix(t2, *t1);

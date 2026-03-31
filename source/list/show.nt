@@ -2,7 +2,7 @@ import {
   this.box,
   this.list {List, for-each, for-each-N, list},
   this.show {Show, show},
-  this.text {intercalate, join},
+  this.string {intercalate, join},
 }
 
 inline as-show<a>(s: show(a)) -> show(list(a)) {

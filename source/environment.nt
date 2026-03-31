@@ -8,8 +8,8 @@ import {
   this.magic,
   this.memory {load-int, load-pointer},
   this.pointer {shift},
+  this.string {_get-content-pointer, string},
   this.system {report-system-error, system},
-  this.text {_get-content-pointer, text},
   this.unit {Unit, unit},
   this.word,
 }
@@ -19,7 +19,7 @@ foreign {
   setenv(pointer, pointer, c-int): c-int,
 }
 
-define get-env(name: &text) ->> ?text {
+define get-env(name: &string) ->> ?string {
   let c-str = _get-content-pointer(name);
   let tmp = magic external getenv(c-str);
   if eq-int(magic cast(pointer, int, tmp), 0) {
@@ -29,7 +29,7 @@ define get-env(name: &text) ->> ?text {
   }
 }
 
-define set-env(name: &text, value: &text, overwrite: bool) ->> system(unit) {
+define set-env(name: &string, value: &string, overwrite: bool) ->> system(unit) {
   let name-c-str = to-c-string(name);
   let value-c-str = to-c-string(value);
   let flag =
@@ -58,13 +58,13 @@ define get-argc() -> int {
   load-int(argc-ptr)
 }
 
-define get-argv() -> list(text) {
+define get-argv() -> list(string) {
   let argc = get-argc();
   let argv-ptr = magic global("neut-unsafe-argv", pointer);
   let argv = load-pointer(argv-ptr);
   let u = this.word.size;
   let f =
-    define get-argv-helper(i: int) -> list(text) {
+    define get-argv-helper(i: int) -> list(string) {
       if eq-int(i, argc) {
         Nil
       } else {

@@ -1,17 +1,17 @@
 import {
   this.bool {bool},
   this.external {exit},
-  this.text {text},
-  this.text.io {print},
+  this.string {string},
+  this.string.io {print},
   this.unit {Unit, unit},
 }
 
-define panic<a>(t: &text) -> a {
+define panic<a>(t: &string) -> a {
   print(t);
   exit(1)
 }
 
-inline _assert(message: &text, check: () -> bool) -> unit {
+inline _assert(message: &string, check: () -> bool) -> unit {
   introspect build-mode {
   | release =>
     let _ = check;

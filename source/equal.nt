@@ -10,7 +10,7 @@ import {
   this.pair {Pair, pair},
   this.pointer {shift},
   this.rune.eq {eq-rune},
-  this.text {text},
+  this.string {string},
   this.type-value {
     Algebraic,
     Binary,
@@ -59,13 +59,13 @@ inline-meta _meta-snd<a, b>(p: pair(a, b)) -> b {
   y
 }
 
-inline-meta _join-text(t1: &text, t2: &text) -> &text {
-  let tmp = magic text-uncons(t1);
+inline-meta _join-string(t1: &string, t2: &string) -> &string {
+  let tmp = magic string-uncons(t1);
   match tmp {
   | Left(_) =>
     t2
   | Right(Pair(r, rest)) =>
-    magic text-cons(r, _join-text(rest, t2))
+    magic string-cons(r, _join-string(rest, t2))
   }
 }
 
@@ -260,7 +260,7 @@ define-meta eq-data<a>(x: '&a, y: '&a) -> 'bool {
     }
   | _ =>
     let t = magic show-type(a);
-    let message = _join-text("eq-data doesn't support: ", t);
+    let message = _join-string("eq-data doesn't support: ", t);
     magic compile-error(message)
   }
 }

@@ -1,5 +1,4 @@
 import {
-  this.binary,
   this.bool {True, bool},
   this.box {axiom-T},
   this.cell {make-cell, mutate},
@@ -12,8 +11,8 @@ import {
   this.pair {Pair, pair},
   this.random {random-int},
   this.ref {make-ref},
-  this.text {append, strip-prefix, strip-suffix, text},
-  this.text.io {print, print-line},
+  this.string {append, string, strip-prefix, strip-suffix},
+  this.string.io {print, print-line},
   this.thread.mvar {make-mvar, receive, send},
   this.thread.pool {for-each-parallel},
   this.unit {Unit, unit},
@@ -112,7 +111,7 @@ define my-add-int(x: int, y: int32) -> int {
   add-int(x, sext-int32-int(y))
 }
 
-define use-text(x: &text) -> text {
+define use-string(x: &string) -> string {
   axiom-T(box x {x})
 }
 
@@ -192,7 +191,7 @@ define my-naive-loop-func(x: int) -> either(int, bool) {
   inner(x)
 }
 
-define text-by-dest(x: &text) ->> text {
+define string-by-dest(x: &string) ->> string {
   let result = append(x, "test");
   result
 }
@@ -282,7 +281,7 @@ define zen() -> unit {
   let f = exact my-def-func;
   pin v = f(True, 3);
   vet::(v);
-  pin val = text-by-dest("hello");
+  pin val = string-by-dest("hello");
   print-line(val);
   pin v = my-loop-func(3);
   vet::(v);
@@ -299,7 +298,7 @@ define zen() -> unit {
   //     let _ = Unit;
   //     Unit
   //   };
-  let !mv = make-mvar<text>();
+  let !mv = make-mvar<string>();
   let _ = mv;
   let _ = mv;
   let _ = mv;
@@ -405,7 +404,7 @@ define zen() -> unit {
   // unquote {vet(quote {xss})};
   vet::(xss);
   // // nested vector
-  // let !foo = *"text";
+  // let !foo = *"string";
   // let _ = !foo;
   // let _ = !foo;
   // let xs = this.vector.make(5);
@@ -435,7 +434,7 @@ define zen() -> unit {
   // let zs = trace(this.vector.append(!xs, ys));
   // pin sample =
   //   this.vector.fold-right(zs, *"test", function (acc, v, _) {
-  //     let tmp on acc, v = core.text.append(acc, v);
+  //     let tmp on acc, v = core.string.append(acc, v);
   //     let _ = acc;
   //     let _ = v;
   //     tmp
@@ -465,29 +464,29 @@ define zen() -> unit {
     print-line("YO");
   };
   // vet("hello");
-  // let xs: vector(text) = this.vector.make(8);
+  // let xs: vector(string) = this.vector.make(8);
   // let xs = push-back(xs, *"hello");
   // pin xs = push-back(xs, *"Lorem ipsum");
   // vet(xs);
-  // let xs: vector(&text) = this.vector.make(8);
+  // let xs: vector(&string) = this.vector.make(8);
   // let xs = push-back(xs, "hello");
   // pin xs = push-back(xs, "Lorem ipsum");
   // vet(xs);
   // for-N(xs, function (x, _) {
   //   vet(*x);
   // });
-  // pin t = this.text.singleton(`あ`);
+  // pin t = this.string.singleton(`あ`);
   // print-line(t);
   // match this.rune.from-int(0xfffff) {
   // | Right(v) =>
-  //   pin t = this.text.singleton(v);
+  //   pin t = this.string.singleton(v);
   //   print-line(t)
   // | Left(_) =>
   //   print-line("left")
   // };
   // let t1 = "hello";
   // let t2 = "helloaoeu";
-  // if eq-text(t1, t2) {
+  // if eq-string(t1, t2) {
   //   print("true\n")
   // } else {
   //   print("false\n")
@@ -500,13 +499,13 @@ define zen() -> unit {
   //   print-line("not-equal")
   // };
   // vet(xs);
-  // pin yo = this.text.intercalate-N(xs, ", yo, ");
+  // pin yo = this.string.intercalate-N(xs, ", yo, ");
   // vet(yo);
   // print-line(yo);
   // let t = "foo\nbar\nbuz";
   // pin yo = lines(t);
-  // pin sometext' = unlines(yo);
-  // print-line(sometext');
+  // pin somestring' = unlines(yo);
+  // print-line(somestring');
   // pin r: ref(int) = _make-ref(123);
   // this.ref.mutate(r, function (x) {
   //   add-int(x, 10)
@@ -521,7 +520,7 @@ define zen() -> unit {
   //     print("item: ");
   //     print-int-line(y)
   //   });
-  // let !k = use-text("te");
+  // let !k = use-string("te");
   // let _ on !k = print-line(!k);
   // let _ on !k = print-line(!k);
   // let _ on !k = print-line(!k);

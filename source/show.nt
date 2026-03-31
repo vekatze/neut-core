@@ -1,7 +1,7 @@
 import {
-  this.text {text},
+  this.string {string},
 }
 
 data show(a) {
-| Show(show: (a) -> text)
+| Show(show: (a) -> string)
 }

@@ -25,8 +25,8 @@
 //     style,
 //   },
 //   this.doc.chunk {Chunk-Style, chunk},
-//   this.text,
-//   this.text.io {print-line},
+//   this.string,
+//   this.string.io {print-line},
 //   this.unit {unit},
 // }
 // inline ansi-chunk(s: style): chunk {

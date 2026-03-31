@@ -2,8 +2,8 @@ import {
   this.bool {bool},
   this.buffer {buffer},
   this.system {system},
-  this.text,
-  this.text.buffer {write, write-line},
+  this.string,
+  this.string.buffer {write, write-line},
   this.unit {unit},
 }
 

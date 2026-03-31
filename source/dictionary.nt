@@ -6,7 +6,7 @@ import {
   this.ord {Ord, ord},
   this.ordering {EQ, GT, LT},
   this.pair {Pair, pair},
-  this.text,
+  this.string,
   this.trick {panic},
   this.unit,
 }

@@ -42,7 +42,7 @@ import {
   this.either {Right},
   this.file.descriptor {stdout},
   this.system {system},
-  this.text,
+  this.string,
   this.unit {Unit, unit},
 }
 

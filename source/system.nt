@@ -4,7 +4,7 @@ import {
   this.either {Left, either},
   this.foreign {get-errno},
   this.magic,
-  this.text {text},
+  this.string {string},
 }
 
 alias errno {
@@ -13,7 +13,7 @@ alias errno {
 
 data system-error {
 | OS-Error(errno)
-| Application-Error(text)
+| Application-Error(string)
 }
 
 alias system(a) {
@@ -32,7 +32,7 @@ foreign {
   strerror(errno): pointer,
 }
 
-define get-error-message(e: system-error) -> text {
+define get-error-message(e: system-error) -> string {
   match e {
   | OS-Error(i) =>
     let c-str = magic external strerror(i);

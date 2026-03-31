@@ -11,17 +11,17 @@ import {
   },
   this.float.show {show-float},
   this.int.show {show-int},
-  this.text {text},
-  this.text.io {print},
+  this.string {string},
+  this.string.io {print},
   this.unit {unit},
 }
 
 data chunk {
 | Chunk-Empty
-| Chunk-Text(content: text)
-| Chunk-Text-N(content: &text)
-| Chunk-Style(content: text)
-| Chunk-Style-N(content: &text)
+| Chunk-String(content: string)
+| Chunk-String-N(content: &string)
+| Chunk-Style(content: string)
+| Chunk-Style-N(content: &string)
 | Chunk-Int(content: int)
 | Chunk-Float(content: float, decimals: int)
 | Chunk-Rune(content: rune)
@@ -39,10 +39,10 @@ define _size-chunk(c: &chunk) -> int {
   case c {
   | Chunk-Empty =>
     0
-  | Chunk-Text(content) =>
-    core.text.length(content)
-  | Chunk-Text-N(content) =>
-    core.text.length(*content)
+  | Chunk-String(content) =>
+    core.string.length(content)
+  | Chunk-String-N(content) =>
+    core.string.length(*content)
   | Chunk-Style(_) =>
     0
   | Chunk-Style-N(_) =>
@@ -62,15 +62,15 @@ define _size-chunk(c: &chunk) -> int {
   }
 }
 
-define _layout-chunk(k: &_doc-kit, c: &chunk) -> text {
+define _layout-chunk(k: &_doc-kit, c: &chunk) -> string {
   case c {
   | Chunk-Empty =>
     *""
-  | Chunk-Text(t) =>
-    _shift-column(k, this.text.length(t));
+  | Chunk-String(t) =>
+    _shift-column(k, this.string.length(t));
     *t
-  | Chunk-Text-N(t) =>
-    _shift-column(k, this.text.length(*t));
+  | Chunk-String-N(t) =>
+    _shift-column(k, this.string.length(*t));
     **t
   | Chunk-Style(t) =>
     *t
@@ -81,15 +81,15 @@ define _layout-chunk(k: &_doc-kit, c: &chunk) -> text {
   | Chunk-Float(x, decimals) =>
     show-float(*x, *decimals)
   | Chunk-Rune(r) =>
-    this.text.singleton(*r)
+    this.string.singleton(*r)
   | Chunk-Line =>
-    pin tmp = this.text.replicate(" ", _get-indentation(k));
+    pin tmp = this.string.replicate(" ", _get-indentation(k));
     _set-column(k, _get-indentation(k));
-    this.text.append("\n", tmp)
+    this.string.append("\n", tmp)
   | Chunk-Join(c1, c2) =>
     pin t1 = _layout-chunk(k, c1);
     pin t2 = _layout-chunk(k, c2);
-    this.text.append(t1, t2)
+    this.string.append(t1, t2)
   | Chunk-Choose(dh, dv) =>
     match _get-mode(k) {
     | _Horizontal =>

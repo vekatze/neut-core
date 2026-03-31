@@ -4,16 +4,16 @@ import {
   this.either {Right},
   this.file.descriptor {stdout},
   this.rune.buffer {write-rune},
+  this.string {string, to-binary},
   this.system {system},
-  this.text {text, to-binary},
   this.unit {Unit, unit},
 }
 
-define write(b: &buffer, content: &text) ->> system(unit) {
+define write(b: &buffer, content: &string) ->> system(unit) {
   this.binary.buffer.write-binary(b, to-binary(content))
 }
 
-define write-line(b: &buffer, content: &text) ->> system(unit) {
+define write-line(b: &buffer, content: &string) ->> system(unit) {
   try _ = write(b, content);
   write-rune(b, `\n`)
 }

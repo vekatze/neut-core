@@ -12,7 +12,7 @@ import {
   this.memory,
   this.pointer {extract, shift},
   this.system {Application-Error, report-system-error, system},
-  this.text {format},
+  this.string {format},
   this.unit {Unit, unit},
   this.word,
 }

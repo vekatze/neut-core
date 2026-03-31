@@ -5,8 +5,8 @@ import {
   this.file.descriptor {stdout},
   this.pointer {shift},
   this.system {system},
-  this.text,
-  this.text.buffer {write},
+  this.string,
+  this.string.buffer {write},
   this.unit {Unit, unit},
 }
 

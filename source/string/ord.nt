@@ -1,0 +1,47 @@
+import {
+  this.binary.ord {ge-binary, gt-binary, le-binary, lt-binary},
+  this.bool {bool},
+  this.ord {Ord, ord},
+  this.ordering {EQ, GT, LT},
+  this.string {_String, string},
+}
+
+define lt-string(t1: &string, t2: &string) -> bool {
+  tie _String(xs1) = t1;
+  tie _String(xs2) = t2;
+  lt-binary(xs1, xs2)
+}
+
+define le-string(t1: &string, t2: &string) -> bool {
+  tie _String(xs1) = t1;
+  tie _String(xs2) = t2;
+  le-binary(xs1, xs2)
+}
+
+define gt-string(t1: &string, t2: &string) -> bool {
+  tie _String(xs1) = t1;
+  tie _String(xs2) = t2;
+  gt-binary(xs1, xs2)
+}
+
+define ge-string(t1: &string, t2: &string) -> bool {
+  tie _String(xs1) = t1;
+  tie _String(xs2) = t2;
+  ge-binary(xs1, xs2)
+}
+
+constant as-ord: ord(string) {
+  Ord {
+    compare := {
+      (x, y) => {
+        if gt-string(x, y) {
+          GT
+        } else-if lt-string(x, y) {
+          LT
+        } else {
+          EQ
+        }
+      }
+    },
+  }
+}

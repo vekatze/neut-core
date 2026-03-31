@@ -3,8 +3,8 @@ import {
   this.either {Left, Right},
   this.file.descriptor {descriptor, stdout},
   this.system {report-system-error, system},
-  this.text,
-  this.text.io {print},
+  this.string,
+  this.string.io {print},
   this.unit {Unit, unit},
 }
 

@@ -7,19 +7,19 @@ import {
   this.either {Right},
   this.file.descriptor {stdout},
   this.system {system},
-  this.text,
-  this.text.buffer,
+  this.string,
+  this.string.buffer,
   this.unit {Unit, unit},
 }
 
 define write-doc(b: &buffer, x: &doc, ribbon-width: int) ->> system(unit) {
   pin tmp = show-doc(x, ribbon-width);
-  this.text.buffer.write(b, tmp)
+  this.string.buffer.write(b, tmp)
 }
 
 define write-doc-line(b: &buffer, x: &doc, ribbon-width: int) ->> system(unit) {
   pin tmp = show-doc(x, ribbon-width);
-  this.text.buffer.write-line(b, tmp)
+  this.string.buffer.write-line(b, tmp)
 }
 
 define zen() -> unit {

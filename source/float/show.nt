@@ -5,7 +5,7 @@ import {
   this.memory {store-int},
   this.pointer {null-pointer, shift},
   this.show {Show, show},
-  this.text {_get-content-pointer, text},
+  this.string {_get-content-pointer, string},
   this.unit,
   this.word,
 }
@@ -15,7 +15,7 @@ foreign {
   sprintf(pointer, pointer): c-int,
 }
 
-define _show(c-fmt: &text, x: float) -> text {
+define _show(c-fmt: &string, x: float) -> string {
   let fmt = _get-content-pointer(c-fmt);
   let size = magic external snprintf(null-pointer, 0, fmt)(x: float);
   let ptr = this.external.malloc(C-Size(add-int(from-c-int(add-c-int(size, 1)), mul-int(this.word.size, 2))));
@@ -23,23 +23,23 @@ define _show(c-fmt: &text, x: float) -> text {
   store-int(from-c-int(size), shift(ptr, this.word.size));
   let buffer = shift(ptr, mul-int(this.word.size, 2));
   let _ = magic external snprintf(buffer, add-c-int(size, 1), fmt)(x: float);
-  magic cast(pointer, text, ptr)
+  magic cast(pointer, string, ptr)
 }
 
 foreign {
   neut_core_v0_52_build_fixed_buf(pointer, int, float, int, int): int,
 }
 
-define show-float(x: float, decimals: int) -> text {
+define show-float(x: float, decimals: int) -> string {
   let size = 80;
   let add-newline = 0;
-  let text-ptr = malloc(C-Size(size));
+  let string-ptr = malloc(C-Size(size));
   let word-size = this.word.size;
-  let buffer-ptr = shift(text-ptr, mul-int(word-size, 2));
+  let buffer-ptr = shift(string-ptr, mul-int(word-size, 2));
   let len = magic external neut_core_v0_52_build_fixed_buf(buffer-ptr, size, x, decimals, add-newline);
-  store-int(0, text-ptr);
-  store-int(len, shift(text-ptr, word-size));
-  magic cast(pointer, text, text-ptr)
+  store-int(0, string-ptr);
+  store-int(len, shift(string-ptr, word-size));
+  magic cast(pointer, string, string-ptr)
 }
 
 constant as-show: show(float) {

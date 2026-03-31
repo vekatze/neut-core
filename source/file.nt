@@ -6,13 +6,13 @@ import {
   this.file.flag {flag},
   this.file.mode {mode},
   this.list {list},
+  this.string {_get-content-pointer, string},
   this.system {report-system-error, system},
-  this.text {_get-content-pointer, text},
   this.unit {Unit, unit},
 }
 
-define open(path: &text, xs: list(flag), ms: list(mode)) ->> system(descriptor) {
-  pin path = this.text.append(path, "\0");
+define open(path: &string, xs: list(flag), ms: list(mode)) ->> system(descriptor) {
+  pin path = this.string.append(path, "\0");
   let actual-path-string = _get-content-pointer(path);
   let fd =
     this.external.open(

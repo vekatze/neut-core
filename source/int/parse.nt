@@ -3,13 +3,13 @@ import {
   this.either {Left, Right},
   this.foreign {_parse_binary, _parse_decimal, _parse_hex},
   this.memory {load-int},
-  this.text {_get-content-pointer, text},
+  this.string {_get-content-pointer, string},
   this.unit {Unit},
 }
 
-define parse-binary(t: &text) ->> ?int {
+define parse-binary(t: &string) ->> ?int {
   let c-int-str = _get-content-pointer(t);
-  let len = this.text.length(t);
+  let len = this.string.length(t);
   let result-ptr = magic alloca(int, 1);
   let result-status = _parse_binary(c-int-str, len, result-ptr);
   if lt-int(result-status, 0) {
@@ -20,9 +20,9 @@ define parse-binary(t: &text) ->> ?int {
   }
 }
 
-define parse-int(t: &text) ->> ?int {
+define parse-int(t: &string) ->> ?int {
   let c-int-str = _get-content-pointer(t);
-  let len = this.text.length(t);
+  let len = this.string.length(t);
   let result-ptr = magic alloca(int, 1);
   let result-status = _parse_decimal(c-int-str, len, result-ptr);
   if lt-int(result-status, 0) {
@@ -33,9 +33,9 @@ define parse-int(t: &text) ->> ?int {
   }
 }
 
-define parse-hex(t: &text) ->> ?int {
+define parse-hex(t: &string) ->> ?int {
   let c-int-str = _get-content-pointer(t);
-  let len = this.text.length(t);
+  let len = this.string.length(t);
   let result-ptr = magic alloca(int, 1);
   let result-status = _parse_hex(c-int-str, len, result-ptr);
   if lt-int(result-status, 0) {

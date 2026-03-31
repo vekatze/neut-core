@@ -2,7 +2,7 @@ import {
   this.bool {bool},
   this.box,
   this.show {Show, show},
-  this.text {text},
+  this.string {string},
 }
 
 constant as-show: show(bool) {
@@ -15,11 +15,11 @@ constant as-show: show(bool) {
   })
 }
 
-define show(b: bool) -> text {
+define show(b: bool) -> string {
   let Show {show} = as-show;
   show(b)
 }
 
-define show-bool(b: bool) -> text {
+define show-bool(b: bool) -> string {
   this.bool.show.show(b)
 }

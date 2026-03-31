@@ -5,8 +5,8 @@ import {
   this.file.descriptor {stdout},
   this.rune {store-rune},
   this.system {system},
-  this.text,
-  this.text.io {print-line},
+  this.string,
+  this.string.io {print-line},
   this.unit {Unit, unit},
 }
 

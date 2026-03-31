@@ -4,7 +4,7 @@ import {
   this.either,
   this.file.descriptor {stdout},
   this.system {system},
-  this.text {to-binary},
+  this.string {to-binary},
   this.unit {Unit, unit},
 }
 

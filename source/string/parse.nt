@@ -8,14 +8,14 @@ import {
   this.rune,
   this.rune.eq {eq-rune},
   this.rune.ord {le-rune},
-  this.text {
+  this.string {
     drop,
     format,
     length,
     singleton,
     split,
+    string,
     take-while-N,
-    text,
   },
 }
 
@@ -27,11 +27,11 @@ define _is-lower-hex-digit(r: rune) -> bool {
 }
 
 data error {
-| Parse-Error(text)
+| Parse-Error(string)
 }
 
-define _read-char(r: rune, t: text) -> either(error, text) {
-  match this.text.uncons(t) {
+define _read-char(r: rune, t: string) -> either(error, string) {
+  match this.string.uncons(t) {
   | Right(Pair(r-found, rest)) =>
     if eq-rune(r, r-found) {
       Right(rest)
@@ -39,11 +39,11 @@ define _read-char(r: rune, t: text) -> either(error, text) {
       Left(Parse-Error(format("Expected `{}`, but got: `{}`", List[singleton(r), singleton(r-found)])))
     }
   | Left(_) =>
-    Left(Parse-Error(format("Expected `{}`, but got: end of text", List[singleton(r)])))
+    Left(Parse-Error(format("Expected `{}`, but got: end of string", List[singleton(r)])))
   }
 }
 
-define _read-unicode-scalar-value(t: &text) -> either(error, rune) {
+define _read-unicode-scalar-value(t: &string) -> either(error, rune) {
   match parse-hex(t) {
   | Left(_) =>
     Left(Parse-Error(format("Could not parse `{}` as a hexadecimal integer", List[*t])))
@@ -57,8 +57,8 @@ define _read-unicode-scalar-value(t: &text) -> either(error, rune) {
   }
 }
 
-define _unquote-text(t: text) -> either(error, list(text)) {
-  match this.text.uncons(t) {
+define _unquote-string(t: string) -> either(error, list(string)) {
+  match this.string.uncons(t) {
   | Left(_) =>
     Right(List[*"\\"])
   | Right(Pair(c, rest)) =>
@@ -78,12 +78,12 @@ define _unquote-text(t: text) -> either(error, list(text)) {
       Right(List[*"\u{60}", rest])
     } else-if eq-rune(c, `u`) {
       try rest = _read-char(`{`, rest);
-      let hex-text on rest = take-while-N(rest, _is-lower-hex-digit);
-      pin hex-text = hex-text;
-      let scalar-value-text-len = length(hex-text);
-      let rest = drop(rest, scalar-value-text-len);
+      let hex-string on rest = take-while-N(rest, _is-lower-hex-digit);
+      pin hex-string = hex-string;
+      let scalar-value-string-len = length(hex-string);
+      let rest = drop(rest, scalar-value-string-len);
       try rest = _read-char(`}`, rest);
-      try r = _read-unicode-scalar-value(hex-text);
+      try r = _read-unicode-scalar-value(hex-string);
       Right(List[singleton(r), rest])
     } else {
       Left(Parse-Error(format("Unknown escape sequence: \\{}", List[singleton(c)])))
@@ -91,19 +91,19 @@ define _unquote-text(t: text) -> either(error, list(text)) {
   }
 }
 
-define _parse-text-fragment(t: &text) -> either(error, list(text)) {
+define _parse-string-fragment(t: &string) -> either(error, list(string)) {
   match split(t, "\\") {
   | Nil =>
     // unreachable
-    Left(Parse-Error(*"(core).text.parse._parse-text-fragment"))
+    Left(Parse-Error(*"(core).string.parse._parse-string-fragment"))
   | Cons(t, ts) =>
-    try fragment-lists = for-each-E(ts, _unquote-text);
+    try fragment-lists = for-each-E(ts, _unquote-string);
     Right(Cons(t, concat(fragment-lists)))
   }
 }
 
-define parse-text(t: &text) -> either(error, text) {
+define parse-string(t: &string) -> either(error, string) {
   pin ts = split(t, "\\\\");
-  try tss = for-each-EN(ts, _parse-text-fragment);
-  Right(this.text.join(this.list.concat(intercalate(tss, List[*"\\"]))))
+  try tss = for-each-EN(ts, _parse-string-fragment);
+  Right(this.string.join(this.list.concat(intercalate(tss, List[*"\\"]))))
 }

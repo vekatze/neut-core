@@ -2,7 +2,7 @@ import {
   this.either {Left, Right, either},
   this.list {List},
   this.show {Show, show},
-  this.text {format},
+  this.string {format},
 }
 
 inline as-show<a, b>(s1: show(a), s2: show(b)) -> show(either(a, b)) {

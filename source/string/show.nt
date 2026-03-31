@@ -4,13 +4,13 @@ import {
   this.list {Cons, List, concat, list},
   this.rune {size-by-head-byte},
   this.show {Show, show},
-  this.text {
+  this.string {
     _drop-N,
     _get-byte,
     _slice-N,
     join,
-    text,
-    text-byte-length,
+    string,
+    string-byte-length,
   },
 }
 
@@ -24,7 +24,7 @@ define _is-1-byte-escaped-character(ch: int8) -> bool {
   ]
 }
 
-define _get-escaped-character-1(ch: int8) -> &text {
+define _get-escaped-character-1(ch: int8) -> &string {
   match ch {
   | 0x00 =>
     "\\0"
@@ -107,7 +107,7 @@ define _is-2-byte-escaped-character(ch: int8) -> bool {
   and(ule-int8(0x80, ch), ule-int8(ch, 0x9f))
 }
 
-define _get-escaped-character-2(ch: int8) -> &text {
+define _get-escaped-character-2(ch: int8) -> &string {
   match ch {
   | 0x80 =>
     "\\u{80}"
@@ -179,7 +179,7 @@ define _get-escaped-character-2(ch: int8) -> &text {
   }
 }
 
-define _escape(t: &text, len: int, pivot: int, cursor: int) -> list(text) {
+define _escape(t: &string, len: int, pivot: int, cursor: int) -> list(string) {
   let _next =
     () => {
       _escape(t, len, pivot, add-int(cursor, 1))
@@ -217,25 +217,25 @@ define _escape(t: &text, len: int, pivot: int, cursor: int) -> list(text) {
   }
 }
 
-define quote-text(t: text) -> text {
+define quote-string(t: string) -> string {
   pin t = t;
-  let len = text-byte-length(t);
+  let len = string-byte-length(t);
   join(concat(List[List[*"\""], _escape(t, len, 0, 0), List[*"\""]]))
 }
 
-define show-text(t: text) -> text {
-  quote-text(t)
+define show-string(t: string) -> string {
+  quote-string(t)
 }
 
-define show-text-N(t: &text) -> text {
-  let len = text-byte-length(t);
+define show-string-N(t: &string) -> string {
+  let len = string-byte-length(t);
   join(concat(List[List[*"\""], _escape(t, len, 0, 0), List[*"\""]]))
 }
 
-constant as-show: show(text) {
-  Show(show-text)
+constant as-show: show(string) {
+  Show(show-string)
 }
 
-constant as-show-N: show(&text) {
-  Show(show-text-N)
+constant as-show-N: show(&string) {
+  Show(show-string-N)
 }

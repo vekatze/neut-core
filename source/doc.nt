@@ -32,13 +32,13 @@ import {
     Chunk-Join,
     Chunk-Line,
     Chunk-Rune,
+    Chunk-String,
+    Chunk-String-N,
     Chunk-Style,
     Chunk-Style-N,
-    Chunk-Text,
-    Chunk-Text-N,
     chunk,
   },
-  this.text {text},
+  this.string {string},
 }
 
 data doc {
@@ -52,19 +52,19 @@ constant empty: doc {
   Chunk(Chunk-Empty)
 }
 
-inline atom(t: text) -> doc {
-  Chunk(Chunk-Text(t))
+inline atom(t: string) -> doc {
+  Chunk(Chunk-String(t))
 }
 
-inline atom-N(t: &text) -> doc {
-  Chunk(Chunk-Text-N(t))
+inline atom-N(t: &string) -> doc {
+  Chunk(Chunk-String-N(t))
 }
 
-inline atom-style(t: text) -> doc {
+inline atom-style(t: string) -> doc {
   Chunk(Chunk-Style(t))
 }
 
-inline atom-style-N(t: &text) -> doc {
+inline atom-style-N(t: &string) -> doc {
   Chunk(Chunk-Style-N(t))
 }
 
@@ -80,8 +80,8 @@ inline atom-rune(x: rune) -> doc {
   Chunk(Chunk-Rune(x))
 }
 
-inline break(t: &text) -> doc {
-  Chunk(Chunk-Choose(Chunk-Text-N(t), Chunk-Line))
+inline break(t: &string) -> doc {
+  Chunk(Chunk-Choose(Chunk-String-N(t), Chunk-Line))
 }
 
 rule-right join {
@@ -97,7 +97,7 @@ rule-right join {
 }
 
 constant newline: doc {
-  Chunk(Chunk-Choose(Chunk-Text-N(""), Chunk-Line))
+  Chunk(Chunk-Choose(Chunk-String-N(""), Chunk-Line))
 }
 
 define _nested-comma-seq(prefix: doc, body: doc, suffix: doc) -> doc {
@@ -110,7 +110,7 @@ define _nested-comma-seq(prefix: doc, body: doc, suffix: doc) -> doc {
         Group(body),
       ],
     ),
-    Chunk(Chunk-Choose(Chunk-Empty, Chunk-Join(Chunk-Text-N(","), Chunk-Line))),
+    Chunk(Chunk-Choose(Chunk-Empty, Chunk-Join(Chunk-String-N(","), Chunk-Line))),
     suffix,
   ]
 }

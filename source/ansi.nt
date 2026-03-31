@@ -5,10 +5,10 @@ import {
   this.file.descriptor {descriptor},
   this.int.buffer,
   this.int.io,
+  this.string {string},
+  this.string.buffer,
+  this.string.io,
   this.system {system},
-  this.text {text},
-  this.text.buffer,
-  this.text.io,
   this.unit {Unit, unit},
 }
 
@@ -103,22 +103,22 @@ define make-ansi-kit-unbuffered(sink: descriptor) -> ansi-kit {
   _ANSI-Kit-Unbuffered {sink}
 }
 
-define write(k: &ansi-kit, t: &text) ->> system(unit) {
+define write(k: &ansi-kit, t: &string) ->> system(unit) {
   case k {
   | _ANSI-Kit {buffer} =>
-    this.text.buffer.write(buffer, t)
+    this.string.buffer.write(buffer, t)
   | _ANSI-Kit-Unbuffered {sink} =>
-    let _ = this.text.io.write(*sink, t);
+    let _ = this.string.io.write(*sink, t);
     Right(Unit)
   }
 }
 
-define write-line(k: &ansi-kit, t: &text) ->> system(unit) {
+define write-line(k: &ansi-kit, t: &string) ->> system(unit) {
   case k {
   | _ANSI-Kit {buffer} =>
-    core.text.buffer.write-line(buffer, t)
+    core.string.buffer.write-line(buffer, t)
   | _ANSI-Kit-Unbuffered {sink} =>
-    let _ = core.text.io.write(*sink, t);
+    let _ = core.string.io.write(*sink, t);
     Right(Unit)
   }
 }

@@ -2,20 +2,20 @@ import {
   this.bool {bool},
   this.list {list},
   this.pair {pair},
-  this.text {text},
+  this.string {string},
 }
 
 data constructor {
-| Constructor(&text, bool, list(pair(&text, type)))
+| Constructor(&string, bool, list(pair(&string, type)))
 }
 
 data type-value {
 | Opaque
 | Type
 | Function
-| Algebraic(data-name: &text, data-param-types: list(type), constructors: list(constructor))
+| Algebraic(data-name: &string, data-param-types: list(type), constructors: list(constructor))
 | Noema(type)
-| Enum(constructors: list(&text))
+| Enum(constructors: list(&string))
 | Int1
 | Int2
 | Int4

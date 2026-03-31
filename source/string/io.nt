@@ -5,8 +5,8 @@ import {
   this.either {Left, Right},
   this.file.descriptor {descriptor, stdin, stdout},
   this.magic,
+  this.string {_get-content-pointer, string, string-byte-length, to-binary},
   this.system {get-error-message, report-system-error, system},
-  this.text {_get-content-pointer, text, text-byte-length, to-binary},
   this.unit {Unit, unit},
 }
 
@@ -14,13 +14,13 @@ foreign {
   neut_core_v0_52_write_line(int32, int, pointer): int,
 }
 
-define write(f: descriptor, t: &text) ->> system(unit) {
+define write(f: descriptor, t: &string) ->> system(unit) {
   this.binary.io.write(f, to-binary(t))
 }
 
-define write-line(d: descriptor, t: &text) ->> system(unit) {
+define write-line(d: descriptor, t: &string) ->> system(unit) {
   let d = magic cast(descriptor, int32, d);
-  let len = text-byte-length(t);
+  let len = string-byte-length(t);
   let ptr = _get-content-pointer(t);
   let result = magic external neut_core_v0_52_write_line(d, len, ptr);
   if lt-int(result, 0) {
@@ -30,7 +30,7 @@ define write-line(d: descriptor, t: &text) ->> system(unit) {
   }
 }
 
-define print(t: &text) -> unit {
+define print(t: &string) -> unit {
   match write(stdout, t) {
   | Left(_) =>
     Unit
@@ -39,7 +39,7 @@ define print(t: &text) -> unit {
   }
 }
 
-define print-line(t: &text) -> unit {
+define print-line(t: &string) -> unit {
   match write-line(stdout, t) {
   | Left(_) =>
     Unit
@@ -48,12 +48,12 @@ define print-line(t: &text) -> unit {
   }
 }
 
-define read(from: descriptor, initial-buffer-size: int) ->> system(text) {
+define read(from: descriptor, initial-buffer-size: int) ->> system(string) {
   try bin = this.binary.io.read(from, initial-buffer-size);
-  Right(this.magic.cast<binary, text>(bin))
+  Right(this.magic.cast<binary, string>(bin))
 }
 
-define read-stdin(initial-buffer-size: int) ->> system(text) {
+define read-stdin(initial-buffer-size: int) ->> system(string) {
   read(stdin, initial-buffer-size)
 }
 
@@ -64,12 +64,12 @@ define zen() -> unit {
   let value = read(stdin, 10);
   match value {
   | Right(_) =>
-    // pin txt = _Text(value);
+    // pin txt = _String(value);
     print// print(txt)
     ("success\n")
   | Left(e) =>
-    pin text = get-error-message(e);
-    print(text);
+    pin string = get-error-message(e);
+    print(string);
     print("\n")
   }
 }

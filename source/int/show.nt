@@ -5,7 +5,7 @@ import {
   this.memory {store-int},
   this.pointer {null-pointer, shift},
   this.show {Show, show},
-  this.text {_get-content-pointer, text},
+  this.string {_get-content-pointer, string},
   this.unit,
   this.word,
 }
@@ -15,7 +15,7 @@ foreign {
   sprintf(pointer, pointer): c-int,
 }
 
-define _show(c-fmt: &text, x: int) -> text {
+define _show(c-fmt: &string, x: int) -> string {
   let fmt = _get-content-pointer(c-fmt);
   let size = from-c-int(magic external snprintf(null-pointer, C-Size(0), fmt)(x: int));
   let ptr = this.external.malloc(C-Size(add-int(size, add-int(1, mul-int(this.word.size, 2)))));
@@ -24,7 +24,7 @@ define _show(c-fmt: &text, x: int) -> text {
   store-int(size, shift(ptr, this.word.size));
   let buffer = shift(ptr, mul-int(this.word.size, 2));
   let _ = magic external sprintf(buffer, fmt)(x: int);
-  magic cast(pointer, text, ptr)
+  magic cast(pointer, string, ptr)
 }
 
 constant as-show: show(int) {
@@ -33,11 +33,11 @@ constant as-show: show(int) {
   })
 }
 
-define show-int(x: int) -> text {
+define show-int(x: int) -> string {
   let Show {show} = as-show;
   show(x)
 }
 
-define show-uint(x: int64) -> text {
+define show-uint(x: int64) -> string {
   _show("%lu", x)
 }

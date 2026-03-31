@@ -4,8 +4,8 @@ import {
   this.either {Right},
   this.file.descriptor {stdout},
   this.system {system},
-  this.text,
-  this.text.buffer {write},
+  this.string,
+  this.string.buffer {write},
   this.unit {Unit, unit},
 }
 

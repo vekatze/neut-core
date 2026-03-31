@@ -2,8 +2,8 @@ import {
   this.bool {bool},
   this.file.descriptor {descriptor, stdout},
   this.system {system},
-  this.text,
-  this.text.io {write, write-line},
+  this.string,
+  this.string.io {write, write-line},
   this.unit {Unit, unit},
 }
 

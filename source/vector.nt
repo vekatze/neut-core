@@ -13,8 +13,8 @@ import {
   this.memory {load-int, load-pointer, store-int, store-pointer},
   this.pair {Pair, pair},
   this.pointer {shift},
-  this.text {replicate, text},
-  this.text.io {print, print-line},
+  this.string {replicate, string},
+  this.string.io {print, print-line},
   this.trick,
   this.unit {Unit, unit},
   this.word,
@@ -1040,7 +1040,7 @@ define zen() -> unit {
     print-line("right");
     print-int-line(*x);
   };
-  let xs: vector(text) = make(0);
+  let xs: vector(string) = make(0);
   let xs = push-back(xs, *"b");
   let xs = push-front(xs, *"a");
   let xs = push-front(xs, *"c");

@@ -1,0 +1,60 @@
+import {
+  this.binary.eq {eq-binary, ne-binary},
+  this.bool {bool},
+  this.either {Right, none},
+  this.eq {Eq, eq},
+  this.string {_String, _drop-N, _take-N, string, string-byte-length},
+  this.unit,
+}
+
+define eq-string(t1: &string, t2: &string) -> bool {
+  tie _String(xs1) = t1;
+  tie _String(xs2) = t2;
+  eq-binary(xs1, xs2)
+}
+
+define ne-string(t1: &string, t2: &string) -> bool {
+  tie _String(xs1) = t1;
+  tie _String(xs2) = t2;
+  ne-binary(xs1, xs2)
+}
+
+constant as-eq: eq(string) {
+  Eq {equal := eq-string}
+}
+
+define eq-prefix(haystack: &string, needle: &string) -> bool {
+  tie _String(haystack) = haystack;
+  tie _String(needle) = needle;
+  this.binary.eq.eq-prefix(haystack, needle)
+}
+
+define eq-suffix(haystack: &string, needle: &string) -> bool {
+  tie _String(haystack) = haystack;
+  tie _String(needle) = needle;
+  this.binary.eq.eq-suffix(haystack, needle)
+}
+
+define eq-infix(haystack: &string, needle: &string) -> bool {
+  tie _String(haystack) = haystack;
+  tie _String(needle) = needle;
+  this.binary.eq.eq-infix(haystack, needle)
+}
+
+define strip-prefix(haystack: &string, needle: &string) ->> ?string {
+  if eq-prefix(haystack, needle) {
+    let needle-len = string-byte-length(needle);
+    Right(_drop-N(haystack, needle-len))
+  } else {
+    none
+  }
+}
+
+define strip-suffix(haystack: &string, needle: &string) ->> ?string {
+  if eq-suffix(haystack, needle) {
+    let new-haystack-len = sub-int(string-byte-length(haystack), string-byte-length(needle));
+    Right(_take-N(haystack, new-haystack-len))
+  } else {
+    none
+  }
+}

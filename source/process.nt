@@ -17,9 +17,9 @@ import {
   this.memory {load-c-int, store-int},
   this.pair {Pair, pair},
   this.pointer {extract, null-pointer, shift},
+  this.string {_get-content-pointer, string},
+  this.string.io {print, read, write},
   this.system {get-error-message, get-system-error, report-system-error, system},
-  this.text {_get-content-pointer, text},
-  this.text.io {print, read, write},
   this.unit {Unit, unit},
   this.word,
 }
@@ -114,22 +114,22 @@ define _fork() ->> system(c-pid) {
 
 data process-spec {
 | Process-Spec(
-    process: text,
-    args: list(text),
-    cwd: ?text,
-    input: text,
+    process: string,
+    args: list(string),
+    cwd: ?string,
+    input: string,
   )
 }
 
 data process-result {
 | Process-Result(
     status: process-result-status,
-    stdout-text: text,
-    stderr-text: text,
+    stdout-string: string,
+    stderr-string: string,
   )
 }
 
-define _call(process: text, args: list(text), error-writer: descriptor) -> system(process-result) {
+define _call(process: string, args: list(string), error-writer: descriptor) -> system(process-result) {
   let cmd on process = _get-content-pointer(process);
   pin tmp = Cons(process, args);
   let raw-args = this.list.for-each-N(tmp, _get-content-pointer);
@@ -180,13 +180,13 @@ define spawn(ps: process-spec, stdout-initial-buffer-size: int, stderr-initial-b
     try _ on input = write(in-writer, input);
     let _ = input;
     try _ = close(in-writer);
-    try stdout-text = read(out-reader, stdout-initial-buffer-size);
-    try stderr-text = read(error-reader, stderr-initial-buffer-size);
+    try stdout-string = read(out-reader, stdout-initial-buffer-size);
+    try stderr-string = read(error-reader, stderr-initial-buffer-size);
     try status = _waitpid(pid);
     Right(Process-Result {
       status,
-      stdout-text,
-      stderr-text,
+      stdout-string,
+      stderr-string,
     })
   }
 }
@@ -212,14 +212,14 @@ define zen() -> unit {
     };
   match spawn(cmd, 1024, 1024) {
   | Right(result) =>
-    let Process-Result {stdout-text, stderr-text, status} = result;
+    let Process-Result {stdout-string, stderr-string, status} = result;
     print("stdout:\n");
-    let _ on stdout-text = print(stdout-text);
+    let _ on stdout-string = print(stdout-string);
     print("\nstderr:\n");
-    let _ on stderr-text = print(stderr-text);
+    let _ on stderr-string = print(stderr-string);
     print("\n");
-    let _ = stdout-text;
-    let _ = stderr-text;
+    let _ = stdout-string;
+    let _ = stderr-string;
     print("exit-code: ");
     _print-process-result-status(status);
   | Left(e) =>

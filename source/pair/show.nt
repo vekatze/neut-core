@@ -3,7 +3,7 @@ import {
   this.list {List},
   this.pair {Pair, pair},
   this.show {Show, show},
-  this.text {intercalate, join},
+  this.string {intercalate, join},
 }
 
 inline as-show<a, b>(s1: show(a), s2: show(b)) -> show(pair(a, b)) {

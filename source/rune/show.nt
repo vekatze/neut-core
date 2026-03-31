@@ -1,12 +1,12 @@
 import {
   this.show {Show, show},
-  this.text {join, text, text-byte-length},
-  this.text.show {_escape},
+  this.string {join, string, string-byte-length},
+  this.string.show {_escape},
 }
 
-define show-rune(ch: rune) -> text {
-  let base = this.text.singleton(ch);
-  let len on base = text-byte-length(base);
+define show-rune(ch: rune) -> string {
+  let base = this.string.singleton(ch);
+  let len on base = string-byte-length(base);
   let result on base = join(_escape(base, len, 0, 0));
   let _ = base;
   result

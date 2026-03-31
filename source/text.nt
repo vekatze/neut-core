@@ -742,3 +742,15 @@ define find-end(t: &text, !pred: (rune) -> bool) ->> ?int {
     };
   f(t, sub-int(len, 1), 0)
 }
+
+define strip-prefix(prefix: &text, haystack: text) -> text {
+  let prefix = magic cast(&text, &binary, prefix);
+  let haystack = magic cast(text, binary, haystack);
+  _Text(this.binary.strip-prefix(prefix, haystack))
+}
+
+define strip-suffix(suffix: &text, haystack: text) -> text {
+  let suffix = magic cast(&text, &binary, suffix);
+  let haystack = magic cast(text, binary, haystack);
+  _Text(this.binary.strip-suffix(suffix, haystack))
+}

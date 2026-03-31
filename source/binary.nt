@@ -94,7 +94,7 @@ define binary-new(xs: list(int8)) -> binary {
   cast<pointer, binary>(base-pointer)
 }
 
-define binary-access(xs: &binary, i: int) -> int8 {
+inline binary-access(xs: &binary, i: int) -> int8 {
   let ptr = cast<&binary, pointer>(xs);
   let u = this.word.size;
   let u2 = mul-int(u, 2);
@@ -371,4 +371,64 @@ define find-end(xs: &binary, !pred: (int8) -> bool) ->> ?int {
       }
     };
   f(xs, sub-int(len, 1))
+}
+
+define _get-matched-prefix-length(xs: &binary, ys: &binary, cursor: int, len: int) -> int {
+  if ge-int(cursor, len) {
+    cursor
+  } else {
+    let x = binary-access(xs, cursor);
+    let y = binary-access(ys, cursor);
+    if eq-int8(x, y) {
+      _get-matched-prefix-length(xs, ys, add-int(cursor, 1), len)
+    } else {
+      0
+    }
+  }
+}
+
+define strip-prefix(prefix: &binary, haystack: binary) -> binary {
+  let len-prefix = binary-length(prefix);
+  let len-haystack on haystack = binary-length(haystack);
+  if gt-int(len-prefix, len-haystack) {
+    haystack
+  } else {
+    let matched-length on haystack = _get-matched-prefix-length(prefix, haystack, 0, len-prefix);
+    drop(haystack, matched-length)
+  }
+}
+
+define _get-matched-suffix-length(xs: &binary, ys: &binary, x-cursor: int, y-cursor: int, len: int) -> int {
+  if lt-int(x-cursor, 0) {
+    len
+  } else-if lt-int(y-cursor, 0) {
+    len
+  } else {
+    let x = binary-access(xs, x-cursor);
+    let y = binary-access(ys, y-cursor);
+    if eq-int8(x, y) {
+      _get-matched-suffix-length(xs, ys, sub-int(x-cursor, 1), sub-int(y-cursor, 1), len)
+    } else {
+      0
+    }
+  }
+}
+
+define strip-suffix(suffix: &binary, haystack: binary) -> binary {
+  let len-suffix = binary-length(suffix);
+  let len-haystack on haystack = binary-length(haystack);
+  if gt-int(len-suffix, len-haystack) {
+    haystack
+  } else {
+    let matched-length on haystack =
+      _get-matched-suffix-length(
+        suffix,
+        haystack,
+        sub-int(len-suffix, 1),
+        sub-int(len-haystack, 1),
+        len-suffix,
+      );
+    // drop-end(haystack, matched-length)
+    drop-end(haystack, matched-length)
+  }
 }

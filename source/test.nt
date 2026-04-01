@@ -13,7 +13,6 @@ import {
   this.ref {make-ref},
   this.string {append, from-text, string, strip-prefix, strip-suffix},
   this.string.io {print, print-line},
-  this.text {text},
   this.thread.mvar {make-mvar, receive, send},
   this.thread.pool {for-each-parallel},
   this.unit {Unit, unit},

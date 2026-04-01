@@ -11,7 +11,6 @@ import {
   this.pair {Pair, pair},
   this.pointer {shift},
   this.rune {load-rune, size-by-head-byte, store-rune, to-int32},
-  this.text {text},
   this.unit {Unit, unit},
   this.word,
 }

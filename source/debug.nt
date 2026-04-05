@@ -151,8 +151,8 @@ inline-meta _vet-adt-cons<a>(
     quote {
       let data-arg-num = unquote {promote {data-arg-num}};
       let low-cursor = unquote {promote {cursor}};
-      let x-ptr = this.magic.cast<&a, pointer>(unquote {x});
-      let x-elem-ptr = this.magic.cast<pointer, &t>(_load-nth-element(data-arg-num, low-cursor, x-ptr));
+      let x-ptr = this.magic.cast-inline<&a, pointer>(unquote {x});
+      let x-elem-ptr = this.magic.cast-inline<pointer, &t>(_load-nth-element(data-arg-num, low-cursor, x-ptr));
       unquote {vet-doc<t>(quote {x-elem-ptr})}
     }
   | Cons(t, rest) =>
@@ -161,8 +161,8 @@ inline-meta _vet-adt-cons<a>(
       quote {
         let data-arg-num = unquote {promote {data-arg-num}};
         let low-cursor = unquote {promote {cursor}};
-        let x-ptr = this.magic.cast<&a, pointer>(unquote {x});
-        let x-elem-ptr = this.magic.cast<pointer, &t>(_load-nth-element(data-arg-num, low-cursor, x-ptr));
+        let x-ptr = this.magic.cast-inline<&a, pointer>(unquote {x});
+        let x-elem-ptr = this.magic.cast-inline<pointer, &t>(_load-nth-element(data-arg-num, low-cursor, x-ptr));
         unquote {vet-doc<t>(quote {x-elem-ptr})}
       }
     };
@@ -171,7 +171,13 @@ inline-meta _vet-adt-cons<a>(
   }
 }
 
-inline-meta _vet-adt<a>(constructors: list(constructor), cons-index: int, data-arg-num: int, disc: 'int, x: '&a) -> 'doc {
+inline-meta _vet-adt<a>(
+  constructors: list(constructor),
+  cons-index: int,
+  data-arg-num: int,
+  disc: 'int,
+  x: '&a,
+) -> 'doc {
   match constructors {
   | Nil =>
     quote {empty}
@@ -228,13 +234,13 @@ define-meta vet-doc<a>(x: '&a) -> 'doc {
   | Algebraic(_, data-args, cons-info) =>
     let data-arg-num = _meta-length(data-args);
     quote {
-      let ptr-x = this.magic.cast<&a, pointer>(unquote {x});
+      let ptr-x = this.magic.cast-inline<&a, pointer>(unquote {x});
       let discriminant-x = load-int(ptr-x);
       unquote {_vet-adt(cons-info, 0, data-arg-num, quote {discriminant-x}, x)}
     }
   | Enum(names) =>
     quote {
-      let discriminant-x = this.magic.cast<&a, int>(unquote {x});
+      let discriminant-x = this.magic.cast-inline<&a, int>(unquote {x});
       unquote {_vet-enum(0, names, quote {discriminant-x}, x)}
     }
   | Int1 =>
@@ -278,25 +284,25 @@ define-meta vet-doc<a>(x: '&a) -> 'doc {
   | Wrapper(t) =>
     unpack-type t = t;
     quote {
-      let x-unwrapped: &t = this.magic.cast<&a, &t>(unquote {x});
+      let x-unwrapped: &t = this.magic.cast-inline<&a, &t>(unquote {x});
       unquote {vet-doc<t>(quote {x-unwrapped})}
     }
   | Vector(t) =>
     unpack-type t = t;
     quote {
-      let x: &vector(t) = this.magic.cast<&a, &vector(t)>(unquote {x});
+      let x: &vector(t) = this.magic.cast-inline<&a, &vector(t)>(unquote {x});
       unquote {_vet-vector<t>(quote {x})}
     }
   | Noema(t) =>
     unpack-type t = t;
     quote {
-      let x-unwrapped: &t = this.magic.cast<&a, &t>(unquote {x});
+      let x-unwrapped: &t = this.magic.cast-inline<&a, &t>(unquote {x});
       unquote {vet-doc<t>(quote {x-unwrapped})}
     }
   | Box-T(t) =>
     unpack-type t = t;
     quote {
-      let x-unwrapped: &t = this.magic.cast<&a, &t>(unquote {x});
+      let x-unwrapped: &t = this.magic.cast-inline<&a, &t>(unquote {x});
       unquote {vet-doc<t>(quote {x-unwrapped})}
     }
   | Pointer =>

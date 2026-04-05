@@ -140,7 +140,11 @@ define _call(process: string, args: list(string), error-writer: descriptor) -> s
   exit(v)
 }
 
-define spawn(ps: process-spec, stdout-initial-buffer-size: int, stderr-initial-buffer-size: int) ->> system(process-result) {
+define spawn(
+  ps: process-spec,
+  stdout-initial-buffer-size: int,
+  stderr-initial-buffer-size: int,
+) ->> system(process-result) {
   try Pair(in-reader, in-writer) = _create-pipe();
   try Pair(out-reader, out-writer) = _create-pipe();
   try Pair(error-reader, error-writer) = _create-pipe();

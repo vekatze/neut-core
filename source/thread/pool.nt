@@ -7,7 +7,7 @@ import {
   this.int {max-int},
   this.magic {cast},
   this.pair {Pair, meta-pair-in},
-  this.thread {thread},
+  this.thread {attach, detach, thread},
   this.thread.mvar {make-mvar, mvar},
   this.unit {Unit, unit},
   this.vector {Vector, for, for-each, meta-vector-in, meta-vector-out, push-back, vector},
@@ -38,7 +38,7 @@ define _close-pool<a>(k: pool(a)) -> unit {
       send(tasks-ref, box {_Finish})
     });
   for(workers, (worker, _) => {
-    attach {worker};
+    attach(worker);
   });
   let futures = axiom-T(this.cell.extract(futures-ref));
   for(futures, (ch, _) => {
@@ -51,7 +51,7 @@ define _close-pool<a>(k: pool(a)) -> unit {
 
 define _setup-workers<a>(tasks-ref: &channel(_task(a)), size: int) -> vector(thread(unit)) {
   grow(this.vector.make(8), max-int(size, 1), (acc, _) => {
-    push-back(acc, this.thread.detach<unit>(
+    push-back(acc, detach(
       define worker() -> unit {
         let v = axiom-T(receive(tasks-ref));
         match v {

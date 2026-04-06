@@ -11,8 +11,8 @@ import {
 }
 
 foreign {
-  snprintf(pointer, c-int, pointer): c-int,
-  sprintf(pointer, pointer): c-int,
+  snprintf(pointer, c-int, pointer) -> c-int,
+  sprintf(pointer, pointer) -> c-int,
 }
 
 define _show(c-fmt: &string, x: float) -> string {
@@ -27,7 +27,7 @@ define _show(c-fmt: &string, x: float) -> string {
 }
 
 foreign {
-  neut_core_v0_52_build_fixed_buf(pointer, int, float, int, int): int,
+  neut_core_v0_52_build_fixed_buf(pointer, int, float, int, int) -> int,
 }
 
 define show-float(x: float, decimals: int) -> string {

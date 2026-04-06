@@ -106,7 +106,7 @@ define _slice-N(t: &string, start: int, size: int) -> string {
 }
 
 foreign {
-  memcmp(pointer, pointer, c-size): int,
+  memcmp(pointer, pointer, c-size) -> int,
 }
 
 define _match-string-content(ptr1: pointer, ptr2: pointer, len: int) -> bool {

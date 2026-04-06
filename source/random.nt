@@ -3,7 +3,7 @@ import {
 }
 
 foreign {
-  arc4random_uniform(int32): int32,
+  arc4random_uniform(int32) -> int32,
 }
 
 define random-int32(ubound: int32) -> int32 {

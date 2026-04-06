@@ -25,12 +25,12 @@ import {
 }
 
 foreign {
-  execvp(pointer, pointer): c-int,
-  fork(): c-pid,
-  waitpid(c-pid, pointer, c-int): c-pid,
-  pipe(pointer): c-int,
-  dup2(c-int, c-int): c-int,
-  chdir(pointer): c-int,
+  execvp(pointer, pointer) -> c-int,
+  fork() -> c-pid,
+  waitpid(c-pid, pointer, c-int) -> c-pid,
+  pipe(pointer) -> c-int,
+  dup2(c-int, c-int) -> c-int,
+  chdir(pointer) -> c-int,
 }
 
 define __waitpid(pid: c-pid, status-ptr: pointer, option: c-int) -> c-pid {

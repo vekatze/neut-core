@@ -7,7 +7,7 @@ import {
 }
 
 foreign {
-  memcmp(pointer, pointer, c-size): int,
+  memcmp(pointer, pointer, c-size) -> int,
 }
 
 define _eq-binary(ptr1: pointer, ptr2: pointer, len: int) -> bool {

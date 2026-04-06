@@ -14,7 +14,7 @@ import {
 }
 
 foreign {
-  llvm.memcpy.p0.p0.i64(pointer, pointer, int64, int1): void,
+  llvm.memcpy.p0.p0.i64(pointer, pointer, int64, int1) -> void,
 }
 
 inline _copy-binary(source-pointer: pointer, target-pointer: pointer, len: int) -> unit {

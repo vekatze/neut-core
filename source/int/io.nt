@@ -9,8 +9,8 @@ import {
 }
 
 foreign {
-  neut_core_v0_52_write_int64(int32, int64): int,
-  neut_core_v0_52_write_int64_nl(int32, int64): int,
+  neut_core_v0_52_write_int64(int32, int64) -> int,
+  neut_core_v0_52_write_int64_nl(int32, int64) -> int,
 }
 
 define write-int(d: descriptor, x: int) ->> system(unit) {

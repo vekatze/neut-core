@@ -9,8 +9,8 @@ import {
 }
 
 foreign {
-  neut_core_v0_52_write_double(int32, float, int): int,
-  neut_core_v0_52_write_double_line(int32, float, int): int,
+  neut_core_v0_52_write_double(int32, float, int) -> int,
+  neut_core_v0_52_write_double_line(int32, float, int) -> int,
 }
 
 define write-float(d: descriptor, x: float, decimals: int) ->> system(unit) {

@@ -11,8 +11,8 @@ import {
 }
 
 foreign {
-  snprintf(pointer, c-size, pointer): c-int,
-  sprintf(pointer, pointer): c-int,
+  snprintf(pointer, c-size, pointer) -> c-int,
+  sprintf(pointer, pointer) -> c-int,
 }
 
 define _show(c-fmt: &string, x: int) -> string {

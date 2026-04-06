@@ -54,9 +54,9 @@ import {
 }
 
 foreign {
-  llvm.memcpy.p0.p0.i64(pointer, pointer, int64, int1): void,
-  snprintf(pointer, c-int, pointer): c-int,
-  sprintf(pointer, pointer): c-int,
+  llvm.memcpy.p0.p0.i64(pointer, pointer, int64, int1) -> void,
+  snprintf(pointer, c-int, pointer) -> c-int,
+  sprintf(pointer, pointer) -> c-int,
 }
 
 data _binary-builder {

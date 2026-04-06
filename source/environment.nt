@@ -15,8 +15,8 @@ import {
 }
 
 foreign {
-  getenv(pointer): pointer,
-  setenv(pointer, pointer, c-int): c-int,
+  getenv(pointer) -> pointer,
+  setenv(pointer, pointer, c-int) -> c-int,
 }
 
 define get-env(name: &string) ->> ?string {

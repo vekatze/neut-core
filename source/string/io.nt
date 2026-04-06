@@ -11,7 +11,7 @@ import {
 }
 
 foreign {
-  neut_core_v0_52_write_line(int32, int, pointer): int,
+  neut_core_v0_52_write_line(int32, int, pointer) -> int,
 }
 
 define write(f: descriptor, t: &string) ->> system(unit) {

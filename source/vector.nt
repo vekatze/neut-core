@@ -181,8 +181,8 @@ resource _vector-internal {
 }
 
 foreign {
-  llvm.memmove.p0.p0.i64(pointer, pointer, int64, int1): void,
-  llvm.memcpy.p0.p0.i64(pointer, pointer, int64, int1): void,
+  llvm.memmove.p0.p0.i64(pointer, pointer, int64, int1) -> void,
+  llvm.memcpy.p0.p0.i64(pointer, pointer, int64, int1) -> void,
 }
 
 constant _extend-factor: int {

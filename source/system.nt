@@ -29,7 +29,7 @@ inline report-system-error<a>() ->> system(a) {
 }
 
 foreign {
-  strerror(errno): pointer,
+  strerror(errno) -> pointer,
 }
 
 define get-error-message(e: system-error) -> string {

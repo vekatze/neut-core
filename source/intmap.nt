@@ -9,7 +9,7 @@ import {
 }
 
 foreign {
-  llvm.ctlz.i64(int64): int64,
+  llvm.ctlz.i64(int64) -> int64,
 }
 
 // Data.IntMap.Strict in Haskell

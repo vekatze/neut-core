@@ -31,8 +31,8 @@ data chunk {
 }
 
 foreign {
-  neut_core_v0_52_int64_strlen(int): int,
-  neut_core_v0_52_double_strlen(float, int): int,
+  neut_core_v0_52_int64_strlen(int) -> int,
+  neut_core_v0_52_double_strlen(float, int) -> int,
 }
 
 define _size-chunk(c: &chunk) -> int {

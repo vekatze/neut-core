@@ -10,7 +10,7 @@ import {
 }
 
 foreign {
-  neut_core_v0_52_build_fixed_buf(pointer, int, float, int, int): int,
+  neut_core_v0_52_build_fixed_buf(pointer, int, float, int, int) -> int,
 }
 
 define write-float(b: &buffer, x: float, decimals: int) ->> system(unit) {

@@ -11,7 +11,7 @@ import {
 }
 
 foreign {
-  neut_core_v0_52_write_int64_core(pointer, int, int32): int,
+  neut_core_v0_52_write_int64_core(pointer, int, int32) -> int,
 }
 
 define write-int(b: &buffer, x: int) ->> system(unit) {

@@ -334,7 +334,7 @@ inline fold-left-N<elem-type, result-type>(
 ) -> result-type {
   let sz = length(xs);
   let helper =
-    define loop(cursor: int, acc, xs) -> result-type {
+    define loop(cursor: int, acc: result-type, xs: &vector(elem-type)) -> result-type {
       if eq-int(cursor, sz) {
         acc
       } else {
@@ -370,7 +370,7 @@ inline fold-left-EN<e, elem-type, result-type>(
 ) -> either(e, result-type) {
   let sz = length(xs);
   let helper =
-    define loop(cursor: int, acc, xs) -> either(e, result-type) {
+    define loop(cursor: int, acc: result-type, xs: &vector(elem-type)) -> either(e, result-type) {
       if eq-int(cursor, sz) {
         Right(acc)
       } else {

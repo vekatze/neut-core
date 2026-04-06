@@ -37,7 +37,7 @@ inline fold-left<elem-type, result-type>(
   !consumer: (result-type, elem-type) -> result-type,
 ) -> result-type {
   let helper =
-    define loop(acc, xs) -> result-type {
+    define loop(acc: result-type, xs: list(elem-type)) -> result-type {
       match xs {
       | Nil =>
         acc
@@ -54,7 +54,7 @@ inline fold-left-N<elem-type, result-type>(
   !consumer: (result-type, &elem-type) -> result-type,
 ) -> result-type {
   let helper =
-    define loop(acc, xs) -> result-type {
+    define loop(acc: result-type, xs: &list(elem-type)) -> result-type {
       case xs {
       | Nil =>
         acc
@@ -71,7 +71,7 @@ inline fold-left-with-index<elem-type, result-type>(
   !consumer: (result-type, elem-type, int) -> result-type,
 ) -> result-type {
   let helper =
-    define loop(acc, xs, i) -> result-type {
+    define loop(acc: result-type, xs: list(elem-type), i: int) -> result-type {
       match xs {
       | Nil =>
         acc
@@ -88,7 +88,7 @@ inline fold-right<elem-type, result-type>(
   !consumer: (elem-type, result-type) -> result-type,
 ) -> result-type {
   let helper =
-    define loop(xs, acc) -> result-type {
+    define loop(xs: list(elem-type), acc: result-type) -> result-type {
       match xs {
       | Nil =>
         acc
@@ -105,7 +105,7 @@ inline fold-right-N<elem-type, result-type>(
   !consumer: (&elem-type, result-type) -> result-type,
 ) -> result-type {
   let helper =
-    define loop(xs, acc) -> result-type {
+    define loop(xs: &list(elem-type), acc: result-type) -> result-type {
       case xs {
       | Nil =>
         acc
@@ -243,7 +243,7 @@ define reverse<a>(xs: list(a)) -> list(a) {
 
 inline iterate<a>(count: int, !f: (int) -> a) -> list(a) {
   let helper =
-    define self(cursor) -> list(a) {
+    define self(cursor: int) -> list(a) {
       if ge-int(cursor, count) {
         Nil
       } else {

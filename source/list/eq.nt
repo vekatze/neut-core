@@ -1,6 +1,5 @@
 import {
   this.bool {False, True, bool},
-  this.box,
   this.eq {Eq, eq},
   this.list {Cons, Nil, list},
 }
@@ -9,7 +8,7 @@ inline as-eq<a>(f: eq(a)) -> eq(list(a)) {
   let Eq {equal := !eq} = f;
   Eq {
     equal := {
-      define self(xs, ys) -> bool {
+      define self(xs: &list(a), ys: &list(a)) -> bool {
         case xs, ys {
         | Nil, Nil =>
           True
@@ -27,10 +26,6 @@ inline as-eq<a>(f: eq(a)) -> eq(list(a)) {
       }
     },
   }
-}
-
-define _nop-copy<a>(x: &&a) -> &a {
-  *x
 }
 
 define member<a>(e: &eq(a), xs: &list(a), value: &a) -> bool {

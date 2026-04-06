@@ -6,7 +6,7 @@ import {
 
 inline loop(count: int, !f: (int) -> unit) -> unit {
   let helper =
-    define self(cursor) -> unit {
+    define self(cursor: int) -> unit {
       match ge-int(cursor, count) {
       | True =>
         Unit
@@ -20,7 +20,7 @@ inline loop(count: int, !f: (int) -> unit) -> unit {
 
 inline loop-E<e>(count: int, !f: (int) -> either(e, unit)) -> either(e, unit) {
   let helper =
-    define self(cursor) -> either(e, unit) {
+    define self(cursor: int) -> either(e, unit) {
       match ge-int(cursor, count) {
       | True =>
         Right(Unit)

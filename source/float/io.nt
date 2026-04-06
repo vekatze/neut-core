@@ -2,9 +2,9 @@ import {
   this.bool,
   this.either {Left, Right},
   this.file.descriptor {descriptor, stdout},
-  this.system {report-system-error, system},
   this.string,
   this.string.io {print},
+  this.system {report-system-error, system},
   this.unit {Unit, unit},
 }
 
@@ -42,7 +42,7 @@ define print-float(x: float, decimals: int) -> unit {
   }
 }
 
-define print-float-line(x: float, decimals) -> unit {
+define print-float-line(x: float, decimals: int) -> unit {
   match write-float-line(stdout, x, decimals) {
   | Left(_) =>
     Unit

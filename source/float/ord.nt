@@ -6,7 +6,7 @@ import {
 }
 
 constant as-ord: ord(float) {
-  Ord {
+  Ord{
     compare := {
       (x, y) => {
         if gt-float(*x, *y) {

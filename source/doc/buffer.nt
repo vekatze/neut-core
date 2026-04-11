@@ -6,9 +6,9 @@ import {
   this.doc.show {show-doc},
   this.either {Right},
   this.file.descriptor {stdout},
-  this.system {system},
   this.string,
   this.string.buffer,
+  this.system {system},
   this.unit {Unit, unit},
 }
 

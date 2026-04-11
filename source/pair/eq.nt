@@ -5,9 +5,9 @@ import {
 }
 
 inline as-eq<a, b>(f: eq(a), g: eq(b)) -> eq(pair(a, b)) {
-  let Eq {equal := equal-f} = f;
-  let Eq {equal := equal-g} = g;
-  Eq {
+  let Eq{equal := equal-f} = f;
+  let Eq{equal := equal-g} = g;
+  Eq{
     equal := {
       (p1, p2) => {
         tie Pair(x1, y1) = p1;

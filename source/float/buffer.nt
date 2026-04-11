@@ -3,9 +3,9 @@ import {
   this.buffer {buffer, flush, make-buffer},
   this.either {Right},
   this.file.descriptor {stdout},
-  this.system {system},
   this.string,
   this.string.buffer {write},
+  this.system {system},
   this.unit {Unit, unit},
 }
 

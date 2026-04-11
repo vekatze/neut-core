@@ -4,5 +4,5 @@ import {
 }
 
 constant as-functor: functor(list) {
-  Functor {for-each}
+  Functor{for-each}
 }

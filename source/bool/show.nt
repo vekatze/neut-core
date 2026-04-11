@@ -16,7 +16,7 @@ constant as-show: show(bool) {
 }
 
 define show(b: bool) -> string {
-  let Show {show} = as-show;
+  let Show{show} = as-show;
   show(b)
 }
 

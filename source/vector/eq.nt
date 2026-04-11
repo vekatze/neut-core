@@ -5,8 +5,8 @@ import {
 }
 
 inline as-eq<a>(class: eq(a)) -> eq(vector(a)) {
-  let Eq {equal := !equal} = class;
-  Eq {
+  let Eq{equal := !equal} = class;
+  Eq{
     equal := {
       (xs, ys) => {
         let len1 = length(xs);

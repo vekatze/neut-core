@@ -31,7 +31,7 @@ define ge-string(t1: &string, t2: &string) -> bool {
 }
 
 constant as-ord: ord(string) {
-  Ord {
+  Ord{
     compare := {
       (x, y) => {
         if gt-string(x, y) {

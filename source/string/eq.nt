@@ -20,7 +20,7 @@ define ne-string(t1: &string, t2: &string) -> bool {
 }
 
 constant as-eq: eq(string) {
-  Eq {equal := eq-string}
+  Eq{equal := eq-string}
 }
 
 define eq-prefix(haystack: &string, needle: &string) -> bool {

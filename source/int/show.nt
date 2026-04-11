@@ -34,7 +34,7 @@ constant as-show: show(int) {
 }
 
 define show-int(x: int) -> string {
-  let Show {show} = as-show;
+  let Show{show} = as-show;
   show(x)
 }
 

@@ -11,8 +11,8 @@ import {
   this.magic,
   this.memory,
   this.pointer {extract, shift},
-  this.system {Application-Error, report-system-error, system},
   this.string {format},
+  this.system {Application-Error, report-system-error, system},
   this.unit {Unit, unit},
   this.word,
 }

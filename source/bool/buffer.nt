@@ -1,9 +1,9 @@
 import {
   this.bool {bool},
   this.buffer {buffer},
-  this.system {system},
   this.string,
   this.string.buffer {write, write-line},
+  this.system {system},
   this.unit {unit},
 }
 

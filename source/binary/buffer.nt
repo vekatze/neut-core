@@ -3,8 +3,8 @@ import {
   this.buffer {_write, buffer, flush, make-buffer},
   this.either,
   this.file.descriptor {stdout},
-  this.system {system},
   this.string {to-binary},
+  this.system {system},
   this.unit {Unit, unit},
 }
 

@@ -5,7 +5,7 @@ import {
 }
 
 constant as-eq: eq(unit) {
-  Eq {
+  Eq{
     equal := {
       (x1, x2) => {
         case x1, x2 {

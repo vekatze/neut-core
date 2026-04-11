@@ -158,7 +158,7 @@ define spawn(
     try _ = _dup2(in-reader, stdin);
     try _ = _dup2(out-writer, stdout);
     try _ = _dup2(error-writer, stderr);
-    let Process-Spec {process, args, cwd} = ps;
+    let Process-Spec{process, args, cwd} = ps;
     match cwd {
     | Left(_) =>
       _call(process, args, error-writer)
@@ -180,14 +180,14 @@ define spawn(
     try _ = close(in-reader);
     try _ = close(out-writer);
     try _ = close(error-writer);
-    let Process-Spec {input} = ps;
+    let Process-Spec{input} = ps;
     try _ on input = write(in-writer, input);
     let _ = input;
     try _ = close(in-writer);
     try stdout-string = read(out-reader, stdout-initial-buffer-size);
     try stderr-string = read(error-reader, stderr-initial-buffer-size);
     try status = _waitpid(pid);
-    Right(Process-Result {
+    Right(Process-Result{
       status,
       stdout-string,
       stderr-string,
@@ -208,7 +208,7 @@ define _print-process-result-status(st: process-result-status) -> unit {
 
 define zen() -> unit {
   let cmd =
-    Process-Spec {
+    Process-Spec{
       process := *"sh",
       args := List[*"-c", *"ls"],
       cwd := Right(*"/etc"),
@@ -216,7 +216,7 @@ define zen() -> unit {
     };
   match spawn(cmd, 1024, 1024) {
   | Right(result) =>
-    let Process-Result {stdout-string, stderr-string, status} = result;
+    let Process-Result{stdout-string, stderr-string, status} = result;
     print("stdout:\n");
     let _ on stdout-string = print(stdout-string);
     print("\nstderr:\n");

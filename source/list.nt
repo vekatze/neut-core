@@ -421,7 +421,7 @@ define filter-some<a>(xs: list(?a)) -> list(a) {
 }
 
 inline sum<a>(as-monoid: monoid(a), xs: list(a)) -> a {
-  let Monoid {e, op} = as-monoid;
+  let Monoid{e, op} = as-monoid;
   fold-left(e, xs, (acc, x) => {
     op(acc, x)
   })
@@ -429,7 +429,7 @@ inline sum<a>(as-monoid: monoid(a), xs: list(a)) -> a {
 
 inline minimum<a>(as-ord: ord(a)) -> (list(a)) -> ?a {
   (xs) => {
-    let Ord {compare} = as-ord;
+    let Ord{compare} = as-ord;
     match xs {
     | Nil =>
       none
@@ -449,7 +449,7 @@ inline minimum<a>(as-ord: ord(a)) -> (list(a)) -> ?a {
 
 inline maximum<a>(as-ord: ord(a)) -> (list(a)) -> ?a {
   (xs) => {
-    let Ord {compare := !compare} = as-ord;
+    let Ord{compare := !compare} = as-ord;
     let helper =
       define self(cand: a, ys: list(a)) -> a {
         match ys {

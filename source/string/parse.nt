@@ -67,13 +67,13 @@ define _unquote-string(t: string) -> either(error, list(string)) {
     } else-if eq-rune(c, `t`) {
       Right(List[*"\u{9}", rest])
     } else-if eq-rune(c, `n`) {
-      Right(List[*"\u{a}", rest])
+      Right(List[*"\u{A}", rest])
     } else-if eq-rune(c, `r`) {
-      Right(List[*"\u{d}", rest])
+      Right(List[*"\u{B}", rest])
     } else-if eq-rune(c, `"`) {
       Right(List[*"\u{22}", rest])
     } else-if eq-rune(c, `\\`) {
-      Right(List[*"\u{5c}", rest])
+      Right(List[*"\u{5C}", rest])
     } else-if eq-rune(c, `\``) {
       Right(List[*"\u{60}", rest])
     } else-if eq-rune(c, `u`) {

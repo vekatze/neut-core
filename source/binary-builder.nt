@@ -245,15 +245,15 @@ inline append-ansi(k: &binary-builder, c: command) -> unit {
   | Set-Style(style) =>
     match style {
     | Normal =>
-      append-string(k, "\u{1b}[0m")
+      append-string(k, "\u{1B}[0m")
     | Bold =>
-      append-string(k, "\u{1b}[1m")
+      append-string(k, "\u{1B}[1m")
     | Faint =>
-      append-string(k, "\u{1b}[2m")
+      append-string(k, "\u{1B}[2m")
     | Italic =>
-      append-string(k, "\u{1b}[3m")
+      append-string(k, "\u{1B}[3m")
     | Underline =>
-      append-string(k, "\u{1b}[4m")
+      append-string(k, "\u{1B}[4m")
     | Color(color-layer, color) =>
       match color-layer {
       | Foreground =>
@@ -263,48 +263,48 @@ inline append-ansi(k: &binary-builder, c: command) -> unit {
           | Dull =>
             match color {
             | Black =>
-              append-string(k, "\u{1b}[30m")
+              append-string(k, "\u{1B}[30m")
             | Red =>
-              append-string(k, "\u{1b}[31m")
+              append-string(k, "\u{1B}[31m")
             | Green =>
-              append-string(k, "\u{1b}[32m")
+              append-string(k, "\u{1B}[32m")
             | Yellow =>
-              append-string(k, "\u{1b}[33m")
+              append-string(k, "\u{1B}[33m")
             | Blue =>
-              append-string(k, "\u{1b}[34m")
+              append-string(k, "\u{1B}[34m")
             | Magenta =>
-              append-string(k, "\u{1b}[35m")
+              append-string(k, "\u{1B}[35m")
             | Cyan =>
-              append-string(k, "\u{1b}[36m")
+              append-string(k, "\u{1B}[36m")
             | White =>
-              append-string(k, "\u{1b}[37m")
+              append-string(k, "\u{1B}[37m")
             }
           | Vivid =>
             match color {
             | Black =>
-              append-string(k, "\u{1b}[90m")
+              append-string(k, "\u{1B}[90m")
             | Red =>
-              append-string(k, "\u{1b}[91m")
+              append-string(k, "\u{1B}[91m")
             | Green =>
-              append-string(k, "\u{1b}[92m")
+              append-string(k, "\u{1B}[92m")
             | Yellow =>
-              append-string(k, "\u{1b}[93m")
+              append-string(k, "\u{1B}[93m")
             | Blue =>
-              append-string(k, "\u{1b}[94m")
+              append-string(k, "\u{1B}[94m")
             | Magenta =>
-              append-string(k, "\u{1b}[95m")
+              append-string(k, "\u{1B}[95m")
             | Cyan =>
-              append-string(k, "\u{1b}[96m")
+              append-string(k, "\u{1B}[96m")
             | White =>
-              append-string(k, "\u{1b}[97m")
+              append-string(k, "\u{1B}[97m")
             }
           }
         | Color-256(value) =>
-          append-string(k, "\u{1b}[38;5;");
+          append-string(k, "\u{1B}[38;5;");
           append-int64-UTF8(k, zext-int8-int(value));
           append-string(k, "m")
         | Color-RGB(r, g, b) =>
-          append-string(k, "\u{1b}[38;2;");
+          append-string(k, "\u{1B}[38;2;");
           append-int64-UTF8(k, zext-int8-int(r));
           append-string(k, ";");
           append-int64-UTF8(k, zext-int8-int(g));
@@ -319,48 +319,48 @@ inline append-ansi(k: &binary-builder, c: command) -> unit {
           | Dull =>
             match color {
             | Black =>
-              append-string(k, "\u{1b}[40m")
+              append-string(k, "\u{1B}[40m")
             | Red =>
-              append-string(k, "\u{1b}[41m")
+              append-string(k, "\u{1B}[41m")
             | Green =>
-              append-string(k, "\u{1b}[42m")
+              append-string(k, "\u{1B}[42m")
             | Yellow =>
-              append-string(k, "\u{1b}[43m")
+              append-string(k, "\u{1B}[43m")
             | Blue =>
-              append-string(k, "\u{1b}[44m")
+              append-string(k, "\u{1B}[44m")
             | Magenta =>
-              append-string(k, "\u{1b}[45m")
+              append-string(k, "\u{1B}[45m")
             | Cyan =>
-              append-string(k, "\u{1b}[46m")
+              append-string(k, "\u{1B}[46m")
             | White =>
-              append-string(k, "\u{1b}[47m")
+              append-string(k, "\u{1B}[47m")
             }
           | Vivid =>
             match color {
             | Black =>
-              append-string(k, "\u{1b}[100m")
+              append-string(k, "\u{1B}[100m")
             | Red =>
-              append-string(k, "\u{1b}[101m")
+              append-string(k, "\u{1B}[101m")
             | Green =>
-              append-string(k, "\u{1b}[102m")
+              append-string(k, "\u{1B}[102m")
             | Yellow =>
-              append-string(k, "\u{1b}[103m")
+              append-string(k, "\u{1B}[103m")
             | Blue =>
-              append-string(k, "\u{1b}[104m")
+              append-string(k, "\u{1B}[104m")
             | Magenta =>
-              append-string(k, "\u{1b}[105m")
+              append-string(k, "\u{1B}[105m")
             | Cyan =>
-              append-string(k, "\u{1b}[106m")
+              append-string(k, "\u{1B}[106m")
             | White =>
-              append-string(k, "\u{1b}[107m")
+              append-string(k, "\u{1B}[107m")
             }
           }
         | Color-256(value) =>
-          append-string(k, "\u{1b}[48;5;");
+          append-string(k, "\u{1B}[48;5;");
           append-int64-UTF8(k, zext-int8-int(value));
           append-string(k, "m");
         | Color-RGB(r, g, b) =>
-          append-string(k, "\u{1b}[48;2;");
+          append-string(k, "\u{1B}[48;2;");
           append-int64-UTF8(k, zext-int8-int(r));
           append-string(k, ";");
           append-int64-UTF8(k, zext-int8-int(g));
@@ -373,35 +373,35 @@ inline append-ansi(k: &binary-builder, c: command) -> unit {
   | Move-Cursor(movement) =>
     match movement {
     | Up(offset) =>
-      append-string(k, "\u{1b}[");
+      append-string(k, "\u{1B}[");
       append-int64-UTF8(k, offset);
       append-string(k, "A");
     | Down(offset) =>
-      append-string(k, "\u{1b}[");
+      append-string(k, "\u{1B}[");
       append-int64-UTF8(k, offset);
       append-string(k, "B");
     | Forward(offset) =>
-      append-string(k, "\u{1b}[");
+      append-string(k, "\u{1B}[");
       append-int64-UTF8(k, offset);
       append-string(k, "C");
     | Backward(offset) =>
-      append-string(k, "\u{1b}[");
+      append-string(k, "\u{1B}[");
       append-int64-UTF8(k, offset);
       append-string(k, "D");
     | Up-Start(offset) =>
-      append-string(k, "\u{1b}[");
+      append-string(k, "\u{1B}[");
       append-int64-UTF8(k, offset);
       append-string(k, "E");
     | Down-Start(offset) =>
-      append-string(k, "\u{1b}[");
+      append-string(k, "\u{1B}[");
       append-int64-UTF8(k, offset);
       append-string(k, "F");
     | To-Column(column) =>
-      append-string(k, "\u{1b}[");
+      append-string(k, "\u{1B}[");
       append-int64-UTF8(k, column);
       append-string(k, "G");
     | To(x, y) =>
-      append-string(k, "\u{1b}[");
+      append-string(k, "\u{1B}[");
       append-int64-UTF8(k, x);
       append-string(k, ";");
       append-int64-UTF8(k, y);
@@ -412,20 +412,20 @@ inline append-ansi(k: &binary-builder, c: command) -> unit {
     | Line =>
       match span {
       | From-Cursor =>
-        append-string(k, "\u{1b}[0K")
+        append-string(k, "\u{1B}[0K")
       | To-Cursor =>
-        append-string(k, "\u{1b}[1K")
+        append-string(k, "\u{1B}[1K")
       | Whole =>
-        append-string(k, "\u{1b}[2K")
+        append-string(k, "\u{1B}[2K")
       }
     | Screen =>
       match span {
       | From-Cursor =>
-        append-string(k, "\u{1b}[0J")
+        append-string(k, "\u{1B}[0J")
       | To-Cursor =>
-        append-string(k, "\u{1b}[1J")
+        append-string(k, "\u{1B}[1J")
       | Whole =>
-        append-string(k, "\u{1b}[2J")
+        append-string(k, "\u{1B}[2J")
       }
     }
   }

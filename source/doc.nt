@@ -118,15 +118,15 @@ define _nested-comma-seq(prefix: doc, body: doc, suffix: doc) -> doc {
 inline ansi-doc(s: style) -> doc {
   match s {
   | Normal =>
-    atom-style-N("\u{1b}[0m")
+    atom-style-N("\u{1B}[0m")
   | Bold =>
-    atom-style-N("\u{1b}[1m")
+    atom-style-N("\u{1B}[1m")
   | Faint =>
-    atom-style-N("\u{1b}[2m")
+    atom-style-N("\u{1B}[2m")
   | Italic =>
-    atom-style-N("\u{1b}[3m")
+    atom-style-N("\u{1B}[3m")
   | Underline =>
-    atom-style-N("\u{1b}[4m")
+    atom-style-N("\u{1B}[4m")
   | Color(color-layer, color) =>
     match color-layer {
     | Foreground =>
@@ -136,51 +136,51 @@ inline ansi-doc(s: style) -> doc {
         | Dull =>
           match color {
           | Black =>
-            atom-style-N("\u{1b}[30m")
+            atom-style-N("\u{1B}[30m")
           | Red =>
-            atom-style-N("\u{1b}[31m")
+            atom-style-N("\u{1B}[31m")
           | Green =>
-            atom-style-N("\u{1b}[32m")
+            atom-style-N("\u{1B}[32m")
           | Yellow =>
-            atom-style-N("\u{1b}[33m")
+            atom-style-N("\u{1B}[33m")
           | Blue =>
-            atom-style-N("\u{1b}[34m")
+            atom-style-N("\u{1B}[34m")
           | Magenta =>
-            atom-style-N("\u{1b}[35m")
+            atom-style-N("\u{1B}[35m")
           | Cyan =>
-            atom-style-N("\u{1b}[36m")
+            atom-style-N("\u{1B}[36m")
           | White =>
-            atom-style-N("\u{1b}[37m")
+            atom-style-N("\u{1B}[37m")
           }
         | Vivid =>
           match color {
           | Black =>
-            atom-style-N("\u{1b}[90m")
+            atom-style-N("\u{1B}[90m")
           | Red =>
-            atom-style-N("\u{1b}[91m")
+            atom-style-N("\u{1B}[91m")
           | Green =>
-            atom-style-N("\u{1b}[92m")
+            atom-style-N("\u{1B}[92m")
           | Yellow =>
-            atom-style-N("\u{1b}[93m")
+            atom-style-N("\u{1B}[93m")
           | Blue =>
-            atom-style-N("\u{1b}[94m")
+            atom-style-N("\u{1B}[94m")
           | Magenta =>
-            atom-style-N("\u{1b}[95m")
+            atom-style-N("\u{1B}[95m")
           | Cyan =>
-            atom-style-N("\u{1b}[96m")
+            atom-style-N("\u{1B}[96m")
           | White =>
-            atom-style-N("\u{1b}[97m")
+            atom-style-N("\u{1B}[97m")
           }
         }
       | Color-256(value) =>
         join[
-          atom-style-N("\u{1b}[38;5;"),
+          atom-style-N("\u{1B}[38;5;"),
           atom-int(zext-int8-int(value)),
           atom-style-N("m"),
         ]
       | Color-RGB(r, g, b) =>
         join[
-          atom-style-N("\u{1b}[38;2;"),
+          atom-style-N("\u{1B}[38;2;"),
           atom-int(zext-int8-int(r)),
           atom-style-N(";"),
           atom-int(zext-int8-int(g)),
@@ -196,51 +196,51 @@ inline ansi-doc(s: style) -> doc {
         | Dull =>
           match color {
           | Black =>
-            atom-style-N("\u{1b}[40m")
+            atom-style-N("\u{1B}[40m")
           | Red =>
-            atom-style-N("\u{1b}[41m")
+            atom-style-N("\u{1B}[41m")
           | Green =>
-            atom-style-N("\u{1b}[42m")
+            atom-style-N("\u{1B}[42m")
           | Yellow =>
-            atom-style-N("\u{1b}[43m")
+            atom-style-N("\u{1B}[43m")
           | Blue =>
-            atom-style-N("\u{1b}[44m")
+            atom-style-N("\u{1B}[44m")
           | Magenta =>
-            atom-style-N("\u{1b}[45m")
+            atom-style-N("\u{1B}[45m")
           | Cyan =>
-            atom-style-N("\u{1b}[46m")
+            atom-style-N("\u{1B}[46m")
           | White =>
-            atom-style-N("\u{1b}[47m")
+            atom-style-N("\u{1B}[47m")
           }
         | Vivid =>
           match color {
           | Black =>
-            atom-style-N("\u{1b}[100m")
+            atom-style-N("\u{1B}[100m")
           | Red =>
-            atom-style-N("\u{1b}[101m")
+            atom-style-N("\u{1B}[101m")
           | Green =>
-            atom-style-N("\u{1b}[102m")
+            atom-style-N("\u{1B}[102m")
           | Yellow =>
-            atom-style-N("\u{1b}[103m")
+            atom-style-N("\u{1B}[103m")
           | Blue =>
-            atom-style-N("\u{1b}[104m")
+            atom-style-N("\u{1B}[104m")
           | Magenta =>
-            atom-style-N("\u{1b}[105m")
+            atom-style-N("\u{1B}[105m")
           | Cyan =>
-            atom-style-N("\u{1b}[106m")
+            atom-style-N("\u{1B}[106m")
           | White =>
-            atom-style-N("\u{1b}[107m")
+            atom-style-N("\u{1B}[107m")
           }
         }
       | Color-256(value) =>
         join[
-          atom-style-N("\u{1b}[48;5;"),
+          atom-style-N("\u{1B}[48;5;"),
           atom-int(zext-int8-int(value)),
           atom-style-N("m"),
         ]
       | Color-RGB(r, g, b) =>
         join[
-          atom-style-N("\u{1b}[48;2;"),
+          atom-style-N("\u{1B}[48;2;"),
           atom-int(zext-int8-int(r)),
           atom-style-N(";"),
           atom-int(zext-int8-int(g)),

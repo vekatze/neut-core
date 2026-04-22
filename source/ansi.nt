@@ -138,15 +138,15 @@ inline write-code(k: &ansi-kit, c: command) ->> system(unit) {
   | Set-Style(style) =>
     match style {
     | Normal =>
-      write(k, "\u{1b}[0m")
+      write(k, "\u{1B}[0m")
     | Bold =>
-      write(k, "\u{1b}[1m")
+      write(k, "\u{1B}[1m")
     | Faint =>
-      write(k, "\u{1b}[2m")
+      write(k, "\u{1B}[2m")
     | Italic =>
-      write(k, "\u{1b}[3m")
+      write(k, "\u{1B}[3m")
     | Underline =>
-      write(k, "\u{1b}[4m")
+      write(k, "\u{1B}[4m")
     | Color(color-layer, color) =>
       match color-layer {
       | Foreground =>
@@ -156,48 +156,48 @@ inline write-code(k: &ansi-kit, c: command) ->> system(unit) {
           | Dull =>
             match color {
             | Black =>
-              write(k, "\u{1b}[30m")
+              write(k, "\u{1B}[30m")
             | Red =>
-              write(k, "\u{1b}[31m")
+              write(k, "\u{1B}[31m")
             | Green =>
-              write(k, "\u{1b}[32m")
+              write(k, "\u{1B}[32m")
             | Yellow =>
-              write(k, "\u{1b}[33m")
+              write(k, "\u{1B}[33m")
             | Blue =>
-              write(k, "\u{1b}[34m")
+              write(k, "\u{1B}[34m")
             | Magenta =>
-              write(k, "\u{1b}[35m")
+              write(k, "\u{1B}[35m")
             | Cyan =>
-              write(k, "\u{1b}[36m")
+              write(k, "\u{1B}[36m")
             | White =>
-              write(k, "\u{1b}[37m")
+              write(k, "\u{1B}[37m")
             }
           | Vivid =>
             match color {
             | Black =>
-              write(k, "\u{1b}[90m")
+              write(k, "\u{1B}[90m")
             | Red =>
-              write(k, "\u{1b}[91m")
+              write(k, "\u{1B}[91m")
             | Green =>
-              write(k, "\u{1b}[92m")
+              write(k, "\u{1B}[92m")
             | Yellow =>
-              write(k, "\u{1b}[93m")
+              write(k, "\u{1B}[93m")
             | Blue =>
-              write(k, "\u{1b}[94m")
+              write(k, "\u{1B}[94m")
             | Magenta =>
-              write(k, "\u{1b}[95m")
+              write(k, "\u{1B}[95m")
             | Cyan =>
-              write(k, "\u{1b}[96m")
+              write(k, "\u{1B}[96m")
             | White =>
-              write(k, "\u{1b}[97m")
+              write(k, "\u{1B}[97m")
             }
           }
         | Color-256(value) =>
-          try _ = write(k, "\u{1b}[38;5;");
+          try _ = write(k, "\u{1B}[38;5;");
           try _ = write-int(k, zext-int8-int(value));
           write(k, "m")
         | Color-RGB(r, g, b) =>
-          try _ = write(k, "\u{1b}[38;2;");
+          try _ = write(k, "\u{1B}[38;2;");
           try _ = write-int(k, zext-int8-int(r));
           try _ = write(k, ";");
           try _ = write-int(k, zext-int8-int(g));
@@ -212,48 +212,48 @@ inline write-code(k: &ansi-kit, c: command) ->> system(unit) {
           | Dull =>
             match color {
             | Black =>
-              write(k, "\u{1b}[40m")
+              write(k, "\u{1B}[40m")
             | Red =>
-              write(k, "\u{1b}[41m")
+              write(k, "\u{1B}[41m")
             | Green =>
-              write(k, "\u{1b}[42m")
+              write(k, "\u{1B}[42m")
             | Yellow =>
-              write(k, "\u{1b}[43m")
+              write(k, "\u{1B}[43m")
             | Blue =>
-              write(k, "\u{1b}[44m")
+              write(k, "\u{1B}[44m")
             | Magenta =>
-              write(k, "\u{1b}[45m")
+              write(k, "\u{1B}[45m")
             | Cyan =>
-              write(k, "\u{1b}[46m")
+              write(k, "\u{1B}[46m")
             | White =>
-              write(k, "\u{1b}[47m")
+              write(k, "\u{1B}[47m")
             }
           | Vivid =>
             match color {
             | Black =>
-              write(k, "\u{1b}[100m")
+              write(k, "\u{1B}[100m")
             | Red =>
-              write(k, "\u{1b}[101m")
+              write(k, "\u{1B}[101m")
             | Green =>
-              write(k, "\u{1b}[102m")
+              write(k, "\u{1B}[102m")
             | Yellow =>
-              write(k, "\u{1b}[103m")
+              write(k, "\u{1B}[103m")
             | Blue =>
-              write(k, "\u{1b}[104m")
+              write(k, "\u{1B}[104m")
             | Magenta =>
-              write(k, "\u{1b}[105m")
+              write(k, "\u{1B}[105m")
             | Cyan =>
-              write(k, "\u{1b}[106m")
+              write(k, "\u{1B}[106m")
             | White =>
-              write(k, "\u{1b}[107m")
+              write(k, "\u{1B}[107m")
             }
           }
         | Color-256(value) =>
-          try _ = write(k, "\u{1b}[48;5;");
+          try _ = write(k, "\u{1B}[48;5;");
           try _ = write-int(k, zext-int8-int(value));
           write(k, "m")
         | Color-RGB(r, g, b) =>
-          try _ = write(k, "\u{1b}[48;2;");
+          try _ = write(k, "\u{1B}[48;2;");
           try _ = write-int(k, zext-int8-int(r));
           try _ = write(k, ";");
           try _ = write-int(k, zext-int8-int(g));
@@ -266,35 +266,35 @@ inline write-code(k: &ansi-kit, c: command) ->> system(unit) {
   | Move-Cursor(movement) =>
     match movement {
     | Up(offset) =>
-      try _ = write(k, "\u{1b}[");
+      try _ = write(k, "\u{1B}[");
       try _ = write-int(k, offset);
       write(k, "A")
     | Down(offset) =>
-      try _ = write(k, "\u{1b}[");
+      try _ = write(k, "\u{1B}[");
       try _ = write-int(k, offset);
       write(k, "B")
     | Forward(offset) =>
-      try _ = write(k, "\u{1b}[");
+      try _ = write(k, "\u{1B}[");
       try _ = write-int(k, offset);
       write(k, "C")
     | Backward(offset) =>
-      try _ = write(k, "\u{1b}[");
+      try _ = write(k, "\u{1B}[");
       try _ = write-int(k, offset);
       write(k, "D")
     | Up-Start(offset) =>
-      try _ = write(k, "\u{1b}[");
+      try _ = write(k, "\u{1B}[");
       try _ = write-int(k, offset);
       write(k, "E")
     | Down-Start(offset) =>
-      try _ = write(k, "\u{1b}[");
+      try _ = write(k, "\u{1B}[");
       try _ = write-int(k, offset);
       write(k, "F")
     | To-Column(column) =>
-      try _ = write(k, "\u{1b}[");
+      try _ = write(k, "\u{1B}[");
       try _ = write-int(k, column);
       write(k, "G")
     | To(x, y) =>
-      try _ = write(k, "\u{1b}[");
+      try _ = write(k, "\u{1B}[");
       try _ = write-int(k, x);
       try _ = write(k, ";");
       try _ = write-int(k, y);
@@ -305,20 +305,20 @@ inline write-code(k: &ansi-kit, c: command) ->> system(unit) {
     | Line =>
       match span {
       | From-Cursor =>
-        write(k, "\u{1b}[0K")
+        write(k, "\u{1B}[0K")
       | To-Cursor =>
-        write(k, "\u{1b}[1K")
+        write(k, "\u{1B}[1K")
       | Whole =>
-        write(k, "\u{1b}[2K")
+        write(k, "\u{1B}[2K")
       }
     | Screen =>
       match span {
       | From-Cursor =>
-        write(k, "\u{1b}[0J")
+        write(k, "\u{1B}[0J")
       | To-Cursor =>
-        write(k, "\u{1b}[1J")
+        write(k, "\u{1B}[1J")
       | Whole =>
-        write(k, "\u{1b}[2J")
+        write(k, "\u{1B}[2J")
       }
     }
   }

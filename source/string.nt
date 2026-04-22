@@ -185,11 +185,11 @@ define _get-rune-size-end(t: &string, index: int) -> int {
     1
   } else {
     let b1 = _get-byte(t, sub-int(index, 1));
-    if uge-int8(b1, 0xc0) {
+    if uge-int8(b1, 0xC0) {
       2
     } else {
       let b2 = _get-byte(t, sub-int(index, 2));
-      if uge-int8(b2, 0xc0) {
+      if uge-int8(b2, 0xC0) {
         3
       } else {
         4
@@ -222,7 +222,7 @@ define singleton(value: rune) -> string {
     create(List[piece-0, piece-1, piece-2, piece-3])
   | _ =>
     // U+FFFE Noncharacter
-    create(List[0xef, 0xbf, 0xbe])
+    create(List[0xEF, 0xBF, 0xBE])
   }
 }
 

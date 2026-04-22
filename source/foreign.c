@@ -469,7 +469,7 @@ neut_core_v0_52_get_online_cpu_count(void) {
 typedef enum {
   ARCH_X86_64 = 62, // EM_X86_64
   ARCH_AARCH64 = 183, // EM_AARCH64
-  ARCH_UNSUPPORTED = 0xffff,
+  ARCH_UNSUPPORTED = 0xFFFF,
 } arch_tag_t;
 
 #if defined(__x86_64__) || defined(_M_X64)

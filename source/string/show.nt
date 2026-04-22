@@ -17,10 +17,10 @@ import {
 // returns true iff `ch` is a C0 control character, a delete, a backslash, or a double quote
 define _is-1-byte-escaped-character(ch: int8) -> bool {
   any[
-    and(ule-int8(0, ch), ule-int8(ch, 0x1f)),
+    and(ule-int8(0, ch), ule-int8(ch, 0x1F)),
     eq-int8(ch, 0x22),
-    eq-int8(ch, 0x5c),
-    eq-int8(ch, 0x7f),
+    eq-int8(ch, 0x5C),
+    eq-int8(ch, 0x7F),
   ]
 }
 
@@ -46,17 +46,17 @@ define _get-escaped-character-1(ch: int8) -> &string {
     "\\u{8}"
   | 0x09 =>
     "\\t"
-  | 0x0a =>
+  | 0x0A =>
     "\\n"
-  | 0x0b =>
+  | 0x0B =>
     "\\u{b}"
-  | 0x0c =>
+  | 0x0C =>
     "\\u{c}"
-  | 0x0d =>
+  | 0x0D =>
     "\\r"
-  | 0x0e =>
+  | 0x0E =>
     "\\u{e}"
-  | 0x0f =>
+  | 0x0F =>
     "\\u{f}"
   | 0x10 =>
     "\\u{10}"
@@ -78,23 +78,23 @@ define _get-escaped-character-1(ch: int8) -> &string {
     "\\u{18}"
   | 0x19 =>
     "\\u{19}"
-  | 0x1a =>
+  | 0x1A =>
     "\\u{1a}"
-  | 0x1b =>
+  | 0x1B =>
     "\\u{1b}"
-  | 0x1c =>
+  | 0x1C =>
     "\\u{1c}"
-  | 0x1d =>
+  | 0x1D =>
     "\\u{1d}"
-  | 0x1e =>
+  | 0x1E =>
     "\\u{1e}"
-  | 0x1f =>
+  | 0x1F =>
     "\\u{1f}"
   | 0x22 =>
     "\\\""
-  | 0x5c =>
+  | 0x5C =>
     "\\\\"
-  | 0x7f =>
+  | 0x7F =>
     "\\u{7f}"
   | _ =>
     // unreachable
@@ -104,7 +104,7 @@ define _get-escaped-character-1(ch: int8) -> &string {
 
 // returns true iff `ch` is the lower 8 bits a C1 control character
 define _is-2-byte-escaped-character(ch: int8) -> bool {
-  and(ule-int8(0x80, ch), ule-int8(ch, 0x9f))
+  and(ule-int8(0x80, ch), ule-int8(ch, 0x9F))
 }
 
 define _get-escaped-character-2(ch: int8) -> &string {
@@ -129,17 +129,17 @@ define _get-escaped-character-2(ch: int8) -> &string {
     "\\u{88}"
   | 0x89 =>
     "\\u{89}"
-  | 0x8a =>
+  | 0x8A =>
     "\\u{8a}"
-  | 0x8b =>
+  | 0x8B =>
     "\\u{8b}"
-  | 0x8c =>
+  | 0x8C =>
     "\\u{8c}"
-  | 0x8d =>
+  | 0x8D =>
     "\\u{8d}"
-  | 0x8e =>
+  | 0x8E =>
     "\\u{8e}"
-  | 0x8f =>
+  | 0x8F =>
     "\\u{8f}"
   | 0x90 =>
     "\\u{90}"
@@ -161,17 +161,17 @@ define _get-escaped-character-2(ch: int8) -> &string {
     "\\u{98}"
   | 0x99 =>
     "\\u{99}"
-  | 0x9a =>
+  | 0x9A =>
     "\\u{9a}"
-  | 0x9b =>
+  | 0x9B =>
     "\\u{9b}"
-  | 0x9c =>
+  | 0x9C =>
     "\\u{9c}"
-  | 0x9d =>
+  | 0x9D =>
     "\\u{9d}"
-  | 0x9e =>
+  | 0x9E =>
     "\\u{9e}"
-  | 0x9f =>
+  | 0x9F =>
     "\\u{9f}"
   | _ =>
     // unreachable
@@ -197,7 +197,7 @@ define _escape(t: &string, len: int, pivot: int, cursor: int) -> list(string) {
       Cons(piece, Cons(*escaped-control-char, rest))
     } else {
       if eq-int(char-len, 2) {
-        if eq-int8(head-char, 0xc2) {
+        if eq-int8(head-char, 0xC2) {
           let head-char-2 = _get-byte(t, add-int(index, 1));
           if _is-2-byte-escaped-character(head-char-2) {
             let piece = _slice-N(t, pivot, cursor);

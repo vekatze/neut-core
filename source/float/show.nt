@@ -27,7 +27,7 @@ define _show(c-fmt: &string, x: float) -> string {
 }
 
 foreign {
-  neut_core_v0_52_build_fixed_buf(pointer, int, float, int, int) -> int,
+  neut_core_v0_54_build_fixed_buf(pointer, int, float, int, int) -> int,
 }
 
 define show-float(x: float, decimals: int) -> string {
@@ -36,7 +36,7 @@ define show-float(x: float, decimals: int) -> string {
   let string-ptr = malloc(C-Size(size));
   let word-size = this.word.size;
   let buffer-ptr = shift(string-ptr, mul-int(word-size, 2));
-  let len = magic external neut_core_v0_52_build_fixed_buf(buffer-ptr, size, x, decimals, add-newline);
+  let len = magic external neut_core_v0_54_build_fixed_buf(buffer-ptr, size, x, decimals, add-newline);
   store-int(0, string-ptr);
   store-int(len, shift(string-ptr, word-size));
   magic cast(pointer, string, string-ptr)

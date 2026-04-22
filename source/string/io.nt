@@ -11,7 +11,7 @@ import {
 }
 
 foreign {
-  neut_core_v0_52_write_line(int32, int, pointer) -> int,
+  neut_core_v0_54_write_line(int32, int, pointer) -> int,
 }
 
 define write(f: descriptor, t: &string) ->> system(unit) {
@@ -22,7 +22,7 @@ define write-line(d: descriptor, t: &string) ->> system(unit) {
   let d = magic cast(descriptor, int32, d);
   let len = string-byte-length(t);
   let ptr = _get-content-pointer(t);
-  let result = magic external neut_core_v0_52_write_line(d, len, ptr);
+  let result = magic external neut_core_v0_54_write_line(d, len, ptr);
   if lt-int(result, 0) {
     report-system-error()
   } else {

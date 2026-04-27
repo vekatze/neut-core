@@ -1,0 +1,176 @@
+import {
+  this.bool {False, bool},
+  this.box,
+  this.list {List, append, list},
+  this.word,
+}
+
+foreign {
+  llvm.ctlz.i64(int64) -> int64,
+}
+
+data intset {
+| Nil
+| Tip(int)
+| Bin(
+    prefix: int,
+    mask: int,
+    left: intset,
+    right: intset,
+  )
+}
+
+alias _Mask {
+  int
+}
+
+alias _Prefix {
+  int
+}
+
+constant empty: intset {
+  Nil
+}
+
+inline singleton(k: int) -> intset {
+  Tip(k)
+}
+
+inline _mask-w(i: int, m: int) -> int {
+  and-int(i, xor-int(mul-int(-1, m), m))
+}
+
+inline _mask(key: int, mask: _Mask) -> int {
+  _mask-w(key, mask)
+}
+
+inline _zero(i: int, m: _Mask) -> bool {
+  eq-int(0, and-int(i, m))
+}
+
+inline _nomatch(i: int, p: _Prefix, m: _Mask) -> bool {
+  ne-int(_mask(i, m), p)
+}
+
+inline _link-with-mask(m: _Mask, p1: _Prefix, t1: intset, t2: intset) -> intset {
+  let p = _mask(p1, m);
+  if _zero(p1, m) {
+    Bin(p, m, t1, t2)
+  } else {
+    Bin(p, m, t2, t1)
+  }
+}
+
+inline _highest-bit-mask(w: int) -> int {
+  let size-in-bits = mul-int(this.word.size, 8);
+  shl-int(1, sub-int(sub-int(size-in-bits, 1), magic external llvm.ctlz.i64(w)))
+}
+
+inline _branch-mask(p1: _Prefix, p2: _Prefix) -> _Mask {
+  _highest-bit-mask(xor-int(p1, p2))
+}
+
+inline _link(p1: _Prefix, t1: intset, p2: _Prefix, t2: intset) -> intset {
+  _link-with-mask(_branch-mask(p1, p2), p1, t1, t2)
+}
+
+define insert(t: intset, k: int) -> intset {
+  match t {
+  | Nil =>
+    Tip(k)
+  | Tip(ky) =>
+    if eq-int(k, ky) {
+      Tip(ky)
+    } else {
+      _link(k, Tip(k), ky, Tip(ky))
+    }
+  | Bin(p, m, l, r) =>
+    if _nomatch(k, p, m) {
+      _link(k, Tip(k), p, Bin(p, m, l, r))
+    } else-if _zero(k, m) {
+      Bin(p, m, insert(l, k), r)
+    } else {
+      Bin(p, m, l, insert(r, k))
+    }
+  }
+}
+
+define member(s: &intset, k: int) -> bool {
+  case s {
+  | Nil =>
+    False
+  | Tip(kx) =>
+    eq-int(k, *kx)
+  | Bin(_, m, left, right) =>
+    if _zero(k, *m) {
+      member(left, k)
+    } else {
+      member(right, k)
+    }
+  }
+}
+
+inline _bin-check-left(p: _Prefix, m: _Mask, l: intset, r: intset) -> intset {
+  match l {
+  | Nil =>
+    r
+  | l =>
+    Bin(p, m, l, r)
+  }
+}
+
+inline _bin-check-right(p: _Prefix, m: _Mask, l: intset, r: intset) -> intset {
+  match r {
+  | Nil =>
+    l
+  | r =>
+    Bin(p, m, l, r)
+  }
+}
+
+define delete(t: intset, k: int) -> intset {
+  match t {
+  | Nil =>
+    Nil
+  | Tip(ky) =>
+    if eq-int(k, ky) {
+      Nil
+    } else {
+      Tip(ky)
+    }
+  | Bin(p, m, l, r) =>
+    if _nomatch(k, p, m) {
+      Bin(p, m, l, r)
+    } else-if _zero(k, m) {
+      _bin-check-left(p, m, delete(l, k), r)
+    } else {
+      _bin-check-right(p, m, l, delete(r, k))
+    }
+  }
+}
+
+define from-list(ks: list(int)) -> intset {
+  let f =
+    define self(ks: list(int), acc: intset) -> intset {
+      match ks {
+      | this.list.Nil =>
+        acc
+      | this.list.Cons(k, rest) =>
+        self(rest, insert(acc, k))
+      }
+    };
+  f(ks, Nil)
+}
+
+define to-list(s: intset) -> list(int) {
+  match s {
+  | Nil =>
+    this.list.Nil
+  | Tip(k) =>
+    List[k]
+  | Bin(_, _, s1, s2) =>
+    let xs = to-list(s1);
+    let ys = to-list(s2);
+    append(xs, ys)
+  }
+}

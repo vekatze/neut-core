@@ -1,51 +1,42 @@
 import {
   this.binary {_get-content-pointer, binary, binary-length},
   this.bool {False, True, bool},
-  this.box,
+  this.c-size {C-Size, c-size},
   this.int {min-int},
-  this.int.ord,
-  this.memory {load-int8},
   this.ord {Ord, ord},
   this.ordering {EQ, GT, LT, ordering},
-  this.pointer {shift},
 }
 
-define _cmp-int8(x: int8, y: int8) -> ordering {
-  if gt-int8(x, y) {
+foreign {
+  memcmp(pointer, pointer, c-size) -> int,
+}
+
+define _cmp-binary(ptr1: pointer, ptr2: pointer, len: int, fallback: ordering) -> ordering {
+  let result = magic external memcmp(ptr1, ptr2, C-Size(len));
+  if gt-int(result, 0) {
     GT
-  } else-if lt-int8(x, y) {
+  } else-if lt-int(result, 0) {
     LT
   } else {
-    EQ
+    fallback
   }
 }
 
 inline cmp-binary(xs1: &binary, xs2: &binary) -> ordering {
-  let f =
-    define self(ptr1: pointer, ptr2: pointer, index: int, len: int, fallback: ordering) -> ordering {
-      if eq-int(index, len) {
-        fallback
-      } else {
-        let v1 = load-int8(shift(ptr1, index));
-        let v2 = load-int8(shift(ptr2, index));
-        match _cmp-int8(v1, v2) {
-        | EQ =>
-          self(ptr1, ptr2, add-int(index, 1), len, fallback)
-        | o =>
-          o
-        }
-      }
-    };
-  pin len1 = binary-length(xs1);
-  pin len2 = binary-length(xs2);
-  let fallback-value = {
-    let Ord{compare} = this.int.ord.as-ord;
-    compare(len1, len2)
-  };
   let ptr1 = _get-content-pointer(xs1);
   let ptr2 = _get-content-pointer(xs2);
-  let min-len = min-int(*len1, *len2);
-  f(ptr1, ptr2, 0, min-len, fallback-value)
+  let len1 = binary-length(xs1);
+  let len2 = binary-length(xs2);
+  let len = min-int(len1, len2);
+  let fallback =
+    if gt-int(len1, len2) {
+      GT
+    } else-if lt-int(len1, len2) {
+      LT
+    } else {
+      EQ
+    };
+  _cmp-binary(ptr1, ptr2, len, fallback)
 }
 
 define lt-binary(t1: &binary, t2: &binary) -> bool {

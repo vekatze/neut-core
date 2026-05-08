@@ -1,0 +1,62 @@
+import {
+  this.c-int {c-int},
+  this.c-pid {c-pid},
+}
+
+foreign {
+  execvp(pointer, pointer) -> c-int,
+  fork() -> c-pid,
+  waitpid(c-pid, pointer, c-int) -> c-pid,
+  chdir(pointer) -> c-int,
+  neut_core_v0_55_wifexited(c-int) -> c-int,
+  neut_core_v0_55_wifsignaled(c-int) -> c-int,
+  neut_core_v0_55_wifstopped(c-int) -> c-int,
+  neut_core_v0_55_wexitstatus(c-int) -> c-int,
+  neut_core_v0_55_wtermsig(c-int) -> c-int,
+  neut_core_v0_55_wcoredump(c-int) -> c-int,
+  neut_core_v0_55_wstopsig(c-int) -> c-int,
+}
+
+define execvp(cmd: pointer, args: pointer) -> c-int {
+  magic external execvp(cmd, args)
+}
+
+define fork() -> c-pid {
+  magic external fork()
+}
+
+define waitpid(pid: c-pid, status-ptr: pointer, option: c-int) -> c-pid {
+  magic external waitpid(pid, status-ptr, option)
+}
+
+define chdir(path: pointer) -> c-int {
+  magic external chdir(path)
+}
+
+define wifexited(stat: c-int) -> c-int {
+  magic external neut_core_v0_55_wifexited(stat)
+}
+
+define wifsignaled(stat: c-int) -> c-int {
+  magic external neut_core_v0_55_wifsignaled(stat)
+}
+
+define wifstopped(stat: c-int) -> c-int {
+  magic external neut_core_v0_55_wifstopped(stat)
+}
+
+define wexitstatus(stat: c-int) -> c-int {
+  magic external neut_core_v0_55_wexitstatus(stat)
+}
+
+define wtermsig(stat: c-int) -> c-int {
+  magic external neut_core_v0_55_wtermsig(stat)
+}
+
+define wcoredump(stat: c-int) -> c-int {
+  magic external neut_core_v0_55_wcoredump(stat)
+}
+
+define wstopsig(stat: c-int) -> c-int {
+  magic external neut_core_v0_55_wstopsig(stat)
+}

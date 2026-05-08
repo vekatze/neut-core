@@ -1,22 +1,5 @@
-import {
-  this.c-int {c-int},
-  this.foreign {SEEK_CUR, SEEK_END, SEEK_SET},
-}
-
-// https://opensource.apple.com/source/xnu/xnu-3248.30.4/bsd/sys/_types/_seek_set.h.auto.html
-data seek {
-| SET
-| CUR
-| END
-}
-
-define interpret(s: seek) -> c-int {
-  match s {
-  | SET =>
-    SEEK_SET
-  | CUR =>
-    SEEK_CUR
-  | END =>
-    SEEK_END
-  }
+data seek-origin {
+| Start
+| Current
+| End
 }

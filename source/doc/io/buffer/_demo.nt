@@ -1,0 +1,48 @@
+import {
+  this.ansi {Blue, Yellow},
+  this.box,
+  this.doc {Group, Nest, ansi-fg, ansi-reset, atom, break, join},
+  this.doc.io.buffer {write-doc-line},
+  this.either {Right},
+  this.file.buffer {flush, make-buffer},
+  this.file.descriptor {stdout},
+  this.string,
+  this.system {system},
+  this.unit {Unit, unit},
+}
+
+define zen() -> unit {
+  pin item =
+    Group(join[
+      ansi-fg(Blue),
+      atom(*"begin"),
+      ansi-reset,
+      Nest(2, join[
+        break(" "),
+        Group(
+          join[
+            ansi-fg(Yellow),
+            atom(*"print;"),
+            ansi-reset,
+            break(" "),
+            atom(*"test;"),
+            break(" "),
+            atom(*"stmt;"),
+          ],
+        ),
+      ]),
+      break(" "),
+      ansi-fg(Blue),
+      atom(*"end"),
+      ansi-reset,
+    ]);
+  let !k = make-buffer(stdout, 4096);
+  pin k = k;
+  let _: system(unit) = {
+    try _ = write-doc-line(k, item, 32);
+    try _ = write-doc-line(k, item, 16);
+    try _ = flush(k);
+    Right(Unit)
+  };
+  Unit
+}

@@ -3,5 +3,5 @@ import {
 }
 
 data show(a) {
-| Show(show: (a) -> string)
+| Show(render: (&a) -> string)
 }

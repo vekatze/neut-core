@@ -1,5 +1,6 @@
 import {
-  this.binary {_get-content-pointer, binary, binary-length},
+  this.binary {binary, length},
+  this.binary.pointer {get-content-pointer},
   this.bool {False, True, bool},
   this.c-size {C-Size, c-size},
   this.int {min-int},
@@ -23,10 +24,10 @@ define _cmp-binary(ptr1: pointer, ptr2: pointer, len: int, fallback: ordering) -
 }
 
 inline cmp-binary(xs1: &binary, xs2: &binary) -> ordering {
-  let ptr1 = _get-content-pointer(xs1);
-  let ptr2 = _get-content-pointer(xs2);
-  let len1 = binary-length(xs1);
-  let len2 = binary-length(xs2);
+  let ptr1 = get-content-pointer(xs1);
+  let ptr2 = get-content-pointer(xs2);
+  let len1 = length(xs1);
+  let len2 = length(xs2);
   let len = min-int(len1, len2);
   let fallback =
     if gt-int(len1, len2) {

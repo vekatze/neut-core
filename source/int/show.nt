@@ -1,11 +1,13 @@
 import {
+  this.box,
   this.c-int {c-int, from-c-int},
   this.c-size {C-Size, c-size},
-  this.external,
-  this.memory {store-int},
+  this.memory {malloc},
+  this.memory.unsafe {store-int},
   this.pointer {null-pointer, shift},
   this.show {Show, show},
-  this.string {_get-content-pointer, string},
+  this.string {string},
+  this.string.pointer {get-content-pointer},
   this.unit,
   this.word,
 }
@@ -16,9 +18,9 @@ foreign {
 }
 
 define _show(c-fmt: &string, x: int) -> string {
-  let fmt = _get-content-pointer(c-fmt);
+  let fmt = get-content-pointer(c-fmt);
   let size = from-c-int(magic external snprintf(null-pointer, C-Size(0), fmt)(x: int));
-  let ptr = this.external.malloc(C-Size(add-int(size, add-int(1, mul-int(this.word.size, 2)))));
+  let ptr = malloc(C-Size(add-int(size, add-int(1, mul-int(this.word.size, 2)))));
   store-int(0, ptr);
   // ignore the trailing null character
   store-int(size, shift(ptr, this.word.size));
@@ -29,15 +31,16 @@ define _show(c-fmt: &string, x: int) -> string {
 
 constant as-show: show(int) {
   Show((x) => {
-    _show("%ld", x)
+    _show("%ld\0", *x)
   })
 }
 
 define show-int(x: int) -> string {
-  let Show{show} = as-show;
-  show(x)
+  let Show{render} = as-show;
+  pin x = x;
+  render(x)
 }
 
 define show-uint(x: int64) -> string {
-  _show("%lu", x)
+  _show("%lu\0", x)
 }

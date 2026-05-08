@@ -1,0 +1,48 @@
+import {
+  this.c-int {c-int},
+  this.c-size {c-size},
+  this.c-ssize {c-ssize},
+}
+
+foreign {
+  open(pointer, c-int) -> c-int,
+  read(c-int, pointer, c-size) -> c-ssize,
+  write(c-int, pointer, c-size) -> c-ssize,
+  pipe(pointer) -> c-int,
+}
+
+define open(path-address: pointer, oflag: c-int, mode: c-int) -> c-int {
+  introspect operating-system {
+  | darwin =>
+    magic external open(path-address, oflag)(mode: c-int)
+  | linux =>
+    magic external open(path-address, oflag)(mode: c-int)
+  }
+}
+
+define read(fd: c-int, content-pointer: pointer, max-read-size: c-size) -> c-ssize {
+  introspect operating-system {
+  | darwin =>
+    magic external read(fd, content-pointer, max-read-size)
+  | linux =>
+    magic external read(fd, content-pointer, max-read-size)
+  }
+}
+
+define write(fd: c-int, content-pointer: pointer, len: c-size) -> c-ssize {
+  introspect operating-system {
+  | darwin =>
+    magic external write(fd, content-pointer, len)
+  | linux =>
+    magic external write(fd, content-pointer, len)
+  }
+}
+
+define pipe(ptr: pointer) -> c-int {
+  introspect operating-system {
+  | darwin =>
+    magic external pipe(ptr)
+  | linux =>
+    magic external pipe(ptr)
+  }
+}

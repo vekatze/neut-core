@@ -8,14 +8,14 @@ import {
 
 inline as-show<a, b>(s1: show(a), s2: show(b)) -> show(pair(a, b)) {
   Show{
-    show := {
-      (p) => {
-        let Pair(x, y) = p;
-        let Show{show := show1} = s1;
-        let Show{show := show2} = s2;
+    render := {
+      (p: &pair(a, b)) => {
+        tie Pair(x, y) = p;
+        let Show{render := render1} = s1;
+        let Show{render := render2} = s2;
         join(List[
           *"(",
-          intercalate(List[show1(x), show2(y)], *", "),
+          intercalate(List[render1(x), render2(y)], *", "),
           *")",
         ])
       }

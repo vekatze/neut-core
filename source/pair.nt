@@ -1,5 +1,5 @@
 import {
-  this.magic {cast},
+  this.unsafe {cast},
 }
 
 data pair(a, b) {

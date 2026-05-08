@@ -1,0 +1,18 @@
+import {
+  this.doc {doc},
+  this.doc.show {show-doc},
+  this.file.buffer {buffer},
+  this.string.io.buffer,
+  this.system {system},
+  this.unit {unit},
+}
+
+define write-doc(b: &buffer, x: &doc, ribbon-width: int) ->> system(unit) {
+  pin tmp = show-doc(x, ribbon-width);
+  this.string.io.buffer.write(b, tmp)
+}
+
+define write-doc-line(b: &buffer, x: &doc, ribbon-width: int) ->> system(unit) {
+  pin tmp = show-doc(x, ribbon-width);
+  this.string.io.buffer.write-line(b, tmp)
+}

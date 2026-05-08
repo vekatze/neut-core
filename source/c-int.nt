@@ -12,7 +12,7 @@ alias _c-int {
 }
 
 data c-int {
-| C-Int(int32)
+| C-Int(_c-int)
 }
 
 inline add-c-int(x: c-int, y: c-int) -> c-int {

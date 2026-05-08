@@ -24,21 +24,21 @@ import {
     color-ansi,
     style,
   },
-  this.doc.chunk {
-    Chunk-Choose,
-    Chunk-Empty,
-    Chunk-Float,
-    Chunk-Int,
-    Chunk-Join,
-    Chunk-Line,
-    Chunk-Rune,
-    Chunk-String,
-    Chunk-String-N,
-    Chunk-Style,
-    Chunk-Style-N,
-    chunk,
-  },
   this.string {string},
+}
+
+data chunk {
+| Chunk-Empty
+| Chunk-String(content: string)
+| Chunk-String-N(content: &string)
+| Chunk-Style(content: string)
+| Chunk-Style-N(content: &string)
+| Chunk-Int(content: int)
+| Chunk-Float(content: float, decimals: int)
+| Chunk-Rune(content: rune)
+| Chunk-Line
+| Chunk-Join(left: chunk, right: chunk)
+| Chunk-Choose(horizontal-content: chunk, vertical-content: chunk)
 }
 
 data doc {
@@ -98,21 +98,6 @@ rule-right join {
 
 constant newline: doc {
   Chunk(Chunk-Choose(Chunk-String-N(""), Chunk-Line))
-}
-
-define _nested-comma-seq(prefix: doc, body: doc, suffix: doc) -> doc {
-  join[
-    prefix,
-    Nest(
-      2,
-      join[
-        break(""),
-        Group(body),
-      ],
-    ),
-    Chunk(Chunk-Choose(Chunk-Empty, Chunk-Join(Chunk-String-N(","), Chunk-Line))),
-    suffix,
-  ]
 }
 
 inline ansi-doc(s: style) -> doc {

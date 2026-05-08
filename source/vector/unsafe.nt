@@ -1,0 +1,11 @@
+import {
+  this.vector,
+}
+
+constant access-unchecked: _ {
+  this.vector._access-unchecked
+}
+
+constant swap-unchecked: _ {
+  this.vector._swap-unchecked
+}

@@ -3,20 +3,18 @@ import {
   this.box,
   this.c-size {C-Size},
   this.control {grow, loop},
+  this.debug,
   this.either {Left, Right, either, none},
-  this.external {free, malloc, realloc},
   this.function {compose},
   this.int {abs-int, max-int, min-int},
-  this.int.io {print-int-line},
-  this.list {Cons, List, Nil, list},
-  this.magic {cast},
-  this.memory {load-int, load-pointer, store-int, store-pointer},
+  this.list {Cons, Nil, list},
+  this.memory {malloc},
+  this.memory.unsafe {free, load-int, load-pointer, memcpy, memmove, realloc, store-int, store-pointer},
   this.pair {Pair, pair},
   this.pointer {shift},
-  this.string {replicate, string},
-  this.string.io {print, print-line},
-  this.trick,
+  this.string,
   this.unit {Unit, unit},
+  this.unsafe {cast},
   this.word,
 }
 
@@ -180,31 +178,21 @@ resource _vector-internal {
   -1,
 }
 
-foreign {
-  llvm.memmove.p0.p0.i64(pointer, pointer, int64, int1) -> void,
-  llvm.memcpy.p0.p0.i64(pointer, pointer, int64, int1) -> void,
-}
-
 constant _extend-factor: int {
   2
 }
 
 define _extend-front<a>(xs: vector(a)) -> vector(a) {
-  let current-capacity on xs = max-int(get-capacity(xs), 1);
-  let new-capacity = mul-int(current-capacity, _extend-factor);
+  let old-capacity on xs = get-capacity(xs);
+  let growth-base = max-int(old-capacity, 1);
+  let new-capacity = mul-int(growth-base, _extend-factor);
   let buffer-ptr on xs = _get-buffer-ptr(xs);
   let new-buffer-ptr = realloc(buffer-ptr, C-Size(mul-int(this.word.size, new-capacity)));
-  let new-head-ptr = shift(new-buffer-ptr, mul-int(this.word.size, current-capacity));
-  let _ =
-    magic external llvm.memcpy.p0.p0.i64(
-      new-head-ptr,
-      new-buffer-ptr,
-      mul-int(this.word.size, current-capacity),
-      0,
-    );
+  let new-head-ptr = shift(new-buffer-ptr, mul-int(this.word.size, growth-base));
+  memcpy(new-head-ptr, new-buffer-ptr, mul-int(this.word.size, old-capacity));
   let _ on xs = {
-    _shift-from(xs, current-capacity);
-    _shift-to(xs, current-capacity);
+    _shift-from(xs, growth-base);
+    _shift-to(xs, growth-base);
     _set-buffer-ptr(xs, new-buffer-ptr);
     _set-capacity(xs, new-capacity)
   };
@@ -292,14 +280,14 @@ define singleton<a>(x: a) -> vector(a) {
   push-back(v, x)
 }
 
-inline _access<a>(xs: &vector(a), i: int) -> &a {
+inline _access-unchecked<a>(xs: &vector(a), i: int) -> &a {
   let element-pointer = _get-element-pointer(xs, i);
   cast<int, &a>(load-int(element-pointer))
 }
 
 define access<a>(xs: &vector(a), i: int) ->> ?&a {
   if and(le-int(0, i), lt-int(i, length(xs))) {
-    Right(_access(xs, i))
+    Right(_access-unchecked(xs, i))
   } else {
     none
   }
@@ -338,7 +326,7 @@ inline fold-left-N<elem-type, result-type>(
       if eq-int(cursor, sz) {
         acc
       } else {
-        let y = _access(xs, cursor);
+        let y = _access-unchecked(xs, cursor);
         loop(add-int(cursor, 1), consumer(acc, y, cursor), xs)
       }
     };
@@ -356,7 +344,7 @@ inline fold-left-reverse-N<elem-type, result-type>(
       if lt-int(cursor, 0) {
         acc
       } else {
-        let y = this.vector._access(xs, cursor);
+        let y = this.vector._access-unchecked(xs, cursor);
         loop(sub-int(cursor, 1), consumer(acc, y, cursor), xs)
       }
     };
@@ -374,7 +362,7 @@ inline fold-left-EN<e, elem-type, result-type>(
       if eq-int(cursor, sz) {
         Right(acc)
       } else {
-        let y = _access(xs, cursor);
+        let y = _access-unchecked(xs, cursor);
         try v = consumer(acc, y, cursor);
         loop(add-int(cursor, 1), v, xs)
       }
@@ -414,7 +402,7 @@ inline fold-right-N<elem-type, result-type>(
       if eq-int(cursor, sz) {
         acc
       } else {
-        let old-value = _access(xs, cursor);
+        let old-value = _access-unchecked(xs, cursor);
         consumer(old-value, loop(add-int(cursor, 1), acc, xs), cursor)
       }
     };
@@ -440,8 +428,8 @@ inline for-each<a, b>(xs: vector(a), !f: (a, int) -> b) -> vector(b) {
 }
 
 inline for-each-N<a, b>(xs: &vector(a), f: (&a, int) -> b) -> vector(b) {
-  let capacity = get-capacity(xs);
-  fold-left-N(make(capacity), xs, (acc, x, i) => {
+  let len = length(xs);
+  fold-left-N(make(len), xs, (acc, x, i) => {
     push-back(acc, f(x, i))
   })
 }
@@ -510,8 +498,10 @@ inline zip-with<a, b, c>(xs: vector(a), ys: vector(b), !f: (a, b, int) -> c) -> 
   let helper =
     define loop(acc: vector(c), cursor: int, xs: vector(a), ys: vector(b)) -> vector(c) {
       if eq-int(cursor, len) {
-        let xs = cast<vector(a), &vector(pointer)>(xs);
-        let ys = cast<vector(b), &vector(pointer)>(ys);
+        let xs = cast<vector(a), &vector(a)>(xs);
+        let ys = cast<vector(b), &vector(b)>(ys);
+        _discard-vector-content(xs, pack-type {a}, len, len1);
+        _discard-vector-content(ys, pack-type {b}, len, len2);
         _free-vector(xs);
         _free-vector(ys);
         acc
@@ -534,8 +524,8 @@ inline zip-with-N<a, b, c>(xs: &vector(a), ys: &vector(b), f: (&a, &b, int) -> c
   let len = min-int(len1, len2);
   let result = make(len);
   grow(result, len, (acc, i) => {
-    let val1 = _access(xs, i);
-    let val2 = _access(ys, i);
+    let val1 = _access-unchecked(xs, i);
+    let val2 = _access-unchecked(ys, i);
     push-back(acc, f(val1, val2, i))
   })
 }
@@ -545,8 +535,8 @@ inline zip-fold<a, b, c>(xs: &vector(a), ys: &vector(b), base: c, f: (&a, &b, c,
   let len2 = length(ys);
   let len = min-int(len1, len2);
   grow(base, len, (acc, i) => {
-    let val1 = _access(xs, i);
-    let val2 = _access(ys, i);
+    let val1 = _access-unchecked(xs, i);
+    let val2 = _access-unchecked(ys, i);
     f(val1, val2, acc, i)
   })
 }
@@ -589,7 +579,7 @@ define exchange<a>(xs: vector(a), index: int, value: a) -> either(vector(a), pai
   }
 }
 
-define _swap<a>(xs: vector(a), i: int, j: int) -> vector(a) {
+define _swap-unchecked<a>(xs: vector(a), i: int, j: int) -> vector(a) {
   let value-i-ptr on xs = _get-element-pointer(xs, i);
   let value-j-ptr on xs = _get-element-pointer(xs, j);
   let value-i = load-int(value-i-ptr);
@@ -604,7 +594,7 @@ define swap<a>(xs: vector(a), i: int, j: int) -> vector(a) {
   let b1 = and(le-int(0, i), lt-int(i, len));
   let b2 = and(le-int(0, j), lt-int(j, len));
   if and(b1, b2) {
-    _swap(xs, i, j)
+    _swap-unchecked(xs, i, j)
   } else {
     xs
   }
@@ -629,7 +619,7 @@ define take<a>(xs: vector(a), n: int) -> vector(a) {
     let len = length(xs);
     let n = max-int(0, n);
     loop(sub-int(len, n), (i) => {
-      let v = this.vector._access(xs, add-int(i, n));
+      let v = _access-unchecked(xs, add-int(i, n));
       let _ = cast<&a, a>(v);
       Unit
     });
@@ -644,7 +634,7 @@ define drop<a>(xs: vector(a), n: int) -> vector(a) {
   let _ on xs = {
     let n = min-int(max-int(0, n), length(xs));
     loop(n, (i) => {
-      let v = this.vector._access(xs, i);
+      let v = _access-unchecked(xs, i);
       let _ = cast<&a, a>(v);
       Unit
     });
@@ -660,7 +650,7 @@ define split<a>(xs: vector(a), n: int) -> pair(vector(a), vector(a)) {
   let n = max-int(0, n);
   let ys =
     grow(ys, sub-int(len, n), (acc, i) => {
-      let v = this.vector._access(xs, add-int(i, n));
+      let v = _access-unchecked(xs, add-int(i, n));
       push-back(acc, cast<&a, a>(v))
     });
   let from = _get-from(xs);
@@ -698,7 +688,7 @@ define delete<a>(xs: vector(a), index: int) -> vector(a) {
       let source-ptr on xs = _get-element-pointer(xs, 0);
       let target-ptr on xs = _get-element-pointer(xs, 1);
       let copy-bytes = mul-int(this.word.size, index);
-      let _ = magic external llvm.memmove.p0.p0.i64(target-ptr, source-ptr, copy-bytes, 0);
+      memmove(target-ptr, source-ptr, copy-bytes);
       let _ on xs = _shift-from(xs, 1);
       xs
     } else {
@@ -706,7 +696,7 @@ define delete<a>(xs: vector(a), index: int) -> vector(a) {
       let source-ptr on xs = _get-element-pointer(xs, next-value-index);
       let target-ptr = value-ptr;
       let copy-bytes = mul-int(this.word.size, sub-int(len, next-value-index));
-      let _ = magic external llvm.memmove.p0.p0.i64(target-ptr, source-ptr, copy-bytes, 0);
+      memmove(target-ptr, source-ptr, copy-bytes);
       let _ on xs = _shift-to(xs, -1);
       xs
     }
@@ -722,7 +712,7 @@ inline find-index<a>(xs: &vector(a), !pred: (&a) -> bool) -> int {
       if ge-int(index, len) {
         -1
       } else {
-        let value = _access(xs, index);
+        let value = _access-unchecked(xs, index);
         if pred(value) {
           index
         } else {
@@ -740,7 +730,7 @@ inline find-index-end<a>(xs: &vector(a), !pred: (&a) -> bool) -> int {
       if lt-int(index, 0) {
         -1
       } else {
-        let value = _access(xs, index);
+        let value = _access-unchecked(xs, index);
         if pred(value) {
           index
         } else {
@@ -763,7 +753,7 @@ inline take-while<a>(xs: vector(a), !pred: (&a) -> bool) -> vector(a) {
 inline drop-while<a>(xs: vector(a), !pred: (&a) -> bool) -> vector(a) {
   let pivot-index on xs = find-index(xs, compose(not, pred));
   if lt-int(pivot-index, 0) {
-    make(1)
+    make(0)
   } else {
     drop(xs, pivot-index)
   }
@@ -807,7 +797,7 @@ define intercalate<a>(xs: vector(a), !sep: a) -> vector(a) {
           let swap-i = index;
           let swap-j = mul-int(2, index);
           let sep-index = sub-int(swap-j, 1);
-          let xs = _swap(xs, swap-i, swap-j);
+          let xs = _swap-unchecked(xs, swap-i, swap-j);
           let value-ptr on xs = _get-element-pointer(xs, sep-index);
           store-int(cast<a, int>(sep), value-ptr);
           self(xs, sub-int(index, 1))
@@ -830,7 +820,7 @@ define concat<a>(xss: vector(vector(a))) -> vector(a) {
       if eq-int(index, xss-size) {
         acc
       } else {
-        let ys = _access(yss, index);
+        let ys = _access-unchecked(yss, index);
         let acc = add-int(acc, length(ys));
         loop(yss, add-int(index, 1), acc)
       }
@@ -890,7 +880,7 @@ define all(xs: &vector(bool)) -> bool {
 }
 
 define any(xs: &vector(bool)) -> bool {
-  fold-left-N(True, xs, (b1, b2, _) => {
+  fold-left-N(False, xs, (b1, b2, _) => {
     or(b1, *b2)
   })
 }
@@ -902,13 +892,13 @@ inline filter<a>(xs: vector(a), !pred: (&a) -> bool) -> vector(a) {
       if eq-int(cursor, len) {
         take(xs, num-of-new-elems)
       } else {
-        let pred-is-true on xs = pred(_access(xs, cursor));
+        let pred-is-true on xs = pred(_access-unchecked(xs, cursor));
         if pred-is-true {
           let xs =
             if eq-int(num-of-new-elems, cursor) {
               xs
             } else {
-              _swap(xs, num-of-new-elems, cursor)
+              _swap-unchecked(xs, num-of-new-elems, cursor)
             };
           loop(add-int(num-of-new-elems, 1), add-int(cursor, 1), xs)
         } else {
@@ -932,7 +922,7 @@ define filter-some<a>(xs: vector(?a)) -> vector(a) {
       } else {
         let found-some on xs = {
           let value-ptr = _get-element-pointer(xs, cursor);
-          match cast<&?a, ?a>(_access(xs, cursor)) {
+          match cast<&?a, ?a>(_access-unchecked(xs, cursor)) {
           | Right(v) =>
             store-int(cast<a, int>(v), value-ptr);
             True
@@ -946,7 +936,7 @@ define filter-some<a>(xs: vector(?a)) -> vector(a) {
             if eq-int(num-of-new-elems, cursor) {
               xs
             } else {
-              _swap(xs, num-of-new-elems, cursor)
+              _swap-unchecked(xs, num-of-new-elems, cursor)
             };
           loop(add-int(num-of-new-elems, 1), add-int(cursor, 1), xs)
         } else {
@@ -964,7 +954,7 @@ inline find<a>(xs: &vector(a), !pred: (&a) -> bool) ->> ?&a {
       if ge-int(index, len) {
         none
       } else {
-        let value = _access(xs, index);
+        let value = _access-unchecked(xs, index);
         if pred(value) {
           Right(value)
         } else {
@@ -1019,96 +1009,4 @@ define meta-vector-out<a>(xs: vector(+a)) -> +vector(a) {
 
 define meta-vector-in<a>(xs: +vector(a)) -> vector(+a) {
   magic cast(_, _, xs)
-}
-
-define zen() -> unit {
-  // find
-  let xs = this.vector.make(5);
-  let xs = push-back(xs, 1);
-  let xs = push-back(xs, 2);
-  let xs = push-back(xs, 3);
-  let xs = push-back(xs, 4);
-  pin xs = push-back(xs, 5);
-  let item =
-    find(xs, (x) => {
-      eq-int(*x, -1)
-    });
-  match item {
-  | Left(_) =>
-    print-line("left")
-  | Right(x) =>
-    print-line("right");
-    print-int-line(*x);
-  };
-  let xs: vector(string) = make(0);
-  let xs = push-back(xs, *"b");
-  let xs = push-front(xs, *"a");
-  let xs = push-front(xs, *"c");
-  let !xs = drop(xs, 2);
-  let _ = xs;
-  let _ = xs;
-  let _ = xs;
-  let xs = push-front(xs, *"d");
-  let xs = push-back(xs, *"e");
-  let xs = push-front(xs, *"f");
-  let xs = push-back(xs, *"g");
-  let xs = push-front(xs, *"h");
-  let !xs = xs;
-  // let !xs = drop(xs, 3);
-  let _ = xs;
-  // let xs = drop(xs, 3);
-  let _ = xs;
-  let _ = xs;
-  let _ = push-front(xs, *"foo");
-  let _ = xs;
-  let _ = xs;
-  let _ = xs;
-  // let xs = push-back(xs, 7);
-  // let xs = push-back(xs, 8);
-  // let xs = push-back(xs, 9);
-  // let xs = push-back(xs, 10);
-  // let xs = take(xs, 5);
-  // let !xs = delete(xs, 0);
-  // let _ = !xs;
-  // let _ = !xs;
-  // let _ = !xs;
-  // let _ = !xs;
-  let xs-clone = xs;
-  pin xs = xs;
-  let ys: vector(int) = from-list(to-list(from-list(List[1, 2, 3, 4, 5])));
-  pin ys = ys;
-  let zs =
-    zip-with-N(xs, ys, (x, y, _) => {
-      replicate(x, *y)
-    });
-  let !zs = delete(reverse(zs), 100);
-  let _ = zs;
-  let _ = zs;
-  match pop-back(zs) {
-  | Left(_) =>
-    print("left\n")
-  | Right(Pair(!rest, z)) =>
-    let _ = rest;
-    let _ = rest;
-    let len on rest = length(rest);
-    let _ = rest;
-    print("right. last-elem = ");
-    let _ on z = print-line(z);
-    let _ = z;
-    print("len = ");
-    print-int-line(len)
-  };
-  pin zs = zs;
-  for(*zs, (x, _) => {
-    pin x = x;
-    print(x);
-    print(", ")
-  });
-  print("\n----\n");
-  for(xs-clone, (x, _) => {
-    pin x = x;
-    print(x);
-    print(", ")
-  });
-  print("\n")
 }

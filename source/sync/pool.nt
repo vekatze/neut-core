@@ -1,0 +1,116 @@
+import {
+  this.box {axiom-K, axiom-T},
+  this.control {discard, grow, loop},
+  this.int {max-int},
+  this.pair {Pair, meta-pair-in},
+  this.sync.cell {cell, make-cell, mutate},
+  this.sync.channel {channel, make-channel, receive, send},
+  this.sync.mvar {make-mvar, mvar},
+  this.sync.thread {join, spawn, thread},
+  this.unit {Unit, unit},
+  this.unsafe {cast},
+  this.vector {for, for-each, meta-vector-in, meta-vector-out, push-back, vector},
+}
+
+data _message(a) {
+| _Stop
+| _Run(work: () -> +a, result-channel: &mvar(a))
+}
+
+data job(a) {
+| _Job(result-chan: &mvar(a))
+}
+
+data pool(a: type) {
+| _Pool(
+    workers: vector(thread(unit)),
+    message-channel: channel(_message(a)),
+    result-channels-cell: cell(vector(&mvar(a))),
+  )
+}
+
+define _close-pool<a>(k: pool(a)) -> unit {
+  let _Pool{workers, message-channel, result-channels-cell} = k;
+  let size on workers = this.vector.length(workers);
+  let _ on message-channel =
+    loop(size, (_) => {
+      send(message-channel, box {_Stop})
+    });
+  for(workers, (worker, _) => {
+    join(worker);
+  });
+  let result-channels = axiom-T(this.sync.cell.extract(result-channels-cell));
+  for(result-channels, (ch, _) => {
+    let _ = cast<&mvar(a), mvar(a)>(ch);
+    Unit
+  });
+  discard(message-channel);
+  Unit
+}
+
+define _setup-workers<a>(message-channel: &channel(_message(a)), size: int) -> vector(thread(unit)) {
+  grow(this.vector.make(8), max-int(size, 1), (acc, _) => {
+    push-back(acc, spawn(
+      define worker() -> unit {
+        let v = axiom-T(receive(message-channel));
+        match v {
+        | _Stop =>
+          Unit
+        | _Run(f, chan) =>
+          let result = f();
+          this.sync.mvar.send(chan, result);
+          worker();
+        }
+      },
+    ))
+  })
+}
+
+inline with-pool<a, b, e>(size: int, env: e, f: (p: &pool(a), env: +e) -> +b) -> b {
+  let message-channel = cast<channel(_message(a)), &channel(_message(a))>(make-channel());
+  let result-channels-cell = make-cell(box {this.vector.make(8)});
+  let workers = _setup-workers(message-channel, size);
+  let message-channel = cast<&channel(_message(a)), channel(_message(a))>(message-channel);
+  let p = _Pool{workers, message-channel, result-channels-cell};
+  let p = cast<pool(a), &pool(a)>(p);
+  let result = f(p, cast<e, +e>(env));
+  _close-pool(cast<&pool(a), pool(a)>(p));
+  axiom-T(result)
+}
+
+define submit<a>(k: &pool(a), f: () -> +a) -> job(a) {
+  tie _Pool{message-channel, result-channels-cell} = k;
+  let result-chan = cast<mvar(a), &mvar(a)>(make-mvar<a>());
+  mutate(result-channels-cell, (result-channels) => {
+    box {
+      letbox result-channels = result-channels;
+      letbox result-chan = cast<&mvar(a), +&mvar(a)>(result-chan);
+      push-back(result-channels, result-chan)
+    }
+  });
+  let message = cast<_message(a), +_message(a)>(_Run(f, result-chan));
+  send(message-channel, message);
+  _Job(result-chan)
+}
+
+define await<a>(i: job(a)) -> +a {
+  let _Job(result-chan) = i;
+  this.sync.mvar.receive(result-chan)
+}
+
+inline for-each-parallel<a, b>(worker-num: int, xs: vector(a), f: (a) -> b) -> vector(b) {
+  with-pool(worker-num, Pair(xs, f), (p, env) => {
+    let Pair(xs, f) = meta-pair-in(env);
+    let jobs =
+      for-each(meta-vector-in(xs), (x, _) => {
+        submit(p, () => {
+          axiom-K(f, x)
+        })
+      });
+    let xs =
+      for-each(jobs, (job, _) => {
+        await(job)
+      });
+    meta-vector-out(xs)
+  })
+}

@@ -1,23 +1,170 @@
 import {
-  this.ansi {Blue, Yellow},
   this.bool,
   this.box,
-  this.doc {Chunk, Group, Nest, Seq, ansi-fg, ansi-reset, atom, break, doc, join},
-  this.doc.chunk {_layout-chunk, _size-chunk},
-  this.doc.doc-kit {
-    _Doc-Kit,
-    _Horizontal,
-    _Vertical,
-    _doc-kit,
-    _get-column,
-    _get-indentation,
-    _shift-indentation,
-    _with-local-mode,
+  this.cell {cell, make-cell},
+  this.doc {
+    Chunk,
+    Chunk-Choose,
+    Chunk-Empty,
+    Chunk-Float,
+    Chunk-Int,
+    Chunk-Join,
+    Chunk-Line,
+    Chunk-Rune,
+    Chunk-String,
+    Chunk-String-N,
+    Chunk-Style,
+    Chunk-Style-N,
+    Group,
+    Nest,
+    Seq,
+    chunk,
+    doc,
   },
-  this.ref {make-ref},
+  this.float.show {show-float},
+  this.int.show {show-int},
   this.string {string},
-  this.string.io {print-line},
-  this.unit {Unit, unit},
+  this.unit {unit},
+}
+
+foreign {
+  neut_core_v0_55_int64_strlen(int) -> int,
+  neut_core_v0_55_double_strlen(float, int) -> int,
+}
+
+data _mode {
+| _Horizontal
+| _Vertical
+}
+
+data _doc-kit {
+| _Doc-Kit(
+    width: int,
+    column-cell: cell(int),
+    indentation-cell: cell(int),
+    layout-mode-cell: cell(_mode),
+  )
+}
+
+define _set-mode(k: &_doc-kit, m: _mode) -> unit {
+  tie _Doc-Kit{layout-mode-cell} = k;
+  this.cell.mutate(layout-mode-cell, (_) => {
+    lift {m}
+  });
+}
+
+define _get-mode(k: &_doc-kit) -> _mode {
+  tie _Doc-Kit{layout-mode-cell} = k;
+  this.cell.clone(layout-mode-cell)
+}
+
+define _get-indentation(k: &_doc-kit) -> int {
+  tie _Doc-Kit{indentation-cell} = k;
+  this.cell.clone(indentation-cell)
+}
+
+define _set-indentation(k: &_doc-kit, x: int) -> unit {
+  tie _Doc-Kit{indentation-cell} = k;
+  this.cell.mutate(indentation-cell, (_) => {
+    lift {x}
+  });
+}
+
+define _shift-indentation(k: &_doc-kit, diff: int) -> unit {
+  let x = _get-indentation(k);
+  _set-indentation(k, add-int(x, diff));
+}
+
+define _get-column(k: &_doc-kit) -> int {
+  tie _Doc-Kit{column-cell} = k;
+  this.cell.clone(column-cell)
+}
+
+define _set-column(k: &_doc-kit, x: int) -> unit {
+  tie _Doc-Kit{column-cell} = k;
+  this.cell.mutate(column-cell, (_) => {
+    lift {x}
+  });
+}
+
+define _shift-column(k: &_doc-kit, diff: int) -> unit {
+  let x = _get-column(k);
+  _set-column(k, add-int(x, diff));
+}
+
+inline _with-local-mode<a>(k: &_doc-kit, local-mode: _mode, f: () -> a) -> a {
+  let i = _get-indentation(k);
+  let m = _get-mode(k);
+  _set-mode(k, local-mode);
+  let result = f();
+  _set-mode(k, m);
+  _set-indentation(k, i);
+  result
+}
+
+define _size-chunk(c: &chunk) -> int {
+  case c {
+  | Chunk-Empty =>
+    0
+  | Chunk-String(content) =>
+    this.string.length(content)
+  | Chunk-String-N(content) =>
+    this.string.length(*content)
+  | Chunk-Style(_) =>
+    0
+  | Chunk-Style-N(_) =>
+    0
+  | Chunk-Int(x) =>
+    magic external neut_core_v0_55_int64_strlen(*x)
+  | Chunk-Float(x, decimals) =>
+    magic external neut_core_v0_55_double_strlen(*x, *decimals)
+  | Chunk-Rune(_) =>
+    1
+  | Chunk-Line =>
+    0
+  | Chunk-Join(c1, c2) =>
+    add-int(_size-chunk(c1), _size-chunk(c2))
+  | Chunk-Choose(c, _) =>
+    _size-chunk(c)
+  }
+}
+
+define _layout-chunk(k: &_doc-kit, c: &chunk) -> string {
+  case c {
+  | Chunk-Empty =>
+    *""
+  | Chunk-String(t) =>
+    _shift-column(k, this.string.length(t));
+    *t
+  | Chunk-String-N(t) =>
+    _shift-column(k, this.string.length(*t));
+    **t
+  | Chunk-Style(t) =>
+    *t
+  | Chunk-Style-N(t) =>
+    **t
+  | Chunk-Int(x) =>
+    show-int(*x)
+  | Chunk-Float(x, decimals) =>
+    show-float(*x, *decimals)
+  | Chunk-Rune(r) =>
+    this.string.singleton(*r)
+  | Chunk-Line =>
+    pin tmp = this.string.replicate(" ", _get-indentation(k));
+    _set-column(k, _get-indentation(k));
+    this.string.append("\n", tmp)
+  | Chunk-Join(c1, c2) =>
+    pin t1 = _layout-chunk(k, c1);
+    pin t2 = _layout-chunk(k, c2);
+    this.string.append(t1, t2)
+  | Chunk-Choose(dh, dv) =>
+    match _get-mode(k) {
+    | _Horizontal =>
+      _layout-chunk(k, dh)
+    | _Vertical =>
+      _layout-chunk(k, dv)
+    }
+  }
 }
 
 define _size(target: &doc) -> int {
@@ -68,39 +215,9 @@ define _layout(k: &_doc-kit, target: &doc) -> string {
 }
 
 define show-doc(target: &doc, max-ribbon-width: int) -> string {
-  let column-ref = make-ref(lift {0});
-  let indentation-ref = make-ref(lift {0});
-  let mode-ref = make-ref(lift {_Horizontal});
-  pin k = _Doc-Kit(max-ribbon-width, column-ref, indentation-ref, mode-ref);
+  let column-cell = make-cell(lift {0});
+  let indentation-cell = make-cell(lift {0});
+  let mode-cell = make-cell(lift {_Horizontal});
+  pin k = _Doc-Kit(max-ribbon-width, column-cell, indentation-cell, mode-cell);
   _layout(k, target)
-}
-
-define zen() -> unit {
-  pin item =
-    Group(join[
-      ansi-fg(Blue),
-      atom(*"begin"),
-      ansi-reset,
-      Nest(2, join[
-        break(" "),
-        Group(
-          join[
-            ansi-fg(Yellow),
-            atom(*"print;"),
-            ansi-reset,
-            break(" "),
-            atom(*"test;"),
-            break(" "),
-            atom(*"stmt;"),
-          ],
-        ),
-      ]),
-      break(" "),
-      ansi-fg(Blue),
-      atom(*"end"),
-      ansi-reset,
-    ]);
-  pin item = show-doc(item, 10);
-  print-line(item);
-  Unit
 }

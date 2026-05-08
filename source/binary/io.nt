@@ -1,46 +1,28 @@
 import {
-  this.binary {_get-content-pointer, binary, binary-length},
+  this.binary {binary, length},
+  this.binary.pointer {get-content-pointer},
   this.bool,
   this.c-size {C-Size},
-  this.c-ssize {C-SSize, from-c-ssize, lt-c-ssize},
+  this.c-ssize {C-SSize},
   this.either {Left, Right},
-  this.external {malloc, read, realloc, write},
   this.file.descriptor {descriptor},
+  this.file.descriptor.unsafe {read, write-all},
   this.int.show {show-int},
   this.list {List},
-  this.magic,
-  this.memory,
+  this.memory {malloc},
+  this.memory.unsafe {realloc, store-int},
   this.pointer {extract, shift},
   this.string {format},
   this.system {Application-Error, report-system-error, system},
-  this.unit {Unit, unit},
+  this.unit {unit},
+  this.unsafe {cast},
   this.word,
 }
 
-define _write-loop(d: descriptor, p: pointer, size: int) ->> system(unit) {
-  let loop =
-    define write-loop(acc: int) ->> system(unit) {
-      let rest = sub-int(size, acc);
-      let head-ptr = shift(p, acc);
-      let bytes = write(d, head-ptr, C-Size(rest));
-      if lt-c-ssize(bytes, 0) {
-        report-system-error()
-      } else {
-        let acc = add-int(acc, from-c-ssize(bytes));
-        if eq-int(acc, size) {
-          Right(Unit)
-        } else {
-          write-loop(acc)
-        }
-      }
-    };
-  loop(0)
-}
-
 define write(d: descriptor, b: &binary) ->> system(unit) {
-  let content-pointer = _get-content-pointer(b);
-  let len = binary-length(b);
-  _write-loop(d, content-pointer, len)
+  let content-pointer = get-content-pointer(b);
+  let len = length(b);
+  write-all(d, content-pointer, len)
 }
 
 define _read-inner(
@@ -57,8 +39,8 @@ define _read-inner(
   if lt-int(bytes, 0) {
     report-system-error()
   } else-if eq-int(bytes, 0) {
-    this.memory.store-int(next-length, shift(base-ptr, u));
-    Right(this.magic.cast<pointer, binary>(base-ptr))
+    store-int(next-length, shift(base-ptr, u));
+    Right(cast<pointer, binary>(base-ptr))
   } else-if lt-int(bytes, readable-size) {
     _read-inner(data-source, base-ptr, next-length, buffer-size)
   } else {
@@ -83,7 +65,7 @@ define read(from: descriptor, initial-buffer-size: int) ->> system(binary) {
     let u = this.word.size;
     let ptr-size = add-int(mul-int(u, 2), initial-buffer-size);
     let ptr = malloc(C-Size(ptr-size));
-    this.memory.store-int(0, ptr);
+    store-int(0, ptr);
     _read-inner(from, ptr, 0, initial-buffer-size)
   }
 }

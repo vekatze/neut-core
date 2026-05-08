@@ -1,6 +1,6 @@
 data monoid(a) {
 | Monoid(
-    e: a,
-    op: (a, a) -> a,
+    empty: a,
+    combine: (a, a) -> a,
   )
 }

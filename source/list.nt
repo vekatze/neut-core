@@ -1,6 +1,6 @@
 import {
   this.bool {False, True, and, bool, or},
-  this.box {embody},
+  this.box,
   this.either {Left, Right, either, none},
   this.monoid {Monoid, monoid},
   this.ord {Ord, ord},
@@ -232,7 +232,7 @@ define append<a>(xs: list(a), ys: list(a)) -> list(a) {
 }
 
 define concat<a>(xss: list(list(a))) -> list(a) {
-  fold-left(Nil, xss, exact append)
+  fold-right(xss, Nil, exact append)
 }
 
 define reverse<a>(xs: list(a)) -> list(a) {
@@ -367,7 +367,7 @@ define any(xs: list(bool)) -> bool {
 
 // right-open interval
 define range(from: int, to: int) -> list(int) {
-  if eq-int(from, to) {
+  if ge-int(from, to) {
     Nil
   } else {
     Cons(from, range(add-int(from, 1), to))
@@ -421,9 +421,9 @@ define filter-some<a>(xs: list(?a)) -> list(a) {
 }
 
 inline sum<a>(as-monoid: monoid(a), xs: list(a)) -> a {
-  let Monoid{e, op} = as-monoid;
-  fold-left(e, xs, (acc, x) => {
-    op(acc, x)
+  let Monoid{empty, combine} = as-monoid;
+  fold-left(empty, xs, (acc, x) => {
+    combine(acc, x)
   })
 }
 
@@ -487,10 +487,6 @@ define take<a>(xs: list(a), n: int) -> list(a) {
   }
 }
 
-define take-N2<a>(xs: &list(a)) -> list(a) {
-  embody(xs)
-}
-
 define take-N<a>(xs: &list(a), n: int) -> list(a) {
   if le-int(n, 0) {
     Nil
@@ -536,7 +532,7 @@ define _split<a>(xs: list(a), n: int, head-acc: list(a)) -> pair(list(a), list(a
   } else {
     match xs {
     | Nil =>
-      Pair(head-acc, Nil)
+      Pair(reverse(head-acc), Nil)
     | Cons(y, ys) =>
       _split(ys, sub-int(n, 1), Cons(y, head-acc))
     }
@@ -549,7 +545,7 @@ define _split-N<a>(xs: &list(a), n: int, head-acc: list(a)) -> pair(list(a), lis
   } else {
     case xs {
     | Nil =>
-      Pair(head-acc, Nil)
+      Pair(reverse(head-acc), Nil)
     | Cons(y, ys) =>
       _split-N(ys, sub-int(n, 1), Cons(*y, head-acc))
     }

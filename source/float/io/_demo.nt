@@ -1,0 +1,12 @@
+import {
+  this.float.io {print-float, print-float-line},
+  this.string,
+  this.string.io {print},
+  this.unit {unit},
+}
+
+define zen() -> unit {
+  print-float(1234.56789, 2);
+  print("\n");
+  print-float-line(123.45, 7)
+}

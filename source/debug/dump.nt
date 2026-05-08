@@ -1,0 +1,29 @@
+import {
+  this.doc.show {show-doc},
+  this.show.generic {to-doc},
+  this.string,
+  this.string.io {print},
+  this.unit {unit},
+}
+
+define-meta vet<a>(x: '&a)[ribbon-length := quote {50}] -> 'unit {
+  quote {
+    pin tmp = unquote {to-doc(x)};
+    pin item = show-doc(tmp, unquote {ribbon-length});
+    print(item);
+    print("\n");
+  }
+}
+
+define-meta trace<a>(x: 'a) -> 'a {
+  introspect build-mode {
+  | release =>
+    x
+  | default =>
+    quote {
+      let x = unquote {x};
+      let _ on x = unquote {vet(quote {x})};
+      x
+    }
+  }
+}

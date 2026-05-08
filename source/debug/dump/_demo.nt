@@ -1,0 +1,22 @@
+import {
+  this.bool {True, bool},
+  this.box,
+  this.debug.dump {vet},
+  this.either {Left, either},
+  this.list {list},
+  this.pair {Pair, pair},
+  this.string {string},
+  this.string.io {print-line},
+  this.unit {Unit, unit},
+  this.vector {vector},
+}
+
+define zen() -> unit {
+  pin xs: vector(pair(&string, +string)) = this.vector.Vector[Pair("a", box {*"b"}), Pair("c", box {*"d"})];
+  print-line("before");
+  pin k: either(bool, list(float)) = Left(True);
+  vet::(k);
+  vet::(xs);
+  print-line("after");
+  Unit
+}

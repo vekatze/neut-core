@@ -1,19 +1,113 @@
-data descriptor {}
+import {
+  this.bool {False, bool, not},
+  this.c-int {C-Int, c-int, eq-c-int, ge-c-int},
+  this.c-offset {C-Offset},
+  this.c-size {C-Size},
+  this.either {Right, none},
+  this.file._descriptor-option,
+  this.file._syscall,
+  this.file._syscall.unsafe,
+  this.file.access-mode {access-mode},
+  this.file.mode {mode},
+  this.file.seek {seek-origin},
+  this.memory {malloc},
+  this.memory.unsafe {free},
+  this.pair {Pair, pair},
+  this.pointer {shift},
+  this.string {string},
+  this.string.pointer {get-content-pointer},
+  this.system {report-system-error, system},
+  this.unit {Unit, unit},
+  this.word,
+}
+
+data descriptor {
+| _Descriptor(c-int)
+}
+
+define to-c-int(d: descriptor) -> c-int {
+  let _Descriptor(c) = d;
+  c
+}
+
+define is-valid-descriptor(d: descriptor) -> bool {
+  ge-c-int(to-c-int(d), 0)
+}
 
 constant stdin: descriptor {
-  magic opaque-value {
-    magic cast(int, descriptor, 0)
-  }
+  _Descriptor(0)
 }
 
 constant stdout: descriptor {
-  magic opaque-value {
-    magic cast(int, descriptor, 1)
-  }
+  _Descriptor(1)
 }
 
 constant stderr: descriptor {
-  magic opaque-value {
-    magic cast(int, descriptor, 2)
+  _Descriptor(2)
+}
+
+define open(
+  path: &string,
+  access: access-mode,
+)[
+  append: bool := False,
+  truncate: bool := False,
+  create: ?mode := none,
+] ->> system(descriptor) {
+  pin path = this.string.append(path, "\0");
+  let actual-path-string = get-content-pointer(path);
+  let Pair(flags, mode) = this.file._descriptor-option.open-args-to-c-int(access, append, truncate, create);
+  let fd = _Descriptor(this.file._syscall.unsafe.open(actual-path-string, flags, mode));
+  let valid = is-valid-descriptor(fd);
+  if not(valid) {
+    report-system-error()
+  } else {
+    Right(fd)
+  }
+}
+
+define close(f: descriptor) ->> system(unit) {
+  let result = this.file._syscall.close(to-c-int(f));
+  if eq-c-int(result, 0) {
+    Right(Unit)
+  } else {
+    report-system-error()
+  }
+}
+
+define seek(f: descriptor, offset: int, origin: seek-origin) ->> system(int) {
+  let C-Offset(result) =
+    this.file._syscall.lseek(
+      to-c-int(f),
+      C-Offset(offset),
+      this.file._descriptor-option.seek-origin-to-c-int(origin),
+    );
+  if lt-int(result, 0) {
+    report-system-error()
+  } else {
+    Right(result)
+  }
+}
+
+define pipe() ->> system(pair(descriptor, descriptor)) {
+  let ptr = malloc(C-Size(mul-int(this.word.size, 2)));
+  let result = this.file._syscall.unsafe.pipe(ptr);
+  if eq-c-int(result, -1) {
+    free(ptr);
+    report-system-error()
+  } else {
+    let reader = _Descriptor(C-Int(magic load(int32, ptr)));
+    let writer = _Descriptor(C-Int(magic load(int32, shift(ptr, 4))));
+    free(ptr);
+    Right(Pair(reader, writer))
+  }
+}
+
+define dup2(fd1: descriptor, fd2: descriptor) ->> system(unit) {
+  let result = this.file._syscall.dup2(to-c-int(fd1), to-c-int(fd2));
+  if eq-c-int(result, -1) {
+    report-system-error()
+  } else {
+    Right(Unit)
   }
 }

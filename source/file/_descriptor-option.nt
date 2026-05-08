@@ -1,0 +1,133 @@
+import {
+  this.bool {bool},
+  this.c-int {C-Int, c-int, or-c-int},
+  this.either {Left, Right},
+  this.file.access-mode {Read, Read-Write, Write, access-mode},
+  this.file.mode {Mode, mode},
+  this.file.seek {Current, End, Start, seek-origin},
+  this.pair {Pair, pair},
+  this.unit,
+}
+
+foreign {
+  neut_core_v0_55_O_RDONLY() -> c-int,
+  neut_core_v0_55_O_WRONLY() -> c-int,
+  neut_core_v0_55_O_RDWR() -> c-int,
+  neut_core_v0_55_O_CREAT() -> c-int,
+  neut_core_v0_55_O_APPEND() -> c-int,
+  neut_core_v0_55_O_TRUNC() -> c-int,
+  neut_core_v0_55_SEEK_SET() -> c-int,
+  neut_core_v0_55_SEEK_CUR() -> c-int,
+  neut_core_v0_55_SEEK_END() -> c-int,
+}
+
+constant _O_RDONLY: c-int {
+  magic opaque-value {
+    magic external neut_core_v0_55_O_RDONLY()
+  }
+}
+
+constant _O_WRONLY: c-int {
+  magic opaque-value {
+    magic external neut_core_v0_55_O_WRONLY()
+  }
+}
+
+constant _O_RDWR: c-int {
+  magic opaque-value {
+    magic external neut_core_v0_55_O_RDWR()
+  }
+}
+
+constant _O_CREAT: c-int {
+  magic opaque-value {
+    magic external neut_core_v0_55_O_CREAT()
+  }
+}
+
+constant _O_APPEND: c-int {
+  magic opaque-value {
+    magic external neut_core_v0_55_O_APPEND()
+  }
+}
+
+constant _O_TRUNC: c-int {
+  magic opaque-value {
+    magic external neut_core_v0_55_O_TRUNC()
+  }
+}
+
+constant _SEEK_SET: c-int {
+  magic opaque-value {
+    magic external neut_core_v0_55_SEEK_SET()
+  }
+}
+
+constant _SEEK_CUR: c-int {
+  magic opaque-value {
+    magic external neut_core_v0_55_SEEK_CUR()
+  }
+}
+
+constant _SEEK_END: c-int {
+  magic opaque-value {
+    magic external neut_core_v0_55_SEEK_END()
+  }
+}
+
+define _access-mode-to-c-int(access: access-mode) -> c-int {
+  match access {
+  | Read =>
+    _O_RDONLY
+  | Write =>
+    _O_WRONLY
+  | Read-Write =>
+    _O_RDWR
+  }
+}
+
+define _flag-if(enabled: bool, flag: c-int) -> c-int {
+  if enabled {
+    flag
+  } else {
+    0
+  }
+}
+
+define mode-to-c-int(mode: mode) -> c-int {
+  let Mode(value) = mode;
+  C-Int(value)
+}
+
+define _create-to-c-int(create: ?mode) -> pair(c-int, c-int) {
+  match create {
+  | Left(_) =>
+    Pair(0, C-Int(0))
+  | Right(mode) =>
+    Pair(_O_CREAT, mode-to-c-int(mode))
+  }
+}
+
+define open-args-to-c-int(access: access-mode, append: bool, truncate: bool, create: ?mode) -> pair(c-int, c-int) {
+  let Pair(create-flag, create-mode) = _create-to-c-int(create);
+  let flags =
+    or-c-int(
+      _access-mode-to-c-int(access),
+      or-c-int(
+        _flag-if(append, _O_APPEND),
+        or-c-int(_flag-if(truncate, _O_TRUNC), create-flag),
+      ),
+    );
+  Pair(flags, create-mode)
+}
+
+define seek-origin-to-c-int(s: seek-origin) -> c-int {
+  match s {
+  | Start =>
+    _SEEK_SET
+  | Current =>
+    _SEEK_CUR
+  | End =>
+    _SEEK_END
+  }
+}

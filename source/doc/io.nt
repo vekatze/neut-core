@@ -1,10 +1,7 @@
 import {
-  this.ansi {Blue, Yellow},
-  this.box,
-  this.doc {Group, Nest, ansi-fg, ansi-reset, atom, break, doc, join},
+  this.doc {doc},
   this.doc.show {show-doc},
   this.file.descriptor {descriptor, stdout},
-  this.string,
   this.string.io {write, write-line},
   this.system {system},
   this.unit {Unit, unit},
@@ -27,34 +24,5 @@ define print-doc(x: &doc, ribbon-width: int) -> unit {
 
 define print-doc-line(x: &doc, ribbon-width: int) -> unit {
   let _ = write-doc-line(stdout, x, ribbon-width);
-  Unit
-}
-
-define zen() -> unit {
-  pin item =
-    Group(join[
-      ansi-fg(Blue),
-      atom(*"begin"),
-      ansi-reset,
-      Nest(2, join[
-        break(" "),
-        Group(
-          join[
-            ansi-fg(Yellow),
-            atom(*"print;"),
-            ansi-reset,
-            break(" "),
-            atom(*"test;"),
-            break(" "),
-            atom(*"stmt;"),
-          ],
-        ),
-      ]),
-      break(" "),
-      ansi-fg(Blue),
-      atom(*"end"),
-      ansi-reset,
-    ]);
-  print-doc-line(item, 20);
   Unit
 }

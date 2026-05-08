@@ -1,0 +1,50 @@
+import {
+  this.box,
+  this.c-int {from-c-int},
+  this.either {Left, Right},
+  this.int.io {print-int-line},
+  this.list {List},
+  this.process {Exited, Process-Result, Process-Spec, Signaled, Stopped, process-status, run},
+  this.string,
+  this.string.io {print},
+  this.system {get-error-message},
+  this.unit {Unit, unit},
+}
+
+define _print-process-status(st: process-status) -> unit {
+  match st {
+  | Exited(status) =>
+    print-int-line(from-c-int(status))
+  | Signaled(_, _) =>
+    Unit
+  | Stopped(_) =>
+    Unit
+  }
+}
+
+define zen() -> unit {
+  let cmd =
+    Process-Spec{
+      command := *"sh",
+      args := List[*"-c", *"ls"],
+      cwd := Right(*"/etc"),
+      input := *"",
+    };
+  match run(cmd, 1024, 1024) {
+  | Right(result) =>
+    let Process-Result{stdout-string, stderr-string, status} = result;
+    print("stdout:\n");
+    let _ on stdout-string = print(stdout-string);
+    print("\nstderr:\n");
+    let _ on stderr-string = print(stderr-string);
+    print("\n");
+    let _ = stdout-string;
+    let _ = stderr-string;
+    print("exit-code: ");
+    _print-process-status(status);
+  | Left(e) =>
+    print("fail: ");
+    pin message = get-error-message(e);
+    print(message)
+  }
+}

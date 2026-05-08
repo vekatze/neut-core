@@ -2,7 +2,9 @@ import {
   this.bool {False, True, bool},
   this.dictionary {dictionary},
   this.either {Left, Right},
+  this.list {Cons, Nil, fold-left, list},
   this.ord {ord},
+  this.pair {Pair, pair},
   this.unit {Unit, unit},
 }
 
@@ -14,35 +16,55 @@ constant empty<a>: set(a) {
   _Set(this.dictionary.empty)
 }
 
+define size<a>(s: &set(a)) -> int {
+  tie _Set(s) = s;
+  this.dictionary.size(s)
+}
+
+define is-empty<a>(s: &set(a)) -> bool {
+  eq-int(size(s), 0)
+}
+
 define singleton<a>(x: a) -> set(a) {
   _Set(this.dictionary.singleton(x, Unit))
 }
 
-inline make-insert<a>(k: ord(a)) -> (s: set(a), x: a) -> set(a) {
-  let !insert = this.dictionary.make-insert(k);
-  define _(s: set(a), x: a) -> set(a) {
-    let _Set(s) = s;
-    _Set(insert(s, x, Unit))
+define insert<a>(L: &ord(a), s: set(a), x: a) -> set(a) {
+  let _Set(s) = s;
+  _Set(this.dictionary.insert(L, s, x, Unit))
+}
+
+define delete<a>(L: &ord(a), s: set(a), x: a) -> set(a) {
+  let _Set(s) = s;
+  _Set(this.dictionary.delete(L, s, x))
+}
+
+define member<a>(L: &ord(a), s: &set(a), x: &a) -> bool {
+  tie _Set(s) = s;
+  match this.dictionary.lookup(L, s, x) {
+  | Right(_) =>
+    True
+  | Left(_) =>
+    False
   }
 }
 
-inline make-delete<a>(k: ord(a)) -> (s: set(a), x: a) -> set(a) {
-  let !delete = this.dictionary.make-delete(k);
-  define _(s: set(a), x: a) -> set(a) {
-    let _Set(s) = s;
-    _Set(delete(s, x))
+define from-list<a>(L: &ord(a), xs: list(a)) -> set(a) {
+  fold-left(empty, xs, (acc, x) => {
+    insert(L, acc, x)
+  })
+}
+
+define _to-list-aux<a>(kvs: list(pair(a, unit)), acc: list(a)) -> list(a) {
+  match kvs {
+  | Nil =>
+    acc
+  | Cons(Pair(x, _), rest) =>
+    Cons(x, _to-list-aux(rest, acc))
   }
 }
 
-inline make-member<a>(k: ord(a)) -> (s: &set(a), x: &a) -> bool {
-  let !lookup = this.dictionary.make-lookup(k);
-  define _(s: &set(a), x: &a) -> bool {
-    tie _Set(s) = s;
-    match lookup(s, x) {
-    | Right(_) =>
-      True
-    | Left(_) =>
-      False
-    }
-  }
+define to-list<a>(s: set(a)) -> list(a) {
+  let _Set(s) = s;
+  _to-list-aux(this.dictionary.to-list(s), Nil)
 }

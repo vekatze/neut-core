@@ -1,0 +1,435 @@
+import {
+  this.ansi {
+    Background,
+    Backward,
+    Black,
+    Blue,
+    Bold,
+    Color,
+    Color-16,
+    Color-256,
+    Color-RGB,
+    Cyan,
+    Down,
+    Down-Start,
+    Dull,
+    Erase,
+    Faint,
+    Foreground,
+    Forward,
+    From-Cursor,
+    Green,
+    Italic,
+    Line,
+    Magenta,
+    Move-Cursor,
+    Normal,
+    Red,
+    Screen,
+    Set-Style,
+    To,
+    To-Column,
+    To-Cursor,
+    Underline,
+    Up,
+    Up-Start,
+    Vivid,
+    White,
+    Whole,
+    Yellow,
+    command,
+  },
+  this.binary {allocate, binary, take},
+  this.binary.pointer {get-content-pointer},
+  this.bool {bool},
+  this.box {axiom-T},
+  this.c-int {c-int, from-c-int},
+  this.c-size {C-Size, c-size},
+  this.control {discard},
+  this.int {max-int},
+  this.memory.unsafe {memcpy, store-float, store-int, store-int16, store-int32, store-int8},
+  this.pointer {null-pointer, shift},
+  this.rune {size, to-int32},
+  this.rune.unsafe {store-rune},
+  this.string {string},
+  this.string.pointer,
+  this.sync.cell {cell, make-cell, mutate},
+  this.unit {unit},
+}
+
+foreign {
+  snprintf(pointer, c-size, pointer) -> c-int,
+  sprintf(pointer, pointer) -> c-int,
+}
+
+data _binary-builder {
+| _Binary-Builder(
+    cursor: int,
+    content: binary,
+  )
+}
+
+alias binary-builder {
+  cell(_binary-builder)
+}
+
+define _extension-required-p(b: &binary-builder, new-size: int) -> bool {
+  this.sync.cell.borrow(b, (val) => {
+    tie _Binary-Builder{cursor, content} = val;
+    let current-len = this.binary.length(content);
+    lift {gt-int(add-int(*cursor, new-size), current-len)}
+  })
+}
+
+define _extend(b: &binary-builder) -> unit {
+  mutate(b, (x: +_binary-builder) => {
+    let _Binary-Builder{cursor, content} = axiom-T(x);
+    let current-size on content = this.binary.length(content);
+    let new-content = allocate(max-int(mul-int(current-size, 2), 1));
+    let content-ptr on content = get-content-pointer(content);
+    let new-content-ptr on new-content = get-content-pointer(new-content);
+    memcpy(new-content-ptr, content-ptr, cursor);
+    discard(content);
+    lift {_Binary-Builder(cursor, new-content)}
+  })
+}
+
+define _get-head-ptr(b: &binary-builder, fragment-size: int) -> pointer {
+  if _extension-required-p(b, fragment-size) {
+    _extend(b);
+    _get-head-ptr(b, fragment-size)
+  } else {
+    this.sync.cell.borrow(b, (val) => {
+      tie _Binary-Builder{cursor, content} = val;
+      lift {shift(get-content-pointer(content), *cursor)}
+    })
+  }
+}
+
+define _proceed(b: &binary-builder, size: int) -> unit {
+  mutate(b, (_b) => {
+    let _Binary-Builder{cursor, content} = axiom-T(_b);
+    lift {_Binary-Builder{cursor := add-int(cursor, size), content}}
+  })
+}
+
+define extract(b: binary-builder) -> binary {
+  let _Binary-Builder{cursor, content} = axiom-T(this.sync.cell.extract(b));
+  take(content, cursor)
+}
+
+define make-binary-builder(size: int) -> binary-builder {
+  make-cell(
+    lift {
+      _Binary-Builder{
+        cursor := 0,
+        content := allocate(size),
+      }
+    },
+  )
+}
+
+define append-int64(b: &binary-builder, x: int) -> unit {
+  let size = 8;
+  let content-head-ptr = _get-head-ptr(b, size);
+  store-int(x, content-head-ptr);
+  _proceed(b, size)
+}
+
+define append-int64-UTF8(b: &binary-builder, x: int64) -> unit {
+  let fmt = this.string.pointer.get-content-pointer("%ld\0");
+  let fragment-size = from-c-int(magic external snprintf(null-pointer, C-Size(0), fmt)(x: int64));
+  let content-head-ptr = _get-head-ptr(b, add-int(fragment-size, 1));
+  let _ = magic external sprintf(content-head-ptr, fmt)(x: int64);
+  _proceed(b, fragment-size)
+}
+
+define append-int32(b: &binary-builder, x: int32) -> unit {
+  let size = 4;
+  let content-head-ptr = _get-head-ptr(b, size);
+  store-int32(x, content-head-ptr);
+  _proceed(b, size)
+}
+
+define append-int32-UTF8(b: &binary-builder, x: int32) -> unit {
+  append-int64-UTF8(b, sext-int32-int64(x))
+}
+
+define append-int16(b: &binary-builder, x: int16) -> unit {
+  let size = 2;
+  let content-head-ptr = _get-head-ptr(b, size);
+  store-int16(x, content-head-ptr);
+  _proceed(b, size)
+}
+
+define append-int16-UTF8(b: &binary-builder, x: int16) -> unit {
+  append-int64-UTF8(b, sext-int16-int64(x))
+}
+
+define append-int8(b: &binary-builder, x: int8) -> unit {
+  let size = 1;
+  let content-head-ptr = _get-head-ptr(b, size);
+  store-int8(x, content-head-ptr);
+  _proceed(b, size)
+}
+
+define append-int8-UTF8(b: &binary-builder, x: int8) -> unit {
+  append-int64-UTF8(b, sext-int8-int64(x))
+}
+
+define append-float64(b: &binary-builder, x: float) -> unit {
+  let size = 8;
+  let content-head-ptr = _get-head-ptr(b, size);
+  store-float(x, content-head-ptr);
+  _proceed(b, size)
+}
+
+define append-float64-UTF8(b: &binary-builder, x: float64) -> unit {
+  let fmt = this.string.pointer.get-content-pointer("%lf\0");
+  let fragment-size = from-c-int(magic external snprintf(null-pointer, C-Size(0), fmt)(x: float64));
+  let content-head-ptr = _get-head-ptr(b, add-int(fragment-size, 1));
+  let _ = magic external sprintf(content-head-ptr, fmt)(x: float64);
+  _proceed(b, fragment-size)
+}
+
+define append-float32(b: &binary-builder, x: float32) -> unit {
+  let size = 4;
+  let content-head-ptr = _get-head-ptr(b, size);
+  magic store(float32, x, content-head-ptr);
+  _proceed(b, size)
+}
+
+define append-float32-UTF8(b: &binary-builder, x: float32) -> unit {
+  append-float64-UTF8(b, fpext-float32-float64(x))
+}
+
+define append-float16(b: &binary-builder, x: float16) -> unit {
+  let size = 2;
+  let content-head-ptr = _get-head-ptr(b, size);
+  magic store(float16, x, content-head-ptr);
+  _proceed(b, size)
+}
+
+define append-float16-UTF8(b: &binary-builder, x: float16) -> unit {
+  append-float64-UTF8(b, fpext-float16-float64(x))
+}
+
+define append-binary(b: &binary-builder, x: &binary) -> unit {
+  let string-ptr = get-content-pointer(x);
+  let string-byte-len = this.binary.length(x);
+  let content-head-ptr = _get-head-ptr(b, string-byte-len);
+  memcpy(content-head-ptr, string-ptr, string-byte-len);
+  _proceed(b, string-byte-len)
+}
+
+define append-string(b: &binary-builder, x: &string) -> unit {
+  let string-ptr = this.string.pointer.get-content-pointer(x);
+  let string-byte-len = this.string.byte-length(x);
+  let content-head-ptr = _get-head-ptr(b, string-byte-len);
+  memcpy(content-head-ptr, string-ptr, string-byte-len);
+  _proceed(b, string-byte-len)
+}
+
+define append-rune(b: &binary-builder, x: rune) -> unit {
+  append-int32(b, to-int32(x));
+}
+
+define append-rune-UTF8(b: &binary-builder, x: rune) -> unit {
+  let rune-size = size(x);
+  let content-head-ptr = _get-head-ptr(b, rune-size);
+  let buffer-ptr = magic alloca(int32, 1);
+  let _ = store-rune(x, buffer-ptr);
+  memcpy(content-head-ptr, buffer-ptr, rune-size);
+  _proceed(b, rune-size);
+}
+
+inline append-ansi(k: &binary-builder, c: command) -> unit {
+  match c {
+  | Set-Style(style) =>
+    match style {
+    | Normal =>
+      append-string(k, "\u{1B}[0m")
+    | Bold =>
+      append-string(k, "\u{1B}[1m")
+    | Faint =>
+      append-string(k, "\u{1B}[2m")
+    | Italic =>
+      append-string(k, "\u{1B}[3m")
+    | Underline =>
+      append-string(k, "\u{1B}[4m")
+    | Color(color-layer, color) =>
+      match color-layer {
+      | Foreground =>
+        match color {
+        | Color-16(color-intensity, color) =>
+          match color-intensity {
+          | Dull =>
+            match color {
+            | Black =>
+              append-string(k, "\u{1B}[30m")
+            | Red =>
+              append-string(k, "\u{1B}[31m")
+            | Green =>
+              append-string(k, "\u{1B}[32m")
+            | Yellow =>
+              append-string(k, "\u{1B}[33m")
+            | Blue =>
+              append-string(k, "\u{1B}[34m")
+            | Magenta =>
+              append-string(k, "\u{1B}[35m")
+            | Cyan =>
+              append-string(k, "\u{1B}[36m")
+            | White =>
+              append-string(k, "\u{1B}[37m")
+            }
+          | Vivid =>
+            match color {
+            | Black =>
+              append-string(k, "\u{1B}[90m")
+            | Red =>
+              append-string(k, "\u{1B}[91m")
+            | Green =>
+              append-string(k, "\u{1B}[92m")
+            | Yellow =>
+              append-string(k, "\u{1B}[93m")
+            | Blue =>
+              append-string(k, "\u{1B}[94m")
+            | Magenta =>
+              append-string(k, "\u{1B}[95m")
+            | Cyan =>
+              append-string(k, "\u{1B}[96m")
+            | White =>
+              append-string(k, "\u{1B}[97m")
+            }
+          }
+        | Color-256(value) =>
+          append-string(k, "\u{1B}[38;5;");
+          append-int64-UTF8(k, zext-int8-int(value));
+          append-string(k, "m")
+        | Color-RGB(r, g, b) =>
+          append-string(k, "\u{1B}[38;2;");
+          append-int64-UTF8(k, zext-int8-int(r));
+          append-string(k, ";");
+          append-int64-UTF8(k, zext-int8-int(g));
+          append-string(k, ";");
+          append-int64-UTF8(k, zext-int8-int(b));
+          append-string(k, "m");
+        }
+      | Background =>
+        match color {
+        | Color-16(color-intensity, color) =>
+          match color-intensity {
+          | Dull =>
+            match color {
+            | Black =>
+              append-string(k, "\u{1B}[40m")
+            | Red =>
+              append-string(k, "\u{1B}[41m")
+            | Green =>
+              append-string(k, "\u{1B}[42m")
+            | Yellow =>
+              append-string(k, "\u{1B}[43m")
+            | Blue =>
+              append-string(k, "\u{1B}[44m")
+            | Magenta =>
+              append-string(k, "\u{1B}[45m")
+            | Cyan =>
+              append-string(k, "\u{1B}[46m")
+            | White =>
+              append-string(k, "\u{1B}[47m")
+            }
+          | Vivid =>
+            match color {
+            | Black =>
+              append-string(k, "\u{1B}[100m")
+            | Red =>
+              append-string(k, "\u{1B}[101m")
+            | Green =>
+              append-string(k, "\u{1B}[102m")
+            | Yellow =>
+              append-string(k, "\u{1B}[103m")
+            | Blue =>
+              append-string(k, "\u{1B}[104m")
+            | Magenta =>
+              append-string(k, "\u{1B}[105m")
+            | Cyan =>
+              append-string(k, "\u{1B}[106m")
+            | White =>
+              append-string(k, "\u{1B}[107m")
+            }
+          }
+        | Color-256(value) =>
+          append-string(k, "\u{1B}[48;5;");
+          append-int64-UTF8(k, zext-int8-int(value));
+          append-string(k, "m");
+        | Color-RGB(r, g, b) =>
+          append-string(k, "\u{1B}[48;2;");
+          append-int64-UTF8(k, zext-int8-int(r));
+          append-string(k, ";");
+          append-int64-UTF8(k, zext-int8-int(g));
+          append-string(k, ";");
+          append-int64-UTF8(k, zext-int8-int(b));
+          append-string(k, "m");
+        }
+      }
+    }
+  | Move-Cursor(movement) =>
+    match movement {
+    | Up(offset) =>
+      append-string(k, "\u{1B}[");
+      append-int64-UTF8(k, offset);
+      append-string(k, "A");
+    | Down(offset) =>
+      append-string(k, "\u{1B}[");
+      append-int64-UTF8(k, offset);
+      append-string(k, "B");
+    | Forward(offset) =>
+      append-string(k, "\u{1B}[");
+      append-int64-UTF8(k, offset);
+      append-string(k, "C");
+    | Backward(offset) =>
+      append-string(k, "\u{1B}[");
+      append-int64-UTF8(k, offset);
+      append-string(k, "D");
+    | Up-Start(offset) =>
+      append-string(k, "\u{1B}[");
+      append-int64-UTF8(k, offset);
+      append-string(k, "E");
+    | Down-Start(offset) =>
+      append-string(k, "\u{1B}[");
+      append-int64-UTF8(k, offset);
+      append-string(k, "F");
+    | To-Column(column) =>
+      append-string(k, "\u{1B}[");
+      append-int64-UTF8(k, column);
+      append-string(k, "G");
+    | To(x, y) =>
+      append-string(k, "\u{1B}[");
+      append-int64-UTF8(k, x);
+      append-string(k, ";");
+      append-int64-UTF8(k, y);
+      append-string(k, "H");
+    }
+  | Erase(space, span) =>
+    match space {
+    | Line =>
+      match span {
+      | From-Cursor =>
+        append-string(k, "\u{1B}[0K")
+      | To-Cursor =>
+        append-string(k, "\u{1B}[1K")
+      | Whole =>
+        append-string(k, "\u{1B}[2K")
+      }
+    | Screen =>
+      match span {
+      | From-Cursor =>
+        append-string(k, "\u{1B}[0J")
+      | To-Cursor =>
+        append-string(k, "\u{1B}[1J")
+      | Whole =>
+        append-string(k, "\u{1B}[2J")
+      }
+    }
+  }
+}

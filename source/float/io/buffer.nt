@@ -1,0 +1,36 @@
+import {
+  this.bool,
+  this.either {Right},
+  this.file.buffer {buffer},
+  this.file.buffer.unsafe {append},
+  this.system {system},
+  this.unit {Unit, unit},
+}
+
+foreign {
+  neut_core_v0_55_build_fixed_buf(pointer, int, float, int, int) -> int,
+}
+
+define write-float(b: &buffer, x: float, decimals: int) ->> system(unit) {
+  let size = 64;
+  let add-newline = 0;
+  let buffer-ptr = magic alloca(int, size);
+  let len = magic external neut_core_v0_55_build_fixed_buf(buffer-ptr, size, x, decimals, add-newline);
+  if gt-int(len, 0) {
+    append(b, buffer-ptr, len)
+  } else {
+    Right(Unit)
+  }
+}
+
+define write-float-line(b: &buffer, x: float, decimals: int) ->> system(unit) {
+  let size = 65;
+  let add-newline = 1;
+  let buffer-ptr = magic alloca(int, size);
+  let len = magic external neut_core_v0_55_build_fixed_buf(buffer-ptr, size, x, decimals, add-newline);
+  if gt-int(len, 0) {
+    append(b, buffer-ptr, len)
+  } else {
+    Right(Unit)
+  }
+}

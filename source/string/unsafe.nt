@@ -1,0 +1,35 @@
+import {
+  this.string,
+}
+
+constant from-binary: _ {
+  this.string._String
+}
+
+constant drop: _ {
+  this.string._drop
+}
+
+constant take: _ {
+  this.string._take
+}
+
+constant slice: _ {
+  this.string._slice
+}
+
+constant drop-N: _ {
+  this.string._drop-N
+}
+
+constant take-N: _ {
+  this.string._take-N
+}
+
+constant slice-N: _ {
+  this.string._slice-N
+}
+
+constant get-rune-unchecked: _ {
+  this.string._get-rune
+}

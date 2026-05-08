@@ -2,15 +2,15 @@ import {
   this.bool {and, any, bool},
   this.box,
   this.list {Cons, List, concat, list},
-  this.rune {size-by-head-byte},
+  this.rune.utf8 {size-by-head-byte},
   this.show {Show, show},
   this.string {
     _drop-N,
     _get-byte,
     _slice-N,
+    byte-length,
     join,
     string,
-    string-byte-length,
   },
 }
 
@@ -49,15 +49,15 @@ define _get-escaped-character-1(ch: int8) -> &string {
   | 0x0A =>
     "\\n"
   | 0x0B =>
-    "\\u{b}"
+    "\\u{B}"
   | 0x0C =>
-    "\\u{c}"
+    "\\u{C}"
   | 0x0D =>
     "\\r"
   | 0x0E =>
-    "\\u{e}"
+    "\\u{E}"
   | 0x0F =>
-    "\\u{f}"
+    "\\u{F}"
   | 0x10 =>
     "\\u{10}"
   | 0x11 =>
@@ -79,23 +79,23 @@ define _get-escaped-character-1(ch: int8) -> &string {
   | 0x19 =>
     "\\u{19}"
   | 0x1A =>
-    "\\u{1a}"
+    "\\u{1A}"
   | 0x1B =>
-    "\\u{1b}"
+    "\\u{1B}"
   | 0x1C =>
-    "\\u{1c}"
+    "\\u{1C}"
   | 0x1D =>
-    "\\u{1d}"
+    "\\u{1D}"
   | 0x1E =>
-    "\\u{1e}"
+    "\\u{1E}"
   | 0x1F =>
-    "\\u{1f}"
+    "\\u{1F}"
   | 0x22 =>
     "\\\""
   | 0x5C =>
     "\\\\"
   | 0x7F =>
-    "\\u{7f}"
+    "\\u{7F}"
   | _ =>
     // unreachable
     ""
@@ -130,17 +130,17 @@ define _get-escaped-character-2(ch: int8) -> &string {
   | 0x89 =>
     "\\u{89}"
   | 0x8A =>
-    "\\u{8a}"
+    "\\u{8A}"
   | 0x8B =>
-    "\\u{8b}"
+    "\\u{8B}"
   | 0x8C =>
-    "\\u{8c}"
+    "\\u{8C}"
   | 0x8D =>
-    "\\u{8d}"
+    "\\u{8D}"
   | 0x8E =>
-    "\\u{8e}"
+    "\\u{8E}"
   | 0x8F =>
-    "\\u{8f}"
+    "\\u{8F}"
   | 0x90 =>
     "\\u{90}"
   | 0x91 =>
@@ -162,17 +162,17 @@ define _get-escaped-character-2(ch: int8) -> &string {
   | 0x99 =>
     "\\u{99}"
   | 0x9A =>
-    "\\u{9a}"
+    "\\u{9A}"
   | 0x9B =>
-    "\\u{9b}"
+    "\\u{9B}"
   | 0x9C =>
-    "\\u{9c}"
+    "\\u{9C}"
   | 0x9D =>
-    "\\u{9d}"
+    "\\u{9D}"
   | 0x9E =>
-    "\\u{9e}"
+    "\\u{9E}"
   | 0x9F =>
-    "\\u{9f}"
+    "\\u{9F}"
   | _ =>
     // unreachable
     ""
@@ -217,10 +217,14 @@ define _escape(t: &string, len: int, pivot: int, cursor: int) -> list(string) {
   }
 }
 
+define escape(t: &string) -> list(string) {
+  let len = byte-length(t);
+  _escape(t, len, 0, 0)
+}
+
 define quote-string(t: string) -> string {
   pin t = t;
-  let len = string-byte-length(t);
-  join(concat(List[List[*"\""], _escape(t, len, 0, 0), List[*"\""]]))
+  join(concat(List[List[*"\""], escape(t), List[*"\""]]))
 }
 
 define show-string(t: string) -> string {
@@ -228,14 +232,9 @@ define show-string(t: string) -> string {
 }
 
 define show-string-N(t: &string) -> string {
-  let len = string-byte-length(t);
-  join(concat(List[List[*"\""], _escape(t, len, 0, 0), List[*"\""]]))
+  join(concat(List[List[*"\""], escape(t), List[*"\""]]))
 }
 
 constant as-show: show(string) {
-  Show(show-string)
-}
-
-constant as-show-N: show(&string) {
   Show(show-string-N)
 }

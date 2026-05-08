@@ -2,7 +2,7 @@ import {
   this.bool {and, any, bool},
   this.box,
   this.either {Left, Right, either},
-  this.int.parse {parse-hex},
+  this.int.parse {parse-hex-digits},
   this.list {Cons, List, Nil, concat, for-each-E, for-each-EN, intercalate, list},
   this.pair {Pair},
   this.rune,
@@ -19,10 +19,10 @@ import {
   },
 }
 
-define _is-lower-hex-digit(r: rune) -> bool {
+define _is-hex-digit(r: rune) -> bool {
   any[
     and(le-rune(`0`, r), le-rune(r, `9`)),
-    and(le-rune(`a`, r), le-rune(r, `f`)),
+    and(le-rune(`A`, r), le-rune(r, `F`)),
   ]
 }
 
@@ -44,7 +44,7 @@ define _read-char(r: rune, t: string) -> either(error, string) {
 }
 
 define _read-unicode-scalar-value(t: &string) -> either(error, rune) {
-  match parse-hex(t) {
+  match parse-hex-digits(t) {
   | Left(_) =>
     Left(Parse-Error(format("Could not parse `{}` as a hexadecimal integer", List[*t])))
   | Right(v) =>
@@ -60,7 +60,7 @@ define _read-unicode-scalar-value(t: &string) -> either(error, rune) {
 define _unquote-string(t: string) -> either(error, list(string)) {
   match this.string.uncons(t) {
   | Left(_) =>
-    Right(List[*"\\"])
+    Left(Parse-Error(*"Unexpected end of string after a backslash"))
   | Right(Pair(c, rest)) =>
     if eq-rune(c, `0`) {
       Right(List[*"\u{0}", rest])
@@ -69,7 +69,7 @@ define _unquote-string(t: string) -> either(error, list(string)) {
     } else-if eq-rune(c, `n`) {
       Right(List[*"\u{A}", rest])
     } else-if eq-rune(c, `r`) {
-      Right(List[*"\u{B}", rest])
+      Right(List[*"\u{D}", rest])
     } else-if eq-rune(c, `"`) {
       Right(List[*"\u{22}", rest])
     } else-if eq-rune(c, `\\`) {
@@ -78,7 +78,7 @@ define _unquote-string(t: string) -> either(error, list(string)) {
       Right(List[*"\u{60}", rest])
     } else-if eq-rune(c, `u`) {
       try rest = _read-char(`{`, rest);
-      let hex-string on rest = take-while-N(rest, _is-lower-hex-digit);
+      let hex-string on rest = take-while-N(rest, _is-hex-digit);
       pin hex-string = hex-string;
       let scalar-value-string-len = length(hex-string);
       let rest = drop(rest, scalar-value-string-len);

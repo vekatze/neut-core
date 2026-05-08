@@ -1,0 +1,41 @@
+import {
+  this.bool,
+  this.either {Right},
+  this.file.buffer {
+    _get-capacity,
+    _get-current-size,
+    _get-next-content-pointer,
+    _set-current-size,
+    buffer,
+    flush,
+  },
+  this.memory.unsafe {memcpy},
+  this.pointer {shift},
+  this.system {system},
+  this.unit {unit},
+}
+
+define append(b: &buffer, content-pointer: pointer, content-length: int) ->> system(unit) {
+  let capacity = _get-capacity(b);
+  let loop =
+    define _buffer-append-loop(current-buffer-size: int, source-pointer: pointer, remaining: int) ->> system(unit) {
+      let new-buffer-size = add-int(current-buffer-size, remaining);
+      if le-int(new-buffer-size, capacity) {
+        let next-content-pointer = _get-next-content-pointer(b);
+        memcpy(next-content-pointer, source-pointer, remaining);
+        Right(_set-current-size(b, new-buffer-size))
+      } else {
+        let written-size = sub-int(capacity, current-buffer-size);
+        let next-content-pointer = _get-next-content-pointer(b);
+        memcpy(next-content-pointer, source-pointer, written-size);
+        _set-current-size(b, capacity);
+        try _ = flush(b);
+        _buffer-append-loop(
+          0,
+          shift(source-pointer, written-size),
+          sub-int(remaining, written-size),
+        )
+      }
+    };
+  loop(_get-current-size(b), content-pointer, content-length)
+}

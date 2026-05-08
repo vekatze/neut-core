@@ -1,0 +1,39 @@
+import {
+  this.ansi {Blue, Yellow},
+  this.box,
+  this.doc {Group, Nest, ansi-fg, ansi-reset, atom, break, join},
+  this.doc.show {show-doc},
+  this.string,
+  this.string.io {print-line},
+  this.unit {Unit, unit},
+}
+
+define zen() -> unit {
+  pin item =
+    Group(join[
+      ansi-fg(Blue),
+      atom(*"begin"),
+      ansi-reset,
+      Nest(2, join[
+        break(" "),
+        Group(
+          join[
+            ansi-fg(Yellow),
+            atom(*"print;"),
+            ansi-reset,
+            break(" "),
+            atom(*"test;"),
+            break(" "),
+            atom(*"stmt;"),
+          ],
+        ),
+      ]),
+      break(" "),
+      ansi-fg(Blue),
+      atom(*"end"),
+      ansi-reset,
+    ]);
+  pin item = show-doc(item, 10);
+  print-line(item);
+  Unit
+}

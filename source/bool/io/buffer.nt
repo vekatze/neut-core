@@ -1,0 +1,24 @@
+import {
+  this.bool {bool},
+  this.file.buffer {buffer},
+  this.string,
+  this.string.io.buffer {write, write-line},
+  this.system {system},
+  this.unit {unit},
+}
+
+define write-bool(k: &buffer, x: bool) ->> system(unit) {
+  if x {
+    write(k, "True")
+  } else {
+    write(k, "False")
+  }
+}
+
+define write-bool-line(k: &buffer, x: bool) ->> system(unit) {
+  if x {
+    write-line(k, "True")
+  } else {
+    write-line(k, "False")
+  }
+}

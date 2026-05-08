@@ -1,7 +1,8 @@
 import {
   this.bool {False, True, bool},
   this.eq {Eq, eq},
-  this.vector {_access, length, vector},
+  this.vector {length, vector},
+  this.vector.unsafe {access-unchecked},
 }
 
 inline as-eq<a>(class: eq(a)) -> eq(vector(a)) {
@@ -19,8 +20,8 @@ inline as-eq<a>(class: eq(a)) -> eq(vector(a)) {
               if ge-int(i, len1) {
                 True
               } else {
-                let x = _access(xs, i);
-                let y = _access(xs, i);
+                let x = access-unchecked(xs, i);
+                let y = access-unchecked(ys, i);
                 if equal(x, y) {
                   loop(add-int(i, 1))
                 } else {

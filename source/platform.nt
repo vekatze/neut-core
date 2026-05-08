@@ -1,0 +1,9 @@
+foreign {
+  neut_core_v0_55_get_online_cpu_count() -> int,
+}
+
+inline get-cpu-count() -> int {
+  magic opaque-value {
+    magic external neut_core_v0_55_get_online_cpu_count()
+  }
+}

@@ -1,10 +1,17 @@
 import {
   this.c-int {c-int},
-  this.c-string {c-string, from-c-string},
+  this.c-string {c-string, to-string},
   this.either {Left, either},
-  this.foreign {get-errno},
-  this.magic,
   this.string {string},
+  this.unsafe {cast},
+}
+
+foreign {
+  neut_core_v0_55_errno() -> c-int,
+}
+
+define _get-errno() -> c-int {
+  magic external neut_core_v0_55_errno()
 }
 
 alias errno {
@@ -21,7 +28,7 @@ alias system(a) {
 }
 
 inline get-system-error() ->> system-error {
-  OS-Error(get-errno())
+  OS-Error(_get-errno())
 }
 
 inline report-system-error<a>() ->> system(a) {
@@ -36,7 +43,7 @@ define get-error-message(e: system-error) -> string {
   match e {
   | OS-Error(i) =>
     let c-str = magic external strerror(i);
-    from-c-string(this.magic.cast<pointer, &c-string>(c-str))
+    to-string(cast<pointer, &c-string>(c-str))
   | Application-Error(message) =>
     message
   }

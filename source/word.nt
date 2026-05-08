@@ -1,14 +1,19 @@
 import {
   this.c-size {c-size, from-c-size},
-  this.foreign,
+}
+
+foreign {
+  neut_core_v0_55_word_size() -> c-size,
+}
+
+constant _size: c-size {
+  magic opaque-value {
+    magic external neut_core_v0_55_word_size()
+  }
 }
 
 constant size: int {
   magic opaque-value {
-    from-c-size(this.foreign._size)
+    from-c-size(_size)
   }
-}
-
-constant word-size: c-size {
-  this.foreign._size
 }

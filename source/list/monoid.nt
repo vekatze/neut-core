@@ -5,8 +5,8 @@ import {
 
 inline as-monoid<a>() -> monoid(list(a)) {
   Monoid{
-    e := Nil,
-    op := {
+    empty := Nil,
+    combine := {
       (x, y) => {
         append(x, y)
       }

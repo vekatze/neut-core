@@ -1,0 +1,28 @@
+import {
+  this.binary.io.buffer {write-binary},
+  this.either,
+  this.file.buffer {flush, make-buffer},
+  this.file.descriptor {stdout},
+  this.string {to-binary},
+  this.system {system},
+  this.unit {Unit, unit},
+}
+
+define zen() -> unit {
+  let !k = make-buffer(stdout, 0);
+  let _ = k;
+  let _ = k;
+  pin k = k;
+  let _: system(unit) = {
+    try _ = write-binary(k, to-binary("hello\n"));
+    try _ = write-binary(k, to-binary("hello\n"));
+    try _ = write-binary(k, to-binary("hello\n"));
+    try _ = write-binary(k, to-binary("hello\n"));
+    try _ = write-binary(k, to-binary("hello\n"));
+    try _ = write-binary(k, to-binary("hello\n"));
+    try _ = write-binary(k, to-binary("hello\n"));
+    try _ = write-binary(k, to-binary("hello\n"));
+    flush(k)
+  };
+  Unit
+}

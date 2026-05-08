@@ -1,21 +1,18 @@
 import {
   this.bool,
-  this.either {Left, Right},
+  this.either {Right},
   this.file.descriptor {descriptor, stdout},
-  this.string,
-  this.string.io {print},
   this.system {report-system-error, system},
   this.unit {Unit, unit},
 }
 
 foreign {
-  neut_core_v0_54_write_int64(int32, int64) -> int,
-  neut_core_v0_54_write_int64_nl(int32, int64) -> int,
+  neut_core_v0_55_write_int64(descriptor, int64) -> int,
+  neut_core_v0_55_write_int64_nl(descriptor, int64) -> int,
 }
 
 define write-int(d: descriptor, x: int) ->> system(unit) {
-  let d = magic cast(descriptor, int32, d);
-  let result = magic external neut_core_v0_54_write_int64(d, x);
+  let result = magic external neut_core_v0_55_write_int64(d, x);
   if lt-int(result, 0) {
     report-system-error()
   } else {
@@ -24,8 +21,7 @@ define write-int(d: descriptor, x: int) ->> system(unit) {
 }
 
 define write-int-line(d: descriptor, x: int) ->> system(unit) {
-  let d = magic cast(descriptor, int32, d);
-  let result = magic external neut_core_v0_54_write_int64_nl(d, x);
+  let result = magic external neut_core_v0_55_write_int64_nl(d, x);
   if lt-int(result, 0) {
     report-system-error()
   } else {
@@ -34,25 +30,11 @@ define write-int-line(d: descriptor, x: int) ->> system(unit) {
 }
 
 define print-int(x: int) -> unit {
-  match write-int(stdout, x) {
-  | Left(_) =>
-    Unit
-  | Right(_) =>
-    Unit
-  }
+  let _ = write-int(stdout, x);
+  Unit
 }
 
 define print-int-line(x: int) -> unit {
-  match write-int-line(stdout, x) {
-  | Left(_) =>
-    Unit
-  | Right(_) =>
-    Unit
-  }
-}
-
-define zen() -> unit {
-  print-int(1234);
-  print("\n");
-  print-int-line(123)
+  let _ = write-int-line(stdout, x);
+  Unit
 }

@@ -1,0 +1,21 @@
+import {
+  this.either {Right},
+  this.file.buffer {flush, make-buffer},
+  this.file.descriptor {stdout},
+  this.string,
+  this.string.io.buffer {write-line},
+  this.system {system},
+  this.unit {Unit, unit},
+}
+
+define zen() -> unit {
+  let !k = make-buffer(stdout, 4096);
+  pin k = k;
+  let _: system(unit) = {
+    try _ = write-line(k, "hello!");
+    try _ = write-line(k, "hello!");
+    try _ = flush(k);
+    Right(Unit)
+  };
+  Unit
+}

@@ -1,0 +1,118 @@
+import {
+  this.box {axiom-T},
+  this.c-size {C-Size, from-c-size},
+  this.memory {malloc},
+  this.memory.unsafe {free, load-int, store-int},
+  this.pair {Pair, pair},
+  this.pointer {shift},
+  this.sync._posix {
+    THREAD_MUTEX_SIZE,
+    thread-mutex-destroy,
+    thread-mutex-init,
+    thread-mutex-lock,
+    thread-mutex-unlock,
+  },
+  this.unit {Unit, unit},
+  this.unsafe {cast, cast-inline},
+  this.word,
+}
+
+inline _get-clone<a>(x: &a) -> a {
+  *x
+}
+
+nominal {
+  resource _cell,
+}
+
+data cell(_: type) {
+| _Cell(_cell)
+}
+
+inline _new<a>(val: a) -> cell(a) {
+  let mutex-size = from-c-size(THREAD_MUTEX_SIZE);
+  let u = this.word.size;
+  let ptr = malloc(C-Size(add-int(u, add-int(mutex-size, u))));
+  store-int(cast<a, int>(val), ptr);
+  let _ = thread-mutex-init(shift(ptr, u));
+  store-int(cast<type, int>(pack-type {a}), shift(ptr, add-int(u, mutex-size)));
+  cast-inline<pointer, cell(a)>(ptr)
+}
+
+// (content, thread-mutex, type)
+resource _cell {
+  (ch: pointer) => {
+    let u = this.word.size;
+    let mutex-size = from-c-size(THREAD_MUTEX_SIZE);
+    let type-offset = add-int(u, mutex-size);
+    let a = cast<int, type>(load-int(shift(ch, type-offset)));
+    thread-mutex-destroy(shift(ch, u));
+    magic call-type(a, 0, load-int(ch));
+    free(ch)
+  },
+  (ch: pointer) => {
+    let u = this.word.size;
+    let mutex-size = from-c-size(THREAD_MUTEX_SIZE);
+    let mutex-ptr = shift(ch, u);
+    let type-offset = add-int(u, mutex-size);
+    unpack-type a = cast<int, type>(load-int(shift(ch, type-offset)));
+    thread-mutex-lock(mutex-ptr);
+    let val-clone = magic call-type(pack-type {a}, 1, load-int(ch));
+    thread-mutex-unlock(mutex-ptr);
+    cast<cell(a), pointer>(_new<a>(val-clone))
+  },
+  -1,
+}
+
+inline make-cell<a>(initial-value: +a) -> cell(a) {
+  _new<a>(axiom-T(initial-value))
+}
+
+inline modify<a, b>(ch: &cell(a), f: (+a) -> pair(+a, b)) -> b {
+  let ch = cast<&cell(a), pointer>(ch);
+  let u = this.word.size;
+  let mutex-ptr = shift(ch, u);
+  thread-mutex-lock(mutex-ptr);
+  let val-base: int = load-int(ch);
+  let orig-val = cast<int, +a>(val-base);
+  let Pair(new-val, result) = f(orig-val);
+  store-int(cast<+a, int>(new-val), ch);
+  thread-mutex-unlock(mutex-ptr);
+  result
+}
+
+inline mutate<a>(ch: &cell(a), f: (+a) -> +a) -> unit {
+  modify(ch, (x) => {
+    Pair(f(x), Unit)
+  })
+}
+
+inline borrow<a, b>(ch: &cell(a), f: (&a) -> +b) -> b {
+  let ch = cast<&cell(a), pointer>(ch);
+  let u = this.word.size;
+  let mutex-ptr = shift(ch, u);
+  thread-mutex-lock(mutex-ptr);
+  let val-base: int = load-int(ch);
+  let val: &a = cast<int, &a>(val-base);
+  letbox-T result = f(val);
+  thread-mutex-unlock(mutex-ptr);
+  result
+}
+
+define clone<a>(ch: &cell(a)) -> a {
+  borrow(ch, (val: &a) => {
+    box val {val}
+  })
+}
+
+inline extract<a>(c: cell(a)) -> +a {
+  let u = this.word.size;
+  letbox-T result on c = {
+    let ch = cast<&cell(a), pointer>(c);
+    let result = cast<int, ++a>(load-int(ch));
+    thread-mutex-destroy(shift(ch, u));
+    result
+  };
+  free(cast-inline<cell(a), pointer>(c));
+  result
+}

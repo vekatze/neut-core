@@ -1,0 +1,26 @@
+import {
+  this.bool,
+}
+
+define size-by-head-byte(head-byte: int8) -> int {
+  if eq-int8(and-int8(head-byte, 0x80), 0x00) {
+    // 0x00 = 0000 0000
+    // 0x80 = 1000 0000
+    1
+  } else-if eq-int8(and-int8(head-byte, 0xE0), 0xC0) {
+    // 0xC0 = 1100 0000
+    // 0xE0 = 1110 0000
+    2
+  } else-if eq-int8(and-int8(head-byte, 0xF0), 0xE0) {
+    // 0xE0 = 1110 0000
+    // 0xF0 = 1111 0000
+    3
+  } else-if eq-int8(and-int8(head-byte, 0xF8), 0xF0) {
+    // 0xF0 = 1111 0000
+    // 0xF8 = 1111 1000
+    4
+  } else {
+    // unicode invalid char (or panic?)
+    3
+  }
+}

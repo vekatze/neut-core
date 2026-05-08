@@ -1,0 +1,32 @@
+import {
+  this.control {nop},
+  this.file.buffer {buffer},
+  this.file.buffer.unsafe {append},
+  this.pointer {shift},
+  this.system {system},
+  this.unit {unit},
+}
+
+foreign {
+  neut_core_v0_55_write_int64_core(pointer, int, int32) -> int,
+}
+
+define write-int(b: &buffer, x: int) ->> system(unit) {
+  let buffer-ptr = magic alloca(int, 22);
+  let buf-end = shift(buffer-ptr, 22);
+  let len = magic external neut_core_v0_55_write_int64_core(buf-end, x, 0);
+  let result = append(b, shift(buf-end, mul-int(-1, len)), len);
+  // avoid tail-calling
+  nop();
+  result
+}
+
+define write-int-line(b: &buffer, x: int) ->> system(unit) {
+  let buffer-ptr = magic alloca(int, 22);
+  let buf-end = shift(buffer-ptr, 22);
+  let len = magic external neut_core_v0_55_write_int64_core(buf-end, x, 1);
+  let result = append(b, shift(buf-end, mul-int(-1, len)), len);
+  // avoid tail-calling
+  nop();
+  result
+}

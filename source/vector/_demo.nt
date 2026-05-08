@@ -1,0 +1,119 @@
+import {
+  this.bool,
+  this.box,
+  this.either {Left, Right},
+  this.int.io {print-int-line},
+  this.list {List},
+  this.pair {Pair},
+  this.string {replicate, string},
+  this.string.io {print, print-line},
+  this.unit {unit},
+  this.vector {
+    delete,
+    drop,
+    find,
+    for,
+    from-list,
+    length,
+    make,
+    pop-back,
+    push-back,
+    push-front,
+    reverse,
+    to-list,
+    vector,
+    zip-with-N,
+  },
+}
+
+define zen() -> unit {
+  // find
+  let xs = this.vector.make(5);
+  let xs = push-back(xs, 1);
+  let xs = push-back(xs, 2);
+  let xs = push-back(xs, 3);
+  let xs = push-back(xs, 4);
+  pin xs = push-back(xs, 5);
+  let item =
+    find(xs, (x) => {
+      eq-int(*x, -1)
+    });
+  match item {
+  | Left(_) =>
+    print-line("left")
+  | Right(x) =>
+    print-line("right");
+    print-int-line(*x);
+  };
+  let xs: vector(string) = make(0);
+  let xs = push-back(xs, *"b");
+  let xs = push-front(xs, *"a");
+  let xs = push-front(xs, *"c");
+  let !xs = drop(xs, 2);
+  let _ = xs;
+  let _ = xs;
+  let _ = xs;
+  let xs = push-front(xs, *"d");
+  let xs = push-back(xs, *"e");
+  let xs = push-front(xs, *"f");
+  let xs = push-back(xs, *"g");
+  let xs = push-front(xs, *"h");
+  let !xs = xs;
+  // let !xs = drop(xs, 3);
+  let _ = xs;
+  // let xs = drop(xs, 3);
+  let _ = xs;
+  let _ = xs;
+  let _ = push-front(xs, *"foo");
+  let _ = xs;
+  let _ = xs;
+  let _ = xs;
+  // let xs = push-back(xs, 7);
+  // let xs = push-back(xs, 8);
+  // let xs = push-back(xs, 9);
+  // let xs = push-back(xs, 10);
+  // let xs = take(xs, 5);
+  // let !xs = delete(xs, 0);
+  // let _ = !xs;
+  // let _ = !xs;
+  // let _ = !xs;
+  // let _ = !xs;
+  let xs-clone = xs;
+  pin xs = xs;
+  let ys: vector(int) = from-list(to-list(from-list(List[1, 2, 3, 4, 5])));
+  pin ys = ys;
+  let zs =
+    zip-with-N(xs, ys, (x, y, _) => {
+      replicate(x, *y)
+    });
+  let !zs = delete(reverse(zs), 100);
+  let _ = zs;
+  let _ = zs;
+  match pop-back(zs) {
+  | Left(_) =>
+    print("left\n")
+  | Right(Pair(!rest, z)) =>
+    let _ = rest;
+    let _ = rest;
+    let len on rest = length(rest);
+    let _ = rest;
+    print("right. last-elem = ");
+    let _ on z = print-line(z);
+    let _ = z;
+    print("len = ");
+    print-int-line(len)
+  };
+  pin zs = zs;
+  for(*zs, (x, _) => {
+    pin x = x;
+    print(x);
+    print(", ")
+  });
+  print("\n----\n");
+  for(xs-clone, (x, _) => {
+    pin x = x;
+    print(x);
+    print(", ")
+  });
+  print("\n")
+}

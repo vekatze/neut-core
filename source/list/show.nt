@@ -1,22 +1,14 @@
 import {
   this.box,
-  this.list {List, for-each, for-each-N, list},
+  this.list {List, for-each-N, list},
   this.show {Show, show},
   this.string {intercalate, join},
 }
 
 inline as-show<a>(s: show(a)) -> show(list(a)) {
   Show((xs) => {
-    let Show(f) = s;
-    let ys = for-each(xs, f);
-    join(List[*"[", intercalate(ys, *", "), *"]"])
-  })
-}
-
-inline as-show-N<a>(s: show(&a)) -> show(&list(a)) {
-  Show((xs) => {
-    let Show(f) = s;
-    let ys = for-each-N(xs, f);
+    let Show{render} = s;
+    let ys = for-each-N(xs, render);
     join(List[*"[", intercalate(ys, *", "), *"]"])
   })
 }

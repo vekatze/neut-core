@@ -1,13 +1,13 @@
 {
   target {
     test {
-      main "test.nt",
+      main "_test.nt",
       build-option [
         "-fsanitize=address",
       ],
     },
     bench-random-dict {
-      main "bench/random-dict.nt",
+      main "_bench/random-dict.nt",
       build-option [
         "-fsanitize=address",
       ],
@@ -28,27 +28,23 @@
     bool ["False", "True", "and", "bool", "not", "or"],
     box [],
     c-size [],
-    cell ["cell"],
-    channel ["channel"],
-    debug ["trace", "vet"],
+    debug [],
+    debug.dump ["trace", "vet"],
     either ["Left", "Right", "either", "none"],
     eq ["Eq", "eq"],
-    equal ["eq-data"],
     list ["Cons", "List", "Nil", "list"],
     ord ["Ord", "ord"],
     ordering ["EQ", "GT", "LT", "ordering"],
     pair ["Pair", "pair"],
     rune.eq ["eq-rune", "ne-rune"],
     rune.ord ["lt-rune", "le-rune", "gt-rune", "ge-rune"],
+    show ["Show", "show"],
     string ["string"],
     string.eq ["eq-string", "ne-string"],
-    string.io ["print"],
+    string.io ["print", "print-line"],
     string.ord ["lt-string", "le-string", "gt-string", "ge-string"],
-    system [],
-    thread ["thread"],
-    trick [],
     type-value [],
     unit ["Unit", "unit"],
-    vector ["Vector", "vector"]
+    vector ["Vector", "vector"],
   },
 }

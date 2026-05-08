@@ -1,0 +1,18 @@
+import {
+  this.binary.io.buffer,
+  this.either,
+  this.file.buffer {buffer},
+  this.rune.io.buffer {write-rune},
+  this.string {string, to-binary},
+  this.system {system},
+  this.unit {unit},
+}
+
+define write(b: &buffer, content: &string) ->> system(unit) {
+  this.binary.io.buffer.write-binary(b, to-binary(content))
+}
+
+define write-line(b: &buffer, content: &string) ->> system(unit) {
+  try _ = write(b, content);
+  write-rune(b, `\n`)
+}

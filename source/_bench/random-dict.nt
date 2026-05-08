@@ -1,0 +1,53 @@
+import {
+  this.box,
+  this.control {grow},
+  this.dictionary {dictionary, insert, lookup},
+  this.either {Left, Right},
+  this.int.io {print-int-line},
+  this.int.ord,
+  this.ord {ord},
+  this.random {random-int},
+  this.unit {Unit, unit},
+}
+
+define _make-big-dictionary(o: &ord(int)) -> dictionary(int, int) {
+  grow(this.dictionary.empty, 700000, (acc, _) => {
+    let key = random-int(1000000);
+    let val = random-int(1000000);
+    insert(o, acc, key, val)
+  })
+}
+
+define make-big-dictionary() -> dictionary(int, int) {
+  pin o = this.int.ord.as-ord;
+  _make-big-dictionary(o)
+}
+
+define _random-lookup-sum(o: &ord(int), d: &dictionary(int, int)) -> unit {
+  let rsum =
+    grow(0, 700000, (acc, _) => {
+      let key = random-int(1000000);
+      let val on key =
+        match lookup(o, d, key) {
+        | Left(_) =>
+          0
+        | Right(v) =>
+          *v
+        };
+      let _ = key;
+      add-int(acc, val)
+    });
+  print-int-line(rsum)
+}
+
+define random-lookup-sum(d: &dictionary(int, int)) -> unit {
+  pin o = this.int.ord.as-ord;
+  _random-lookup-sum(o, d)
+}
+
+define main() -> unit {
+  let big-dictionary = make-big-dictionary();
+  let _ on big-dictionary = random-lookup-sum(big-dictionary);
+  let _ = big-dictionary;
+  Unit
+}

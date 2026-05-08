@@ -4,14 +4,15 @@ import {
   this.bool,
   this.either {Left, Right},
   this.file.descriptor {descriptor, stdin, stdout},
-  this.magic,
-  this.string {_get-content-pointer, string, string-byte-length, to-binary},
-  this.system {get-error-message, report-system-error, system},
+  this.string {byte-length, string, to-binary},
+  this.string.pointer {get-content-pointer},
+  this.system {report-system-error, system},
   this.unit {Unit, unit},
+  this.unsafe {cast},
 }
 
 foreign {
-  neut_core_v0_54_write_line(int32, int, pointer) -> int,
+  neut_core_v0_55_write_line(descriptor, int, pointer) -> int,
 }
 
 define write(f: descriptor, t: &string) ->> system(unit) {
@@ -19,10 +20,9 @@ define write(f: descriptor, t: &string) ->> system(unit) {
 }
 
 define write-line(d: descriptor, t: &string) ->> system(unit) {
-  let d = magic cast(descriptor, int32, d);
-  let len = string-byte-length(t);
-  let ptr = _get-content-pointer(t);
-  let result = magic external neut_core_v0_54_write_line(d, len, ptr);
+  let len = byte-length(t);
+  let ptr = get-content-pointer(t);
+  let result = magic external neut_core_v0_55_write_line(d, len, ptr);
   if lt-int(result, 0) {
     report-system-error()
   } else {
@@ -50,26 +50,9 @@ define print-line(t: &string) -> unit {
 
 define read(from: descriptor, initial-buffer-size: int) ->> system(string) {
   try bin = this.binary.io.read(from, initial-buffer-size);
-  Right(this.magic.cast<binary, string>(bin))
+  Right(cast<binary, string>(bin))
 }
 
 define read-stdin(initial-buffer-size: int) ->> system(string) {
   read(stdin, initial-buffer-size)
-}
-
-define zen() -> unit {
-  // print("hey\n");
-  // Unit
-  let _ = write(stdout, "hello.\n");
-  let value = read(stdin, 10);
-  match value {
-  | Right(_) =>
-    // pin txt = _String(value);
-    print// print(txt)
-    ("success\n")
-  | Left(e) =>
-    pin string = get-error-message(e);
-    print(string);
-    print("\n")
-  }
 }

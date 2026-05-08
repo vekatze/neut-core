@@ -1,9 +1,12 @@
-import {
-  this.foreign {UINT32_MAX},
-}
-
 foreign {
   arc4random_uniform(int32) -> int32,
+  neut_core_v0_55_UINT32_MAX() -> int32,
+}
+
+constant _UINT32_MAX: int32 {
+  magic opaque-value {
+    magic external neut_core_v0_55_UINT32_MAX()
+  }
 }
 
 define random-int32(ubound: int32) -> int32 {
@@ -31,8 +34,8 @@ define random-in-range-int(lower-bound: int32, upper-bound: int32) -> int {
 }
 
 define random-float32(min: float32, max: float32) -> float32 {
-  let numerator = random-int32(UINT32_MAX);
-  let denominator = UINT32_MAX;
+  let numerator = random-int32(_UINT32_MAX);
+  let denominator = _UINT32_MAX;
   add-float32(
     min,
     mul-float32(
@@ -43,8 +46,8 @@ define random-float32(min: float32, max: float32) -> float32 {
 }
 
 define random-float(min: float, max: float) -> float {
-  let numerator = random-int32(UINT32_MAX);
-  let denominator = UINT32_MAX;
+  let numerator = random-int32(_UINT32_MAX);
+  let denominator = _UINT32_MAX;
   add-float(
     min,
     mul-float(

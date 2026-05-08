@@ -1,0 +1,345 @@
+import {
+  this.ansi {Blue, Yellow},
+  this.bool,
+  this.doc {
+    Chunk,
+    Chunk-Choose,
+    Chunk-Empty,
+    Chunk-Join,
+    Chunk-Line,
+    Chunk-String-N,
+    Group,
+    Nest,
+    ansi-bold,
+    ansi-fg,
+    ansi-reset,
+    atom-N,
+    atom-float,
+    atom-int,
+    atom-rune,
+    break,
+    doc,
+    empty,
+    join,
+  },
+  this.doc.show {show-doc},
+  this.either {Left, Right},
+  this.list {Cons, Nil, list},
+  this.memory.unsafe {load-int, load-pointer},
+  this.pair {Pair, pair},
+  this.pointer {shift},
+  this.show {Show, show},
+  this.string {string},
+  this.type-value {
+    Algebraic,
+    Binary,
+    Box-T,
+    Constructor,
+    Enum,
+    Float16,
+    Float32,
+    Float64,
+    Int1,
+    Int16,
+    Int2,
+    Int32,
+    Int4,
+    Int64,
+    Int8,
+    Noema,
+    Null,
+    Pointer,
+    Rune,
+    Vector,
+    Wrapper,
+    constructor,
+  },
+  this.unsafe {cast-inline},
+  this.vector {vector},
+  this.word,
+}
+
+inline-meta _meta-length<a>(xs: list(a)) -> int {
+  match xs {
+  | Nil =>
+    0
+  | Cons(_, ys) =>
+    add-int(1, _meta-length(ys))
+  }
+}
+
+inline-meta _meta-for-each<a, b>(xs: list(a), !f: (a) -> b) -> list(b) {
+  match xs {
+  | Nil =>
+    Nil
+  | Cons(y, ys) =>
+    Cons(f(y), _meta-for-each(ys, f))
+  }
+}
+
+inline-meta _meta-snd<a, b>(p: pair(a, b)) -> b {
+  let Pair(_, y) = p;
+  y
+}
+
+define _literal-doc(d: doc) -> doc {
+  join[
+    ansi-fg(Yellow),
+    d,
+    ansi-reset,
+  ]
+}
+
+inline-meta _join-string(t1: &string, t2: &string) -> &string {
+  let tmp = magic string-uncons(t1);
+  match tmp {
+  | Left(_) =>
+    t2
+  | Right(Pair(r, rest)) =>
+    magic string-cons(r, _join-string(rest, t2))
+  }
+}
+
+nominal {
+  define-meta to-doc<a>(x: '&a) -> 'doc,
+}
+
+define _constructor-doc(x: &string) -> doc {
+  join[
+    ansi-fg(Blue),
+    ansi-bold,
+    atom-N(x),
+    ansi-reset,
+  ]
+}
+
+define _nested-comma-seq(prefix: doc, body: doc, suffix: doc) -> doc {
+  join[
+    prefix,
+    Nest(
+      2,
+      join[
+        break(""),
+        Group(body),
+      ],
+    ),
+    Chunk(Chunk-Choose(Chunk-Empty, Chunk-Join(Chunk-String-N(","), Chunk-Line))),
+    suffix,
+  ]
+}
+
+inline-meta _vector-doc<a>(xs: '&vector(a)) -> 'doc {
+  quote {
+    let prefix = join[_constructor-doc("Vector"), atom-N("[")];
+    let suffix = atom-N("]");
+    let len = this.vector.length(unquote {xs});
+    let content =
+      this.vector.fold-right-N(unquote {xs}, empty, (x: &a, acc: doc, i: int) => {
+        if eq-int(add-int(i, 1), len) {
+          join[unquote {to-doc(quote {x})}, acc]
+        } else {
+          join[unquote {to-doc(quote {x})}, atom-N(","), break(" "), acc]
+        }
+      });
+    Group(_nested-comma-seq(
+      prefix,
+      content,
+      suffix,
+    ))
+  }
+}
+
+inline _load-nth-element(data-arg-num: int, cursor: int, x: pointer) -> pointer {
+  let u = this.word.size;
+  let offset = mul-int(u, add-int(1, add-int(data-arg-num, cursor)));
+  let elem-ptr = shift(x, offset);
+  load-pointer(elem-ptr)
+}
+
+inline-meta _constructor-args-doc<a>(
+  cons-arg-types: list(type),
+  cursor: int,
+  data-arg-num: int,
+  x: '&a,
+) -> 'doc {
+  match cons-arg-types {
+  | Nil =>
+    quote {empty}
+  | Cons(t, Nil) =>
+    unpack-type t = t;
+    quote {
+      let data-arg-num = unquote {promote {data-arg-num}};
+      let low-cursor = unquote {promote {cursor}};
+      let x-ptr = cast-inline<&a, pointer>(unquote {x});
+      let x-elem-ptr = cast-inline<pointer, &t>(_load-nth-element(data-arg-num, low-cursor, x-ptr));
+      unquote {to-doc<t>(quote {x-elem-ptr})}
+    }
+  | Cons(t, rest) =>
+    let d1 = {
+      unpack-type t = t;
+      quote {
+        let data-arg-num = unquote {promote {data-arg-num}};
+        let low-cursor = unquote {promote {cursor}};
+        let x-ptr = cast-inline<&a, pointer>(unquote {x});
+        let x-elem-ptr = cast-inline<pointer, &t>(_load-nth-element(data-arg-num, low-cursor, x-ptr));
+        unquote {to-doc<t>(quote {x-elem-ptr})}
+      }
+    };
+    let d2 = _constructor-args-doc(rest, add-int(cursor, 1), data-arg-num, x);
+    quote {join[unquote {d1}, atom-N(","), break(" "), unquote {d2}]}
+  }
+}
+
+inline-meta _algebraic-doc<a>(
+  constructors: list(constructor),
+  cons-index: int,
+  data-arg-num: int,
+  disc: 'int,
+  x: '&a,
+) -> 'doc {
+  match constructors {
+  | Nil =>
+    quote {empty}
+  | Cons(Constructor(cons-name, is-const-like, xts), rest) =>
+    let ts = _meta-for-each(xts, exact _meta-snd);
+    quote {
+      if eq-int(unquote {promote {cons-index}}, unquote {disc}) {
+        unquote {
+          let prefix =
+            if is-const-like {
+              quote {_constructor-doc(unquote {promote {cons-name}})}
+            } else {
+              quote {join[_constructor-doc(unquote {promote {cons-name}}), atom-N("(")]}
+            };
+          let suffix =
+            if is-const-like {
+              quote {empty}
+            } else {
+              quote {atom-N(")")}
+            };
+          quote {
+            Group(_nested-comma-seq(
+              unquote {prefix},
+              unquote {_constructor-args-doc(ts, 0, data-arg-num, x)},
+              unquote {suffix},
+            ))
+          }
+        }
+      } else {
+        unquote {_algebraic-doc(rest, add-int(cons-index, 1), data-arg-num, disc, x)}
+      }
+    }
+  }
+}
+
+inline-meta _enum-doc<a>(cons-index: int, names: list(&string), disc: 'int, x: '&a) -> 'doc {
+  match names {
+  | Nil =>
+    quote {empty}
+  | Cons(name, rest) =>
+    quote {
+      if eq-int(unquote {promote {cons-index}}, unquote {disc}) {
+        unquote {quote {_constructor-doc(unquote {promote {name}})}}
+      } else {
+        unquote {_enum-doc(add-int(cons-index, 1), rest, disc, x)}
+      }
+    }
+  }
+}
+
+define-meta to-doc<a>(x: '&a) -> 'doc {
+  let k = magic inspect-type(a);
+  match k {
+  | Algebraic(_, data-args, cons-info) =>
+    let data-arg-num = _meta-length(data-args);
+    quote {
+      let ptr-x = cast-inline<&a, pointer>(unquote {x});
+      let discriminant-x = load-int(ptr-x);
+      unquote {_algebraic-doc(cons-info, 0, data-arg-num, quote {discriminant-x}, x)}
+    }
+  | Enum(names) =>
+    quote {
+      let discriminant-x = cast-inline<&a, int>(unquote {x});
+      unquote {_enum-doc(0, names, quote {discriminant-x}, x)}
+    }
+  | Int1 =>
+    quote {atom-int(magic cast(int1, int64, magic cast(&a, int1, unquote {x})))}
+  | Int2 =>
+    quote {atom-int(magic cast(int2, int64, magic cast(&a, int2, unquote {x})))}
+  | Int4 =>
+    quote {atom-int(magic cast(int4, int64, magic cast(&a, int4, unquote {x})))}
+  | Int8 =>
+    quote {atom-int(magic cast(int8, int64, magic cast(&a, int8, unquote {x})))}
+  | Int16 =>
+    quote {atom-int(magic cast(int16, int64, magic cast(&a, int16, unquote {x})))}
+  | Int32 =>
+    quote {atom-int(magic cast(int32, int64, magic cast(&a, int32, unquote {x})))}
+  | Int64 =>
+    quote {atom-int(magic cast(&a, int64, unquote {x}))}
+  | Float16 =>
+    quote {atom-float(magic cast(float16, float64, magic cast(&a, float16, unquote {x})), 6)}
+  | Float32 =>
+    quote {atom-float(magic cast(float32, float64, magic cast(&a, float32, unquote {x})), 6)}
+  | Float64 =>
+    quote {atom-float(magic cast(&a, float64, unquote {x}), 6)}
+  | Null =>
+    quote {atom-N("null")}
+  | Rune =>
+    quote {
+      _literal-doc(join[
+        atom-N("`"),
+        atom-rune(magic cast(&a, rune, unquote {x})),
+        atom-N("`"),
+      ])
+    }
+  | Binary =>
+    quote {
+      _literal-doc(join[
+        atom-N("\""),
+        atom-N(magic cast(&a, &string, unquote {x})),
+        atom-N("\""),
+      ])
+    }
+  | Wrapper(t) =>
+    unpack-type t = t;
+    quote {
+      let x-unwrapped: &t = cast-inline<&a, &t>(unquote {x});
+      unquote {to-doc<t>(quote {x-unwrapped})}
+    }
+  | Vector(t) =>
+    unpack-type t = t;
+    quote {
+      let x: &vector(t) = cast-inline<&a, &vector(t)>(unquote {x});
+      unquote {_vector-doc<t>(quote {x})}
+    }
+  | Noema(t) =>
+    unpack-type t = t;
+    quote {
+      let x-unwrapped: &t = cast-inline<&a, &t>(unquote {x});
+      unquote {to-doc<t>(quote {x-unwrapped})}
+    }
+  | Box-T(t) =>
+    unpack-type t = t;
+    quote {
+      let x-unwrapped: &t = cast-inline<&a, &t>(unquote {x});
+      unquote {to-doc<t>(quote {x-unwrapped})}
+    }
+  | Pointer =>
+    quote {atom-int(magic cast(&a, int64, unquote {x}))}
+  | _ =>
+    quote {_literal-doc(atom-N("_"))}
+  }
+}
+
+define-meta derive<a>(max-ribbon-width: 'int) -> 'show(a) {
+  quote {
+    Show{
+      render := {
+        (x) => {
+          pin d = to-doc::(x);
+          show-doc(d, unquote {max-ribbon-width})
+        }
+      },
+    }
+  }
+}

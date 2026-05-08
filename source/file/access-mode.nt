@@ -1,0 +1,5 @@
+data access-mode {
+| Read
+| Write
+| Read-Write
+}

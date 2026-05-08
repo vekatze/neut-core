@@ -1,0 +1,158 @@
+import {
+  this.c-int {c-int},
+  this.c-size {c-size},
+  this.pointer {null-pointer},
+  this.unit {Unit, unit},
+}
+
+foreign {
+  pthread_create(pointer, pointer, pointer, pointer) -> c-int,
+  pthread_exit(pointer) -> void,
+  pthread_join(pointer, pointer) -> c-int,
+  pthread_mutex_init(pointer, pointer) -> c-int,
+  pthread_mutex_destroy(pointer) -> c-int,
+  pthread_mutex_lock(pointer) -> c-int,
+  pthread_mutex_unlock(pointer) -> c-int,
+  pthread_cond_init(pointer, pointer) -> c-int,
+  pthread_cond_destroy(pointer) -> c-int,
+  pthread_cond_signal(pointer) -> c-int,
+  pthread_cond_wait(pointer, pointer) -> c-int,
+  neut_core_v0_55_thread_size() -> c-size,
+  neut_core_v0_55_thread_mutex_size() -> c-size,
+  neut_core_v0_55_thread_cond_size() -> c-size,
+}
+
+constant THREAD_SIZE: c-size {
+  magic opaque-value {
+    magic external neut_core_v0_55_thread_size()
+  }
+}
+
+constant THREAD_MUTEX_SIZE: c-size {
+  magic opaque-value {
+    magic external neut_core_v0_55_thread_mutex_size()
+  }
+}
+
+constant THREAD_COND_SIZE: c-size {
+  magic opaque-value {
+    magic external neut_core_v0_55_thread_cond_size()
+  }
+}
+
+define thread-create(id-ptr: pointer, thread-func-addr: pointer, thread-env-addr: pointer) -> c-int {
+  introspect operating-system {
+  | darwin =>
+    magic external pthread_create(id-ptr, null-pointer, thread-func-addr, thread-env-addr)
+  | linux =>
+    magic external pthread_create(id-ptr, null-pointer, thread-func-addr, thread-env-addr)
+  }
+}
+
+define thread-exit(result-addr: pointer) -> unit {
+  introspect operating-system {
+  | darwin =>
+    let _ = magic external pthread_exit(result-addr);
+    Unit
+  | linux =>
+    let _ = magic external pthread_exit(result-addr);
+    Unit
+  }
+}
+
+define thread-join(id: pointer, result-addr: pointer) -> unit {
+  introspect operating-system {
+  | darwin =>
+    let _ = magic external pthread_join(id, result-addr);
+    Unit
+  | linux =>
+    let _ = magic external pthread_join(id, result-addr);
+    Unit
+  }
+}
+
+define thread-mutex-init(mutex-ptr: pointer) -> c-int {
+  introspect operating-system {
+  | darwin =>
+    magic external pthread_mutex_init(mutex-ptr, null-pointer)
+  | linux =>
+    magic external pthread_mutex_init(mutex-ptr, null-pointer)
+  }
+}
+
+define thread-mutex-destroy(mutex-ptr: pointer) -> unit {
+  introspect operating-system {
+  | darwin =>
+    let _ = magic external pthread_mutex_destroy(mutex-ptr);
+    Unit
+  | linux =>
+    let _ = magic external pthread_mutex_destroy(mutex-ptr);
+    Unit
+  }
+}
+
+define thread-mutex-lock(mutex-ptr: pointer) -> unit {
+  introspect operating-system {
+  | darwin =>
+    let _ = magic external pthread_mutex_lock(mutex-ptr);
+    Unit
+  | linux =>
+    let _ = magic external pthread_mutex_lock(mutex-ptr);
+    Unit
+  }
+}
+
+define thread-mutex-unlock(mutex-ptr: pointer) -> unit {
+  introspect operating-system {
+  | darwin =>
+    let _ = magic external pthread_mutex_unlock(mutex-ptr);
+    Unit
+  | linux =>
+    let _ = magic external pthread_mutex_unlock(mutex-ptr);
+    Unit
+  }
+}
+
+define thread-cond-init(cond-ptr: pointer) -> unit {
+  introspect operating-system {
+  | darwin =>
+    let _ = magic external pthread_cond_init(cond-ptr, null-pointer);
+    Unit
+  | linux =>
+    let _ = magic external pthread_cond_init(cond-ptr, null-pointer);
+    Unit
+  }
+}
+
+define thread-cond-destroy(cond-ptr: pointer) -> unit {
+  introspect operating-system {
+  | darwin =>
+    let _ = magic external pthread_cond_destroy(cond-ptr);
+    Unit
+  | linux =>
+    let _ = magic external pthread_cond_destroy(cond-ptr);
+    Unit
+  }
+}
+
+define thread-cond-signal(cond-ptr: pointer) -> unit {
+  introspect operating-system {
+  | darwin =>
+    let _ = magic external pthread_cond_signal(cond-ptr);
+    Unit
+  | linux =>
+    let _ = magic external pthread_cond_signal(cond-ptr);
+    Unit
+  }
+}
+
+define thread-cond-wait(cond-ptr: pointer, mutex-ptr: pointer) -> unit {
+  introspect operating-system {
+  | darwin =>
+    let _ = magic external pthread_cond_wait(cond-ptr, mutex-ptr);
+    Unit
+  | linux =>
+    let _ = magic external pthread_cond_wait(cond-ptr, mutex-ptr);
+    Unit
+  }
+}

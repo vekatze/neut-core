@@ -1,0 +1,7 @@
+import {
+  this.binary,
+}
+
+constant access-unchecked: _ {
+  this.binary._access
+}

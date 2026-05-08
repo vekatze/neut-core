@@ -1,317 +1,441 @@
-#include <ctype.h>
 #include <float.h>
 #include <limits.h>
 #include <math.h>
 #include <pthread.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/errno.h>
 #include <sys/fcntl.h>
 #include <sys/uio.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
-__attribute__((always_inline)) int neut_core_v0_54_wifexited(int stat) {
+__attribute__((always_inline)) int neut_core_v0_55_wifexited(int stat) {
   return WIFEXITED(stat);
 }
 
-__attribute__((always_inline)) int neut_core_v0_54_wifsignaled(int stat) {
+__attribute__((always_inline)) int neut_core_v0_55_wifsignaled(int stat) {
   return WIFSIGNALED(stat);
 }
 
-__attribute__((always_inline)) int neut_core_v0_54_wifstopped(int stat) {
+__attribute__((always_inline)) int neut_core_v0_55_wifstopped(int stat) {
   return WIFSTOPPED(stat);
 }
 
-__attribute__((always_inline)) int neut_core_v0_54_wexitstatus(int stat) {
+__attribute__((always_inline)) int neut_core_v0_55_wexitstatus(int stat) {
   return WEXITSTATUS(stat);
 }
 
-__attribute__((always_inline)) int neut_core_v0_54_wtermsig(int stat) {
+__attribute__((always_inline)) int neut_core_v0_55_wtermsig(int stat) {
   return WTERMSIG(stat);
 }
 
-__attribute__((always_inline)) int neut_core_v0_54_wcoredump(int stat) {
+__attribute__((always_inline)) int neut_core_v0_55_wcoredump(int stat) {
   return WCOREDUMP(stat);
 }
 
-__attribute__((always_inline)) int neut_core_v0_54_wstopsig(int stat) {
+__attribute__((always_inline)) int neut_core_v0_55_wstopsig(int stat) {
   return WSTOPSIG(stat);
 }
 
-__attribute__((always_inline)) size_t neut_core_v0_54_word_size() {
+__attribute__((always_inline)) size_t neut_core_v0_55_word_size() {
   return sizeof(void *);
 }
 
-__attribute__((always_inline)) int neut_core_v0_54_O_RDONLY() {
+__attribute__((always_inline)) int neut_core_v0_55_O_RDONLY() {
   return O_RDONLY;
 }
 
-__attribute__((always_inline)) int neut_core_v0_54_O_WRONLY() {
+__attribute__((always_inline)) int neut_core_v0_55_O_WRONLY() {
   return O_WRONLY;
 }
 
-__attribute__((always_inline)) int neut_core_v0_54_O_RDWR() { return O_RDWR; }
+__attribute__((always_inline)) int neut_core_v0_55_O_RDWR() { return O_RDWR; }
 
-__attribute__((always_inline)) int neut_core_v0_54_O_CREAT() { return O_CREAT; }
+__attribute__((always_inline)) int neut_core_v0_55_O_CREAT() { return O_CREAT; }
 
-__attribute__((always_inline)) int neut_core_v0_54_O_APPEND() {
+__attribute__((always_inline)) int neut_core_v0_55_O_APPEND() {
   return O_APPEND;
 }
 
-__attribute__((always_inline)) int neut_core_v0_54_SEEK_SET() {
+__attribute__((always_inline)) int neut_core_v0_55_O_TRUNC() { return O_TRUNC; }
+
+__attribute__((always_inline)) int neut_core_v0_55_SEEK_SET() {
   return SEEK_SET;
 }
 
-__attribute__((always_inline)) int neut_core_v0_54_SEEK_CUR() {
+__attribute__((always_inline)) int neut_core_v0_55_SEEK_CUR() {
   return SEEK_CUR;
 }
 
-__attribute__((always_inline)) int neut_core_v0_54_SEEK_END() {
+__attribute__((always_inline)) int neut_core_v0_55_SEEK_END() {
   return SEEK_END;
 }
 
-__attribute__((always_inline)) size_t neut_core_v0_54_thread_size() {
+__attribute__((always_inline)) size_t neut_core_v0_55_thread_size() {
   return sizeof(pthread_t);
 }
 
-__attribute__((always_inline)) size_t neut_core_v0_54_thread_mutex_size() {
+__attribute__((always_inline)) size_t neut_core_v0_55_thread_mutex_size() {
   return sizeof(pthread_mutex_t);
 }
 
-__attribute__((always_inline)) size_t neut_core_v0_54_thread_cond_size() {
+__attribute__((always_inline)) size_t neut_core_v0_55_thread_cond_size() {
   return sizeof(pthread_cond_t);
 }
 
-__attribute__((always_inline)) int neut_core_v0_54_errno() { return errno; }
+__attribute__((always_inline)) int neut_core_v0_55_errno() { return errno; }
 
-__attribute__((always_inline)) uint32_t neut_core_v0_54_UINT32_MAX() {
+__attribute__((always_inline)) uint32_t neut_core_v0_55_UINT32_MAX() {
   return UINT32_MAX;
 }
 
-int neut_core_v0_54_sleep(double duration) {
-  struct timespec ts;
-  ts.tv_sec = (time_t)duration;
-  ts.tv_nsec = (long)((duration - ts.tv_sec) * 1e9);
-  return nanosleep(&ts, NULL);
+static int64_t neut_core_v0_55_skip_underscores(const char *str,
+                                                int64_t length, int64_t i) {
+  while (i < length && str[i] == '_') {
+    i++;
+  }
+  return i;
 }
 
-int64_t neut_core_v0_54_parse_binary(const char *str, int64_t length,
+static void neut_core_v0_55_read_int_sign(const char *str, int64_t length,
+                                          int64_t *i, int64_t *out_sign) {
+  *i = neut_core_v0_55_skip_underscores(str, length, *i);
+  *out_sign = 1;
+  if (*i < length) {
+    if (str[*i] == '-') {
+      *out_sign = -1;
+      (*i)++;
+    } else if (str[*i] == '+') {
+      (*i)++;
+    }
+  }
+}
+
+static int neut_core_v0_55_read_prefix(const char *str, int64_t length,
+                                       int64_t *i, const char *prefix,
+                                       int64_t prefix_length) {
+  int64_t j = *i;
+  for (int64_t k = 0; k < prefix_length; k++) {
+    j = neut_core_v0_55_skip_underscores(str, length, j);
+    if (j >= length || str[j] != prefix[k]) {
+      return 0;
+    }
+    j++;
+  }
+  *i = j;
+  return 1;
+}
+
+static int neut_core_v0_55_decimal_digit(unsigned char ch, int *out_digit) {
+  if ('0' <= ch && ch <= '9') {
+    *out_digit = ch - '0';
+    return 1;
+  }
+  return 0;
+}
+
+static int neut_core_v0_55_binary_digit(unsigned char ch, int *out_digit) {
+  if (ch == '0' || ch == '1') {
+    *out_digit = ch - '0';
+    return 1;
+  }
+  return 0;
+}
+
+static int neut_core_v0_55_octal_digit(unsigned char ch, int *out_digit) {
+  if ('0' <= ch && ch <= '7') {
+    *out_digit = ch - '0';
+    return 1;
+  }
+  return 0;
+}
+
+static int neut_core_v0_55_hex_digit(unsigned char ch, int *out_digit) {
+  if ('0' <= ch && ch <= '9') {
+    *out_digit = ch - '0';
+    return 1;
+  }
+  if ('A' <= ch && ch <= 'F') {
+    *out_digit = ch - 'A' + 10;
+    return 1;
+  }
+  return 0;
+}
+
+static int neut_core_v0_55_read_required_digits(
+    const char *str, int64_t length, int64_t *i,
+    int (*read_digit)(unsigned char, int *), int base, uint64_t *out_value) {
+  uint64_t result = 0;
+  int has_digits = 0;
+  while (1) {
+    int digit = 0;
+    *i = neut_core_v0_55_skip_underscores(str, length, *i);
+    if (*i >= length || !read_digit((unsigned char)str[*i], &digit)) {
+      break;
+    }
+    result = result * (uint64_t)base + (uint64_t)digit;
+    (*i)++;
+    has_digits = 1;
+  }
+  if (!has_digits) {
+    return 0;
+  }
+  *out_value = result;
+  return 1;
+}
+
+static int64_t neut_core_v0_55_parse_integer_literal(
+    const char *str, int64_t length, const char *prefix, int64_t prefix_length,
+    int (*read_digit)(unsigned char, int *), int base, int64_t *out_value) {
+  int64_t i = 0;
+  int64_t sign = 1;
+  uint64_t result = 0;
+  neut_core_v0_55_read_int_sign(str, length, &i, &sign);
+  if (!neut_core_v0_55_read_prefix(str, length, &i, prefix, prefix_length)) {
+    return -1;
+  }
+  if (!neut_core_v0_55_read_required_digits(str, length, &i, read_digit, base,
+                                            &result)) {
+    return -1;
+  }
+  i = neut_core_v0_55_skip_underscores(str, length, i);
+  if (i != length) {
+    return -1;
+  }
+  if (sign < 0) {
+    *out_value = (int64_t)(0 - result);
+  } else {
+    *out_value = (int64_t)result;
+  }
+  return 1;
+}
+
+static int64_t neut_core_v0_55_parse_integer_digits(
+    const char *str, int64_t length, int (*read_digit)(unsigned char, int *),
+    int base, int64_t *out_value) {
+  int64_t i = 0;
+  uint64_t result = 0;
+  if (!neut_core_v0_55_read_required_digits(str, length, &i, read_digit, base,
+                                            &result)) {
+    return -1;
+  }
+  i = neut_core_v0_55_skip_underscores(str, length, i);
+  if (i != length) {
+    return -1;
+  }
+  *out_value = (int64_t)result;
+  return 1;
+}
+
+static int neut_core_v0_55_parse_normalized_double(const char *str,
+                                                   int64_t length,
+                                                   double *out_value) {
+  if (length < 0) {
+    return 0;
+  }
+  char *normalized = malloc((size_t)length + 1);
+  if (normalized == NULL) {
+    return 0;
+  }
+  size_t normalized_length = 0;
+  for (int64_t i = 0; i < length; i++) {
+    if (str[i] != '_') {
+      normalized[normalized_length] = str[i];
+      normalized_length++;
+    }
+  }
+  normalized[normalized_length] = '\0';
+  char *end = NULL;
+  double value = strtod(normalized, &end);
+  int ok = end == normalized + normalized_length && isfinite(value);
+  free(normalized);
+  if (!ok) {
+    return 0;
+  }
+  *out_value = value;
+  return 1;
+}
+
+int neut_core_v0_55_sleep(double duration) {
+  struct timespec request;
+  struct timespec remaining;
+  request.tv_sec = (time_t)duration;
+  request.tv_nsec = (long)((duration - request.tv_sec) * 1e9);
+
+  while (nanosleep(&request, &remaining) < 0) {
+    if (errno != EINTR) {
+      return -1;
+    }
+    request = remaining;
+  }
+
+  return 0;
+}
+
+int64_t neut_core_v0_55_parse_binary(const char *str, int64_t length,
                                      int64_t *out_value) {
-  int64_t result = 0;
-  int64_t i = 0;
-  int64_t sign = 1;
-  if (i < length) {
-    if (str[i] == '-') {
-      sign = -1;
-      i++;
-    } else if (str[i] == '+') {
-      sign = 1;
-      i++;
-    }
-  }
-  if (length - i >= 2 && str[i] == '0' && str[i + 1] == 'b') {
-    i += 2;
-  }
-  int has_digits = 0;
-  while (i < length) {
-    unsigned char ch = str[i];
-    if (ch == '0' || ch == '1') {
-      result = result * 2 + (ch - '0');
-      i++;
-      has_digits = 1;
-    } else if (ch == '_') {
-      i++;
-    } else {
-      break;
-    }
-  }
-  if (!has_digits) {
-    return -1;
-  }
-  if (i == length) {
-    *out_value = sign * result;
-    return 1;
-  } else {
-    return -1;
-  }
+  return neut_core_v0_55_parse_integer_literal(
+      str, length, "0b", 2, neut_core_v0_55_binary_digit, 2, out_value);
 }
 
-int64_t neut_core_v0_54_parse_decimal(const char *str, int64_t length,
+int64_t neut_core_v0_55_parse_binary_digits(const char *str, int64_t length,
+                                            int64_t *out_value) {
+  return neut_core_v0_55_parse_integer_digits(
+      str, length, neut_core_v0_55_binary_digit, 2, out_value);
+}
+
+int64_t neut_core_v0_55_parse_octal(const char *str, int64_t length,
+                                    int64_t *out_value) {
+  return neut_core_v0_55_parse_integer_literal(
+      str, length, "0o", 2, neut_core_v0_55_octal_digit, 8, out_value);
+}
+
+int64_t neut_core_v0_55_parse_octal_digits(const char *str, int64_t length,
+                                           int64_t *out_value) {
+  return neut_core_v0_55_parse_integer_digits(
+      str, length, neut_core_v0_55_octal_digit, 8, out_value);
+}
+
+int64_t neut_core_v0_55_parse_decimal(const char *str, int64_t length,
                                       int64_t *out_value) {
-  int64_t result = 0;
-  int64_t i = 0;
-  int64_t sign = 1;
-  if (i < length) {
-    if (str[i] == '-') {
-      sign = -1;
-      i++;
-    } else if (str[i] == '+') {
-      sign = 1;
-      i++;
-    }
-  }
-  int has_digits = 0;
-  while (i < length) {
-    unsigned char ch = str[i];
-    if (isdigit(ch)) {
-      result = result * 10 + (ch - '0');
-      i++;
-      has_digits = 1;
-    } else if (ch == '_') {
-      i++;
-    } else {
-      break;
-    }
-  }
-  if (!has_digits) {
-    return -1;
-  }
-  if (i == length) {
-    *out_value = sign * result;
-    return 1;
-  } else {
-    return -1;
-  }
+  return neut_core_v0_55_parse_integer_literal(
+      str, length, "", 0, neut_core_v0_55_decimal_digit, 10, out_value);
 }
 
-int64_t neut_core_v0_54_parse_hex(const char *str, int64_t length,
+int64_t neut_core_v0_55_parse_decimal_digits(const char *str, int64_t length,
+                                             int64_t *out_value) {
+  return neut_core_v0_55_parse_integer_digits(
+      str, length, neut_core_v0_55_decimal_digit, 10, out_value);
+}
+
+int64_t neut_core_v0_55_parse_hex(const char *str, int64_t length,
                                   int64_t *out_value) {
-  int64_t result = 0;
-  int64_t i = 0;
-  int64_t sign = 1;
-  if (i < length) {
-    if (str[i] == '-') {
-      sign = -1;
-      i++;
-    } else if (str[i] == '+') {
-      sign = 1;
-      i++;
-    }
-  }
-  if (length - i >= 2 && str[i] == '0' && str[i + 1] == 'x') {
-    i += 2;
-  }
-  int has_digits = 0;
-  while (i < length) {
-    unsigned char ch = str[i];
-    if (isdigit(ch)) {
-      result = result * 16 + (ch - '0');
-      i++;
-      has_digits = 1;
-    } else if ('a' <= ch && ch <= 'f') {
-      result = result * 16 + (ch - 'a' + 10);
-      i++;
-      has_digits = 1;
-    } else if ('A' <= ch && ch <= 'F') {
-      result = result * 16 + (ch - 'A' + 10);
-      i++;
-      has_digits = 1;
-    } else if (ch == '_') {
-      i++;
-    } else {
-      break;
-    }
-  }
-  if (!has_digits) {
-    return -1;
-  }
-  if (i == length) {
-    *out_value = sign * result;
-    return 1;
-  } else {
-    return -1;
-  }
+  return neut_core_v0_55_parse_integer_literal(
+      str, length, "0x", 2, neut_core_v0_55_hex_digit, 16, out_value);
 }
 
-int64_t neut_core_v0_54_parse_double(const char *str, int64_t length,
-                                     double *out_value) {
-  double result = 0.0;
-  int64_t i = 0;
-  double sign = 1.0;
-  if (i < length) {
-    unsigned char ch = str[i];
-    if (ch == '-') {
-      sign = -1.0;
-      i++;
-    } else if (ch == '+') {
-      sign = 1.0;
-      i++;
-    } else if (ch == '_') {
-      i++;
+int64_t neut_core_v0_55_parse_hex_digits(const char *str, int64_t length,
+                                         int64_t *out_value) {
+  return neut_core_v0_55_parse_integer_digits(
+      str, length, neut_core_v0_55_hex_digit, 16, out_value);
+}
+
+static int neut_core_v0_55_read_float_exponent(const char *str, int64_t length,
+                                               int64_t *i, char marker) {
+  int has_digits = 0;
+  *i = neut_core_v0_55_skip_underscores(str, length, *i);
+  if (*i >= length || str[*i] != marker) {
+    return 1;
+  }
+  (*i)++;
+  *i = neut_core_v0_55_skip_underscores(str, length, *i);
+  if (*i < length) {
+    if (str[*i] == '-') {
+      (*i)++;
+    } else if (str[*i] == '+') {
+      (*i)++;
     }
   }
-  int has_digits = 0;
-  while (i < length) {
-    unsigned char ch = str[i];
-    if (isdigit(ch)) {
-      result = result * 10.0 + (ch - '0');
-      i++;
-      has_digits = 1;
-    } else if (ch == '_') {
-      i++;
-    } else {
+  while (1) {
+    int digit = 0;
+    *i = neut_core_v0_55_skip_underscores(str, length, *i);
+    if (*i >= length ||
+        !neut_core_v0_55_decimal_digit((unsigned char)str[*i], &digit)) {
       break;
     }
+    (*i)++;
+    has_digits = 1;
   }
   if (!has_digits) {
+    return 0;
+  }
+  return 1;
+}
+
+static int64_t neut_core_v0_55_parse_decimal_double(const char *str,
+                                                    int64_t length,
+                                                    double *out_value) {
+  int64_t i = 0;
+  int64_t sign = 1;
+  uint64_t ignored = 0;
+  neut_core_v0_55_read_int_sign(str, length, &i, &sign);
+  if (!neut_core_v0_55_read_required_digits(
+          str, length, &i, neut_core_v0_55_decimal_digit, 10, &ignored)) {
     return -1;
   }
-  double fraction = 1.0;
+  i = neut_core_v0_55_skip_underscores(str, length, i);
+  if (i >= length || str[i] != '.') {
+    return -1;
+  }
+  i++;
+  if (!neut_core_v0_55_read_required_digits(
+          str, length, &i, neut_core_v0_55_decimal_digit, 10, &ignored)) {
+    return -1;
+  }
+  if (!neut_core_v0_55_read_float_exponent(str, length, &i, 'e')) {
+    return -1;
+  }
+  i = neut_core_v0_55_skip_underscores(str, length, i);
+  if (i != length) {
+    return -1;
+  }
+  double value = 0.0;
+  if (!neut_core_v0_55_parse_normalized_double(str, length, &value)) {
+    return -1;
+  }
+  *out_value = value;
+  return 1;
+}
+
+static int64_t neut_core_v0_55_parse_hex_double(const char *str, int64_t length,
+                                                double *out_value) {
+  int64_t i = 0;
+  int64_t sign = 1;
+  uint64_t ignored = 0;
+  neut_core_v0_55_read_int_sign(str, length, &i, &sign);
+  if (!neut_core_v0_55_read_prefix(str, length, &i, "0x", 2)) {
+    return -1;
+  }
+  if (!neut_core_v0_55_read_required_digits(
+          str, length, &i, neut_core_v0_55_hex_digit, 16, &ignored)) {
+    return -1;
+  }
+  i = neut_core_v0_55_skip_underscores(str, length, i);
   if (i < length && str[i] == '.') {
     i++;
-    int has_fractions = 0;
-    while (i < length) {
-      unsigned char ch = str[i];
-      if (isdigit(ch)) {
-        fraction /= 10.0;
-        result += (ch - '0') * fraction;
-        i++;
-        has_fractions = 1;
-      } else if (ch == '_') {
-        i++;
-      } else {
-        break;
-      }
-    }
-    if (!has_fractions) {
-      return -1;
-    }
-  }
-  int exp_sign = 1;
-  int exponent = 0;
-  if (i < length && (str[i] == 'e' || str[i] == 'E')) {
-    i++;
-    if (i < length) {
-      if (str[i] == '-') {
-        exp_sign = -1;
-        i++;
-      } else if (str[i] == '+') {
-        exp_sign = 1;
-        i++;
-      }
-      while (i < length) {
-        unsigned char ch = str[i];
-        if (isdigit(ch)) {
-          exponent = exponent * 10 + (ch - '0');
-          i++;
-        } else {
-          break;
-        }
-      }
-    } else {
-      return -1;
-    }
-  }
-  if (i == length) {
-    *out_value = sign * result * pow(10, exp_sign * exponent);
-    return 1;
   } else {
     return -1;
   }
+  if (!neut_core_v0_55_read_required_digits(
+          str, length, &i, neut_core_v0_55_hex_digit, 16, &ignored)) {
+    return -1;
+  }
+  if (!neut_core_v0_55_read_float_exponent(str, length, &i, 'p')) {
+    return -1;
+  }
+  i = neut_core_v0_55_skip_underscores(str, length, i);
+  if (i != length) {
+    return -1;
+  }
+  double value = 0.0;
+  if (!neut_core_v0_55_parse_normalized_double(str, length, &value)) {
+    return -1;
+  }
+  *out_value = value;
+  return 1;
 }
 
-int64_t neut_core_v0_54_write_loop(int fd, const char *buf, size_t len) {
+int64_t neut_core_v0_55_parse_double(const char *str, int64_t length,
+                                     double *out_value) {
+  if (neut_core_v0_55_parse_hex_double(str, length, out_value) > 0) {
+    return 1;
+  }
+  return neut_core_v0_55_parse_decimal_double(str, length, out_value);
+}
+
+int64_t neut_core_v0_55_write_loop(int fd, const char *buf, size_t len) {
   size_t off = 0;
   while (off < len) {
     ssize_t w = write(fd, buf + off, len - off);
@@ -326,13 +450,13 @@ int64_t neut_core_v0_54_write_loop(int fd, const char *buf, size_t len) {
   return (int64_t)len;
 }
 
-ssize_t neut_core_v0_54_write_line(int fd, size_t len, const char *s) {
+ssize_t neut_core_v0_55_write_line(int fd, size_t len, const char *s) {
   struct iovec iov[2] = {{.iov_base = (void *)s, .iov_len = len},
                          {.iov_base = (void *)"\n", .iov_len = 1}};
   return writev(fd, iov, 2);
 }
 
-int neut_core_v0_54_write_int64_core(char *buf_end, int64_t v, int add_nl) {
+int neut_core_v0_55_write_int64_core(char *buf_end, int64_t v, int add_nl) {
   char *p = buf_end;
   if (add_nl) {
     *--p = '\n';
@@ -357,21 +481,21 @@ int neut_core_v0_54_write_int64_core(char *buf_end, int64_t v, int add_nl) {
   return (int)(buf_end - p);
 }
 
-int64_t neut_core_v0_54_write_int64(int fd, int64_t v) {
+int64_t neut_core_v0_55_write_int64(int fd, int64_t v) {
   char buf[22];
   char *end = buf + sizeof(buf);
-  int len = neut_core_v0_54_write_int64_core(end, v, 0);
-  return neut_core_v0_54_write_loop(fd, end - len, (size_t)len);
+  int len = neut_core_v0_55_write_int64_core(end, v, 0);
+  return neut_core_v0_55_write_loop(fd, end - len, (size_t)len);
 }
 
-int64_t neut_core_v0_54_write_int64_nl(int fd, int64_t v) {
+int64_t neut_core_v0_55_write_int64_nl(int fd, int64_t v) {
   char buf[22];
   char *end = buf + sizeof(buf);
-  int len = neut_core_v0_54_write_int64_core(end, v, 1);
-  return neut_core_v0_54_write_loop(fd, end - len, (size_t)len);
+  int len = neut_core_v0_55_write_int64_core(end, v, 1);
+  return neut_core_v0_55_write_loop(fd, end - len, (size_t)len);
 }
 
-size_t neut_core_v0_54_build_fixed_buf(char *buf, size_t cap, double value,
+size_t neut_core_v0_55_build_fixed_buf(char *buf, size_t cap, double value,
                                        int decimals, int add_nl) {
   if (decimals < 0) {
     errno = EINVAL;
@@ -404,29 +528,29 @@ size_t neut_core_v0_54_build_fixed_buf(char *buf, size_t cap, double value,
   return (size_t)n;
 }
 
-int64_t neut_core_v0_54_write_double(int fd, double value, int decimals) {
+int64_t neut_core_v0_55_write_double(int fd, double value, int decimals) {
   char buf[64];
   size_t len =
-      neut_core_v0_54_build_fixed_buf(buf, sizeof buf, value, decimals, 0);
+      neut_core_v0_55_build_fixed_buf(buf, sizeof buf, value, decimals, 0);
   if (!len) {
     return -1;
   }
 
-  return neut_core_v0_54_write_loop(fd, buf, len);
+  return neut_core_v0_55_write_loop(fd, buf, len);
 }
 
-int64_t neut_core_v0_54_write_double_line(int fd, double value, int decimals) {
+int64_t neut_core_v0_55_write_double_line(int fd, double value, int decimals) {
   char buf[65];
   size_t len =
-      neut_core_v0_54_build_fixed_buf(buf, sizeof buf, value, decimals, 1);
+      neut_core_v0_55_build_fixed_buf(buf, sizeof buf, value, decimals, 1);
   if (!len) {
     return -1;
   }
 
-  return neut_core_v0_54_write_loop(fd, buf, len);
+  return neut_core_v0_55_write_loop(fd, buf, len);
 }
 
-ssize_t neut_core_v0_54_int64_strlen(int64_t v) {
+ssize_t neut_core_v0_55_int64_strlen(int64_t v) {
   uint64_t u = (v < 0) ? (uint64_t)(-v) : (uint64_t)v;
   int len = 0;
   if (u == 0) {
@@ -443,7 +567,7 @@ ssize_t neut_core_v0_54_int64_strlen(int64_t v) {
   return len;
 }
 
-size_t neut_core_v0_54_double_strlen(double value, int decimals) {
+size_t neut_core_v0_55_double_strlen(double value, int decimals) {
   if (decimals < 0) {
     errno = EINVAL;
     return 0;
@@ -460,7 +584,7 @@ size_t neut_core_v0_54_double_strlen(double value, int decimals) {
 }
 
 __attribute__((always_inline)) int64_t
-neut_core_v0_54_get_online_cpu_count(void) {
+neut_core_v0_55_get_online_cpu_count(void) {
   int64_t n = (int64_t)sysconf(_SC_NPROCESSORS_ONLN);
   return (n > 0) ? n : 1;
 }
@@ -480,6 +604,6 @@ typedef enum {
 #define ARCH_TAG ARCH_NONE
 #endif
 
-__attribute__((always_inline)) arch_tag_t neut_core_v0_54_get_arch_tag() {
+__attribute__((always_inline)) arch_tag_t neut_core_v0_55_get_arch_tag() {
   return ARCH_TAG;
 }

@@ -1,17 +1,20 @@
 import {
-  this.binary {_copy-binary, binary, binary-access, binary-length, binary-new},
+  this.binary {binary, from-list},
+  this.binary.unsafe {access-unchecked},
   this.bool {False, True, bool},
   this.box,
   this.c-size {C-Size, c-size},
   this.either {Right, none},
-  this.external {malloc},
   this.list {Cons, List, Nil, list, reverse},
-  this.magic,
-  this.memory {load-int, load-int8, store-int},
+  this.memory {malloc},
+  this.memory.unsafe {load-int, load-int8, store-int},
   this.pair {Pair, pair},
   this.pointer {shift},
-  this.rune {load-rune, size-by-head-byte, store-rune, to-int32},
+  this.rune {to-int32},
+  this.rune.unsafe {load-rune, store-rune},
+  this.rune.utf8 {size-by-head-byte},
   this.unit {Unit, unit},
+  this.unsafe {cast},
   this.word,
 }
 
@@ -20,7 +23,7 @@ data string {
 }
 
 define create(xs: list(int8)) -> string {
-  magic cast(binary, string, binary-new(xs))
+  magic cast(binary, string, from-list(xs))
 }
 
 define empty() -> string {
@@ -36,13 +39,13 @@ inline to-binary(x: &string) -> &binary {
   content
 }
 
-inline string-byte-length(t: &string) -> int {
+inline byte-length(t: &string) -> int {
   let ptr = magic cast(&string, &binary, t);
-  binary-length(ptr)
+  this.binary.length(ptr)
 }
 
 define _get-content-pointer(t: &string) -> pointer {
-  let ptr = this.magic.cast<&string, pointer>(t);
+  let ptr = cast<&string, pointer>(t);
   let from = load-int(ptr);
   let u = this.word.size;
   shift(ptr, add-int(mul-int(u, 2), from))
@@ -65,11 +68,11 @@ define append(t1: &string, t2: &string) -> string {
 }
 
 define _access(haystack: &string, cursor: int) -> int8 {
-  binary-access(magic cast(&string, &binary, haystack), cursor)
+  access-unchecked(magic cast(&string, &binary, haystack), cursor)
 }
 
 define is-empty(t: &string) -> bool {
-  eq-int(string-byte-length(t), 0)
+  eq-int(byte-length(t), 0)
 }
 
 // O(1)
@@ -117,8 +120,8 @@ define _match-string-content(ptr1: pointer, ptr2: pointer, len: int) -> bool {
 define break(haystack: &string, needle: &string) -> pair(string, string) {
   let ptr = _get-content-pointer(haystack);
   let ptr2 = _get-content-pointer(needle);
-  let len = string-byte-length(haystack);
-  let needle-len = string-byte-length(needle);
+  let len = byte-length(haystack);
+  let needle-len = byte-length(needle);
   let f =
     define loop(cursor: int) -> pair(string, string) {
       let rem-len = sub-int(len, cursor);
@@ -141,8 +144,8 @@ define break(haystack: &string, needle: &string) -> pair(string, string) {
 define find-string(haystack: &string, needle: &string) -> bool {
   let ptr = _get-content-pointer(haystack);
   let ptr2 = _get-content-pointer(needle);
-  let len = string-byte-length(haystack);
-  let needle-len = string-byte-length(needle);
+  let len = byte-length(haystack);
+  let needle-len = byte-length(needle);
   let f =
     define loop(cursor: int) -> bool {
       let rem-len = sub-int(len, cursor);
@@ -236,15 +239,15 @@ define _length(t: &string, len: int, index: int, acc: int) -> int {
 }
 
 define length(t: &string) -> int {
-  let len = string-byte-length(t);
+  let len = byte-length(t);
   _length(t, len, 0, 0)
 }
 
 define split(haystack: &string, needle: &string) -> list(string) {
   let haystack-ptr = _get-content-pointer(haystack);
   let needle-ptr = _get-content-pointer(needle);
-  let len = string-byte-length(haystack);
-  let needle-len = string-byte-length(needle);
+  let len = byte-length(haystack);
+  let needle-len = byte-length(needle);
   let f =
     define loop(pivot: int, cursor: int) -> list(string) {
       let rem-len = sub-int(len, add-int(pivot, cursor));
@@ -317,7 +320,7 @@ define _unpack(ptr: pointer, len: int, index: int, acc: list(rune)) -> list(rune
 
 define unpack(t: &string) -> list(rune) {
   let ptr = _get-content-pointer(t);
-  let len = string-byte-length(t);
+  let len = byte-length(t);
   _unpack(ptr, len, 0, Nil)
 }
 
@@ -365,7 +368,7 @@ define _get-rune(t: &string, index: int) -> rune {
 }
 
 define get-first-rune(t: &string) ->> ?rune {
-  if gt-int(string-byte-length(t), 0) {
+  if gt-int(byte-length(t), 0) {
     Right(_get-rune(t, 0))
   } else {
     none
@@ -373,7 +376,7 @@ define get-first-rune(t: &string) ->> ?rune {
 }
 
 define uncons(t: string) ->> ?pair(rune, string) {
-  let len on t = string-byte-length(t);
+  let len on t = byte-length(t);
   if eq-int(len, 0) {
     none
   } else {
@@ -407,62 +410,62 @@ define _find-pivot-end(char-len: int, len: int, t: &string, index: int, char-cou
 }
 
 define take(t: string, n: int) -> string {
-  let len on t = string-byte-length(t);
+  let len on t = byte-length(t);
   let pivot on t = _find-pivot(n, len, t, 0, 0);
   _take(t, pivot)
 }
 
 define take-N(t: &string, n: int) -> string {
-  let len = string-byte-length(t);
+  let len = byte-length(t);
   let pivot = _find-pivot(n, len, t, 0, 0);
   _take-N(t, pivot)
 }
 
 define drop(t: string, n: int) -> string {
-  let len on t = string-byte-length(t);
+  let len on t = byte-length(t);
   let pivot on t = _find-pivot(n, len, t, 0, 0);
   _drop(t, pivot)
 }
 
 define drop-N(t: &string, n: int) -> string {
-  let len = string-byte-length(t);
+  let len = byte-length(t);
   let pivot = _find-pivot(n, len, t, 0, 0);
   _drop-N(t, pivot)
 }
 
 define take-end(t: string, n: int) -> string {
-  let len on t = string-byte-length(t);
+  let len on t = byte-length(t);
   let pivot on t = _find-pivot-end(n, len, t, sub-int(len, 1), 0);
   _drop(t, pivot)
 }
 
 define take-end-N(t: &string, n: int) -> string {
-  let len = string-byte-length(t);
+  let len = byte-length(t);
   let pivot = _find-pivot-end(n, len, t, sub-int(len, 1), 0);
   _drop-N(t, pivot)
 }
 
 define drop-end(t: string, n: int) -> string {
-  let len on t = string-byte-length(t);
+  let len on t = byte-length(t);
   let pivot on t = _find-pivot-end(n, len, t, sub-int(len, 1), 0);
   _take(t, pivot)
 }
 
 define drop-end-N(t: &string, n: int) -> string {
-  let len = string-byte-length(t);
+  let len = byte-length(t);
   let pivot = _find-pivot-end(n, len, t, sub-int(len, 1), 0);
   _take-N(t, pivot)
 }
 
 define slice(t: string, start: int, size: int) -> string {
-  let len on t = string-byte-length(t);
+  let len on t = byte-length(t);
   let start-byte-index on t = _find-pivot(start, len, t, 0, 0);
   let end-byte-index on t = _find-pivot(size, len, t, start-byte-index, 0);
   _slice(t, start-byte-index, sub-int(end-byte-index, start-byte-index))
 }
 
 define slice-N(t: &string, start: int, size: int) -> string {
-  let len = string-byte-length(t);
+  let len = byte-length(t);
   let start-byte-index = _find-pivot(start, len, t, 0, 0);
   let end-byte-index = _find-pivot(size, len, t, start-byte-index, 0);
   _slice-N(t, start-byte-index, sub-int(end-byte-index, start-byte-index))
@@ -471,16 +474,16 @@ define slice-N(t: &string, start: int, size: int) -> string {
 inline take-while(t: string, !pred: (rune) -> bool) -> string {
   let f =
     define self(t: string, index: int) -> string {
-      let len on t = string-byte-length(t);
+      let len on t = byte-length(t);
       if ge-int(index, len) {
-        take(t, index)
+        _take(t, index)
       } else {
         let ch on t = _get-rune(t, index);
         if pred(ch) {
           let char-len = this.rune.size(ch);
           self(t, add-int(index, char-len))
         } else {
-          take(t, index)
+          _take(t, index)
         }
       }
     };
@@ -488,7 +491,7 @@ inline take-while(t: string, !pred: (rune) -> bool) -> string {
 }
 
 inline take-while-N(t: &string, !pred: (rune) -> bool) -> string {
-  let len = string-byte-length(t);
+  let len = byte-length(t);
   let f =
     define self(index: int, acc: list(rune)) -> list(rune) {
       if ge-int(index, len) {
@@ -508,7 +511,7 @@ inline take-while-N(t: &string, !pred: (rune) -> bool) -> string {
 }
 
 inline take-while-end(t: string, !pred: (rune) -> bool) -> string {
-  let len on t = string-byte-length(t);
+  let len on t = byte-length(t);
   let f =
     define self(t: string, index: int) -> string {
       if lt-int(index, 0) {
@@ -528,7 +531,7 @@ inline take-while-end(t: string, !pred: (rune) -> bool) -> string {
 }
 
 inline take-while-end-N(t: &string, !pred: (rune) -> bool) -> string {
-  let len = string-byte-length(t);
+  let len = byte-length(t);
   let f =
     define self(t: &string, index: int) -> string {
       if lt-int(index, 0) {
@@ -567,7 +570,7 @@ inline drop-while(t: string, !pred: (rune) -> bool) -> string {
 }
 
 inline drop-while-N(t: &string, !pred: (rune) -> bool) -> string {
-  let len = string-byte-length(t);
+  let len = byte-length(t);
   let f =
     define self(index: int) -> string {
       if ge-int(index, len) {
@@ -586,7 +589,7 @@ inline drop-while-N(t: &string, !pred: (rune) -> bool) -> string {
 }
 
 inline drop-while-end(t: string, !pred: (rune) -> bool) -> string {
-  let len on t = string-byte-length(t);
+  let len on t = byte-length(t);
   let f =
     define self(t: string, index: int) -> string {
       if lt-int(index, 0) {
@@ -606,7 +609,7 @@ inline drop-while-end(t: string, !pred: (rune) -> bool) -> string {
 }
 
 inline drop-while-end-N(t: &string, !pred: (rune) -> bool) -> string {
-  let len = string-byte-length(t);
+  let len = byte-length(t);
   let f =
     define self(t: &string, index: int) -> string {
       if lt-int(index, 0) {
@@ -626,35 +629,12 @@ inline drop-while-end-N(t: &string, !pred: (rune) -> bool) -> string {
 }
 
 define replicate(t: &string, n: int) -> string {
-  if le-int(n, 0) {
-    empty()
-  } else {
-    let base-len = string-byte-length(t);
-    let len = mul-int(n, base-len);
-    let u = this.word.size;
-    let u2 = mul-int(u, 2);
-    let new-string = malloc(C-Size(add-int(len, u2)));
-    store-int(0, new-string);
-    store-int(len, shift(new-string, u));
-    let content-ptr = shift(new-string, u2);
-    let loop =
-      define self(count: int, t: &string) -> unit {
-        if ge-int(count, n) {
-          Unit
-        } else {
-          let current-content-ptr = shift(content-ptr, mul-int(count, base-len));
-          let x-ptr = _get-content-pointer(t);
-          _copy-binary(x-ptr, current-content-ptr, base-len);
-          self(add-int(count, 1), t)
-        }
-      };
-    loop(0, t);
-    magic cast(pointer, string, new-string)
-  }
+  let t = magic cast(&string, &binary, t);
+  magic cast(binary, string, this.binary.replicate(t, n))
 }
 
 inline fold<a>(acc: a, t: &string, !f: (a, rune) -> a) -> a {
-  let len = string-byte-length(t);
+  let len = byte-length(t);
   let f =
     define self(index: int, acc: a) -> a {
       if ge-int(index, len) {
@@ -669,7 +649,7 @@ inline fold<a>(acc: a, t: &string, !f: (a, rune) -> a) -> a {
 }
 
 inline all(t: &string, !pred: (rune) -> bool) -> bool {
-  let len = string-byte-length(t);
+  let len = byte-length(t);
   let f =
     define self(index: int) -> bool {
       if ge-int(index, len) {
@@ -689,7 +669,7 @@ inline all(t: &string, !pred: (rune) -> bool) -> bool {
 }
 
 inline any(t: &string, !pred: (rune) -> bool) -> bool {
-  let len = string-byte-length(t);
+  let len = byte-length(t);
   let f =
     define self(index: int) -> bool {
       if ge-int(index, len) {
@@ -709,7 +689,7 @@ inline any(t: &string, !pred: (rune) -> bool) -> bool {
 }
 
 define find(t: &string, !pred: (rune) -> bool) ->> ?int {
-  let len = string-byte-length(t);
+  let len = byte-length(t);
   let f =
     define self(byte-index: int, index: int) ->> ?int {
       if ge-int(byte-index, len) {
@@ -728,7 +708,7 @@ define find(t: &string, !pred: (rune) -> bool) ->> ?int {
 }
 
 define find-end(t: &string, !pred: (rune) -> bool) ->> ?int {
-  let len = string-byte-length(t);
+  let len = byte-length(t);
   let f =
     define self(t: &string, byte-index: int, index: int) ->> ?int {
       if lt-int(byte-index, 0) {

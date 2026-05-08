@@ -1,0 +1,37 @@
+import {
+  this.c-int {c-int},
+  this.c-offset {c-offset},
+}
+
+foreign {
+  close(c-int) -> c-int,
+  lseek(c-int, c-offset, c-int) -> c-offset,
+  dup2(c-int, c-int) -> c-int,
+}
+
+define close(fd: c-int) -> c-int {
+  introspect operating-system {
+  | darwin =>
+    magic external close(fd)
+  | linux =>
+    magic external close(fd)
+  }
+}
+
+define lseek(fd: c-int, offset: c-offset, origin: c-int) -> c-offset {
+  introspect operating-system {
+  | darwin =>
+    magic external lseek(fd, offset, origin)
+  | linux =>
+    magic external lseek(fd, offset, origin)
+  }
+}
+
+define dup2(fd1: c-int, fd2: c-int) -> c-int {
+  introspect operating-system {
+  | darwin =>
+    magic external dup2(fd1, fd2)
+  | linux =>
+    magic external dup2(fd1, fd2)
+  }
+}

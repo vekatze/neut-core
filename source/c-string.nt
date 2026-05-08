@@ -1,18 +1,17 @@
 import {
   this.c-size {C-Size},
-  this.external {free, malloc},
-  this.magic {cast},
-  this.memory {store-int8},
+  this.memory {malloc},
+  this.memory.unsafe {free, memcpy, store-int, store-int8},
   this.pointer {shift},
-  this.string {_get-content-pointer, string, string-byte-length},
+  this.string {byte-length, string},
+  this.string.pointer,
   this.unit,
+  this.unsafe {cast},
   this.word,
 }
 
 foreign {
   strlen(pointer) -> int,
-  llvm.memcpy.p0.p0.i64(pointer, pointer, int64, int1) -> void,
-  neut_core_v0_54_arch() -> pointer,
 }
 
 nominal {
@@ -29,34 +28,34 @@ resource c-string {
     free(ptr)
   },
   (ptr: pointer) => {
-    let len = _length-c-string(ptr);
-    let new-ptr = malloc(C-Size(add-int(len, 1)));
-    let _ = magic external llvm.memcpy.p0.p0.i64(new-ptr, ptr, len, 0);
+    let total = add-int(_length-c-string(ptr), 1);
+    let new-ptr = malloc(C-Size(total));
+    memcpy(new-ptr, ptr, total);
     new-ptr
   },
   -1,
 }
 
-define length-c-string(s: &c-string) -> int {
+define length(s: &c-string) -> int {
   _length-c-string(magic cast(&c-string, pointer, s))
 }
 
-define to-c-string(t: &string) -> c-string {
-  let len = string-byte-length(t);
+define from-string(t: &string) -> c-string {
+  let len = byte-length(t);
   let new-ptr = malloc(C-Size(add-int(len, 1)));
-  let src-ptr = _get-content-pointer(t);
-  let _ = magic external llvm.memcpy.p0.p0.i64(new-ptr, src-ptr, len, 0);
+  let src-ptr = this.string.pointer.get-content-pointer(t);
+  memcpy(new-ptr, src-ptr, len);
   store-int8(0, shift(new-ptr, len));
   cast<pointer, c-string>(new-ptr)
 }
 
-define from-c-string(s: &c-string) -> string {
+define to-string(s: &c-string) -> string {
   let u = this.word.size;
   let u2 = mul-int(u, 2);
-  let len = length-c-string(s);
+  let len = length(s);
   let new-ptr = malloc(C-Size(add-int(len, u2)));
-  this.memory.store-int(0, new-ptr);
-  this.memory.store-int(len, shift(new-ptr, u));
-  let _ = magic external llvm.memcpy.p0.p0.i64(shift(new-ptr, u2), magic cast(&c-string, pointer, s), len, 0);
+  store-int(0, new-ptr);
+  store-int(len, shift(new-ptr, u));
+  memcpy(shift(new-ptr, u2), magic cast(&c-string, pointer, s), len);
   cast<pointer, string>(new-ptr)
 }

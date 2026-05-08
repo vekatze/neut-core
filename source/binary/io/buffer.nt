@@ -1,0 +1,12 @@
+import {
+  this.binary {binary, length},
+  this.binary.pointer {get-content-pointer},
+  this.file.buffer {buffer},
+  this.file.buffer.unsafe {append},
+  this.system {system},
+  this.unit {unit},
+}
+
+define write-binary(b: &buffer, content: &binary) ->> system(unit) {
+  append(b, get-content-pointer(content), length(content))
+}

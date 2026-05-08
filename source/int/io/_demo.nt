@@ -1,0 +1,12 @@
+import {
+  this.int.io {print-int, print-int-line},
+  this.string,
+  this.string.io {print},
+  this.unit {unit},
+}
+
+define zen() -> unit {
+  print-int(123);
+  print("\n");
+  print-int-line(456)
+}

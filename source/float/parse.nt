@@ -1,15 +1,23 @@
 import {
   this.bool,
   this.either {Left, Right},
-  this.foreign {_parse_double},
-  this.memory {load-float},
-  this.string {_get-content-pointer, string},
+  this.memory.unsafe {load-float},
+  this.string {string},
+  this.string.pointer {get-content-pointer},
   this.unit {Unit},
 }
 
+foreign {
+  neut_core_v0_55_parse_double(pointer, int, pointer) -> int,
+}
+
+inline _parse_double(num-str-ptr: pointer, len: int, result-ptr: pointer) -> int {
+  magic external neut_core_v0_55_parse_double(num-str-ptr, len, result-ptr)
+}
+
 inline parse-float(t: &string) ->> ?float {
-  let c-float-str = _get-content-pointer(t);
-  let len = this.string.length(t);
+  let c-float-str = get-content-pointer(t);
+  let len = this.string.byte-length(t);
   let result-ptr = magic alloca(float, 1);
   let result-status = _parse_double(c-float-str, len, result-ptr);
   if lt-int(result-status, 0) {

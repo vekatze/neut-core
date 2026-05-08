@@ -1,0 +1,41 @@
+import {
+  this.ansi {Blue, Bold, Color, Color-16, Foreground, Normal, Set-Style, Vivid},
+  this.string,
+  this.string.builder {
+    append-ansi,
+    append-int64-UTF8,
+    append-rune-UTF8,
+    append-string,
+    extract,
+    make-string-builder,
+  },
+  this.string.io {print-line},
+  this.unit {unit},
+}
+
+define zen() -> unit {
+  let b = make-string-builder(4);
+  let _ on b = {
+    // append-int32(b, 3);
+    // append-int32(b, 65535)
+    // append-int64(b, 3);
+    // append-int64(b, 4);
+    // append-int64(b, 5);
+    // append-int64(b, 6);
+    // append-int64(b, 7);
+    // append-int64(b, 8);
+    // append-int64(b, 9)
+    append-string(b, "xxx");
+    append-ansi(b, Set-Style(Bold));
+    append-ansi(b, Set-Style(Color(Foreground, Color-16(Vivid, Blue))));
+    append-string(b, "hello");
+    append-ansi(b, Set-Style(Normal));
+    append-rune-UTF8(b, `a`);
+    append-rune-UTF8(b, `α`);
+    append-rune-UTF8(b, `あ`);
+    append-int64-UTF8(b, 123);
+    append-string(b, "world")
+  };
+  pin result = extract(b);
+  print-line(result);
+}

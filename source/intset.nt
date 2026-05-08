@@ -1,7 +1,7 @@
 import {
   this.bool {False, bool},
   this.box,
-  this.list {List, append, list},
+  this.list {list},
   this.word,
 }
 
@@ -10,9 +10,9 @@ foreign {
 }
 
 data intset {
-| Nil
-| Tip(int)
-| Bin(
+| _Nil
+| _Tip(int)
+| _Bin(
     prefix: int,
     mask: int,
     left: intset,
@@ -29,11 +29,11 @@ alias _Prefix {
 }
 
 constant empty: intset {
-  Nil
+  _Nil
 }
 
 inline singleton(k: int) -> intset {
-  Tip(k)
+  _Tip(k)
 }
 
 inline _mask-w(i: int, m: int) -> int {
@@ -55,9 +55,9 @@ inline _nomatch(i: int, p: _Prefix, m: _Mask) -> bool {
 inline _link-with-mask(m: _Mask, p1: _Prefix, t1: intset, t2: intset) -> intset {
   let p = _mask(p1, m);
   if _zero(p1, m) {
-    Bin(p, m, t1, t2)
+    _Bin(p, m, t1, t2)
   } else {
-    Bin(p, m, t2, t1)
+    _Bin(p, m, t2, t1)
   }
 }
 
@@ -76,32 +76,32 @@ inline _link(p1: _Prefix, t1: intset, p2: _Prefix, t2: intset) -> intset {
 
 define insert(t: intset, k: int) -> intset {
   match t {
-  | Nil =>
-    Tip(k)
-  | Tip(ky) =>
+  | _Nil =>
+    _Tip(k)
+  | _Tip(ky) =>
     if eq-int(k, ky) {
-      Tip(ky)
+      _Tip(ky)
     } else {
-      _link(k, Tip(k), ky, Tip(ky))
+      _link(k, _Tip(k), ky, _Tip(ky))
     }
-  | Bin(p, m, l, r) =>
+  | _Bin(p, m, l, r) =>
     if _nomatch(k, p, m) {
-      _link(k, Tip(k), p, Bin(p, m, l, r))
+      _link(k, _Tip(k), p, _Bin(p, m, l, r))
     } else-if _zero(k, m) {
-      Bin(p, m, insert(l, k), r)
+      _Bin(p, m, insert(l, k), r)
     } else {
-      Bin(p, m, l, insert(r, k))
+      _Bin(p, m, l, insert(r, k))
     }
   }
 }
 
 define member(s: &intset, k: int) -> bool {
   case s {
-  | Nil =>
+  | _Nil =>
     False
-  | Tip(kx) =>
+  | _Tip(kx) =>
     eq-int(k, *kx)
-  | Bin(_, m, left, right) =>
+  | _Bin(_, m, left, right) =>
     if _zero(k, *m) {
       member(left, k)
     } else {
@@ -112,35 +112,35 @@ define member(s: &intset, k: int) -> bool {
 
 inline _bin-check-left(p: _Prefix, m: _Mask, l: intset, r: intset) -> intset {
   match l {
-  | Nil =>
+  | _Nil =>
     r
   | l =>
-    Bin(p, m, l, r)
+    _Bin(p, m, l, r)
   }
 }
 
 inline _bin-check-right(p: _Prefix, m: _Mask, l: intset, r: intset) -> intset {
   match r {
-  | Nil =>
+  | _Nil =>
     l
   | r =>
-    Bin(p, m, l, r)
+    _Bin(p, m, l, r)
   }
 }
 
 define delete(t: intset, k: int) -> intset {
   match t {
-  | Nil =>
-    Nil
-  | Tip(ky) =>
+  | _Nil =>
+    _Nil
+  | _Tip(ky) =>
     if eq-int(k, ky) {
-      Nil
+      _Nil
     } else {
-      Tip(ky)
+      _Tip(ky)
     }
-  | Bin(p, m, l, r) =>
+  | _Bin(p, m, l, r) =>
     if _nomatch(k, p, m) {
-      Bin(p, m, l, r)
+      _Bin(p, m, l, r)
     } else-if _zero(k, m) {
       _bin-check-left(p, m, delete(l, k), r)
     } else {
@@ -159,18 +159,31 @@ define from-list(ks: list(int)) -> intset {
         self(rest, insert(acc, k))
       }
     };
-  f(ks, Nil)
+  f(ks, _Nil)
+}
+
+define _to-list-aux(s: intset, acc: list(int)) -> list(int) {
+  match s {
+  | _Nil =>
+    acc
+  | _Tip(k) =>
+    this.list.Cons(k, acc)
+  | _Bin(_, _, s1, s2) =>
+    _to-list-aux(s1, _to-list-aux(s2, acc))
+  }
 }
 
 define to-list(s: intset) -> list(int) {
   match s {
-  | Nil =>
+  | _Nil =>
     this.list.Nil
-  | Tip(k) =>
-    List[k]
-  | Bin(_, _, s1, s2) =>
-    let xs = to-list(s1);
-    let ys = to-list(s2);
-    append(xs, ys)
+  | _Tip(k) =>
+    this.list.Cons(k, this.list.Nil)
+  | _Bin(_, m, s1, s2) =>
+    if lt-int(m, 0) {
+      _to-list-aux(s2, _to-list-aux(s1, this.list.Nil))
+    } else {
+      _to-list-aux(s1, _to-list-aux(s2, this.list.Nil))
+    }
   }
 }

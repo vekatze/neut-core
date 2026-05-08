@@ -1,55 +1,11 @@
-import {
-  this.c-int {c-int, or-c-int},
-  this.list {List, list},
-}
-
 data mode {
-| Owner-R
-| Owner-W
-| Owner-X
-| Group-R
-| Group-W
-| Group-X
-| Other-R
-| Other-W
-| Other-X
+| Mode(int32)
 }
 
-define interpret-mode(flag: mode) -> c-int {
-  match flag {
-  | Owner-R =>
-    0o400
-  | Owner-W =>
-    0o200
-  | Owner-X =>
-    0o100
-  | Group-R =>
-    0o40
-  | Group-W =>
-    0o20
-  | Group-X =>
-    0o10
-  | Other-R =>
-    0o4
-  | Other-W =>
-    0o2
-  | Other-X =>
-    0o1
-  }
+constant default-file-mode: mode {
+  Mode(0o644)
 }
 
-define interpret(xs: list(mode)) -> c-int {
-  this.list.fold-left(0, xs, (acc, x) => {
-    or-c-int(acc, interpret-mode(x))
-  })
-}
-
-constant default-file-mode: list(mode) {
-  // 644
-  List[Owner-R, Owner-W, Group-R, Other-R]
-}
-
-constant default-directory-mode: list(mode) {
-  // 755
-  List[Owner-R, Owner-W, Owner-X, Group-R, Group-X, Other-R, Other-X]
+constant default-directory-mode: mode {
+  Mode(0o755)
 }

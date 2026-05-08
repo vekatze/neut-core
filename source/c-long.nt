@@ -12,10 +12,10 @@ alias _c-long {
 }
 
 data c-long {
-| C-Long(int64)
+| C-Long(_c-long)
 }
 
-define add-c-long(x: c-long, y: c-long) -> c-long {
+inline add-c-long(x: c-long, y: c-long) -> c-long {
   let C-Long(x) = x;
   let C-Long(y) = y;
   introspect architecture {

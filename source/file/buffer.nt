@@ -1,0 +1,95 @@
+import {
+  this.bool,
+  this.c-int {C-Int},
+  this.c-size {C-Size},
+  this.either {Right},
+  this.file.descriptor {descriptor, to-c-int},
+  this.file.descriptor.unsafe {from-c-int, write-all},
+  this.memory {malloc},
+  this.memory.unsafe {free, load-int, memcpy, store-int},
+  this.pointer {shift},
+  this.system {system},
+  this.unit {unit},
+  this.word,
+}
+
+inline _get-pointer-size-from-capacity(capacity: int) -> int {
+  let u = this.word.size;
+  add-int(capacity, mul-int(u, 3))
+}
+
+// internal representation: (current-size, capacity, descriptor, byte-0, byte-1, ..., byte-n)
+resource _buffer-internal {
+  (x: pointer) => {
+    free(x)
+  },
+  (source-pointer: pointer) => {
+    let u = this.word.size;
+    let capacity = load-int(shift(source-pointer, u));
+    let pointer-size = _get-pointer-size-from-capacity(capacity);
+    let new-pointer = malloc(C-Size(pointer-size));
+    memcpy(new-pointer, source-pointer, pointer-size);
+    new-pointer
+  },
+  -1,
+}
+
+data buffer {
+| _Buffer(_buffer-internal)
+}
+
+define make-buffer(d: descriptor, capacity: int) -> buffer {
+  let capacity =
+    if gt-int(capacity, 0) {
+      capacity
+    } else {
+      4096
+    };
+  let word-size = this.word.size;
+  let pointer-size = _get-pointer-size-from-capacity(capacity);
+  let buffer-ptr = malloc(C-Size(pointer-size));
+  store-int(0, buffer-ptr);
+  store-int(capacity, shift(buffer-ptr, word-size));
+  let c = to-c-int(d);
+  let C-Int(fd) = c;
+  store-int(sext-int32-int(fd), shift(buffer-ptr, mul-int(word-size, 2)));
+  magic cast(pointer, buffer, buffer-ptr)
+}
+
+inline _get-current-size(b: &buffer) -> int {
+  load-int(magic cast(&buffer, pointer, b))
+}
+
+inline _set-current-size(b: &buffer, size: int) -> unit {
+  store-int(size, magic cast(&buffer, pointer, b))
+}
+
+inline _get-capacity(b: &buffer) -> int {
+  let u = this.word.size;
+  load-int(shift(magic cast(&buffer, pointer, b), u))
+}
+
+inline _get-descriptor(b: &buffer) -> descriptor {
+  let u2 = mul-int(this.word.size, 2);
+  let stored = load-int(shift(magic cast(&buffer, pointer, b), u2));
+  from-c-int(C-Int(trunc-int-int32(stored)))
+}
+
+inline _get-content-pointer(b: &buffer) -> pointer {
+  let u3 = mul-int(this.word.size, 3);
+  shift(magic cast(&buffer, pointer, b), u3)
+}
+
+inline _get-next-content-pointer(b: &buffer) -> pointer {
+  let current-size = _get-current-size(b);
+  let content-pointer = _get-content-pointer(b);
+  shift(content-pointer, current-size)
+}
+
+define flush(b: &buffer) ->> system(unit) {
+  let descriptor = _get-descriptor(b);
+  let current-size = _get-current-size(b);
+  let content-pointer = _get-content-pointer(b);
+  try _ = write-all(descriptor, content-pointer, current-size);
+  Right(_set-current-size(b, 0))
+}

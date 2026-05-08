@@ -1,0 +1,24 @@
+import {
+  this.bool.io {print-bool-line},
+  this.eq.generic {derive, eq-data},
+  this.list {List, list},
+  this.unit {unit},
+  this.vector {vector},
+}
+
+define zen() -> unit {
+  let _ = derive<list(int)>::();
+  pin xs: vector(list(int)) = this.vector.Vector[List[], List[10, 20]];
+  pin ys: vector(list(int)) = this.vector.Vector[List[], List[10, 20]];
+  let foo = eq-data::(xs, ys);
+  // pin f: list((int) -> int) =
+  //   List[function (x) {
+  //     x
+  //   }];
+  // pin g: list((int) -> int) =
+  //   List[function (x) {
+  //     x
+  //   }];
+  // let foo = unquote {eq-data(quote {f}, quote {g})};
+  print-bool-line(foo);
+}

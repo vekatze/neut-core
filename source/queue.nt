@@ -1,40 +1,40 @@
 import {
   this.bool {False, True, bool},
   this.either {Right, none},
-  this.list {Cons, Nil, length, list},
+  this.list {Cons, Nil, length, list, reverse},
   this.pair {Pair, pair},
   this.unit,
 }
 
 // naive queue
 data queue(a: type) {
-| Queue(list(a), list(a))
+| _Queue(list(a), list(a))
 }
 
 constant empty<a>: queue(a) {
-  Queue(Nil, Nil)
+  _Queue(Nil, Nil)
 }
 
 define dequeue<a>(q: queue(a)) -> ?pair(a, queue(a)) {
-  let Queue(ls, rs) = q;
+  let _Queue(ls, rs) = q;
   match ls, rs {
   | Nil, Nil =>
     none
   | Cons(l, ls-rest), rs =>
-    Right(Pair(l, Queue(ls-rest, rs)))
+    Right(Pair(l, _Queue(ls-rest, rs)))
   | Nil, rs =>
-    dequeue(Queue(rs, Nil))
+    dequeue(_Queue(reverse(rs), Nil))
   }
 }
 
 define enqueue<a>(q: queue(a), x: a) -> queue(a) {
-  let Queue(ls, rs) = q;
-  Queue(ls, Cons(x, rs))
+  let _Queue(ls, rs) = q;
+  _Queue(ls, Cons(x, rs))
 }
 
 define size<a>(q: &queue(a)) -> int {
   case q {
-  | Queue(ls, rs) =>
+  | _Queue(ls, rs) =>
     let l1 = length(ls);
     let l2 = length(rs);
     add-int(l1, l2)
@@ -43,7 +43,7 @@ define size<a>(q: &queue(a)) -> int {
 
 define is-empty<a>(q: &queue(a)) -> bool {
   case q {
-  | Queue(Nil, Nil) =>
+  | _Queue(Nil, Nil) =>
     True
   | _ =>
     False

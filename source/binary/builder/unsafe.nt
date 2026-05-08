@@ -1,0 +1,11 @@
+import {
+  this.binary.builder {_get-head-ptr, _proceed, binary-builder},
+  this.memory.unsafe {memcpy},
+  this.unit {unit},
+}
+
+define append-chunk(b: &binary-builder, ptr: pointer, size: int) -> unit {
+  let content-head-ptr = _get-head-ptr(b, size);
+  memcpy(content-head-ptr, ptr, size);
+  _proceed(b, size)
+}

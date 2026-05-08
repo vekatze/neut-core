@@ -1,0 +1,19 @@
+import {
+  this.bool,
+  this.either {Right},
+  this.system {report-system-error, system},
+  this.unit {Unit, unit},
+}
+
+foreign {
+  neut_core_v0_55_sleep(float64) -> int,
+}
+
+define sleep(duration: float64) ->> system(unit) {
+  let result = magic external neut_core_v0_55_sleep(duration);
+  if lt-int(result, 0) {
+    report-system-error()
+  } else {
+    Right(Unit)
+  }
+}

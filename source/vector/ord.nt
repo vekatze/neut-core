@@ -3,14 +3,15 @@ import {
   this.box,
   this.ord {Ord, ord},
   this.ordering {LT},
-  this.vector {_swap, vector},
+  this.vector {vector},
+  this.vector.unsafe {access-unchecked, swap-unchecked},
 }
 
 define _find-lower<a>(o: &ord(a), vs: &vector(a), from: int, to: int, pivot: &a) -> int {
   if ge-int(from, to) {
     -1
   } else {
-    let v = this.vector._access(vs, from);
+    let v = access-unchecked(vs, from);
     tie Ord{compare} = o;
     match compare(v, pivot) {
     | LT =>
@@ -25,7 +26,7 @@ define _find-higher<a>(o: &ord(a), vs: &vector(a), boundary: int, to: int, pivot
   if le-int(to, boundary) {
     -1
   } else {
-    let v = this.vector._access(vs, to);
+    let v = access-unchecked(vs, to);
     tie Ord{compare} = o;
     match compare(v, pivot) {
     | LT =>
@@ -43,7 +44,7 @@ define vector-quicksort<a>(o: &ord(a), nes: &(a) -> +a, xs: vector(a)) -> vector
         vs
       } else {
         let pivot-index = div-int(add-int(from, to), 2);
-        letbox-T pivot on vs = nes(*this.vector._access(vs, pivot-index));
+        letbox-T pivot on vs = nes(*access-unchecked(vs, pivot-index));
         let pivot-swap-loop =
           define inner-loop(
             vs: vector(a),
@@ -59,16 +60,16 @@ define vector-quicksort<a>(o: &ord(a), nes: &(a) -> +a, xs: vector(a)) -> vector
               outer-loop(outer-loop(vs, from, boundary), add-int(boundary, 1), to)
             | True, False =>
               let hi = higher;
-              let vs = _swap(vs, hi, boundary);
+              let vs = swap-unchecked(vs, hi, boundary);
               inner-loop(vs, boundary, current-to, pivot, hi)
             | False, True =>
               let lo = lower;
-              let vs = _swap(vs, lo, boundary);
+              let vs = swap-unchecked(vs, lo, boundary);
               inner-loop(vs, current-from, boundary, pivot, lo)
             | False, False =>
               let lo = lower;
               let hi = higher;
-              let vs = _swap(vs, lo, hi);
+              let vs = swap-unchecked(vs, lo, hi);
               inner-loop(vs, add-int(lo, 1), sub-int(hi, 1), pivot, boundary)
             }
           };

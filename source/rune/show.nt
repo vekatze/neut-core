@@ -1,19 +1,23 @@
 import {
+  this.box,
   this.show {Show, show},
-  this.string {join, string, string-byte-length},
-  this.string.show {_escape},
+  this.string {join, string},
+  this.string.show {escape},
 }
 
 define show-rune(ch: rune) -> string {
   let base = this.string.singleton(ch);
-  let len on base = string-byte-length(base);
-  let result on base = join(_escape(base, len, 0, 0));
+  let result on base = join(escape(base));
   let _ = base;
   result
 }
 
 constant as-show: show(rune) {
   Show{
-    show := show-rune,
+    render := {
+      (ch) => {
+        show-rune(*ch)
+      }
+    },
   }
 }

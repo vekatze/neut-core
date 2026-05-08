@@ -1,0 +1,23 @@
+import {
+  this.file.descriptor {stdout},
+  this.rune.io {print-rune, print-rune-line, write-rune, write-rune-line},
+  this.unit {Unit, unit},
+}
+
+define zen() -> unit {
+  let _ = write-rune(stdout, `a`);
+  let _ = write-rune(stdout, `b`);
+  let _ = write-rune(stdout, `c`);
+  let _ = write-rune(stdout, `\n`);
+  let _ = write-rune-line(stdout, `a`);
+  let _ = write-rune-line(stdout, `b`);
+  let _ = write-rune-line(stdout, `c`);
+  let _ = print-rune(`a`);
+  let _ = print-rune(`b`);
+  let _ = print-rune(`c`);
+  let _ = print-rune(`\n`);
+  let _ = print-rune-line(`a`);
+  let _ = print-rune-line(`b`);
+  let _ = print-rune-line(`c`);
+  Unit
+}

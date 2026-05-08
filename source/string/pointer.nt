@@ -1,0 +1,7 @@
+import {
+  this.string,
+}
+
+constant get-content-pointer: _ {
+  this.string._get-content-pointer
+}

@@ -1,0 +1,14 @@
+import {
+  this.debug.dump {vet},
+  this.sync.pool {for-each-parallel},
+  this.unit {unit},
+  this.vector {Vector},
+}
+
+define zen() -> unit {
+  pin result =
+    for-each-parallel(5, Vector[1, 2, 3, 4, 5], (x) => {
+      lift {add-int(x, 10)}
+    });
+  unquote {vet(quote {result})};
+}

@@ -1,20 +1,20 @@
 import {
   this.bool,
   this.box,
+  this.debug {panic},
   this.either {Right, none},
-  this.list {Cons, Nil, append, list},
+  this.list {Cons, Nil, list},
   this.ord {Ord, ord},
   this.ordering {EQ, GT, LT},
   this.pair {Pair, pair},
   this.string,
-  this.trick {panic},
   this.unit,
 }
 
 // size balanced tree
 data dictionary(k, v) {
-| Tip
-| Bin(
+| _Tip
+| _Bin(
     size: int,
     key: k,
     value: v,
@@ -25,19 +25,19 @@ data dictionary(k, v) {
 
 inline size<k, v>(d: &dictionary(k, v)) -> int {
   case d {
-  | Tip =>
+  | _Tip =>
     0
-  | Bin{size} =>
+  | _Bin{size} =>
     *size
   }
 }
 
 constant empty<k, v>: dictionary(k, v) {
-  Tip
+  _Tip
 }
 
 inline singleton<k, v>(key: k, value: v) -> dictionary(k, v) {
-  Bin{size := 1, left := Tip, right := Tip, key, value}
+  _Bin{size := 1, left := _Tip, right := _Tip, key, value}
 }
 
 constant _delta: int {
@@ -50,68 +50,68 @@ constant _ratio: int {
 
 inline _balance-L<a, b>(k: a, x: b, l: dictionary(a, b), r: dictionary(a, b)) -> dictionary(a, b) {
   match r {
-  | Tip =>
+  | _Tip =>
     match l {
-    | Tip =>
+    | _Tip =>
       singleton(k, x)
-    | Bin(ls, lk, lx, ll, lr) =>
+    | _Bin(ls, lk, lx, ll, lr) =>
       match ll, lr {
-      | Tip, Tip =>
-        Bin(2, k, x, Bin(ls, lk, lx, Tip, Tip), Tip)
-      | Tip, Bin(_, lrk, lrx, _, _) =>
-        Bin(3, lrk, lrx, Bin(1, lk, lx, Tip, Tip), Bin(1, k, x, Tip, Tip))
-      | Bin(lls, llk, llx, lll, llr), Tip =>
-        Bin(3, lk, lx, Bin(lls, llk, llx, lll, llr), Bin(1, k, x, Tip, Tip))
-      | Bin(lls, llk, llx, lll, llr), Bin(lrs, lrk, lrx, lrl, lrr) =>
+      | _Tip, _Tip =>
+        _Bin(2, k, x, _Bin(ls, lk, lx, _Tip, _Tip), _Tip)
+      | _Tip, _Bin(_, lrk, lrx, _, _) =>
+        _Bin(3, lrk, lrx, _Bin(1, lk, lx, _Tip, _Tip), _Bin(1, k, x, _Tip, _Tip))
+      | _Bin(lls, llk, llx, lll, llr), _Tip =>
+        _Bin(3, lk, lx, _Bin(lls, llk, llx, lll, llr), _Bin(1, k, x, _Tip, _Tip))
+      | _Bin(lls, llk, llx, lll, llr), _Bin(lrs, lrk, lrx, lrl, lrr) =>
         if lt-int(lrs, mul-int(_ratio, lls)) {
-          let ll = Bin(lls, llk, llx, lll, llr);
-          let lr = Bin(lrs, lrk, lrx, lrl, lrr);
-          Bin(add-int(1, ls), lk, lx, ll, Bin(add-int(1, lrs), k, x, lr, Tip))
+          let ll = _Bin(lls, llk, llx, lll, llr);
+          let lr = _Bin(lrs, lrk, lrx, lrl, lrr);
+          _Bin(add-int(1, ls), lk, lx, ll, _Bin(add-int(1, lrs), k, x, lr, _Tip))
         } else {
-          let ll = Bin(lls, llk, llx, lll, llr);
+          let ll = _Bin(lls, llk, llx, lll, llr);
           let lrls on lrl = size(lrl);
           let lrrs on lrr = size(lrr);
           let ls-new = add-int(1, add-int(lls, lrls));
           let rs-new = add-int(1, lrrs);
-          Bin(add-int(1, ls), lrk, lrx, Bin(ls-new, lk, lx, ll, lrl), Bin(rs-new, k, x, lrr, Tip))
+          _Bin(add-int(1, ls), lrk, lrx, _Bin(ls-new, lk, lx, ll, lrl), _Bin(rs-new, k, x, lrr, _Tip))
         }
       }
     }
-  | Bin(rs, rk, rx, rl, rr) =>
+  | _Bin(rs, rk, rx, rl, rr) =>
     match l {
-    | Tip =>
-      let r = Bin(rs, rk, rx, rl, rr);
-      Bin(add-int(1, rs), k, x, Tip, r)
-    | Bin(ls, lk, lx, ll, lr) =>
+    | _Tip =>
+      let r = _Bin(rs, rk, rx, rl, rr);
+      _Bin(add-int(1, rs), k, x, _Tip, r)
+    | _Bin(ls, lk, lx, ll, lr) =>
       if gt-int(ls, mul-int(_delta, rs)) {
         match ll, lr {
-        | Bin(lls, llk, llx, lll, llr), Bin(lrs, lrk, lrx, lrl, lrr) =>
+        | _Bin(lls, llk, llx, lll, llr), _Bin(lrs, lrk, lrx, lrl, lrr) =>
           let lrls on lrl = size(lrl);
           let lrrs on lrr = size(lrr);
-          let ll = Bin(lls, llk, llx, lll, llr);
-          let r = Bin(rs, rk, rx, rl, rr);
+          let ll = _Bin(lls, llk, llx, lll, llr);
+          let r = _Bin(rs, rk, rx, rl, rr);
           if lt-int(lrs, mul-int(_ratio, lls)) {
             let s-new = add-int(1, add-int(ls, rs));
             let rs-new = add-int(1, add-int(rs, lrs));
-            Bin(s-new, lk, lx, ll, Bin(rs-new, k, x, Bin(lrs, lrk, lrx, lrl, lrr), r))
+            _Bin(s-new, lk, lx, ll, _Bin(rs-new, k, x, _Bin(lrs, lrk, lrx, lrl, lrr), r))
           } else {
             let s-new = add-int(1, add-int(ls, rs));
             let ls-new = add-int(1, add-int(lls, lrls));
             let rs-new = add-int(1, add-int(rs, lrrs));
-            Bin(s-new, lrk, lrx, Bin(ls-new, lk, lx, ll, lrl), Bin(rs-new, k, x, lrr, r))
+            _Bin(s-new, lrk, lrx, _Bin(ls-new, lk, lx, ll, lrl), _Bin(rs-new, k, x, lrr, r))
           }
         | _, _ =>
           // unreachable
           let !lk = lk;
           let !lx = lx;
           let !tip = panic("failure in (core).dictionary._balance-L");
-          Bin(ls, lk, lx, Bin(ls, lk, lx, tip, tip), Bin(ls, lk, lx, tip, tip))
+          _Bin(ls, lk, lx, _Bin(ls, lk, lx, tip, tip), _Bin(ls, lk, lx, tip, tip))
         }
       } else {
         let s-new = add-int(1, add-int(ls, rs));
-        let l = Bin(ls, lk, lx, ll, lr);
-        let r = Bin(rs, rk, rx, rl, rr);
-        Bin(s-new, k, x, l, r)
+        let l = _Bin(ls, lk, lx, ll, lr);
+        let r = _Bin(rs, rk, rx, rl, rr);
+        _Bin(s-new, k, x, l, r)
       }
     }
   }
@@ -119,68 +119,68 @@ inline _balance-L<a, b>(k: a, x: b, l: dictionary(a, b), r: dictionary(a, b)) ->
 
 inline _balance-R<a, b>(k: a, x: b, l: dictionary(a, b), r: dictionary(a, b)) -> dictionary(a, b) {
   match l {
-  | Tip =>
+  | _Tip =>
     match r {
-    | Tip =>
+    | _Tip =>
       singleton(k, x)
-    | Bin(rs, rk, rx, rl, rr) =>
+    | _Bin(rs, rk, rx, rl, rr) =>
       match rl, rr {
-      | Tip, Tip =>
-        Bin(2, k, x, Tip, Bin(rs, rk, rx, Tip, Tip))
-      | Tip, Bin(rrs, rrk, rrx, rrl, rrr) =>
-        Bin(3, rk, rx, Bin(1, k, x, Tip, Tip), Bin(rrs, rrk, rrx, rrl, rrr))
-      | Bin(_, rlk, rlx, _, _), Tip =>
-        Bin(3, rlk, rlx, Bin(1, k, x, Tip, Tip), Bin(1, rk, rx, Tip, Tip))
-      | Bin(rls, rlk, rlx, rll, rlr), Bin(rrs, rrk, rrx, rrl, rrr) =>
+      | _Tip, _Tip =>
+        _Bin(2, k, x, _Tip, _Bin(rs, rk, rx, _Tip, _Tip))
+      | _Tip, _Bin(rrs, rrk, rrx, rrl, rrr) =>
+        _Bin(3, rk, rx, _Bin(1, k, x, _Tip, _Tip), _Bin(rrs, rrk, rrx, rrl, rrr))
+      | _Bin(_, rlk, rlx, _, _), _Tip =>
+        _Bin(3, rlk, rlx, _Bin(1, k, x, _Tip, _Tip), _Bin(1, rk, rx, _Tip, _Tip))
+      | _Bin(rls, rlk, rlx, rll, rlr), _Bin(rrs, rrk, rrx, rrl, rrr) =>
         if lt-int(rls, mul-int(_ratio, rrs)) {
-          let rl = Bin(rls, rlk, rlx, rll, rlr);
-          let rr = Bin(rrs, rrk, rrx, rrl, rrr);
-          Bin(add-int(1, rs), rk, rx, Bin(add-int(1, rls), k, x, Tip, rl), rr)
+          let rl = _Bin(rls, rlk, rlx, rll, rlr);
+          let rr = _Bin(rrs, rrk, rrx, rrl, rrr);
+          _Bin(add-int(1, rs), rk, rx, _Bin(add-int(1, rls), k, x, _Tip, rl), rr)
         } else {
-          let rr = Bin(rrs, rrk, rrx, rrl, rrr);
+          let rr = _Bin(rrs, rrk, rrx, rrl, rrr);
           let rlrs on rlr = size(rlr);
           let rlls on rll = size(rll);
           let rs-new = add-int(1, rlls);
           let ls-new = add-int(1, add-int(rrs, rlrs));
-          Bin(add-int(1, rs), rlk, rlx, Bin(rs-new, k, x, Tip, rll), Bin(ls-new, rk, rx, rlr, rr))
+          _Bin(add-int(1, rs), rlk, rlx, _Bin(rs-new, k, x, _Tip, rll), _Bin(ls-new, rk, rx, rlr, rr))
         }
       }
     }
-  | Bin(ls, lk, lx, ll, lr) =>
+  | _Bin(ls, lk, lx, ll, lr) =>
     match r {
-    | Tip =>
-      let l = Bin(ls, lk, lx, ll, lr);
-      Bin(add-int(1, ls), k, x, l, Tip)
-    | Bin(rs, rk, rx, rl, rr) =>
+    | _Tip =>
+      let l = _Bin(ls, lk, lx, ll, lr);
+      _Bin(add-int(1, ls), k, x, l, _Tip)
+    | _Bin(rs, rk, rx, rl, rr) =>
       if gt-int(rs, mul-int(_delta, ls)) {
         match rl, rr {
-        | Bin(rls, rlk, rlx, rll, rlr), Bin(rrs, rrk, rrx, rrl, rrr) =>
+        | _Bin(rls, rlk, rlx, rll, rlr), _Bin(rrs, rrk, rrx, rrl, rrr) =>
           let rlls on rll = size(rll);
           let rlrs on rlr = size(rlr);
-          let rr = Bin(rrs, rrk, rrx, rrl, rrr);
-          let l = Bin(ls, lk, lx, ll, lr);
+          let rr = _Bin(rrs, rrk, rrx, rrl, rrr);
+          let l = _Bin(ls, lk, lx, ll, lr);
           if lt-int(rls, mul-int(_ratio, rrs)) {
             let s-new = add-int(1, add-int(ls, rs));
-            let rs-new = add-int(1, add-int(rs, rls));
-            Bin(s-new, rk, rx, Bin(rs-new, k, x, l, Bin(rls, rlk, rlx, rll, rlr)), rr)
+            let rs-new = add-int(1, add-int(ls, rls));
+            _Bin(s-new, rk, rx, _Bin(rs-new, k, x, l, _Bin(rls, rlk, rlx, rll, rlr)), rr)
           } else {
             let s-new = add-int(1, add-int(ls, rs));
             let ls-new = add-int(1, add-int(ls, rlls));
             let rs-new = add-int(1, add-int(rrs, rlrs));
-            Bin(s-new, rlk, rlx, Bin(ls-new, k, x, l, rll), Bin(rs-new, rk, rx, rlr, rr))
+            _Bin(s-new, rlk, rlx, _Bin(ls-new, k, x, l, rll), _Bin(rs-new, rk, rx, rlr, rr))
           }
         | _, _ =>
           // unreachable
           let !rk = rk;
           let !rx = rx;
           let !tip = panic("failure in (core).dictionary._balance-L");
-          Bin(rs, rk, rx, Bin(rs, rk, rx, tip, tip), Bin(rs, rk, rx, tip, tip))
+          _Bin(rs, rk, rx, _Bin(rs, rk, rx, tip, tip), _Bin(rs, rk, rx, tip, tip))
         }
       } else {
         let s-new = add-int(1, add-int(ls, rs));
-        let l = Bin(ls, lk, lx, ll, lr);
-        let r = Bin(rs, rk, rx, rl, rr);
-        Bin(s-new, k, x, l, r)
+        let l = _Bin(ls, lk, lx, ll, lr);
+        let r = _Bin(rs, rk, rx, rl, rr);
+        _Bin(s-new, k, x, l, r)
       }
     }
   }
@@ -196,9 +196,9 @@ data _view(k, a) {
 
 define _min-view-sure<a, b>(k: a, x: b, l: dictionary(a, b), r: dictionary(a, b)) -> _view(a, b) {
   match l {
-  | Tip =>
+  | _Tip =>
     _View(k, x, r)
-  | Bin(_, lk, lx, ll, lr) =>
+  | _Bin(_, lk, lx, ll, lr) =>
     let _View{key, value, mdictionary := l-new} = _min-view-sure(lk, lx, ll, lr);
     _View(key, value, _balance-R(k, x, l-new, r))
   }
@@ -206,9 +206,9 @@ define _min-view-sure<a, b>(k: a, x: b, l: dictionary(a, b), r: dictionary(a, b)
 
 define _max-view-sure<a, b>(k: a, x: b, l: dictionary(a, b), r: dictionary(a, b)) -> _view(a, b) {
   match r {
-  | Tip =>
+  | _Tip =>
     _View(k, x, l)
-  | Bin(_, rk, rx, rl, rr) =>
+  | _Bin(_, rk, rx, rl, rr) =>
     let _View{key, value, mdictionary := r-new} = _max-view-sure(rk, rx, rl, rr);
     _View(key, value, _balance-L(k, x, l, r-new))
   }
@@ -216,17 +216,17 @@ define _max-view-sure<a, b>(k: a, x: b, l: dictionary(a, b), r: dictionary(a, b)
 
 inline _glue<k, v>(d1: dictionary(k, v), d2: dictionary(k, v)) -> dictionary(k, v) {
   match d1, d2 {
-  | Tip, d2 =>
+  | _Tip, d2 =>
     d2
-  | d1, Tip =>
+  | d1, _Tip =>
     d1
-  | Bin(ls, lk, lx, ll, lr), Bin(rs, rk, rx, rl, rr) =>
+  | _Bin(ls, lk, lx, ll, lr), _Bin(rs, rk, rx, rl, rr) =>
     if gt-int(ls, rs) {
       let _View{key, value, mdictionary := l-new} = _max-view-sure(lk, lx, ll, lr);
-      _balance-R(key, value, l-new, Bin(rs, rk, rx, rl, rr))
+      _balance-R(key, value, l-new, _Bin(rs, rk, rx, rl, rr))
     } else {
       let _View{key, value, mdictionary := r-new} = _min-view-sure(rk, rx, rl, rr);
-      _balance-L(key, value, Bin(ls, lk, lx, ll, lr), r-new)
+      _balance-L(key, value, _Bin(ls, lk, lx, ll, lr), r-new)
     }
   }
 }
@@ -234,9 +234,9 @@ inline _glue<k, v>(d1: dictionary(k, v), d2: dictionary(k, v)) -> dictionary(k, 
 define delete<k, v>(L: &ord(k), d: dictionary(k, v), needle: k) -> dictionary(k, v) {
   tie Ord{compare} = L;
   match d {
-  | Tip =>
-    Tip
-  | Bin(_, kx, x, l, r) =>
+  | _Tip =>
+    _Tip
+  | _Bin(_, kx, x, l, r) =>
     let order on needle, kx = compare(needle, kx);
     match order {
     | LT =>
@@ -249,206 +249,175 @@ define delete<k, v>(L: &ord(k), d: dictionary(k, v), needle: k) -> dictionary(k,
   }
 }
 
-inline make-insert<k, v>(o: ord(k)) -> (dictionary(k, v), k, v) -> dictionary(k, v) {
-  let Ord{compare := !compare} = o;
-  define loop(d: dictionary(k, v), key-X: k, val-X: v) -> dictionary(k, v) {
-    match d {
-    | Tip =>
-      singleton(key-X, val-X)
-    | Bin(size, key-Y, val-Y, left, right) =>
-      let order on key-X, key-Y = compare(key-X, key-Y);
-      match order {
-      | LT =>
-        _balance-L(key-Y, val-Y, loop(left, key-X, val-X), right)
-      | GT =>
-        _balance-R(key-Y, val-Y, left, loop(right, key-X, val-X))
-      | EQ =>
-        Bin(size, key-X, val-X, left, right)
-      }
+define insert<k, v>(L: &ord(k), d: dictionary(k, v), key-X: k, val-X: v) -> dictionary(k, v) {
+  tie Ord{compare} = L;
+  match d {
+  | _Tip =>
+    singleton(key-X, val-X)
+  | _Bin(size, key-Y, val-Y, left, right) =>
+    let order on key-X, key-Y = compare(key-X, key-Y);
+    match order {
+    | LT =>
+      _balance-L(key-Y, val-Y, insert(L, left, key-X, val-X), right)
+    | GT =>
+      _balance-R(key-Y, val-Y, left, insert(L, right, key-X, val-X))
+    | EQ =>
+      _Bin(size, key-X, val-X, left, right)
     }
   }
 }
 
-inline make-insert-with<k, v>(o: ord(k), !f: (v, v) -> v) -> (dictionary(k, v), k, v) -> dictionary(k, v) {
-  let Ord{compare := !compare} = o;
-  define loop(d: dictionary(k, v), key-X: k, val-X: v) -> dictionary(k, v) {
-    match d {
-    | Tip =>
-      singleton(key-X, val-X)
-    | Bin(size, key-Y, val-Y, left, right) =>
-      let order on key-X, key-Y = compare(key-X, key-Y);
-      match order {
-      | LT =>
-        _balance-L(key-Y, val-Y, loop(left, key-X, val-X), right)
-      | GT =>
-        _balance-R(key-Y, val-Y, left, loop(right, key-X, val-X))
-      | EQ =>
-        Bin(size, key-X, f(val-X, val-Y), left, right)
-      }
+define insert-with<k, v>(L: &ord(k), !f: (v, v) -> v, d: dictionary(k, v), key-X: k, val-X: v) -> dictionary(k, v) {
+  tie Ord{compare} = L;
+  match d {
+  | _Tip =>
+    singleton(key-X, val-X)
+  | _Bin(size, key-Y, val-Y, left, right) =>
+    let order on key-X, key-Y = compare(key-X, key-Y);
+    match order {
+    | LT =>
+      _balance-L(key-Y, val-Y, insert-with(L, f, left, key-X, val-X), right)
+    | GT =>
+      _balance-R(key-Y, val-Y, left, insert-with(L, f, right, key-X, val-X))
+    | EQ =>
+      _Bin(size, key-X, f(val-X, val-Y), left, right)
     }
   }
 }
 
-inline make-lookup<k, v>(o: ord(k)) -> (d: &dictionary(k, v), needle: &k) ->> ?&v {
-  let Ord{compare := !compare} = o;
-  define loop(d: &dictionary(k, v), needle: &k) ->> ?&v {
-    case d {
-    | Tip =>
-      none
-    | Bin(_, key, x, l, r) =>
-      match compare(needle, key) {
-      | LT =>
-        loop(l, needle)
-      | GT =>
-        loop(r, needle)
-      | EQ =>
-        Right(x)
-      }
+define lookup<k, v>(L: &ord(k), d: &dictionary(k, v), needle: &k) ->> ?&v {
+  tie Ord{compare} = L;
+  case d {
+  | _Tip =>
+    none
+  | _Bin(_, key, x, l, r) =>
+    match compare(needle, key) {
+    | LT =>
+      lookup(L, l, needle)
+    | GT =>
+      lookup(L, r, needle)
+    | EQ =>
+      Right(x)
     }
   }
 }
 
-inline make-delete<k, v>(o: ord(k)) -> (d: dictionary(k, v), needle: k) -> dictionary(k, v) {
-  let Ord{compare := !compare} = o;
-  define loop(d: dictionary(k, v), needle: k) -> dictionary(k, v) {
-    match d {
-    | Tip =>
-      Tip
-    | Bin(_, kx, x, l, r) =>
-      let order on needle, kx = compare(needle, kx);
-      match order {
-      | LT =>
-        _balance-R(kx, x, loop(l, needle), r)
-      | GT =>
-        _balance-L(kx, x, l, loop(r, needle))
-      | EQ =>
-        _glue(l, r)
-      }
+define _lookup-LE-with-cand<k, v>(L: &ord(k), d: &dictionary(k, v), needle: &k, cand-k: &k, cand-v: &v) -> pair(&k, &v) {
+  tie Ord{compare} = L;
+  case d {
+  | _Tip =>
+    Pair(cand-k, cand-v)
+  | _Bin(_, key, x, l, r) =>
+    match compare(needle, key) {
+    | GT =>
+      _lookup-LE-with-cand(L, r, needle, key, x)
+    | LT =>
+      _lookup-LE-with-cand(L, l, needle, cand-k, cand-v)
+    | _ =>
+      Pair(key, x)
     }
   }
 }
 
-inline _make-lookup-LE-with-cand<k, v>(L: ord(k)) -> (&dictionary(k, v), &k, &k, &v) -> pair(&k, &v) {
-  let Ord{compare := !compare} = L;
-  define loop(d: &dictionary(k, v), needle: &k, cand-k: &k, cand-v: &v) -> pair(&k, &v) {
-    case d {
-    | Tip =>
-      Pair(cand-k, cand-v)
-    | Bin(_, key, x, l, r) =>
-      match compare(needle, key) {
-      | GT =>
-        loop(r, needle, key, x)
-      | LT =>
-        loop(l, needle, cand-k, cand-v)
-      | _ =>
-        Pair(key, x)
-      }
+define lookup-LE<k, v>(L: &ord(k), d: &dictionary(k, v), needle: &k) ->> ?pair(&k, &v) {
+  tie Ord{compare} = L;
+  case d {
+  | _Tip =>
+    none
+  | _Bin(_, key, x, l, r) =>
+    match compare(needle, key) {
+    | GT =>
+      Right(_lookup-LE-with-cand(L, r, needle, key, x))
+    | LT =>
+      lookup-LE(L, l, needle)
+    | _ =>
+      Right(Pair(key, x))
     }
   }
 }
 
-inline make-lookup-LE<k, v>(!o: ord(k)) -> (&dictionary(k, v), &k) ->> ?pair(&k, &v) {
-  let Ord{compare := !compare} = o;
-  let !lookup-LE-with-cand = _make-lookup-LE-with-cand(o);
-  define loop(d: &dictionary(k, v), needle: &k) ->> ?pair(&k, &v) {
-    case d {
-    | Tip =>
-      none
-    | Bin(_, key, x, l, r) =>
-      match compare(needle, key) {
-      | GT =>
-        Right(lookup-LE-with-cand(r, needle, key, x))
-      | LT =>
-        loop(l, needle)
-      | _ =>
-        Right(Pair(key, x))
-      }
+define _lookup-GE-with-cand<k, v>(L: &ord(k), d: &dictionary(k, v), needle: &k, cand-k: &k, cand-v: &v) -> pair(&k, &v) {
+  tie Ord{compare} = L;
+  case d {
+  | _Tip =>
+    Pair(cand-k, cand-v)
+  | _Bin(_, key, x, l, r) =>
+    match compare(needle, key) {
+    | GT =>
+      _lookup-GE-with-cand(L, r, needle, cand-k, cand-v)
+    | LT =>
+      _lookup-GE-with-cand(L, l, needle, key, x)
+    | _ =>
+      Pair(key, x)
     }
   }
 }
 
-inline _make-lookup-GE-with-cand<k, v>(L: ord(k)) -> (&dictionary(k, v), &k, &k, &v) -> pair(&k, &v) {
-  let Ord{compare := !compare} = L;
-  define loop(d: &dictionary(k, v), needle: &k, cand-k: &k, cand-v: &v) -> pair(&k, &v) {
-    case d {
-    | Tip =>
-      Pair(cand-k, cand-v)
-    | Bin(_, key, x, l, r) =>
-      match compare(needle, key) {
-      | GT =>
-        loop(r, needle, cand-k, cand-v)
-      | LT =>
-        loop(l, needle, key, x)
-      | _ =>
-        Pair(key, x)
-      }
+define lookup-GE<k, v>(L: &ord(k), d: &dictionary(k, v), needle: &k) ->> ?pair(&k, &v) {
+  tie Ord{compare} = L;
+  case d {
+  | _Tip =>
+    none
+  | _Bin(_, key, x, l, r) =>
+    match compare(needle, key) {
+    | GT =>
+      lookup-GE(L, r, needle)
+    | LT =>
+      Right(_lookup-GE-with-cand(L, l, needle, key, x))
+    | _ =>
+      Right(Pair(key, x))
     }
   }
 }
 
-inline make-lookup-GE<k, v>(!o: ord(k)) -> (&dictionary(k, v), &k) ->> ?pair(&k, &v) {
-  let Ord{compare := !compare} = o;
-  let !lookup-GE-with-cand = _make-lookup-GE-with-cand(o);
-  define loop(d: &dictionary(k, v), needle: &k) ->> ?pair(&k, &v) {
-    case d {
-    | Tip =>
-      none
-    | Bin(_, key, x, l, r) =>
-      match compare(needle, key) {
-      | GT =>
-        loop(l, needle)
-      | LT =>
-        Right(lookup-GE-with-cand(r, needle, key, x))
-      | _ =>
-        Right(Pair(key, x))
-      }
-    }
-  }
-}
-
-inline from-list<k, v>(_ord: ord(k), kvs: list(pair(k, v))) -> dictionary(k, v) {
-  let !insert = make-insert(_ord);
+inline from-list<k, v>(L: &ord(k), kvs: list(pair(k, v))) -> dictionary(k, v) {
   let f =
     define self(kvs: list(pair(k, v)), acc: dictionary(k, v)) -> dictionary(k, v) {
       match kvs {
       | Nil =>
         acc
       | Cons(Pair(k, v), rest) =>
-        self(rest, insert(acc, k, v))
+        self(rest, insert(L, acc, k, v))
       }
     };
-  f(kvs, Tip)
+  f(kvs, _Tip)
+}
+
+define _to-list-aux<k, v>(d: dictionary(k, v), acc: list(pair(k, v))) -> list(pair(k, v)) {
+  match d {
+  | _Tip =>
+    acc
+  | _Bin(_, k, v, d1, d2) =>
+    _to-list-aux(d1, Cons(Pair(k, v), _to-list-aux(d2, acc)))
+  }
 }
 
 define to-list<k, v>(d: dictionary(k, v)) -> list(pair(k, v)) {
-  match d {
-  | Tip =>
-    Nil
-  | Bin(_, k, v, d1, d2) =>
-    let xs = to-list(d1);
-    let ys = to-list(d2);
-    append(xs, Cons(Pair(k, v), ys))
+  _to-list-aux(d, Nil)
+}
+
+define _keys-aux<k, v>(d: &dictionary(k, v), acc: list(&k)) -> list(&k) {
+  case d {
+  | _Tip =>
+    acc
+  | _Bin(_, k, _, d1, d2) =>
+    _keys-aux(d1, Cons(k, _keys-aux(d2, acc)))
   }
 }
 
 define keys<k, v>(d: &dictionary(k, v)) -> list(&k) {
+  _keys-aux(d, Nil)
+}
+
+define _values-aux<k, v>(d: &dictionary(k, v), acc: list(&v)) -> list(&v) {
   case d {
-  | Tip =>
-    Nil
-  | Bin(_, k, _, d1, d2) =>
-    let xs = keys(d1);
-    let ys = keys(d2);
-    append(xs, Cons(k, ys))
+  | _Tip =>
+    acc
+  | _Bin(_, _, v, d1, d2) =>
+    _values-aux(d1, Cons(v, _values-aux(d2, acc)))
   }
 }
 
 define values<k, v>(d: &dictionary(k, v)) -> list(&v) {
-  case d {
-  | Tip =>
-    Nil
-  | Bin(_, _, v, d1, d2) =>
-    let xs = values(d1);
-    let ys = values(d2);
-    append(xs, Cons(v, ys))
-  }
+  _values-aux(d, Nil)
 }

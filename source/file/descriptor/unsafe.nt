@@ -1,0 +1,44 @@
+import {
+  this.bool,
+  this.c-int {c-int},
+  this.c-size {C-Size, c-size},
+  this.c-ssize {c-ssize, from-c-ssize, lt-c-ssize},
+  this.either {Right},
+  this.file._syscall.unsafe,
+  this.file.descriptor {descriptor, to-c-int},
+  this.pointer {shift},
+  this.system {report-system-error, system},
+  this.unit {Unit, unit},
+}
+
+define from-c-int(c: c-int) -> descriptor {
+  magic cast(c-int, descriptor, c)
+}
+
+define read(d: descriptor, p: pointer, size: c-size) -> c-ssize {
+  this.file._syscall.unsafe.read(to-c-int(d), p, size)
+}
+
+define write(d: descriptor, p: pointer, size: c-size) -> c-ssize {
+  this.file._syscall.unsafe.write(to-c-int(d), p, size)
+}
+
+define write-all(d: descriptor, p: pointer, size: int) ->> system(unit) {
+  let loop =
+    define write-loop(acc: int) ->> system(unit) {
+      let rest = sub-int(size, acc);
+      let head-ptr = shift(p, acc);
+      let bytes = write(d, head-ptr, C-Size(rest));
+      if lt-c-ssize(bytes, 0) {
+        report-system-error()
+      } else {
+        let acc = add-int(acc, from-c-ssize(bytes));
+        if eq-int(acc, size) {
+          Right(Unit)
+        } else {
+          write-loop(acc)
+        }
+      }
+    };
+  loop(0)
+}

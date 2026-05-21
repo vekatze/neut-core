@@ -1,20 +1,16 @@
 import {
-  this.bool {bool},
-  this.c-int {C-Int, c-int, eq-c-int},
-  this.c-string {c-string, from-string, to-string},
-  this.control {discard},
+  this.bool,
+  this.c-string {c-string, to-string},
   this.either {Right, none},
   this.pointer {is-null-pointer},
   this.string {string},
   this.string.pointer {get-content-pointer},
-  this.system {report-system-error, system},
-  this.unit {Unit, unit},
+  this.unit,
   this.unsafe {cast},
 }
 
 foreign {
   getenv(pointer) -> pointer,
-  setenv(pointer, pointer, c-int) -> c-int,
 }
 
 define get-env(name: &string) ->> ?string {
@@ -24,29 +20,5 @@ define get-env(name: &string) ->> ?string {
     none
   } else {
     Right(to-string(cast<pointer, &c-string>(tmp)))
-  }
-}
-
-define set-env(name: &string, value: &string, overwrite: bool) ->> system(unit) {
-  let name-c-str = from-string(name);
-  let value-c-str = from-string(value);
-  let flag =
-    if overwrite {
-      1
-    } else {
-      0
-    };
-  let result on name-c-str, value-c-str =
-    magic external setenv(
-      magic cast(&c-string, pointer, name-c-str),
-      magic cast(&c-string, pointer, value-c-str),
-      C-Int(flag),
-    );
-  discard(name-c-str);
-  discard(value-c-str);
-  if eq-c-int(result, 0) {
-    Right(Unit)
-  } else {
-    report-system-error()
   }
 }

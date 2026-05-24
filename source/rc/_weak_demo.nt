@@ -1,0 +1,40 @@
+import {
+  this.box,
+  this.either {Left, Right},
+  this.rc {borrow, downgrade, new, upgrade},
+  this.string,
+  this.string.io {print, print-line},
+  this.unit {Unit, unit},
+}
+
+define zen() -> unit {
+  let !value = new(*"hello");
+  letbox-T !weak on value = downgrade(value);
+  letbox-T result on weak = upgrade(weak);
+  match result {
+  | Left(_) =>
+    print-line("upgrade failed")
+  | Right(value-2) =>
+    let _ on value-2 = {
+      print("upgraded = ");
+      print-line(borrow(value-2))
+    };
+    let _ = value-2;
+    Unit
+  };
+  let _ on value = {
+    print("value = ");
+    print-line(borrow(value))
+  };
+  let _ = value;
+  letbox-T result on weak = upgrade(weak);
+  match result {
+  | Left(_) =>
+    print-line("expired")
+  | Right(value-3) =>
+    let _ = value-3;
+    print-line("unexpected")
+  };
+  let _ = weak;
+  Unit
+}

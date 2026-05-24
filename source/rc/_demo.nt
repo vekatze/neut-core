@@ -1,0 +1,22 @@
+import {
+  this.box,
+  this.rc {borrow, new},
+  this.string,
+  this.string.io {print, print-line},
+  this.unit {Unit, unit},
+}
+
+define zen() -> unit {
+  let value = new(*"hello");
+  let !value = value;
+  let alias = value;
+  let _ on value, alias = {
+    print("value = ");
+    print-line(borrow(value));
+    print("alias = ");
+    print-line(borrow(alias))
+  };
+  let _ = value;
+  let _ = alias;
+  Unit
+}

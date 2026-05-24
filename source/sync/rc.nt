@@ -1,0 +1,131 @@
+import {
+  this.bool,
+  this.c-size {C-Size},
+  this.either {Right, none},
+  this.memory {malloc},
+  this.memory.unsafe {free, load-int, store-int},
+  this.pointer {shift},
+  this.sync._atomic {
+    fetch-add-int,
+    fetch-sub-int,
+    increment-if-positive-int,
+  },
+  this.unit {Unit, unit},
+  this.unsafe {cast},
+  this.word,
+}
+
+nominal {
+  resource _rc-inner,
+  resource _weak-inner,
+  alias-opaque rc(_: type),
+  alias-opaque weak(_: type),
+}
+
+inline _header-size() -> int {
+  mul-int(this.word.size, 4)
+}
+
+inline _weak-ptr(ptr: pointer) -> pointer {
+  shift(ptr, this.word.size)
+}
+
+inline _type-ptr(ptr: pointer) -> pointer {
+  shift(ptr, mul-int(this.word.size, 2))
+}
+
+inline _value-ptr(ptr: pointer) -> pointer {
+  shift(ptr, mul-int(this.word.size, 3))
+}
+
+inline _increment-strong(ptr: pointer) -> unit {
+  let _ = fetch-add-int(ptr, 1);
+  Unit
+}
+
+inline _increment-weak(ptr: pointer) -> unit {
+  let _ = fetch-add-int(_weak-ptr(ptr), 1);
+  Unit
+}
+
+inline _release-weak(ptr: pointer) -> unit {
+  let old-count = fetch-sub-int(_weak-ptr(ptr), 1);
+  if eq-int(old-count, 1) {
+    free(ptr)
+  } else {
+    Unit
+  }
+}
+
+inline _release(ptr: pointer) -> unit {
+  let old-count = fetch-sub-int(ptr, 1);
+  if eq-int(old-count, 1) {
+    let elem-type = cast<int, type>(load-int(_type-ptr(ptr)));
+    magic call-type(elem-type, 0, load-int(_value-ptr(ptr)));
+    _release-weak(ptr)
+  } else {
+    Unit
+  }
+}
+
+// (strong-count, weak-count, elem-type, elem-value)
+// `weak-count` includes one implicit weak handle while `strong-count > 0`.
+resource _rc-inner {
+  (ptr: pointer) => {
+    _release(ptr)
+  },
+  (ptr: pointer) => {
+    _increment-strong(ptr);
+    ptr
+  },
+  -1,
+}
+
+resource _weak-inner {
+  (ptr: pointer) => {
+    _release-weak(ptr)
+  },
+  (ptr: pointer) => {
+    _increment-weak(ptr);
+    ptr
+  },
+  -1,
+}
+
+alias-opaque rc(_: type) {
+  _rc-inner
+}
+
+alias-opaque weak(_: type) {
+  _weak-inner
+}
+
+define new<a>(value: a) -> rc(a) {
+  let ptr = malloc(C-Size(_header-size()));
+  store-int(1, ptr);
+  store-int(1, _weak-ptr(ptr));
+  store-int(cast<type, int>(pack-type {a}), _type-ptr(ptr));
+  store-int(cast<a, int>(value), _value-ptr(ptr));
+  cast<pointer, rc(a)>(ptr)
+}
+
+inline borrow<a>(x: &rc(a)) -> &a {
+  let ptr = cast<&rc(a), pointer>(x);
+  cast<int, &a>(load-int(_value-ptr(ptr)))
+}
+
+define downgrade<a>(x: &rc(a)) -> +weak(a) {
+  let ptr = cast<&rc(a), pointer>(x);
+  _increment-weak(ptr);
+  cast<weak(a), +weak(a)>(cast<pointer, weak(a)>(ptr))
+}
+
+define upgrade<a>(x: &weak(a)) -> +?rc(a) {
+  let ptr = cast<&weak(a), pointer>(x);
+  let old-count = increment-if-positive-int(ptr);
+  if eq-int(old-count, 0) {
+    cast<?rc(a), +?rc(a)>(none)
+  } else {
+    cast<?rc(a), +?rc(a)>(Right(cast<pointer, rc(a)>(ptr)))
+  }
+}

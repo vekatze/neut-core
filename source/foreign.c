@@ -85,6 +85,33 @@ __attribute__((always_inline)) size_t neut_core_v0_55_thread_cond_size() {
   return sizeof(pthread_cond_t);
 }
 
+__attribute__((always_inline)) int64_t
+neut_core_v0_55_atomic_load_int(int64_t *ptr) {
+  return __atomic_load_n(ptr, __ATOMIC_ACQUIRE);
+}
+
+__attribute__((always_inline)) int64_t
+neut_core_v0_55_atomic_fetch_add_int(int64_t *ptr, int64_t value) {
+  return __atomic_fetch_add(ptr, value, __ATOMIC_ACQ_REL);
+}
+
+__attribute__((always_inline)) int64_t
+neut_core_v0_55_atomic_fetch_sub_int(int64_t *ptr, int64_t value) {
+  return __atomic_fetch_sub(ptr, value, __ATOMIC_ACQ_REL);
+}
+
+__attribute__((always_inline)) int64_t
+neut_core_v0_55_atomic_increment_if_positive_int(int64_t *ptr) {
+  int64_t current = __atomic_load_n(ptr, __ATOMIC_ACQUIRE);
+  while (current > 0) {
+    if (__atomic_compare_exchange_n(ptr, &current, current + 1, 1,
+                                    __ATOMIC_ACQ_REL, __ATOMIC_ACQUIRE)) {
+      return current;
+    }
+  }
+  return 0;
+}
+
 __attribute__((always_inline)) int neut_core_v0_55_errno() { return errno; }
 
 __attribute__((always_inline)) uint32_t neut_core_v0_55_UINT32_MAX() {

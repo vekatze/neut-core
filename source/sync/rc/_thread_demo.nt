@@ -1,0 +1,50 @@
+import {
+  this.box,
+  this.either {Left, Right},
+  this.string {string},
+  this.string.io {print, print-line},
+  this.sync.rc {borrow, downgrade, new, rc, upgrade},
+  this.sync.thread {join, spawn},
+  this.unit {Unit, unit},
+}
+
+define print-in-thread(value: rc(string)) -> unit {
+  let _ on value = {
+    print("thread saw = ");
+    print-line(borrow(value))
+  };
+  let _ = value;
+  Unit
+}
+
+define zen() -> unit {
+  let !value = new(*"shared");
+  let !thread-value-1 = value;
+  let !thread-value-2 = value;
+  letbox-T weak on value = downgrade(value);
+  let t1 =
+    spawn(() => {
+      print-in-thread(thread-value-1)
+    });
+  let t2 =
+    spawn(() => {
+      print-in-thread(thread-value-2)
+    });
+  join(t1);
+  join(t2);
+  let _ on value = {
+    print("main saw = ");
+    print-line(borrow(value))
+  };
+  let _ = value;
+  letbox-T result on weak = upgrade(weak);
+  match result {
+  | Left(_) =>
+    print-line("expired after threads")
+  | Right(unexpected) =>
+    let _ = unexpected;
+    print-line("unexpected live after threads")
+  };
+  let _ = weak;
+  Unit
+}

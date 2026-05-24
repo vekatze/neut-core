@@ -1,0 +1,22 @@
+foreign {
+  neut_core_v0_55_atomic_load_int(pointer) -> int,
+  neut_core_v0_55_atomic_fetch_add_int(pointer, int) -> int,
+  neut_core_v0_55_atomic_fetch_sub_int(pointer, int) -> int,
+  neut_core_v0_55_atomic_increment_if_positive_int(pointer) -> int,
+}
+
+inline load-int(ptr: pointer) -> int {
+  magic external neut_core_v0_55_atomic_load_int(ptr)
+}
+
+inline fetch-add-int(ptr: pointer, value: int) -> int {
+  magic external neut_core_v0_55_atomic_fetch_add_int(ptr, value)
+}
+
+inline fetch-sub-int(ptr: pointer, value: int) -> int {
+  magic external neut_core_v0_55_atomic_fetch_sub_int(ptr, value)
+}
+
+inline increment-if-positive-int(ptr: pointer) -> int {
+  magic external neut_core_v0_55_atomic_increment_if_positive_int(ptr)
+}

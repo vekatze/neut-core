@@ -53,7 +53,7 @@ define make-buffer(d: descriptor, capacity: int) -> buffer {
   let c = to-c-int(d);
   let C-Int(fd) = c;
   store-int(sext-int32-int(fd), shift(buffer-ptr, mul-int(word-size, 2)));
-  magic cast(pointer, buffer, buffer-ptr)
+  _Buffer(magic cast(pointer, _buffer-internal, buffer-ptr))
 }
 
 inline _get-current-size(b: &buffer) -> int {

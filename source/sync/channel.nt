@@ -47,7 +47,7 @@ define _new<a>(q: queue(a)) -> channel(a) {
   let _ = thread-mutex-init(shift(ptr, u));
   thread-cond-init(shift(ptr, add-int(u, mutex-size)));
   store-int(cast<type, int>(pack-type {a}), shift(ptr, add-int(u, add-int(mutex-size, cond-size))));
-  cast<pointer, channel(a)>(ptr)
+  _Channel(cast<pointer, _channel>(ptr))
 }
 
 // (queue, thread-mutex, thread-cond)

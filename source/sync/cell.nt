@@ -17,10 +17,6 @@ import {
   this.word,
 }
 
-inline _get-clone<a>(x: &a) -> a {
-  *x
-}
-
 nominal {
   resource _cell,
 }
@@ -36,7 +32,7 @@ inline _new<a>(val: a) -> cell(a) {
   store-int(cast<a, int>(val), ptr);
   let _ = thread-mutex-init(shift(ptr, u));
   store-int(cast<type, int>(pack-type {a}), shift(ptr, add-int(u, mutex-size)));
-  cast-inline<pointer, cell(a)>(ptr)
+  _Cell(cast-inline<pointer, _cell>(ptr))
 }
 
 // (content, thread-mutex, type)

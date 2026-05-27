@@ -27,7 +27,7 @@ inline _make<a>(val: a) -> cell(a) {
   let ptr = malloc(C-Size(mul-int(this.word.size, 2)));
   store-int(cast-inline<a, int>(val), ptr);
   store-int(cast-inline<type, int>(pack-type {a}), shift(ptr, u));
-  cast-inline<pointer, cell(a)>(ptr)
+  _Cell(cast-inline<pointer, _cell>(ptr))
 }
 
 // (content, type)

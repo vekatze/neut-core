@@ -114,7 +114,7 @@ define make<a>(initial-capacity: int) -> vector(a) {
   store-int(initial-cursor, shift(vector-ptr, mul-int(word-size, 2)));
   store-int(cast<type, int>(pack-type {a}), shift(vector-ptr, mul-int(word-size, 3)));
   store-pointer(buffer-ptr, shift(vector-ptr, mul-int(word-size, 4)));
-  magic cast(pointer, vector(a), vector-ptr)
+  _Vector(magic cast(pointer, _vector-internal, vector-ptr))
 }
 
 define _discard-vector-content<a>(xs: &vector(a), elem-type: type, index: int, len: int) -> unit {
@@ -122,10 +122,8 @@ define _discard-vector-content<a>(xs: &vector(a), elem-type: type, index: int, l
     Unit
   } else {
     let element-ptr = _get-element-pointer(xs, index);
-    // let _ = cast<int, elem-type>(load-int(element-ptr));
     let v = load-int(element-ptr);
     magic call-type(elem-type, 0, v);
-    // let _ = cast<int, elem-type>(load-int(element-ptr));
     _discard-vector-content(xs, elem-type, add-int(index, 1), len)
   }
 }

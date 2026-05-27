@@ -68,7 +68,7 @@ define _new<a>() -> mvar(a) {
   thread-cond-init(readable-cond-ptr);
   thread-cond-init(writable-cond-ptr);
   store-int(cast<type, int>(pack-type {a}), type-ptr);
-  cast<pointer, mvar(a)>(ptr)
+  _MVar(cast<pointer, _mvar>(ptr))
 }
 
 // (flag, type, value, mutex, readable-cond, writable-cond)

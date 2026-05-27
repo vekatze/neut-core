@@ -1,6 +1,5 @@
 import {
   this.binary {binary, from-list},
-  this.binary.unsafe {access-unchecked},
   this.bool {False, True, bool},
   this.box,
   this.c-size {C-Size, c-size},
@@ -65,10 +64,6 @@ define append(t1: &string, t2: &string) -> string {
   tie _String(t1) = t1;
   tie _String(t2) = t2;
   _String(this.binary.append(t1, t2))
-}
-
-define _access(haystack: &string, cursor: int) -> int8 {
-  access-unchecked(magic cast(&string, &binary, haystack), cursor)
 }
 
 define is-empty(t: &string) -> bool {

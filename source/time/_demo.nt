@@ -1,0 +1,391 @@
+import {
+  this.bool {False, True, bool, not},
+  this.box,
+  this.debug {panic},
+  this.either {Left, Right},
+  this.environment.unsafe {set-env},
+  this.int.io {print-int, print-int-line},
+  this.list {List},
+  this.string {format, string},
+  this.string.eq {eq-string},
+  this.string.io {print, print-line},
+  this.time {
+    Clock,
+    add-time,
+    eq-time,
+    from-ISO8601,
+    from-clock,
+    ge-time,
+    get-time,
+    gt-time,
+    le-time,
+    lt-time,
+    make-time,
+    nanoseconds,
+    now,
+    show-time,
+    sub-time,
+    time,
+    to-ISO8601-UTC,
+    to-ISO8601-local,
+    to-UTC-clock,
+    to-local-clock,
+    unix-seconds,
+  },
+  this.unit {Unit, unit},
+}
+
+foreign {
+  tzset() -> void,
+}
+
+inline _ensure(message: &string, check: bool) -> unit {
+  if check {
+    Unit
+  } else {
+    panic(message)
+  }
+}
+
+define _expect-time(message: &string, a: time, b: time) -> unit {
+  pin a = a;
+  pin b = b;
+  _ensure(message, eq-time(a, b))
+}
+
+define _check-comparison() -> unit {
+  pin t0 = make-time(0, 0);
+  pin t1 = make-time(1, 0);
+  pin t2 = make-time(1, 1);
+  pin t3 = make-time(2, 0);
+  pin t4 = make-time(1, 999999999);
+  pin n-15 = make-time(-2, 500000000); // -1.5s
+  pin n-12 = make-time(-2, 800000000); // -1.2s
+  pin n-10 = make-time(-1, 0); // -1.0s
+  _ensure("eq: identical equal\n", eq-time(t1, t1));
+  _ensure("eq: differing ns not equal\n", not(eq-time(t1, t2)));
+  _ensure("lt: ns breaks ties\n", lt-time(t1, t2));
+  _ensure("lt: seconds dominate ns\n", lt-time(t4, t3));
+  _ensure("le: identical is <=\n", le-time(t1, t1));
+  _ensure("gt: seconds dominate ns\n", gt-time(t3, t4));
+  _ensure("ge: identical is >=\n", ge-time(t1, t1));
+  _ensure("lt: -1.5 < -1.2\n", lt-time(n-15, n-12));
+  _ensure("lt: -1.5 < -1.0\n", lt-time(n-15, n-10));
+  _ensure("lt: -1.0 < 0\n", lt-time(n-10, t0));
+  _ensure("gt: 0 > -1.5\n", gt-time(t0, n-15))
+}
+
+define _check-arithmetic() -> unit {
+  _expect-time(
+    "add: 0.3 + 10.0 = 10.3\n",
+    add-time(make-time(0, 300000000), make-time(10, 0)),
+    make-time(10, 300000000),
+  );
+  _expect-time(
+    "sub: 5.3 - 5.0 = 0.3\n",
+    sub-time(make-time(5, 300000000), make-time(5, 0)),
+    make-time(0, 300000000),
+  );
+  _expect-time(
+    "add: 0.3 + 0.3 = 0.6\n",
+    add-time(make-time(0, 300000000), make-time(0, 300000000)),
+    make-time(0, 600000000),
+  );
+  _expect-time(
+    "add: 0.7 + 0.5 = 1.2\n",
+    add-time(make-time(0, 700000000), make-time(0, 500000000)),
+    make-time(1, 200000000),
+  );
+  _expect-time(
+    "sub: 0 - 0.5 = -0.5\n",
+    sub-time(make-time(0, 0), make-time(0, 500000000)),
+    make-time(-1, 500000000),
+  );
+  _expect-time(
+    "sub: 0 - 1.5 = -1.5\n",
+    sub-time(make-time(0, 0), make-time(1, 500000000)),
+    make-time(-2, 500000000),
+  );
+  _expect-time(
+    "round-trip: (a + b) - b = a\n",
+    sub-time(
+      add-time(make-time(123, 456), make-time(78, 900000000)),
+      make-time(78, 900000000),
+    ),
+    make-time(123, 456),
+  );
+  _expect-time(
+    "add is commutative\n",
+    add-time(make-time(7, 800000000), make-time(1, 500000000)),
+    add-time(make-time(1, 500000000), make-time(7, 800000000)),
+  );
+  _expect-time(
+    "sub identity at year 1\n",
+    sub-time(make-time(-62135596800, 0), make-time(0, 0)),
+    make-time(-62135596800, 0),
+  );
+  _expect-time(
+    "borrow with large equal seconds\n",
+    sub-time(make-time(-62135596800, 500000000), make-time(-62135596800, 200000000)),
+    make-time(0, 300000000),
+  );
+  _expect-time(
+    "carry with large seconds\n",
+    add-time(make-time(-62135596800, 700000000), make-time(0, 500000000)),
+    make-time(-62135596799, 200000000),
+  );
+  _expect-time("make-time: 2e9 ns -> +2s\n", make-time(0, 2000000000), make-time(2, 0));
+  _expect-time("make-time: 2.5e9 ns\n", make-time(5, 2500000000), make-time(7, 500000000));
+  _expect-time("make-time: negative ns borrows\n", make-time(0, -500000000), make-time(-1, 500000000));
+  _expect-time("make-time: large seconds + denormalized ns\n", make-time(-62135596800, 2000000000), make-time(-62135596798, 0));
+  _expect-time("make-time: already normalized\n", make-time(10, 250), make-time(10, 250))
+}
+
+define _expect-utc-roundtrip(sec: int, ns: int) -> unit {
+  let !t = make-time(sec, ns);
+  _expect-time("UTC clock round-trip failed\n", from-clock(to-UTC-clock(t)), t)
+}
+
+define _check-utc() -> unit {
+  _expect-utc-roundtrip(-3772526400, 0); // 1850-06-15T12:00:00Z
+  _expect-utc-roundtrip(-62135596800, 0); // 0001-01-01T00:00:00Z
+  _expect-utc-roundtrip(-1, 999999999); // 1969-12-31T23:59:59.999999999Z
+  _expect-utc-roundtrip(0, 0); // epoch
+  _expect-utc-roundtrip(1716808300, 553393000); // 2024 with sub-second
+  _expect-utc-roundtrip(1780157311, 0); // 2026
+  _expect-utc-roundtrip(70000000000000000, 0); // year ~2.2e9 (no struct-tm truncation)
+  _expect-utc-roundtrip(-70000000000000000, 0) // far past
+}
+
+define _expect-iso(input: &string, sec: int, ns: int) -> unit {
+  match from-ISO8601(input) {
+  | Right(parsed) =>
+    pin parsed = parsed;
+    pin want = make-time(sec, ns);
+    if eq-time(parsed, want) {
+      Unit
+    } else {
+      pin m = format("from-ISO8601 mismatch: {}\n", List[*input]);
+      panic(m)
+    }
+  | Left(_) =>
+    pin m = format("from-ISO8601 unexpectedly returned none: {}\n", List[*input]);
+    panic(m)
+  }
+}
+
+define _expect-iso-none(input: &string) -> unit {
+  match from-ISO8601(input) {
+  | Right(_) =>
+    pin m = format("from-ISO8601 should have failed: {}\n", List[*input]);
+    panic(m)
+  | Left(_) =>
+    Unit
+  }
+}
+
+define _expect-render(input: &string) -> unit {
+  match from-ISO8601(input) {
+  | Right(parsed) =>
+    pin out = to-ISO8601-UTC(parsed, 0);
+    if eq-string(out, input) {
+      Unit
+    } else {
+      pin m = format("render mismatch: {} != {}\n", List[*out, *input]);
+      panic(m)
+    }
+  | Left(_) =>
+    pin m = format("render: parse failed for {}\n", List[*input]);
+    panic(m)
+  }
+}
+
+define _check-iso() -> unit {
+  _expect-iso("1850-06-15T12:00:00Z", -3772526400, 0);
+  _expect-iso("0001-01-01T00:00:00Z", -62135596800, 0);
+  _expect-iso("1969-12-31T23:59:59Z", -1, 0);
+  _expect-iso("1970-01-01T00:00:00Z", 0, 0);
+  _expect-iso("2024-05-27T11:11:40Z", 1716808300, 0);
+  _expect-iso("2024-05-27T11:11:40.553393Z", 1716808300, 553393000);
+  _expect-iso("1970-01-01T00:00:00.5Z", 0, 500000000);
+  _expect-iso("1970-01-01T00:00:00.05Z", 0, 50000000);
+  _expect-iso("1970-01-01T00:00:00.000000001Z", 0, 1);
+  _expect-iso("1970-01-01T00:00:00.0Z", 0, 0);
+  _expect-iso("1970-01-01T00:00:00.000Z", 0, 0);
+  _expect-iso("1970-01-01T00:00:00.1234567890Z", 0, 123456789);
+  _expect-iso("2024-05-27T11:11:40+09:00", 1716775900, 0);
+  _expect-iso("1850-06-15T12:00:00+09:00", -3772558800, 0);
+  _expect-iso("2024-05-27T11:11:40+04:56:02", 1716790538, 0);
+  _expect-iso("2024-05-27T11:11:40-04:56:02", 1716826062, 0);
+  _expect-render("2024-05-27T11:11:40Z");
+  _expect-render("1850-06-15T12:00:00Z");
+  _expect-render("0001-01-01T00:00:00Z");
+  _expect-render("0099-12-31T23:59:59Z");
+  _expect-iso("2024-02-29T00:00:00Z", 1709164800, 0);
+  // malformed / unsupported / nonexistent inputs must yield none
+  _expect-iso-none("yo");
+  _expect-iso-none("hello, world");
+  _expect-iso-none("2024-05-27T11:11:40"); // missing offset/Z
+  _expect-iso-none("2024-02-31T00:00:00Z"); // Feb 31 does not exist
+  _expect-iso-none("2023-02-29T00:00:00Z"); // 2023 is not a leap year
+  _expect-iso-none("2024-13-01T00:00:00Z"); // month 13
+  _expect-iso-none("2024-00-01T00:00:00Z"); // month 0
+  _expect-iso-none("2024-01-32T00:00:00Z"); // day 32
+  _expect-iso-none("2024-01-01T25:00:00Z"); // hour 25
+  _expect-iso-none("2016-12-31T23:59:60Z"); // leap second is unsupported
+  _expect-iso-none("2024-01-01T00:00:00+25:00") // offset hour 25
+}
+
+define _expect-local-roundtrip(sec: int) -> unit {
+  let !t = make-time(sec, 0);
+  _expect-time("local clock round-trip failed\n", from-clock(to-local-clock(t)), t)
+}
+
+define _set-time-zone(name: &string) -> unit {
+  match set-env("TZ", name, True) {
+  | Right(_) =>
+    let _ = magic external tzset();
+    Unit
+  | Left(_) =>
+    panic("failed to set TZ for time demo\n")
+  }
+}
+
+define _expect-ny-fall-back(sec: int, offset: int, zone: &string, want-is-dst: bool) -> unit {
+  let t = make-time(sec, 0);
+  let Clock{seconds, minutes, hours, day, month, year, is-dst, gmt-offset, timezone} = to-local-clock(t);
+  pin timezone = timezone;
+  _ensure("NY DST fall-back year mismatch\n", eq-int(year, 2025));
+  _ensure("NY DST fall-back month mismatch\n", eq-int(month, 11));
+  _ensure("NY DST fall-back day mismatch\n", eq-int(day, 2));
+  _ensure("NY DST fall-back hour mismatch\n", eq-int(hours, 1));
+  _ensure("NY DST fall-back minute mismatch\n", eq-int(minutes, 30));
+  _ensure("NY DST fall-back second mismatch\n", eq-int(seconds, 0));
+  _ensure("NY DST fall-back GMT offset mismatch\n", eq-int(gmt-offset, offset));
+  _ensure("NY DST fall-back timezone mismatch\n", eq-string(timezone, zone));
+  let is-dst-ok =
+    if want-is-dst {
+      is-dst
+    } else {
+      not(is-dst)
+    };
+  _ensure("NY DST fall-back is-dst mismatch\n", is-dst-ok)
+}
+
+define _check-local() -> unit {
+  _set-time-zone("America/New_York");
+  _expect-local-roundtrip(1780157311); // 2026
+  _expect-local-roundtrip(-3772526400); // 1850 (LMT)
+  _expect-local-roundtrip(1762061400); // NY DST fall-back, earlier (EDT) occurrence
+  _expect-local-roundtrip(1762065000); // NY DST fall-back, later (EST) occurrence
+  _expect-ny-fall-back(1762061400, -14400, "EDT", True);
+  _expect-ny-fall-back(1762065000, -18000, "EST", False)
+}
+
+define _expect-iso-local-roundtrip(sec: int) -> unit {
+  let !t = make-time(sec, 0);
+  pin rendered = to-ISO8601-local(t, 0);
+  match from-ISO8601(rendered) {
+  | Right(back) =>
+    _expect-time("local ISO 8601 round-trip failed\n", back, t)
+  | Left(_) =>
+    panic("from-ISO8601 failed to parse to-ISO8601-local output\n")
+  }
+}
+
+define _check-iso-local() -> unit {
+  _expect-iso-local-roundtrip(0);
+  _expect-iso-local-roundtrip(-1);
+  _expect-iso-local-roundtrip(1780157311); // 2026
+  _expect-iso-local-roundtrip(-3772526400) // 1850 (sub-minute LMT offsets)
+}
+
+define _expect-show(label: &string, t: time, decimals: int, want: &string) -> unit {
+  pin s = show-time(t, decimals);
+  if eq-string(s, want) {
+    Unit
+  } else {
+    pin m = format("{}: got \"{}\" want \"{}\"\n", List[*label, *s, *want]);
+    panic(m)
+  }
+}
+
+define _check-show() -> unit {
+  _expect-show("show +1.5\n", make-time(1, 500000000), 9, "1.500000000");
+  _expect-show("show -0.5\n", make-time(0, -500000000), 9, "-0.500000000");
+  _expect-show("show -1.5\n", make-time(0, -1500000000), 9, "-1.500000000");
+  _expect-show("show -2.0 (exact)\n", make-time(-2, 0), 9, "-2.000000000");
+  _expect-show("show -0.5 3dp\n", make-time(0, -500000000), 3, "-0.500");
+  _expect-show("show 0 no frac\n", make-time(0, 0), 0, "0")
+}
+
+define _check-from-clock() -> unit {
+  let c =
+    Clock{
+      nanoseconds := 2000000000,
+      seconds := 0,
+      minutes := 0,
+      hours := 0,
+      day := 1,
+      month := 1,
+      year := 1970,
+      weekday := 0,
+      yearday := 0,
+      is-dst := False,
+      gmt-offset := 0,
+      timezone := *"UTC",
+    };
+  _expect-time("from-clock normalizes denormalized ns\n", from-clock(c), make-time(2, 0))
+}
+
+define _check-accessors() -> unit {
+  pin t = make-time(1716808300, 553393000);
+  _ensure("unix-seconds accessor\n", eq-int(unix-seconds(t), 1716808300));
+  _ensure("nanoseconds accessor\n", eq-int(nanoseconds(t), 553393000));
+  pin u = make-time(0, 2000000000);
+  _ensure("unix-seconds after normalize\n", eq-int(unix-seconds(u), 2));
+  _ensure("nanoseconds after normalize\n", eq-int(nanoseconds(u), 0))
+}
+
+define _demonstrate() -> unit {
+  print-line("--- demonstration ---");
+  pin g = show-time(get-time(), 3);
+  print("get-time (epoch seconds): ");
+  print-line(g);
+  pin n = now();
+  print("now (local ISO 8601):     ");
+  print-line(n);
+  pin utc = to-ISO8601-UTC(make-time(1716808300, 553393000), 6);
+  print("a UTC instant:            ");
+  print-line(utc);
+  pin loc = to-ISO8601-local(make-time(1716808300, 0), 0);
+  print("same instant, local:      ");
+  print-line(loc);
+  let Clock{year, month, day, hours, minutes, seconds} = to-UTC-clock(make-time(1716808300, 0));
+  print("decomposed (UTC): ");
+  print-int(year);
+  print("-");
+  print-int(month);
+  print("-");
+  print-int(day);
+  print(" ");
+  print-int(hours);
+  print(":");
+  print-int(minutes);
+  print(":");
+  print-int-line(seconds)
+}
+
+define zen() -> unit {
+  _check-comparison();
+  _check-arithmetic();
+  _check-utc();
+  _check-iso();
+  _check-local();
+  _check-iso-local();
+  _check-show();
+  _check-from-clock();
+  _check-accessors();
+  print-line("all time assertions passed");
+  _demonstrate()
+}

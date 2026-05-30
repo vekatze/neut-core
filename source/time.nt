@@ -1,8 +1,20 @@
 import {
-  this.bool,
-  this.either {Right},
+  this.bool {False, True, and, bool, or},
+  this.box,
+  this.c-int {c-int, from-c-int},
+  this.c-size {C-Size, c-size, from-c-size},
+  this.c-string {c-string, from-string, to-string},
+  this.debug {panic},
+  this.either {Right, none},
+  this.int.show {show-int},
+  this.list {List},
+  this.memory {malloc},
+  this.memory.unsafe {store-int},
+  this.pointer {is-null-pointer, null-pointer, shift},
+  this.string {format, string, take},
   this.system {report-system-error, system},
   this.unit {Unit, unit},
+  this.word,
 }
 
 foreign {
@@ -16,4 +28,316 @@ define sleep(duration: float64) ->> system(unit) {
   } else {
     Right(Unit)
   }
+}
+
+alias clockid-t {
+  introspect architecture {
+  | arm64 =>
+    c-int
+  | amd64 =>
+    c-int
+  }
+}
+
+foreign {
+  clock_gettime(clockid-t, pointer) -> c-int,
+  snprintf(pointer, c-size, pointer) -> c-int,
+  sprintf(pointer, pointer) -> c-int,
+  neut_core_v0_55_parse_iso8601(pointer, pointer) -> int32,
+  neut_core_v0_55_CLOCK_REALTIME() -> clockid-t,
+  neut_core_v0_55_civil_to_utc(int, int, int, int, int, int) -> int,
+  neut_core_v0_55_sizeof_fields() -> c-size,
+  neut_core_v0_55_sizeof_timespec() -> c-size,
+  neut_core_v0_55_timespec_sec(pointer) -> int,
+  neut_core_v0_55_timespec_nsec(pointer) -> int,
+  neut_core_v0_55_decompose(int, int, pointer) -> pointer,
+  neut_core_v0_55_field_sec(pointer) -> int,
+  neut_core_v0_55_field_min(pointer) -> int,
+  neut_core_v0_55_field_hour(pointer) -> int,
+  neut_core_v0_55_field_mday(pointer) -> int,
+  neut_core_v0_55_field_mon(pointer) -> int,
+  neut_core_v0_55_field_year(pointer) -> int,
+  neut_core_v0_55_field_wday(pointer) -> int,
+  neut_core_v0_55_field_yday(pointer) -> int,
+  neut_core_v0_55_field_isdst(pointer) -> int,
+  neut_core_v0_55_field_gmtoff(pointer) -> int,
+  neut_core_v0_55_field_zone(pointer) -> pointer,
+}
+
+constant SIZEOF_FIELDS: c-size {
+  magic opaque-value {
+    magic external neut_core_v0_55_sizeof_fields()
+  }
+}
+
+constant SIZEOF_TIMESPEC: c-size {
+  magic opaque-value {
+    magic external neut_core_v0_55_sizeof_timespec()
+  }
+}
+
+constant CLOCK_REALTIME: clockid-t {
+  magic opaque-value {
+    magic external neut_core_v0_55_CLOCK_REALTIME()
+  }
+}
+
+data time {
+| _Time(
+    seconds: int,
+    nanoseconds: int,
+  )
+}
+
+data clock {
+| Clock(
+    nanoseconds: int,
+    seconds: int,
+    minutes: int,
+    hours: int,
+    day: int,
+    month: int,
+    year: int,
+    weekday: int,
+    yearday: int,
+    is-dst: bool,
+    gmt-offset: int,
+    timezone: string,
+  )
+}
+
+define _encode-dst(x: int) -> bool {
+  if eq-int(x, 0) {
+    False
+  } else {
+    True
+  }
+}
+
+define _from-time(t: time, is-local: int) -> clock {
+  let _Time{seconds, nanoseconds} = t;
+  let size = from-c-size(SIZEOF_FIELDS);
+  let f = magic external neut_core_v0_55_decompose(seconds, is-local, magic alloca(int8, size));
+  if is-null-pointer(f) {
+    panic("time: instant is out of range for local-time conversion\n")
+  } else {
+    Clock{
+      nanoseconds,
+      seconds := magic external neut_core_v0_55_field_sec(f),
+      minutes := magic external neut_core_v0_55_field_min(f),
+      hours := magic external neut_core_v0_55_field_hour(f),
+      day := magic external neut_core_v0_55_field_mday(f),
+      month := magic external neut_core_v0_55_field_mon(f),
+      year := magic external neut_core_v0_55_field_year(f),
+      weekday := magic external neut_core_v0_55_field_wday(f),
+      yearday := magic external neut_core_v0_55_field_yday(f),
+      is-dst := _encode-dst(magic external neut_core_v0_55_field_isdst(f)),
+      gmt-offset := magic external neut_core_v0_55_field_gmtoff(f),
+      timezone := to-string(magic cast(pointer, &c-string, magic external neut_core_v0_55_field_zone(f))),
+    }
+  }
+}
+
+define get-time() -> time {
+  let size = from-c-size(SIZEOF_TIMESPEC);
+  let struct = magic alloca(int8, size);
+  let result = from-c-int(magic external clock_gettime(CLOCK_REALTIME, struct));
+  if lt-int(result, 0) {
+    panic("time.time.get-time(); `clock_gettime` failed\n")
+  } else {
+    let seconds: int = magic external neut_core_v0_55_timespec_sec(struct);
+    let nanoseconds: int = magic external neut_core_v0_55_timespec_nsec(struct);
+    _Time{seconds, nanoseconds}
+  }
+}
+
+define _normalize(s: int, n: int) -> time {
+  let q = div-int(n, 1000000000);
+  let r = rem-int(n, 1000000000);
+  if lt-int(r, 0) {
+    _Time{seconds := add-int(s, sub-int(q, 1)), nanoseconds := add-int(r, 1000000000)}
+  } else {
+    _Time{seconds := add-int(s, q), nanoseconds := r}
+  }
+}
+
+define from-clock(t: clock) -> time {
+  let Clock{nanoseconds, seconds, minutes, hours, day, month, year, gmt-offset} = t;
+  let epoch =
+    sub-int(
+      magic external neut_core_v0_55_civil_to_utc(year, month, day, hours, minutes, seconds),
+      gmt-offset,
+    );
+  _normalize(epoch, nanoseconds)
+}
+
+define to-local-clock(t: time) -> clock {
+  _from-time(t, 1)
+}
+
+define to-UTC-clock(t: time) -> clock {
+  _from-time(t, 0)
+}
+
+define _zeropad(x: int, format-string: &string) -> string {
+  pin fmt = from-string(format-string);
+  let fmt = magic cast(&c-string, pointer, fmt);
+  let size = from-c-int(magic external snprintf(null-pointer, 0, fmt)(x: int));
+  let ptr = malloc(C-Size(add-int(size, add-int(1, mul-int(this.word.size, 2)))));
+  store-int(0, ptr);
+  store-int(size, shift(ptr, this.word.size));
+  let buffer = shift(ptr, mul-int(this.word.size, 2));
+  let _ = magic external sprintf(buffer, fmt)(x: int);
+  magic cast(pointer, string, ptr)
+}
+
+define _zeropad2(x: int) -> string {
+  _zeropad(x, "%02ld")
+}
+
+define _zeropad4(x: int) -> string {
+  _zeropad(x, "%04ld")
+}
+
+define _zeropad9(x: int) -> string {
+  _zeropad(x, "%09ld")
+}
+
+define _format-nanoseconds(nanoseconds: int, digits: int) -> string {
+  if gt-int(digits, 0) {
+    let result = _zeropad9(nanoseconds);
+    format(".{}", List[take(result, digits)])
+  } else {
+    this.string.empty()
+  }
+}
+
+define _format-signed-offset(sign: &string, magnitude: int) -> string {
+  let hours = div-int(magnitude, 3600);
+  let minutes = div-int(rem-int(magnitude, 3600), 60);
+  let seconds = rem-int(magnitude, 60);
+  if eq-int(seconds, 0) {
+    format("{}{}:{}", List[*sign, _zeropad2(hours), _zeropad2(minutes)])
+  } else {
+    format("{}{}:{}:{}", List[*sign, _zeropad2(hours), _zeropad2(minutes), _zeropad2(seconds)])
+  }
+}
+
+define _format-gmt-offset(offset: int) -> string {
+  if lt-int(offset, 0) {
+    _format-signed-offset("-", mul-int(offset, -1))
+  } else-if lt-int(0, offset) {
+    _format-signed-offset("+", offset)
+  } else {
+    *"Z"
+  }
+}
+
+inline _to-ISO8601(ts: time, nanosecond-digits: int, to-clock: (time) -> clock) -> string {
+  let t = to-clock(ts);
+  let Clock{nanoseconds, seconds, minutes, hours, day, month, year, gmt-offset} = t;
+  format("{}-{}-{}T{}:{}:{}{}{}", List[
+    _zeropad4(year),
+    _zeropad2(month),
+    _zeropad2(day),
+    _zeropad2(hours),
+    _zeropad2(minutes),
+    _zeropad2(seconds),
+    _format-nanoseconds(nanoseconds, nanosecond-digits),
+    _format-gmt-offset(gmt-offset),
+  ])
+}
+
+define to-ISO8601-local(ts: time, nanosecond-digits: int) -> string {
+  _to-ISO8601(ts, nanosecond-digits, to-local-clock)
+}
+
+define to-ISO8601-UTC(ts: time, nanosecond-digits: int) -> string {
+  _to-ISO8601(ts, nanosecond-digits, to-UTC-clock)
+}
+
+define from-ISO8601(datetime-string: &string) -> ?time {
+  let size = from-c-size(SIZEOF_TIMESPEC);
+  let time-struct = magic alloca(int8, size);
+  pin datetime-string = from-string(datetime-string);
+  let datetime-string = magic cast(&c-string, pointer, datetime-string);
+  let result: int32 = magic external neut_core_v0_55_parse_iso8601(datetime-string, time-struct);
+  if ge-int32(result, 0) {
+    let seconds = magic external neut_core_v0_55_timespec_sec(time-struct);
+    let nanoseconds = magic external neut_core_v0_55_timespec_nsec(time-struct);
+    Right(_Time{seconds, nanoseconds})
+  } else {
+    none
+  }
+}
+
+define show-time(m: time, decimals: int) -> string {
+  let _Time{seconds := s, nanoseconds := ns} = m;
+  if and(lt-int(s, 0), gt-int(ns, 0)) {
+    let int-part = sub-int(mul-int(s, -1), 1);
+    let frac = sub-int(1000000000, ns);
+    format("-{}{}", List[show-int(int-part), _format-nanoseconds(frac, decimals)])
+  } else {
+    format("{}{}", List[show-int(s), _format-nanoseconds(ns, decimals)])
+  }
+}
+
+define make-time(seconds: int, nanoseconds: int) -> time {
+  _normalize(seconds, nanoseconds)
+}
+
+define unix-seconds(t: &time) -> int {
+  tie _Time{seconds} = t;
+  *seconds
+}
+
+define nanoseconds(t: &time) -> int {
+  tie _Time{nanoseconds} = t;
+  *nanoseconds
+}
+
+define add-time(m1: time, m2: time) -> time {
+  let _Time{seconds := s1, nanoseconds := n1} = m1;
+  let _Time{seconds := s2, nanoseconds := n2} = m2;
+  _normalize(add-int(s1, s2), add-int(n1, n2))
+}
+
+define sub-time(m1: time, m2: time) -> time {
+  let _Time{seconds := s1, nanoseconds := n1} = m1;
+  let _Time{seconds := s2, nanoseconds := n2} = m2;
+  _normalize(sub-int(s1, s2), sub-int(n1, n2))
+}
+
+define eq-time(m1: &time, m2: &time) -> bool {
+  tie _Time{seconds := s1, nanoseconds := ns1} = m1;
+  tie _Time{seconds := s2, nanoseconds := ns2} = m2;
+  and(eq-int(*s1, *s2), eq-int(*ns1, *ns2))
+}
+
+define lt-time(m1: &time, m2: &time) -> bool {
+  tie _Time{seconds := s1, nanoseconds := ns1} = m1;
+  tie _Time{seconds := s2, nanoseconds := ns2} = m2;
+  if lt-int(*s1, *s2) {
+    True
+  } else-if gt-int(*s1, *s2) {
+    False
+  } else {
+    lt-int(*ns1, *ns2)
+  }
+}
+
+define le-time(m1: &time, m2: &time) -> bool {
+  or(lt-time(m1, m2), eq-time(m1, m2))
+}
+
+define gt-time(m1: &time, m2: &time) -> bool {
+  lt-time(m2, m1)
+}
+
+define ge-time(m1: &time, m2: &time) -> bool {
+  le-time(m2, m1)
+}
+
+define now() -> string {
+  to-ISO8601-local(get-time(), 6)
 }

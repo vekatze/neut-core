@@ -1,3 +1,8 @@
+#ifdef __linux__
+#define _XOPEN_SOURCE 700
+#define _DEFAULT_SOURCE
+#endif
+
 #include <float.h>
 #include <limits.h>
 #include <math.h>
@@ -5,10 +10,12 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/errno.h>
 #include <sys/fcntl.h>
 #include <sys/uio.h>
 #include <sys/wait.h>
+#include <time.h>
 #include <unistd.h>
 
 __attribute__((always_inline)) int neut_core_v0_55_wifexited(int stat) {
@@ -633,4 +640,228 @@ typedef enum {
 
 __attribute__((always_inline)) arch_tag_t neut_core_v0_55_get_arch_tag() {
   return ARCH_TAG;
+}
+
+__attribute__((always_inline))
+clockid_t neut_core_v0_55_CLOCK_REALTIME() {
+  return CLOCK_REALTIME;
+}
+
+__attribute__((always_inline)) size_t neut_core_v0_55_sizeof_timespec() {
+  return sizeof(struct timespec);
+}
+
+__attribute__((always_inline)) int64_t
+neut_core_v0_55_timespec_sec(struct timespec *ts) {
+  return (int64_t)ts->tv_sec;
+}
+
+__attribute__((always_inline)) int64_t
+neut_core_v0_55_timespec_nsec(struct timespec *ts) {
+  return (int64_t)ts->tv_nsec;
+}
+
+static int64_t neut_core_v0_55_days_from_civil(int64_t y, int64_t m,
+                                               int64_t d) {
+  y -= m <= 2;
+  int64_t era = (y >= 0 ? y : y - 399) / 400;
+  int64_t yoe = y - era * 400;
+  int64_t doy = (153 * (m > 2 ? m - 3 : m + 9) + 2) / 5 + d - 1;
+  int64_t doe = yoe * 365 + yoe / 4 - yoe / 100 + doy;
+  return era * 146097 + doe - 719468;
+}
+
+static void neut_core_v0_55_civil_from_days(int64_t z, int64_t *y, int64_t *m,
+                                            int64_t *d) {
+  z += 719468;
+  int64_t era = (z >= 0 ? z : z - 146096) / 146097;
+  int64_t doe = z - era * 146097;
+  int64_t yoe = (doe - doe / 1460 + doe / 36524 - doe / 146096) / 365;
+  int64_t y0 = yoe + era * 400;
+  int64_t doy = doe - (365 * yoe + yoe / 4 - yoe / 100);
+  int64_t mp = (5 * doy + 2) / 153;
+  *d = doy - (153 * mp + 2) / 5 + 1;
+  *m = mp < 10 ? mp + 3 : mp - 9;
+  *y = y0 + (*m <= 2);
+}
+
+int64_t neut_core_v0_55_civil_to_utc(int64_t y, int64_t mo, int64_t d,
+                                     int64_t h, int64_t mi, int64_t s) {
+  return neut_core_v0_55_days_from_civil(y, mo, d) * 86400 + h * 3600 +
+         mi * 60 + s;
+}
+
+static int64_t neut_core_v0_55_tm_to_utc(const struct tm *tm) {
+  return neut_core_v0_55_civil_to_utc(
+      (int64_t)tm->tm_year + 1900, (int64_t)tm->tm_mon + 1, (int64_t)tm->tm_mday,
+      (int64_t)tm->tm_hour, (int64_t)tm->tm_min, (int64_t)tm->tm_sec);
+}
+
+typedef struct {
+  int64_t sec;
+  int64_t min;
+  int64_t hour;
+  int64_t mday;
+  int64_t mon;
+  int64_t year;
+  int64_t wday;
+  int64_t yday;
+  int64_t isdst;
+  int64_t gmtoff;
+  const char *zone;
+} neut_time_fields;
+
+__attribute__((always_inline))
+size_t neut_core_v0_55_sizeof_fields() {
+  return sizeof(neut_time_fields);
+}
+
+static void neut_core_v0_55_fill_utc_fields(int64_t epoch,
+                                            neut_time_fields *f) {
+  int64_t days = epoch >= 0 ? epoch / 86400 : (epoch - 86399) / 86400;
+  int64_t secs = epoch - days * 86400;
+  int64_t y, m, d;
+  neut_core_v0_55_civil_from_days(days, &y, &m, &d);
+  f->sec = secs % 60;
+  f->min = (secs / 60) % 60;
+  f->hour = secs / 3600;
+  f->mday = d;
+  f->mon = m;
+  f->year = y;
+  int64_t wd = (days % 7 + 4) % 7;
+  f->wday = wd < 0 ? wd + 7 : wd;
+  f->yday = days - neut_core_v0_55_days_from_civil(y, 1, 1);
+  f->isdst = 0;
+  f->gmtoff = 0;
+  f->zone = "UTC";
+}
+
+neut_time_fields *neut_core_v0_55_decompose(int64_t epoch, int64_t is_local,
+                                            neut_time_fields *f) {
+  if (is_local) {
+    time_t t = (time_t)epoch;
+    struct tm tm;
+    if (localtime_r(&t, &tm) == NULL) {
+      return NULL;
+    }
+    int64_t off = (int64_t)tm.tm_gmtoff;
+    neut_core_v0_55_fill_utc_fields(epoch + off, f);
+    f->isdst = (int64_t)tm.tm_isdst;
+    f->gmtoff = off;
+    f->zone = tm.tm_zone;
+    return f;
+  }
+  neut_core_v0_55_fill_utc_fields(epoch, f);
+  return f;
+}
+
+__attribute__((always_inline)) int64_t
+neut_core_v0_55_field_sec(neut_time_fields *f) { return f->sec; }
+__attribute__((always_inline)) int64_t
+neut_core_v0_55_field_min(neut_time_fields *f) { return f->min; }
+__attribute__((always_inline)) int64_t
+neut_core_v0_55_field_hour(neut_time_fields *f) { return f->hour; }
+__attribute__((always_inline)) int64_t
+neut_core_v0_55_field_mday(neut_time_fields *f) { return f->mday; }
+__attribute__((always_inline)) int64_t
+neut_core_v0_55_field_mon(neut_time_fields *f) { return f->mon; }
+__attribute__((always_inline)) int64_t
+neut_core_v0_55_field_year(neut_time_fields *f) { return f->year; }
+__attribute__((always_inline)) int64_t
+neut_core_v0_55_field_wday(neut_time_fields *f) { return f->wday; }
+__attribute__((always_inline)) int64_t
+neut_core_v0_55_field_yday(neut_time_fields *f) { return f->yday; }
+__attribute__((always_inline)) int64_t
+neut_core_v0_55_field_isdst(neut_time_fields *f) { return f->isdst; }
+__attribute__((always_inline)) int64_t
+neut_core_v0_55_field_gmtoff(neut_time_fields *f) { return f->gmtoff; }
+__attribute__((always_inline)) const char *
+neut_core_v0_55_field_zone(neut_time_fields *f) { return f->zone; }
+
+static int neut_core_v0_55_days_in_month(int64_t year, int month) {
+  static const int dim[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+  if (month < 1 || month > 12) {
+    return 0;
+  }
+  if (month == 2 && year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)) {
+    return 29;
+  }
+  return dim[month - 1];
+}
+
+int32_t neut_core_v0_55_parse_iso8601(const char *datetime_str,
+                                      struct timespec *ts) {
+  struct tm tm = {0};
+  char *rest = strptime(datetime_str, "%Y-%m-%dT%H:%M:%S", &tm);
+  if (rest == NULL) {
+    return -1;
+  }
+  if (tm.tm_mday < 1 ||
+      tm.tm_mday >
+          neut_core_v0_55_days_in_month((int64_t)tm.tm_year + 1900,
+                                        tm.tm_mon + 1) ||
+      tm.tm_hour < 0 || tm.tm_hour > 23 || tm.tm_min < 0 || tm.tm_min > 59 ||
+      tm.tm_sec < 0 || tm.tm_sec > 59) {
+    return -1;
+  }
+  int fraction = 0;
+  if (*rest == '.') {
+    rest++;
+    if (*rest < '0' || *rest > '9') {
+      return -1;
+    }
+    int digits = 0;
+    while (*rest >= '0' && *rest <= '9') {
+      if (digits < 9) {
+        fraction = fraction * 10 + (*rest - '0');
+      }
+      digits++;
+      rest++;
+    }
+    while (digits < 9) {
+      fraction *= 10;
+      digits++;
+    }
+  }
+  if (strcmp(rest, "Z") == 0) {
+    ts->tv_sec = (time_t)neut_core_v0_55_tm_to_utc(&tm);
+    ts->tv_nsec = fraction;
+    return 0;
+  } else {
+    int gmtoff_sign = 1;
+    char sign;
+    if (sscanf(rest, "%c", &sign) == 1) {
+      rest += 1;
+      if (sign == '+') {
+        gmtoff_sign = 1;
+      } else if (sign == '-') {
+        gmtoff_sign = -1;
+      } else {
+        return -1;
+      }
+    } else {
+      return -1;
+    }
+    struct tm mini_tm = {0};
+    char *trail = NULL;
+    trail = trail ?: strptime(rest, "%H:%M:%S", &mini_tm);
+    trail = trail ?: strptime(rest, "%H:%M", &mini_tm);
+    trail = trail ?: strptime(rest, "%H%M", &mini_tm);
+    trail = trail ?: strptime(rest, "%H", &mini_tm);
+    int gmtoff_abssec = 0;
+    if (trail == NULL || strcmp(trail, "") != 0) {
+      return -1;
+    } else if (mini_tm.tm_hour < 0 || mini_tm.tm_hour > 23 ||
+               mini_tm.tm_min < 0 || mini_tm.tm_min > 59 ||
+               mini_tm.tm_sec < 0 || mini_tm.tm_sec > 59) {
+      return -1;
+    } else {
+      gmtoff_abssec =
+          mini_tm.tm_hour * 3600 + mini_tm.tm_min * 60 + mini_tm.tm_sec;
+    }
+    int gmtoff_sec = gmtoff_sign * gmtoff_abssec;
+    ts->tv_sec = (time_t)neut_core_v0_55_tm_to_utc(&tm) - gmtoff_sec;
+    ts->tv_nsec = fraction;
+    return 0;
+  }
 }

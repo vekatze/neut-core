@@ -1,0 +1,128 @@
+import {
+  this.bool {and, bool, not},
+  this.box,
+  this.debug {panic},
+  this.list {List},
+  this.pair {Pair},
+  this.path {
+    append,
+    clean,
+    drop-last,
+    is-absolute,
+    split-extension,
+    take-last,
+  },
+  this.string {format, string},
+  this.string.eq {eq-string},
+  this.string.io {print-line},
+  this.unit {Unit, unit},
+}
+
+inline _ensure(message: &string, check: bool) -> unit {
+  if check {
+    Unit
+  } else {
+    panic(message)
+  }
+}
+
+define _expect-str(label: &string, got: string, want: &string) -> unit {
+  pin got = got;
+  if eq-string(got, want) {
+    Unit
+  } else {
+    pin m = format("{}: got \"{}\" want \"{}\"\n", List[*label, *got, *want]);
+    panic(m)
+  }
+}
+
+define _expect-clean(input: &string, want: &string) -> unit {
+  _expect-str("clean", clean(input), want)
+}
+
+define _expect-append(a: &string, b: &string, want: &string) -> unit {
+  _expect-str("append", append(a, b), want)
+}
+
+define _expect-split(input: &string, want-base: &string, want-ext: &string) -> unit {
+  let Pair(base, ext) = split-extension(input);
+  pin base = base;
+  pin ext = ext;
+  if and(eq-string(base, want-base), eq-string(ext, want-ext)) {
+    Unit
+  } else {
+    pin m = format("split-extension({}): got (\"{}\", \"{}\")\n", List[*input, *base, *ext]);
+    panic(m)
+  }
+}
+
+define _check-clean() -> unit {
+  _expect-clean("", ".");
+  _expect-clean(".", ".");
+  _expect-clean("./", ".");
+  _expect-clean("/", "/");
+  _expect-clean("a/b", "a/b");
+  _expect-clean("a//b", "a/b");
+  _expect-clean("a/./b", "a/b");
+  _expect-clean("/foo/bar", "/foo/bar");
+  _expect-clean("foo/", "foo");
+  _expect-clean("a/../b", "b");
+  _expect-clean("a/..", ".");
+  _expect-clean("a/b/../..", ".");
+  _expect-clean("/a/b/../c", "/a/c");
+  // ".." handling: absolute drops, relative keeps
+  _expect-clean("/../a", "/a");
+  _expect-clean("/..", "/");
+  _expect-clean("../a", "../a");
+  _expect-clean("a/../../b", "../b");
+  _expect-clean("../../x", "../../x")
+}
+
+define _check-absolute() -> unit {
+  _ensure("is-absolute /x\n", is-absolute("/x"));
+  _ensure("is-absolute /\n", is-absolute("/"));
+  _ensure("not is-absolute x\n", not(is-absolute("x")));
+  _ensure("not is-absolute (empty)\n", not(is-absolute("")))
+}
+
+define _check-append() -> unit {
+  _expect-append("a", "b", "a/b");
+  _expect-append("", "b", "b");
+  _expect-append("", "", ".");
+  _expect-append("", "a//b", "a/b");
+  _expect-append("a", "", "a");
+  _expect-append("a", "..", ".");
+  _expect-append("a", "../b", "b");
+  _expect-append("a/b", "../c", "a/c")
+}
+
+define _check-last() -> unit {
+  _expect-str("take-last", take-last("foo/bar"), "bar");
+  _expect-str("drop-last", drop-last("foo/bar"), "foo");
+  _expect-str("take-last", take-last("foo/"), ".");
+  _expect-str("drop-last", drop-last("foo/"), "foo");
+  _expect-str("take-last", take-last("foobar"), "foobar");
+  _expect-str("drop-last", drop-last("foobar"), ".");
+  _expect-str("take-last", take-last("a/b/c"), "c");
+  _expect-str("drop-last", drop-last("a/b/c"), "a/b")
+}
+
+define _check-split-extension() -> unit {
+  _expect-split("foo.txt", "foo", ".txt");
+  _expect-split("a/b.c", "a/b", ".c");
+  _expect-split("a.b/c", "a.b/c", "");
+  _expect-split("noext", "noext", "");
+  _expect-split("archive.tar.gz", "archive.tar", ".gz");
+  _expect-split(".bashrc", ".bashrc", "");
+  _expect-split(".gitignore", ".gitignore", "");
+  _expect-split(".config.json", ".config", ".json")
+}
+
+define zen() -> unit {
+  _check-clean();
+  _check-absolute();
+  _check-append();
+  _check-last();
+  _check-split-extension();
+  print-line("all path assertions passed")
+}

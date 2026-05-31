@@ -1,0 +1,43 @@
+import {
+  this.bool,
+  this.path.entity._dtype-constant {
+    dt-blk,
+    dt-chr,
+    dt-dir,
+    dt-fifo,
+    dt-lnk,
+    dt-reg,
+    dt-sock,
+  },
+}
+
+data dtype {
+| DT_BLK
+| DT_CHR
+| DT_DIR
+| DT_FIFO
+| DT_LNK
+| DT_REG
+| DT_SOCK
+| DT_UNKNOWN
+}
+
+define dtype-from-int(i: int8) -> dtype {
+  if eq-int8(i, dt-reg) {
+    DT_REG
+  } else-if eq-int8(i, dt-dir) {
+    DT_DIR
+  } else-if eq-int8(i, dt-blk) {
+    DT_BLK
+  } else-if eq-int8(i, dt-chr) {
+    DT_CHR
+  } else-if eq-int8(i, dt-fifo) {
+    DT_FIFO
+  } else-if eq-int8(i, dt-lnk) {
+    DT_LNK
+  } else-if eq-int8(i, dt-sock) {
+    DT_SOCK
+  } else {
+    DT_UNKNOWN
+  }
+}

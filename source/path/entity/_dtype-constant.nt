@@ -1,0 +1,51 @@
+foreign {
+  neut_core_v0_55_DT_BLK() -> int8,
+  neut_core_v0_55_DT_CHR() -> int8,
+  neut_core_v0_55_DT_DIR() -> int8,
+  neut_core_v0_55_DT_FIFO() -> int8,
+  neut_core_v0_55_DT_LNK() -> int8,
+  neut_core_v0_55_DT_REG() -> int8,
+  neut_core_v0_55_DT_SOCK() -> int8,
+}
+
+constant dt-blk: int8 {
+  magic opaque-value {
+    magic external neut_core_v0_55_DT_BLK()
+  }
+}
+
+constant dt-chr: int8 {
+  magic opaque-value {
+    magic external neut_core_v0_55_DT_CHR()
+  }
+}
+
+constant dt-dir: int8 {
+  magic opaque-value {
+    magic external neut_core_v0_55_DT_DIR()
+  }
+}
+
+constant dt-fifo: int8 {
+  magic opaque-value {
+    magic external neut_core_v0_55_DT_FIFO()
+  }
+}
+
+constant dt-lnk: int8 {
+  magic opaque-value {
+    magic external neut_core_v0_55_DT_LNK()
+  }
+}
+
+constant dt-reg: int8 {
+  magic opaque-value {
+    magic external neut_core_v0_55_DT_REG()
+  }
+}
+
+constant dt-sock: int8 {
+  magic opaque-value {
+    magic external neut_core_v0_55_DT_SOCK()
+  }
+}

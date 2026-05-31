@@ -3,16 +3,19 @@
 #define _DEFAULT_SOURCE
 #endif
 
+#include <dirent.h>
 #include <float.h>
 #include <limits.h>
 #include <math.h>
 #include <pthread.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/errno.h>
 #include <sys/fcntl.h>
+#include <sys/stat.h>
 #include <sys/uio.h>
 #include <sys/wait.h>
 #include <time.h>
@@ -864,4 +867,212 @@ int32_t neut_core_v0_55_parse_iso8601(const char *datetime_str,
     ts->tv_nsec = fraction;
     return 0;
   }
+}
+
+__attribute__((always_inline)) char *
+neut_core_v0_55_GET_DNAME(struct dirent *d) {
+  return d->d_name;
+}
+
+__attribute__((always_inline)) uint8_t
+neut_core_v0_55_GET_DTYPE(struct dirent *d) {
+  return d->d_type;
+}
+
+int64_t neut_core_v0_55_readdir(DIR *dir, struct dirent **entry) {
+  errno = 0;
+  *entry = readdir(dir);
+  if (*entry == NULL) {
+    return errno == 0 ? 0 : -1;
+  }
+  return 1;
+}
+
+__attribute__((always_inline)) uint8_t neut_core_v0_55_DT_FIFO() {
+  return DT_FIFO;
+}
+
+__attribute__((always_inline)) uint8_t neut_core_v0_55_DT_CHR() {
+  return DT_CHR;
+}
+
+__attribute__((always_inline)) uint8_t neut_core_v0_55_DT_DIR() {
+  return DT_DIR;
+}
+
+__attribute__((always_inline)) uint8_t neut_core_v0_55_DT_BLK() {
+  return DT_BLK;
+}
+
+__attribute__((always_inline)) uint8_t neut_core_v0_55_DT_REG() {
+  return DT_REG;
+}
+
+__attribute__((always_inline)) uint8_t neut_core_v0_55_DT_LNK() {
+  return DT_LNK;
+}
+
+__attribute__((always_inline)) uint8_t neut_core_v0_55_DT_SOCK() {
+  return DT_SOCK;
+}
+
+int64_t neut_core_v0_55_is_regular_file(const char *path) {
+  struct stat st;
+  if (stat(path, &st) != 0) {
+    return false;
+  }
+  return S_ISREG(st.st_mode) ? 1 : 0;
+}
+
+int64_t neut_core_v0_55_is_directory(const char *path) {
+  struct stat st;
+  if (stat(path, &st) != 0) {
+    return false;
+  }
+  return S_ISDIR(st.st_mode) ? 1 : 0;
+}
+
+int64_t neut_core_v0_55_mkdir(const char *path, mode_t mode) {
+  return (int64_t)mkdir(path, mode);
+}
+
+int64_t neut_core_v0_55_get_modification_time(const char *path, int64_t *sec,
+                                              int64_t *nsec) {
+  struct stat st;
+  if (stat(path, &st) != 0) {
+    return -1;
+  }
+
+  *sec = (int64_t)st.st_mtime;
+#if defined(__APPLE__)
+  *nsec = st.st_mtimespec.tv_nsec;
+#elif defined(st_mtim) ||                                                      \
+    (defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 200809L)
+  *nsec = st.st_mtim.tv_nsec;
+#else
+  *nsec = 0;
+#endif
+  return 0;
+}
+
+int64_t neut_core_v0_55_unlink(const char *path) {
+  return (int64_t)unlink(path);
+}
+
+int64_t neut_core_v0_55_rmdir(const char *path) {
+  return (int64_t)rmdir(path);
+}
+
+static int neut_core_v0_55_open_directory_nofollow(int parent_fd,
+                                                   const char *path) {
+  int flags = O_RDONLY;
+#ifdef O_CLOEXEC
+  flags |= O_CLOEXEC;
+#endif
+#ifdef O_DIRECTORY
+  flags |= O_DIRECTORY;
+#endif
+#ifdef O_NOFOLLOW
+  flags |= O_NOFOLLOW;
+#endif
+
+  int fd = parent_fd >= 0 ? openat(parent_fd, path, flags) : open(path, flags);
+  if (fd < 0) {
+    return -1;
+  }
+
+  struct stat st;
+  if (fstat(fd, &st) != 0) {
+    int saved_errno = errno;
+    close(fd);
+    errno = saved_errno;
+    return -1;
+  }
+  if (!S_ISDIR(st.st_mode)) {
+    close(fd);
+    errno = ENOTDIR;
+    return -1;
+  }
+
+  return fd;
+}
+
+static int neut_core_v0_55_remove_directory_contents(int fd) {
+  DIR *dir = fdopendir(fd);
+  if (dir == NULL) {
+    int saved_errno = errno;
+    close(fd);
+    errno = saved_errno;
+    return -1;
+  }
+
+  for (;;) {
+    errno = 0;
+    struct dirent *entry = readdir(dir);
+    if (entry == NULL) {
+      if (errno != 0) {
+        int saved_errno = errno;
+        closedir(dir);
+        errno = saved_errno;
+        return -1;
+      }
+      break;
+    }
+
+    if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
+      continue;
+    }
+
+    int dir_fd = dirfd(dir);
+    struct stat st;
+    if (fstatat(dir_fd, entry->d_name, &st, AT_SYMLINK_NOFOLLOW) != 0) {
+      int saved_errno = errno;
+      closedir(dir);
+      errno = saved_errno;
+      return -1;
+    }
+
+    if (S_ISDIR(st.st_mode)) {
+      int child_fd =
+          neut_core_v0_55_open_directory_nofollow(dir_fd, entry->d_name);
+      if (child_fd < 0) {
+        int saved_errno = errno;
+        closedir(dir);
+        errno = saved_errno;
+        return -1;
+      }
+      if (neut_core_v0_55_remove_directory_contents(child_fd) != 0) {
+        int saved_errno = errno;
+        closedir(dir);
+        errno = saved_errno;
+        return -1;
+      }
+      if (unlinkat(dir_fd, entry->d_name, AT_REMOVEDIR) != 0) {
+        int saved_errno = errno;
+        closedir(dir);
+        errno = saved_errno;
+        return -1;
+      }
+    } else if (unlinkat(dir_fd, entry->d_name, 0) != 0) {
+      int saved_errno = errno;
+      closedir(dir);
+      errno = saved_errno;
+      return -1;
+    }
+  }
+
+  return closedir(dir);
+}
+
+int64_t neut_core_v0_55_remove_directory(const char *path) {
+  int fd = neut_core_v0_55_open_directory_nofollow(-1, path);
+  if (fd < 0) {
+    return -1;
+  }
+
+  if (neut_core_v0_55_remove_directory_contents(fd) != 0) {
+    return -1;
+  }
+
+  return (int64_t)rmdir(path);
 }

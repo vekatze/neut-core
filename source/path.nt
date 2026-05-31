@@ -1,0 +1,171 @@
+import {
+  this.bool {bool, not, or},
+  this.box,
+  this.either {Left, Right},
+  this.list {Cons, List, Nil, all, filter, length, list, reverse},
+  this.pair {Pair, pair},
+  this.rune.eq {eq-rune, ne-rune},
+  this.string {
+    drop-end-N,
+    drop-while-end-N,
+    intercalate,
+    split,
+    string,
+    take-N,
+    take-end-N,
+    take-while-end-N,
+  },
+  this.string.eq {eq-string, eq-suffix},
+}
+
+constant separator-rune: rune {
+  `/`
+}
+
+constant separator: &string {
+  introspect operating-system {
+  | linux =>
+    "/"
+  | darwin =>
+    "/"
+  }
+}
+
+define is-absolute(path: &string) -> bool {
+  pin head = take-N(path, 1);
+  eq-string(head, separator)
+}
+
+define is-relative(path: &string) -> bool {
+  not(is-absolute(path))
+}
+
+define _clean-double-dots(is-abs: bool, components: list(string), acc: list(string)) -> list(string) {
+  match components {
+  | Nil =>
+    reverse(acc)
+  | Cons(c, cs) =>
+    let is-dotdot on c = eq-string(c, "..");
+    if is-dotdot {
+      match acc {
+      | Nil =>
+        if is-abs {
+          let _ = c;
+          _clean-double-dots(is-abs, cs, Nil)
+        } else {
+          _clean-double-dots(is-abs, cs, Cons(c, Nil))
+        }
+      | Cons(top, acc-rest) =>
+        let top-is-dotdot on top = eq-string(top, "..");
+        if top-is-dotdot {
+          _clean-double-dots(is-abs, cs, Cons(c, Cons(top, acc-rest)))
+        } else {
+          let _ = c;
+          let _ = top;
+          _clean-double-dots(is-abs, cs, acc-rest)
+        }
+      }
+    } else {
+      _clean-double-dots(is-abs, cs, Cons(c, acc))
+    }
+  }
+}
+
+define clean(path: &string) -> string {
+  let components = split(path, separator);
+  let components =
+    filter(components, (component) => {
+      all(List[
+        not(eq-string(component, "")),
+        not(eq-string(component, ".")),
+      ])
+    });
+  let components = _clean-double-dots(is-absolute(path), components, List[]);
+  if is-absolute(path) {
+    let len on components = length(components);
+    if eq-int(len, 0) {
+      *separator
+    } else {
+      intercalate(Cons(*"", components), *separator)
+    }
+  } else {
+    let len on components = length(components);
+    if eq-int(len, 0) {
+      *"."
+    } else {
+      intercalate(components, *separator)
+    }
+  }
+}
+
+define append(path1: &string, path2: &string) -> string {
+  if eq-string(path1, "") {
+    clean(path2)
+  } else {
+    pin tmp1 = this.string.append(path1, separator);
+    pin tmp2 = this.string.append(tmp1, path2);
+    clean(tmp2)
+  }
+}
+
+define take-last(path: &string) -> string {
+  // take-last("foo/") => "."
+  // take-last("foo/bar") => "bar"
+  // take-last("foobar") => "foobar"
+  // take-last("root/foo/") => "."
+  // take-last("root/foo/bar") => "bar"
+  pin tmp =
+    take-while-end-N(path, (r) => {
+      ne-rune(r, separator-rune)
+    });
+  clean(tmp)
+}
+
+define drop-last(path: &string) -> string {
+  // drop-last("foo/") => "foo"
+  // drop-last("foo/bar") => "foo"
+  // drop-last("foobar") => "."
+  // drop-last("root/foo/") => "root/foo"
+  // drop-last("root/foo/bar") => "root/foo"
+  pin tmp =
+    drop-while-end-N(path, (r) => {
+      ne-rune(r, separator-rune)
+    });
+  clean(tmp)
+}
+
+define _split-extension(path: &string, pivot: int) -> pair(string, string) {
+  pin file = drop-end-N(path, pivot);
+  let ext = take-end-N(path, pivot);
+  if or(or(eq-suffix(file, "."), eq-suffix(file, "/")), eq-string(file, "")) {
+    Pair(clean(path), *"")
+  } else {
+    Pair(clean(file), ext)
+  }
+}
+
+define split-extension(path: &string) -> pair(string, string) {
+  let dot-pos-or-none =
+    this.string.find-end(path, (r) => {
+      eq-rune(r, `.`)
+    });
+  let slash-pos-or-none =
+    this.string.find-end(path, (r) => {
+      eq-rune(r, `/`)
+    });
+  match dot-pos-or-none {
+  | Left(_) =>
+    Pair(clean(path), *"")
+  | Right(dot-pos) =>
+    match slash-pos-or-none {
+    | Left(_) =>
+      _split-extension(path, add-int(dot-pos, 1))
+    | Right(slash-pos) =>
+      if lt-int(slash-pos, dot-pos) {
+        Pair(clean(path), *"")
+      } else {
+        _split-extension(path, add-int(dot-pos, 1))
+      }
+    }
+  }
+}

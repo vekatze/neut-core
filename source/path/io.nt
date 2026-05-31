@@ -1,0 +1,186 @@
+import {
+  this.bool {and, bool},
+  this.c-int {c-int, from-c-int},
+  this.c-size {c-size},
+  this.c-string {c-string, from-string, to-string},
+  this.either {Left, Right},
+  this.list {Cons, Nil, filter, for-each, list},
+  this.memory.unsafe {load-int, load-pointer},
+  this.path,
+  this.path.entity.dirent {Dirent, dirent},
+  this.path.entity.dtype {dtype-from-int},
+  this.pointer {is-null-pointer, null-pointer},
+  this.string {append, string},
+  this.string.eq {eq-suffix, ne-string},
+  this.system {report-system-error, system},
+  this.time {make-time, time},
+  this.unit {Unit, unit},
+}
+
+foreign {
+  getcwd(pointer, c-size) -> pointer,
+  opendir(pointer) -> pointer,
+  closedir(pointer) -> c-int,
+  neut_core_v0_55_readdir(pointer, pointer) -> int,
+  neut_core_v0_55_GET_DNAME(pointer) -> pointer,
+  neut_core_v0_55_GET_DTYPE(pointer) -> int8,
+  neut_core_v0_55_mkdir(pointer, int) -> int,
+  neut_core_v0_55_get_modification_time(pointer, pointer, pointer) -> int,
+  neut_core_v0_55_unlink(pointer) -> int,
+  neut_core_v0_55_rmdir(pointer) -> int,
+  neut_core_v0_55_remove_directory(pointer) -> int,
+}
+
+data _directory {}
+
+define get-current-directory() -> system(string) {
+  let result = magic external getcwd(null-pointer, 0);
+  if is-null-pointer(result) {
+    report-system-error()
+  } else {
+    pin cwd = magic cast(pointer, c-string, result);
+    Right(to-string(cwd))
+  }
+}
+
+define _open-directory(p: &string) -> system(_directory) {
+  pin c-str = from-string(p);
+  let result = magic external opendir(magic cast(&c-string, pointer, c-str));
+  if is-null-pointer(result) {
+    report-system-error()
+  } else {
+    Right(magic cast(pointer, _directory, result))
+  }
+}
+
+define _read-directory(d: _directory) -> system(list(dirent)) {
+  let result-ptr = magic alloca(pointer, 1);
+  let status = magic external neut_core_v0_55_readdir(magic cast(_directory, pointer, d), result-ptr);
+  if lt-int(status, 0) {
+    report-system-error()
+  } else-if eq-int(status, 0) {
+    Right(Nil)
+  } else {
+    let result = load-pointer(result-ptr);
+    let name = to-string(magic cast(pointer, &c-string, magic external neut_core_v0_55_GET_DNAME(result)));
+    let kind = dtype-from-int(magic external neut_core_v0_55_GET_DTYPE(result));
+    try rest = _read-directory(d);
+    Right(Cons(Dirent{kind, name}, rest))
+  }
+}
+
+define _close-directory(d: _directory) -> system(unit) {
+  let result = magic external closedir(magic cast(_directory, pointer, d));
+  if eq-int(from-c-int(result), -1) {
+    report-system-error()
+  } else {
+    Right(Unit)
+  }
+}
+
+define read-directory(p: &string) -> system(list(dirent)) {
+  try dir = _open-directory(p);
+  let output-or-error = _read-directory(dir);
+  let close-result = _close-directory(dir);
+  match output-or-error {
+  | Left(e) =>
+    let _ = close-result;
+    Left(e)
+  | Right(output) =>
+    try _ = close-result;
+    Right(output)
+  }
+}
+
+define get-directory-contents(dir-path: &string) -> system(list(string)) {
+  try items = read-directory(dir-path);
+  let items =
+    filter(items, (i) => {
+      tie Dirent{name} = i;
+      and(ne-string(name, "."), ne-string(name, ".."))
+    });
+  Right(for-each(items, (i) => {
+    let Dirent{name} = i;
+    pin name = name;
+    if eq-suffix(dir-path, this.path.separator) {
+      append(dir-path, name)
+    } else {
+      pin parent = append(dir-path, this.path.separator);
+      append(parent, name)
+    }
+  }))
+}
+
+foreign {
+  neut_core_v0_55_is_regular_file(pointer) -> int,
+  neut_core_v0_55_is_directory(pointer) -> int,
+}
+
+inline is-regular-file(t: &string) -> bool {
+  pin c-str = from-string(t);
+  eq-int(magic external neut_core_v0_55_is_regular_file(magic cast(&c-string, pointer, c-str)), 1)
+}
+
+inline is-directory(t: &string) -> bool {
+  pin c-str = from-string(t);
+  eq-int(magic external neut_core_v0_55_is_directory(magic cast(&c-string, pointer, c-str)), 1)
+}
+
+define create-directory(t: &string)[mode := 0o777] -> system(unit) {
+  pin c-str = from-string(t);
+  let result = magic external neut_core_v0_55_mkdir(magic cast(&c-string, pointer, c-str), mode);
+  if lt-int(result, 0) {
+    report-system-error()
+  } else {
+    Right(Unit)
+  }
+}
+
+define unlink(path: &string) -> system(unit) {
+  pin c-str = from-string(path);
+  let result = magic external neut_core_v0_55_unlink(magic cast(&c-string, pointer, c-str));
+  if lt-int(result, 0) {
+    report-system-error()
+  } else {
+    Right(Unit)
+  }
+}
+
+define remove-empty-directory(path: &string) -> system(unit) {
+  pin c-str = from-string(path);
+  let result = magic external neut_core_v0_55_rmdir(magic cast(&c-string, pointer, c-str));
+  if lt-int(result, 0) {
+    report-system-error()
+  } else {
+    Right(Unit)
+  }
+}
+
+define remove-directory(dir-path: &string) -> system(unit) {
+  pin c-str = from-string(dir-path);
+  let result = magic external neut_core_v0_55_remove_directory(magic cast(&c-string, pointer, c-str));
+  if lt-int(result, 0) {
+    report-system-error()
+  } else {
+    Right(Unit)
+  }
+}
+
+define get-modification-time(path: &string) ->> system(time) {
+  pin c-str = from-string(path);
+  let sec = magic alloca(int, 1);
+  let nsec = magic alloca(int, 1);
+  let result =
+    magic external neut_core_v0_55_get_modification_time(
+      magic cast(&c-string, pointer, c-str),
+      sec,
+      nsec,
+    );
+  if lt-int(result, 0) {
+    report-system-error()
+  } else {
+    let sec = load-int(sec);
+    let nsec = load-int(nsec);
+    Right(make-time(sec, nsec))
+  }
+}

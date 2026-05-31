@@ -1,0 +1,59 @@
+import {
+  this.debug.dump {vet},
+  this.either {Left, Right},
+  this.list {for},
+  this.string,
+  this.string.io {print, print-line},
+  this.system {get-error-message, system},
+  this.unit {Unit, unit},
+  this.path {drop-last},
+  this.path.entity.dirent.show {show-dirent},
+  this.path.io {
+    get-current-directory,
+    get-modification-time,
+    is-directory,
+    is-regular-file,
+    read-directory,
+  },
+  this.time {to-ISO8601-local},
+}
+
+define test-zen() -> system(unit) {
+  try out = read-directory("/Users/");
+  for(out, (item) => {
+    pin t = show-dirent(item);
+    print-line(t);
+  });
+  try cwd = get-current-directory();
+  pin cwd = cwd;
+  pin p2 = drop-last(cwd);
+  print("→");
+  print(p2);
+  print-line("←");
+  Right(Unit)
+}
+
+define zen() -> unit {
+  match get-modification-time("/bin/ls") {
+  | Left(_) =>
+    Unit
+  | Right(t) =>
+    pin t = to-ISO8601-local(t, 8);
+    vet::(t);
+  };
+  pin b = is-regular-file("/bin/ls");
+  vet::(b);
+  pin b = is-regular-file("/bin/");
+  vet::(b);
+  pin b = is-directory("/etc");
+  vet::(b);
+  pin b = is-directory("/etc/");
+  vet::(b);
+  match test-zen() {
+  | Left(e) =>
+    pin e = get-error-message(e);
+    print-line(e);
+  | Right(_) =>
+    print("ok\n")
+  }
+}

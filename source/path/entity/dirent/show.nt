@@ -1,0 +1,16 @@
+import {
+  this.list {List},
+  this.path.entity.dirent {Dirent, dirent},
+  this.path.entity.dtype {DT_DIR},
+  this.string {format, string},
+}
+
+define show-dirent(e: dirent) -> string {
+  let Dirent{kind, name} = e;
+  match kind {
+  | DT_DIR =>
+    format("{}/", List[name])
+  | _ =>
+    format("{}", List[name])
+  }
+}

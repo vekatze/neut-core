@@ -1,0 +1,11 @@
+import {
+  this.path.entity.dtype {dtype},
+  this.string {string},
+}
+
+data dirent {
+| Dirent(
+    kind: dtype,
+    name: string,
+  )
+}

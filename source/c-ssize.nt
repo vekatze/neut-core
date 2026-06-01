@@ -3,12 +3,7 @@ import {
 }
 
 alias _c-ssize {
-  introspect target-arch {
-  | amd64 =>
-    int64
-  | arm64 =>
-    int64
-  }
+  int64
 }
 
 data c-ssize {
@@ -17,54 +12,29 @@ data c-ssize {
 
 inline from-c-ssize(x: c-ssize) -> int {
   let C-SSize(x) = x;
-  introspect target-arch {
-  | amd64 =>
-    x
-  | arm64 =>
-    x
-  }
+  x
 }
 
 inline add-c-ssize(x: c-ssize, y: c-ssize) -> c-ssize {
   let C-SSize(x) = x;
   let C-SSize(y) = y;
-  introspect target-arch {
-  | amd64 =>
-    C-SSize(add-int(x, y))
-  | arm64 =>
-    C-SSize(add-int(x, y))
-  }
+  C-SSize(add-int(x, y))
 }
 
 inline mul-c-ssize(x: c-ssize, y: c-ssize) -> c-ssize {
   let C-SSize(x) = x;
   let C-SSize(y) = y;
-  introspect target-arch {
-  | amd64 =>
-    C-SSize(mul-int(x, y))
-  | arm64 =>
-    C-SSize(mul-int(x, y))
-  }
+  C-SSize(mul-int(x, y))
 }
 
 inline lt-c-ssize(x: c-ssize, y: c-ssize) -> bool {
   let C-SSize(x) = x;
   let C-SSize(y) = y;
-  introspect target-arch {
-  | amd64 =>
-    lt-int(x, y)
-  | arm64 =>
-    lt-int(x, y)
-  }
+  lt-int(x, y)
 }
 
 inline eq-c-ssize(x: c-ssize, y: c-ssize) -> bool {
   let C-SSize(x) = x;
   let C-SSize(y) = y;
-  introspect target-arch {
-  | amd64 =>
-    eq-int(x, y)
-  | arm64 =>
-    eq-int(x, y)
-  }
+  eq-int(x, y)
 }

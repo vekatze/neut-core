@@ -1,10 +1,5 @@
 alias _c-offset {
-  introspect target-arch {
-  | amd64 =>
-    int64
-  | arm64 =>
-    int64
-  }
+  int64
 }
 
 data c-offset {

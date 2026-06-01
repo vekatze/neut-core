@@ -3,12 +3,7 @@ import {
 }
 
 alias _c-int {
-  introspect target-arch {
-  | amd64 =>
-    int32
-  | arm64 =>
-    int32
-  }
+  int32
 }
 
 data c-int {
@@ -18,152 +13,82 @@ data c-int {
 inline add-c-int(x: c-int, y: c-int) -> c-int {
   let C-Int(x) = x;
   let C-Int(y) = y;
-  introspect target-arch {
-  | amd64 =>
-    C-Int(add-int32(x, y))
-  | arm64 =>
-    C-Int(add-int32(x, y))
-  }
+  C-Int(add-int32(x, y))
 }
 
 inline sub-c-int(x: c-int, y: c-int) -> c-int {
   let C-Int(x) = x;
   let C-Int(y) = y;
-  introspect target-arch {
-  | amd64 =>
-    C-Int(sub-int32(x, y))
-  | arm64 =>
-    C-Int(sub-int32(x, y))
-  }
+  C-Int(sub-int32(x, y))
 }
 
 inline mul-c-int(x: c-int, y: c-int) -> c-int {
   let C-Int(x) = x;
   let C-Int(y) = y;
-  introspect target-arch {
-  | amd64 =>
-    C-Int(mul-int32(x, y))
-  | arm64 =>
-    C-Int(mul-int32(x, y))
-  }
+  C-Int(mul-int32(x, y))
 }
 
 inline div-c-int(x: c-int, y: c-int) -> c-int {
   let C-Int(x) = x;
   let C-Int(y) = y;
-  introspect target-arch {
-  | amd64 =>
-    C-Int(div-int32(x, y))
-  | arm64 =>
-    C-Int(div-int32(x, y))
-  }
+  C-Int(div-int32(x, y))
 }
 
 inline and-c-int(x: c-int, y: c-int) -> c-int {
   let C-Int(x) = x;
   let C-Int(y) = y;
-  introspect target-arch {
-  | amd64 =>
-    C-Int(and-int32(x, y))
-  | arm64 =>
-    C-Int(and-int32(x, y))
-  }
+  C-Int(and-int32(x, y))
 }
 
 inline or-c-int(x: c-int, y: c-int) -> c-int {
   let C-Int(x) = x;
   let C-Int(y) = y;
-  introspect target-arch {
-  | amd64 =>
-    C-Int(or-int32(x, y))
-  | arm64 =>
-    C-Int(or-int32(x, y))
-  }
+  C-Int(or-int32(x, y))
 }
 
 inline xor-c-int(x: c-int, y: c-int) -> c-int {
   let C-Int(x) = x;
   let C-Int(y) = y;
-  introspect target-arch {
-  | amd64 =>
-    C-Int(xor-int32(x, y))
-  | arm64 =>
-    C-Int(xor-int32(x, y))
-  }
+  C-Int(xor-int32(x, y))
 }
 
 inline eq-c-int(x: c-int, y: c-int) -> bool {
   let C-Int(x) = x;
   let C-Int(y) = y;
-  introspect target-arch {
-  | amd64 =>
-    eq-int32(x, y)
-  | arm64 =>
-    eq-int32(x, y)
-  }
+  eq-int32(x, y)
 }
 
 inline ne-c-int(x: c-int, y: c-int) -> bool {
   let C-Int(x) = x;
   let C-Int(y) = y;
-  introspect target-arch {
-  | amd64 =>
-    ne-int32(x, y)
-  | arm64 =>
-    ne-int32(x, y)
-  }
+  ne-int32(x, y)
 }
 
 inline lt-c-int(x: c-int, y: c-int) -> bool {
   let C-Int(x) = x;
   let C-Int(y) = y;
-  introspect target-arch {
-  | amd64 =>
-    lt-int32(x, y)
-  | arm64 =>
-    lt-int32(x, y)
-  }
+  lt-int32(x, y)
 }
 
 inline le-c-int(x: c-int, y: c-int) -> bool {
   let C-Int(x) = x;
   let C-Int(y) = y;
-  introspect target-arch {
-  | amd64 =>
-    le-int32(x, y)
-  | arm64 =>
-    le-int32(x, y)
-  }
+  le-int32(x, y)
 }
 
 inline gt-c-int(x: c-int, y: c-int) -> bool {
   let C-Int(x) = x;
   let C-Int(y) = y;
-  introspect target-arch {
-  | amd64 =>
-    gt-int32(x, y)
-  | arm64 =>
-    gt-int32(x, y)
-  }
+  gt-int32(x, y)
 }
 
 inline ge-c-int(x: c-int, y: c-int) -> bool {
   let C-Int(x) = x;
   let C-Int(y) = y;
-  introspect target-arch {
-  | amd64 =>
-    ge-int32(x, y)
-  | arm64 =>
-    ge-int32(x, y)
-  }
+  ge-int32(x, y)
 }
 
 inline from-c-int(x: c-int) -> int {
   let C-Int(x) = x;
-  introspect target-arch {
-  | amd64 =>
-    sext-int32-int(x)
-  | arm64 =>
-    sext-int32-int(x)
-  }
+  sext-int32-int(x)
 }

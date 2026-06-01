@@ -11,17 +11,10 @@ define panic<a>(t: &string) -> a {
   exit(1)
 }
 
-inline assert(message: &string, check: () -> bool) -> unit {
-  introspect build-mode {
-  | release =>
-    let _ = check;
-    let _ = message;
+define assert(message: &string, cond: bool) -> unit {
+  if cond {
     Unit
-  | default =>
-    if check() {
-      Unit
-    } else {
-      panic(message)
-    }
+  } else {
+    panic(message)
   }
 }

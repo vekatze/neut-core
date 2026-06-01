@@ -16,14 +16,9 @@ define-meta vet<a>(x: '&a)[ribbon-length := quote {50}] -> 'unit {
 }
 
 define-meta trace<a>(x: 'a) -> 'a {
-  introspect build-mode {
-  | release =>
+  quote {
+    let x = unquote {x};
+    let _ on x = unquote {vet(quote {x})};
     x
-  | default =>
-    quote {
-      let x = unquote {x};
-      let _ on x = unquote {vet(quote {x})};
-      x
-    }
   }
 }

@@ -3,7 +3,6 @@ import {
   this.box,
   this.c-size {C-Size},
   this.control {grow, loop},
-  this.debug,
   this.either {Left, Right, either, none},
   this.function {compose},
   this.int {abs-int, max-int, min-int},
@@ -12,7 +11,6 @@ import {
   this.memory.unsafe {free, load-int, load-pointer, memcpy, memmove, realloc, store-int, store-pointer},
   this.pair {Pair, pair},
   this.pointer {shift},
-  this.string,
   this.unit {Unit, unit},
   this.unsafe {cast},
   this.word,
@@ -457,9 +455,6 @@ inline for-N<a>(xs: &vector(a), f: (&a, int) -> unit) -> unit {
 }
 
 define for-each-vertical<a, b>(xs: vector(a), col-size: int, !f: (a, int) -> b) -> vector(b) {
-  assert "this.vector.for-each-vertical: col-size > 0" {
-    gt-int(col-size, 0)
-  };
   let _ on xs = _set-elem-type(xs, pack-type {b});
   let vec-size on xs = length(xs);
   let store-values =

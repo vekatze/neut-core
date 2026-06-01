@@ -3,7 +3,7 @@ import {
 }
 
 alias _c-long {
-  introspect architecture {
+  introspect target-arch {
   | amd64 =>
     int64
   | arm64 =>
@@ -18,7 +18,7 @@ data c-long {
 inline add-c-long(x: c-long, y: c-long) -> c-long {
   let C-Long(x) = x;
   let C-Long(y) = y;
-  introspect architecture {
+  introspect target-arch {
   | amd64 =>
     C-Long(add-int64(x, y))
   | arm64 =>
@@ -29,7 +29,7 @@ inline add-c-long(x: c-long, y: c-long) -> c-long {
 inline sub-c-long(x: c-long, y: c-long) -> c-long {
   let C-Long(x) = x;
   let C-Long(y) = y;
-  introspect architecture {
+  introspect target-arch {
   | amd64 =>
     C-Long(sub-int64(x, y))
   | arm64 =>
@@ -40,7 +40,7 @@ inline sub-c-long(x: c-long, y: c-long) -> c-long {
 inline mul-c-long(x: c-long, y: c-long) -> c-long {
   let C-Long(x) = x;
   let C-Long(y) = y;
-  introspect architecture {
+  introspect target-arch {
   | amd64 =>
     C-Long(mul-int64(x, y))
   | arm64 =>
@@ -51,7 +51,7 @@ inline mul-c-long(x: c-long, y: c-long) -> c-long {
 inline div-c-long(x: c-long, y: c-long) -> c-long {
   let C-Long(x) = x;
   let C-Long(y) = y;
-  introspect architecture {
+  introspect target-arch {
   | amd64 =>
     C-Long(div-int64(x, y))
   | arm64 =>
@@ -62,7 +62,7 @@ inline div-c-long(x: c-long, y: c-long) -> c-long {
 inline and-c-long(x: c-long, y: c-long) -> c-long {
   let C-Long(x) = x;
   let C-Long(y) = y;
-  introspect architecture {
+  introspect target-arch {
   | amd64 =>
     C-Long(and-int64(x, y))
   | arm64 =>
@@ -73,7 +73,7 @@ inline and-c-long(x: c-long, y: c-long) -> c-long {
 inline or-c-long(x: c-long, y: c-long) -> c-long {
   let C-Long(x) = x;
   let C-Long(y) = y;
-  introspect architecture {
+  introspect target-arch {
   | amd64 =>
     C-Long(or-int64(x, y))
   | arm64 =>
@@ -84,7 +84,7 @@ inline or-c-long(x: c-long, y: c-long) -> c-long {
 inline xor-c-long(x: c-long, y: c-long) -> c-long {
   let C-Long(x) = x;
   let C-Long(y) = y;
-  introspect architecture {
+  introspect target-arch {
   | amd64 =>
     C-Long(xor-int64(x, y))
   | arm64 =>
@@ -95,7 +95,7 @@ inline xor-c-long(x: c-long, y: c-long) -> c-long {
 inline eq-c-long(x: c-long, y: c-long) -> bool {
   let C-Long(x) = x;
   let C-Long(y) = y;
-  introspect architecture {
+  introspect target-arch {
   | amd64 =>
     eq-int64(x, y)
   | arm64 =>
@@ -106,7 +106,7 @@ inline eq-c-long(x: c-long, y: c-long) -> bool {
 inline ne-c-long(x: c-long, y: c-long) -> bool {
   let C-Long(x) = x;
   let C-Long(y) = y;
-  introspect architecture {
+  introspect target-arch {
   | amd64 =>
     ne-int64(x, y)
   | arm64 =>
@@ -117,7 +117,7 @@ inline ne-c-long(x: c-long, y: c-long) -> bool {
 inline lt-c-long(x: c-long, y: c-long) -> bool {
   let C-Long(x) = x;
   let C-Long(y) = y;
-  introspect architecture {
+  introspect target-arch {
   | amd64 =>
     lt-int64(x, y)
   | arm64 =>
@@ -128,7 +128,7 @@ inline lt-c-long(x: c-long, y: c-long) -> bool {
 inline le-c-long(x: c-long, y: c-long) -> bool {
   let C-Long(x) = x;
   let C-Long(y) = y;
-  introspect architecture {
+  introspect target-arch {
   | amd64 =>
     le-int64(x, y)
   | arm64 =>
@@ -139,7 +139,7 @@ inline le-c-long(x: c-long, y: c-long) -> bool {
 inline gt-c-long(x: c-long, y: c-long) -> bool {
   let C-Long(x) = x;
   let C-Long(y) = y;
-  introspect architecture {
+  introspect target-arch {
   | amd64 =>
     gt-int64(x, y)
   | arm64 =>
@@ -150,7 +150,7 @@ inline gt-c-long(x: c-long, y: c-long) -> bool {
 inline ge-c-long(x: c-long, y: c-long) -> bool {
   let C-Long(x) = x;
   let C-Long(y) = y;
-  introspect architecture {
+  introspect target-arch {
   | amd64 =>
     ge-int64(x, y)
   | arm64 =>
@@ -160,7 +160,7 @@ inline ge-c-long(x: c-long, y: c-long) -> bool {
 
 inline from-c-long(x: c-long) -> int {
   let C-Long(x) = x;
-  introspect architecture {
+  introspect target-arch {
   | amd64 =>
     x
   | arm64 =>

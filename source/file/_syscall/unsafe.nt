@@ -12,7 +12,7 @@ foreign {
 }
 
 define open(path-address: pointer, oflag: c-int, mode: c-int) -> c-int {
-  introspect operating-system {
+  introspect target-os {
   | darwin =>
     magic external open(path-address, oflag)(mode: c-int)
   | linux =>
@@ -21,7 +21,7 @@ define open(path-address: pointer, oflag: c-int, mode: c-int) -> c-int {
 }
 
 define read(fd: c-int, content-pointer: pointer, max-read-size: c-size) -> c-ssize {
-  introspect operating-system {
+  introspect target-os {
   | darwin =>
     magic external read(fd, content-pointer, max-read-size)
   | linux =>
@@ -30,7 +30,7 @@ define read(fd: c-int, content-pointer: pointer, max-read-size: c-size) -> c-ssi
 }
 
 define write(fd: c-int, content-pointer: pointer, len: c-size) -> c-ssize {
-  introspect operating-system {
+  introspect target-os {
   | darwin =>
     magic external write(fd, content-pointer, len)
   | linux =>
@@ -39,7 +39,7 @@ define write(fd: c-int, content-pointer: pointer, len: c-size) -> c-ssize {
 }
 
 define pipe(ptr: pointer) -> c-int {
-  introspect operating-system {
+  introspect target-os {
   | darwin =>
     magic external pipe(ptr)
   | linux =>

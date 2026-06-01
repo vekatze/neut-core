@@ -23,7 +23,7 @@ constant separator-rune: rune {
 }
 
 constant separator: &string {
-  introspect operating-system {
+  introspect target-os {
   | linux =>
     "/"
   | darwin =>

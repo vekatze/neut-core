@@ -10,7 +10,7 @@ constant _UINT32_MAX: int32 {
 }
 
 define random-int32(ubound: int32) -> int32 {
-  introspect operating-system {
+  introspect target-os {
   | darwin =>
     magic external arc4random_uniform(ubound)
   | linux =>

@@ -3,7 +3,7 @@ import {
 }
 
 alias _c-pid {
-  introspect architecture {
+  introspect target-arch {
   | amd64 =>
     int32
   | arm64 =>
@@ -18,7 +18,7 @@ data c-pid {
 inline eq-c-pid(x: c-pid, y: c-pid) -> bool {
   let C-PID(x) = x;
   let C-PID(y) = y;
-  introspect architecture {
+  introspect target-arch {
   | amd64 =>
     eq-int32(x, y)
   | arm64 =>

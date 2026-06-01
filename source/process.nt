@@ -27,7 +27,7 @@ foreign {
 }
 
 define exit<a>(status: c-int) -> a {
-  introspect operating-system {
+  introspect target-os {
   | darwin =>
     let _ = magic external exit(status);
     magic cast(type, a, pack-type {unit})

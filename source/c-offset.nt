@@ -1,5 +1,5 @@
 alias _c-offset {
-  introspect architecture {
+  introspect target-arch {
   | amd64 =>
     int64
   | arm64 =>

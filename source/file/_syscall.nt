@@ -10,7 +10,7 @@ foreign {
 }
 
 define close(fd: c-int) -> c-int {
-  introspect operating-system {
+  introspect target-os {
   | darwin =>
     magic external close(fd)
   | linux =>
@@ -19,7 +19,7 @@ define close(fd: c-int) -> c-int {
 }
 
 define lseek(fd: c-int, offset: c-offset, origin: c-int) -> c-offset {
-  introspect operating-system {
+  introspect target-os {
   | darwin =>
     magic external lseek(fd, offset, origin)
   | linux =>
@@ -28,7 +28,7 @@ define lseek(fd: c-int, offset: c-offset, origin: c-int) -> c-offset {
 }
 
 define dup2(fd1: c-int, fd2: c-int) -> c-int {
-  introspect operating-system {
+  introspect target-os {
   | darwin =>
     magic external dup2(fd1, fd2)
   | linux =>

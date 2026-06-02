@@ -31,12 +31,7 @@ define sleep(duration: float64) ->> system(unit) {
 }
 
 alias clockid-t {
-  introspect target-arch {
-  | arm64 =>
-    c-int
-  | amd64 =>
-    c-int
-  }
+  c-int
 }
 
 foreign {

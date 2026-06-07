@@ -11,6 +11,7 @@ import {
   this.pair {Pair, pair},
   this.platform {get-cpu-count},
   this.string {append, from-text, string, strip-prefix, strip-suffix},
+  this.string.builder {String},
   this.string.io {print, print-line},
   this.sync.mvar {make-mvar, receive, send},
   this.sync.pool {for-each-parallel},
@@ -107,6 +108,8 @@ define my-def-func<a>(t: a, x: int)[y: int := 42] -> pair(a, int) {
 }
 
 define zen() -> unit {
+  pin k = String["hello\n", "yo\n", "hey"];
+  print-line(k);
   pin v = this.int.parse.parse-octal("0o755");
   vet::(v);
   use-text(static "sample");

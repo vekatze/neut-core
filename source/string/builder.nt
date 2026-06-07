@@ -67,3 +67,16 @@ inline append-rune-UTF8(b: &string-builder, x: rune) -> unit {
 inline append-ansi(b: &string-builder, x: command) -> unit {
   this.binary.builder.append-ansi(_to-binary-builder-N(b), x)
 }
+
+rule-left String {
+  inline leaf(_: int) -> string-builder {
+    make-string-builder(64)
+  },
+  inline node-left(acc: string-builder, s: &string) -> string-builder {
+    let _ on acc = this.string.builder.append-string(acc, s);
+    acc
+  },
+  inline root(acc: string-builder) -> string {
+    extract(acc)
+  },
+}

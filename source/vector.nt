@@ -536,9 +536,7 @@ inline zip-fold<a, b, c>(xs: &vector(a), ys: &vector(b), base: c, f: (&a, &b, c,
 
 define from-list<a>(base-list: list(a)) -> vector(a) {
   let len on base-list = this.list.length(base-list);
-  this.list.fold-left(make(len), base-list, (acc, x) => {
-    push-back(acc, x)
-  })
+  this.list.fold-left(make(len), base-list, exact push-back)
 }
 
 define to-list<a>(xs: vector(a)) -> list(a) {

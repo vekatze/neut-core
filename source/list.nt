@@ -308,9 +308,7 @@ define zip<a, b>(xs: list(a), ys: list(b)) -> list(pair(a, b)) {
 }
 
 define zip-N<a, b>(xs: &list(a), ys: &list(b)) -> list(pair(&a, &b)) {
-  zip-with-N(xs, ys, (x, y) => {
-    Pair(x, y)
-  })
+  zip-with-N(xs, ys, exact Pair)
 }
 
 define unzip<a, b>(xs: list(pair(a, b))) -> pair(list(a), list(b)) {
@@ -422,9 +420,7 @@ define filter-some<a>(xs: list(?a)) -> list(a) {
 
 inline sum<a>(as-monoid: monoid(a), xs: list(a)) -> a {
   let Monoid{empty, combine} = as-monoid;
-  fold-left(empty, xs, (acc, x) => {
-    combine(acc, x)
-  })
+  fold-left(empty, xs, combine)
 }
 
 inline minimum<a>(as-ord: ord(a)) -> (list(a)) -> ?a {

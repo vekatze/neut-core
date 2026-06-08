@@ -6,10 +6,6 @@ import {
 inline as-monoid<a>() -> monoid(list(a)) {
   Monoid{
     empty := Nil,
-    combine := {
-      (x, y) => {
-        append(x, y)
-      }
-    },
+    combine := exact append,
   }
 }

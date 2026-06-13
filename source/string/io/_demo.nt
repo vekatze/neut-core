@@ -2,7 +2,7 @@ import {
   this.either {Left, Right},
   this.file.descriptor {stdin, stdout},
   this.string,
-  this.string.io {print, read, write},
+  this.string.io {print, print-line, read, write},
   this.system {get-error-message},
   this.unit {unit},
 }
@@ -13,7 +13,9 @@ define zen() -> unit {
   let _ = write(stdout, "hello.\n");
   let value = read(stdin, 10);
   match value {
-  | Right(_) =>
+  | Right(sample) =>
+    pin sample = sample;
+    print-line(sample);
     print("success\n")
   | Left(e) =>
     pin string = get-error-message(e);

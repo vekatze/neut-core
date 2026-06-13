@@ -1,0 +1,47 @@
+import {
+  this.binary {binary, from-list, length, take-N, with-slice},
+  this.binary.eq {eq-binary},
+  this.bool,
+  this.debug {assert},
+  this.list {List},
+  this.string {string},
+  this.string.io {print-line},
+  this.unit {unit},
+}
+
+define _expect-slice(label: &string, source: &binary, start: int, size: int, expected: &binary) -> unit {
+  with-slice(source, start, size, (slice) => {
+    lift {assert(label, eq-binary(slice, expected))}
+  })
+}
+
+define _expect-length(label: &string, source: &binary, start: int, size: int, expected: int) -> unit {
+  with-slice(source, start, size, (slice) => {
+    lift {assert(label, eq-int(length(slice), expected))}
+  })
+}
+
+define _expect-materialized-copy(label: &string, source: &binary, start: int, size: int, expected: &binary) -> unit {
+  with-slice(source, start, size, (slice) => {
+    lift {
+      pin copied = take-N(slice, length(slice));
+      assert(label, eq-binary(copied, expected))
+    }
+  })
+}
+
+define zen() -> unit {
+  pin source = from-list(List[0, 1, 2, 3, 4, 5]);
+  pin middle = from-list(List[2, 3, 4]);
+  pin prefix = from-list(List[0, 1]);
+  pin suffix = from-list(List[3, 4, 5]);
+  pin empty = from-list(List[]);
+  _expect-slice("binary.with-slice: middle\n", source, 2, 3, middle);
+  _expect-slice("binary.with-slice: negative start clamps to zero\n", source, -10, 2, prefix);
+  _expect-slice("binary.with-slice: oversized start clamps to end\n", source, 99, 4, empty);
+  _expect-slice("binary.with-slice: oversized size clamps to end\n", source, 3, 99, suffix);
+  _expect-slice("binary.with-slice: negative size clamps to zero\n", source, 2, -5, empty);
+  _expect-length("binary.with-slice: length\n", source, 1, 4, 4);
+  _expect-materialized-copy("binary.with-slice: materialized copy\n", source, 2, 3, middle);
+  print-line("all binary assertions passed")
+}

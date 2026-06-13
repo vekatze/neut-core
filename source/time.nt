@@ -9,7 +9,7 @@ import {
   this.int.show {show-int},
   this.list {List},
   this.memory {malloc},
-  this.memory.unsafe {store-int},
+  this.memory.unsafe {store-int, store-pointer},
   this.pointer {is-null-pointer, null-pointer, shift},
   this.string {format, string, take},
   this.system {report-system-error, system},
@@ -178,10 +178,14 @@ define _zeropad(x: int, format-string: &string) -> string {
   pin fmt = from-string(format-string);
   let fmt = magic cast(&c-string, pointer, fmt);
   let size = from-c-int(magic external snprintf(null-pointer, 0, fmt)(x: int));
-  let ptr = malloc(C-Size(add-int(size, add-int(1, mul-int(this.word.size, 2)))));
+  let u = this.word.size;
+  let u2 = mul-int(u, 2);
+  let u3 = mul-int(u, 3);
+  let ptr = malloc(C-Size(add-int(size, add-int(1, u3))));
   store-int(0, ptr);
-  store-int(size, shift(ptr, this.word.size));
-  let buffer = shift(ptr, mul-int(this.word.size, 2));
+  store-int(size, shift(ptr, u));
+  let buffer = shift(ptr, u3);
+  store-pointer(buffer, shift(ptr, u2));
   let _ = magic external sprintf(buffer, fmt)(x: int);
   magic cast(pointer, string, ptr)
 }

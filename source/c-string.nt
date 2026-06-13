@@ -1,7 +1,7 @@
 import {
   this.c-size {C-Size},
   this.memory {malloc},
-  this.memory.unsafe {free, memcpy, store-int, store-int8},
+  this.memory.unsafe {free, memcpy, store-int, store-int8, store-pointer},
   this.pointer {shift},
   this.string {byte-length, string},
   this.string.pointer,
@@ -52,10 +52,13 @@ define from-string(t: &string) -> c-string {
 define to-string(s: &c-string) -> string {
   let u = this.word.size;
   let u2 = mul-int(u, 2);
+  let u3 = mul-int(u, 3);
   let len = length(s);
-  let new-ptr = malloc(C-Size(add-int(len, u2)));
+  let new-ptr = malloc(C-Size(add-int(len, u3)));
   store-int(0, new-ptr);
   store-int(len, shift(new-ptr, u));
-  memcpy(shift(new-ptr, u2), magic cast(&c-string, pointer, s), len);
+  let content-ptr = shift(new-ptr, u3);
+  store-pointer(content-ptr, shift(new-ptr, u2));
+  memcpy(content-ptr, magic cast(&c-string, pointer, s), len);
   cast<pointer, string>(new-ptr)
 }

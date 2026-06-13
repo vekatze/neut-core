@@ -2,7 +2,7 @@ import {
   this.box,
   this.c-size {C-Size},
   this.memory {malloc},
-  this.memory.unsafe {store-int},
+  this.memory.unsafe {store-int, store-pointer},
   this.pointer {shift},
   this.show {Show, show},
   this.string {string},
@@ -17,12 +17,15 @@ foreign {
 define show-float(x: float, decimals: int) -> string {
   let size = 80;
   let add-newline = 0;
-  let string-ptr = malloc(C-Size(size));
   let word-size = this.word.size;
-  let buffer-ptr = shift(string-ptr, mul-int(word-size, 2));
+  let u2 = mul-int(word-size, 2);
+  let u3 = mul-int(word-size, 3);
+  let string-ptr = malloc(C-Size(add-int(size, u3)));
+  let buffer-ptr = shift(string-ptr, u3);
   let len = magic external neut_core_v0_55_build_fixed_buf(buffer-ptr, size, x, decimals, add-newline);
   store-int(0, string-ptr);
   store-int(len, shift(string-ptr, word-size));
+  store-pointer(buffer-ptr, shift(string-ptr, u2));
   magic cast(pointer, string, string-ptr)
 }
 

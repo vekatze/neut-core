@@ -6,7 +6,7 @@ import {
   this.either {Right, none},
   this.list {Cons, List, Nil, list, reverse},
   this.memory {malloc},
-  this.memory.unsafe {load-int, load-int8, store-int},
+  this.memory.unsafe {load-int, load-int8, load-pointer, store-int, store-pointer},
   this.pair {Pair, pair},
   this.pointer {shift},
   this.rune {to-int32},
@@ -43,11 +43,20 @@ inline byte-length(t: &string) -> int {
   this.binary.length(ptr)
 }
 
+inline with-byte-slice<a>(t: &string, start: int, size: int, f: (&string) -> +a) -> a {
+  let xs = magic cast(&string, &binary, t);
+  this.binary.with-slice(xs, start, size, (slice) => {
+    let slice = magic cast(&binary, &string, slice);
+    f(slice)
+  })
+}
+
 define _get-content-pointer(t: &string) -> pointer {
   let ptr = cast<&string, pointer>(t);
   let from = load-int(ptr);
   let u = this.word.size;
-  shift(ptr, add-int(mul-int(u, 2), from))
+  let content-ptr = load-pointer(shift(ptr, mul-int(u, 2)));
+  shift(content-ptr, from)
 }
 
 define join(xs: list(string)) -> string {
@@ -332,10 +341,12 @@ define pack(xs: &list(rune)) -> string {
   let len = _char-list-length(xs, 0);
   let u = this.word.size;
   let u2 = mul-int(u, 2);
-  let new-string = malloc(C-Size(add-int(len, u2)));
+  let u3 = mul-int(u, 3);
+  let new-string = malloc(C-Size(add-int(len, u3)));
   store-int(0, new-string);
   store-int(len, shift(new-string, u));
-  let content-ptr = shift(new-string, u2);
+  let content-ptr = shift(new-string, u3);
+  store-pointer(content-ptr, shift(new-string, u2));
   let loop =
     define self(offset: int, xs: &list(rune)) -> unit {
       case xs {
@@ -402,6 +413,13 @@ define _find-pivot-end(char-len: int, len: int, t: &string, index: int, char-cou
     let rune-size = _get-rune-size-end(t, index);
     _find-pivot-end(char-len, len, t, sub-int(index, rune-size), add-int(char-count, 1))
   }
+}
+
+inline with-slice<a>(t: &string, start: int, size: int, f: (&string) -> +a) -> a {
+  let len = byte-length(t);
+  let start-byte-index = _find-pivot(start, len, t, 0, 0);
+  let end-byte-index = _find-pivot(size, len, t, start-byte-index, 0);
+  with-byte-slice(t, start-byte-index, sub-int(end-byte-index, start-byte-index), f)
 }
 
 define take(t: string, n: int) -> string {

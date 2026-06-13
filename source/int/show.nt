@@ -3,7 +3,7 @@ import {
   this.c-int {c-int, from-c-int},
   this.c-size {C-Size, c-size},
   this.memory {malloc},
-  this.memory.unsafe {store-int},
+  this.memory.unsafe {store-int, store-pointer},
   this.pointer {null-pointer, shift},
   this.show {Show, show},
   this.string {string},
@@ -20,11 +20,15 @@ foreign {
 define _show(c-fmt: &string, x: int) -> string {
   let fmt = get-content-pointer(c-fmt);
   let size = from-c-int(magic external snprintf(null-pointer, C-Size(0), fmt)(x: int));
-  let ptr = malloc(C-Size(add-int(size, add-int(1, mul-int(this.word.size, 2)))));
+  let u = this.word.size;
+  let u2 = mul-int(u, 2);
+  let u3 = mul-int(u, 3);
+  let ptr = malloc(C-Size(add-int(size, add-int(1, u3))));
   store-int(0, ptr);
   // ignore the trailing null character
-  store-int(size, shift(ptr, this.word.size));
-  let buffer = shift(ptr, mul-int(this.word.size, 2));
+  store-int(size, shift(ptr, u));
+  let buffer = shift(ptr, u3);
+  store-pointer(buffer, shift(ptr, u2));
   let _ = magic external sprintf(buffer, fmt)(x: int);
   magic cast(pointer, string, ptr)
 }

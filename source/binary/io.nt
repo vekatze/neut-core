@@ -10,7 +10,7 @@ import {
   this.int.show {show-int},
   this.list {List},
   this.memory {malloc},
-  this.memory.unsafe {realloc, store-int},
+  this.memory.unsafe {load-pointer, realloc, store-int, store-pointer},
   this.pointer {extract, shift},
   this.string {format},
   this.system {Application-Error, report-system-error, system},
@@ -32,7 +32,11 @@ define _read-inner(
   buffer-size: int,
 ) ->> system(binary) {
   let u = this.word.size;
-  let content-ptr = shift(base-ptr, add-int(mul-int(u, 2), current-length));
+  let u2 = mul-int(u, 2);
+  let u3 = mul-int(u, 3);
+  let content-head-ptr = shift(base-ptr, u2);
+  let content-base-ptr = load-pointer(content-head-ptr);
+  let content-ptr = shift(content-base-ptr, current-length);
   let readable-size = sub-int(buffer-size, current-length);
   let C-SSize(bytes) = read(data-source, content-ptr, C-Size(readable-size));
   let next-length = add-int(current-length, bytes);
@@ -45,11 +49,12 @@ define _read-inner(
     _read-inner(data-source, base-ptr, next-length, buffer-size)
   } else {
     let new-buffer-size = mul-int(buffer-size, 2);
-    let new-size = add-int(mul-int(u, 2), new-buffer-size);
+    let new-size = add-int(u3, new-buffer-size);
     let new-base-ptr = realloc(base-ptr, C-Size(new-size));
     if eq-int(extract(new-base-ptr), 0) {
       report-system-error()
     } else {
+      store-pointer(shift(new-base-ptr, u3), shift(new-base-ptr, u2));
       _read-inner(data-source, new-base-ptr, next-length, new-buffer-size)
     }
   }
@@ -63,9 +68,12 @@ define read(from: descriptor, initial-buffer-size: int) ->> system(binary) {
     )))
   } else {
     let u = this.word.size;
-    let ptr-size = add-int(mul-int(u, 2), initial-buffer-size);
+    let u2 = mul-int(u, 2);
+    let u3 = mul-int(u, 3);
+    let ptr-size = add-int(u3, initial-buffer-size);
     let ptr = malloc(C-Size(ptr-size));
     store-int(0, ptr);
+    store-pointer(shift(ptr, u3), shift(ptr, u2));
     _read-inner(from, ptr, 0, initial-buffer-size)
   }
 }

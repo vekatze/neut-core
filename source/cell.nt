@@ -18,16 +18,12 @@ nominal {
   resource _cell,
 }
 
-data cell(_: type) {
-| _Cell(_cell)
-}
-
-inline _make<a>(val: a) -> cell(a) {
+inline _make<a>(val: a) -> _cell {
   let u = this.word.size;
   let ptr = malloc(C-Size(mul-int(this.word.size, 2)));
   store-int(cast-inline<a, int>(val), ptr);
   store-int(cast-inline<type, int>(pack-type {a}), shift(ptr, u));
-  _Cell(cast-inline<pointer, _cell>(ptr))
+  cast-inline<pointer, _cell>(ptr)
 }
 
 // (content, type)
@@ -43,13 +39,17 @@ resource _cell {
     unpack-type a = cast-inline<int, type>(load-int(shift(r, u)));
     let val: &a = cast-inline<int, &a>(load-int(r));
     let val-clone: a = _get-clone<a>(val);
-    cast-inline<cell(a), pointer>(_make<a>(val-clone))
+    cast-inline<_cell, pointer>(_make<a>(val-clone))
   },
   2,
 }
 
+data cell(_: type) {
+| _Cell(_cell)
+}
+
 inline make-cell<a>(initial-value: +a) -> cell(a) {
-  _make<a>(axiom-T(initial-value))
+  _Cell(_make<a>(axiom-T(initial-value)))
 }
 
 inline modify<a, b>(r: &cell(a), f: (+a) -> pair(+a, b)) -> b {

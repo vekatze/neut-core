@@ -21,18 +21,14 @@ nominal {
   resource _cell,
 }
 
-data cell(_: type) {
-| _Cell(_cell)
-}
-
-inline _new<a>(val: a) -> cell(a) {
+inline _new<a>(val: a) -> _cell {
   let mutex-size = from-c-size(THREAD_MUTEX_SIZE);
   let u = this.word.size;
   let ptr = malloc(C-Size(add-int(u, add-int(mutex-size, u))));
   store-int(cast<a, int>(val), ptr);
   let _ = thread-mutex-init(shift(ptr, u));
   store-int(cast<type, int>(pack-type {a}), shift(ptr, add-int(u, mutex-size)));
-  _Cell(cast-inline<pointer, _cell>(ptr))
+  cast-inline<pointer, _cell>(ptr)
 }
 
 // (content, thread-mutex, type)
@@ -55,13 +51,17 @@ resource _cell {
     thread-mutex-lock(mutex-ptr);
     let val-clone = magic call-type(pack-type {a}, 1, load-int(ch));
     thread-mutex-unlock(mutex-ptr);
-    cast<cell(a), pointer>(_new<a>(val-clone))
+    cast<_cell, pointer>(_new<a>(val-clone))
   },
   2,
 }
 
+data cell(_: type) {
+| _Cell(_cell)
+}
+
 inline make-cell<a>(initial-value: +a) -> cell(a) {
-  _new<a>(axiom-T(initial-value))
+  _Cell(_new<a>(axiom-T(initial-value)))
 }
 
 inline modify<a, b>(ch: &cell(a), f: (+a) -> pair(+a, b)) -> b {

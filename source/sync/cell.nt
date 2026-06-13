@@ -53,7 +53,7 @@ resource _cell {
     thread-mutex-unlock(mutex-ptr);
     cast<_cell, pointer>(_new<a>(val-clone))
   },
-  2,
+  -1,
 }
 
 data cell(_: type) {

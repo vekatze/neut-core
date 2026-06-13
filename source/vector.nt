@@ -8,7 +8,7 @@ import {
   this.int {abs-int, max-int, min-int},
   this.list {Cons, Nil, list},
   this.memory {malloc},
-  this.memory.unsafe {free, load-int, load-pointer, memcpy, memmove, realloc, store-int, store-pointer},
+  this.memory.unsafe {free, load-int, load-pointer, memmove, realloc, store-int, store-pointer},
   this.pair {Pair, pair},
   this.pointer {shift},
   this.unit {Unit, unit},
@@ -23,6 +23,18 @@ nominal {
 // (capacity: int, from: int, to: int, elem-type: type, ptr-to-buffer: pointer)
 data vector(_: type) {
 | _Vector(_vector-internal)
+}
+
+inline _header-size() -> int {
+  mul-int(this.word.size, 5)
+}
+
+inline _allocation-size(capacity: int) -> int {
+  add-int(_header-size(), mul-int(this.word.size, capacity))
+}
+
+inline _inline-buffer-ptr(vector-ptr: pointer) -> pointer {
+  shift(vector-ptr, _header-size())
 }
 
 inline get-capacity<a>(xs: &vector(a)) -> int {
@@ -77,6 +89,25 @@ define length<a>(xs: &vector(a)) -> int {
   sub-int(to, from)
 }
 
+inline with-slice<a, b>(xs: &vector(a), start: int, size: int, f: (&vector(a)) -> +b) -> b {
+  let len = length(xs);
+  let start = min-int(max-int(start, 0), len);
+  let size = min-int(max-int(size, 0), sub-int(len, start));
+  let from = _get-from(xs);
+  let slice-from = add-int(from, start);
+  let slice-to = add-int(slice-from, size);
+  let slice-ptr = magic alloca(int, 5);
+  let word-size = this.word.size;
+  store-int(get-capacity(xs), slice-ptr);
+  store-int(slice-from, shift(slice-ptr, word-size));
+  store-int(slice-to, shift(slice-ptr, mul-int(word-size, 2)));
+  store-int(cast<type, int>(_get-elem-type(xs)), shift(slice-ptr, mul-int(word-size, 3)));
+  store-pointer(_get-buffer-ptr(xs), shift(slice-ptr, mul-int(word-size, 4)));
+  let slice = cast<pointer, &vector(a)>(slice-ptr);
+  letbox-T result = f(slice);
+  result
+}
+
 inline _shift-from<a>(xs: &vector(a), offset: int) -> unit {
   let vector-ptr = cast<&vector(a), pointer>(xs);
   let from-ptr = shift(vector-ptr, mul-int(this.word.size, 1));
@@ -104,8 +135,8 @@ inline _set-to<a>(xs: &vector(a), to: int) -> unit {
 define make<a>(initial-capacity: int) -> vector(a) {
   let abs-capacity = abs-int(initial-capacity);
   let word-size = this.word.size;
-  let vector-ptr = malloc(C-Size(mul-int(word-size, 5)));
-  let buffer-ptr = malloc(C-Size(mul-int(word-size, abs-capacity)));
+  let vector-ptr = malloc(C-Size(_allocation-size(abs-capacity)));
+  let buffer-ptr = _inline-buffer-ptr(vector-ptr);
   let initial-cursor = match gt-int(initial-capacity, 0) {True => 0 | False => abs-capacity};
   store-int(abs-capacity, vector-ptr);
   store-int(initial-cursor, shift(vector-ptr, mul-int(word-size, 1)));
@@ -146,7 +177,6 @@ define _copy-vector-content<elem-type>(
 
 define _free-vector<a>(xs: &vector(a)) -> unit {
   let xs = cast<&vector(a), &vector(pointer)>(xs);
-  free(_get-buffer-ptr(xs));
   free(cast<&vector(pointer), pointer>(xs));
 }
 
@@ -182,10 +212,12 @@ define _extend-front<a>(xs: vector(a)) -> vector(a) {
   let old-capacity on xs = get-capacity(xs);
   let growth-base = max-int(old-capacity, 1);
   let new-capacity = mul-int(growth-base, _extend-factor);
-  let buffer-ptr on xs = _get-buffer-ptr(xs);
-  let new-buffer-ptr = realloc(buffer-ptr, C-Size(mul-int(this.word.size, new-capacity)));
+  let vector-ptr = cast<vector(a), pointer>(xs);
+  let new-vector-ptr = realloc(vector-ptr, C-Size(_allocation-size(new-capacity)));
+  let new-buffer-ptr = _inline-buffer-ptr(new-vector-ptr);
   let new-head-ptr = shift(new-buffer-ptr, mul-int(this.word.size, growth-base));
-  memcpy(new-head-ptr, new-buffer-ptr, mul-int(this.word.size, old-capacity));
+  memmove(new-head-ptr, new-buffer-ptr, mul-int(this.word.size, old-capacity));
+  let xs = cast<pointer, vector(a)>(new-vector-ptr);
   let _ on xs = {
     _shift-from(xs, growth-base);
     _shift-to(xs, growth-base);
@@ -198,8 +230,10 @@ define _extend-front<a>(xs: vector(a)) -> vector(a) {
 define _extend-back<a>(xs: vector(a)) -> vector(a) {
   let current-capacity on xs = max-int(get-capacity(xs), 1);
   let new-capacity = mul-int(current-capacity, _extend-factor);
-  let buffer-ptr on xs = _get-buffer-ptr(xs);
-  let new-buffer-ptr = realloc(buffer-ptr, C-Size(mul-int(this.word.size, new-capacity)));
+  let vector-ptr = cast<vector(a), pointer>(xs);
+  let new-vector-ptr = realloc(vector-ptr, C-Size(_allocation-size(new-capacity)));
+  let new-buffer-ptr = _inline-buffer-ptr(new-vector-ptr);
+  let xs = cast<pointer, vector(a)>(new-vector-ptr);
   let _ on xs = {
     _set-buffer-ptr(xs, new-buffer-ptr);
     _set-capacity(xs, new-capacity)
@@ -435,9 +469,8 @@ inline for<a>(xs: vector(a), !f: (a, int) -> unit) -> unit {
   let loop =
     define self(xs: vector(a), index: int) -> unit {
       if ge-int(index, len) {
-        let buffer-ptr on xs = _get-buffer-ptr(xs);
-        free(buffer-ptr);
-        free(cast<vector(a), pointer>(xs))
+        let xs = cast<vector(a), &vector(a)>(xs);
+        _free-vector(xs)
       } else {
         let element-ptr on xs = _get-element-pointer(xs, index);
         let old-value = cast<int, a>(load-int(element-ptr));
@@ -544,10 +577,8 @@ define to-list<a>(xs: vector(a)) -> list(a) {
   let loop =
     define self(xs: vector(a), index: int) -> list(a) {
       if ge-int(index, len) {
-        let buffer-ptr on xs = _get-buffer-ptr(xs);
-        let vector-ptr = cast<vector(a), pointer>(xs);
-        free(buffer-ptr);
-        free(vector-ptr);
+        let xs = cast<vector(a), &vector(a)>(xs);
+        _free-vector(xs);
         Nil
       } else {
         let value-ptr on xs = _get-element-pointer(xs, index);

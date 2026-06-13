@@ -1,18 +1,21 @@
 import {
   this.bool,
   this.box,
+  this.debug {assert, panic},
   this.either {Left, Right},
   this.int.io {print-int-line},
   this.list {List},
   this.pair {Pair},
   this.string {replicate, string},
   this.string.io {print, print-line},
-  this.unit {unit},
+  this.unit {Unit, unit},
   this.vector {
+    access,
     delete,
     drop,
     find,
     for,
+    for-each-N,
     from-list,
     length,
     make,
@@ -20,13 +23,102 @@ import {
     push-back,
     push-front,
     reverse,
+    take,
     to-list,
     vector,
+    with-slice,
     zip-with-N,
   },
 }
 
+define _expect-access(label: &string, xs: &vector(int), index: int, expected: int) -> unit {
+  match access(xs, index) {
+  | Left(_) =>
+    panic(label)
+  | Right(actual) =>
+    assert(label, eq-int(*actual, expected))
+  }
+}
+
+define _expect-no-access(label: &string, xs: &vector(int), index: int) -> unit {
+  match access(xs, index) {
+  | Left(_) =>
+    Unit
+  | Right(_) =>
+    panic(label)
+  }
+}
+
+define _expect-slice-3(label: &string, source: &vector(int), start: int, size: int, x0: int, x1: int, x2: int) -> unit {
+  with-slice(source, start, size, (slice) => {
+    lift {
+      assert(label, eq-int(length(slice), 3));
+      _expect-access(label, slice, 0, x0);
+      _expect-access(label, slice, 1, x1);
+      _expect-access(label, slice, 2, x2)
+    }
+  })
+}
+
+define _expect-slice-2(label: &string, source: &vector(int), start: int, size: int, x0: int, x1: int) -> unit {
+  with-slice(source, start, size, (slice) => {
+    lift {
+      assert(label, eq-int(length(slice), 2));
+      _expect-access(label, slice, 0, x0);
+      _expect-access(label, slice, 1, x1)
+    }
+  })
+}
+
+define _expect-empty-slice(label: &string, source: &vector(int), start: int, size: int) -> unit {
+  with-slice(source, start, size, (slice) => {
+    lift {
+      assert(label, eq-int(length(slice), 0));
+      _expect-no-access(label, slice, 0)
+    }
+  })
+}
+
+define _expect-materialized-copy(label: &string, source: &vector(int), start: int, size: int, x0: int, x1: int, x2: int) -> unit {
+  with-slice(source, start, size, (slice) => {
+    lift {
+      pin copied =
+        for-each-N(slice, (x, _) => {
+          *x
+        });
+      assert(label, eq-int(length(copied), 3));
+      _expect-access(label, copied, 0, x0);
+      _expect-access(label, copied, 1, x1);
+      _expect-access(label, copied, 2, x2)
+    }
+  })
+}
+
+define _assert-vector-layout() -> unit {
+  let xs: vector(int) = make(0);
+  let xs = push-back(xs, 20);
+  let xs = push-back(xs, 30);
+  let xs = push-back(xs, 40);
+  let xs = push-front(xs, 10);
+  let xs = push-back(xs, 50);
+  pin xs = push-front(xs, 0);
+  assert("vector inline buffer: length after growth\n", eq-int(length(xs), 6));
+  _expect-access("vector inline buffer: front growth\n", xs, 0, 0);
+  _expect-access("vector inline buffer: middle after growth\n", xs, 3, 30);
+  _expect-access("vector inline buffer: back growth\n", xs, 5, 50);
+  _expect-slice-3("vector.with-slice: middle\n", xs, 2, 3, 20, 30, 40);
+  _expect-slice-2("vector.with-slice: negative start clamps to zero\n", xs, -10, 2, 0, 10);
+  _expect-slice-3("vector.with-slice: oversized size clamps to end\n", xs, 3, 99, 30, 40, 50);
+  _expect-empty-slice("vector.with-slice: oversized start clamps to end\n", xs, 99, 4);
+  _expect-empty-slice("vector.with-slice: negative size clamps to zero\n", xs, 2, -5);
+  _expect-materialized-copy("vector.with-slice: materialized copy\n", xs, 2, 3, 20, 30, 40);
+  let shifted = drop(from-list(List[0, 1, 2, 3, 4, 5, 6]), 2);
+  pin shifted = take(shifted, 4);
+  _expect-slice-2("vector.with-slice: non-zero from\n", shifted, 1, 2, 3, 4)
+}
+
 define zen() -> unit {
+  _assert-vector-layout();
   // find
   let xs = this.vector.make(5);
   let xs = push-back(xs, 1);

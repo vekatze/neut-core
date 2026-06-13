@@ -57,7 +57,7 @@ resource _cell {
     thread-mutex-unlock(mutex-ptr);
     cast<cell(a), pointer>(_new<a>(val-clone))
   },
-  -1,
+  2,
 }
 
 inline make-cell<a>(initial-value: +a) -> cell(a) {

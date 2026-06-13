@@ -45,7 +45,7 @@ resource _cell {
     let val-clone: a = _get-clone<a>(val);
     cast-inline<cell(a), pointer>(_make<a>(val-clone))
   },
-  -1,
+  2,
 }
 
 inline make-cell<a>(initial-value: +a) -> cell(a) {

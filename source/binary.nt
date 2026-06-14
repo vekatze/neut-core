@@ -49,6 +49,10 @@ resource binary {
   -1,
 }
 
+inline from-blob(t: blob) -> &binary {
+  magic cast(blob, &binary, t)
+}
+
 define length(xs: &binary) -> int {
   let source-pointer = magic cast(&binary, pointer, xs);
   let u = this.word.size;

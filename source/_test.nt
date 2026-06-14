@@ -1,4 +1,5 @@
 import {
+  this.binary,
   this.bool {True, bool},
   this.box {axiom-T},
   this.cell,
@@ -16,7 +17,7 @@ import {
   this.sync.mvar {make-mvar, receive, send},
   this.sync.pool {for-each-parallel},
   this.unit {Unit, unit},
-  this.vector {Vector, product, push-back},
+  this.vector {Vector, product, push-back, vector},
 }
 
 data adt-with-text {
@@ -26,7 +27,7 @@ data adt-with-text {
 define use-text(t: text) -> unit {
   let t1 = t;
   let t2 = t;
-  let v = static "Hello, world!\n";
+  let v = "Hello, world!\n";
   print(from-text(v));
   print-line(from-text(t));
   print-line(from-text(t1));
@@ -112,7 +113,7 @@ define zen() -> unit {
   print-line(k);
   pin v = this.int.parse.parse-octal("0o755");
   vet::(v);
-  use-text(static "sample");
+  use-text("sample");
   let t1 = "abcde";
   let t2 = "abcdef";
   pin t3 = strip-prefix(t2, *t1);
@@ -154,7 +155,7 @@ define zen() -> unit {
   vet::(result);
   pin xs = this.vector.range(1, 10);
   vet::(xs);
-  let xs = this.vector.make(5);
+  let xs: vector(string) = this.vector.make(5);
   let xs = push-back(xs, *"a");
   let xs = push-back(xs, *"b");
   let !xs = trace::(push-back(xs, *"c"));

@@ -1,4 +1,5 @@
 import {
+  this.binary,
   this.ansi {Blue, Yellow},
   this.box,
   this.doc {Group, Nest, ansi-fg, ansi-reset, atom, break, join},

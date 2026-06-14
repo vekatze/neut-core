@@ -1,4 +1,5 @@
 import {
+  this.binary,
   this.box,
   this.list {List},
   this.pair {Pair, pair},

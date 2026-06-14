@@ -1,4 +1,5 @@
 import {
+  this.binary,
   this.box,
   this.either {Left, Right},
   this.rc {borrow, downgrade, new, upgrade},

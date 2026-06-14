@@ -1,4 +1,5 @@
 import {
+  this.binary,
   this.bool,
   this.debug {assert, panic},
   this.either {Left, Right},

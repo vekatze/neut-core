@@ -1,4 +1,5 @@
 import {
+  this.binary,
   this.bool {bool},
   this.file.buffer {buffer},
   this.string,

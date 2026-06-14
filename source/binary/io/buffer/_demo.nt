@@ -1,4 +1,5 @@
 import {
+  this.binary,
   this.binary.io.buffer {write-binary},
   this.either,
   this.file.buffer {flush, make-buffer},

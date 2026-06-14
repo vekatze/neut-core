@@ -1,4 +1,5 @@
 import {
+  this.binary,
   this.box,
   this.list {List, for-each-N, list},
   this.show {Show, show},

@@ -1,4 +1,5 @@
 import {
+  this.binary,
   this.bool {False, bool, not},
   this.c-int {C-Int, c-int, eq-c-int, ge-c-int},
   this.c-offset {C-Offset},

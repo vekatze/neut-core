@@ -1,4 +1,5 @@
 import {
+  this.binary,
   this.bool {and, any, bool},
   this.box,
   this.either {Left, Right, either},

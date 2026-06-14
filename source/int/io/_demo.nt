@@ -1,4 +1,5 @@
 import {
+  this.binary,
   this.int.io {print-int, print-int-line},
   this.string,
   this.string.io {print},

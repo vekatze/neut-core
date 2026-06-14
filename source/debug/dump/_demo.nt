@@ -1,4 +1,5 @@
 import {
+  this.binary,
   this.bool {True, bool},
   this.box,
   this.debug.dump {vet},

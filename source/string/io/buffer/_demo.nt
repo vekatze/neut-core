@@ -1,4 +1,5 @@
 import {
+  this.binary,
   this.either {Right},
   this.file.buffer {flush, make-buffer},
   this.file.descriptor {stdout},

@@ -1,4 +1,5 @@
 import {
+  this.binary,
   this.doc.show {show-doc},
   this.show.generic {to-doc},
   this.string,

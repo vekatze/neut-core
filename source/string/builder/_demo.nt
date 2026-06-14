@@ -1,4 +1,5 @@
 import {
+  this.binary,
   this.ansi {Blue, Bold, Color, Color-16, Foreground, Normal, Set-Style, Vivid},
   this.string,
   this.string.builder {

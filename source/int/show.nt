@@ -1,4 +1,5 @@
 import {
+  this.binary,
   this.box,
   this.c-int {c-int, from-c-int},
   this.c-size {C-Size, c-size},

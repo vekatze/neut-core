@@ -25,6 +25,7 @@
     ],
   },
   preset {
+    binary ["binary"],
     bool ["False", "True", "and", "bool", "not", "or"],
     box [],
     c-size [],

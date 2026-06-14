@@ -1,4 +1,5 @@
 import {
+  this.binary,
   this.box,
   this.c-int {from-c-int},
   this.either {Left, Right},

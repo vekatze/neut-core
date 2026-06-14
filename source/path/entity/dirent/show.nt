@@ -1,4 +1,5 @@
 import {
+  this.binary,
   this.list {List},
   this.path.entity.dirent {Dirent, dirent},
   this.path.entity.dtype {DT_DIR},

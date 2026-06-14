@@ -90,9 +90,9 @@ inline-meta _equal-vector<a>(xs: '&vector(a), ys: '&vector(a)) -> 'bool {
   }
 }
 
-inline _load-nth-element(data-arg-num: int, cursor: int, x: pointer) -> pointer {
+inline _load-nth-element(header: int, data-arg-num: int, cursor: int, x: pointer) -> pointer {
   let u = this.word.size;
-  let offset = mul-int(u, add-int(1, add-int(data-arg-num, cursor))); // x = (disc, data-args, cons-args)
+  let offset = mul-int(u, add-int(header, add-int(data-arg-num, cursor))); // x = (disc?, data-args, cons-args)
   let elem-ptr = shift(x, offset);
   load-pointer(elem-ptr)
 }
@@ -100,6 +100,7 @@ inline _load-nth-element(data-arg-num: int, cursor: int, x: pointer) -> pointer 
 inline-meta _eq-data-adt-cons<a>(
   cons-arg-types: list(type),
   data-arg-num: int,
+  header: int,
   cursor: int,
   x: '&a,
   y: '&a,
@@ -110,15 +111,16 @@ inline-meta _eq-data-adt-cons<a>(
   | Cons(t, rest) =>
     unpack-type t = t;
     quote {
+      let header-inner = unquote {promote {header}};
       let data-arg-num-inner = unquote {promote {data-arg-num}};
       let low-cursor = unquote {promote {cursor}};
       let x-ptr = cast<&a, pointer>(unquote {x});
       let y-ptr = cast<&a, pointer>(unquote {y});
-      let x-elem-ptr = cast<pointer, &t>(_load-nth-element(data-arg-num-inner, low-cursor, x-ptr));
-      let y-elem-ptr = cast<pointer, &t>(_load-nth-element(data-arg-num-inner, low-cursor, y-ptr));
+      let x-elem-ptr = cast<pointer, &t>(_load-nth-element(header-inner, data-arg-num-inner, low-cursor, x-ptr));
+      let y-elem-ptr = cast<pointer, &t>(_load-nth-element(header-inner, data-arg-num-inner, low-cursor, y-ptr));
       let is-eq = unquote {eq-data(quote {x-elem-ptr}, quote {y-elem-ptr})};
       if is-eq {
-        unquote {_eq-data-adt-cons(rest, data-arg-num, add-int(cursor, 1), x, y)}
+        unquote {_eq-data-adt-cons(rest, data-arg-num, header, add-int(cursor, 1), x, y)}
       } else {
         False
       }
@@ -141,7 +143,7 @@ inline-meta _eq-data-adt<a>(
     let ts = _meta-for-each(xts, exact _meta-snd);
     quote {
       if eq-int(unquote {promote {cons-index}}, unquote {disc}) {
-        unquote {_eq-data-adt-cons(ts, data-arg-num, 0, x, y)}
+        unquote {_eq-data-adt-cons(ts, data-arg-num, 1, 0, x, y)}
       } else {
         unquote {_eq-data-adt(rest, add-int(cons-index, 1), data-arg-num, disc, x, y)}
       }
@@ -149,21 +151,40 @@ inline-meta _eq-data-adt<a>(
   }
 }
 
+inline-meta _eq-data-single-cons<a>(
+  constructors: list(constructor),
+  data-arg-num: int,
+  x: '&a,
+  y: '&a,
+) -> 'bool {
+  match constructors {
+  | Nil =>
+    quote {True}
+  | Cons(Constructor(_, _, xts), _) =>
+    let ts = _meta-for-each(xts, exact _meta-snd);
+    _eq-data-adt-cons(ts, data-arg-num, 0, 0, x, y)
+  }
+}
+
 define-meta eq-data<a>(x: '&a, y: '&a) -> 'bool {
   let k = magic inspect-type(a);
   match k {
-  | Algebraic(_, data-args, cons-info) =>
+  | Algebraic(_, data-args, !cons-info) =>
     let data-arg-num = _meta-length(data-args);
-    quote {
-      let ptr-x = cast<&a, pointer>(unquote {x});
-      let ptr-y = cast<&a, pointer>(unquote {y});
-      let discriminant-x = load-int(ptr-x);
-      let discriminant-y = load-int(ptr-y);
-      if ne-int(discriminant-x, discriminant-y) {
-        False
-      } else {
-        unquote {_eq-data-adt(cons-info, 0, data-arg-num, quote {discriminant-x}, x, y)}
+    if gt-int(_meta-length(cons-info), 1) {
+      quote {
+        let ptr-x = cast<&a, pointer>(unquote {x});
+        let ptr-y = cast<&a, pointer>(unquote {y});
+        let discriminant-x = load-int(ptr-x);
+        let discriminant-y = load-int(ptr-y);
+        if ne-int(discriminant-x, discriminant-y) {
+          False
+        } else {
+          unquote {_eq-data-adt(cons-info, 0, data-arg-num, quote {discriminant-x}, x, y)}
+        }
       }
+    } else {
+      _eq-data-single-cons(cons-info, data-arg-num, x, y)
     }
   | Enum(_) =>
     quote {

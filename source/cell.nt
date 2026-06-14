@@ -1,62 +1,26 @@
 import {
   this.box {axiom-T},
-  this.c-size {C-Size},
-  this.memory {malloc},
   this.memory.unsafe {free, load-int, store-int},
   this.pair {Pair, pair},
   this.pointer {shift},
   this.unit {Unit, unit},
   this.unsafe {cast-inline},
-  this.word,
+  this.word {size},
 }
 
-inline _get-clone<a>(x: &a) -> a {
-  *x
-}
-
-nominal {
-  resource _cell,
-}
-
-inline _make<a>(val: a) -> _cell {
-  let u = this.word.size;
-  let ptr = malloc(C-Size(mul-int(this.word.size, 2)));
-  store-int(cast-inline<a, int>(val), ptr);
-  store-int(cast-inline<type, int>(pack-type {a}), shift(ptr, u));
-  cast-inline<pointer, _cell>(ptr)
-}
-
-// (content, type)
-resource _cell {
-  (r: pointer) => {
-    let u = this.word.size;
-    unpack-type a = cast-inline<int, type>(load-int(shift(r, u)));
-    let _: a = cast-inline<int, a>(load-int(r));
-    free(r)
-  },
-  (r: pointer) => {
-    let u = this.word.size;
-    unpack-type a = cast-inline<int, type>(load-int(shift(r, u)));
-    let val: &a = cast-inline<int, &a>(load-int(r));
-    let val-clone: a = _get-clone<a>(val);
-    cast-inline<_cell, pointer>(_make<a>(val-clone))
-  },
-  2,
-}
-
-data cell(_: type) {
-| _Cell(_cell)
+data-raw cell(a) {
+| _Cell(a)
 }
 
 inline make-cell<a>(initial-value: +a) -> cell(a) {
-  _Cell(_make<a>(axiom-T(initial-value)))
+  _Cell(axiom-T(initial-value))
 }
 
 inline modify<a, b>(r: &cell(a), f: (+a) -> pair(+a, b)) -> b {
   let r = cast-inline<&cell(a), pointer>(r);
-  let orig-val = cast-inline<int, +a>(load-int(r));
+  let orig-val = cast-inline<int, +a>(load-int(shift(r, size)));
   let Pair(new-val, result) = f(orig-val);
-  store-int(cast-inline<+a, int>(new-val), r);
+  store-int(cast-inline<+a, int>(new-val), shift(r, size));
   result
 }
 
@@ -68,7 +32,7 @@ inline mutate<a>(r: &cell(a), f: (+a) -> +a) -> unit {
 
 inline borrow<a, b>(r: &cell(a), f: (&a) -> +b) -> b {
   let r = cast-inline<&cell(a), pointer>(r);
-  let orig-val = cast-inline<int, &a>(load-int(r));
+  let orig-val = cast-inline<int, &a>(load-int(shift(r, size)));
   letbox-T result = f(orig-val);
   result
 }
@@ -82,7 +46,7 @@ inline clone<a>(r: &cell(a)) -> a {
 inline extract<a>(c: cell(a)) -> +a {
   letbox-T result on c = {
     let r = cast-inline<&cell(a), pointer>(c);
-    cast-inline<int, ++a>(load-int(r))
+    cast-inline<int, ++a>(load-int(shift(r, size)))
   };
   free(cast-inline<cell(a), pointer>(c));
   result

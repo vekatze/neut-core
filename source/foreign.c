@@ -464,8 +464,37 @@ static int64_t neut_core_v0_55_parse_hex_double(const char *str, int64_t length,
   return 1;
 }
 
+static int neut_core_v0_55_match(const char *str, int64_t length, int64_t start,
+                                 const char *word, int64_t word_len) {
+  return start + word_len == length &&
+         memcmp(str + start, word, (size_t)word_len) == 0;
+}
+
+static int64_t neut_core_v0_55_parse_special_double(const char *str,
+                                                    int64_t length,
+                                                    double *out_value) {
+  int64_t i = 0;
+  int negative = 0;
+  if (i < length && str[i] == '-') {
+    negative = 1;
+    i++;
+  }
+  if (neut_core_v0_55_match(str, length, i, "infinity", 8)) {
+    *out_value = negative ? -INFINITY : INFINITY;
+    return 1;
+  }
+  if (!negative && neut_core_v0_55_match(str, length, i, "nan", 3)) {
+    *out_value = NAN;
+    return 1;
+  }
+  return -1;
+}
+
 int64_t neut_core_v0_55_parse_double(const char *str, int64_t length,
                                      double *out_value) {
+  if (neut_core_v0_55_parse_special_double(str, length, out_value) > 0) {
+    return 1;
+  }
   if (neut_core_v0_55_parse_hex_double(str, length, out_value) > 0) {
     return 1;
   }
@@ -548,7 +577,17 @@ size_t neut_core_v0_55_build_fixed_buf(char *buf, size_t cap, double value,
     return 0;
   }
 
-  int n = snprintf(buf, cap, "%.*f", decimals, value);
+  int n;
+  if (isnan(value)) {
+    n = snprintf(buf, cap, "%s", "nan");
+  } else if (isinf(value)) {
+    n = snprintf(buf, cap, "%s", value < 0 ? "-infinity" : "infinity");
+  } else {
+    n = snprintf(buf, cap, "%.*f", decimals, value);
+    if (n >= 0 && (size_t)n >= cap) {
+      n = snprintf(buf, cap, "%.*e", decimals, value);
+    }
+  }
   if (n < 0 || (size_t)n >= cap) {
     errno = EOVERFLOW;
     return 0;

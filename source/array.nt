@@ -361,6 +361,27 @@ define access<a>(xs: &array(a), i: int) ->> ?&a {
   }
 }
 
+define _swap-unchecked<a>(xs: array(a), i: int, j: int) -> array(a) {
+  let value-i-ptr on xs = _get-element-pointer(xs, i);
+  let value-j-ptr on xs = _get-element-pointer(xs, j);
+  let value-i = load-int(value-i-ptr);
+  let value-j = load-int(value-j-ptr);
+  store-int(value-j, value-i-ptr);
+  store-int(value-i, value-j-ptr);
+  xs
+}
+
+define swap<a>(xs: array(a), i: int, j: int) -> array(a) {
+  let len on xs = length(xs);
+  let b1 = and(le-int(0, i), lt-int(i, len));
+  let b2 = and(le-int(0, j), lt-int(j, len));
+  if and(b1, b2) {
+    _swap-unchecked(xs, i, j)
+  } else {
+    xs
+  }
+}
+
 define to-list<a>(xs: array(a)) -> list(a) {
   let len on xs = length(xs);
   let loop =

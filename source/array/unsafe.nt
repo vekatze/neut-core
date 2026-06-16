@@ -1,0 +1,11 @@
+import {
+  this.array,
+}
+
+constant access-unchecked: _ {
+  this.array._access-unchecked
+}
+
+constant swap-unchecked: _ {
+  this.array._swap-unchecked
+}

@@ -1,8 +1,7 @@
 import {
-  this.bool {False, True, and},
+  this.bool {False, True, and, bool},
   this.box,
   this.c-size {C-Size},
-  this.control {discard},
   this.either {Right, none},
   this.int {abs-int, max-int, min-int},
   this.list {Cons, Nil, list},
@@ -19,13 +18,13 @@ nominal {
   resource _array-internal,
 }
 
-// (capacity: int, from: int, to: int, elem-type: type, stride: int, ptr-to-buffer: pointer)
+// (capacity: int, from: int, to: int, elem-type: type, ptr-to-buffer: pointer)
 data array(_: type) {
 | _Array(_array-internal)
 }
 
 inline _header-size() -> int {
-  mul-int(this.word.size, 6)
+  mul-int(this.word.size, 5)
 }
 
 inline _allocation-size(capacity: int, stride: int) -> int {
@@ -41,7 +40,7 @@ define get-capacity<a>(xs: &array(a)) -> int {
   load-int(array-ptr)
 }
 
-define _get-from<a>(xs: &array(a)) -> int {
+inline _get-from<a>(xs: &array(a)) -> int {
   let array-ptr = cast-inline<&array(a), pointer>(xs);
   load-int(shift(array-ptr, this.word.size))
 }
@@ -56,19 +55,18 @@ inline _get-elem-type<a>(xs: &array(a)) -> type {
   cast-inline<int, type>(load-int(shift(array-ptr, mul-int(this.word.size, 3))))
 }
 
-define _get-stride<a>(xs: &array(a)) -> int {
-  let array-ptr = cast-inline<&array(a), pointer>(xs);
-  load-int(shift(array-ptr, mul-int(this.word.size, 4)))
+inline-meta _get-stride<a>() -> 'int {
+  quote {magic call-type(pack-type {a}, 2, null-pointer)}
 }
 
-define _get-buffer-ptr<a>(xs: &array(a)) -> pointer {
+inline _get-buffer-ptr<a>(xs: &array(a)) -> pointer {
   let array-ptr = cast-inline<&array(a), pointer>(xs);
-  load-pointer(shift(array-ptr, mul-int(this.word.size, 5)))
+  load-pointer(shift(array-ptr, mul-int(this.word.size, 4)))
 }
 
 define _set-buffer-ptr<a>(xs: &array(a), buffer-ptr: pointer) -> unit {
   let array-ptr = cast-inline<&array(a), pointer>(xs);
-  store-pointer(buffer-ptr, shift(array-ptr, mul-int(this.word.size, 5)))
+  store-pointer(buffer-ptr, shift(array-ptr, mul-int(this.word.size, 4)))
 }
 
 define _set-capacity<a>(xs: &array(a), capacity: int) -> unit {
@@ -76,9 +74,15 @@ define _set-capacity<a>(xs: &array(a), capacity: int) -> unit {
   store-int(capacity, array-ptr)
 }
 
-define _get-element-pointer<a>(xs: &array(a), index: int) -> pointer {
+inline _get-element-pointer<a>(xs: &array(a), index: int) -> pointer {
   let from = _get-from(xs);
-  let stride = _get-stride(xs);
+  let stride = _get-stride<a>::();
+  let buffer-ptr = _get-buffer-ptr(xs);
+  shift(buffer-ptr, mul-int(stride, add-int(from, index)))
+}
+
+define _get-element-pointer-with-stride(xs: &array(pointer), stride: int, index: int) -> pointer {
+  let from = _get-from(xs);
   let buffer-ptr = _get-buffer-ptr(xs);
   shift(buffer-ptr, mul-int(stride, add-int(from, index)))
 }
@@ -101,12 +105,11 @@ define setup-slice-ptr<a>(xs: &array(a), start: int, size: int, slice-ptr: point
   store-int(slice-from, shift(slice-ptr, word-size));
   store-int(slice-to, shift(slice-ptr, mul-int(word-size, 2)));
   store-int(cast-inline<type, int>(_get-elem-type(xs)), shift(slice-ptr, mul-int(word-size, 3)));
-  store-int(_get-stride(xs), shift(slice-ptr, mul-int(word-size, 4)));
-  store-pointer(_get-buffer-ptr(xs), shift(slice-ptr, mul-int(word-size, 5)));
+  store-pointer(_get-buffer-ptr(xs), shift(slice-ptr, mul-int(word-size, 4)));
 }
 
 inline with-slice<a, b>(xs: &array(a), start: int, size: int, f: (&array(a)) -> +b) -> b {
-  let slice-ptr = magic alloca(int, 6);
+  let slice-ptr = magic alloca(int, 5);
   setup-slice-ptr(xs, start, size, slice-ptr);
   let slice = cast-inline<pointer, &array(a)>(slice-ptr);
   letbox-T result = f(slice);
@@ -120,7 +123,7 @@ define _shift-from<a>(xs: &array(a), offset: int) -> unit {
   store-int(add-int(current-value, offset), from-ptr)
 }
 
-define _shift-to<a>(xs: &array(a), offset: int) -> unit {
+inline _shift-to<a>(xs: &array(a), offset: int) -> unit {
   let array-ptr = cast-inline<&array(a), pointer>(xs);
   let to-ptr = shift(array-ptr, mul-int(this.word.size, 2));
   let current-value = load-int(to-ptr);
@@ -140,8 +143,7 @@ define _make-raw<a>(capacity: int, initial-cursor: int, elem-type: type, stride:
   store-int(initial-cursor, shift(array-ptr, mul-int(word-size, 1)));
   store-int(initial-cursor, shift(array-ptr, mul-int(word-size, 2)));
   store-int(cast-inline<type, int>(elem-type), shift(array-ptr, mul-int(word-size, 3)));
-  store-int(stride, shift(array-ptr, mul-int(word-size, 4)));
-  store-pointer(buffer-ptr, shift(array-ptr, mul-int(word-size, 5)));
+  store-pointer(buffer-ptr, shift(array-ptr, mul-int(word-size, 4)));
   _Array(magic cast(pointer, _array-internal, array-ptr))
 }
 
@@ -149,7 +151,7 @@ define _make-inner<a>(initial-capacity: int) -> array(a) {
   let initial-capacity = initial-capacity;
   let abs-capacity = abs-int(initial-capacity);
   let initial-cursor = match gt-int(initial-capacity, 0) {True => 0 | False => abs-capacity};
-  let stride = magic call-type(pack-type {a}, 2, null-pointer);
+  let stride = _get-stride<a>::();
   _make-raw<a>(abs-capacity, initial-cursor, pack-type {a}, stride)
 }
 
@@ -158,38 +160,37 @@ inline-meta make<a>(initial-capacity: 'int) -> 'array(a) {
   quote {_make-inner(unquote {initial-capacity})}
 }
 
-define _discard-array-content<a>(xs: &array(pointer), elem-type: type, index: int, len: int) -> unit {
+define _discard-array-content<a>(xs: &array(pointer), elem-type: type, stride: int, index: int, len: int) -> unit {
   if eq-int(index, len) {
     Unit
   } else {
-    let element-ptr = _get-element-pointer(xs, index);
-    let stride = _get-stride(xs);
+    let element-ptr = _get-element-pointer-with-stride(xs, stride, index);
     let value-ptr = malloc(C-Size(stride));
     memcpy(value-ptr, element-ptr, stride);
     let value = cast<pointer, a>(value-ptr);
-    discard(value);
-    _discard-array-content<a>(xs, elem-type, add-int(index, 1), len)
+    let _ = value;
+    _discard-array-content<a>(xs, elem-type, stride, add-int(index, 1), len)
   }
 }
 
 define _copy-array-content<elem-type>(
   xs: &array(pointer),
   ys: &array(pointer),
+  stride: int,
   index: int,
   len: int,
 ) -> unit {
   if eq-int(index, len) {
     Unit
   } else {
-    let source-ptr = _get-element-pointer(xs, index);
-    let target-ptr = _get-element-pointer(ys, index);
-    let stride = _get-stride(xs);
+    let source-ptr = _get-element-pointer-with-stride(xs, stride, index);
+    let target-ptr = _get-element-pointer-with-stride(ys, stride, index);
     let original = cast-inline<pointer, &elem-type>(source-ptr);
     let clone = *original;
     let clone-ptr = cast<elem-type, pointer>(clone);
     memcpy(target-ptr, clone-ptr, stride);
     free(clone-ptr);
-    _copy-array-content<elem-type>(xs, ys, add-int(index, 1), len)
+    _copy-array-content<elem-type>(xs, ys, stride, add-int(index, 1), len)
   }
 }
 
@@ -202,16 +203,17 @@ resource _array-internal {
   (xs: &array(pointer)) => {
     let len = length(xs);
     unpack-type elem-type = _get-elem-type(xs);
-    _discard-array-content<elem-type>(xs, pack-type {elem-type}, 0, len);
+    let stride = magic call-type(pack-type {elem-type}, 2, null-pointer);
+    _discard-array-content<elem-type>(xs, pack-type {elem-type}, stride, 0, len);
     _free-array(xs);
   },
   (xs: &array(pointer)) => {
     let capacity = get-capacity(xs);
-    let stride = _get-stride(xs);
     let from = _get-from(xs);
     let to = _get-to(xs);
     let len = length(xs);
     unpack-type elem-type = _get-elem-type(xs);
+    let stride = magic call-type(pack-type {elem-type}, 2, null-pointer);
     let ys: &array(pointer) =
       cast<array(elem-type), &array(pointer)>(_make-raw<elem-type>(
         capacity,
@@ -220,7 +222,7 @@ resource _array-internal {
         stride,
       ));
     _set-to(ys, to);
-    _copy-array-content<elem-type>(xs, ys, 0, len);
+    _copy-array-content<elem-type>(xs, ys, stride, 0, len);
     ys
   },
   -1,
@@ -232,7 +234,7 @@ constant _extend-factor: int {
 
 define _extend-front<a>(xs: array(a)) -> array(a) {
   let old-capacity on xs = get-capacity(xs);
-  let stride on xs = _get-stride(xs);
+  let stride = _get-stride<a>::();
   let growth-base = max-int(old-capacity, 1);
   let new-capacity = mul-int(growth-base, _extend-factor);
   let array-ptr = cast<array(a), pointer>(xs);
@@ -252,7 +254,7 @@ define _extend-front<a>(xs: array(a)) -> array(a) {
 
 define _extend-back<a>(xs: array(a)) -> array(a) {
   let old-capacity on xs = get-capacity(xs);
-  let stride on xs = _get-stride(xs);
+  let stride = _get-stride<a>::();
   let current-capacity = max-int(old-capacity, 1);
   let new-capacity = mul-int(current-capacity, _extend-factor);
   let array-ptr = cast<array(a), pointer>(xs);
@@ -273,7 +275,7 @@ inline _load-element<a>(element-ptr: pointer, stride: int) -> a {
 }
 
 define _store-front-element-without-free<a>(xs: &array(a), x: &a) -> unit {
-  let stride = _get-stride(xs);
+  let stride = _get-stride<a>::();
   let element-ptr = _get-element-pointer(xs, -1);
   let value-ptr = cast-inline<&a, pointer>(x);
   memcpy(element-ptr, value-ptr, stride);
@@ -307,7 +309,7 @@ define _extend-back-if-necessary<a>(xs: array(a)) -> array(a) {
 }
 
 define _store-back-element-without-free<a>(xs: &array(a), x: &a) -> unit {
-  let stride = _get-stride(xs);
+  let stride = _get-stride<a>::();
   let len = length(xs);
   let element-ptr = _get-element-pointer(xs, len);
   let value-ptr = cast-inline<&a, pointer>(x);
@@ -322,12 +324,52 @@ inline push-back<a>(xs: array(a), x: a) -> array(a) {
   xs
 }
 
+define _is-valid-index<a>(xs: &array(a), i: int) -> bool {
+  let len = length(xs);
+  and(le-int(0, i), lt-int(i, len))
+}
+
+inline-meta _put-unchecked<a>(xs: 'array(a), i: 'int, x: 'a) -> 'array(a) {
+  quote {
+    let xs = unquote {xs};
+    let i = unquote {i};
+    let x = unquote {x};
+    let stride = _get-stride<a>::();
+    let element-ptr on xs = _get-element-pointer(xs, i);
+    let old-ptr = malloc(C-Size(stride));
+    memcpy(old-ptr, element-ptr, stride);
+    magic call-type(pack-type {a}, 0, old-ptr);
+    let _ on x = {
+      let new-ptr = cast-inline<&a, pointer>(x);
+      memcpy(element-ptr, new-ptr, stride);
+      free(new-ptr);
+    };
+    magic call-type(pack-type {pointer}, 0, x);
+    xs
+  }
+}
+
+inline-meta put<a>(xs: 'array(a), i: 'int, x: 'a) -> 'array(a) {
+  quote {
+    let xs = unquote {xs};
+    let i = unquote {i};
+    let x = unquote {x};
+    let b on xs = _is-valid-index(xs, i);
+    if b {
+      _put-unchecked::(xs, i, x)
+    } else {
+      let _ = x;
+      xs
+    }
+  }
+}
+
 define pop-front<a>(xs: array(a)) ->> ?pair(a, array(a)) {
   let len on xs = length(xs);
   if eq-int(len, 0) {
     none
   } else {
-    let stride on xs = _get-stride(xs);
+    let stride = _get-stride<a>::();
     let first-value-pointer on xs = _get-element-pointer(xs, 0);
     let first-value = _load-element(first-value-pointer, stride);
     let _ on xs = _shift-from(xs, 1);
@@ -340,7 +382,7 @@ define pop-back<a>(xs: array(a)) ->> ?pair(array(a), a) {
   if eq-int(len, 0) {
     none
   } else {
-    let stride on xs = _get-stride(xs);
+    let stride = _get-stride<a>::();
     let last-value-pointer on xs = _get-element-pointer(xs, sub-int(len, 1));
     let last-value = _load-element(last-value-pointer, stride);
     let _ on xs = _shift-to(xs, -1);
@@ -392,7 +434,7 @@ define to-list<a>(xs: array(a)) -> list(a) {
         Nil
       } else {
         let element-ptr on xs = _get-element-pointer(xs, index);
-        let stride on xs = _get-stride(xs);
+        let stride = _get-stride<a>::();
         let value = _load-element(element-ptr, stride);
         Cons(value, self(xs, add-int(index, 1)))
       }

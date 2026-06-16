@@ -1,5 +1,5 @@
 import {
-  this.array,
+  this.array {array},
 }
 
 constant access-unchecked: _ {
@@ -8,4 +8,8 @@ constant access-unchecked: _ {
 
 constant swap-unchecked: _ {
   this.array._swap-unchecked
+}
+
+inline-meta put-unchecked<a>(xs: 'array(a), i: 'int, x: 'a) -> 'array(a) {
+  this.array._put-unchecked(xs, i, x)
 }

@@ -25,6 +25,7 @@
     ],
   },
   preset {
+    array ["array"],
     binary ["binary"],
     bool ["False", "True", "and", "bool", "not", "or"],
     box [],

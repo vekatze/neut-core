@@ -1,0 +1,380 @@
+import {
+  this.bool {False, True, and},
+  this.box,
+  this.c-size {C-Size},
+  this.control {discard},
+  this.either {Right, none},
+  this.int {abs-int, max-int, min-int},
+  this.list {Cons, Nil, list},
+  this.memory {malloc},
+  this.memory.unsafe {free, load-int, load-pointer, memcpy, memmove, realloc, store-int, store-pointer},
+  this.pair {Pair, pair},
+  this.pointer {null-pointer, shift},
+  this.unit {Unit, unit},
+  this.unsafe {cast, cast-inline},
+  this.word,
+}
+
+nominal {
+  resource _array-internal,
+}
+
+// (capacity: int, from: int, to: int, elem-type: type, stride: int, ptr-to-buffer: pointer)
+data array(_: type) {
+| _Array(_array-internal)
+}
+
+inline _header-size() -> int {
+  mul-int(this.word.size, 6)
+}
+
+inline _allocation-size(capacity: int, stride: int) -> int {
+  add-int(_header-size(), mul-int(stride, capacity))
+}
+
+inline _inline-buffer-ptr(array-ptr: pointer) -> pointer {
+  shift(array-ptr, _header-size())
+}
+
+define get-capacity<a>(xs: &array(a)) -> int {
+  let array-ptr = cast-inline<&array(a), pointer>(xs);
+  load-int(array-ptr)
+}
+
+define _get-from<a>(xs: &array(a)) -> int {
+  let array-ptr = cast-inline<&array(a), pointer>(xs);
+  load-int(shift(array-ptr, this.word.size))
+}
+
+define _get-to<a>(xs: &array(a)) -> int {
+  let array-ptr = cast-inline<&array(a), pointer>(xs);
+  load-int(shift(array-ptr, mul-int(this.word.size, 2)))
+}
+
+inline _get-elem-type<a>(xs: &array(a)) -> type {
+  let array-ptr = cast-inline<&array(a), pointer>(xs);
+  cast-inline<int, type>(load-int(shift(array-ptr, mul-int(this.word.size, 3))))
+}
+
+define _get-stride<a>(xs: &array(a)) -> int {
+  let array-ptr = cast-inline<&array(a), pointer>(xs);
+  load-int(shift(array-ptr, mul-int(this.word.size, 4)))
+}
+
+define _get-buffer-ptr<a>(xs: &array(a)) -> pointer {
+  let array-ptr = cast-inline<&array(a), pointer>(xs);
+  load-pointer(shift(array-ptr, mul-int(this.word.size, 5)))
+}
+
+define _set-buffer-ptr<a>(xs: &array(a), buffer-ptr: pointer) -> unit {
+  let array-ptr = cast-inline<&array(a), pointer>(xs);
+  store-pointer(buffer-ptr, shift(array-ptr, mul-int(this.word.size, 5)))
+}
+
+define _set-capacity<a>(xs: &array(a), capacity: int) -> unit {
+  let array-ptr = cast-inline<&array(a), pointer>(xs);
+  store-int(capacity, array-ptr)
+}
+
+define _get-element-pointer<a>(xs: &array(a), index: int) -> pointer {
+  let from = _get-from(xs);
+  let stride = _get-stride(xs);
+  let buffer-ptr = _get-buffer-ptr(xs);
+  shift(buffer-ptr, mul-int(stride, add-int(from, index)))
+}
+
+define length<a>(xs: &array(a)) -> int {
+  let from = _get-from(xs);
+  let to = _get-to(xs);
+  sub-int(to, from)
+}
+
+define setup-slice-ptr<a>(xs: &array(a), start: int, size: int, slice-ptr: pointer) -> unit {
+  let len = length(xs);
+  let start = min-int(max-int(start, 0), len);
+  let size = min-int(max-int(size, 0), sub-int(len, start));
+  let from = _get-from(xs);
+  let slice-from = add-int(from, start);
+  let slice-to = add-int(slice-from, size);
+  let word-size = this.word.size;
+  store-int(get-capacity(xs), slice-ptr);
+  store-int(slice-from, shift(slice-ptr, word-size));
+  store-int(slice-to, shift(slice-ptr, mul-int(word-size, 2)));
+  store-int(cast-inline<type, int>(_get-elem-type(xs)), shift(slice-ptr, mul-int(word-size, 3)));
+  store-int(_get-stride(xs), shift(slice-ptr, mul-int(word-size, 4)));
+  store-pointer(_get-buffer-ptr(xs), shift(slice-ptr, mul-int(word-size, 5)));
+}
+
+inline with-slice<a, b>(xs: &array(a), start: int, size: int, f: (&array(a)) -> +b) -> b {
+  let slice-ptr = magic alloca(int, 6);
+  setup-slice-ptr(xs, start, size, slice-ptr);
+  let slice = cast-inline<pointer, &array(a)>(slice-ptr);
+  letbox-T result = f(slice);
+  result
+}
+
+define _shift-from<a>(xs: &array(a), offset: int) -> unit {
+  let array-ptr = cast-inline<&array(a), pointer>(xs);
+  let from-ptr = shift(array-ptr, mul-int(this.word.size, 1));
+  let current-value = load-int(from-ptr);
+  store-int(add-int(current-value, offset), from-ptr)
+}
+
+define _shift-to<a>(xs: &array(a), offset: int) -> unit {
+  let array-ptr = cast-inline<&array(a), pointer>(xs);
+  let to-ptr = shift(array-ptr, mul-int(this.word.size, 2));
+  let current-value = load-int(to-ptr);
+  store-int(add-int(current-value, offset), to-ptr)
+}
+
+define _set-to<a>(xs: &array(a), to: int) -> unit {
+  let array-ptr = cast-inline<&array(a), pointer>(xs);
+  store-int(to, shift(array-ptr, mul-int(this.word.size, 2)))
+}
+
+define _make-raw<a>(capacity: int, initial-cursor: int, elem-type: type, stride: int) -> array(a) {
+  let array-ptr = malloc(C-Size(_allocation-size(capacity, stride)));
+  let buffer-ptr = _inline-buffer-ptr(array-ptr);
+  let word-size = this.word.size;
+  store-int(capacity, array-ptr);
+  store-int(initial-cursor, shift(array-ptr, mul-int(word-size, 1)));
+  store-int(initial-cursor, shift(array-ptr, mul-int(word-size, 2)));
+  store-int(cast-inline<type, int>(elem-type), shift(array-ptr, mul-int(word-size, 3)));
+  store-int(stride, shift(array-ptr, mul-int(word-size, 4)));
+  store-pointer(buffer-ptr, shift(array-ptr, mul-int(word-size, 5)));
+  _Array(magic cast(pointer, _array-internal, array-ptr))
+}
+
+define _make-inner<a>(initial-capacity: int) -> array(a) {
+  let initial-capacity = initial-capacity;
+  let abs-capacity = abs-int(initial-capacity);
+  let initial-cursor = match gt-int(initial-capacity, 0) {True => 0 | False => abs-capacity};
+  let stride = magic call-type(pack-type {a}, 2, null-pointer);
+  _make-raw<a>(abs-capacity, initial-cursor, pack-type {a}, stride)
+}
+
+inline-meta make<a>(initial-capacity: 'int) -> 'array(a) {
+  magic assert-mixable(a);
+  quote {_make-inner(unquote {initial-capacity})}
+}
+
+define _discard-array-content<a>(xs: &array(pointer), elem-type: type, index: int, len: int) -> unit {
+  if eq-int(index, len) {
+    Unit
+  } else {
+    let element-ptr = _get-element-pointer(xs, index);
+    let stride = _get-stride(xs);
+    let value-ptr = malloc(C-Size(stride));
+    memcpy(value-ptr, element-ptr, stride);
+    let value = cast<pointer, a>(value-ptr);
+    discard(value);
+    _discard-array-content<a>(xs, elem-type, add-int(index, 1), len)
+  }
+}
+
+define _copy-array-content<elem-type>(
+  xs: &array(pointer),
+  ys: &array(pointer),
+  index: int,
+  len: int,
+) -> unit {
+  if eq-int(index, len) {
+    Unit
+  } else {
+    let source-ptr = _get-element-pointer(xs, index);
+    let target-ptr = _get-element-pointer(ys, index);
+    let stride = _get-stride(xs);
+    let original = cast-inline<pointer, &elem-type>(source-ptr);
+    let clone = *original;
+    let clone-ptr = cast<elem-type, pointer>(clone);
+    memcpy(target-ptr, clone-ptr, stride);
+    free(clone-ptr);
+    _copy-array-content<elem-type>(xs, ys, add-int(index, 1), len)
+  }
+}
+
+define _free-array<a>(xs: &array(a)) -> unit {
+  let xs = cast-inline<&array(a), &array(pointer)>(xs);
+  free(cast-inline<&array(pointer), pointer>(xs))
+}
+
+resource _array-internal {
+  (xs: &array(pointer)) => {
+    let len = length(xs);
+    unpack-type elem-type = _get-elem-type(xs);
+    _discard-array-content<elem-type>(xs, pack-type {elem-type}, 0, len);
+    _free-array(xs);
+  },
+  (xs: &array(pointer)) => {
+    let capacity = get-capacity(xs);
+    let stride = _get-stride(xs);
+    let from = _get-from(xs);
+    let to = _get-to(xs);
+    let len = length(xs);
+    unpack-type elem-type = _get-elem-type(xs);
+    let ys: &array(pointer) =
+      cast<array(elem-type), &array(pointer)>(_make-raw<elem-type>(
+        capacity,
+        from,
+        pack-type {elem-type},
+        stride,
+      ));
+    _set-to(ys, to);
+    _copy-array-content<elem-type>(xs, ys, 0, len);
+    ys
+  },
+  -1,
+}
+
+constant _extend-factor: int {
+  2
+}
+
+define _extend-front<a>(xs: array(a)) -> array(a) {
+  let old-capacity on xs = get-capacity(xs);
+  let stride on xs = _get-stride(xs);
+  let growth-base = max-int(old-capacity, 1);
+  let new-capacity = mul-int(growth-base, _extend-factor);
+  let array-ptr = cast<array(a), pointer>(xs);
+  let new-array-ptr = realloc(array-ptr, C-Size(_allocation-size(new-capacity, stride)));
+  let new-buffer-ptr = _inline-buffer-ptr(new-array-ptr);
+  let new-head-ptr = shift(new-buffer-ptr, mul-int(stride, growth-base));
+  memmove(new-head-ptr, new-buffer-ptr, mul-int(stride, old-capacity));
+  let xs = cast<pointer, array(a)>(new-array-ptr);
+  let _ on xs = {
+    _shift-from(xs, growth-base);
+    _shift-to(xs, growth-base);
+    _set-buffer-ptr(xs, new-buffer-ptr);
+    _set-capacity(xs, new-capacity)
+  };
+  xs
+}
+
+define _extend-back<a>(xs: array(a)) -> array(a) {
+  let old-capacity on xs = get-capacity(xs);
+  let stride on xs = _get-stride(xs);
+  let current-capacity = max-int(old-capacity, 1);
+  let new-capacity = mul-int(current-capacity, _extend-factor);
+  let array-ptr = cast<array(a), pointer>(xs);
+  let new-array-ptr = realloc(array-ptr, C-Size(_allocation-size(new-capacity, stride)));
+  let new-buffer-ptr = _inline-buffer-ptr(new-array-ptr);
+  let xs = cast<pointer, array(a)>(new-array-ptr);
+  let _ on xs = {
+    _set-buffer-ptr(xs, new-buffer-ptr);
+    _set-capacity(xs, new-capacity)
+  };
+  xs
+}
+
+inline _load-element<a>(element-ptr: pointer, stride: int) -> a {
+  let value-ptr = malloc(C-Size(stride));
+  memcpy(value-ptr, element-ptr, stride);
+  cast<pointer, a>(value-ptr)
+}
+
+define _store-front-element-without-free<a>(xs: &array(a), x: &a) -> unit {
+  let stride = _get-stride(xs);
+  let element-ptr = _get-element-pointer(xs, -1);
+  let value-ptr = cast-inline<&a, pointer>(x);
+  memcpy(element-ptr, value-ptr, stride);
+}
+
+define _extend-front-if-necessary<a>(xs: array(a)) -> array(a) {
+  let from on xs = _get-from(xs);
+  if gt-int(from, 0) {
+    xs
+  } else {
+    _extend-front(xs)
+  }
+}
+
+inline push-front<a>(xs: array(a), x: a) -> array(a) {
+  let xs = _extend-front-if-necessary(xs);
+  let _ on xs, x = _store-front-element-without-free(xs, x);
+  free(cast-inline<a, pointer>(x));
+  let _ on xs = _shift-from(xs, -1);
+  xs
+}
+
+define _extend-back-if-necessary<a>(xs: array(a)) -> array(a) {
+  let capacity on xs = get-capacity(xs);
+  let to on xs = _get-to(xs);
+  if lt-int(to, capacity) {
+    xs
+  } else {
+    _extend-back(xs)
+  }
+}
+
+define _store-back-element-without-free<a>(xs: &array(a), x: &a) -> unit {
+  let stride = _get-stride(xs);
+  let len = length(xs);
+  let element-ptr = _get-element-pointer(xs, len);
+  let value-ptr = cast-inline<&a, pointer>(x);
+  memcpy(element-ptr, value-ptr, stride);
+}
+
+inline push-back<a>(xs: array(a), x: a) -> array(a) {
+  let xs = _extend-back-if-necessary(xs);
+  let _ on xs, x = _store-back-element-without-free(xs, x);
+  free(cast-inline<a, pointer>(x));
+  let _ on xs = _shift-to(xs, 1);
+  xs
+}
+
+define pop-front<a>(xs: array(a)) ->> ?pair(a, array(a)) {
+  let len on xs = length(xs);
+  if eq-int(len, 0) {
+    none
+  } else {
+    let stride on xs = _get-stride(xs);
+    let first-value-pointer on xs = _get-element-pointer(xs, 0);
+    let first-value = _load-element(first-value-pointer, stride);
+    let _ on xs = _shift-from(xs, 1);
+    Right(Pair(first-value, xs))
+  }
+}
+
+define pop-back<a>(xs: array(a)) ->> ?pair(array(a), a) {
+  let len on xs = length(xs);
+  if eq-int(len, 0) {
+    none
+  } else {
+    let stride on xs = _get-stride(xs);
+    let last-value-pointer on xs = _get-element-pointer(xs, sub-int(len, 1));
+    let last-value = _load-element(last-value-pointer, stride);
+    let _ on xs = _shift-to(xs, -1);
+    Right(Pair(xs, last-value))
+  }
+}
+
+inline _access-unchecked<a>(xs: &array(a), i: int) -> &a {
+  let element-pointer = _get-element-pointer(xs, i);
+  cast-inline<pointer, &a>(element-pointer)
+}
+
+define access<a>(xs: &array(a), i: int) ->> ?&a {
+  if and(le-int(0, i), lt-int(i, length(xs))) {
+    Right(_access-unchecked(xs, i))
+  } else {
+    none
+  }
+}
+
+define to-list<a>(xs: array(a)) -> list(a) {
+  let len on xs = length(xs);
+  let loop =
+    define self(xs: array(a), index: int) -> list(a) {
+      if ge-int(index, len) {
+        let xs = cast<array(a), &array(a)>(xs);
+        _free-array(xs);
+        Nil
+      } else {
+        let element-ptr on xs = _get-element-pointer(xs, index);
+        let stride on xs = _get-stride(xs);
+        let value = _load-element(element-ptr, stride);
+        Cons(value, self(xs, add-int(index, 1)))
+      }
+    };
+  loop(xs, 0)
+}

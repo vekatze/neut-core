@@ -87,5 +87,5 @@ define trunc(x: float) -> float {
 }
 
 define sigmoid(x: float) -> float {
-  div-float(1, add-float(1, exp(mul-float(-1, x))))
+  div-float(1.0, add-float(1.0, exp(mul-float(-1.0, x))))
 }

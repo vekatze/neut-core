@@ -479,7 +479,7 @@ static int64_t neut_core_v0_55_parse_special_double(const char *str,
     negative = 1;
     i++;
   }
-  if (neut_core_v0_55_match(str, length, i, "infinity", 8)) {
+  if (neut_core_v0_55_match(str, length, i, "inf", 8)) {
     *out_value = negative ? -INFINITY : INFINITY;
     return 1;
   }
@@ -581,7 +581,7 @@ size_t neut_core_v0_55_build_fixed_buf(char *buf, size_t cap, double value,
   if (isnan(value)) {
     n = snprintf(buf, cap, "%s", "nan");
   } else if (isinf(value)) {
-    n = snprintf(buf, cap, "%s", value < 0 ? "-infinity" : "infinity");
+    n = snprintf(buf, cap, "%s", value < 0 ? "-inf" : "inf");
   } else {
     n = snprintf(buf, cap, "%.*f", decimals, value);
     if (n >= 0 && (size_t)n >= cap) {

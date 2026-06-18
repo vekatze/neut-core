@@ -1,0 +1,150 @@
+import {
+  this.binary,
+  this.bool {False},
+  this.debug {assert},
+  this.either {Left, Right},
+  this.float {
+    Float-Finite-Negative,
+    Float-Finite-Positive,
+    Float-Infinity-Negative,
+    Float-Infinity-Positive,
+    Float-NaN,
+    decompose-float,
+    decompose-float32,
+    float-decimal,
+  },
+  this.float.parse,
+  this.float.show {show-float, show-float32},
+  this.int.parse,
+  this.string {string},
+  this.string.eq {eq-string},
+  this.unit {Unit, unit},
+}
+
+define _expect-no-int(label: &string, parsed: ?int) -> unit {
+  match parsed {
+  | Left(_) =>
+    Unit
+  | Right(_) =>
+    assert(label, False)
+  }
+}
+
+define _expect-no-float(label: &string, parsed: ?float) -> unit {
+  match parsed {
+  | Left(_) =>
+    Unit
+  | Right(_) =>
+    assert(label, False)
+  }
+}
+
+define _expect-float(label: &string, parsed: ?float) -> unit {
+  match parsed {
+  | Left(_) =>
+    assert(label, False)
+  | Right(_) =>
+    Unit
+  }
+}
+
+define _expect-string(label: &string, actual: string, expected: &string) -> unit {
+  pin actual = actual;
+  assert(label, eq-string(actual, expected))
+}
+
+define _expect-float-finite-positive(
+  label: &string,
+  actual: float-decimal,
+  expected-mantissa: int,
+  expected-exponent: int,
+) -> unit {
+  match actual {
+  | Float-Finite-Positive(actual-mantissa, actual-exponent) =>
+    assert(label, if eq-int(actual-mantissa, expected-mantissa) {
+      eq-int(actual-exponent, expected-exponent)
+    } else {
+      False
+    })
+  | _ =>
+    assert(label, False)
+  }
+}
+
+define _expect-float-finite-negative(
+  label: &string,
+  actual: float-decimal,
+  expected-mantissa: int,
+  expected-exponent: int,
+) -> unit {
+  match actual {
+  | Float-Finite-Negative(actual-mantissa, actual-exponent) =>
+    assert(label, if eq-int(actual-mantissa, expected-mantissa) {
+      eq-int(actual-exponent, expected-exponent)
+    } else {
+      False
+    })
+  | _ =>
+    assert(label, False)
+  }
+}
+
+define _expect-float-infinity-positive(label: &string, actual: float-decimal) -> unit {
+  match actual {
+  | Float-Infinity-Positive =>
+    Unit
+  | _ =>
+    assert(label, False)
+  }
+}
+
+define _expect-float-infinity-negative(label: &string, actual: float-decimal) -> unit {
+  match actual {
+  | Float-Infinity-Negative =>
+    Unit
+  | _ =>
+    assert(label, False)
+  }
+}
+
+define _expect-float-nan(label: &string, actual: float-decimal) -> unit {
+  match actual {
+  | Float-NaN =>
+    Unit
+  | _ =>
+    assert(label, False)
+  }
+}
+
+define test-float() -> unit {
+  _expect-no-int("int.parse: reject leading plus decimal\n", this.int.parse.parse-int("+123"));
+  _expect-no-int("int.parse: reject leading plus hex\n", this.int.parse.parse-hex("+0xFF"));
+  _expect-no-float("float.parse: reject leading plus decimal\n", this.float.parse.parse-float("+1.0"));
+  _expect-no-float("float.parse: reject plus decimal exponent\n", this.float.parse.parse-float("1.0e+2"));
+  _expect-no-float("float.parse: reject plus hex exponent\n", this.float.parse.parse-float("0x1.0p+2"));
+  _expect-float("float.parse: accept Ryu zero\n", this.float.parse.parse-float("0e0"));
+  _expect-float("float.parse: accept Ryu integer form\n", this.float.parse.parse-float("1e0"));
+  _expect-string("float.show: Ryu zero\n", show-float(0.0), "0e0");
+  _expect-string("float.show: fixed integer form\n", show-float(1.0), "1.0");
+  _expect-string("float.show: fixed decimal form\n", show-float(1.234), "1.234");
+  _expect-string("float.show: lower fixed boundary\n", show-float(0.0001), "0.0001");
+  _expect-string("float.show: below fixed boundary\n", show-float(0.00001), "1e-5");
+  _expect-string("float.show: upper scientific boundary\n", show-float(100000000.0), "1e8");
+  _expect-string("float.show: Ryu float32 integer form\n", show-float32(1.0), "1.0");
+  _expect-string("float.show: Ryu float32 shortest form\n", show-float32(1.23456789), "1.2345679");
+  _expect-float-finite-positive("float.decompose: zero\n", decompose-float(0.0), 0, 0);
+  _expect-float-finite-negative("float.decompose: negative zero\n", decompose-float(-0.0), 0, 0);
+  _expect-float-finite-positive("float.decompose: decimal\n", decompose-float(1.234), 1234, -3);
+  _expect-float-finite-positive("float.decompose: exponent\n", decompose-float(10.0), 1, 1);
+  _expect-float-finite-positive("float.decompose: float32 shortest\n", decompose-float32(1.23456789), 12345679, -7);
+  _expect-float-infinity-positive("float.decompose: infinity\n", decompose-float(inf));
+  _expect-float-infinity-negative("float.decompose: negative infinity\n", decompose-float(-inf));
+  _expect-float-nan("float.decompose: nan\n", decompose-float(nan));
+  _expect-float-infinity-positive("float.decompose: float32 infinity\n", decompose-float32(inf));
+  _expect-float-infinity-negative("float.decompose: float32 negative infinity\n", decompose-float32(-inf));
+  _expect-float-nan("float.decompose: float32 nan\n", decompose-float32(nan))
+}
+
+define zen() -> unit {
+  test-float()
+}

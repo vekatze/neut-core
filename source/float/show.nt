@@ -11,18 +11,34 @@ import {
 }
 
 foreign {
-  neut_core_v0_55_build_fixed_buf(pointer, int, float, int, int) -> int,
+  neut_core_v0_55_build_float_buf(pointer, int, float, int) -> int,
+  neut_core_v0_55_build_float32_buf(pointer, int, float32, int) -> int,
 }
 
-define show-float(x: float, decimals: int) -> string {
-  let size = 80;
+define show-float(x: float) -> string {
+  let size = 32;
   let add-newline = 0;
   let word-size = this.word.size;
   let u2 = mul-int(word-size, 2);
   let u3 = mul-int(word-size, 3);
   let string-ptr = malloc(C-Size(add-int(size, u3)));
   let buffer-ptr = shift(string-ptr, u3);
-  let len = magic external neut_core_v0_55_build_fixed_buf(buffer-ptr, size, x, decimals, add-newline);
+  let len = magic external neut_core_v0_55_build_float_buf(buffer-ptr, size, x, add-newline);
+  store-int(0, string-ptr);
+  store-int(len, shift(string-ptr, word-size));
+  store-pointer(buffer-ptr, shift(string-ptr, u2));
+  magic cast(pointer, string, string-ptr)
+}
+
+define show-float32(x: float32) -> string {
+  let size = 32;
+  let add-newline = 0;
+  let word-size = this.word.size;
+  let u2 = mul-int(word-size, 2);
+  let u3 = mul-int(word-size, 3);
+  let string-ptr = malloc(C-Size(add-int(size, u3)));
+  let buffer-ptr = shift(string-ptr, u3);
+  let len = magic external neut_core_v0_55_build_float32_buf(buffer-ptr, size, x, add-newline);
   store-int(0, string-ptr);
   store-int(len, shift(string-ptr, word-size));
   store-pointer(buffer-ptr, shift(string-ptr, u2));
@@ -31,6 +47,6 @@ define show-float(x: float, decimals: int) -> string {
 
 constant as-show: show(float) {
   Show((x) => {
-    show-float(*x, 6)
+    show-float(*x)
   })
 }

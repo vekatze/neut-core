@@ -16,12 +16,20 @@
   foreign {
     input [
       "source/foreign.c",
+      "source/foreign/ryu/d2s.c",
+      "source/foreign/ryu/f2s.c",
+      "source/foreign/ryu/ryu/common.h",
+      "source/foreign/ryu/ryu/d2s_full_table.h",
+      "source/foreign/ryu/ryu/d2s_intrinsics.h",
+      "source/foreign/ryu/ryu/f2s_intrinsics.h",
+      "source/foreign/ryu/ryu/digit_table.h",
+      "source/foreign/ryu/ryu/ryu.h",
     ],
     output [
       "foreign.o",
     ],
     script [
-      "{{clang}} -c -flto=thin -O2 source/foreign.c -o {{foreign}}/foreign.o",
+      "{{clang}} -Isource/foreign/ryu -c -flto=thin -O2 source/foreign.c -o {{foreign}}/foreign.o",
     ],
   },
   preset {

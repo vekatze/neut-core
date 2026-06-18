@@ -21,6 +21,11 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "foreign/ryu/d2s.c"
+#define to_chars f2s_to_chars
+#include "foreign/ryu/f2s.c"
+#undef to_chars
+
 __attribute__((always_inline)) int neut_core_v0_55_wifexited(int stat) {
   return WIFEXITED(stat);
 }
@@ -143,8 +148,6 @@ static void neut_core_v0_55_read_int_sign(const char *str, int64_t length,
   if (*i < length) {
     if (str[*i] == '-') {
       *out_sign = -1;
-      (*i)++;
-    } else if (str[*i] == '+') {
       (*i)++;
     }
   }
@@ -371,8 +374,6 @@ static int neut_core_v0_55_read_float_exponent(const char *str, int64_t length,
   if (*i < length) {
     if (str[*i] == '-') {
       (*i)++;
-    } else if (str[*i] == '+') {
-      (*i)++;
     }
   }
   while (1) {
@@ -396,6 +397,8 @@ static int64_t neut_core_v0_55_parse_decimal_double(const char *str,
                                                     double *out_value) {
   int64_t i = 0;
   int64_t sign = 1;
+  int has_fraction = 0;
+  int has_exponent = 0;
   uint64_t ignored = 0;
   neut_core_v0_55_read_int_sign(str, length, &i, &sign);
   if (!neut_core_v0_55_read_required_digits(
@@ -403,15 +406,22 @@ static int64_t neut_core_v0_55_parse_decimal_double(const char *str,
     return -1;
   }
   i = neut_core_v0_55_skip_underscores(str, length, i);
-  if (i >= length || str[i] != '.') {
-    return -1;
+  if (i < length && str[i] == '.') {
+    has_fraction = 1;
+    i++;
+    if (!neut_core_v0_55_read_required_digits(
+            str, length, &i, neut_core_v0_55_decimal_digit, 10, &ignored)) {
+      return -1;
+    }
+    i = neut_core_v0_55_skip_underscores(str, length, i);
   }
-  i++;
-  if (!neut_core_v0_55_read_required_digits(
-          str, length, &i, neut_core_v0_55_decimal_digit, 10, &ignored)) {
-    return -1;
+  has_exponent = i < length && str[i] == 'e';
+  if (has_exponent) {
+    if (!neut_core_v0_55_read_float_exponent(str, length, &i, 'e')) {
+      return -1;
+    }
   }
-  if (!neut_core_v0_55_read_float_exponent(str, length, &i, 'e')) {
+  if (!has_fraction && !has_exponent) {
     return -1;
   }
   i = neut_core_v0_55_skip_underscores(str, length, i);
@@ -479,7 +489,7 @@ static int64_t neut_core_v0_55_parse_special_double(const char *str,
     negative = 1;
     i++;
   }
-  if (neut_core_v0_55_match(str, length, i, "inf", 8)) {
+  if (neut_core_v0_55_match(str, length, i, "inf", 3)) {
     *out_value = negative ? -INFINITY : INFINITY;
     return 1;
   }
@@ -561,33 +571,14 @@ int64_t neut_core_v0_55_write_int64_nl(int fd, int64_t v) {
   return neut_core_v0_55_write_loop(fd, end - len, (size_t)len);
 }
 
-size_t neut_core_v0_55_build_fixed_buf(char *buf, size_t cap, double value,
-                                       int decimals, int add_nl) {
-  if (decimals < 0) {
-    errno = EINVAL;
-    return 0;
-  }
-
-  if (decimals > 17) {
-    decimals = 17;
-  }
-
-  if (cap < 64) {
+size_t neut_core_v0_55_build_float_buf(char *buf, size_t cap, double value,
+                                       int add_nl) {
+  if (cap < 32) {
     errno = EOVERFLOW;
     return 0;
   }
 
-  int n;
-  if (isnan(value)) {
-    n = snprintf(buf, cap, "%s", "nan");
-  } else if (isinf(value)) {
-    n = snprintf(buf, cap, "%s", value < 0 ? "-inf" : "inf");
-  } else {
-    n = snprintf(buf, cap, "%.*f", decimals, value);
-    if (n >= 0 && (size_t)n >= cap) {
-      n = snprintf(buf, cap, "%.*e", decimals, value);
-    }
-  }
+  int n = d2s_buffered_n(value, buf);
   if (n < 0 || (size_t)n >= cap) {
     errno = EOVERFLOW;
     return 0;
@@ -604,10 +595,100 @@ size_t neut_core_v0_55_build_fixed_buf(char *buf, size_t cap, double value,
   return (size_t)n;
 }
 
-int64_t neut_core_v0_55_write_double(int fd, double value, int decimals) {
-  char buf[64];
-  size_t len =
-      neut_core_v0_55_build_fixed_buf(buf, sizeof buf, value, decimals, 0);
+size_t neut_core_v0_55_build_float32_buf(char *buf, size_t cap, float value,
+                                         int add_nl) {
+  if (cap < 32) {
+    errno = EOVERFLOW;
+    return 0;
+  }
+
+  int n = f2s_buffered_n(value, buf);
+  if (n < 0 || (size_t)n >= cap) {
+    errno = EOVERFLOW;
+    return 0;
+  }
+
+  if (add_nl) {
+    if ((size_t)n + 1 >= cap) {
+      errno = EOVERFLOW;
+      return 0;
+    }
+    buf[n++] = '\n';
+    buf[n] = '\0';
+  }
+  return (size_t)n;
+}
+
+int64_t neut_core_v0_55_decompose_double(double value, int64_t *out_sign,
+                                         int64_t *out_mantissa,
+                                         int64_t *out_exponent) {
+  const uint64_t bits = double_to_bits(value);
+  const bool ieeeSign =
+      ((bits >> (DOUBLE_MANTISSA_BITS + DOUBLE_EXPONENT_BITS)) & 1) != 0;
+  const uint64_t ieeeMantissa =
+      bits & ((1ull << DOUBLE_MANTISSA_BITS) - 1);
+  const uint32_t ieeeExponent =
+      (uint32_t)((bits >> DOUBLE_MANTISSA_BITS) &
+                 ((1u << DOUBLE_EXPONENT_BITS) - 1));
+
+  *out_sign = ieeeSign ? 1 : 0;
+  if (ieeeExponent == ((1u << DOUBLE_EXPONENT_BITS) - 1u)) {
+    return ieeeMantissa == 0 ? 1 : 2;
+  }
+  if (ieeeExponent == 0 && ieeeMantissa == 0) {
+    *out_mantissa = 0;
+    *out_exponent = 0;
+    return 0;
+  }
+
+  floating_decimal_64 v;
+  if (d2d_small_int(ieeeMantissa, ieeeExponent, &v)) {
+    for (;;) {
+      const uint64_t q = div10(v.mantissa);
+      const uint32_t r = ((uint32_t)v.mantissa) - 10 * ((uint32_t)q);
+      if (r != 0) {
+        break;
+      }
+      v.mantissa = q;
+      ++v.exponent;
+    }
+  } else {
+    v = d2d(ieeeMantissa, ieeeExponent);
+  }
+  *out_mantissa = (int64_t)v.mantissa;
+  *out_exponent = (int64_t)v.exponent;
+  return 0;
+}
+
+int64_t neut_core_v0_55_decompose_float32(float value, int64_t *out_sign,
+                                          int64_t *out_mantissa,
+                                          int64_t *out_exponent) {
+  const uint32_t bits = float_to_bits(value);
+  const bool ieeeSign =
+      ((bits >> (FLOAT_MANTISSA_BITS + FLOAT_EXPONENT_BITS)) & 1) != 0;
+  const uint32_t ieeeMantissa = bits & ((1u << FLOAT_MANTISSA_BITS) - 1);
+  const uint32_t ieeeExponent =
+      (bits >> FLOAT_MANTISSA_BITS) & ((1u << FLOAT_EXPONENT_BITS) - 1);
+
+  *out_sign = ieeeSign ? 1 : 0;
+  if (ieeeExponent == ((1u << FLOAT_EXPONENT_BITS) - 1u)) {
+    return ieeeMantissa == 0 ? 1 : 2;
+  }
+  if (ieeeExponent == 0 && ieeeMantissa == 0) {
+    *out_mantissa = 0;
+    *out_exponent = 0;
+    return 0;
+  }
+
+  const floating_decimal_32 v = f2d(ieeeMantissa, ieeeExponent);
+  *out_mantissa = (int64_t)v.mantissa;
+  *out_exponent = (int64_t)v.exponent;
+  return 0;
+}
+
+int64_t neut_core_v0_55_write_double(int fd, double value) {
+  char buf[32];
+  size_t len = neut_core_v0_55_build_float_buf(buf, sizeof buf, value, 0);
   if (!len) {
     return -1;
   }
@@ -615,10 +696,9 @@ int64_t neut_core_v0_55_write_double(int fd, double value, int decimals) {
   return neut_core_v0_55_write_loop(fd, buf, len);
 }
 
-int64_t neut_core_v0_55_write_double_line(int fd, double value, int decimals) {
-  char buf[65];
-  size_t len =
-      neut_core_v0_55_build_fixed_buf(buf, sizeof buf, value, decimals, 1);
+int64_t neut_core_v0_55_write_double_line(int fd, double value) {
+  char buf[32];
+  size_t len = neut_core_v0_55_build_float_buf(buf, sizeof buf, value, 1);
   if (!len) {
     return -1;
   }
@@ -643,15 +723,9 @@ ssize_t neut_core_v0_55_int64_strlen(int64_t v) {
   return len;
 }
 
-size_t neut_core_v0_55_double_strlen(double value, int decimals) {
-  if (decimals < 0) {
-    errno = EINVAL;
-    return 0;
-  }
-  if (decimals > 17) {
-    decimals = 17;
-  }
-  int n = snprintf(NULL, 0, "%.*f", decimals, value);
+size_t neut_core_v0_55_double_strlen(double value) {
+  char buf[32];
+  int n = d2s_buffered_n(value, buf);
   if (n < 0) {
     errno = EOVERFLOW;
     return 0;

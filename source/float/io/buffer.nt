@@ -8,14 +8,14 @@ import {
 }
 
 foreign {
-  neut_core_v0_55_build_fixed_buf(pointer, int, float, int, int) -> int,
+  neut_core_v0_55_build_float_buf(pointer, int, float, int) -> int,
 }
 
-define write-float(b: &buffer, x: float, decimals: int) ->> system(unit) {
-  let size = 64;
+define write-float(b: &buffer, x: float) ->> system(unit) {
+  let size = 32;
   let add-newline = 0;
   let buffer-ptr = magic alloca(int, size);
-  let len = magic external neut_core_v0_55_build_fixed_buf(buffer-ptr, size, x, decimals, add-newline);
+  let len = magic external neut_core_v0_55_build_float_buf(buffer-ptr, size, x, add-newline);
   if gt-int(len, 0) {
     append(b, buffer-ptr, len)
   } else {
@@ -23,11 +23,11 @@ define write-float(b: &buffer, x: float, decimals: int) ->> system(unit) {
   }
 }
 
-define write-float-line(b: &buffer, x: float, decimals: int) ->> system(unit) {
-  let size = 65;
+define write-float-line(b: &buffer, x: float) ->> system(unit) {
+  let size = 32;
   let add-newline = 1;
   let buffer-ptr = magic alloca(int, size);
-  let len = magic external neut_core_v0_55_build_fixed_buf(buffer-ptr, size, x, decimals, add-newline);
+  let len = magic external neut_core_v0_55_build_float_buf(buffer-ptr, size, x, add-newline);
   if gt-int(len, 0) {
     append(b, buffer-ptr, len)
   } else {

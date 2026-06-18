@@ -7,7 +7,7 @@ import {
 }
 
 define zen() -> unit {
-  print-float(1234.56789, 2);
+  print-float(1234.56789);
   print("\n");
-  print-float-line(123.45, 7)
+  print-float-line(123.45)
 }

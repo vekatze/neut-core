@@ -1,6 +1,6 @@
 import {
-  this.binary,
   this.ansi {Blue, Yellow},
+  this.binary,
   this.bool,
   this.doc {
     Chunk,
@@ -14,6 +14,7 @@ import {
     ansi-bold,
     ansi-fg,
     ansi-reset,
+    atom,
     atom-N,
     atom-float,
     atom-int,
@@ -25,6 +26,7 @@ import {
   },
   this.doc.show {show-doc},
   this.either {Left, Right},
+  this.float.show {show-float32},
   this.list {Cons, Nil, list},
   this.memory.unsafe {load-int, load-pointer},
   this.pair {Pair, pair},
@@ -313,11 +315,11 @@ define-meta to-doc<a>(x: '&a) -> 'doc {
   | Int64 =>
     quote {atom-int(magic cast(&a, int64, unquote {x}))}
   | Float16 =>
-    quote {atom-float(magic cast(float16, float64, magic cast(&a, float16, unquote {x})), 6)}
+    quote {atom-float(magic cast(float16, float64, magic cast(&a, float16, unquote {x})))}
   | Float32 =>
-    quote {atom-float(magic cast(float32, float64, magic cast(&a, float32, unquote {x})), 6)}
+    quote {atom(show-float32(magic cast(&a, float32, unquote {x})))}
   | Float64 =>
-    quote {atom-float(magic cast(&a, float64, unquote {x}), 6)}
+    quote {atom-float(magic cast(&a, float64, unquote {x}))}
   | Null =>
     quote {atom-N("null")}
   | Rune =>

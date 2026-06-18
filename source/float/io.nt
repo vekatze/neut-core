@@ -7,12 +7,12 @@ import {
 }
 
 foreign {
-  neut_core_v0_55_write_double(descriptor, float, int) -> int,
-  neut_core_v0_55_write_double_line(descriptor, float, int) -> int,
+  neut_core_v0_55_write_double(descriptor, float) -> int,
+  neut_core_v0_55_write_double_line(descriptor, float) -> int,
 }
 
-define write-float(d: descriptor, x: float, decimals: int) ->> system(unit) {
-  let result = magic external neut_core_v0_55_write_double(d, x, decimals);
+define write-float(d: descriptor, x: float) ->> system(unit) {
+  let result = magic external neut_core_v0_55_write_double(d, x);
   if lt-int(result, 0) {
     report-system-error()
   } else {
@@ -20,8 +20,8 @@ define write-float(d: descriptor, x: float, decimals: int) ->> system(unit) {
   }
 }
 
-define write-float-line(d: descriptor, x: float, decimals: int) ->> system(unit) {
-  let result = magic external neut_core_v0_55_write_double_line(d, x, decimals);
+define write-float-line(d: descriptor, x: float) ->> system(unit) {
+  let result = magic external neut_core_v0_55_write_double_line(d, x);
   if lt-int(result, 0) {
     report-system-error()
   } else {
@@ -29,8 +29,8 @@ define write-float-line(d: descriptor, x: float, decimals: int) ->> system(unit)
   }
 }
 
-define print-float(x: float, decimals: int) -> unit {
-  match write-float(stdout, x, decimals) {
+define print-float(x: float) -> unit {
+  match write-float(stdout, x) {
   | Left(_) =>
     Unit
   | Right(_) =>
@@ -38,8 +38,8 @@ define print-float(x: float, decimals: int) -> unit {
   }
 }
 
-define print-float-line(x: float, decimals: int) -> unit {
-  match write-float-line(stdout, x, decimals) {
+define print-float-line(x: float) -> unit {
+  match write-float-line(stdout, x) {
   | Left(_) =>
     Unit
   | Right(_) =>

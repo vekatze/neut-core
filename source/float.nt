@@ -1,3 +1,8 @@
+import {
+  this.bool,
+  this.memory.unsafe {load-int},
+}
+
 foreign {
   llvm.ceil.f64(float) -> float,
   llvm.cos.f64(float) -> float,
@@ -16,6 +21,8 @@ foreign {
   llvm.sin.f64(float) -> float,
   llvm.sqrt.f64(float) -> float,
   llvm.trunc.f64(float) -> float,
+  neut_core_v0_55_decompose_double(float, pointer, pointer, pointer) -> int,
+  neut_core_v0_55_decompose_float32(float32, pointer, pointer, pointer) -> int,
 }
 
 define sqrt(x: float) -> float {
@@ -88,4 +95,51 @@ define trunc(x: float) -> float {
 
 define sigmoid(x: float) -> float {
   div-float(1.0, add-float(1.0, exp(mul-float(-1.0, x))))
+}
+
+data float-decimal {
+| Float-Finite-Positive(mantissa: int, exponent: int)
+| Float-Finite-Negative(mantissa: int, exponent: int)
+| Float-Infinity-Positive
+| Float-Infinity-Negative
+| Float-NaN
+}
+
+inline _decimal-from-slots(
+  status: int,
+  sign-ptr: pointer,
+  mantissa-ptr: pointer,
+  exponent-ptr: pointer,
+) ->> float-decimal {
+  if eq-int(status, 0) {
+    if eq-int(load-int(sign-ptr), 0) {
+      Float-Finite-Positive(load-int(mantissa-ptr), load-int(exponent-ptr))
+    } else {
+      Float-Finite-Negative(load-int(mantissa-ptr), load-int(exponent-ptr))
+    }
+  } else-if eq-int(status, 1) {
+    if eq-int(load-int(sign-ptr), 0) {
+      Float-Infinity-Positive
+    } else {
+      Float-Infinity-Negative
+    }
+  } else {
+    Float-NaN
+  }
+}
+
+define decompose-float(x: float) ->> float-decimal {
+  let sign-ptr = magic alloca(int, 1);
+  let mantissa-ptr = magic alloca(int, 1);
+  let exponent-ptr = magic alloca(int, 1);
+  let status = magic external neut_core_v0_55_decompose_double(x, sign-ptr, mantissa-ptr, exponent-ptr);
+  _decimal-from-slots(status, sign-ptr, mantissa-ptr, exponent-ptr)
+}
+
+define decompose-float32(x: float32) ->> float-decimal {
+  let sign-ptr = magic alloca(int, 1);
+  let mantissa-ptr = magic alloca(int, 1);
+  let exponent-ptr = magic alloca(int, 1);
+  let status = magic external neut_core_v0_55_decompose_float32(x, sign-ptr, mantissa-ptr, exponent-ptr);
+  _decimal-from-slots(status, sign-ptr, mantissa-ptr, exponent-ptr)
 }

@@ -35,7 +35,7 @@ data chunk {
 | Chunk-Style(content: string)
 | Chunk-Style-N(content: &string)
 | Chunk-Int(content: int)
-| Chunk-Float(content: float, decimals: int)
+| Chunk-Float(content: float)
 | Chunk-Rune(content: rune)
 | Chunk-Line
 | Chunk-Join(left: chunk, right: chunk)
@@ -73,8 +73,8 @@ inline atom-int(x: int) -> doc {
   Chunk(Chunk-Int(x))
 }
 
-inline atom-float(x: float, decimals: int) -> doc {
-  Chunk(Chunk-Float(x, decimals))
+inline atom-float(x: float) -> doc {
+  Chunk(Chunk-Float(x))
 }
 
 inline atom-rune(x: rune) -> doc {

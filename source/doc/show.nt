@@ -30,7 +30,7 @@ import {
 
 foreign {
   neut_core_v0_55_int64_strlen(int) -> int,
-  neut_core_v0_55_double_strlen(float, int) -> int,
+  neut_core_v0_55_double_strlen(float) -> int,
 }
 
 data _mode {
@@ -117,8 +117,8 @@ define _size-chunk(c: &chunk) -> int {
     0
   | Chunk-Int(x) =>
     magic external neut_core_v0_55_int64_strlen(*x)
-  | Chunk-Float(x, decimals) =>
-    magic external neut_core_v0_55_double_strlen(*x, *decimals)
+  | Chunk-Float(x) =>
+    magic external neut_core_v0_55_double_strlen(*x)
   | Chunk-Rune(_) =>
     1
   | Chunk-Line =>
@@ -146,8 +146,8 @@ define _layout-chunk(k: &_doc-kit, c: &chunk) -> string {
     **t
   | Chunk-Int(x) =>
     show-int(*x)
-  | Chunk-Float(x, decimals) =>
-    show-float(*x, *decimals)
+  | Chunk-Float(x) =>
+    show-float(*x)
   | Chunk-Rune(r) =>
     this.string.singleton(*r)
   | Chunk-Line =>

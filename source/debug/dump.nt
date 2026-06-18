@@ -7,7 +7,7 @@ import {
   this.unit {unit},
 }
 
-define-meta vet<a>(x: '&a)[ribbon-length := quote {50}] -> 'unit {
+inline-meta vet<a>(x: '&a)[ribbon-length := quote {50}] -> 'unit {
   quote {
     pin tmp = unquote {to-doc(x)};
     pin item = show-doc(tmp, unquote {ribbon-length});
@@ -16,7 +16,7 @@ define-meta vet<a>(x: '&a)[ribbon-length := quote {50}] -> 'unit {
   }
 }
 
-define-meta trace<a>(x: 'a) -> 'a {
+inline-meta trace<a>(x: 'a) -> 'a {
   quote {
     let x = unquote {x};
     let _ on x = unquote {vet(quote {x})};

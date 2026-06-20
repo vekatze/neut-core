@@ -81,7 +81,7 @@ resource _rc-inner {
     _increment-strong(ptr);
     ptr
   },
-  4,
+  32,
 }
 
 resource _weak-inner {
@@ -92,7 +92,7 @@ resource _weak-inner {
     _increment-weak(ptr);
     ptr
   },
-  4,
+  32,
 }
 
 alias-opaque rc(_: type) {

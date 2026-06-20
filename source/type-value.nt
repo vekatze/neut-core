@@ -4,10 +4,16 @@ import {
   this.string {string},
 }
 
+data field-layout {
+| Direct
+| Mixed(slot-count: int)
+}
+
 data field {
 | Field(
     name: &string,
     field-type: type,
+    layout: field-layout,
   )
 }
 

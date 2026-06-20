@@ -29,8 +29,16 @@ data inspect-sample {
 | Inspect-Sample(int, bool)
 }
 
+data generic-point {
+| Generic-Point(int, int)
+}
+
+data generic-mixed {
+| Generic-Mixed(generic-point mix, int)
+}
+
 inline-meta field-type(f: field) -> type {
-  let Field(_, t) = f;
+  let Field(_, t, _) = f;
   t
 }
 
@@ -203,6 +211,15 @@ define zen() -> unit {
   pin sample: either(unit, _) = Right(Pair(Unit, True));
   vet::(sample);
   print-int-line(inspect-sample-field-count::());
+  pin m0 = Generic-Mixed(Generic-Point(1, 2), 3);
+  vet::(m0);
+  pin m1 = Generic-Mixed(Generic-Point(1, 2), 3);
+  pin m2 = Generic-Mixed(Generic-Point(1, 2), 4);
+  if eq-data::(m1, m2) {
+    print-line("generic-mix-broken");
+  } else {
+    print-line("generic-mix-ok");
+  };
   pin v1 = add-int(10, 201);
   pin v2 = add-int(10, 1);
   if eq-data::(v1, v2) {

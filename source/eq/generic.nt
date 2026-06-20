@@ -29,8 +29,11 @@ import {
     Vector,
     Wrapper,
     constructor,
+    field-layout,
     field,
+    Direct,
     Field,
+    Mixed,
   },
   this.unsafe {cast},
   this.vector {vector},
@@ -87,11 +90,45 @@ inline-meta _equal-vector<a>(xs: '&vector(a), ys: '&vector(a)) -> 'bool {
   }
 }
 
-inline _load-nth-element(header: int, data-arg-num: int, cursor: int, x: pointer) -> pointer {
+inline _nth-element-pointer(header: int, data-arg-num: int, cursor: int, x: pointer) -> pointer {
   let u = this.word.size;
   let offset = mul-int(u, add-int(header, add-int(data-arg-num, cursor))); // x = (disc?, data-args, cons-args)
-  let elem-ptr = shift(x, offset);
-  load-pointer(elem-ptr)
+  shift(x, offset)
+}
+
+inline _load-nth-element(header: int, data-arg-num: int, cursor: int, x: pointer) -> pointer {
+  load-pointer(_nth-element-pointer(header, data-arg-num, cursor, x))
+}
+
+inline-meta _field-slot-count(layout: field-layout) -> int {
+  match layout {
+  | Direct =>
+    1
+  | Mixed(slot-count) =>
+    slot-count
+  }
+}
+
+inline-meta _field-ptr<a>(f: field, header: int, data-arg-num: int, cursor: int, x: '&a) -> 'pointer {
+  let Field(_, _, layout) = f;
+  match layout {
+  | Direct =>
+    quote {
+      let header-inner = unquote {promote {header}};
+      let data-arg-num-inner = unquote {promote {data-arg-num}};
+      let low-cursor = unquote {promote {cursor}};
+      let x-ptr = cast<&a, pointer>(unquote {x});
+      _load-nth-element(header-inner, data-arg-num-inner, low-cursor, x-ptr)
+    }
+  | Mixed(_) =>
+    quote {
+      let header-inner = unquote {promote {header}};
+      let data-arg-num-inner = unquote {promote {data-arg-num}};
+      let low-cursor = unquote {promote {cursor}};
+      let x-ptr = cast<&a, pointer>(unquote {x});
+      _nth-element-pointer(header-inner, data-arg-num-inner, low-cursor, x-ptr)
+    }
+  }
 }
 
 inline-meta _eq-data-adt-cons<a>(
@@ -105,19 +142,15 @@ inline-meta _eq-data-adt-cons<a>(
   match fields {
   | Nil =>
     quote {True}
-  | Cons(Field(_, t), rest) =>
+  | Cons(!f, rest) =>
+    let Field(_, t, layout) = f;
     unpack-type t = t;
     quote {
-      let header-inner = unquote {promote {header}};
-      let data-arg-num-inner = unquote {promote {data-arg-num}};
-      let low-cursor = unquote {promote {cursor}};
-      let x-ptr = cast<&a, pointer>(unquote {x});
-      let y-ptr = cast<&a, pointer>(unquote {y});
-      let x-elem-ptr = cast<pointer, &t>(_load-nth-element(header-inner, data-arg-num-inner, low-cursor, x-ptr));
-      let y-elem-ptr = cast<pointer, &t>(_load-nth-element(header-inner, data-arg-num-inner, low-cursor, y-ptr));
+      let x-elem-ptr = cast<pointer, &t>(unquote {_field-ptr(f, header, data-arg-num, cursor, x)});
+      let y-elem-ptr = cast<pointer, &t>(unquote {_field-ptr(f, header, data-arg-num, cursor, y)});
       let is-eq = unquote {eq-data(quote {x-elem-ptr}, quote {y-elem-ptr})};
       if is-eq {
-        unquote {_eq-data-adt-cons(rest, data-arg-num, header, add-int(cursor, 1), x, y)}
+        unquote {_eq-data-adt-cons(rest, data-arg-num, header, add-int(cursor, _field-slot-count(layout)), x, y)}
       } else {
         False
       }

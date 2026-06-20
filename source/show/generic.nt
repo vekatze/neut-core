@@ -56,8 +56,11 @@ import {
     Vector,
     Wrapper,
     constructor,
+    field-layout,
     field,
+    Direct,
     Field,
+    Mixed,
   },
   this.unsafe {cast-inline},
   this.vector {vector},
@@ -149,11 +152,55 @@ inline-meta _vector-doc<a>(xs: '&vector(a)) -> 'doc {
   }
 }
 
-inline _load-nth-element(header: int, data-arg-num: int, cursor: int, x: pointer) -> pointer {
+inline _nth-element-pointer(header: int, data-arg-num: int, cursor: int, x: pointer) -> pointer {
   let u = this.word.size;
   let offset = mul-int(u, add-int(header, add-int(data-arg-num, cursor)));
-  let elem-ptr = shift(x, offset);
-  load-pointer(elem-ptr)
+  shift(x, offset)
+}
+
+inline _load-nth-element(header: int, data-arg-num: int, cursor: int, x: pointer) -> pointer {
+  load-pointer(_nth-element-pointer(header, data-arg-num, cursor, x))
+}
+
+inline-meta _field-slot-count(layout: field-layout) -> int {
+  match layout {
+  | Direct =>
+    1
+  | Mixed(slot-count) =>
+    slot-count
+  }
+}
+
+inline-meta _constructor-arg-doc<a>(
+  f: field,
+  cursor: int,
+  header: int,
+  data-arg-num: int,
+  x: '&a,
+) -> 'doc {
+  let Field(_, t, layout) = f;
+  match layout {
+  | Direct =>
+    unpack-type t = t;
+    quote {
+      let header = unquote {promote {header}};
+      let data-arg-num = unquote {promote {data-arg-num}};
+      let low-cursor = unquote {promote {cursor}};
+      let x-ptr = cast-inline<&a, pointer>(unquote {x});
+      let x-elem-ptr = cast-inline<pointer, &t>(_load-nth-element(header, data-arg-num, low-cursor, x-ptr));
+      unquote {to-doc<t>(quote {x-elem-ptr})}
+    }
+  | Mixed(_) =>
+    unpack-type t = t;
+    quote {
+      let header = unquote {promote {header}};
+      let data-arg-num = unquote {promote {data-arg-num}};
+      let low-cursor = unquote {promote {cursor}};
+      let x-ptr = cast-inline<&a, pointer>(unquote {x});
+      let x-elem-ptr = cast-inline<pointer, &t>(_nth-element-pointer(header, data-arg-num, low-cursor, x-ptr));
+      unquote {to-doc<t>(quote {x-elem-ptr})}
+    }
+  }
 }
 
 inline-meta _constructor-args-doc<a>(
@@ -166,29 +213,12 @@ inline-meta _constructor-args-doc<a>(
   match fields {
   | Nil =>
     quote {empty}
-  | Cons(Field(_, t), Nil) =>
-    unpack-type t = t;
-    quote {
-      let header = unquote {promote {header}};
-      let data-arg-num = unquote {promote {data-arg-num}};
-      let low-cursor = unquote {promote {cursor}};
-      let x-ptr = cast-inline<&a, pointer>(unquote {x});
-      let x-elem-ptr = cast-inline<pointer, &t>(_load-nth-element(header, data-arg-num, low-cursor, x-ptr));
-      unquote {to-doc<t>(quote {x-elem-ptr})}
-    }
-  | Cons(Field(_, t), rest) =>
-    let d1 = {
-      unpack-type t = t;
-      quote {
-        let header = unquote {promote {header}};
-        let data-arg-num = unquote {promote {data-arg-num}};
-        let low-cursor = unquote {promote {cursor}};
-        let x-ptr = cast-inline<&a, pointer>(unquote {x});
-        let x-elem-ptr = cast-inline<pointer, &t>(_load-nth-element(header, data-arg-num, low-cursor, x-ptr));
-        unquote {to-doc<t>(quote {x-elem-ptr})}
-      }
-    };
-    let d2 = _constructor-args-doc(rest, add-int(cursor, 1), header, data-arg-num, x);
+  | Cons(f, Nil) =>
+    _constructor-arg-doc(f, cursor, header, data-arg-num, x)
+  | Cons(!f, rest) =>
+    let Field(_, _, layout) = f;
+    let d1 = _constructor-arg-doc(f, cursor, header, data-arg-num, x);
+    let d2 = _constructor-args-doc(rest, add-int(cursor, _field-slot-count(layout)), header, data-arg-num, x);
     quote {join[unquote {d1}, atom-N(","), break(" "), unquote {d2}]}
   }
 }

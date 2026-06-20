@@ -1,0 +1,141 @@
+import {
+  this.bool {False, True, bool},
+  this.either {Left, Right},
+  this.list {Cons, Nil, list},
+  this.pair {Pair, pair},
+  this.unit {Unit},
+}
+
+inline-meta length<a>(xs: list(a)) -> int {
+  match xs {
+  | Nil =>
+    0
+  | Cons(_, ys) =>
+    add-int(1, length(ys))
+  }
+}
+
+inline-meta is-empty<a>(xs: list(a)) -> bool {
+  match xs {
+  | Nil =>
+    True
+  | Cons(_, _) =>
+    False
+  }
+}
+
+inline-meta fold-left<a, b>(acc: b, xs: list(a), !f: (b, a) -> b) -> b {
+  match xs {
+  | Nil =>
+    acc
+  | Cons(!y, ys) =>
+    fold-left(f(acc, y), ys, f)
+  }
+}
+
+inline-meta fold-right<a, b>(xs: list(a), acc: b, !f: (a, b) -> b) -> b {
+  match xs {
+  | Nil =>
+    acc
+  | Cons(!y, ys) =>
+    f(y, fold-right(ys, acc, f))
+  }
+}
+
+inline-meta for-each<a, b>(xs: list(a), !f: (a) -> b) -> list(b) {
+  match xs {
+  | Nil =>
+    Nil
+  | Cons(!y, ys) =>
+    Cons(f(y), for-each(ys, f))
+  }
+}
+
+inline-meta append<a>(xs: list(a), ys: list(a)) -> list(a) {
+  match xs {
+  | Nil =>
+    ys
+  | Cons(x, rest) =>
+    Cons(x, append(rest, ys))
+  }
+}
+
+inline-meta concat<a>(xss: list(list(a))) -> list(a) {
+  fold-right(xss, Nil, exact append)
+}
+
+inline-meta reverse<a>(xs: list(a)) -> list(a) {
+  fold-left(Nil, xs, (acc, x) => {
+    Cons(x, acc)
+  })
+}
+
+inline-meta any<a>(xs: list(a), !pred: (a) -> bool) -> bool {
+  match xs {
+  | Nil =>
+    False
+  | Cons(!y, ys) =>
+    if pred(y) {
+      True
+    } else {
+      any(ys, pred)
+    }
+  }
+}
+
+inline-meta all<a>(xs: list(a), !pred: (a) -> bool) -> bool {
+  match xs {
+  | Nil =>
+    True
+  | Cons(y, ys) =>
+    if pred(y) {
+      all(ys, pred)
+    } else {
+      False
+    }
+  }
+}
+
+inline-meta find<a>(xs: list(a), !pred: (a) -> bool) -> ?a {
+  match xs {
+  | Nil =>
+    Left(Unit)
+  | Cons(!y, ys) =>
+    if pred(y) {
+      Right(y)
+    } else {
+      find(ys, pred)
+    }
+  }
+}
+
+inline-meta nth<a>(xs: list(a), index: int) -> ?a {
+  match xs {
+  | Nil =>
+    Left(Unit)
+  | Cons(!y, ys) =>
+    if eq-int(index, 0) {
+      Right(y)
+    } else {
+      nth(ys, sub-int(index, 1))
+    }
+  }
+}
+
+inline-meta zip<a, b>(xs: list(a), ys: list(b)) -> list(pair(a, b)) {
+  match xs, ys {
+  | Cons(x, xs), Cons(y, ys) =>
+    Cons(Pair(x, y), zip(xs, ys))
+  | _, _ =>
+    Nil
+  }
+}
+
+inline-meta zip-with<a, b, c>(xs: list(a), ys: list(b), !f: (a, b) -> c) -> list(c) {
+  match xs, ys {
+  | Cons(x, xs), Cons(y, ys) =>
+    Cons(f(x, y), zip-with(xs, ys, f))
+  | _, _ =>
+    Nil
+  }
+}

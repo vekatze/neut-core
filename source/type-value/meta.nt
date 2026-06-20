@@ -1,0 +1,266 @@
+import {
+  this.bool {False, True, bool},
+  this.either {Left, Right},
+  this.list {Cons, Nil, list},
+  this.list.meta {fold-left, length},
+  this.memory.unsafe {load-int, load-pointer},
+  this.pair {Pair, pair},
+  this.pointer {shift},
+  this.string {string},
+  this.type-value {
+    Algebraic,
+    Constructor,
+    Direct,
+    Field,
+    Mixed,
+    constructor,
+    field,
+    field-layout,
+    type-value,
+  },
+  this.unit {Unit},
+  this.unsafe {cast-inline},
+  this.word,
+}
+
+inline-meta field-name(f: field) -> &string {
+  let Field(name, _, _) = f;
+  name
+}
+
+inline-meta field-type(f: field) -> type {
+  let Field(_, t, _) = f;
+  t
+}
+
+inline-meta field-layout-of(f: field) -> field-layout {
+  let Field(_, _, layout) = f;
+  layout
+}
+
+inline-meta is-direct(layout: field-layout) -> bool {
+  match layout {
+  | Direct =>
+    True
+  | Mixed(_) =>
+    False
+  }
+}
+
+inline-meta is-mixed(layout: field-layout) -> bool {
+  match layout {
+  | Direct =>
+    False
+  | Mixed(_) =>
+    True
+  }
+}
+
+inline-meta field-slot-count(layout: field-layout) -> int {
+  match layout {
+  | Direct =>
+    1
+  | Mixed(slot-count) =>
+    slot-count
+  }
+}
+
+inline-meta field-storage-slot-count(f: field) -> int {
+  field-slot-count(field-layout-of(f))
+}
+
+inline-meta constructor-name(c: constructor) -> &string {
+  let Constructor(name, _, _) = c;
+  name
+}
+
+inline-meta constructor-is-const-like(c: constructor) -> bool {
+  let Constructor(_, is-const-like, _) = c;
+  is-const-like
+}
+
+inline-meta constructor-fields(c: constructor) -> list(field) {
+  let Constructor(_, _, fields) = c;
+  fields
+}
+
+inline-meta constructor-field-count(c: constructor) -> int {
+  length(constructor-fields(c))
+}
+
+inline-meta constructor-payload-slot-count(c: constructor) -> int {
+  fold-left(0, constructor-fields(c), (acc, f) => {
+    add-int(acc, field-storage-slot-count(f))
+  })
+}
+
+inline-meta header-slot-count(constructors: list(constructor)) -> int {
+  if gt-int(length(constructors), 1) {
+    1
+  } else {
+    0
+  }
+}
+
+inline-meta algebraic-header-slot-count(constructors: list(constructor)) -> int {
+  header-slot-count(constructors)
+}
+
+inline-meta algebraic-discriminant<a>(constructors: list(constructor), x: '&a) -> 'int {
+  if gt-int(length(constructors), 1) {
+    quote {
+      let x-ptr = cast-inline<&a, pointer>(unquote {x});
+      load-int(x-ptr)
+    }
+  } else {
+    quote {0}
+  }
+}
+
+inline-meta _constructor-switch<a>(
+  constructors: list(constructor),
+  cons-index: int,
+  disc: 'int,
+  fallback: 'a,
+  !on-hit: (constructor) -> 'a,
+) -> 'a {
+  match constructors {
+  | Nil =>
+    fallback
+  | Cons(!c, rest) =>
+    quote {
+      let matched = eq-int(unquote {promote {cons-index}}, unquote {disc});
+      if matched {
+        unquote {on-hit(c)}
+      } else {
+        unquote {_constructor-switch(rest, add-int(cons-index, 1), disc, fallback, on-hit)}
+      }
+    }
+  }
+}
+
+// Generates a runtime branch over the algebraic discriminant while traversing
+// the constructor metadata at meta-time. `on-hit` is expanded only for the
+// constructor selected by the generated discriminant check.
+inline-meta constructor-switch<a>(
+  constructors: list(constructor),
+  disc: 'int,
+  fallback: 'a,
+  !on-hit: (constructor) -> 'a,
+) -> 'a {
+  _constructor-switch(constructors, 0, disc, fallback, on-hit)
+}
+
+inline-meta _enum-switch<a>(
+  names: list(&string),
+  cons-index: int,
+  disc: 'int,
+  fallback: 'a,
+  !on-hit: (&string) -> 'a,
+) -> 'a {
+  match names {
+  | Nil =>
+    fallback
+  | Cons(name, rest) =>
+    quote {
+      let matched = eq-int(unquote {promote {cons-index}}, unquote {disc});
+      if matched {
+        unquote {on-hit(name)}
+      } else {
+        unquote {_enum-switch(rest, add-int(cons-index, 1), disc, fallback, on-hit)}
+      }
+    }
+  }
+}
+
+// Generates a runtime branch over an enum discriminant while traversing the
+// constructor names at meta-time.
+inline-meta enum-switch<a>(
+  names: list(&string),
+  disc: 'int,
+  fallback: 'a,
+  !on-hit: (&string) -> 'a,
+) -> 'a {
+  _enum-switch(names, 0, disc, fallback, on-hit)
+}
+
+inline-meta is-algebraic(tv: type-value) -> bool {
+  match tv {
+  | Algebraic(_, _, _) =>
+    True
+  | _ =>
+    False
+  }
+}
+
+inline-meta algebraic-data-args(tv: type-value) -> ?list(type) {
+  match tv {
+  | Algebraic(_, data-args, _) =>
+    Right(data-args)
+  | _ =>
+    Left(Unit)
+  }
+}
+
+inline-meta algebraic-constructors(tv: type-value) -> ?list(constructor) {
+  match tv {
+  | Algebraic(_, _, constructors) =>
+    Right(constructors)
+  | _ =>
+    Left(Unit)
+  }
+}
+
+inline-meta data-arg-count(data-args: list(type)) -> int {
+  length(data-args)
+}
+
+inline-meta fields-with-cursors(fields: list(field), cursor: int) -> list(pair(field, int)) {
+  match fields {
+  | Nil =>
+    Nil
+  | Cons(!f, rest) =>
+    Cons(Pair(f, cursor), fields-with-cursors(rest, add-int(cursor, field-storage-slot-count(f))))
+  }
+}
+
+inline-meta constructor-fields-with-cursors(c: constructor, cursor: int) -> list(pair(field, int)) {
+  fields-with-cursors(constructor-fields(c), cursor)
+}
+
+inline nth-field-slot-pointer(header: int, data-arg-num: int, cursor: int, x: pointer) -> pointer {
+  let u = this.word.size;
+  let offset = mul-int(u, add-int(header, add-int(data-arg-num, cursor)));
+  shift(x, offset)
+}
+
+inline load-direct-field-pointer(header: int, data-arg-num: int, cursor: int, x: pointer) -> pointer {
+  load-pointer(nth-field-slot-pointer(header, data-arg-num, cursor, x))
+}
+
+inline-meta field-pointer<a>(
+  f: field,
+  header: int,
+  data-arg-num: int,
+  cursor: int,
+  x: '&a,
+) -> 'pointer {
+  match field-layout-of(f) {
+  | Direct =>
+    quote {
+      let header-inner = unquote {promote {header}};
+      let data-arg-num-inner = unquote {promote {data-arg-num}};
+      let low-cursor = unquote {promote {cursor}};
+      let x-ptr = cast-inline<&a, pointer>(unquote {x});
+      load-direct-field-pointer(header-inner, data-arg-num-inner, low-cursor, x-ptr)
+    }
+  | Mixed(_) =>
+    quote {
+      let header-inner = unquote {promote {header}};
+      let data-arg-num-inner = unquote {promote {data-arg-num}};
+      let low-cursor = unquote {promote {cursor}};
+      let x-ptr = cast-inline<&a, pointer>(unquote {x});
+      nth-field-slot-pointer(header-inner, data-arg-num-inner, low-cursor, x-ptr)
+    }
+  }
+}

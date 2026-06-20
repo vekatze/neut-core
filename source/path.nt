@@ -5,7 +5,6 @@ import {
   this.either {Left, Right},
   this.list {Cons, List, Nil, all, filter, length, list, reverse},
   this.pair {Pair, pair},
-  this.rune.eq {eq-rune, ne-rune},
   this.string {
     drop-end-N,
     drop-while-end-N,

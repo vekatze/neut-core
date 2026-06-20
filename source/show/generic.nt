@@ -25,12 +25,9 @@ import {
     join,
   },
   this.doc.show {show-doc},
-  this.either {Left, Right},
   this.float.show {show-float32},
   this.list {Cons, Nil, list},
-  this.memory.unsafe {load-int, load-pointer},
-  this.pair {Pair},
-  this.pointer {shift},
+  this.pair {Pair, pair},
   this.show {Show, show},
   this.string {string},
   this.type-value {
@@ -39,6 +36,7 @@ import {
     Box-T,
     Constructor,
     Enum,
+    Field,
     Float16,
     Float32,
     Float64,
@@ -56,33 +54,19 @@ import {
     Vector,
     Wrapper,
     constructor,
-    field-layout,
     field,
-    Direct,
-    Field,
-    Mixed,
+  },
+  this.type-value.meta {
+    algebraic-discriminant,
+    algebraic-header-slot-count,
+    constructor-switch,
+    data-arg-count,
+    enum-switch,
+    field-pointer,
+    fields-with-cursors,
   },
   this.unsafe {cast-inline},
   this.vector {vector},
-  this.word,
-}
-
-inline-meta _meta-length<a>(xs: list(a)) -> int {
-  match xs {
-  | Nil =>
-    0
-  | Cons(_, ys) =>
-    add-int(1, _meta-length(ys))
-  }
-}
-
-inline-meta _meta-for-each<a, b>(xs: list(a), !f: (a) -> b) -> list(b) {
-  match xs {
-  | Nil =>
-    Nil
-  | Cons(y, ys) =>
-    Cons(f(y), _meta-for-each(ys, f))
-  }
 }
 
 define _literal-doc(d: doc) -> doc {
@@ -91,16 +75,6 @@ define _literal-doc(d: doc) -> doc {
     d,
     ansi-reset,
   ]
-}
-
-inline-meta _join-string(t1: &string, t2: &string) -> &string {
-  let tmp = magic string-uncons(t1);
-  match tmp {
-  | Left(_) =>
-    t2
-  | Right(Pair(r, rest)) =>
-    magic string-cons(r, _join-string(rest, t2))
-  }
 }
 
 nominal {
@@ -152,178 +126,99 @@ inline-meta _vector-doc<a>(xs: '&vector(a)) -> 'doc {
   }
 }
 
-inline _nth-element-pointer(header: int, data-arg-num: int, cursor: int, x: pointer) -> pointer {
-  let u = this.word.size;
-  let offset = mul-int(u, add-int(header, add-int(data-arg-num, cursor)));
-  shift(x, offset)
-}
-
-inline _load-nth-element(header: int, data-arg-num: int, cursor: int, x: pointer) -> pointer {
-  load-pointer(_nth-element-pointer(header, data-arg-num, cursor, x))
-}
-
-inline-meta _field-slot-count(layout: field-layout) -> int {
-  match layout {
-  | Direct =>
-    1
-  | Mixed(slot-count) =>
-    slot-count
-  }
-}
-
 inline-meta _constructor-arg-doc<a>(
-  f: field,
+  !f: field,
   cursor: int,
   header: int,
   data-arg-num: int,
   x: '&a,
 ) -> 'doc {
-  let Field(_, t, layout) = f;
-  match layout {
-  | Direct =>
-    unpack-type t = t;
-    quote {
-      let header = unquote {promote {header}};
-      let data-arg-num = unquote {promote {data-arg-num}};
-      let low-cursor = unquote {promote {cursor}};
-      let x-ptr = cast-inline<&a, pointer>(unquote {x});
-      let x-elem-ptr = cast-inline<pointer, &t>(_load-nth-element(header, data-arg-num, low-cursor, x-ptr));
-      unquote {to-doc<t>(quote {x-elem-ptr})}
-    }
-  | Mixed(_) =>
-    unpack-type t = t;
-    quote {
-      let header = unquote {promote {header}};
-      let data-arg-num = unquote {promote {data-arg-num}};
-      let low-cursor = unquote {promote {cursor}};
-      let x-ptr = cast-inline<&a, pointer>(unquote {x});
-      let x-elem-ptr = cast-inline<pointer, &t>(_nth-element-pointer(header, data-arg-num, low-cursor, x-ptr));
-      unquote {to-doc<t>(quote {x-elem-ptr})}
-    }
+  let Field(_, t, _) = f;
+  unpack-type t = t;
+  quote {
+    let x-elem-ptr = cast-inline<pointer, &t>(unquote {field-pointer(f, header, data-arg-num, cursor, x)});
+    unquote {to-doc<t>(quote {x-elem-ptr})}
   }
 }
 
 inline-meta _constructor-args-doc<a>(
-  fields: list(field),
-  cursor: int,
+  field-cursors: list(pair(field, int)),
   header: int,
   data-arg-num: int,
   x: '&a,
 ) -> 'doc {
-  match fields {
+  match field-cursors {
   | Nil =>
     quote {empty}
-  | Cons(f, Nil) =>
+  | Cons(entry, Nil) =>
+    let Pair(f, cursor) = entry;
     _constructor-arg-doc(f, cursor, header, data-arg-num, x)
-  | Cons(!f, rest) =>
-    let Field(_, _, layout) = f;
+  | Cons(!entry, rest) =>
+    let Pair(f, cursor) = entry;
     let d1 = _constructor-arg-doc(f, cursor, header, data-arg-num, x);
-    let d2 = _constructor-args-doc(rest, add-int(cursor, _field-slot-count(layout)), header, data-arg-num, x);
+    let d2 = _constructor-args-doc(rest, header, data-arg-num, x);
     quote {join[unquote {d1}, atom-N(","), break(" "), unquote {d2}]}
+  }
+}
+
+inline-meta _algebraic-constructor-doc<a>(
+  cons: constructor,
+  header: int,
+  data-arg-num: int,
+  x: '&a,
+) -> 'doc {
+  let Constructor(cons-name, is-const-like, xts) = cons;
+  let prefix =
+    if is-const-like {
+      quote {_constructor-doc(unquote {promote {cons-name}})}
+    } else {
+      quote {join[_constructor-doc(unquote {promote {cons-name}}), atom-N("(")]}
+    };
+  let suffix =
+    if is-const-like {
+      quote {empty}
+    } else {
+      quote {atom-N(")")}
+    };
+  quote {
+    Group(_nested-comma-seq(
+      unquote {prefix},
+      unquote {_constructor-args-doc(fields-with-cursors(xts, 0), header, data-arg-num, x)},
+      unquote {suffix},
+    ))
   }
 }
 
 inline-meta _algebraic-doc<a>(
   constructors: list(constructor),
-  cons-index: int,
+  header: int,
   data-arg-num: int,
   disc: 'int,
   x: '&a,
 ) -> 'doc {
-  match constructors {
-  | Nil =>
-    quote {empty}
-  | Cons(Constructor(cons-name, is-const-like, xts), rest) =>
-    quote {
-      if eq-int(unquote {promote {cons-index}}, unquote {disc}) {
-        unquote {
-          let prefix =
-            if is-const-like {
-              quote {_constructor-doc(unquote {promote {cons-name}})}
-            } else {
-              quote {join[_constructor-doc(unquote {promote {cons-name}}), atom-N("(")]}
-            };
-          let suffix =
-            if is-const-like {
-              quote {empty}
-            } else {
-              quote {atom-N(")")}
-            };
-          quote {
-            Group(_nested-comma-seq(
-              unquote {prefix},
-              unquote {_constructor-args-doc(xts, 0, 1, data-arg-num, x)},
-              unquote {suffix},
-            ))
-          }
-        }
-      } else {
-        unquote {_algebraic-doc(rest, add-int(cons-index, 1), data-arg-num, disc, x)}
-      }
-    }
-  }
-}
-
-inline-meta _single-constructor-doc<a>(constructors: list(constructor), data-arg-num: int, x: '&a) -> 'doc {
-  match constructors {
-  | Nil =>
-    quote {empty}
-  | Cons(Constructor(cons-name, is-const-like, xts), _) =>
-    let prefix =
-      if is-const-like {
-        quote {_constructor-doc(unquote {promote {cons-name}})}
-      } else {
-        quote {join[_constructor-doc(unquote {promote {cons-name}}), atom-N("(")]}
-      };
-    let suffix =
-      if is-const-like {
-        quote {empty}
-      } else {
-        quote {atom-N(")")}
-      };
-    quote {
-      Group(_nested-comma-seq(
-        unquote {prefix},
-        unquote {_constructor-args-doc(xts, 0, 0, data-arg-num, x)},
-        unquote {suffix},
-      ))
-    }
-  }
-}
-
-inline-meta _enum-doc<a>(cons-index: int, names: list(&string), disc: 'int, x: '&a) -> 'doc {
-  match names {
-  | Nil =>
-    quote {empty}
-  | Cons(name, rest) =>
-    quote {
-      if eq-int(unquote {promote {cons-index}}, unquote {disc}) {
-        unquote {quote {_constructor-doc(unquote {promote {name}})}}
-      } else {
-        unquote {_enum-doc(add-int(cons-index, 1), rest, disc, x)}
-      }
-    }
-  }
+  constructor-switch(constructors, disc, quote {empty}, (cons) => {
+    _algebraic-constructor-doc(cons, header, data-arg-num, x)
+  })
 }
 
 define-meta to-doc<a>(x: '&a) -> 'doc {
   let k = magic inspect-type(a);
   match k {
   | Algebraic(_, data-args, !cons-info) =>
-    let data-arg-num = _meta-length(data-args);
-    if gt-int(_meta-length(cons-info), 1) {
-      quote {
-        let ptr-x = cast-inline<&a, pointer>(unquote {x});
-        let discriminant-x = load-int(ptr-x);
-        unquote {_algebraic-doc(cons-info, 0, data-arg-num, quote {discriminant-x}, x)}
-      }
-    } else {
-      _single-constructor-doc(cons-info, data-arg-num, x)
+    let data-arg-num = data-arg-count(data-args);
+    let header = algebraic-header-slot-count(cons-info);
+    quote {
+      let discriminant-x = unquote {algebraic-discriminant(cons-info, x)};
+      unquote {_algebraic-doc(cons-info, header, data-arg-num, quote {discriminant-x}, x)}
     }
   | Enum(names) =>
     quote {
       let discriminant-x = cast-inline<&a, int>(unquote {x});
-      unquote {_enum-doc(0, names, quote {discriminant-x}, x)}
+      unquote {
+        enum-switch(names, quote {discriminant-x}, quote {empty}, (name) => {
+          quote {_constructor-doc(unquote {promote {name}})}
+        })
+      }
     }
   | Int1 =>
     quote {atom-int(magic cast(int1, int64, magic cast(&a, int1, unquote {x})))}

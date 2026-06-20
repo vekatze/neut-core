@@ -9,6 +9,7 @@ import {
   this.int.io {print-int-line},
   this.int.parse,
   this.list {Cons, Nil, list},
+  this.list.meta,
   this.pair {Pair, pair},
   this.platform {get-cpu-count},
   this.string {append, from-text, string, strip-prefix, strip-suffix},
@@ -16,7 +17,14 @@ import {
   this.string.io {print, print-line},
   this.sync.mvar {make-mvar, receive, send},
   this.sync.pool {for-each-parallel},
-  this.type-value {Algebraic, Constructor, Field, field},
+  this.type-value {Algebraic, Constructor},
+  this.type-value.meta {
+    algebraic-header-slot-count,
+    constructor-field-count,
+    constructor-fields-with-cursors,
+    field-storage-slot-count,
+    field-type,
+  },
   this.unit {Unit, unit},
   this.vector {Vector, product, push-back, vector},
 }
@@ -37,12 +45,8 @@ data generic-mixed {
 | Generic-Mixed(generic-point mix, int)
 }
 
-inline-meta field-type(f: field) -> type {
-  let Field(_, t, _) = f;
-  t
-}
-
 define-meta inspect-sample-field-count() -> 'int {
+  let _ = Inspect-Sample;
   let k = magic inspect-type(inspect-sample);
   match k {
   | Algebraic(_, _, Cons(Constructor(_, _, fields), Nil)) =>
@@ -67,6 +71,54 @@ define-meta inspect-sample-field-count() -> 'int {
   | _ =>
     quote {-3}
   }
+}
+
+define-meta inspect-mixed-slot-summary() -> 'int {
+  let k = magic inspect-type(generic-mixed);
+  match k {
+  | Algebraic(_, _, !constructors) =>
+    let header = algebraic-header-slot-count(constructors);
+    match constructors {
+    | Cons(!c, Nil) =>
+      let field-count = constructor-field-count(c);
+      match constructor-fields-with-cursors(c, 0) {
+      | Cons(Pair(f1, cursor1), Cons(Pair(f2, cursor2), Nil)) =>
+        let first-slots = field-storage-slot-count(f1);
+        let second-slots = field-storage-slot-count(f2);
+        if eq-int(header, 0) {
+          if eq-int(cursor1, 0) {
+            if eq-int(cursor2, first-slots) {
+              let value = add-int(mul-int(field-count, 100), add-int(mul-int(first-slots, 10), second-slots));
+              quote {unquote {promote {value}}}
+            } else {
+              quote {-5}
+            }
+          } else {
+            quote {-4}
+          }
+        } else {
+          quote {-3}
+        }
+      | _ =>
+        quote {-1}
+      }
+    | _ =>
+      quote {-6}
+    }
+  | _ =>
+    quote {-2}
+  }
+}
+
+define-meta meta-list-sample() -> 'int {
+  let !xs = Cons(1, Cons(2, Cons(3, Nil)));
+  let len = this.list.meta.length(xs);
+  let sum =
+    this.list.meta.fold-left(0, xs, (acc, x) => {
+      add-int(acc, x)
+    });
+  let value = add-int(mul-int(len, 10), sum);
+  quote {unquote {promote {value}}}
 }
 
 define use-text(t: text) -> unit {
@@ -211,6 +263,8 @@ define zen() -> unit {
   pin sample: either(unit, _) = Right(Pair(Unit, True));
   vet::(sample);
   print-int-line(inspect-sample-field-count::());
+  print-int-line(inspect-mixed-slot-summary::());
+  print-int-line(meta-list-sample::());
   pin m0 = Generic-Mixed(Generic-Point(1, 2), 3);
   vet::(m0);
   pin m1 = Generic-Mixed(Generic-Point(1, 2), 3);

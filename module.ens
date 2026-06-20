@@ -46,8 +46,6 @@
     ord ["Ord", "ord"],
     ordering ["EQ", "GT", "LT", "ordering"],
     pair ["Pair", "pair"],
-    rune.eq ["eq-rune", "ne-rune"],
-    rune.ord ["lt-rune", "le-rune", "gt-rune", "ge-rune"],
     show ["Show", "show"],
     string ["string"],
     string.eq ["eq-string", "ne-string"],

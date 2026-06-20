@@ -1,0 +1,35 @@
+import {
+  this.bool {False, True, bool},
+}
+
+inline-meta and(b1: bool, b2: bool) -> bool {
+  if b1 {
+    if b2 {
+      True
+    } else {
+      False
+    }
+  } else {
+    False
+  }
+}
+
+inline-meta or(b1: bool, b2: bool) -> bool {
+  if b1 {
+    True
+  } else {
+    if b2 {
+      True
+    } else {
+      False
+    }
+  }
+}
+
+inline-meta not(b: bool) -> bool {
+  if b {
+    False
+  } else {
+    True
+  }
+}

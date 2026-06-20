@@ -1,0 +1,13 @@
+import {
+  this.bool {bool},
+  this.string {string},
+  this.unit {Unit, unit},
+}
+
+inline-meta assert(message: &string, cond: bool) -> 'unit {
+  if cond {
+    quote {Unit}
+  } else {
+    magic compile-error(message)
+  }
+}

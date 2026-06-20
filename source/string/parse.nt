@@ -7,8 +7,6 @@ import {
   this.list {Cons, List, Nil, concat, for-each-E, for-each-EN, intercalate, list},
   this.pair {Pair},
   this.rune,
-  this.rune.eq {eq-rune},
-  this.rune.ord {le-rune},
   this.string {
     drop,
     format,

@@ -6,7 +6,7 @@ import {
   this.eq {Eq, eq},
   this.list {Cons, Nil, list},
   this.memory.unsafe {load-int, load-pointer},
-  this.pair {Pair, pair},
+  this.pair {Pair},
   this.pointer {shift},
   this.rune.eq {eq-rune},
   this.string {string},
@@ -29,6 +29,8 @@ import {
     Vector,
     Wrapper,
     constructor,
+    field,
+    Field,
   },
   this.unsafe {cast},
   this.vector {vector},
@@ -51,11 +53,6 @@ inline-meta _meta-for-each<a, b>(xs: list(a), !f: (a) -> b) -> list(b) {
   | Cons(y, ys) =>
     Cons(f(y), _meta-for-each(ys, f))
   }
-}
-
-inline-meta _meta-snd<a, b>(p: pair(a, b)) -> b {
-  let Pair(_, y) = p;
-  y
 }
 
 inline-meta _join-string(t1: &string, t2: &string) -> &string {
@@ -98,17 +95,17 @@ inline _load-nth-element(header: int, data-arg-num: int, cursor: int, x: pointer
 }
 
 inline-meta _eq-data-adt-cons<a>(
-  cons-arg-types: list(type),
+  fields: list(field),
   data-arg-num: int,
   header: int,
   cursor: int,
   x: '&a,
   y: '&a,
 ) -> 'bool {
-  match cons-arg-types {
+  match fields {
   | Nil =>
     quote {True}
-  | Cons(t, rest) =>
+  | Cons(Field(_, t), rest) =>
     unpack-type t = t;
     quote {
       let header-inner = unquote {promote {header}};
@@ -140,10 +137,9 @@ inline-meta _eq-data-adt<a>(
   | Nil =>
     quote {True}
   | Cons(Constructor(_, _, xts), rest) =>
-    let ts = _meta-for-each(xts, exact _meta-snd);
     quote {
       if eq-int(unquote {promote {cons-index}}, unquote {disc}) {
-        unquote {_eq-data-adt-cons(ts, data-arg-num, 1, 0, x, y)}
+        unquote {_eq-data-adt-cons(xts, data-arg-num, 1, 0, x, y)}
       } else {
         unquote {_eq-data-adt(rest, add-int(cons-index, 1), data-arg-num, disc, x, y)}
       }
@@ -161,8 +157,7 @@ inline-meta _eq-data-single-cons<a>(
   | Nil =>
     quote {True}
   | Cons(Constructor(_, _, xts), _) =>
-    let ts = _meta-for-each(xts, exact _meta-snd);
-    _eq-data-adt-cons(ts, data-arg-num, 0, 0, x, y)
+    _eq-data-adt-cons(xts, data-arg-num, 0, 0, x, y)
   }
 }
 

@@ -1,12 +1,18 @@
 import {
   this.bool {bool},
   this.list {list},
-  this.pair {pair},
   this.string {string},
 }
 
+data field {
+| Field(
+    name: &string,
+    field-type: type,
+  )
+}
+
 data constructor {
-| Constructor(&string, bool, list(pair(&string, type)))
+| Constructor(&string, bool, list(field))
 }
 
 data type-value {

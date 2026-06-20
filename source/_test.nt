@@ -16,12 +16,49 @@ import {
   this.string.io {print, print-line},
   this.sync.mvar {make-mvar, receive, send},
   this.sync.pool {for-each-parallel},
+  this.type-value {Algebraic, Constructor, Field, field},
   this.unit {Unit, unit},
   this.vector {Vector, product, push-back, vector},
 }
 
 data adt-with-text {
 | CBar(text)
+}
+
+data inspect-sample {
+| Inspect-Sample(int, bool)
+}
+
+inline-meta field-type(f: field) -> type {
+  let Field(_, t) = f;
+  t
+}
+
+define-meta inspect-sample-field-count() -> 'int {
+  let k = magic inspect-type(inspect-sample);
+  match k {
+  | Algebraic(_, _, Cons(Constructor(_, _, fields), Nil)) =>
+    match fields {
+    | Cons(f1, Cons(f2, Nil)) =>
+      unpack-type t1 = field-type(f1);
+      unpack-type t2 = field-type(f2);
+      let b1 = magic eq-type(t1, int);
+      let b2 = magic eq-type(t2, bool);
+      if b1 {
+        if b2 {
+          quote {2}
+        } else {
+          quote {-1}
+        }
+      } else {
+        quote {-2}
+      }
+    | _ =>
+      quote {-4}
+    }
+  | _ =>
+    quote {-3}
+  }
 }
 
 define use-text(t: text) -> unit {
@@ -165,6 +202,7 @@ define zen() -> unit {
   vet::(ys);
   pin sample: either(unit, _) = Right(Pair(Unit, True));
   vet::(sample);
+  print-int-line(inspect-sample-field-count::());
   pin v1 = add-int(10, 201);
   pin v2 = add-int(10, 1);
   if eq-data::(v1, v2) {

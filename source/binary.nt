@@ -7,7 +7,7 @@ import {
   this.list {Cons, Nil, fold-left-N, list},
   this.memory {malloc},
   this.memory.unsafe {free, load-int, load-int8, load-pointer, memcpy, store-int, store-int8, store-pointer},
-  this.pointer {return-or-store-pointer, shift},
+  this.pointer {shift},
   this.unit {Unit, unit},
   this.unsafe {cast},
   this.word,
@@ -35,7 +35,7 @@ resource binary {
   (x: pointer, _: int) => {
     free(x)
   },
-  (source-pointer: pointer, dest: pointer) => {
+  (source-pointer: pointer, _: pointer) => {
     let u = this.word.size;
     let from = load-int(source-pointer);
     let to = load-int(shift(source-pointer, u));
@@ -44,7 +44,7 @@ resource binary {
     let target-content-pointer = _initialize-header(target-pointer, length);
     let source-content-pointer = load-pointer(shift(source-pointer, _content-pointer-offset()));
     memcpy(target-content-pointer, shift(source-content-pointer, from), length);
-    return-or-store-pointer(target-pointer, dest)
+    target-pointer
   },
   -1,
 }

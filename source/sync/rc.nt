@@ -4,7 +4,7 @@ import {
   this.either {Right, none},
   this.memory {malloc},
   this.memory.unsafe {free, load-int, store-int},
-  this.pointer {return-or-store-pointer, shift},
+  this.pointer {shift},
   this.sync._atomic {
     fetch-add-int,
     fetch-sub-int,
@@ -74,9 +74,9 @@ resource _rc-inner {
   (ptr: pointer, _: int) => {
     _release(ptr)
   },
-  (ptr: pointer, dest: pointer) => {
+  (ptr: pointer, _: pointer) => {
     _increment-strong(ptr);
-    return-or-store-pointer(ptr, dest)
+    ptr
   },
   -1,
 }
@@ -85,9 +85,9 @@ resource _weak-inner {
   (ptr: pointer, _: int) => {
     _release-weak(ptr)
   },
-  (ptr: pointer, dest: pointer) => {
+  (ptr: pointer, _: pointer) => {
     _increment-weak(ptr);
-    return-or-store-pointer(ptr, dest)
+    ptr
   },
   -1,
 }

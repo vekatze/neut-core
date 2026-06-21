@@ -4,7 +4,7 @@ import {
   this.memory {malloc},
   this.memory.unsafe {free, load-int, store-int},
   this.pair {Pair, pair},
-  this.pointer {null-pointer, return-or-store-pointer, shift},
+  this.pointer {null-pointer, shift},
   this.sync._posix {
     THREAD_MUTEX_SIZE,
     thread-mutex-destroy,
@@ -42,7 +42,7 @@ resource _cell {
     magic call-type(a, 0, load-int(ch), add-int(0, 1));
     free(ch)
   },
-  (ch: pointer, dest: pointer) => {
+  (ch: pointer, _: pointer) => {
     let u = this.word.size;
     let mutex-size = from-c-size(THREAD_MUTEX_SIZE);
     let mutex-ptr = shift(ch, u);
@@ -51,8 +51,7 @@ resource _cell {
     thread-mutex-lock(mutex-ptr);
     let val-clone = magic call-type(pack-type {a}, 1, load-int(ch), null-pointer);
     thread-mutex-unlock(mutex-ptr);
-    let result-ptr = cast<_cell, pointer>(_new<a>(val-clone));
-    return-or-store-pointer(result-ptr, dest)
+    cast<_cell, pointer>(_new<a>(val-clone))
   },
   -1,
 }

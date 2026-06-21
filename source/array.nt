@@ -7,7 +7,7 @@ import {
   this.memory {malloc},
   this.memory.unsafe {free, load-int, load-pointer, memcpy, memmove, realloc, store-int, store-pointer},
   this.pair {Pair, pair},
-  this.pointer {null-pointer, return-or-store-pointer, shift},
+  this.pointer {null-pointer, shift},
   this.unit {Unit, unit},
   this.unsafe {cast, cast-inline},
   this.word,
@@ -192,14 +192,16 @@ define _free-array<a>(xs: &array(a)) -> unit {
 }
 
 resource _array-internal {
-  (xs: &array(pointer), _: int) => {
+  (xs: pointer, _: int) => {
+    let xs = cast-inline<pointer, &array(pointer)>(xs);
     let len = length(xs);
     unpack-type elem-type = _get-elem-type(xs);
     let stride = magic call-type(pack-type {elem-type}, 2, null-pointer, null-pointer);
     _discard-array-content<elem-type>(xs, stride, 0, len);
     _free-array(xs);
   },
-  (xs: &array(pointer), dest: pointer) => {
+  (xs: pointer, _: pointer) => {
+    let xs = cast-inline<pointer, &array(pointer)>(xs);
     let capacity = get-capacity(xs);
     let from = _get-from(xs);
     let to = _get-to(xs);
@@ -215,7 +217,7 @@ resource _array-internal {
       ));
     _set-to(ys, to);
     _copy-array-content<elem-type>(xs, ys, stride, 0, len);
-    return-or-store-pointer(cast-inline<&array(pointer), pointer>(ys), dest)
+    cast-inline<&array(pointer), pointer>(ys)
   },
   -1,
 }

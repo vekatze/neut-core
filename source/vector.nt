@@ -10,9 +10,9 @@ import {
   this.memory {malloc},
   this.memory.unsafe {free, load-int, load-pointer, memmove, realloc, store-int, store-pointer},
   this.pair {Pair, pair},
-  this.pointer {return-or-store-pointer, shift},
+  this.pointer {shift},
   this.unit {Unit, unit},
-  this.unsafe {cast},
+  this.unsafe {cast, cast-inline},
   this.word,
 }
 
@@ -182,13 +182,15 @@ define _free-vector<a>(xs: &vector(a)) -> unit {
 
 // (capacity: int, from: int, to: int, elem-type: type, ptr-to-buffer: pointer)
 resource _vector-internal {
-  (xs: &vector(pointer), _: int) => {
+  (xs: pointer, _: int) => {
+    let xs = cast-inline<pointer, &vector(pointer)>(xs);
     let len = length(xs);
     let elem-type = _get-elem-type(xs);
     _discard-vector-content(xs, elem-type, 0, len);
     _free-vector(xs);
   },
-  (xs: &vector(pointer), dest: pointer) => {
+  (xs: pointer, _: pointer) => {
+    let xs = cast-inline<pointer, &vector(pointer)>(xs);
     let capacity = get-capacity(xs);
     let ys: &vector(pointer) = cast<vector(pointer), &vector(pointer)>(make(capacity));
     unpack-type elem-type = _get-elem-type(xs);
@@ -199,7 +201,7 @@ resource _vector-internal {
     _set-to(ys, to);
     _set-elem-type(ys, pack-type {elem-type});
     _copy-vector-content<elem-type>(xs, ys, 0, len);
-    return-or-store-pointer(cast<&vector(pointer), pointer>(ys), dest)
+    cast<&vector(pointer), pointer>(ys)
   },
   -1,
 }

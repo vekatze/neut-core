@@ -7,7 +7,7 @@ import {
   this.memory {malloc},
   this.memory.unsafe {free, load-int, store-int},
   this.pair {Pair},
-  this.pointer {shift},
+  this.pointer {return-or-store-pointer, shift},
   this.queue {dequeue, empty, enqueue, queue},
   this.sync._posix {
     THREAD_COND_SIZE,
@@ -52,7 +52,7 @@ define _new<a>(q: queue(a)) -> channel(a) {
 
 // (queue, thread-mutex, thread-cond)
 resource _channel {
-  (ch: pointer) => {
+  (ch: pointer, _: int) => {
     let u = this.word.size;
     let mutex-size = from-c-size(THREAD_MUTEX_SIZE);
     let cond-size = from-c-size(THREAD_COND_SIZE);
@@ -61,10 +61,10 @@ resource _channel {
     unpack-type a = cast<int, type>(load-int(shift(ch, type-offset)));
     thread-cond-destroy(shift(ch, cond-offset));
     thread-mutex-destroy(shift(ch, u));
-    magic call-type(pack-type {queue(a)}, 0, load-int(ch));
+    magic call-type(pack-type {queue(a)}, 0, load-int(ch), add-int(0, 1));
     free(ch)
   },
-  (ch: pointer) => {
+  (ch: pointer, dest: pointer) => {
     let u = this.word.size;
     let mutex-size = from-c-size(THREAD_MUTEX_SIZE);
     let cond-size = from-c-size(THREAD_COND_SIZE);
@@ -75,7 +75,8 @@ resource _channel {
     let q: &queue(a) = cast<int, &queue(a)>(load-int(ch));
     let q-clone: queue(a) = _get-clone<queue(a)>(q);
     thread-mutex-unlock(mutex-ptr);
-    cast<channel(a), pointer>(_new<a>(q-clone))
+    let result-ptr = cast<channel(a), pointer>(_new<a>(q-clone));
+    return-or-store-pointer(result-ptr, dest)
   },
   -1,
 }

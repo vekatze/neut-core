@@ -7,7 +7,7 @@ import {
   this.file.descriptor.unsafe {from-c-int, write-all},
   this.memory {malloc},
   this.memory.unsafe {free, load-int, memcpy, store-int},
-  this.pointer {shift},
+  this.pointer {return-or-store-pointer, shift},
   this.system {system},
   this.unit {unit},
   this.word,
@@ -20,16 +20,16 @@ inline _get-pointer-size-from-capacity(capacity: int) -> int {
 
 // internal representation: (current-size, capacity, descriptor, byte-0, byte-1, ..., byte-n)
 resource _buffer-internal {
-  (x: pointer) => {
+  (x: pointer, _: int) => {
     free(x)
   },
-  (source-pointer: pointer) => {
+  (source-pointer: pointer, dest: pointer) => {
     let u = this.word.size;
     let capacity = load-int(shift(source-pointer, u));
     let pointer-size = _get-pointer-size-from-capacity(capacity);
     let new-pointer = malloc(C-Size(pointer-size));
     memcpy(new-pointer, source-pointer, pointer-size);
-    new-pointer
+    return-or-store-pointer(new-pointer, dest)
   },
   -1,
 }

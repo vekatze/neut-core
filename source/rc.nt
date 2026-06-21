@@ -4,7 +4,7 @@ import {
   this.either {Right, none},
   this.memory {malloc},
   this.memory.unsafe {free, load-int, store-int},
-  this.pointer {shift},
+  this.pointer {return-or-store-pointer, shift},
   this.unit {Unit, unit},
   this.unsafe {cast},
   this.word,
@@ -48,7 +48,7 @@ inline _release(ptr: pointer) -> unit {
   if eq-int(count, 0) {
     store-int(0, ptr);
     let elem-type = cast<int, type>(load-int(_type-ptr(ptr)));
-    magic call-type(elem-type, 0, load-int(_value-ptr(ptr)));
+    magic call-type(elem-type, 0, load-int(_value-ptr(ptr)), add-int(0, 1));
     if eq-int(load-int(_weak-ptr(ptr)), 0) {
       free(ptr)
     } else {
@@ -74,25 +74,25 @@ inline _release-weak(ptr: pointer) -> unit {
 
 // (strong-count, weak-count, elem-type, elem-value)
 resource _rc-inner {
-  (ptr: pointer) => {
+  (ptr: pointer, _: int) => {
     _release(ptr)
   },
-  (ptr: pointer) => {
+  (ptr: pointer, dest: pointer) => {
     _increment-strong(ptr);
-    ptr
+    return-or-store-pointer(ptr, dest)
   },
-  32,
+  -1,
 }
 
 resource _weak-inner {
-  (ptr: pointer) => {
+  (ptr: pointer, _: int) => {
     _release-weak(ptr)
   },
-  (ptr: pointer) => {
+  (ptr: pointer, dest: pointer) => {
     _increment-weak(ptr);
-    ptr
+    return-or-store-pointer(ptr, dest)
   },
-  32,
+  -1,
 }
 
 alias-opaque rc(_: type) {

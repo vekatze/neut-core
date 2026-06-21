@@ -4,7 +4,7 @@ import {
   this.either {Right, none},
   this.memory {malloc},
   this.memory.unsafe {free, load-int, store-int},
-  this.pointer {shift},
+  this.pointer {return-or-store-pointer, shift},
   this.sync._atomic {
     fetch-add-int,
     fetch-sub-int,
@@ -61,7 +61,7 @@ inline _release(ptr: pointer) -> unit {
   let old-count = fetch-sub-int(ptr, 1);
   if eq-int(old-count, 1) {
     let elem-type = cast<int, type>(load-int(_type-ptr(ptr)));
-    magic call-type(elem-type, 0, load-int(_value-ptr(ptr)));
+    magic call-type(elem-type, 0, load-int(_value-ptr(ptr)), add-int(0, 1));
     _release-weak(ptr)
   } else {
     Unit
@@ -71,23 +71,23 @@ inline _release(ptr: pointer) -> unit {
 // (strong-count, weak-count, elem-type, elem-value)
 // `weak-count` includes one implicit weak handle while `strong-count > 0`.
 resource _rc-inner {
-  (ptr: pointer) => {
+  (ptr: pointer, _: int) => {
     _release(ptr)
   },
-  (ptr: pointer) => {
+  (ptr: pointer, dest: pointer) => {
     _increment-strong(ptr);
-    ptr
+    return-or-store-pointer(ptr, dest)
   },
   -1,
 }
 
 resource _weak-inner {
-  (ptr: pointer) => {
+  (ptr: pointer, _: int) => {
     _release-weak(ptr)
   },
-  (ptr: pointer) => {
+  (ptr: pointer, dest: pointer) => {
     _increment-weak(ptr);
-    ptr
+    return-or-store-pointer(ptr, dest)
   },
   -1,
 }

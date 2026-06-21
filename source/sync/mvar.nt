@@ -6,7 +6,7 @@ import {
   this.list {List},
   this.memory {malloc},
   this.memory.unsafe {free, load-int, store-int},
-  this.pointer {shift},
+  this.pointer {return-or-store-pointer, shift},
   this.sync._posix {
     THREAD_COND_SIZE,
     THREAD_MUTEX_SIZE,
@@ -73,7 +73,7 @@ define _new<a>() -> mvar(a) {
 
 // (flag, type, value, mutex, readable-cond, writable-cond)
 resource _mvar {
-  (ptr: pointer) => {
+  (ptr: pointer, _: int) => {
     let ch = cast<pointer, &mvar(unit)>(ptr);
     let _MVar-Info{flag-ptr, value-ptr, mutex-ptr, readable-cond-ptr, writable-cond-ptr, type-ptr} = _get-info(ch);
     let flag = load-int(flag-ptr);
@@ -87,24 +87,26 @@ resource _mvar {
     };
     free(ptr)
   },
-  (ptr: pointer) => {
+  (ptr: pointer, dest: pointer) => {
     let ch = cast<pointer, &mvar(unit)>(ptr);
     let _MVar-Info{flag-ptr, value-ptr, mutex-ptr, type-ptr} = _get-info(ch);
     unpack-type a = cast<int, type>(load-int(type-ptr));
     let base: &mvar(a) = cast<mvar(a), &mvar(a)>(_new());
     thread-mutex-lock(mutex-ptr);
     let flag = load-int(flag-ptr);
-    if eq-int(flag, 0) {
-      thread-mutex-unlock(mutex-ptr);
-      cast<&mvar(a), pointer>(base)
-    } else {
-      let result: a = embody<a>(cast<int, &a>(load-int(value-ptr)));
-      thread-mutex-unlock(mutex-ptr);
-      let _MVar-Info{value-ptr := new-value-ptr, flag-ptr := new-flag-ptr} = _get-info<a>(base);
-      store-int(1, new-flag-ptr);
-      store-int(cast<a, int>(result), new-value-ptr);
-      cast<&mvar(a), pointer>(base)
-    }
+    let result-ptr =
+      if eq-int(flag, 0) {
+        thread-mutex-unlock(mutex-ptr);
+        cast<&mvar(a), pointer>(base)
+      } else {
+        let result: a = embody<a>(cast<int, &a>(load-int(value-ptr)));
+        thread-mutex-unlock(mutex-ptr);
+        let _MVar-Info{value-ptr := new-value-ptr, flag-ptr := new-flag-ptr} = _get-info<a>(base);
+        store-int(1, new-flag-ptr);
+        store-int(cast<a, int>(result), new-value-ptr);
+        cast<&mvar(a), pointer>(base)
+      };
+    return-or-store-pointer(result-ptr, dest)
   },
   -1,
 }

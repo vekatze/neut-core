@@ -5,7 +5,7 @@ import {
   this.c-size {C-Size, add-c-size, c-size, from-c-size, mul-c-size},
   this.memory {malloc},
   this.memory.unsafe {free, load-int, load-int8, load-pointer, store-int, store-int8},
-  this.pointer {shift},
+  this.pointer {return-or-store-pointer, shift},
   this.sync._posix {
     THREAD_MUTEX_SIZE,
     THREAD_SIZE,
@@ -49,14 +49,14 @@ nominal {
 }
 
 resource _thread-inner {
-  (addr: pointer) => {
+  (addr: pointer, _: int) => {
     let u = this.word.size;
     unpack-type elem-type = cast<int, type>(load-int(shift(addr, u)));
     let pr: thread(elem-type) = cast<pointer, thread(elem-type)>(addr);
     let _: elem-type = this.sync.thread.join<elem-type>(pr);
     Unit
   },
-  (addr: pointer) => {
+  (addr: pointer, dest: pointer) => {
     let u = this.word.size;
     let u2 = mul-int(u, 2);
     _await-and-write-result(addr);
@@ -70,7 +70,7 @@ resource _thread-inner {
     store-int(cast<elem-type, int>(cloned-value), shift(new-addr, u2));
     let _ = thread-mutex-init(_get-mutex-ptr(new-addr));
     store-int8(1, _get-finished-flag-ptr(new-addr));
-    new-addr
+    return-or-store-pointer(new-addr, dest)
   },
   -1,
 }

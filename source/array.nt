@@ -1,6 +1,5 @@
 import {
   this.bool {False, True, and, bool},
-  this.box,
   this.c-size {C-Size},
   this.either {Right, none},
   this.int {abs-int, max-int, min-int},
@@ -8,7 +7,7 @@ import {
   this.memory {malloc},
   this.memory.unsafe {free, load-int, load-pointer, memcpy, memmove, realloc, store-int, store-pointer},
   this.pair {Pair, pair},
-  this.pointer {null-pointer, shift},
+  this.pointer {null-pointer, return-or-store-pointer, shift},
   this.unit {Unit, unit},
   this.unsafe {cast, cast-inline},
   this.word,
@@ -56,7 +55,7 @@ inline _get-elem-type<a>(xs: &array(a)) -> type {
 }
 
 inline-meta _get-stride<a>() -> 'int {
-  quote {magic call-type(pack-type {a}, 2, null-pointer)}
+  quote {magic call-type(pack-type {a}, 2, null-pointer, null-pointer)}
 }
 
 inline _get-buffer-ptr<a>(xs: &array(a)) -> pointer {
@@ -160,16 +159,13 @@ inline-meta make<a>(initial-capacity: 'int) -> 'array(a) {
   quote {_make-inner(unquote {initial-capacity})}
 }
 
-define _discard-array-content<a>(xs: &array(pointer), elem-type: type, stride: int, index: int, len: int) -> unit {
+define _discard-array-content<a>(xs: &array(pointer), stride: int, index: int, len: int) -> unit {
   if eq-int(index, len) {
     Unit
   } else {
     let element-ptr = _get-element-pointer-with-stride(xs, stride, index);
-    let value-ptr = malloc(C-Size(stride));
-    memcpy(value-ptr, element-ptr, stride);
-    let value = cast<pointer, a>(value-ptr);
-    let _ = value;
-    _discard-array-content<a>(xs, elem-type, stride, add-int(index, 1), len)
+    magic call-type(pack-type {a}, 0, element-ptr, null-pointer);
+    _discard-array-content<a>(xs, stride, add-int(index, 1), len)
   }
 }
 
@@ -185,11 +181,7 @@ define _copy-array-content<elem-type>(
   } else {
     let source-ptr = _get-element-pointer-with-stride(xs, stride, index);
     let target-ptr = _get-element-pointer-with-stride(ys, stride, index);
-    let original = cast-inline<pointer, &elem-type>(source-ptr);
-    let clone = *original;
-    let clone-ptr = cast<elem-type, pointer>(clone);
-    memcpy(target-ptr, clone-ptr, stride);
-    free(clone-ptr);
+    magic call-type(pack-type {elem-type}, 1, source-ptr, target-ptr);
     _copy-array-content<elem-type>(xs, ys, stride, add-int(index, 1), len)
   }
 }
@@ -200,20 +192,20 @@ define _free-array<a>(xs: &array(a)) -> unit {
 }
 
 resource _array-internal {
-  (xs: &array(pointer)) => {
+  (xs: &array(pointer), _: int) => {
     let len = length(xs);
     unpack-type elem-type = _get-elem-type(xs);
-    let stride = magic call-type(pack-type {elem-type}, 2, null-pointer);
-    _discard-array-content<elem-type>(xs, pack-type {elem-type}, stride, 0, len);
+    let stride = magic call-type(pack-type {elem-type}, 2, null-pointer, null-pointer);
+    _discard-array-content<elem-type>(xs, stride, 0, len);
     _free-array(xs);
   },
-  (xs: &array(pointer)) => {
+  (xs: &array(pointer), dest: pointer) => {
     let capacity = get-capacity(xs);
     let from = _get-from(xs);
     let to = _get-to(xs);
     let len = length(xs);
     unpack-type elem-type = _get-elem-type(xs);
-    let stride = magic call-type(pack-type {elem-type}, 2, null-pointer);
+    let stride = magic call-type(pack-type {elem-type}, 2, null-pointer, null-pointer);
     let ys: &array(pointer) =
       cast<array(elem-type), &array(pointer)>(_make-raw<elem-type>(
         capacity,
@@ -223,7 +215,7 @@ resource _array-internal {
       ));
     _set-to(ys, to);
     _copy-array-content<elem-type>(xs, ys, stride, 0, len);
-    ys
+    return-or-store-pointer(cast-inline<&array(pointer), pointer>(ys), dest)
   },
   -1,
 }
@@ -336,15 +328,13 @@ inline-meta _put-unchecked<a>(xs: 'array(a), i: 'int, x: 'a) -> 'array(a) {
     let x = unquote {x};
     let stride = _get-stride<a>::();
     let element-ptr on xs = _get-element-pointer(xs, i);
-    let old-ptr = malloc(C-Size(stride));
-    memcpy(old-ptr, element-ptr, stride);
-    magic call-type(pack-type {a}, 0, old-ptr);
+    magic call-type(pack-type {a}, 0, element-ptr, null-pointer);
     let _ on x = {
       let new-ptr = cast-inline<&a, pointer>(x);
       memcpy(element-ptr, new-ptr, stride);
       free(new-ptr);
     };
-    magic call-type(pack-type {pointer}, 0, x);
+    magic call-type(pack-type {pointer}, 0, x, add-int(0, 1));
     xs
   }
 }

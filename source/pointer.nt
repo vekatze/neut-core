@@ -1,6 +1,8 @@
 import {
   this.bool {bool},
   this.c-int {c-int},
+  this.memory.unsafe {store-pointer},
+  this.unit,
 }
 
 inline shift(p: pointer, offset: int) -> pointer {
@@ -24,4 +26,13 @@ constant null-pointer: pointer {
 
 inline is-null-pointer(p: pointer) -> bool {
   eq-int(magic cast(pointer, int, p), 0)
+}
+
+inline return-or-store-pointer(value: pointer, dest: pointer) -> pointer {
+  if is-null-pointer(dest) {
+    value
+  } else {
+    store-pointer(value, dest);
+    null-pointer
+  }
 }

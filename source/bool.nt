@@ -36,25 +36,25 @@ inline not(b: bool) -> bool {
 }
 
 rule-left any {
-  inline leaf(_: int) -> bool {
-    False
+  inline-meta leaf(_: int) -> 'bool {
+    quote {False}
   },
-  inline node-left(acc: bool, b: bool) -> bool {
-    or(acc, b)
+  inline-meta node-left(acc: 'bool, b: 'bool) -> 'bool {
+    quote {or(unquote {acc}, unquote {b})}
   },
-  inline root<a>(x: a) -> a {
+  inline-meta root<a>(x: 'a) -> 'a {
     x
   },
 }
 
 rule-left all {
-  inline leaf(_: int) -> bool {
-    True
+  inline-meta leaf(_: int) -> 'bool {
+    quote {True}
   },
-  inline node-left(acc: bool, b: bool) -> bool {
-    and(acc, b)
+  inline-meta node-left(acc: 'bool, b: 'bool) -> 'bool {
+    quote {and(unquote {acc}, unquote {b})}
   },
-  inline root<a>(x: a) -> a {
+  inline-meta root<a>(x: 'a) -> 'a {
     x
   },
 }

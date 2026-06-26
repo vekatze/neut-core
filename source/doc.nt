@@ -86,13 +86,13 @@ inline break(t: &string) -> doc {
 }
 
 rule-right join {
-  inline leaf(_: int) -> doc {
-    empty
+  inline-meta leaf(_: int) -> 'doc {
+    quote {empty}
   },
-  inline node-left(d: doc, acc: doc) -> doc {
-    Seq(d, acc)
+  inline-meta node-left(d: 'doc, acc: 'doc) -> 'doc {
+    quote {Seq(unquote {d}, unquote {acc})}
   },
-  inline root<a>(x: a) -> a {
+  inline-meta root<a>(x: 'a) -> 'a {
     x
   },
 }

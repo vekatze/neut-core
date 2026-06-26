@@ -15,13 +15,13 @@ data list(a: type) {
 }
 
 rule-right List {
-  inline leaf<a>(_: int) -> list(a) {
-    Nil
+  inline-meta leaf<a>(_: int) -> 'list(a) {
+    quote {Nil}
   },
-  inline node-right<a>(x: a, acc: list(a)) -> list(a) {
-    Cons(x, acc)
+  inline-meta node-right<a>(x: 'a, acc: 'list(a)) -> 'list(a) {
+    quote {Cons(unquote {x}, unquote {acc})}
   },
-  inline root<a>(x: a) -> a {
+  inline-meta root<a>(x: 'list(a)) -> 'list(a) {
     x
   },
 }

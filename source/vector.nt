@@ -296,13 +296,13 @@ define pop-back<a>(xs: vector(a)) ->> ?pair(vector(a), a) {
 }
 
 rule-left Vector {
-  inline leaf<a>(size: int) -> vector(a) {
-    this.vector.make(size)
+  inline-meta leaf<a>(size: int) -> 'vector(a) {
+    quote {this.vector.make(unquote {promote {size}})}
   },
-  inline node-left<a>(acc: vector(a), x: a) -> vector(a) {
-    push-back(acc, x)
+  inline-meta node-left<a>(acc: 'vector(a), x: 'a) -> 'vector(a) {
+    quote {push-back(unquote {acc}, unquote {x})}
   },
-  inline root<a>(x: a) -> a {
+  inline-meta root<a>(x: 'a) -> 'a {
     x
   },
 }

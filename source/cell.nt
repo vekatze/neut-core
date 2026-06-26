@@ -38,8 +38,8 @@ inline borrow<a, b>(r: &cell(a), f: (&a) -> +b) -> b {
 }
 
 inline clone<a>(r: &cell(a)) -> a {
-  modify(r, (!val: +a) => {
-    Pair(val, axiom-T(val))
+  borrow(r, (v) => {
+    box v {v}
   })
 }
 

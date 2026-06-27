@@ -4,16 +4,16 @@ import {
   this.either {Left, Right},
   this.list {Cons, Nil, list},
   this.pair {Pair, pair},
-  this.string {string},
+  this.string,
   this.unit {Unit},
 }
 
-inline-meta singleton(r: rune) -> &string {
-  magic string-cons(r, "")
+inline-meta singleton(r: rune) -> text {
+  magic text-cons(r, "")
 }
 
-inline-meta is-empty(t: &string) -> bool {
-  let tmp = magic string-uncons(t);
+inline-meta is-empty(t: text) -> bool {
+  let tmp = magic text-uncons(t);
   match tmp {
   | Left(_) =>
     True
@@ -22,25 +22,25 @@ inline-meta is-empty(t: &string) -> bool {
   }
 }
 
-inline-meta append(t1: &string, t2: &string) -> &string {
-  let tmp = magic string-uncons(t1);
+inline-meta append(t1: text, t2: text) -> text {
+  let tmp = magic text-uncons(t1);
   match tmp {
   | Left(_) =>
     t2
   | Right(Pair(r, rest)) =>
-    magic string-cons(r, append(rest, t2))
+    magic text-cons(r, append(rest, t2))
   }
 }
 
-inline-meta eq-string(t1: &string, t2: &string) -> bool {
-  let tmp1 = magic string-uncons(t1);
-  let tmp2 = magic string-uncons(t2);
+inline-meta eq-text(t1: text, t2: text) -> bool {
+  let tmp1 = magic text-uncons(t1);
+  let tmp2 = magic text-uncons(t2);
   match tmp1, tmp2 {
   | Left(_), Left(_) =>
     True
   | Right(Pair(r1, rest1)), Right(Pair(r2, rest2)) =>
     if eq-rune(r1, r2) {
-      eq-string(rest1, rest2)
+      eq-text(rest1, rest2)
     } else {
       False
     }
@@ -49,16 +49,16 @@ inline-meta eq-string(t1: &string, t2: &string) -> bool {
   }
 }
 
-inline-meta ne-string(t1: &string, t2: &string) -> bool {
-  if eq-string(t1, t2) {
+inline-meta ne-text(t1: text, t2: text) -> bool {
+  if eq-text(t1, t2) {
     False
   } else {
     True
   }
 }
 
-inline-meta length(t: &string) -> int {
-  let tmp = magic string-uncons(t);
+inline-meta length(t: text) -> int {
+  let tmp = magic text-uncons(t);
   match tmp {
   | Left(_) =>
     0
@@ -67,25 +67,25 @@ inline-meta length(t: &string) -> int {
   }
 }
 
-inline-meta take(t: &string, count: int) -> &string {
+inline-meta take(t: text, count: int) -> text {
   if le-int(count, 0) {
     ""
   } else {
-    let tmp = magic string-uncons(t);
+    let tmp = magic text-uncons(t);
     match tmp {
     | Left(_) =>
       ""
     | Right(Pair(r, rest)) =>
-      magic string-cons(r, take(rest, sub-int(count, 1)))
+      magic text-cons(r, take(rest, sub-int(count, 1)))
     }
   }
 }
 
-inline-meta drop(t: &string, count: int) -> &string {
+inline-meta drop(t: text, count: int) -> text {
   if le-int(count, 0) {
     t
   } else {
-    let tmp = magic string-uncons(t);
+    let tmp = magic text-uncons(t);
     match tmp {
     | Left(_) =>
       t
@@ -95,15 +95,15 @@ inline-meta drop(t: &string, count: int) -> &string {
   }
 }
 
-inline-meta slice(t: &string, start: int, count: int) -> &string {
+inline-meta slice(t: text, start: int, count: int) -> text {
   take(drop(t, start), count)
 }
 
-inline-meta split-at(t: &string, count: int) -> pair(&string, &string) {
+inline-meta split-at(t: text, count: int) -> pair(text, text) {
   Pair(take(t, count), drop(t, count))
 }
 
-inline-meta take-end(t: &string, count: int) -> &string {
+inline-meta take-end(t: text, count: int) -> text {
   let len = length(t);
   if ge-int(count, len) {
     t
@@ -112,7 +112,7 @@ inline-meta take-end(t: &string, count: int) -> &string {
   }
 }
 
-inline-meta drop-end(t: &string, count: int) -> &string {
+inline-meta drop-end(t: text, count: int) -> text {
   let len = length(t);
   if ge-int(count, len) {
     ""
@@ -121,13 +121,13 @@ inline-meta drop-end(t: &string, count: int) -> &string {
   }
 }
 
-inline-meta eq-prefix(t: &string, prefix: &string) -> bool {
-  let prefix-tmp = magic string-uncons(prefix);
+inline-meta eq-prefix(t: text, prefix: text) -> bool {
+  let prefix-tmp = magic text-uncons(prefix);
   match prefix-tmp {
   | Left(_) =>
     True
   | Right(Pair(prefix-rune, prefix-rest)) =>
-    let t-tmp = magic string-uncons(t);
+    let t-tmp = magic text-uncons(t);
     match t-tmp {
     | Right(Pair(t-rune, t-rest)) =>
       if eq-rune(t-rune, prefix-rune) {
@@ -141,36 +141,36 @@ inline-meta eq-prefix(t: &string, prefix: &string) -> bool {
   }
 }
 
-inline-meta eq-suffix(t: &string, suffix: &string) -> bool {
+inline-meta eq-suffix(t: text, suffix: text) -> bool {
   let t-len = length(t);
   let suffix-len = length(suffix);
   if lt-int(t-len, suffix-len) {
     False
   } else {
-    eq-string(drop(t, sub-int(t-len, suffix-len)), suffix)
+    eq-text(drop(t, sub-int(t-len, suffix-len)), suffix)
   }
 }
 
-inline-meta find-string(haystack: &string, needle: &string) -> bool {
+inline-meta find-text(haystack: text, needle: text) -> bool {
   if eq-prefix(haystack, needle) {
     True
   } else {
-    let tmp = magic string-uncons(haystack);
+    let tmp = magic text-uncons(haystack);
     match tmp {
     | Left(_) =>
       False
     | Right(Pair(_, rest)) =>
-      find-string(rest, needle)
+      find-text(rest, needle)
     }
   }
 }
 
-inline-meta eq-infix(t: &string, piece: &string) -> bool {
-  find-string(t, piece)
+inline-meta eq-infix(t: text, piece: text) -> bool {
+  find-text(t, piece)
 }
 
-inline-meta _take-while-count(t: &string, !pred: (rune) -> bool) -> int {
-  let tmp = magic string-uncons(t);
+inline-meta _take-while-count(t: text, !pred: (rune) -> bool) -> int {
+  let tmp = magic text-uncons(t);
   match tmp {
   | Left(_) =>
     0
@@ -183,11 +183,11 @@ inline-meta _take-while-count(t: &string, !pred: (rune) -> bool) -> int {
   }
 }
 
-inline-meta drop-while(t: &string, !pred: (rune) -> bool) -> &string {
+inline-meta drop-while(t: text, !pred: (rune) -> bool) -> text {
   drop(t, _take-while-count(t, pred))
 }
 
-inline-meta strip-prefix(prefix: &string, haystack: &string) -> &string {
+inline-meta strip-prefix(prefix: text, haystack: text) -> text {
   if eq-prefix(haystack, prefix) {
     drop(haystack, length(prefix))
   } else {
@@ -195,7 +195,7 @@ inline-meta strip-prefix(prefix: &string, haystack: &string) -> &string {
   }
 }
 
-inline-meta strip-suffix(suffix: &string, haystack: &string) -> &string {
+inline-meta strip-suffix(suffix: text, haystack: text) -> text {
   if eq-suffix(haystack, suffix) {
     drop-end(haystack, length(suffix))
   } else {
@@ -203,8 +203,8 @@ inline-meta strip-suffix(suffix: &string, haystack: &string) -> &string {
   }
 }
 
-inline-meta fold<a>(acc: a, t: &string, !f: (a, rune) -> a) -> a {
-  let tmp = magic string-uncons(t);
+inline-meta fold<a>(acc: a, t: text, !f: (a, rune) -> a) -> a {
+  let tmp = magic text-uncons(t);
   match tmp {
   | Left(_) =>
     acc
@@ -213,8 +213,8 @@ inline-meta fold<a>(acc: a, t: &string, !f: (a, rune) -> a) -> a {
   }
 }
 
-inline-meta all(t: &string, !pred: (rune) -> bool) -> bool {
-  let tmp = magic string-uncons(t);
+inline-meta all(t: text, !pred: (rune) -> bool) -> bool {
+  let tmp = magic text-uncons(t);
   match tmp {
   | Left(_) =>
     True
@@ -227,8 +227,8 @@ inline-meta all(t: &string, !pred: (rune) -> bool) -> bool {
   }
 }
 
-inline-meta any(t: &string, !pred: (rune) -> bool) -> bool {
-  let tmp = magic string-uncons(t);
+inline-meta any(t: text, !pred: (rune) -> bool) -> bool {
+  let tmp = magic text-uncons(t);
   match tmp {
   | Left(_) =>
     False
@@ -241,8 +241,8 @@ inline-meta any(t: &string, !pred: (rune) -> bool) -> bool {
   }
 }
 
-inline-meta find(t: &string, !pred: (rune) -> bool) -> ?int {
-  let tmp = magic string-uncons(t);
+inline-meta find(t: text, !pred: (rune) -> bool) -> ?int {
+  let tmp = magic text-uncons(t);
   match tmp {
   | Left(_) =>
     Left(Unit)
@@ -260,7 +260,7 @@ inline-meta find(t: &string, !pred: (rune) -> bool) -> ?int {
   }
 }
 
-inline-meta concat(xs: list(&string)) -> &string {
+inline-meta concat(xs: list(text)) -> text {
   match xs {
   | Nil =>
     ""
@@ -269,7 +269,7 @@ inline-meta concat(xs: list(&string)) -> &string {
   }
 }
 
-inline-meta intercalate(xs: list(&string), sep: &string) -> &string {
+inline-meta intercalate(xs: list(text), sep: text) -> text {
   match xs {
   | Nil =>
     ""

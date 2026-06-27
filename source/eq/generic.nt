@@ -6,7 +6,7 @@ import {
   this.list {Cons, Nil, list},
   this.pair {Pair, pair},
   this.string,
-  this.string.meta,
+  this.text.meta,
   this.type-value {
     Algebraic,
     Binary,
@@ -214,7 +214,7 @@ define-meta eq-data<a>(x: '&a, y: '&a) -> 'bool {
     }
   | _ =>
     let t = magic show-type(a);
-    let message = this.string.meta.append("eq-data doesn't support: ", t);
+    let message = this.text.meta.append("eq-data doesn't support: ", t);
     magic compile-error(message)
   }
 }

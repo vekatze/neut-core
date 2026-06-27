@@ -1,0 +1,121 @@
+import {
+  this.binary,
+  this.bool {False},
+  this.bool.meta {or},
+  this.debug.meta {assert},
+  this.either {Left, Right},
+  this.int.io {print-int-line},
+  this.list {Cons, Nil},
+  this.pair {Pair},
+  this.string,
+  this.text.meta,
+  this.unit {Unit, unit},
+}
+
+define-meta _assert-basic() -> 'unit {
+  quote {
+    unquote {assert("text.meta: is-empty\n", this.text.meta.is-empty(""))};
+    unquote {assert("text.meta: eq-text\n", this.text.meta.eq-text("abc", "abc"))};
+    unquote {assert("text.meta: ne-text\n", this.text.meta.ne-text("abc", "abd"))};
+    unquote {assert("text.meta: singleton\n", this.text.meta.eq-text(this.text.meta.singleton(`x`), "x"))};
+    unquote {assert("text.meta: append\n", this.text.meta.eq-text(this.text.meta.append("ab", "cd"), "abcd"))};
+    Unit
+  }
+}
+
+define-meta _assert-substrings() -> 'unit {
+  let s = "abcdef";
+  let Pair(prefix, suffix) = this.text.meta.split-at(s, 2);
+  quote {
+    unquote {assert("text.meta: length\n", eq-int(this.text.meta.length(s), 6))};
+    unquote {assert("text.meta: take\n", this.text.meta.eq-text(this.text.meta.take(s, 3), "abc"))};
+    unquote {assert("text.meta: drop\n", this.text.meta.eq-text(this.text.meta.drop(s, 3), "def"))};
+    unquote {assert("text.meta: slice\n", this.text.meta.eq-text(this.text.meta.slice(s, 2, 3), "cde"))};
+    unquote {assert("text.meta: split-at prefix\n", this.text.meta.eq-text(prefix, "ab"))};
+    unquote {assert("text.meta: split-at suffix\n", this.text.meta.eq-text(suffix, "cdef"))};
+    unquote {assert("text.meta: take-end\n", this.text.meta.eq-text(this.text.meta.take-end(s, 2), "ef"))};
+    unquote {assert("text.meta: drop-end\n", this.text.meta.eq-text(this.text.meta.drop-end(s, 2), "abcd"))};
+    Unit
+  }
+}
+
+define-meta _assert-search() -> 'unit {
+  let s = "abcあdef";
+  quote {
+    unquote {assert("text.meta: eq-prefix\n", this.text.meta.eq-prefix(s, "abc"))};
+    unquote {assert("text.meta: eq-suffix\n", this.text.meta.eq-suffix(s, "def"))};
+    unquote {assert("text.meta: eq-infix\n", this.text.meta.eq-infix(s, "cあd"))};
+    unquote {assert("text.meta: find-text\n", this.text.meta.find-text(s, "あd"))};
+    unquote {assert("text.meta: ne-text shorter\n", this.text.meta.ne-text(s, "abc"))};
+    Unit
+  }
+}
+
+define-meta _assert-fold-and-predicates() -> 'unit {
+  let s = "aaabc";
+  let is-a =
+    (r) => {
+      eq-rune(r, `a`)
+    };
+  let is-ascii-prefix =
+    (r) => {
+      or(eq-rune(r, `a`), or(eq-rune(r, `b`), eq-rune(r, `c`)))
+    };
+  let count =
+    this.text.meta.fold(0, s, (acc, _) => {
+      add-int(acc, 1)
+    });
+  let found =
+    this.text.meta.find(s, (r) => {
+      eq-rune(r, `b`)
+    });
+  match found {
+  | Right(index) =>
+    quote {
+      unquote {assert("text.meta: fold\n", eq-int(count, 5))};
+      unquote {assert("text.meta: drop-while\n", this.text.meta.eq-text(this.text.meta.drop-while(s, is-a), "bc"))};
+      unquote {assert("text.meta: all\n", this.text.meta.all(s, is-ascii-prefix))};
+      unquote {
+        assert("text.meta: any\n", this.text.meta.any(s, (r) => {
+          eq-rune(r, `b`)
+        }))
+      };
+      unquote {assert("text.meta: find\n", eq-int(index, 3))};
+      Unit
+    }
+  | Left(_) =>
+    assert("text.meta: find\n", False)
+  }
+}
+
+define-meta _assert-list-combinators() -> 'unit {
+  let !xs = Cons("ab", Cons("cd", Cons("ef", Nil)));
+  let joined = this.text.meta.concat(xs);
+  let separated = this.text.meta.intercalate(xs, "-");
+  quote {
+    unquote {assert("text.meta: concat\n", this.text.meta.eq-text(joined, "abcdef"))};
+    unquote {assert("text.meta: intercalate\n", this.text.meta.eq-text(separated, "ab-cd-ef"))};
+    Unit
+  }
+}
+
+define-meta _assert-strip() -> 'unit {
+  quote {
+    unquote {assert("text.meta: strip-prefix hit\n", this.text.meta.eq-text(this.text.meta.strip-prefix("abc", "abcdef"), "def"))};
+    unquote {assert("text.meta: strip-prefix miss\n", this.text.meta.eq-text(this.text.meta.strip-prefix("xxx", "abcdef"), "abcdef"))};
+    unquote {assert("text.meta: strip-suffix hit\n", this.text.meta.eq-text(this.text.meta.strip-suffix("def", "abcdef"), "abc"))};
+    unquote {assert("text.meta: strip-suffix miss\n", this.text.meta.eq-text(this.text.meta.strip-suffix("xxx", "abcdef"), "abcdef"))};
+    Unit
+  }
+}
+
+define zen() -> unit {
+  _assert-basic::();
+  _assert-substrings::();
+  _assert-search::();
+  _assert-fold-and-predicates::();
+  _assert-list-combinators::();
+  _assert-strip::();
+  print-int-line(1);
+  Unit
+}

@@ -1,9 +1,9 @@
 import {
   this.binary,
-  this.bool {bool, not, or},
+  this.bool {all, bool, not, or},
   this.box,
   this.either {Left, Right},
-  this.list {Cons, List, Nil, all, filter, length, list, reverse},
+  this.list {Cons, List, Nil, filter, length, list, reverse},
   this.pair {Pair, pair},
   this.string {
     drop-end-N,
@@ -75,10 +75,10 @@ define clean(path: &string) -> string {
   let components = split(path, separator);
   let components =
     filter(components, (component) => {
-      all(List[
+      all[
         not(eq-string(component, "")),
         not(eq-string(component, ".")),
-      ])
+      ]
     });
   let components = _clean-double-dots(is-absolute(path), components, List[]);
   if is-absolute(path) {

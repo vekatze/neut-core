@@ -355,15 +355,15 @@ define unsnoc<a>(xs: list(a)) ->> ?pair(list(a), a) {
   f(xs, Nil)
 }
 
-define all(xs: list(bool)) -> bool {
-  fold-left(True, xs, (x, y) => {
-    and::(x, y)
+define all(xs: &list(bool)) -> bool {
+  fold-left-N(True, xs, (x, y) => {
+    and::(x, *y)
   })
 }
 
-define any(xs: list(bool)) -> bool {
-  fold-left(False, xs, (x, y) => {
-    or::(x, y)
+define any(xs: &list(bool)) -> bool {
+  fold-left-N(False, xs, (x, y) => {
+    or::(x, *y)
   })
 }
 

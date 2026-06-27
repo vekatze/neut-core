@@ -49,7 +49,7 @@ define _expect-split(input: &string, want-base: &string, want-ext: &string) -> u
   let Pair(base, ext) = split-extension(input);
   pin base = base;
   pin ext = ext;
-  if and(eq-string(base, want-base), eq-string(ext, want-ext)) {
+  if and::(eq-string(base, want-base), eq-string(ext, want-ext)) {
     Unit
   } else {
     pin m = format("split-extension({}): got (\"{}\", \"{}\")\n", List[*input, *base, *ext]);

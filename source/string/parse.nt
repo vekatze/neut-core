@@ -20,8 +20,8 @@ import {
 
 define _is-hex-digit(r: rune) -> bool {
   any[
-    and(le-rune(`0`, r), le-rune(r, `9`)),
-    and(le-rune(`A`, r), le-rune(r, `F`)),
+    and::(le-rune(`0`, r), le-rune(r, `9`)),
+    and::(le-rune(`A`, r), le-rune(r, `F`)),
   ]
 }
 

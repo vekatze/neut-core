@@ -273,7 +273,7 @@ define from-ISO8601(datetime-string: &string) -> ?time {
 
 define show-time(m: time, decimals: int) -> string {
   let _Time{seconds := s, nanoseconds := ns} = m;
-  if and(lt-int(s, 0), gt-int(ns, 0)) {
+  if and::(lt-int(s, 0), gt-int(ns, 0)) {
     let int-part = sub-int(mul-int(s, -1), 1);
     let frac = sub-int(1000000000, ns);
     format("-{}{}", List[show-int(int-part), _format-nanoseconds(frac, decimals)])
@@ -311,7 +311,7 @@ define sub-time(m1: time, m2: time) -> time {
 define eq-time(m1: &time, m2: &time) -> bool {
   tie _Time{seconds := s1, nanoseconds := ns1} = m1;
   tie _Time{seconds := s2, nanoseconds := ns2} = m2;
-  and(eq-int(*s1, *s2), eq-int(*ns1, *ns2))
+  and::(eq-int(*s1, *s2), eq-int(*ns1, *ns2))
 }
 
 define lt-time(m1: &time, m2: &time) -> bool {
@@ -327,7 +327,7 @@ define lt-time(m1: &time, m2: &time) -> bool {
 }
 
 define le-time(m1: &time, m2: &time) -> bool {
-  or(lt-time(m1, m2), eq-time(m1, m2))
+  or::(lt-time(m1, m2), eq-time(m1, m2))
 }
 
 define gt-time(m1: &time, m2: &time) -> bool {

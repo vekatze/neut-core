@@ -318,7 +318,7 @@ inline _access-unchecked<a>(xs: &vector(a), i: int) -> &a {
 }
 
 define access<a>(xs: &vector(a), i: int) ->> ?&a {
-  if and(le-int(0, i), lt-int(i, length(xs))) {
+  if and::(le-int(0, i), lt-int(i, length(xs))) {
     Right(_access-unchecked(xs, i))
   } else {
     none
@@ -593,7 +593,7 @@ define to-list<a>(xs: vector(a)) -> list(a) {
 
 define exchange<a>(xs: vector(a), index: int, value: a) -> either(vector(a), pair(a, vector(a))) {
   let len on xs = length(xs);
-  if and(le-int(0, index), lt-int(index, len)) {
+  if and::(le-int(0, index), lt-int(index, len)) {
     let value-ptr on xs = _get-element-pointer(xs, index);
     let old-value = cast<int, a>(load-int(value-ptr));
     store-int(cast<a, int>(value), value-ptr);
@@ -615,9 +615,9 @@ define _swap-unchecked<a>(xs: vector(a), i: int, j: int) -> vector(a) {
 
 define swap<a>(xs: vector(a), i: int, j: int) -> vector(a) {
   let len on xs = length(xs);
-  let b1 = and(le-int(0, i), lt-int(i, len));
-  let b2 = and(le-int(0, j), lt-int(j, len));
-  if and(b1, b2) {
+  let b1 = and::(le-int(0, i), lt-int(i, len));
+  let b2 = and::(le-int(0, j), lt-int(j, len));
+  if and::(b1, b2) {
     _swap-unchecked(xs, i, j)
   } else {
     xs
@@ -704,7 +704,7 @@ define delete<a>(xs: vector(a), index: int) -> vector(a) {
     drop(xs, 1)
   } else-if eq-int(index, sub-int(len, 1)) {
     drop-end(xs, 1)
-  } else-if and(lt-int(0, index), lt-int(index, sub-int(len, 1))) {
+  } else-if and::(lt-int(0, index), lt-int(index, sub-int(len, 1))) {
     let value-ptr on xs = _get-element-pointer(xs, index);
     let _ = cast<int, a>(load-int(value-ptr));
     let pivot = div-int(len, 2);
@@ -899,13 +899,13 @@ define partition<a, b>(xs: vector(either(a, b))) -> pair(vector(a), vector(b)) {
 
 define all(xs: &vector(bool)) -> bool {
   fold-left-N(True, xs, (b1, b2, _) => {
-    and(b1, *b2)
+    and::(b1, *b2)
   })
 }
 
 define any(xs: &vector(bool)) -> bool {
   fold-left-N(False, xs, (b1, b2, _) => {
-    or(b1, *b2)
+    or::(b1, *b2)
   })
 }
 

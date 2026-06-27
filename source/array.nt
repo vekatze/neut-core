@@ -320,7 +320,7 @@ inline push-back<a>(xs: array(a), x: a) -> array(a) {
 
 define _is-valid-index<a>(xs: &array(a), i: int) -> bool {
   let len = length(xs);
-  and(le-int(0, i), lt-int(i, len))
+  and::(le-int(0, i), lt-int(i, len))
 }
 
 inline-meta _put-unchecked<a>(xs: 'array(a), i: 'int, x: 'a) -> 'array(a) {
@@ -388,7 +388,7 @@ inline _access-unchecked<a>(xs: &array(a), i: int) -> &a {
 }
 
 define access<a>(xs: &array(a), i: int) ->> ?&a {
-  if and(le-int(0, i), lt-int(i, length(xs))) {
+  if and::(le-int(0, i), lt-int(i, length(xs))) {
     Right(_access-unchecked(xs, i))
   } else {
     none
@@ -407,9 +407,9 @@ define _swap-unchecked<a>(xs: array(a), i: int, j: int) -> array(a) {
 
 define swap<a>(xs: array(a), i: int, j: int) -> array(a) {
   let len on xs = length(xs);
-  let b1 = and(le-int(0, i), lt-int(i, len));
-  let b2 = and(le-int(0, j), lt-int(j, len));
-  if and(b1, b2) {
+  let b1 = and::(le-int(0, i), lt-int(i, len));
+  let b2 = and::(le-int(0, j), lt-int(j, len));
+  if and::(b1, b2) {
     _swap-unchecked(xs, i, j)
   } else {
     xs

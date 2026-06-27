@@ -3,26 +3,24 @@ data bool {
 | True
 }
 
-inline and(b1: bool, b2: bool) -> bool {
-  if b1 {
-    if b2 {
-      True
+inline-meta and(b1: 'bool, b2: 'bool) -> 'bool {
+  quote {
+    let b1 = unquote {b1};
+    if b1 {
+      unquote {b2}
     } else {
       False
     }
-  } else {
-    False
   }
 }
 
-inline or(b1: bool, b2: bool) -> bool {
-  if b1 {
-    True
-  } else {
-    if b2 {
+inline-meta or(b1: 'bool, b2: 'bool) -> 'bool {
+  quote {
+    let b1 = unquote {b1};
+    if b1 {
       True
     } else {
-      False
+      unquote {b2}
     }
   }
 }
@@ -40,7 +38,7 @@ rule-left any {
     quote {False}
   },
   inline-meta node-left(acc: 'bool, b: 'bool) -> 'bool {
-    quote {or(unquote {acc}, unquote {b})}
+    or(acc, b)
   },
   inline-meta root<a>(x: 'a) -> 'a {
     x
@@ -52,7 +50,7 @@ rule-left all {
     quote {True}
   },
   inline-meta node-left(acc: 'bool, b: 'bool) -> 'bool {
-    quote {and(unquote {acc}, unquote {b})}
+    and(acc, b)
   },
   inline-meta root<a>(x: 'a) -> 'a {
     x

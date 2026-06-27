@@ -137,7 +137,7 @@ define drop-last(path: &string) -> string {
 define _split-extension(path: &string, pivot: int) -> pair(string, string) {
   pin file = drop-end-N(path, pivot);
   let ext = take-end-N(path, pivot);
-  if or(or(eq-suffix(file, "."), eq-suffix(file, "/")), eq-string(file, "")) {
+  if or::(or::(eq-suffix(file, "."), eq-suffix(file, "/")), eq-string(file, "")) {
     Pair(clean(path), *"")
   } else {
     Pair(clean(file), ext)

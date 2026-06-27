@@ -98,7 +98,7 @@ define get-directory-contents(dir-path: &string) -> system(list(string)) {
   let items =
     filter(items, (i) => {
       tie Dirent{name} = i;
-      and(ne-string(name, "."), ne-string(name, ".."))
+      and::(ne-string(name, "."), ne-string(name, ".."))
     });
   Right(for-each(items, (i) => {
     let Dirent{name} = i;

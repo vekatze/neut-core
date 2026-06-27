@@ -1,6 +1,6 @@
 import {
   this.binary,
-  this.bool {True, bool},
+  this.bool {False, True, all, and, any, bool, or},
   this.box {axiom-T},
   this.cell,
   this.debug.dump {trace, vet},
@@ -281,11 +281,114 @@ define zen() -> unit {
   } else {
     print-line("YO");
   };
+  let _ =
+    and::({
+      print-line("and1");
+      False
+    }, {
+      print-line("and2");
+      True
+    });
+  let _ =
+    or::({
+      print-line("or1");
+      True
+    }, {
+      print-line("or2");
+      False
+    });
+  let _ =
+    // short-circuiting
+    all[
+      {
+        print-line("all1");
+        True
+      },
+      {
+        print-line("all2");
+        False
+      },
+      {
+        print-line("all3");
+        True
+      },
+    ];
+  let _ =
+    // short-circuiting
+    any[
+      {
+        print-line("any1");
+        False
+      },
+      {
+        print-line("any2");
+        True
+      },
+      {
+        print-line("any3");
+        False
+      },
+    ];
+  Unit
+}
+
+inline-meta tdm-add-one(x: 'int) -> 'int {
+  let helper =
+    define-meta rec(y: 'int) -> 'int {
+      quote {add-int(1, unquote {y})}
+    };
+  helper(x)
+}
+
+inline-meta tdm-memo(!x: 'int) -> 'int {
+  let !helper =
+    define-meta dup<a>(y: 'a) -> 'a {
+      y
+    };
+  let a = helper<int>(x);
+  let b = helper<int>(x);
+  quote {add-int(unquote {a}, unquote {b})}
+}
+
+inline-meta tdm-knot(x: 'int) -> 'int {
+  let helper =
+    define-meta go<a>(!flag: 'bool, base: 'a) -> 'a {
+      quote {
+        let f = unquote {flag};
+        if f {
+          unquote {base}
+        } else {
+          unquote {go(flag, base)}
+        }
+      }
+    };
+  helper(quote {True}, x)
+}
+
+inline-meta tdm-hc(!c: 'int) -> 'int {
+  let !helper =
+    define-meta rec<a>(tag: 'a) -> 'int {
+      let _ = tag;
+      c
+    };
+  let _ = helper<bool>(quote {True});
+  helper<int>(quote {1})
+}
+
+define use-item(c: int) -> unit {
+  let v = tdm-hc::(c);
+  print-int-line(v);
   Unit
 }
 
 define main() -> unit {
   zen();
+  print-int-line(tdm-add-one::(41));
+  print-int-line(tdm-memo::(21));
+  print-int-line(tdm-knot::(77));
+  print-int-line(tdm-hc::(99));
+  use-item(1234);
+  Unit
 }
 
 define foo(x: int, acc: int) -> int {

@@ -1,5 +1,4 @@
 import {
-  this.binary,
   this.ansi {
     Background,
     Black,
@@ -25,6 +24,7 @@ import {
     color-ansi,
     style,
   },
+  this.binary,
   this.string {string},
 }
 

@@ -1,5 +1,4 @@
 import {
-  this.binary,
   this.ansi {
     Background,
     Backward,
@@ -40,6 +39,7 @@ import {
     write,
     write-code,
   },
+  this.binary,
   this.bool,
   this.control {loop-E},
   this.either {Right},

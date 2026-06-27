@@ -1,5 +1,4 @@
 import {
-  this.binary,
   this.ansi {
     Background,
     Backward,
@@ -40,6 +39,7 @@ import {
     Yellow,
     command,
   },
+  this.binary,
   this.box,
   this.either {Right},
   this.file.buffer {make-buffer},

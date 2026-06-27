@@ -1,6 +1,6 @@
 import {
-  this.binary,
   this.ansi {Blue, Bold, Color, Color-16, Foreground, Normal, Set-Style, Vivid},
+  this.binary,
   this.binary.builder {
     append-ansi,
     append-int64-UTF8,

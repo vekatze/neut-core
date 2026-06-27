@@ -1,6 +1,6 @@
 import {
-  this.binary,
   this.ansi {Blue, Yellow},
+  this.binary,
   this.box,
   this.doc {Group, Nest, ansi-fg, ansi-reset, atom, break, join},
   this.doc.io {print-doc-line},

@@ -2,12 +2,8 @@ import {
   this.bool {bool},
 }
 
-alias _c-int {
-  int32
-}
-
 data c-int {
-| C-Int(_c-int)
+| C-Int(int32)
 }
 
 inline add-c-int(x: c-int, y: c-int) -> c-int {

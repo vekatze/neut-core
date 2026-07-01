@@ -83,7 +83,7 @@ inline _link<a>(p1: _Prefix, t1: intmap(a), p2: _Prefix, t2: intmap(a)) -> intma
   _link-with-mask(_branch-mask(p1, p2), p1, t1, t2)
 }
 
-define insert<a>(t: intmap(a), k: _Key, x: a) -> intmap(a) {
+define insert<a>(t: intmap(a), k: int, x: a) -> intmap(a) {
   match t {
   | _Nil =>
     _Tip(k, x)
@@ -104,7 +104,7 @@ define insert<a>(t: intmap(a), k: _Key, x: a) -> intmap(a) {
   }
 }
 
-define lookup<a>(t: &intmap(a), k: _Key) ->> ?&a {
+define lookup<a>(t: &intmap(a), k: int) ->> ?&a {
   case t {
   | _Nil =>
     none
@@ -141,7 +141,7 @@ inline _bin-check-right<a>(p: _Prefix, m: _Mask, l: intmap(a), r: intmap(a)) -> 
   }
 }
 
-define delete<a>(t: intmap(a), k: _Key) -> intmap(a) {
+define delete<a>(t: intmap(a), k: int) -> intmap(a) {
   match t {
   | _Nil =>
     _Nil

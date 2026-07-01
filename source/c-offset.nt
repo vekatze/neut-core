@@ -1,7 +1,3 @@
-alias _c-offset {
-  int64
-}
-
 data c-offset {
-| C-Offset(_c-offset)
+| C-Offset(int64)
 }

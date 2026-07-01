@@ -3,12 +3,8 @@ import {
   this.c-ssize {C-SSize, c-ssize},
 }
 
-alias _c-size {
-  int64
-}
-
 data c-size {
-| C-Size(_c-size)
+| C-Size(int64)
 }
 
 inline from-c-size(x: c-size) -> int {

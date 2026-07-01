@@ -2,12 +2,8 @@ import {
   this.bool {bool},
 }
 
-alias _c-ssize {
-  int64
-}
-
 data c-ssize {
-| C-SSize(_c-ssize)
+| C-SSize(int64)
 }
 
 inline from-c-ssize(x: c-ssize) -> int {

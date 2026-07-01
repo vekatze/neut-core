@@ -2,12 +2,8 @@ import {
   this.bool {bool},
 }
 
-alias _c-long {
-  int64
-}
-
 data c-long {
-| C-Long(_c-long)
+| C-Long(int64)
 }
 
 inline add-c-long(x: c-long, y: c-long) -> c-long {

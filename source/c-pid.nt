@@ -2,12 +2,8 @@ import {
   this.bool {bool},
 }
 
-alias _c-pid {
-  int32
-}
-
 data c-pid {
-| C-PID(_c-pid)
+| C-PID(int32)
 }
 
 inline eq-c-pid(x: c-pid, y: c-pid) -> bool {

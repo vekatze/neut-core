@@ -1,11 +1,11 @@
 import {
-  this.binary,
-  this.bool {and, any, bool},
-  this.box,
-  this.list {Cons, List, concat, list},
-  this.rune.utf8 {size-by-head-byte},
-  this.show {Show, show},
-  this.string {
+  binary,
+  bool {and, any, bool},
+  box,
+  list {Cons, List, concat, list},
+  rune.utf8 {size-by-head-byte},
+  show {Show, show},
+  string {
     _drop-N,
     _get-byte,
     _slice-N,

@@ -1,9 +1,9 @@
 import {
-  this.binary,
-  this.bool {False},
-  this.debug {assert},
-  this.either {Left, Right},
-  this.float {
+  binary,
+  bool {False},
+  debug {assert},
+  either {Left, Right},
+  float {
     Float-Finite-Negative,
     Float-Finite-Positive,
     Float-Infinity-Negative,
@@ -13,12 +13,12 @@ import {
     decompose-float32,
     float-decimal,
   },
-  this.float.parse,
-  this.float.show {show-float, show-float32},
-  this.int.parse,
-  this.string {string},
-  this.string.eq {eq-string},
-  this.unit {Unit, unit},
+  float.parse,
+  float.show {show-float, show-float32},
+  int.parse,
+  string {string},
+  string.eq {eq-string},
+  unit {Unit, unit},
 }
 
 define _expect-no-int(label: &string, parsed: ?int) -> unit {
@@ -117,13 +117,13 @@ define _expect-float-nan(label: &string, actual: float-decimal) -> unit {
 }
 
 define test-float() -> unit {
-  _expect-no-int("int.parse: reject leading plus decimal\n", this.int.parse.parse-int("+123"));
-  _expect-no-int("int.parse: reject leading plus hex\n", this.int.parse.parse-hex("+0xFF"));
-  _expect-no-float("float.parse: reject leading plus decimal\n", this.float.parse.parse-float("+1.0"));
-  _expect-no-float("float.parse: reject plus decimal exponent\n", this.float.parse.parse-float("1.0e+2"));
-  _expect-no-float("float.parse: reject plus hex exponent\n", this.float.parse.parse-float("0x1.0p+2"));
-  _expect-float("float.parse: accept Ryu zero\n", this.float.parse.parse-float("0e0"));
-  _expect-float("float.parse: accept Ryu integer form\n", this.float.parse.parse-float("1e0"));
+  _expect-no-int("int.parse: reject leading plus decimal\n", int.parse.parse-int("+123"));
+  _expect-no-int("int.parse: reject leading plus hex\n", int.parse.parse-hex("+0xFF"));
+  _expect-no-float("float.parse: reject leading plus decimal\n", float.parse.parse-float("+1.0"));
+  _expect-no-float("float.parse: reject plus decimal exponent\n", float.parse.parse-float("1.0e+2"));
+  _expect-no-float("float.parse: reject plus hex exponent\n", float.parse.parse-float("0x1.0p+2"));
+  _expect-float("float.parse: accept Ryu zero\n", float.parse.parse-float("0e0"));
+  _expect-float("float.parse: accept Ryu integer form\n", float.parse.parse-float("1e0"));
   _expect-string("float.show: Ryu zero\n", show-float(0.0), "0e0");
   _expect-string("float.show: fixed integer form\n", show-float(1.0), "1.0");
   _expect-string("float.show: fixed decimal form\n", show-float(1.234), "1.234");

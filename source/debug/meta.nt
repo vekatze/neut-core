@@ -1,6 +1,6 @@
 import {
-  this.bool {bool},
-  this.unit {Unit, unit},
+  bool {bool},
+  unit {Unit, unit},
 }
 
 inline-meta assert(message: text, cond: bool) -> 'unit {

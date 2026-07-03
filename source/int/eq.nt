@@ -1,6 +1,6 @@
 import {
-  this.eq {eq, from-ord},
-  this.int.ord {as-ord},
+  eq {eq, from-ord},
+  int.ord {as-ord},
 }
 
 constant as-eq: eq(int) {

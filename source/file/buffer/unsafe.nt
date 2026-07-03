@@ -1,7 +1,7 @@
 import {
-  this.bool,
-  this.either {Right},
-  this.file.buffer {
+  bool,
+  either {Right},
+  file.buffer {
     _get-capacity,
     _get-current-size,
     _get-next-content-pointer,
@@ -9,10 +9,10 @@ import {
     buffer,
     flush,
   },
-  this.memory.unsafe {memcpy},
-  this.pointer {shift},
-  this.system {system},
-  this.unit {unit},
+  memory.unsafe {memcpy},
+  pointer {shift},
+  system {system},
+  unit {unit},
 }
 
 define append(b: &buffer, content-pointer: pointer, content-length: int) ->> system(unit) {

@@ -1,12 +1,12 @@
 import {
-  this.control {nop},
-  this.file.descriptor {descriptor, stdout},
-  this.file.descriptor.unsafe {write-all},
-  this.pointer {shift},
-  this.rune {size},
-  this.rune.unsafe {store-rune},
-  this.system {system},
-  this.unit {Unit, unit},
+  control {nop},
+  file.descriptor {descriptor, stdout},
+  file.descriptor.unsafe {write-all},
+  pointer {shift},
+  rune {size},
+  rune.unsafe {store-rune},
+  system {system},
+  unit {Unit, unit},
 }
 
 define write-rune(k: descriptor, x: rune) ->> system(unit) {

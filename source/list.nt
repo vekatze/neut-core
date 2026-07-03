@@ -1,12 +1,12 @@
 import {
-  this.bool {False, True, and, bool, or},
-  this.box,
-  this.either {Left, Right, either, none},
-  this.monoid {Monoid, monoid},
-  this.ord {Ord, ord},
-  this.ordering {GT, LT},
-  this.pair {Pair, pair},
-  this.unit {Unit, unit},
+  bool {False, True, and, bool, or},
+  box,
+  either {Left, Right, either, none},
+  monoid {Monoid, monoid},
+  ord {Ord, ord},
+  ordering {GT, LT},
+  pair {Pair, pair},
+  unit {Unit, unit},
 }
 
 data list(a: type) {

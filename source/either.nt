@@ -1,6 +1,6 @@
 import {
-  this.bool {False, True, bool},
-  this.unit {Unit},
+  bool {False, True, bool},
+  unit {Unit},
 }
 
 data either(a, b) {

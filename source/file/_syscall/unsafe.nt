@@ -1,7 +1,7 @@
 import {
-  this.c-int {c-int},
-  this.c-size {c-size},
-  this.c-ssize {c-ssize},
+  c-int {c-int},
+  c-size {c-size},
+  c-ssize {c-ssize},
 }
 
 foreign {

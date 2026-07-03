@@ -1,12 +1,12 @@
 import {
-  this.bool,
-  this.c-string {c-string, to-string},
-  this.either {Right, none},
-  this.pointer {is-null-pointer},
-  this.string {string},
-  this.string.pointer {get-content-pointer},
-  this.unit,
-  this.unsafe {cast},
+  bool,
+  c-string {c-string, to-string},
+  either {Right, none},
+  pointer {is-null-pointer},
+  string {string},
+  string.pointer {get-content-pointer},
+  unit,
+  unsafe {cast},
 }
 
 foreign {

@@ -1,15 +1,15 @@
 import {
-  this.binary,
-  this.box,
-  this.c-int {from-c-int},
-  this.either {Left, Right},
-  this.int.io {print-int-line},
-  this.list {List},
-  this.process {Exited, Process-Result, Process-Spec, Signaled, Stopped, process-status, run},
-  this.string,
-  this.string.io {print},
-  this.system {get-error-message},
-  this.unit {Unit, unit},
+  binary,
+  box,
+  c-int {from-c-int},
+  either {Left, Right},
+  int.io {print-int-line},
+  list {List},
+  process {Exited, Process-Result, Process-Spec, Signaled, Stopped, process-status, run},
+  string,
+  string.io {print},
+  system {get-error-message},
+  unit {Unit, unit},
 }
 
 define _print-process-status(st: process-status) -> unit {

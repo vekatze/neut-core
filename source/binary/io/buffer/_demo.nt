@@ -1,12 +1,12 @@
 import {
-  this.binary,
-  this.binary.io.buffer {write-binary},
-  this.either,
-  this.file.buffer {flush, make-buffer},
-  this.file.descriptor {stdout},
-  this.string {to-binary},
-  this.system {system},
-  this.unit {Unit, unit},
+  binary,
+  binary.io.buffer {write-binary},
+  either,
+  file.buffer {flush, make-buffer},
+  file.descriptor {stdout},
+  string {to-binary},
+  system {system},
+  unit {Unit, unit},
 }
 
 define zen() -> unit {

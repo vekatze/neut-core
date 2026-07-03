@@ -1,21 +1,21 @@
 import {
-  this.binary,
-  this.bool {and, bool},
-  this.c-int {c-int, from-c-int},
-  this.c-size {c-size},
-  this.c-string {c-string, from-string, to-string},
-  this.either {Left, Right},
-  this.list {Cons, Nil, filter, for-each, list},
-  this.memory.unsafe {load-int, load-pointer},
-  this.path,
-  this.path.entity.dirent {Dirent, dirent},
-  this.path.entity.dtype {dtype-from-int},
-  this.pointer {is-null-pointer, null-pointer},
-  this.string {append, string},
-  this.string.eq {eq-suffix, ne-string},
-  this.system {report-system-error, system},
-  this.time {make-time, time},
-  this.unit {Unit, unit},
+  binary,
+  bool {and, bool},
+  c-int {c-int, from-c-int},
+  c-size {c-size},
+  c-string {c-string, from-string, to-string},
+  either {Left, Right},
+  list {Cons, Nil, filter, for-each, list},
+  memory.unsafe {load-int, load-pointer},
+  path,
+  path.entity.dirent {Dirent, dirent},
+  path.entity.dtype {dtype-from-int},
+  pointer {is-null-pointer, null-pointer},
+  string {append, string},
+  string.eq {eq-suffix, ne-string},
+  system {report-system-error, system},
+  time {make-time, time},
+  unit {Unit, unit},
 }
 
 foreign {
@@ -103,10 +103,10 @@ define get-directory-contents(dir-path: &string) -> system(list(string)) {
   Right(for-each(items, (i) => {
     let Dirent{name} = i;
     pin name = name;
-    if eq-suffix(dir-path, this.path.separator) {
+    if eq-suffix(dir-path, path.separator) {
       append(dir-path, name)
     } else {
-      pin parent = append(dir-path, this.path.separator);
+      pin parent = append(dir-path, path.separator);
       append(parent, name)
     }
   }))

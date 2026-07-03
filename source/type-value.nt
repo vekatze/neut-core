@@ -1,7 +1,7 @@
 import {
-  this.bool {bool},
-  this.list {list},
-  this.string {string},
+  bool {bool},
+  list {list},
+  string {string},
 }
 
 data field-layout {

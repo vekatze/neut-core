@@ -1,10 +1,10 @@
 import {
-  this.bool,
-  this.either {Right},
-  this.file.buffer {buffer},
-  this.file.buffer.unsafe {append},
-  this.system {system},
-  this.unit {Unit, unit},
+  bool,
+  either {Right},
+  file.buffer {buffer},
+  file.buffer.unsafe {append},
+  system {system},
+  unit {Unit, unit},
 }
 
 foreign {

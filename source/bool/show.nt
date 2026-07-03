@@ -1,9 +1,9 @@
 import {
-  this.binary,
-  this.bool {bool},
-  this.box,
-  this.show {Show, show},
-  this.string {string},
+  binary,
+  bool {bool},
+  box,
+  show {Show, show},
+  string {string},
 }
 
 constant as-show: show(bool) {
@@ -23,5 +23,5 @@ define show(b: bool) -> string {
 }
 
 define show-bool(b: bool) -> string {
-  this.bool.show.show(b)
+  bool.show.show(b)
 }

@@ -1,16 +1,16 @@
 import {
-  this.binary,
-  this.bool {False, True, bool, not},
-  this.box,
-  this.debug {panic},
-  this.either {Left, Right},
-  this.environment.unsafe {set-env},
-  this.int.io {print-int, print-int-line},
-  this.list {List},
-  this.string {format, string},
-  this.string.eq {eq-string},
-  this.string.io {print, print-line},
-  this.time {
+  binary,
+  bool {False, True, bool, not},
+  box,
+  debug {panic},
+  either {Left, Right},
+  environment.unsafe {set-env},
+  int.io {print-int, print-int-line},
+  list {List},
+  string {format, string},
+  string.eq {eq-string},
+  string.io {print, print-line},
+  time {
     Clock,
     add-time,
     eq-time,
@@ -33,7 +33,7 @@ import {
     to-local-clock,
     unix-seconds,
   },
-  this.unit {Unit, unit},
+  unit {Unit, unit},
 }
 
 foreign {

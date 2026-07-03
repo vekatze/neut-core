@@ -1,7 +1,7 @@
 import {
-  this.binary,
+  binary,
 }
 
 constant get-content-pointer: _ {
-  this.binary._get-content-pointer
+  binary._get-content-pointer
 }

@@ -1,9 +1,9 @@
 import {
-  this.binary.ord {ge-binary, gt-binary, le-binary, lt-binary},
-  this.bool {bool},
-  this.ord {Ord, ord},
-  this.ordering {EQ, GT, LT},
-  this.string {_String, string},
+  binary.ord {ge-binary, gt-binary, le-binary, lt-binary},
+  bool {bool},
+  ord {Ord, ord},
+  ordering {EQ, GT, LT},
+  string {_String, string},
 }
 
 define lt-string(t1: &string, t2: &string) -> bool {

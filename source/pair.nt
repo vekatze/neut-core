@@ -1,5 +1,5 @@
 import {
-  this.unsafe {cast},
+  unsafe {cast},
 }
 
 data pair(a, b) {

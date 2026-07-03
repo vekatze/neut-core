@@ -1,5 +1,5 @@
 import {
-  this.ansi {
+  ansi {
     Background,
     Backward,
     Black,
@@ -31,7 +31,7 @@ import {
     Whole,
     Yellow,
   },
-  this.ansi.io {
+  ansi.io {
     ansi-kit,
     flush,
     make-ansi-kit,
@@ -39,14 +39,14 @@ import {
     write,
     write-code,
   },
-  this.binary,
-  this.bool,
-  this.control {loop-E},
-  this.either {Right},
-  this.file.descriptor {stdout},
-  this.string,
-  this.system {system},
-  this.unit {Unit, unit},
+  binary,
+  bool,
+  control {loop-E},
+  either {Right},
+  file.descriptor {stdout},
+  string,
+  system {system},
+  unit {Unit, unit},
 }
 
 define _write-space(k: &ansi-kit) -> system(unit) {

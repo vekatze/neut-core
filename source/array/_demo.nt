@@ -1,16 +1,16 @@
 import {
-  this.array {access, array, length, make, pop-back, pop-front, push-back, push-front, put, to-list, with-slice},
-  this.binary,
-  this.bool {False, True, bool},
-  this.box {axiom-T},
-  this.cell {cell, clone, extract, make-cell, mutate},
-  this.debug {assert, panic},
-  this.either {Left, Right},
-  this.list {Cons, Nil, list},
-  this.pair {Pair},
-  this.string {string},
-  this.string.io {print-line},
-  this.unit {Unit, unit},
+  array {access, array, length, make, pop-back, pop-front, push-back, push-front, put, to-list, with-slice},
+  binary,
+  bool {False, True, bool},
+  box {axiom-T},
+  cell {cell, clone, extract, make-cell, mutate},
+  debug {assert, panic},
+  either {Left, Right},
+  list {Cons, Nil, list},
+  pair {Pair},
+  string {string},
+  string.io {print-line},
+  unit {Unit, unit},
 }
 
 data item {

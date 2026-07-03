@@ -1,10 +1,10 @@
 import {
-  this.doc {doc},
-  this.doc.show {show-doc},
-  this.file.descriptor {descriptor, stdout},
-  this.string.io {write, write-line},
-  this.system {system},
-  this.unit {Unit, unit},
+  doc {doc},
+  doc.show {show-doc},
+  file.descriptor {descriptor, stdout},
+  string.io {write, write-line},
+  system {system},
+  unit {Unit, unit},
 }
 
 define write-doc(d: descriptor, x: &doc, ribbon-width: int) ->> system(unit) {

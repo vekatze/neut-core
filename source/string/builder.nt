@@ -1,9 +1,9 @@
 import {
-  this.ansi {command},
-  this.binary.builder {binary-builder, make-binary-builder},
-  this.string {string},
-  this.string.unsafe {from-binary},
-  this.unit {unit},
+  ansi {command},
+  binary.builder {binary-builder, make-binary-builder},
+  string {string},
+  string.unsafe {from-binary},
+  unit {unit},
 }
 
 data string-builder {
@@ -25,47 +25,47 @@ define make-string-builder(size: int) -> string-builder {
 }
 
 define extract(b: string-builder) -> string {
-  from-binary(this.binary.builder.extract(_to-binary-builder(b)))
+  from-binary(binary.builder.extract(_to-binary-builder(b)))
 }
 
 define append-int64-UTF8(b: &string-builder, x: int64) -> unit {
-  this.binary.builder.append-int64-UTF8(_to-binary-builder-N(b), x)
+  binary.builder.append-int64-UTF8(_to-binary-builder-N(b), x)
 }
 
 define append-int32-UTF8(b: &string-builder, x: int32) -> unit {
-  this.binary.builder.append-int32-UTF8(_to-binary-builder-N(b), x)
+  binary.builder.append-int32-UTF8(_to-binary-builder-N(b), x)
 }
 
 define append-int16-UTF8(b: &string-builder, x: int16) -> unit {
-  this.binary.builder.append-int16-UTF8(_to-binary-builder-N(b), x)
+  binary.builder.append-int16-UTF8(_to-binary-builder-N(b), x)
 }
 
 define append-int8-UTF8(b: &string-builder, x: int8) -> unit {
-  this.binary.builder.append-int8-UTF8(_to-binary-builder-N(b), x)
+  binary.builder.append-int8-UTF8(_to-binary-builder-N(b), x)
 }
 
 define append-float64-UTF8(b: &string-builder, x: float64) -> unit {
-  this.binary.builder.append-float64-UTF8(_to-binary-builder-N(b), x)
+  binary.builder.append-float64-UTF8(_to-binary-builder-N(b), x)
 }
 
 define append-float32-UTF8(b: &string-builder, x: float32) -> unit {
-  this.binary.builder.append-float32-UTF8(_to-binary-builder-N(b), x)
+  binary.builder.append-float32-UTF8(_to-binary-builder-N(b), x)
 }
 
 define append-float16-UTF8(b: &string-builder, x: float16) -> unit {
-  this.binary.builder.append-float16-UTF8(_to-binary-builder-N(b), x)
+  binary.builder.append-float16-UTF8(_to-binary-builder-N(b), x)
 }
 
 define append-string(b: &string-builder, x: &string) -> unit {
-  this.binary.builder.append-string(_to-binary-builder-N(b), x)
+  binary.builder.append-string(_to-binary-builder-N(b), x)
 }
 
 inline append-rune-UTF8(b: &string-builder, x: rune) -> unit {
-  this.binary.builder.append-rune-UTF8(_to-binary-builder-N(b), x)
+  binary.builder.append-rune-UTF8(_to-binary-builder-N(b), x)
 }
 
 inline append-ansi(b: &string-builder, x: command) -> unit {
-  this.binary.builder.append-ansi(_to-binary-builder-N(b), x)
+  binary.builder.append-ansi(_to-binary-builder-N(b), x)
 }
 
 rule-left String {
@@ -75,7 +75,7 @@ rule-left String {
   inline-meta node-left(acc: 'string-builder, s: '&string) -> 'string-builder {
     quote {
       let b = unquote {acc};
-      let _ on b = this.string.builder.append-string(b, unquote {s});
+      let _ on b = string.builder.append-string(b, unquote {s});
       b
     }
   },

@@ -1,11 +1,11 @@
 import {
-  this.binary,
-  this.bool {bool},
-  this.file.descriptor {descriptor, stdout},
-  this.string,
-  this.string.io {write, write-line},
-  this.system {system},
-  this.unit {Unit, unit},
+  binary,
+  bool {bool},
+  file.descriptor {descriptor, stdout},
+  string,
+  string.io {write, write-line},
+  system {system},
+  unit {Unit, unit},
 }
 
 define write-bool(k: descriptor, x: bool) ->> system(unit) {

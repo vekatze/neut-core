@@ -1,8 +1,8 @@
 import {
-  this.debug.dump {vet},
-  this.sync.pool {for-each-parallel},
-  this.unit {unit},
-  this.vector {Vector},
+  debug.dump {vet},
+  sync.pool {for-each-parallel},
+  unit {unit},
+  vector {Vector},
 }
 
 define zen() -> unit {

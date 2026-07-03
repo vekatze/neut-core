@@ -1,13 +1,13 @@
 import {
-  this.binary {binary},
-  this.binary.eq {eq-binary},
-  this.bool {False, True, bool},
-  this.eq {Eq, eq},
-  this.list {Cons, Nil, list},
-  this.pair {Pair, pair},
-  this.string,
-  this.text.meta,
-  this.type-value {
+  binary {binary},
+  binary.eq {eq-binary},
+  bool {False, True, bool},
+  eq {Eq, eq},
+  list {Cons, Nil, list},
+  pair {Pair, pair},
+  string,
+  text.meta,
+  type-value {
     Algebraic,
     Binary,
     Constructor,
@@ -29,7 +29,7 @@ import {
     constructor,
     field,
   },
-  this.type-value.meta {
+  type-value.meta {
     algebraic-discriminant,
     algebraic-header-slot-count,
     constructor-switch,
@@ -37,8 +37,8 @@ import {
     field-pointer,
     fields-with-cursors,
   },
-  this.unsafe {cast, cast-inline},
-  this.vector {vector},
+  unsafe {cast, cast-inline},
+  vector {vector},
 }
 
 nominal {
@@ -47,10 +47,10 @@ nominal {
 
 inline-meta _equal-vector<a>(xs: '&vector(a), ys: '&vector(a)) -> 'bool {
   quote {
-    let len-x = this.vector.length(unquote {xs});
-    let len-y = this.vector.length(unquote {ys});
+    let len-x = vector.length(unquote {xs});
+    let len-y = vector.length(unquote {ys});
     if eq-int(len-x, len-y) {
-      this.vector.zip-fold(unquote {xs}, unquote {ys}, True, (x: &a, y: &a, acc: bool, _: int) => {
+      vector.zip-fold(unquote {xs}, unquote {ys}, True, (x: &a, y: &a, acc: bool, _: int) => {
         if acc {
           unquote {eq-data(quote {x}, quote {y})}
         } else {
@@ -214,7 +214,7 @@ define-meta eq-data<a>(x: '&a, y: '&a) -> 'bool {
     }
   | _ =>
     let t = magic show-type(a);
-    let message = this.text.meta.append("eq-data doesn't support: ", t);
+    let message = text.meta.append("eq-data doesn't support: ", t);
     magic compile-error(message)
   }
 }

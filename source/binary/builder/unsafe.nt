@@ -1,7 +1,7 @@
 import {
-  this.binary.builder {_get-head-ptr, _proceed, binary-builder},
-  this.memory.unsafe {memcpy},
-  this.unit {unit},
+  binary.builder {_get-head-ptr, _proceed, binary-builder},
+  memory.unsafe {memcpy},
+  unit {unit},
 }
 
 define append-chunk(b: &binary-builder, ptr: pointer, size: int) -> unit {

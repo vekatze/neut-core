@@ -1,11 +1,11 @@
 import {
-  this.binary,
-  this.either {Left, Right},
-  this.file.descriptor {stdin, stdout},
-  this.string,
-  this.string.io {print, print-line, read, write},
-  this.system {get-error-message},
-  this.unit {unit},
+  binary,
+  either {Left, Right},
+  file.descriptor {stdin, stdout},
+  string,
+  string.io {print, print-line, read, write},
+  system {get-error-message},
+  unit {unit},
 }
 
 define zen() -> unit {

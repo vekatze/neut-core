@@ -1,6 +1,6 @@
 import {
-  this.path.entity.dtype {dtype},
-  this.string {string},
+  path.entity.dtype {dtype},
+  string {string},
 }
 
 data dirent {

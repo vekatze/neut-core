@@ -1,8 +1,8 @@
 import {
-  this.binary.eq {eq-binary, ne-binary},
-  this.bool {bool},
-  this.eq {Eq, eq},
-  this.string {_String, string},
+  binary.eq {eq-binary, ne-binary},
+  bool {bool},
+  eq {Eq, eq},
+  string {_String, string},
 }
 
 define eq-string(t1: &string, t2: &string) -> bool {
@@ -24,17 +24,17 @@ constant as-eq: eq(string) {
 define eq-prefix(haystack: &string, needle: &string) -> bool {
   tie _String(haystack) = haystack;
   tie _String(needle) = needle;
-  this.binary.eq.eq-prefix(haystack, needle)
+  binary.eq.eq-prefix(haystack, needle)
 }
 
 define eq-suffix(haystack: &string, needle: &string) -> bool {
   tie _String(haystack) = haystack;
   tie _String(needle) = needle;
-  this.binary.eq.eq-suffix(haystack, needle)
+  binary.eq.eq-suffix(haystack, needle)
 }
 
 define eq-infix(haystack: &string, needle: &string) -> bool {
   tie _String(haystack) = haystack;
   tie _String(needle) = needle;
-  this.binary.eq.eq-infix(haystack, needle)
+  binary.eq.eq-infix(haystack, needle)
 }

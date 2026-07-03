@@ -1,9 +1,9 @@
 import {
-  this.c-int {c-int},
-  this.c-string {c-string, to-string},
-  this.either {Left, either},
-  this.string {string},
-  this.unsafe {cast},
+  c-int {c-int},
+  c-string {c-string, to-string},
+  either {Left, either},
+  string {string},
+  unsafe {cast},
 }
 
 foreign {

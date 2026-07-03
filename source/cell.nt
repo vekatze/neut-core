@@ -1,11 +1,11 @@
 import {
-  this.box {axiom-T},
-  this.memory.unsafe {free, load-int, store-int},
-  this.pair {Pair, pair},
-  this.pointer {shift},
-  this.unit {Unit, unit},
-  this.unsafe {cast-inline},
-  this.word {size},
+  box {axiom-T},
+  memory.unsafe {free, load-int, store-int},
+  pair {Pair, pair},
+  pointer {shift},
+  unit {Unit, unit},
+  unsafe {cast-inline},
+  word {size},
 }
 
 data-raw cell(a) {

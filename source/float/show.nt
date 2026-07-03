@@ -1,13 +1,13 @@
 import {
-  this.box,
-  this.c-size {C-Size},
-  this.memory {malloc},
-  this.memory.unsafe {store-int, store-pointer},
-  this.pointer {shift},
-  this.show {Show, show},
-  this.string {string},
-  this.unit,
-  this.word,
+  box,
+  c-size {C-Size},
+  memory {malloc},
+  memory.unsafe {store-int, store-pointer},
+  pointer {shift},
+  show {Show, show},
+  string {string},
+  unit,
+  word,
 }
 
 foreign {
@@ -18,7 +18,7 @@ foreign {
 define show-float(x: float) -> string {
   let size = 32;
   let add-newline = 0;
-  let word-size = this.word.size;
+  let word-size = word.size;
   let u2 = mul-int(word-size, 2);
   let u3 = mul-int(word-size, 3);
   let string-ptr = malloc(C-Size(add-int(size, u3)));
@@ -33,7 +33,7 @@ define show-float(x: float) -> string {
 define show-float32(x: float32) -> string {
   let size = 32;
   let add-newline = 0;
-  let word-size = this.word.size;
+  let word-size = word.size;
   let u2 = mul-int(word-size, 2);
   let u3 = mul-int(word-size, 3);
   let string-ptr = malloc(C-Size(add-int(size, u3)));

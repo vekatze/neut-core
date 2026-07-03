@@ -1,7 +1,7 @@
 import {
-  this.bool {False, True, bool},
-  this.box,
-  this.eq {Eq, eq},
+  bool {False, True, bool},
+  box,
+  eq {Eq, eq},
 }
 
 define eq-bool(b1: bool, b2: bool) -> bool {

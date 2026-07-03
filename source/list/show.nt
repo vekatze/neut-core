@@ -1,9 +1,9 @@
 import {
-  this.binary,
-  this.box,
-  this.list {List, for-each-N, list},
-  this.show {Show, show},
-  this.string {intercalate, join},
+  binary,
+  box,
+  list {List, for-each-N, list},
+  show {Show, show},
+  string {intercalate, join},
 }
 
 inline as-show<a>(s: show(a)) -> show(list(a)) {

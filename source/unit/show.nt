@@ -1,9 +1,9 @@
 import {
-  this.binary,
-  this.box,
-  this.show {Show, show},
-  this.string,
-  this.unit {Unit, unit},
+  binary,
+  box,
+  show {Show, show},
+  string,
+  unit {Unit, unit},
 }
 
 constant as-show: show(unit) {

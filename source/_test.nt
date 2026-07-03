@@ -1,32 +1,32 @@
 import {
-  this.binary,
-  this.bool {False, True, all, and, any, bool, or},
-  this.box {axiom-T},
-  this.cell,
-  this.debug.dump {trace, vet},
-  this.either {Right, either},
-  this.eq.generic {eq-data},
-  this.int.io {print-int-line},
-  this.int.parse,
-  this.list {Cons, Nil, list},
-  this.list.meta,
-  this.pair {Pair, pair},
-  this.platform {get-cpu-count},
-  this.string {append, from-text, string, strip-prefix, strip-suffix},
-  this.string.builder {String},
-  this.string.io {print, print-line},
-  this.sync.mvar {make-mvar, receive, send},
-  this.sync.pool {for-each-parallel},
-  this.type-value {Algebraic, Constructor},
-  this.type-value.meta {
+  binary,
+  bool {False, True, all, and, any, bool, or},
+  box {axiom-T},
+  cell,
+  debug.dump {trace, vet},
+  either {Right, either},
+  eq.generic {eq-data},
+  int.io {print-int-line},
+  int.parse,
+  list {Cons, Nil, list},
+  list.meta,
+  pair {Pair, pair},
+  platform {get-cpu-count},
+  string {append, from-text, string, strip-prefix, strip-suffix},
+  string.builder {String},
+  string.io {print, print-line},
+  sync.mvar {make-mvar, receive, send},
+  sync.pool {for-each-parallel},
+  type-value {Algebraic, Constructor},
+  type-value.meta {
     algebraic-header-slot-count,
     constructor-field-count,
     constructor-fields-with-cursors,
     field-storage-slot-count,
     field-type,
   },
-  this.unit {Unit, unit},
-  this.vector {Vector, product, push-back, vector},
+  unit {Unit, unit},
+  vector {Vector, product, push-back, vector},
 }
 
 data adt-with-text {
@@ -112,9 +112,9 @@ define-meta inspect-mixed-slot-summary() -> 'int {
 
 define-meta meta-list-sample() -> 'int {
   let !xs = Cons(1, Cons(2, Cons(3, Nil)));
-  let len = this.list.meta.length(xs);
+  let len = list.meta.length(xs);
   let sum =
-    this.list.meta.fold-left(0, xs, (acc, x) => {
+    list.meta.fold-left(0, xs, (acc, x) => {
       add-int(acc, x)
     });
   let value = add-int(mul-int(len, 10), sum);
@@ -136,12 +136,12 @@ define use-text(t: text) -> unit {
 }
 
 define with-cell(i: int) -> int {
-  let c = this.cell.make-cell(lift {i});
+  let c = cell.make-cell(lift {i});
   let _ on c =
-    this.cell.mutate(c, (x) => {
+    cell.mutate(c, (x) => {
       lift {add-int(axiom-T(x), 1)}
     });
-  axiom-T(this.cell.extract(c))
+  axiom-T(cell.extract(c))
 }
 
 inline loop<a>(xs: list(a)) -> list(a) {
@@ -208,7 +208,7 @@ define my-def-func<a>(t: a, x: int)[y: int := 42] -> pair(a, int) {
 define zen() -> unit {
   pin k = String["hello\n", "yo\n", "hey"];
   print-line(k);
-  pin v = this.int.parse.parse-octal("0o755");
+  pin v = int.parse.parse-octal("0o755");
   vet::(v);
   use-text("sample");
   let t1 = "abcde";
@@ -250,9 +250,9 @@ define zen() -> unit {
       lift {add-int(x, 10)}
     });
   vet::(result);
-  pin xs = this.vector.range(1, 10);
+  pin xs = vector.range(1, 10);
   vet::(xs);
-  let xs: vector(string) = this.vector.make(5);
+  let xs: vector(string) = vector.make(5);
   let xs = push-back(xs, *"a");
   let xs = push-back(xs, *"b");
   let !xs = trace::(push-back(xs, *"c"));

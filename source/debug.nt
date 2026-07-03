@@ -1,9 +1,9 @@
 import {
-  this.bool {bool},
-  this.process {exit},
-  this.string {string},
-  this.string.io {print},
-  this.unit {Unit, unit},
+  bool {bool},
+  process {exit},
+  string {string},
+  string.io {print},
+  unit {Unit, unit},
 }
 
 define panic<a>(t: &string) -> a {

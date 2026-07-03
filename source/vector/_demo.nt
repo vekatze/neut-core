@@ -1,16 +1,16 @@
 import {
-  this.binary,
-  this.bool,
-  this.box,
-  this.debug {assert, panic},
-  this.either {Left, Right},
-  this.int.io {print-int-line},
-  this.list {List},
-  this.pair {Pair},
-  this.string {replicate, string},
-  this.string.io {print, print-line},
-  this.unit {Unit, unit},
-  this.vector {
+  binary,
+  bool,
+  box,
+  debug {assert, panic},
+  either {Left, Right},
+  int.io {print-int-line},
+  list {List},
+  pair {Pair},
+  string {replicate, string},
+  string.io {print, print-line},
+  unit {Unit, unit},
+  vector {
     access,
     delete,
     drop,
@@ -121,7 +121,7 @@ define _assert-vector-layout() -> unit {
 define zen() -> unit {
   _assert-vector-layout();
   // find
-  let xs = this.vector.make(5);
+  let xs = vector.make(5);
   let xs = push-back(xs, 1);
   let xs = push-back(xs, 2);
   let xs = push-back(xs, 3);

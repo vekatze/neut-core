@@ -1,5 +1,5 @@
 import {
-  this.c-size {c-size},
+  c-size {c-size},
 }
 
 inline malloc(size: c-size) -> pointer {

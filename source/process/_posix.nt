@@ -1,6 +1,6 @@
 import {
-  this.c-int {c-int},
-  this.c-pid {c-pid},
+  c-int {c-int},
+  c-pid {c-pid},
 }
 
 foreign {

@@ -1,11 +1,11 @@
 import {
-  this.binary {binary, length},
-  this.binary.pointer {get-content-pointer},
-  this.bool {False, True, bool},
-  this.c-size {C-Size, c-size},
-  this.int {min-int},
-  this.ord {Ord, ord},
-  this.ordering {EQ, GT, LT, ordering},
+  binary {binary, length},
+  binary.pointer {get-content-pointer},
+  bool {False, True, bool},
+  c-size {C-Size, c-size},
+  int {min-int},
+  ord {Ord, ord},
+  ordering {EQ, GT, LT, ordering},
 }
 
 foreign {

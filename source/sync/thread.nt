@@ -1,12 +1,12 @@
 import {
-  this.bool,
-  this.box,
-  this.c-int {eq-c-int},
-  this.c-size {C-Size, add-c-size, c-size, from-c-size, mul-c-size},
-  this.memory {malloc},
-  this.memory.unsafe {free, load-int, load-int8, load-pointer, store-int, store-int8},
-  this.pointer {shift},
-  this.sync._posix {
+  bool,
+  box,
+  c-int {eq-c-int},
+  c-size {C-Size, add-c-size, c-size, from-c-size, mul-c-size},
+  memory {malloc},
+  memory.unsafe {free, load-int, load-int8, load-pointer, store-int, store-int8},
+  pointer {shift},
+  sync._posix {
     THREAD_MUTEX_SIZE,
     THREAD_SIZE,
     thread-create,
@@ -17,9 +17,9 @@ import {
     thread-mutex-lock,
     thread-mutex-unlock,
   },
-  this.unit {Unit, unit},
-  this.unsafe {cast},
-  this.word,
+  unit {Unit, unit},
+  unsafe {cast},
+  word,
 }
 
 inline _embody<a>(x: &a) -> a {
@@ -27,17 +27,17 @@ inline _embody<a>(x: &a) -> a {
 }
 
 inline _thread-size() -> c-size {
-  let u = this.word.size;
+  let u = word.size;
   add-c-size(add-c-size(mul-c-size(C-Size(u), C-Size(3)), THREAD_MUTEX_SIZE), C-Size(1))
 }
 
 inline _get-mutex-ptr(addr: pointer) -> pointer {
-  let u = this.word.size;
+  let u = word.size;
   shift(addr, mul-int(u, 3))
 }
 
 inline _get-finished-flag-ptr(addr: pointer) -> pointer {
-  let u = this.word.size;
+  let u = word.size;
   let mutex-size = from-c-size(THREAD_MUTEX_SIZE);
   shift(addr, add-int(mul-int(u, 3), mutex-size))
 }
@@ -50,14 +50,14 @@ nominal {
 
 resource _thread-inner {
   (addr: pointer, _: int) => {
-    let u = this.word.size;
+    let u = word.size;
     unpack-type elem-type = cast<int, type>(load-int(shift(addr, u)));
     let pr: thread(elem-type) = cast<pointer, thread(elem-type)>(addr);
-    let _: elem-type = this.sync.thread.join<elem-type>(pr);
+    let _: elem-type = sync.thread.join<elem-type>(pr);
     Unit
   },
   (addr: pointer, _: pointer) => {
-    let u = this.word.size;
+    let u = word.size;
     let u2 = mul-int(u, 2);
     _await-and-write-result(addr);
     let thread-id = load-int(addr);
@@ -84,7 +84,7 @@ alias-opaque thread(_: type) {
 define join<a>(e: thread(a)) -> a {
   let addr = cast<thread(a), pointer>(e);
   _await-and-write-result(addr);
-  let u = this.word.size;
+  let u = word.size;
   let value-ptr = shift(addr, mul-int(u, 2));
   let value = load-int(value-ptr);
   thread-mutex-destroy(_get-mutex-ptr(addr));
@@ -93,7 +93,7 @@ define join<a>(e: thread(a)) -> a {
 }
 
 define _await-and-write-result(addr: pointer) -> unit {
-  let u = this.word.size;
+  let u = word.size;
   let u2 = mul-int(u, 2);
   let mutex-ptr = _get-mutex-ptr(addr);
   let finished-flag-ptr = _get-finished-flag-ptr(addr);
@@ -116,7 +116,7 @@ define spawn<a>(f: () -> a) -> thread(a) {
     () => {
       thread-exit(cast<a, pointer>(f()))
     };
-  let u = this.word.size;
+  let u = word.size;
   let u2 = mul-int(u, 2);
   let closure = cast<() -> unit, pointer>(thread-func);
   let closure-env = load-pointer(shift(closure, u));

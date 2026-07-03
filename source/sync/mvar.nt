@@ -1,13 +1,13 @@
 import {
-  this.bool,
-  this.box {embody},
-  this.c-size {C-Size, from-c-size},
-  this.int {sum-int},
-  this.list {List},
-  this.memory {malloc},
-  this.memory.unsafe {free, load-int, store-int},
-  this.pointer {shift},
-  this.sync._posix {
+  bool,
+  box {embody},
+  c-size {C-Size, from-c-size},
+  int {sum-int},
+  list {List},
+  memory {malloc},
+  memory.unsafe {free, load-int, store-int},
+  pointer {shift},
+  sync._posix {
     THREAD_COND_SIZE,
     THREAD_MUTEX_SIZE,
     thread-cond-destroy,
@@ -19,9 +19,9 @@ import {
     thread-mutex-lock,
     thread-mutex-unlock,
   },
-  this.unit {Unit, unit},
-  this.unsafe {cast},
-  this.word,
+  unit {Unit, unit},
+  unsafe {cast},
+  word,
 }
 
 nominal {
@@ -46,7 +46,7 @@ data _mvar-info {
 inline _get-info<a>(x: &mvar(a)) -> _mvar-info {
   let mutex-size = from-c-size(THREAD_MUTEX_SIZE);
   let cond-size = from-c-size(THREAD_COND_SIZE);
-  let u = this.word.size;
+  let u = word.size;
   let flag-ptr = cast<&mvar(a), pointer>(x);
   let type-ptr = shift(flag-ptr, u);
   let value-ptr = shift(type-ptr, u);
@@ -59,7 +59,7 @@ inline _get-info<a>(x: &mvar(a)) -> _mvar-info {
 define _new<a>() -> mvar(a) {
   let mutex-size = from-c-size(THREAD_MUTEX_SIZE);
   let cond-size = from-c-size(THREAD_COND_SIZE);
-  let u = this.word.size;
+  let u = word.size;
   let ptr = malloc(C-Size(sum-int(List[u, u, mutex-size, cond-size, cond-size, u])));
   let ch = cast<pointer, &mvar(a)>(ptr);
   let _MVar-Info{flag-ptr, mutex-ptr, readable-cond-ptr, writable-cond-ptr, type-ptr} = _get-info(ch);

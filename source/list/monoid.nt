@@ -1,6 +1,6 @@
 import {
-  this.list {Nil, append, list},
-  this.monoid {Monoid, monoid},
+  list {Nil, append, list},
+  monoid {Monoid, monoid},
 }
 
 inline as-monoid<a>() -> monoid(list(a)) {

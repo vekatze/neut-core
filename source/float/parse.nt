@@ -1,10 +1,10 @@
 import {
-  this.bool,
-  this.either {Left, Right},
-  this.memory.unsafe {load-float},
-  this.string {string},
-  this.string.pointer {get-content-pointer},
-  this.unit {Unit},
+  bool,
+  either {Left, Right},
+  memory.unsafe {load-float},
+  string {string},
+  string.pointer {get-content-pointer},
+  unit {Unit},
 }
 
 foreign {
@@ -17,7 +17,7 @@ inline _parse_double(num-str-ptr: pointer, len: int, result-ptr: pointer) -> int
 
 inline parse-float(t: &string) ->> ?float {
   let c-float-str = get-content-pointer(t);
-  let len = this.string.byte-length(t);
+  let len = string.byte-length(t);
   let result-ptr = magic alloca(float, 1);
   let result-status = _parse_double(c-float-str, len, result-ptr);
   if lt-int(result-status, 0) {

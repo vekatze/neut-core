@@ -1,11 +1,11 @@
 import {
-  this.ansi {Blue, Yellow},
-  this.binary,
-  this.box,
-  this.doc {Group, Nest, ansi-fg, ansi-reset, atom, break, join},
-  this.doc.io {print-doc-line},
-  this.string,
-  this.unit {Unit, unit},
+  ansi {Blue, Yellow},
+  binary,
+  box,
+  doc {Group, Nest, ansi-fg, ansi-reset, atom, break, join},
+  doc.io {print-doc-line},
+  string,
+  unit {Unit, unit},
 }
 
 define zen() -> unit {

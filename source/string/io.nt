@@ -1,14 +1,14 @@
 import {
-  this.binary {binary},
-  this.binary.io,
-  this.bool,
-  this.either {Left, Right},
-  this.file.descriptor {descriptor, stdin, stdout},
-  this.string {byte-length, string, to-binary},
-  this.string.pointer {get-content-pointer},
-  this.system {report-system-error, system},
-  this.unit {Unit, unit},
-  this.unsafe {cast},
+  binary {binary},
+  binary.io,
+  bool,
+  either {Left, Right},
+  file.descriptor {descriptor, stdin, stdout},
+  string {byte-length, string, to-binary},
+  string.pointer {get-content-pointer},
+  system {report-system-error, system},
+  unit {Unit, unit},
+  unsafe {cast},
 }
 
 foreign {
@@ -16,7 +16,7 @@ foreign {
 }
 
 define write(f: descriptor, t: &string) ->> system(unit) {
-  this.binary.io.write(f, to-binary(t))
+  binary.io.write(f, to-binary(t))
 }
 
 define write-line(d: descriptor, t: &string) ->> system(unit) {
@@ -49,7 +49,7 @@ define print-line(t: &string) -> unit {
 }
 
 define read(from: descriptor, initial-buffer-size: int) ->> system(string) {
-  try bin = this.binary.io.read(from, initial-buffer-size);
+  try bin = binary.io.read(from, initial-buffer-size);
   Right(cast<binary, string>(bin))
 }
 

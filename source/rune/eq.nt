@@ -1,7 +1,7 @@
 import {
-  this.bool,
-  this.box,
-  this.eq {Eq, eq},
+  bool,
+  box,
+  eq {Eq, eq},
 }
 
 constant as-eq: eq(rune) {

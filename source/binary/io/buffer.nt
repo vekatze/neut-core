@@ -1,10 +1,10 @@
 import {
-  this.binary {binary, length},
-  this.binary.pointer {get-content-pointer},
-  this.file.buffer {buffer},
-  this.file.buffer.unsafe {append},
-  this.system {system},
-  this.unit {unit},
+  binary {binary, length},
+  binary.pointer {get-content-pointer},
+  file.buffer {buffer},
+  file.buffer.unsafe {append},
+  system {system},
+  unit {unit},
 }
 
 define write-binary(b: &buffer, content: &binary) ->> system(unit) {

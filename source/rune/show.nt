@@ -1,12 +1,12 @@
 import {
-  this.box,
-  this.show {Show, show},
-  this.string {join, string},
-  this.string.show {escape},
+  box,
+  show {Show, show},
+  string {join, string},
+  string.show {escape},
 }
 
 define show-rune(ch: rune) -> string {
-  let base = this.string.singleton(ch);
+  let base = string.singleton(ch);
   let result on base = join(escape(base));
   let _ = base;
   result

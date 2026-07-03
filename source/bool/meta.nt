@@ -1,5 +1,5 @@
 import {
-  this.bool {False, True, bool},
+  bool {False, True, bool},
 }
 
 inline-meta and(b1: bool, b2: bool) -> bool {

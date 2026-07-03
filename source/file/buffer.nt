@@ -1,20 +1,20 @@
 import {
-  this.bool,
-  this.c-int {C-Int},
-  this.c-size {C-Size},
-  this.either {Right},
-  this.file.descriptor {descriptor, to-c-int},
-  this.file.descriptor.unsafe {from-c-int, write-all},
-  this.memory {malloc},
-  this.memory.unsafe {free, load-int, memcpy, store-int},
-  this.pointer {shift},
-  this.system {system},
-  this.unit {unit},
-  this.word,
+  bool,
+  c-int {C-Int},
+  c-size {C-Size},
+  either {Right},
+  file.descriptor {descriptor, to-c-int},
+  file.descriptor.unsafe {from-c-int, write-all},
+  memory {malloc},
+  memory.unsafe {free, load-int, memcpy, store-int},
+  pointer {shift},
+  system {system},
+  unit {unit},
+  word,
 }
 
 inline _get-pointer-size-from-capacity(capacity: int) -> int {
-  let u = this.word.size;
+  let u = word.size;
   add-int(capacity, mul-int(u, 3))
 }
 
@@ -24,7 +24,7 @@ resource _buffer-internal {
     free(x)
   },
   (source-pointer: pointer, _: pointer) => {
-    let u = this.word.size;
+    let u = word.size;
     let capacity = load-int(shift(source-pointer, u));
     let pointer-size = _get-pointer-size-from-capacity(capacity);
     let new-pointer = malloc(C-Size(pointer-size));
@@ -45,7 +45,7 @@ define make-buffer(d: descriptor, capacity: int) -> buffer {
     } else {
       4096
     };
-  let word-size = this.word.size;
+  let word-size = word.size;
   let pointer-size = _get-pointer-size-from-capacity(capacity);
   let buffer-ptr = malloc(C-Size(pointer-size));
   store-int(0, buffer-ptr);
@@ -65,18 +65,18 @@ inline _set-current-size(b: &buffer, size: int) -> unit {
 }
 
 inline _get-capacity(b: &buffer) -> int {
-  let u = this.word.size;
+  let u = word.size;
   load-int(shift(magic cast(&buffer, pointer, b), u))
 }
 
 inline _get-descriptor(b: &buffer) -> descriptor {
-  let u2 = mul-int(this.word.size, 2);
+  let u2 = mul-int(word.size, 2);
   let stored = load-int(shift(magic cast(&buffer, pointer, b), u2));
   from-c-int(C-Int(trunc-int-int32(stored)))
 }
 
 inline _get-content-pointer(b: &buffer) -> pointer {
-  let u3 = mul-int(this.word.size, 3);
+  let u3 = mul-int(word.size, 3);
   shift(magic cast(&buffer, pointer, b), u3)
 }
 

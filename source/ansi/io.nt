@@ -1,5 +1,5 @@
 import {
-  this.ansi {
+  ansi {
     Background,
     Backward,
     Black,
@@ -39,23 +39,23 @@ import {
     Yellow,
     command,
   },
-  this.binary,
-  this.box,
-  this.either {Right},
-  this.file.buffer {make-buffer},
-  this.file.descriptor {descriptor},
-  this.int.io,
-  this.int.io.buffer,
-  this.string {string},
-  this.string.io,
-  this.string.io.buffer,
-  this.system {system},
-  this.unit {Unit, unit},
+  binary,
+  box,
+  either {Right},
+  file.buffer {make-buffer},
+  file.descriptor {descriptor},
+  int.io,
+  int.io.buffer,
+  string {string},
+  string.io,
+  string.io.buffer,
+  system {system},
+  unit {Unit, unit},
 }
 
 data ansi-kit {
 | _ANSI-Kit(
-    buffer: this.file.buffer.buffer,
+    buffer: file.buffer.buffer,
   )
 | _ANSI-Kit-Unbuffered(
     sink: descriptor,
@@ -65,7 +65,7 @@ data ansi-kit {
 define flush(k: &ansi-kit) ->> system(unit) {
   case k {
   | _ANSI-Kit{buffer} =>
-    this.file.buffer.flush(buffer)
+    file.buffer.flush(buffer)
   | _ANSI-Kit-Unbuffered{} =>
     Right(Unit)
   }
@@ -83,9 +83,9 @@ define make-ansi-kit-unbuffered(sink: descriptor) -> ansi-kit {
 define write(k: &ansi-kit, t: &string) ->> system(unit) {
   case k {
   | _ANSI-Kit{buffer} =>
-    this.string.io.buffer.write(buffer, t)
+    string.io.buffer.write(buffer, t)
   | _ANSI-Kit-Unbuffered{sink} =>
-    let _ = this.string.io.write(*sink, t);
+    let _ = string.io.write(*sink, t);
     Right(Unit)
   }
 }
@@ -93,9 +93,9 @@ define write(k: &ansi-kit, t: &string) ->> system(unit) {
 define write-line(k: &ansi-kit, t: &string) ->> system(unit) {
   case k {
   | _ANSI-Kit{buffer} =>
-    this.string.io.buffer.write-line(buffer, t)
+    string.io.buffer.write-line(buffer, t)
   | _ANSI-Kit-Unbuffered{sink} =>
-    let _ = this.string.io.write-line(*sink, t);
+    let _ = string.io.write-line(*sink, t);
     Right(Unit)
   }
 }
@@ -103,9 +103,9 @@ define write-line(k: &ansi-kit, t: &string) ->> system(unit) {
 define write-int(k: &ansi-kit, x: int) ->> system(unit) {
   case k {
   | _ANSI-Kit{buffer} =>
-    this.int.io.buffer.write-int(buffer, x)
+    int.io.buffer.write-int(buffer, x)
   | _ANSI-Kit-Unbuffered{sink} =>
-    let _ = this.int.io.write-int(*sink, x);
+    let _ = int.io.write-int(*sink, x);
     Right(Unit)
   }
 }

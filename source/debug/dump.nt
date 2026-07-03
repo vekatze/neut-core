@@ -1,10 +1,10 @@
 import {
-  this.binary,
-  this.doc.show {show-doc},
-  this.show.generic {to-doc},
-  this.string,
-  this.string.io {print},
-  this.unit {unit},
+  binary,
+  doc.show {show-doc},
+  show.generic {to-doc},
+  string,
+  string.io {print},
+  unit {unit},
 }
 
 inline-meta vet<a>(x: '&a)[ribbon-length := quote {50}] -> 'unit {

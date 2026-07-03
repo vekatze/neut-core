@@ -1,12 +1,12 @@
 import {
-  this.binary {binary, from-list, length, take-N, with-slice},
-  this.binary.eq {eq-binary},
-  this.bool,
-  this.debug {assert},
-  this.list {List},
-  this.string {string},
-  this.string.io {print-line},
-  this.unit {unit},
+  binary {binary, from-list, length, take-N, with-slice},
+  binary.eq {eq-binary},
+  bool,
+  debug {assert},
+  list {List},
+  string {string},
+  string.io {print-line},
+  unit {unit},
 }
 
 define _expect-slice(label: &string, source: &binary, start: int, size: int, expected: &binary) -> unit {

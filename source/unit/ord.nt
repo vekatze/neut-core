@@ -1,7 +1,7 @@
 import {
-  this.ord {Ord, ord},
-  this.ordering {EQ},
-  this.unit {Unit, unit},
+  ord {Ord, ord},
+  ordering {EQ},
+  unit {Unit, unit},
 }
 
 constant as-ord: ord(unit) {

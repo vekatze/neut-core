@@ -1,15 +1,15 @@
 import {
-  this.binary,
-  this.bool,
-  this.box,
-  this.debug {panic},
-  this.either {Right, none},
-  this.list {Cons, Nil, list},
-  this.ord {Ord, ord},
-  this.ordering {EQ, GT, LT},
-  this.pair {Pair, pair},
-  this.string,
-  this.unit,
+  binary,
+  bool,
+  box,
+  debug {panic},
+  either {Right, none},
+  list {Cons, Nil, list},
+  ord {Ord, ord},
+  ordering {EQ, GT, LT},
+  pair {Pair, pair},
+  string,
+  unit,
 }
 
 // size balanced tree

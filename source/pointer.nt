@@ -1,6 +1,6 @@
 import {
-  this.bool {bool},
-  this.c-int {c-int},
+  bool {bool},
+  c-int {c-int},
 }
 
 inline shift(p: pointer, offset: int) -> pointer {

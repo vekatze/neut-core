@@ -1,12 +1,12 @@
 import {
-  this.bool {bool},
-  this.c-int {C-Int, c-int, eq-c-int},
-  this.c-string {c-string, from-string},
-  this.control {discard},
-  this.either {Right},
-  this.string {string},
-  this.system {report-system-error, system},
-  this.unit {Unit, unit},
+  bool {bool},
+  c-int {C-Int, c-int, eq-c-int},
+  c-string {c-string, from-string},
+  control {discard},
+  either {Right},
+  string {string},
+  system {report-system-error, system},
+  unit {Unit, unit},
 }
 
 foreign {

@@ -1,10 +1,10 @@
 import {
-  this.bool {False, True},
-  this.box,
-  this.ord {Ord, ord},
-  this.ordering {LT},
-  this.vector {vector},
-  this.vector.unsafe {access-unchecked, swap-unchecked},
+  bool {False, True},
+  box,
+  ord {Ord, ord},
+  ordering {LT},
+  vector {vector},
+  vector.unsafe {access-unchecked, swap-unchecked},
 }
 
 define _find-lower<a>(o: &ord(a), vs: &vector(a), from: int, to: int, pivot: &a) -> int {
@@ -76,6 +76,6 @@ define vector-quicksort<a>(o: &ord(a), nes: &(a) -> +a, xs: vector(a)) -> vector
         pivot-swap-loop(vs, from, to, pivot, pivot-index)
       }
     };
-  let len on xs = this.vector.length(xs);
+  let len on xs = vector.length(xs);
   f(xs, 0, sub-int(len, 1))
 }

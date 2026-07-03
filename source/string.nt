@@ -1,20 +1,20 @@
 import {
-  this.binary {binary, from-list},
-  this.bool {False, True, bool},
-  this.box,
-  this.c-size {C-Size, c-size},
-  this.either {Right, none},
-  this.list {Cons, List, Nil, list, reverse},
-  this.memory {malloc},
-  this.memory.unsafe {load-int, load-int8, load-pointer, store-int, store-pointer},
-  this.pair {Pair, pair},
-  this.pointer {shift},
-  this.rune {to-int32},
-  this.rune.unsafe {load-rune, store-rune},
-  this.rune.utf8 {size-by-head-byte},
-  this.unit {Unit, unit},
-  this.unsafe {cast},
-  this.word,
+  binary {binary, from-list},
+  bool {False, True, bool},
+  box,
+  c-size {C-Size, c-size},
+  either {Right, none},
+  list {Cons, List, Nil, list, reverse},
+  memory {malloc},
+  memory.unsafe {load-int, load-int8, load-pointer, store-int, store-pointer},
+  pair {Pair, pair},
+  pointer {shift},
+  rune {to-int32},
+  rune.unsafe {load-rune, store-rune},
+  rune.utf8 {size-by-head-byte},
+  unit {Unit, unit},
+  unsafe {cast},
+  word,
 }
 
 data string {
@@ -40,12 +40,12 @@ inline to-binary(x: &string) -> &binary {
 
 inline byte-length(t: &string) -> int {
   let ptr = magic cast(&string, &binary, t);
-  this.binary.length(ptr)
+  binary.length(ptr)
 }
 
 inline with-byte-slice<a>(t: &string, start: int, size: int, f: (&string) -> +a) -> a {
   let xs = magic cast(&string, &binary, t);
-  this.binary.with-slice(xs, start, size, (slice) => {
+  binary.with-slice(xs, start, size, (slice) => {
     let slice = magic cast(&binary, &string, slice);
     f(slice)
   })
@@ -54,25 +54,25 @@ inline with-byte-slice<a>(t: &string, start: int, size: int, f: (&string) -> +a)
 define _get-content-pointer(t: &string) -> pointer {
   let ptr = cast<&string, pointer>(t);
   let from = load-int(ptr);
-  let u = this.word.size;
+  let u = word.size;
   let content-ptr = load-pointer(shift(ptr, mul-int(u, 2)));
   shift(content-ptr, from)
 }
 
 define join(xs: list(string)) -> string {
   let xs = magic cast(list(string), list(binary), xs);
-  _String(this.binary.join(xs))
+  _String(binary.join(xs))
 }
 
 define join-N(xs: &list(string)) -> string {
   let xs = magic cast(&list(string), &list(binary), xs);
-  _String(this.binary.join-N(xs))
+  _String(binary.join-N(xs))
 }
 
 define append(t1: &string, t2: &string) -> string {
   tie _String(t1) = t1;
   tie _String(t2) = t2;
-  _String(this.binary.append(t1, t2))
+  _String(binary.append(t1, t2))
 }
 
 define is-empty(t: &string) -> bool {
@@ -82,34 +82,34 @@ define is-empty(t: &string) -> bool {
 // O(1)
 define _drop(t: string, offset: int) -> string {
   let t = magic cast(string, binary, t);
-  magic cast(binary, string, this.binary.drop(t, offset))
+  magic cast(binary, string, binary.drop(t, offset))
 }
 
 // O(1)
 define _take(t: string, offset: int) -> string {
   let t = magic cast(string, binary, t);
-  magic cast(binary, string, this.binary.take(t, offset))
+  magic cast(binary, string, binary.take(t, offset))
 }
 
 // O(1)
 define _slice(t: string, start: int, size: int) -> string {
   let t = magic cast(string, binary, t);
-  magic cast(binary, string, this.binary.slice(t, start, size))
+  magic cast(binary, string, binary.slice(t, start, size))
 }
 
 define _drop-N(t: &string, offset: int) -> string {
   let t = magic cast(&string, &binary, t);
-  magic cast(binary, string, this.binary.drop-N(t, offset))
+  magic cast(binary, string, binary.drop-N(t, offset))
 }
 
 define _take-N(t: &string, offset: int) -> string {
   let t = magic cast(&string, &binary, t);
-  magic cast(binary, string, this.binary.take-N(t, offset))
+  magic cast(binary, string, binary.take-N(t, offset))
 }
 
 define _slice-N(t: &string, start: int, size: int) -> string {
   let t = magic cast(&string, &binary, t);
-  magic cast(binary, string, this.binary.slice-N(t, start, size))
+  magic cast(binary, string, binary.slice-N(t, start, size))
 }
 
 foreign {
@@ -168,12 +168,12 @@ define find-string(haystack: &string, needle: &string) -> bool {
 }
 
 define intercalate(xs: list(string), sep: string) -> string {
-  join(this.list.intercalate(xs, sep))
+  join(list.intercalate(xs, sep))
 }
 
 define intercalate-N(xs: &list(string), sep: &string) -> string {
   let xs = magic cast(&list(string), &list(binary), xs);
-  _String(this.binary.intercalate-N(xs, to-binary(sep)))
+  _String(binary.intercalate-N(xs, to-binary(sep)))
 }
 
 define _get-byte(t: &string, index: int) -> int8 {
@@ -206,7 +206,7 @@ define _get-rune-size-end(t: &string, index: int) -> int {
 }
 
 define singleton(value: rune) -> string {
-  let s = this.rune.size(value);
+  let s = rune.size(value);
   let value = to-int32(value);
   match s {
   | 1 =>
@@ -285,7 +285,7 @@ define unlines(xs: &list(string)) -> string {
 }
 
 define replace(haystack: &string, from: &string, to: string) -> string {
-  this.string.intercalate(split(haystack, from), to)
+  string.intercalate(split(haystack, from), to)
 }
 
 // [x1], [y1, y2] => [x1]
@@ -317,7 +317,7 @@ define _unpack(ptr: pointer, len: int, index: int, acc: list(rune)) -> list(rune
     reverse(acc)
   } else {
     let r = load-rune(shift(ptr, index));
-    let s = this.rune.size(r);
+    let s = rune.size(r);
     _unpack(ptr, len, add-int(index, s), Cons(r, acc))
   }
 }
@@ -333,13 +333,13 @@ define _char-list-length(xs: &list(rune), acc: int) -> int {
   | Nil =>
     acc
   | Cons(x, rest) =>
-    _char-list-length(rest, add-int(acc, this.rune.size(*x)))
+    _char-list-length(rest, add-int(acc, rune.size(*x)))
   }
 }
 
 define pack(xs: &list(rune)) -> string {
   let len = _char-list-length(xs, 0);
-  let u = this.word.size;
+  let u = word.size;
   let u2 = mul-int(u, 2);
   let u3 = mul-int(u, 3);
   let new-string = malloc(C-Size(add-int(len, u3)));
@@ -364,7 +364,7 @@ define pack(xs: &list(rune)) -> string {
 
 define reverse(t: &string) -> string {
   // for now
-  pin xs = this.list.reverse(unpack(t));
+  pin xs = list.reverse(unpack(t));
   pack(xs)
 }
 
@@ -387,7 +387,7 @@ define uncons(t: string) ->> ?pair(rune, string) {
     none
   } else {
     let ch on t = _get-rune(t, 0);
-    let char-len = this.rune.size(ch);
+    let char-len = rune.size(ch);
     let t = _drop(t, char-len);
     Right(Pair(ch, t))
   }
@@ -493,7 +493,7 @@ inline take-while(t: string, !pred: (rune) -> bool) -> string {
       } else {
         let ch on t = _get-rune(t, index);
         if pred(ch) {
-          let char-len = this.rune.size(ch);
+          let char-len = rune.size(ch);
           self(t, add-int(index, char-len))
         } else {
           _take(t, index)
@@ -508,14 +508,14 @@ inline take-while-N(t: &string, !pred: (rune) -> bool) -> string {
   let f =
     define self(index: int, acc: list(rune)) -> list(rune) {
       if ge-int(index, len) {
-        this.list.reverse(acc)
+        list.reverse(acc)
       } else {
         let ch = _get-rune(t, index);
         if pred(ch) {
-          let char-len = this.rune.size(ch);
+          let char-len = rune.size(ch);
           self(add-int(index, char-len), Cons(ch, acc))
         } else {
-          this.list.reverse(acc)
+          list.reverse(acc)
         }
       }
     };
@@ -566,7 +566,7 @@ inline take-while-end-N(t: &string, !pred: (rune) -> bool) -> string {
 inline drop-while(t: string, !pred: (rune) -> bool) -> string {
   let f =
     define self(t: string) -> string {
-      let b on t = this.string.is-empty(t);
+      let b on t = string.is-empty(t);
       if b {
         empty()
       } else {
@@ -591,7 +591,7 @@ inline drop-while-N(t: &string, !pred: (rune) -> bool) -> string {
       } else {
         let ch = _get-rune(t, index);
         if pred(ch) {
-          let char-len = this.rune.size(ch);
+          let char-len = rune.size(ch);
           self(add-int(index, char-len))
         } else {
           _drop-N(t, index)
@@ -643,7 +643,7 @@ inline drop-while-end-N(t: &string, !pred: (rune) -> bool) -> string {
 
 define replicate(t: &string, n: int) -> string {
   let t = magic cast(&string, &binary, t);
-  magic cast(binary, string, this.binary.replicate(t, n))
+  magic cast(binary, string, binary.replicate(t, n))
 }
 
 inline fold<a>(acc: a, t: &string, !f: (a, rune) -> a) -> a {
@@ -654,7 +654,7 @@ inline fold<a>(acc: a, t: &string, !f: (a, rune) -> a) -> a {
         acc
       } else {
         let ch = _get-rune(t, index);
-        let char-len = this.rune.size(ch);
+        let char-len = rune.size(ch);
         self(add-int(index, char-len), f(acc, ch))
       }
     };
@@ -671,7 +671,7 @@ inline all(t: &string, !pred: (rune) -> bool) -> bool {
         let ch = _get-rune(t, index);
         let cond = pred(ch);
         if cond {
-          let char-len = this.rune.size(ch);
+          let char-len = rune.size(ch);
           self(add-int(index, char-len))
         } else {
           False
@@ -693,7 +693,7 @@ inline any(t: &string, !pred: (rune) -> bool) -> bool {
         if cond {
           True
         } else {
-          let char-len = this.rune.size(ch);
+          let char-len = rune.size(ch);
           self(add-int(index, char-len))
         }
       }
@@ -712,7 +712,7 @@ define find(t: &string, !pred: (rune) -> bool) ->> ?int {
         if pred(ch) {
           Right(index)
         } else {
-          let char-len = this.rune.size(ch);
+          let char-len = rune.size(ch);
           self(add-int(byte-index, char-len), add-int(index, 1))
         }
       }
@@ -743,11 +743,11 @@ define find-end(t: &string, !pred: (rune) -> bool) ->> ?int {
 define strip-prefix(prefix: &string, haystack: string) -> string {
   let prefix = magic cast(&string, &binary, prefix);
   let haystack = magic cast(string, binary, haystack);
-  _String(this.binary.strip-prefix(prefix, haystack))
+  _String(binary.strip-prefix(prefix, haystack))
 }
 
 define strip-suffix(suffix: &string, haystack: string) -> string {
   let suffix = magic cast(&string, &binary, suffix);
   let haystack = magic cast(string, binary, haystack);
-  _String(this.binary.strip-suffix(suffix, haystack))
+  _String(binary.strip-suffix(suffix, haystack))
 }

@@ -1,9 +1,9 @@
 import {
-  this.bool,
-  this.either {Right},
-  this.file.descriptor {descriptor, stdout},
-  this.system {report-system-error, system},
-  this.unit {Unit, unit},
+  bool,
+  either {Right},
+  file.descriptor {descriptor, stdout},
+  system {report-system-error, system},
+  unit {Unit, unit},
 }
 
 foreign {

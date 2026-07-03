@@ -1,11 +1,11 @@
 import {
-  this.binary,
-  this.bool {all, bool, not, or},
-  this.box,
-  this.either {Left, Right},
-  this.list {Cons, List, Nil, filter, length, list, reverse},
-  this.pair {Pair, pair},
-  this.string {
+  binary,
+  bool {all, bool, not, or},
+  box,
+  either {Left, Right},
+  list {Cons, List, Nil, filter, length, list, reverse},
+  pair {Pair, pair},
+  string {
     drop-end-N,
     drop-while-end-N,
     intercalate,
@@ -15,7 +15,7 @@ import {
     take-end-N,
     take-while-end-N,
   },
-  this.string.eq {eq-string, eq-suffix},
+  string.eq {eq-string, eq-suffix},
 }
 
 constant separator-rune: rune {
@@ -102,8 +102,8 @@ define append(path1: &string, path2: &string) -> string {
   if eq-string(path1, "") {
     clean(path2)
   } else {
-    pin tmp1 = this.string.append(path1, separator);
-    pin tmp2 = this.string.append(tmp1, path2);
+    pin tmp1 = string.append(path1, separator);
+    pin tmp2 = string.append(tmp1, path2);
     clean(tmp2)
   }
 }
@@ -146,11 +146,11 @@ define _split-extension(path: &string, pivot: int) -> pair(string, string) {
 
 define split-extension(path: &string) -> pair(string, string) {
   let dot-pos-or-none =
-    this.string.find-end(path, (r) => {
+    string.find-end(path, (r) => {
       eq-rune(r, `.`)
     });
   let slash-pos-or-none =
-    this.string.find-end(path, (r) => {
+    string.find-end(path, (r) => {
       eq-rune(r, `/`)
     });
   match dot-pos-or-none {

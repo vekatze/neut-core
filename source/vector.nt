@@ -1,19 +1,19 @@
 import {
-  this.bool {False, True, and, bool, not, or},
-  this.box,
-  this.c-size {C-Size},
-  this.control {grow, loop},
-  this.either {Left, Right, either, none},
-  this.function {compose},
-  this.int {abs-int, max-int, min-int},
-  this.list {Cons, Nil, list},
-  this.memory {malloc},
-  this.memory.unsafe {free, load-int, load-pointer, memmove, realloc, store-int, store-pointer},
-  this.pair {Pair, pair},
-  this.pointer {shift},
-  this.unit {Unit, unit},
-  this.unsafe {cast, cast-inline},
-  this.word,
+  bool {False, True, and, bool, not, or},
+  box,
+  c-size {C-Size},
+  control {grow, loop},
+  either {Left, Right, either, none},
+  function {compose},
+  int {abs-int, max-int, min-int},
+  list {Cons, Nil, list},
+  memory {malloc},
+  memory.unsafe {free, load-int, load-pointer, memmove, realloc, store-int, store-pointer},
+  pair {Pair, pair},
+  pointer {shift},
+  unit {Unit, unit},
+  unsafe {cast, cast-inline},
+  word,
 }
 
 nominal {
@@ -26,11 +26,11 @@ data vector(_: type) {
 }
 
 inline _header-size() -> int {
-  mul-int(this.word.size, 5)
+  mul-int(word.size, 5)
 }
 
 inline _allocation-size(capacity: int) -> int {
-  add-int(_header-size(), mul-int(this.word.size, capacity))
+  add-int(_header-size(), mul-int(word.size, capacity))
 }
 
 inline _inline-buffer-ptr(vector-ptr: pointer) -> pointer {
@@ -44,32 +44,32 @@ inline get-capacity<a>(xs: &vector(a)) -> int {
 
 inline _get-from<a>(xs: &vector(a)) -> int {
   let vector-ptr = cast<&vector(a), pointer>(xs);
-  load-int(shift(vector-ptr, this.word.size))
+  load-int(shift(vector-ptr, word.size))
 }
 
 inline _get-to<a>(xs: &vector(a)) -> int {
   let vector-ptr = cast<&vector(a), pointer>(xs);
-  load-int(shift(vector-ptr, mul-int(this.word.size, 2)))
+  load-int(shift(vector-ptr, mul-int(word.size, 2)))
 }
 
 inline _get-elem-type<a>(xs: &vector(a)) -> type {
   let vector-ptr = cast<&vector(a), pointer>(xs);
-  cast<int, type>(load-int(shift(vector-ptr, mul-int(this.word.size, 3))))
+  cast<int, type>(load-int(shift(vector-ptr, mul-int(word.size, 3))))
 }
 
 inline _set-elem-type<a>(xs: &vector(a), b: type) -> unit {
   let vector-ptr = cast<&vector(a), pointer>(xs);
-  store-int(cast<type, int>(b), shift(vector-ptr, mul-int(this.word.size, 3)))
+  store-int(cast<type, int>(b), shift(vector-ptr, mul-int(word.size, 3)))
 }
 
 inline _get-buffer-ptr<a>(xs: &vector(a)) -> pointer {
   let vector-ptr = cast<&vector(a), pointer>(xs);
-  load-pointer(shift(vector-ptr, mul-int(this.word.size, 4)))
+  load-pointer(shift(vector-ptr, mul-int(word.size, 4)))
 }
 
 define _set-buffer-ptr<a>(xs: &vector(a), buffer-ptr: pointer) -> unit {
   let vector-ptr = cast<&vector(a), pointer>(xs);
-  store-pointer(buffer-ptr, shift(vector-ptr, mul-int(this.word.size, 4)))
+  store-pointer(buffer-ptr, shift(vector-ptr, mul-int(word.size, 4)))
 }
 
 define _set-capacity<a>(xs: &vector(a), capacity: int) -> unit {
@@ -80,7 +80,7 @@ define _set-capacity<a>(xs: &vector(a), capacity: int) -> unit {
 define _get-element-pointer<a>(xs: &vector(a), index: int) -> pointer {
   let from = _get-from(xs);
   let buffer-ptr = _get-buffer-ptr(xs);
-  shift(buffer-ptr, mul-int(this.word.size, add-int(from, index)))
+  shift(buffer-ptr, mul-int(word.size, add-int(from, index)))
 }
 
 define length<a>(xs: &vector(a)) -> int {
@@ -97,7 +97,7 @@ inline with-slice<a, b>(xs: &vector(a), start: int, size: int, f: (&vector(a)) -
   let slice-from = add-int(from, start);
   let slice-to = add-int(slice-from, size);
   let slice-ptr = magic alloca(int, 5);
-  let word-size = this.word.size;
+  let word-size = word.size;
   store-int(get-capacity(xs), slice-ptr);
   store-int(slice-from, shift(slice-ptr, word-size));
   store-int(slice-to, shift(slice-ptr, mul-int(word-size, 2)));
@@ -110,31 +110,31 @@ inline with-slice<a, b>(xs: &vector(a), start: int, size: int, f: (&vector(a)) -
 
 inline _shift-from<a>(xs: &vector(a), offset: int) -> unit {
   let vector-ptr = cast<&vector(a), pointer>(xs);
-  let from-ptr = shift(vector-ptr, mul-int(this.word.size, 1));
+  let from-ptr = shift(vector-ptr, mul-int(word.size, 1));
   let current-value = load-int(from-ptr);
   store-int(add-int(current-value, offset), from-ptr)
 }
 
 inline _shift-to<a>(xs: &vector(a), offset: int) -> unit {
   let vector-ptr = cast<&vector(a), pointer>(xs);
-  let to-ptr = shift(vector-ptr, mul-int(this.word.size, 2));
+  let to-ptr = shift(vector-ptr, mul-int(word.size, 2));
   let current-value = load-int(to-ptr);
   store-int(add-int(current-value, offset), to-ptr)
 }
 
 inline _set-from<a>(xs: &vector(a), from: int) -> unit {
   let vector-ptr = cast<&vector(a), pointer>(xs);
-  store-int(from, shift(vector-ptr, this.word.size))
+  store-int(from, shift(vector-ptr, word.size))
 }
 
 inline _set-to<a>(xs: &vector(a), to: int) -> unit {
   let vector-ptr = cast<&vector(a), pointer>(xs);
-  store-int(to, shift(vector-ptr, mul-int(this.word.size, 2)))
+  store-int(to, shift(vector-ptr, mul-int(word.size, 2)))
 }
 
 define make<a>(initial-capacity: int) -> vector(a) {
   let abs-capacity = abs-int(initial-capacity);
-  let word-size = this.word.size;
+  let word-size = word.size;
   let vector-ptr = malloc(C-Size(_allocation-size(abs-capacity)));
   let buffer-ptr = _inline-buffer-ptr(vector-ptr);
   let initial-cursor = match gt-int(initial-capacity, 0) {True => 0 | False => abs-capacity};
@@ -217,8 +217,8 @@ define _extend-front<a>(xs: vector(a)) -> vector(a) {
   let vector-ptr = cast<vector(a), pointer>(xs);
   let new-vector-ptr = realloc(vector-ptr, C-Size(_allocation-size(new-capacity)));
   let new-buffer-ptr = _inline-buffer-ptr(new-vector-ptr);
-  let new-head-ptr = shift(new-buffer-ptr, mul-int(this.word.size, growth-base));
-  memmove(new-head-ptr, new-buffer-ptr, mul-int(this.word.size, old-capacity));
+  let new-head-ptr = shift(new-buffer-ptr, mul-int(word.size, growth-base));
+  memmove(new-head-ptr, new-buffer-ptr, mul-int(word.size, old-capacity));
   let xs = cast<pointer, vector(a)>(new-vector-ptr);
   let _ on xs = {
     _shift-from(xs, growth-base);
@@ -297,7 +297,7 @@ define pop-back<a>(xs: vector(a)) ->> ?pair(vector(a), a) {
 
 rule-left Vector {
   inline-meta leaf<a>(size: int) -> 'vector(a) {
-    quote {this.vector.make(unquote {promote {size}})}
+    quote {vector.make(unquote {promote {size}})}
   },
   inline-meta node-left<a>(acc: 'vector(a), x: 'a) -> 'vector(a) {
     quote {push-back(unquote {acc}, unquote {x})}
@@ -376,7 +376,7 @@ inline fold-left-reverse-N<elem-type, result-type>(
       if lt-int(cursor, 0) {
         acc
       } else {
-        let y = this.vector._access-unchecked(xs, cursor);
+        let y = vector._access-unchecked(xs, cursor);
         loop(sub-int(cursor, 1), consumer(acc, y, cursor), xs)
       }
     };
@@ -570,8 +570,8 @@ inline zip-fold<a, b, c>(xs: &vector(a), ys: &vector(b), base: c, f: (&a, &b, c,
 }
 
 define from-list<a>(base-list: list(a)) -> vector(a) {
-  let len on base-list = this.list.length(base-list);
-  this.list.fold-left(make(len), base-list, exact push-back)
+  let len on base-list = list.length(base-list);
+  list.fold-left(make(len), base-list, exact push-back)
 }
 
 define to-list<a>(xs: vector(a)) -> list(a) {
@@ -711,7 +711,7 @@ define delete<a>(xs: vector(a), index: int) -> vector(a) {
     if lt-int(index, pivot) {
       let source-ptr on xs = _get-element-pointer(xs, 0);
       let target-ptr on xs = _get-element-pointer(xs, 1);
-      let copy-bytes = mul-int(this.word.size, index);
+      let copy-bytes = mul-int(word.size, index);
       memmove(target-ptr, source-ptr, copy-bytes);
       let _ on xs = _shift-from(xs, 1);
       xs
@@ -719,7 +719,7 @@ define delete<a>(xs: vector(a), index: int) -> vector(a) {
       let next-value-index = add-int(index, 1);
       let source-ptr on xs = _get-element-pointer(xs, next-value-index);
       let target-ptr = value-ptr;
-      let copy-bytes = mul-int(this.word.size, sub-int(len, next-value-index));
+      let copy-bytes = mul-int(word.size, sub-int(len, next-value-index));
       memmove(target-ptr, source-ptr, copy-bytes);
       let _ on xs = _shift-to(xs, -1);
       xs
@@ -1018,7 +1018,7 @@ define lift-vector<a>(xs: vector(a), _: (a) -> +a) -> +vector(a) {
   magic cast(vector(a), +vector(a), xs)
   // admissible:
   //   let base: +vector(a) = box {make(10)};
-  //   this.list.fold-left(base, to-list(xs), function (acc, x) {
+  //   list.fold-left(base, to-list(xs), function (acc, x) {
   //     box {
   //       letbox v = acc;
   //       letbox x' = f(x);

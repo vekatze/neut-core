@@ -32,7 +32,7 @@ define _expect-str(label: &string, got: string, want: &string) -> unit {
   if eq-string(got, want) {
     Unit
   } else {
-    pin m = format("{}: got \"{}\" want \"{}\"\n", List[*label, *got, *want]);
+    pin m = format("{}: got \"{}\" want \"{}\"\n", List::[*label, *got, *want]);
     panic(m)
   }
 }
@@ -52,7 +52,7 @@ define _expect-split(input: &string, want-base: &string, want-ext: &string) -> u
   if and::(eq-string(base, want-base), eq-string(ext, want-ext)) {
     Unit
   } else {
-    pin m = format("split-extension({}): got (\"{}\", \"{}\")\n", List[*input, *base, *ext]);
+    pin m = format("split-extension({}): got (\"{}\", \"{}\")\n", List::[*input, *base, *ext]);
     panic(m)
   }
 }

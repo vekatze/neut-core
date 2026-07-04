@@ -70,7 +70,7 @@ import {
 }
 
 define _literal-doc(d: doc) -> doc {
-  join[
+  join::[
     ansi-fg(Yellow),
     d,
     ansi-reset,
@@ -82,7 +82,7 @@ nominal {
 }
 
 define _constructor-doc(x: &string) -> doc {
-  join[
+  join::[
     ansi-fg(Blue),
     ansi-bold,
     atom-N(x),
@@ -91,11 +91,11 @@ define _constructor-doc(x: &string) -> doc {
 }
 
 define _nested-comma-seq(prefix: doc, body: doc, suffix: doc) -> doc {
-  join[
+  join::[
     prefix,
     Nest(
       2,
-      join[
+      join::[
         break(""),
         Group(body),
       ],
@@ -107,15 +107,15 @@ define _nested-comma-seq(prefix: doc, body: doc, suffix: doc) -> doc {
 
 inline-meta _vector-doc<a>(xs: '&vector(a)) -> 'doc {
   quote {
-    let prefix = join[_constructor-doc("Vector"), atom-N("[")];
+    let prefix = join::[_constructor-doc("Vector"), atom-N("[")];
     let suffix = atom-N("]");
     let len = vector.length(unquote {xs});
     let content =
       vector.fold-right-N(unquote {xs}, empty, (x: &a, acc: doc, i: int) => {
         if eq-int(add-int(i, 1), len) {
-          join[unquote {to-doc(quote {x})}, acc]
+          join::[unquote {to-doc(quote {x})}, acc]
         } else {
-          join[unquote {to-doc(quote {x})}, atom-N(","), break(" "), acc]
+          join::[unquote {to-doc(quote {x})}, atom-N(","), break(" "), acc]
         }
       });
     Group(_nested-comma-seq(
@@ -157,7 +157,7 @@ inline-meta _constructor-args-doc<a>(
     let Pair(f, cursor) = entry;
     let d1 = _constructor-arg-doc(f, cursor, header, data-arg-num, x);
     let d2 = _constructor-args-doc(rest, header, data-arg-num, x);
-    quote {join[unquote {d1}, atom-N(","), break(" "), unquote {d2}]}
+    quote {join::[unquote {d1}, atom-N(","), break(" "), unquote {d2}]}
   }
 }
 
@@ -172,7 +172,7 @@ inline-meta _algebraic-constructor-doc<a>(
     if is-const-like {
       quote {_constructor-doc(unquote {promote {cons-name}})}
     } else {
-      quote {join[_constructor-doc(unquote {promote {cons-name}}), atom-N("(")]}
+      quote {join::[_constructor-doc(unquote {promote {cons-name}}), atom-N("(")]}
     };
   let suffix =
     if is-const-like {
@@ -244,7 +244,7 @@ define-meta to-doc<a>(x: '&a) -> 'doc {
     quote {atom-N("null")}
   | Rune =>
     quote {
-      _literal-doc(join[
+      _literal-doc(join::[
         atom-N("`"),
         atom-rune(magic cast(&a, rune, unquote {x})),
         atom-N("`"),
@@ -252,7 +252,7 @@ define-meta to-doc<a>(x: '&a) -> 'doc {
     }
   | Binary =>
     quote {
-      _literal-doc(join[
+      _literal-doc(join::[
         atom-N("\""),
         atom-N(magic cast(&a, &string, unquote {x})),
         atom-N("\""),

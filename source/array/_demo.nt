@@ -396,17 +396,17 @@ define _test-set() -> unit {
   let xs = put::(xs, 1, Foo(22));
   let xs = put::(xs, -1, Bar(False));
   pin xs = put::(xs, 0, Bar(False));
-  assert("array.put::: length\n", eq-int(length(xs), 3));
-  _expect-item("array.put::: front overwritten\n", xs, 0, 1001);
-  _expect-item("array.put::: middle overwritten\n", xs, 1, 22);
-  _expect-item("array.put::: out-of-range ignored\n", xs, 2, 3);
+  assert("array.put: length\n", eq-int(length(xs), 3));
+  _expect-item("array.put: front overwritten\n", xs, 0, 1001);
+  _expect-item("array.put: middle overwritten\n", xs, 1, 22);
+  _expect-item("array.put: out-of-range ignored\n", xs, 2, 3);
   let cs: array(cell(int)) = make::(0);
   let cs = push-back(cs, make-cell(lift {10}));
   let cs = push-back(cs, make-cell(lift {20}));
   let cs = put::(cs, 1, make-cell(lift {99}));
   let cs = put::(cs, 4, make-cell(lift {77}));
   pin cs = put::(cs, 0, make-cell(lift {42}));
-  assert("array.set:: cell: length\n", eq-int(length(cs), 2));
+  assert("array.set: cell: length\n", eq-int(length(cs), 2));
   _expect-cell("array.set cell: front overwritten\n", cs, 0, 42);
   _expect-cell("array.set cell: back overwritten\n", cs, 1, 99);
   Unit

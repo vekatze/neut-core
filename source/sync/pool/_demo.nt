@@ -7,7 +7,7 @@ import {
 
 define zen() -> unit {
   pin result =
-    for-each-parallel(5, Vector[1, 2, 3, 4, 5], (x) => {
+    for-each-parallel(5, Vector::[1, 2, 3, 4, 5], (x) => {
       lift {add-int(x, 10)}
     });
   unquote {vet(quote {result})};

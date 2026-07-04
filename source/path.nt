@@ -75,12 +75,12 @@ define clean(path: &string) -> string {
   let components = split(path, separator);
   let components =
     filter(components, (component) => {
-      all[
+      all::[
         not(eq-string(component, "")),
         not(eq-string(component, ".")),
       ]
     });
-  let components = _clean-double-dots(is-absolute(path), components, List[]);
+  let components = _clean-double-dots(is-absolute(path), components, List::[]);
   if is-absolute(path) {
     let len on components = length(components);
     if eq-int(len, 0) {

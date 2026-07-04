@@ -27,7 +27,7 @@ define zen() -> unit {
   let cmd =
     Process-Spec{
       command := *"sh",
-      args := List[*"-c", *"ls"],
+      args := List::[*"-c", *"ls"],
       cwd := Right(*"/etc"),
       input := *"",
     };

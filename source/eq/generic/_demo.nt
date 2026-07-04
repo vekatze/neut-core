@@ -7,16 +7,16 @@ import {
 }
 
 define zen() -> unit {
-  let _ = derive<list(int)>::();
-  pin xs: vector(list(int)) = vector.Vector[List[], List[10, 20]];
-  pin ys: vector(list(int)) = vector.Vector[List[], List[10, 20]];
+  let _ = derive::<list(int)>();
+  pin xs: vector(list(int)) = vector.Vector::[List::[], List::[10, 20]];
+  pin ys: vector(list(int)) = vector.Vector::[List::[], List::[10, 20]];
   let foo = eq-data::(xs, ys);
   // pin f: list((int) -> int) =
-  //   List[function (x) {
+  //   List::[function (x) {
   //     x
   //   }];
   // pin g: list((int) -> int) =
-  //   List[function (x) {
+  //   List::[function (x) {
   //     x
   //   }];
   // let foo = unquote {eq-data(quote {f}, quote {g})};

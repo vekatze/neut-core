@@ -31,11 +31,11 @@ define _expect-materialized-copy(label: &string, source: &binary, start: int, si
 }
 
 define zen() -> unit {
-  pin source = from-list(List[0, 1, 2, 3, 4, 5]);
-  pin middle = from-list(List[2, 3, 4]);
-  pin prefix = from-list(List[0, 1]);
-  pin suffix = from-list(List[3, 4, 5]);
-  pin empty = from-list(List[]);
+  pin source = from-list(List::[0, 1, 2, 3, 4, 5]);
+  pin middle = from-list(List::[2, 3, 4]);
+  pin prefix = from-list(List::[0, 1]);
+  pin suffix = from-list(List::[3, 4, 5]);
+  pin empty = from-list(List::[]);
   _expect-slice("binary.with-slice: middle\n", source, 2, 3, middle);
   _expect-slice("binary.with-slice: negative start clamps to zero\n", source, -10, 2, prefix);
   _expect-slice("binary.with-slice: oversized start clamps to end\n", source, 99, 4, empty);

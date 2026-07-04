@@ -11,10 +11,10 @@ inline as-show<a, b>(s1: show(a), s2: show(b)) -> show(either(a, b)) {
     case val {
     | Left(x) =>
       let Show{render} = s1;
-      format("Left({})", List[render(x)])
+      format("Left({})", List::[render(x)])
     | Right(y) =>
       let Show{render} = s2;
-      format("Right({})", List[render(y)])
+      format("Right({})", List::[render(y)])
     }
   })
 }

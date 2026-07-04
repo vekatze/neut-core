@@ -166,11 +166,11 @@ define _expect-iso(input: &string, sec: int, ns: int) -> unit {
     if eq-time(parsed, want) {
       Unit
     } else {
-      pin m = format("from-ISO8601 mismatch: {}\n", List[*input]);
+      pin m = format("from-ISO8601 mismatch: {}\n", List::[*input]);
       panic(m)
     }
   | Left(_) =>
-    pin m = format("from-ISO8601 unexpectedly returned none: {}\n", List[*input]);
+    pin m = format("from-ISO8601 unexpectedly returned none: {}\n", List::[*input]);
     panic(m)
   }
 }
@@ -178,7 +178,7 @@ define _expect-iso(input: &string, sec: int, ns: int) -> unit {
 define _expect-iso-none(input: &string) -> unit {
   match from-ISO8601(input) {
   | Right(_) =>
-    pin m = format("from-ISO8601 should have failed: {}\n", List[*input]);
+    pin m = format("from-ISO8601 should have failed: {}\n", List::[*input]);
     panic(m)
   | Left(_) =>
     Unit
@@ -192,11 +192,11 @@ define _expect-render(input: &string) -> unit {
     if eq-string(out, input) {
       Unit
     } else {
-      pin m = format("render mismatch: {} != {}\n", List[*out, *input]);
+      pin m = format("render mismatch: {} != {}\n", List::[*out, *input]);
       panic(m)
     }
   | Left(_) =>
-    pin m = format("render: parse failed for {}\n", List[*input]);
+    pin m = format("render: parse failed for {}\n", List::[*input]);
     panic(m)
   }
 }
@@ -306,7 +306,7 @@ define _expect-show(label: &string, t: time, decimals: int, want: &string) -> un
   if eq-string(s, want) {
     Unit
   } else {
-    pin m = format("{}: got \"{}\" want \"{}\"\n", List[*label, *s, *want]);
+    pin m = format("{}: got \"{}\" want \"{}\"\n", List::[*label, *s, *want]);
     panic(m)
   }
 }

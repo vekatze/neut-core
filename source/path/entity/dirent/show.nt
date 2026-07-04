@@ -10,8 +10,8 @@ define show-dirent(e: dirent) -> string {
   let Dirent{kind, name} = e;
   match kind {
   | DT_DIR =>
-    format("{}/", List[name])
+    format("{}/", List::[name])
   | _ =>
-    format("{}", List[name])
+    format("{}", List::[name])
   }
 }

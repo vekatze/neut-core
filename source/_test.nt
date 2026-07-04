@@ -206,7 +206,7 @@ define my-def-func<a>(t: a, x: int)[y: int := 42] -> pair(a, int) {
 }
 
 define zen() -> unit {
-  pin k = String["hello\n", "yo\n", "hey"];
+  pin k = String::["hello\n", "yo\n", "hey"];
   print-line(k);
   pin v = int.parse.parse-octal("0o755");
   vet::(v);
@@ -230,7 +230,7 @@ define zen() -> unit {
   vet::(v);
   let result = my-func(20);
   print-int-line(result);
-  let x = sample<bool>::();
+  let x = sample::<bool>();
   print-int-line(x);
   let !mv = make-mvar<string>();
   let _ = mv;
@@ -246,7 +246,7 @@ define zen() -> unit {
   pin count = get-cpu-count();
   vet::(count);
   pin result =
-    for-each-parallel(get-cpu-count(), Vector[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], (x) => {
+    for-each-parallel(get-cpu-count(), Vector::[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], (x) => {
       lift {add-int(x, 10)}
     });
   vet::(result);
@@ -299,7 +299,7 @@ define zen() -> unit {
     });
   let _ =
     // short-circuiting
-    all[
+    all::[
       {
         print-line("all1");
         True
@@ -315,7 +315,7 @@ define zen() -> unit {
     ];
   let _ =
     // short-circuiting
-    any[
+    any::[
       {
         print-line("any1");
         False

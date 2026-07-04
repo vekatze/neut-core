@@ -17,7 +17,7 @@ import {
 
 // returns true iff `ch` is a C0 control character, a delete, a backslash, or a double quote
 define _is-1-byte-escaped-character(ch: int8) -> bool {
-  any[
+  any::[
     and::(ule-int8(0, ch), ule-int8(ch, 0x1F)),
     eq-int8(ch, 0x22),
     eq-int8(ch, 0x5C),
@@ -187,7 +187,7 @@ define _escape(t: &string, len: int, pivot: int, cursor: int) -> list(string) {
     };
   let index = add-int(pivot, cursor);
   if ge-int(index, len) {
-    List[_drop-N(t, pivot)]
+    List::[_drop-N(t, pivot)]
   } else {
     let head-char = _get-byte(t, index);
     let char-len = size-by-head-byte(head-char);
@@ -225,7 +225,7 @@ define escape(t: &string) -> list(string) {
 
 define quote-string(t: string) -> string {
   pin t = t;
-  join(concat(List[List[*"\""], escape(t), List[*"\""]]))
+  join(concat(List::[List::[*"\""], escape(t), List::[*"\""]]))
 }
 
 define show-string(t: string) -> string {
@@ -233,7 +233,7 @@ define show-string(t: string) -> string {
 }
 
 define show-string-N(t: &string) -> string {
-  join(concat(List[List[*"\""], escape(t), List[*"\""]]))
+  join(concat(List::[List::[*"\""], escape(t), List::[*"\""]]))
 }
 
 constant as-show: show(string) {

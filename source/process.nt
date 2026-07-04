@@ -165,7 +165,7 @@ define _exec(command: string, args: list(string), error-writer: descriptor) -> s
   let cmd on command = string.pointer.get-content-pointer(command);
   pin tmp = Cons(command, args);
   let raw-args = list.for-each-N(tmp, string.pointer.get-content-pointer);
-  let cmd-args = _make-argv(list.append(raw-args, List[null-pointer]));
+  let cmd-args = _make-argv(list.append(raw-args, List::[null-pointer]));
   let v = process._posix.execvp(cmd, cmd-args);
   pin message = get-error-message(get-system-error());
   let _ = write(error-writer, message);

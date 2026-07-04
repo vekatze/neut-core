@@ -19,7 +19,7 @@ import {
 }
 
 define _is-hex-digit(r: rune) -> bool {
-  any[
+  any::[
     and::(le-rune(`0`, r), le-rune(r, `9`)),
     and::(le-rune(`A`, r), le-rune(r, `F`)),
   ]
@@ -35,23 +35,23 @@ define _read-char(r: rune, t: string) -> either(error, string) {
     if eq-rune(r, r-found) {
       Right(rest)
     } else {
-      Left(Parse-Error(format("Expected `{}`, but got: `{}`", List[singleton(r), singleton(r-found)])))
+      Left(Parse-Error(format("Expected `{}`, but got: `{}`", List::[singleton(r), singleton(r-found)])))
     }
   | Left(_) =>
-    Left(Parse-Error(format("Expected `{}`, but got: end of string", List[singleton(r)])))
+    Left(Parse-Error(format("Expected `{}`, but got: end of string", List::[singleton(r)])))
   }
 }
 
 define _read-unicode-scalar-value(t: &string) -> either(error, rune) {
   match parse-hex-digits(t) {
   | Left(_) =>
-    Left(Parse-Error(format("Could not parse `{}` as a hexadecimal integer", List[*t])))
+    Left(Parse-Error(format("Could not parse `{}` as a hexadecimal integer", List::[*t])))
   | Right(v) =>
     match rune.from-int(v) {
     | Right(r) =>
       Right(r)
     | Left(_) =>
-      Left(Parse-Error(format("The value `{}` is outside the Unicode codespace", List[*t])))
+      Left(Parse-Error(format("The value `{}` is outside the Unicode codespace", List::[*t])))
     }
   }
 }
@@ -62,19 +62,19 @@ define _unquote-string(t: string) -> either(error, list(string)) {
     Left(Parse-Error(*"Unexpected end of string after a backslash"))
   | Right(Pair(c, rest)) =>
     if eq-rune(c, `0`) {
-      Right(List[*"\u{0}", rest])
+      Right(List::[*"\u{0}", rest])
     } else-if eq-rune(c, `t`) {
-      Right(List[*"\u{9}", rest])
+      Right(List::[*"\u{9}", rest])
     } else-if eq-rune(c, `n`) {
-      Right(List[*"\u{A}", rest])
+      Right(List::[*"\u{A}", rest])
     } else-if eq-rune(c, `r`) {
-      Right(List[*"\u{D}", rest])
+      Right(List::[*"\u{D}", rest])
     } else-if eq-rune(c, `"`) {
-      Right(List[*"\u{22}", rest])
+      Right(List::[*"\u{22}", rest])
     } else-if eq-rune(c, `\\`) {
-      Right(List[*"\u{5C}", rest])
+      Right(List::[*"\u{5C}", rest])
     } else-if eq-rune(c, `\``) {
-      Right(List[*"\u{60}", rest])
+      Right(List::[*"\u{60}", rest])
     } else-if eq-rune(c, `u`) {
       try rest = _read-char(`{`, rest);
       let hex-string on rest = take-while-N(rest, _is-hex-digit);
@@ -83,9 +83,9 @@ define _unquote-string(t: string) -> either(error, list(string)) {
       let rest = drop(rest, scalar-value-string-len);
       try rest = _read-char(`}`, rest);
       try r = _read-unicode-scalar-value(hex-string);
-      Right(List[singleton(r), rest])
+      Right(List::[singleton(r), rest])
     } else {
-      Left(Parse-Error(format("Unknown escape sequence: \\{}", List[singleton(c)])))
+      Left(Parse-Error(format("Unknown escape sequence: \\{}", List::[singleton(c)])))
     }
   }
 }
@@ -104,5 +104,5 @@ define _parse-string-fragment(t: &string) -> either(error, list(string)) {
 define parse-string(t: &string) -> either(error, string) {
   pin ts = split(t, "\\\\");
   try tss = for-each-EN(ts, _parse-string-fragment);
-  Right(string.join(list.concat(intercalate(tss, List[*"\\"]))))
+  Right(string.join(list.concat(intercalate(tss, List::[*"\\"]))))
 }

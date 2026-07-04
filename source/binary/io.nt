@@ -64,7 +64,7 @@ define read(from: descriptor, initial-buffer-size: int) ->> system(binary) {
   if le-int(initial-buffer-size, 0) {
     Left(Application-Error(format(
       "core.binary.io.read: initial-buffer-size must be positive, but got: {}",
-      List[show-int(initial-buffer-size)],
+      List::[show-int(initial-buffer-size)],
     )))
   } else {
     let u = word.size;

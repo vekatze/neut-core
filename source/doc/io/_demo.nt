@@ -10,14 +10,14 @@ import {
 
 define zen() -> unit {
   pin item =
-    Group(join[
+    Group(join::[
       ansi-fg(Blue),
       atom(*"begin"),
       ansi-reset,
-      Nest(2, join[
+      Nest(2, join::[
         break(" "),
         Group(
-          join[
+          join::[
             ansi-fg(Yellow),
             atom(*"print;"),
             ansi-reset,

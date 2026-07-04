@@ -159,13 +159,13 @@ inline ansi-doc(s: style) -> doc {
           }
         }
       | Color-256(value) =>
-        join[
+        join::[
           atom-style-N("\u{1B}[38;5;"),
           atom-int(zext-int8-int(value)),
           atom-style-N("m"),
         ]
       | Color-RGB(r, g, b) =>
-        join[
+        join::[
           atom-style-N("\u{1B}[38;2;"),
           atom-int(zext-int8-int(r)),
           atom-style-N(";"),
@@ -219,13 +219,13 @@ inline ansi-doc(s: style) -> doc {
           }
         }
       | Color-256(value) =>
-        join[
+        join::[
           atom-style-N("\u{1B}[48;5;"),
           atom-int(zext-int8-int(value)),
           atom-style-N("m"),
         ]
       | Color-RGB(r, g, b) =>
-        join[
+        join::[
           atom-style-N("\u{1B}[48;2;"),
           atom-int(zext-int8-int(r)),
           atom-style-N(";"),

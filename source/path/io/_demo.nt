@@ -19,7 +19,7 @@ import {
   unit {Unit, unit},
 }
 
-define test-zen() -> system(unit) {
+define test-zen() -> system(unit.unit) {
   try out = read-directory("/Users/");
   for(out, (item) => {
     pin t = show-dirent(item);

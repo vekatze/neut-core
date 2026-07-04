@@ -113,7 +113,7 @@ define _assert-vector-layout() -> unit {
   _expect-empty-slice("vector.with-slice: oversized start clamps to end\n", xs, 99, 4);
   _expect-empty-slice("vector.with-slice: negative size clamps to zero\n", xs, 2, -5);
   _expect-materialized-copy("vector.with-slice: materialized copy\n", xs, 2, 3, 20, 30, 40);
-  let shifted = drop(from-list(List[0, 1, 2, 3, 4, 5, 6]), 2);
+  let shifted = drop(from-list(List::[0, 1, 2, 3, 4, 5, 6]), 2);
   pin shifted = take(shifted, 4);
   _expect-slice-2("vector.with-slice: non-zero from\n", shifted, 1, 2, 3, 4)
 }
@@ -173,7 +173,7 @@ define zen() -> unit {
   // let _ = !xs;
   let xs-clone = xs;
   pin xs = xs;
-  let ys: vector(int) = from-list(to-list(from-list(List[1, 2, 3, 4, 5])));
+  let ys: vector(int) = from-list(to-list(from-list(List::[1, 2, 3, 4, 5])));
   pin ys = ys;
   let zs =
     zip-with-N(xs, ys, (x, y, _) => {

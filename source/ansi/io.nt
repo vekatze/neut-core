@@ -71,12 +71,12 @@ define flush(k: &ansi-kit) ->> system(unit) {
   }
 }
 
-define make-ansi-kit(sink: descriptor, capacity: int) -> ansi-kit {
+define make-ansi-kit(sink: descriptor, capacity: int) ->> ansi-kit {
   let buffer = make-buffer(sink, capacity);
   _ANSI-Kit{buffer}
 }
 
-define make-ansi-kit-unbuffered(sink: descriptor) -> ansi-kit {
+define make-ansi-kit-unbuffered(sink: descriptor) ->> ansi-kit {
   _ANSI-Kit-Unbuffered{sink}
 }
 

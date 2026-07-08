@@ -8,7 +8,7 @@ import {
   word {size},
 }
 
-data-raw cell(a) {
+data-opaque cell(a) {
 | _Cell(a)
 }
 

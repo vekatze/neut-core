@@ -1,6 +1,6 @@
 import {
   binary,
-  box,
+  layer,
   rc {borrow, new},
   string,
   string.io {print, print-line},

@@ -1,7 +1,7 @@
 import {
   bool {False, True, and, bool, or},
-  box,
   either {Left, Right, either, none},
+  layer,
   monoid {Monoid, monoid},
   ord {Ord, ord},
   ordering {GT, LT},

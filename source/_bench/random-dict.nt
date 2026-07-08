@@ -1,10 +1,10 @@
 import {
-  box,
   control {grow},
   dictionary {dictionary, insert, lookup},
   either {Left, Right},
   int.io {print-int-line},
   int.ord,
+  layer,
   ord {ord},
   random {random-int},
   unit {Unit, unit},

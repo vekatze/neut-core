@@ -1,7 +1,7 @@
 import {
   bool {False, True, bool},
-  box,
   eq {Eq, eq},
+  layer,
 }
 
 define eq-bool(b1: bool, b2: bool) -> bool {

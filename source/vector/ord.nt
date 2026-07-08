@@ -1,6 +1,6 @@
 import {
   bool {False, True},
-  box,
+  layer,
   ord {Ord, ord},
   ordering {LT},
   vector {vector},

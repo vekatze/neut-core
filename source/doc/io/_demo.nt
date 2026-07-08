@@ -1,9 +1,9 @@
 import {
   ansi {Blue, Yellow},
   binary,
-  box,
   doc {Group, Nest, ansi-fg, ansi-reset, atom, break, join},
   doc.io {print-doc-line},
+  layer,
   string,
   unit {Unit, unit},
 }

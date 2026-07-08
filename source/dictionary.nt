@@ -1,9 +1,9 @@
 import {
   binary,
   bool,
-  box,
   debug {panic},
   either {Right, none},
+  layer,
   list {Cons, Nil, list},
   ord {Ord, ord},
   ordering {EQ, GT, LT},

@@ -1,7 +1,6 @@
 import {
   binary,
   bool,
-  box,
   cell {cell, make-cell},
   doc {
     Chunk,
@@ -24,6 +23,7 @@ import {
   },
   float.show {show-float},
   int.show {show-int},
+  layer,
   string {string},
   unit {unit},
 }

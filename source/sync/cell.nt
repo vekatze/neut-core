@@ -1,6 +1,6 @@
 import {
-  box {axiom-T},
   c-size {C-Size, from-c-size},
+  layer {axiom-T},
   memory {malloc},
   memory.unsafe {free, load-int, store-int},
   pair {Pair, pair},

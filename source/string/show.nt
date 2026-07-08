@@ -1,7 +1,7 @@
 import {
   binary,
   bool {and, any, bool},
-  box,
+  layer,
   list {Cons, List, concat, list},
   rune.utf8 {size-by-head-byte},
   show {Show, show},

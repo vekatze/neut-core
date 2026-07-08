@@ -1,7 +1,7 @@
 import {
   bool,
-  box,
   eq {Eq, eq},
+  layer,
 }
 
 constant as-eq: eq(rune) {

@@ -1,9 +1,9 @@
 import {
   binary {binary, from-list},
   bool {False, True, bool},
-  box,
   c-size {C-Size, c-size},
   either {Right, none},
+  layer,
   list {Cons, List, Nil, list, reverse},
   memory {malloc},
   memory.unsafe {load-int, load-int8, load-pointer, store-int, store-pointer},

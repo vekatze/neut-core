@@ -1,6 +1,6 @@
 import {
   binary,
-  box,
+  layer,
   list {List, for-each-N, list},
   show {Show, show},
   string {intercalate, join},

@@ -1,9 +1,9 @@
 import {
   binary,
   bool {True, bool},
-  box,
   debug.dump {vet},
   either {Left, either},
+  layer,
   list {list},
   pair {Pair, pair},
   string {string},

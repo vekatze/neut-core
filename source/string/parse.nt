@@ -1,9 +1,9 @@
 import {
   binary,
   bool {and, any, bool},
-  box,
   either {Left, Right, either},
   int.parse {parse-hex-digits},
+  layer,
   list {Cons, List, Nil, concat, for-each-E, for-each-EN, intercalate, list},
   pair {Pair},
   rune,

@@ -1,7 +1,7 @@
 import {
   binary,
   bool {bool},
-  box,
+  layer,
   show {Show, show},
   string {string},
 }

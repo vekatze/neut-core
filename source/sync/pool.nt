@@ -1,7 +1,7 @@
 import {
-  box {axiom-K, axiom-T},
   control {discard, grow, loop},
   int {max-int},
+  layer {axiom-K, axiom-T},
   pair {Pair, meta-pair-in},
   sync.cell {cell, make-cell, mutate},
   sync.channel {channel, make-channel, receive, send},

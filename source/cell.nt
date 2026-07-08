@@ -1,7 +1,7 @@
 import {
   bool,
-  box {axiom-T},
   c-size {C-Size},
+  layer {axiom-T},
   memory {malloc},
   memory.unsafe {free, load-int, store-int},
   pair {Pair, pair},

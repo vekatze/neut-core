@@ -1,5 +1,5 @@
 import {
-  box,
+  layer,
   show {Show, show},
   string {join, string},
   string.show {escape},

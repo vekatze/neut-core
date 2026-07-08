@@ -1,12 +1,12 @@
 import {
   ansi {Blue, Yellow},
   binary,
-  box,
   doc {Group, Nest, ansi-fg, ansi-reset, atom, break, join},
   doc.io.buffer {write-doc-line},
   either {Right},
   file.buffer {flush, make-buffer},
   file.descriptor {stdout},
+  layer,
   string,
   system {system},
   unit {Unit, unit},

@@ -1,6 +1,6 @@
 import {
   binary,
-  box,
+  layer,
   show {Show, show},
   string,
   unit {Unit, unit},

@@ -1,7 +1,7 @@
 import {
   bool {bool},
-  box,
   either {Right, none},
+  layer,
   list {list},
   pair {Pair, pair},
   unit,

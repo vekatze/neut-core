@@ -1,6 +1,6 @@
 import {
   bool,
-  box,
+  layer,
   ord {Ord, ord},
   ordering {EQ, GT, LT},
 }

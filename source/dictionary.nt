@@ -232,8 +232,8 @@ inline _glue<k, v>(d1: dictionary(k, v), d2: dictionary(k, v)) -> dictionary(k, 
   }
 }
 
-define delete<k, v>(L: &ord(k), d: dictionary(k, v), needle: k) -> dictionary(k, v) {
-  tie Ord{compare} = L;
+define delete<k, v>(o: &ord(k), d: dictionary(k, v), needle: k) -> dictionary(k, v) {
+  tie Ord{compare} = o;
   match d {
   | _Tip =>
     _Tip
@@ -241,17 +241,17 @@ define delete<k, v>(L: &ord(k), d: dictionary(k, v), needle: k) -> dictionary(k,
     let order on needle, kx = compare(needle, kx);
     match order {
     | LT =>
-      _balance-R(kx, x, delete(L, l, needle), r)
+      _balance-R(kx, x, delete(o, l, needle), r)
     | GT =>
-      _balance-L(kx, x, l, delete(L, r, needle))
+      _balance-L(kx, x, l, delete(o, r, needle))
     | EQ =>
       _glue(l, r)
     }
   }
 }
 
-define insert<k, v>(L: &ord(k), d: dictionary(k, v), key-X: k, val-X: v) -> dictionary(k, v) {
-  tie Ord{compare} = L;
+define insert<k, v>(o: &ord(k), d: dictionary(k, v), key-X: k, val-X: v) -> dictionary(k, v) {
+  tie Ord{compare} = o;
   match d {
   | _Tip =>
     singleton(key-X, val-X)
@@ -259,17 +259,17 @@ define insert<k, v>(L: &ord(k), d: dictionary(k, v), key-X: k, val-X: v) -> dict
     let order on key-X, key-Y = compare(key-X, key-Y);
     match order {
     | LT =>
-      _balance-L(key-Y, val-Y, insert(L, left, key-X, val-X), right)
+      _balance-L(key-Y, val-Y, insert(o, left, key-X, val-X), right)
     | GT =>
-      _balance-R(key-Y, val-Y, left, insert(L, right, key-X, val-X))
+      _balance-R(key-Y, val-Y, left, insert(o, right, key-X, val-X))
     | EQ =>
       _Bin(size, key-X, val-X, left, right)
     }
   }
 }
 
-define insert-with<k, v>(L: &ord(k), !f: (v, v) -> v, d: dictionary(k, v), key-X: k, val-X: v) -> dictionary(k, v) {
-  tie Ord{compare} = L;
+define insert-with<k, v>(o: &ord(k), !f: (v, v) -> v, d: dictionary(k, v), key-X: k, val-X: v) -> dictionary(k, v) {
+  tie Ord{compare} = o;
   match d {
   | _Tip =>
     singleton(key-X, val-X)
@@ -277,108 +277,108 @@ define insert-with<k, v>(L: &ord(k), !f: (v, v) -> v, d: dictionary(k, v), key-X
     let order on key-X, key-Y = compare(key-X, key-Y);
     match order {
     | LT =>
-      _balance-L(key-Y, val-Y, insert-with(L, f, left, key-X, val-X), right)
+      _balance-L(key-Y, val-Y, insert-with(o, f, left, key-X, val-X), right)
     | GT =>
-      _balance-R(key-Y, val-Y, left, insert-with(L, f, right, key-X, val-X))
+      _balance-R(key-Y, val-Y, left, insert-with(o, f, right, key-X, val-X))
     | EQ =>
       _Bin(size, key-X, f(val-X, val-Y), left, right)
     }
   }
 }
 
-define lookup<k, v>(L: &ord(k), d: &dictionary(k, v), needle: &k) ->> ?&v {
-  tie Ord{compare} = L;
+define lookup<k, v>(o: &ord(k), d: &dictionary(k, v), needle: &k) ->> ?&v {
+  tie Ord{compare} = o;
   case d {
   | _Tip =>
     none
   | _Bin(_, key, x, l, r) =>
     match compare(needle, key) {
     | LT =>
-      lookup(L, l, needle)
+      lookup(o, l, needle)
     | GT =>
-      lookup(L, r, needle)
+      lookup(o, r, needle)
     | EQ =>
       Right(x)
     }
   }
 }
 
-define _lookup-LE-with-cand<k, v>(L: &ord(k), d: &dictionary(k, v), needle: &k, cand-k: &k, cand-v: &v) -> pair(&k, &v) {
-  tie Ord{compare} = L;
+define _lookup-LE-with-cand<k, v>(o: &ord(k), d: &dictionary(k, v), needle: &k, cand-k: &k, cand-v: &v) -> pair(&k, &v) {
+  tie Ord{compare} = o;
   case d {
   | _Tip =>
     Pair(cand-k, cand-v)
   | _Bin(_, key, x, l, r) =>
     match compare(needle, key) {
     | GT =>
-      _lookup-LE-with-cand(L, r, needle, key, x)
+      _lookup-LE-with-cand(o, r, needle, key, x)
     | LT =>
-      _lookup-LE-with-cand(L, l, needle, cand-k, cand-v)
+      _lookup-LE-with-cand(o, l, needle, cand-k, cand-v)
     | _ =>
       Pair(key, x)
     }
   }
 }
 
-define lookup-LE<k, v>(L: &ord(k), d: &dictionary(k, v), needle: &k) ->> ?pair(&k, &v) {
-  tie Ord{compare} = L;
+define lookup-LE<k, v>(o: &ord(k), d: &dictionary(k, v), needle: &k) ->> ?pair(&k, &v) {
+  tie Ord{compare} = o;
   case d {
   | _Tip =>
     none
   | _Bin(_, key, x, l, r) =>
     match compare(needle, key) {
     | GT =>
-      Right(_lookup-LE-with-cand(L, r, needle, key, x))
+      Right(_lookup-LE-with-cand(o, r, needle, key, x))
     | LT =>
-      lookup-LE(L, l, needle)
+      lookup-LE(o, l, needle)
     | _ =>
       Right(Pair(key, x))
     }
   }
 }
 
-define _lookup-GE-with-cand<k, v>(L: &ord(k), d: &dictionary(k, v), needle: &k, cand-k: &k, cand-v: &v) -> pair(&k, &v) {
-  tie Ord{compare} = L;
+define _lookup-GE-with-cand<k, v>(o: &ord(k), d: &dictionary(k, v), needle: &k, cand-k: &k, cand-v: &v) -> pair(&k, &v) {
+  tie Ord{compare} = o;
   case d {
   | _Tip =>
     Pair(cand-k, cand-v)
   | _Bin(_, key, x, l, r) =>
     match compare(needle, key) {
     | GT =>
-      _lookup-GE-with-cand(L, r, needle, cand-k, cand-v)
+      _lookup-GE-with-cand(o, r, needle, cand-k, cand-v)
     | LT =>
-      _lookup-GE-with-cand(L, l, needle, key, x)
+      _lookup-GE-with-cand(o, l, needle, key, x)
     | _ =>
       Pair(key, x)
     }
   }
 }
 
-define lookup-GE<k, v>(L: &ord(k), d: &dictionary(k, v), needle: &k) ->> ?pair(&k, &v) {
-  tie Ord{compare} = L;
+define lookup-GE<k, v>(o: &ord(k), d: &dictionary(k, v), needle: &k) ->> ?pair(&k, &v) {
+  tie Ord{compare} = o;
   case d {
   | _Tip =>
     none
   | _Bin(_, key, x, l, r) =>
     match compare(needle, key) {
     | GT =>
-      lookup-GE(L, r, needle)
+      lookup-GE(o, r, needle)
     | LT =>
-      Right(_lookup-GE-with-cand(L, l, needle, key, x))
+      Right(_lookup-GE-with-cand(o, l, needle, key, x))
     | _ =>
       Right(Pair(key, x))
     }
   }
 }
 
-inline from-list<k, v>(L: &ord(k), kvs: list(pair(k, v))) -> dictionary(k, v) {
+inline from-list<k, v>(o: &ord(k), kvs: list(pair(k, v))) -> dictionary(k, v) {
   let f =
     define self(kvs: list(pair(k, v)), acc: dictionary(k, v)) -> dictionary(k, v) {
       match kvs {
       | Nil =>
         acc
       | Cons(Pair(k, v), rest) =>
-        self(rest, insert(L, acc, k, v))
+        self(rest, insert(o, acc, k, v))
       }
     };
   f(kvs, _Tip)

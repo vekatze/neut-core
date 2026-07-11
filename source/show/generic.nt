@@ -1,7 +1,7 @@
 import {
   ansi {Blue, Yellow},
   binary,
-  bool,
+  bool {True, bool},
   doc {
     Chunk,
     Chunk-Choose,
@@ -69,25 +69,36 @@ import {
   vector {vector},
 }
 
-define _literal-doc(d: doc) -> doc {
-  join::[
-    ansi-fg(Yellow),
-    d,
-    ansi-reset,
-  ]
+define _literal-doc(d: doc, enable-ansi: bool) -> doc {
+  if enable-ansi {
+    join::[
+      ansi-fg(Yellow),
+      d,
+      ansi-reset,
+    ]
+  } else {
+    d
+  }
 }
 
 nominal {
-  define-meta to-doc<a>(x: '&a) -> 'doc,
+  define-meta to-doc<a>(
+    x: '&a,
+    enable-ansi: 'bool,
+  ) -> 'doc,
 }
 
-define _constructor-doc(x: &string) -> doc {
-  join::[
-    ansi-fg(Blue),
-    ansi-bold,
-    atom-N(x),
-    ansi-reset,
-  ]
+define _constructor-doc(x: &string, enable-ansi: bool) -> doc {
+  if enable-ansi {
+    join::[
+      ansi-fg(Blue),
+      ansi-bold,
+      atom-N(x),
+      ansi-reset,
+    ]
+  } else {
+    atom-N(x)
+  }
 }
 
 define _nested-comma-seq(prefix: doc, body: doc, suffix: doc) -> doc {
@@ -105,17 +116,17 @@ define _nested-comma-seq(prefix: doc, body: doc, suffix: doc) -> doc {
   ]
 }
 
-inline-meta _vector-doc<a>(xs: '&vector(a)) -> 'doc {
+inline-meta _vector-doc<a>(xs: '&vector(a), enable-ansi: 'bool) -> 'doc {
   quote {
-    let prefix = join::[_constructor-doc("Vector"), atom-N("[")];
+    let prefix = join::[_constructor-doc("Vector", unquote {enable-ansi}), atom-N("[")];
     let suffix = atom-N("]");
     let len = vector.length(unquote {xs});
     let content =
       vector.fold-right-N(unquote {xs}, empty, (x: &a, acc: doc, i: int) => {
         if eq-int(add-int(i, 1), len) {
-          join::[unquote {to-doc(quote {x})}, acc]
+          join::[unquote {to-doc(quote {x}, enable-ansi)}, acc]
         } else {
-          join::[unquote {to-doc(quote {x})}, atom-N(","), break(" "), acc]
+          join::[unquote {to-doc(quote {x}, enable-ansi)}, atom-N(","), break(" "), acc]
         }
       });
     Group(_nested-comma-seq(
@@ -132,12 +143,13 @@ inline-meta _constructor-arg-doc<a>(
   header: int,
   data-arg-num: int,
   x: '&a,
+  enable-ansi: 'bool,
 ) -> 'doc {
   let Field(_, t, _) = f;
   unpack-type t = t;
   quote {
     let x-elem-ptr = cast-inline<pointer, &t>(unquote {field-pointer(f, header, data-arg-num, cursor, x)});
-    unquote {to-doc<t>(quote {x-elem-ptr})}
+    unquote {to-doc<t>(quote {x-elem-ptr}, enable-ansi)}
   }
 }
 
@@ -146,17 +158,18 @@ inline-meta _constructor-args-doc<a>(
   header: int,
   data-arg-num: int,
   x: '&a,
+  enable-ansi: 'bool,
 ) -> 'doc {
   match field-cursors {
   | Nil =>
     quote {empty}
   | Cons(entry, Nil) =>
     let Pair(f, cursor) = entry;
-    _constructor-arg-doc(f, cursor, header, data-arg-num, x)
+    _constructor-arg-doc(f, cursor, header, data-arg-num, x, enable-ansi)
   | Cons(!entry, rest) =>
     let Pair(f, cursor) = entry;
-    let d1 = _constructor-arg-doc(f, cursor, header, data-arg-num, x);
-    let d2 = _constructor-args-doc(rest, header, data-arg-num, x);
+    let d1 = _constructor-arg-doc(f, cursor, header, data-arg-num, x, enable-ansi);
+    let d2 = _constructor-args-doc(rest, header, data-arg-num, x, enable-ansi);
     quote {join::[unquote {d1}, atom-N(","), break(" "), unquote {d2}]}
   }
 }
@@ -166,13 +179,14 @@ inline-meta _algebraic-constructor-doc<a>(
   header: int,
   data-arg-num: int,
   x: '&a,
+  enable-ansi: 'bool,
 ) -> 'doc {
   let Constructor(cons-name, is-const-like, xts) = cons;
   let prefix =
     if is-const-like {
-      quote {_constructor-doc(unquote {promote {cons-name}})}
+      quote {_constructor-doc(unquote {promote {cons-name}}, unquote {enable-ansi})}
     } else {
-      quote {join::[_constructor-doc(unquote {promote {cons-name}}), atom-N("(")]}
+      quote {join::[_constructor-doc(unquote {promote {cons-name}}, unquote {enable-ansi}), atom-N("(")]}
     };
   let suffix =
     if is-const-like {
@@ -183,7 +197,7 @@ inline-meta _algebraic-constructor-doc<a>(
   quote {
     Group(_nested-comma-seq(
       unquote {prefix},
-      unquote {_constructor-args-doc(fields-with-cursors(xts, 0), header, data-arg-num, x)},
+      unquote {_constructor-args-doc(fields-with-cursors(xts, 0), header, data-arg-num, x, enable-ansi)},
       unquote {suffix},
     ))
   }
@@ -195,13 +209,14 @@ inline-meta _algebraic-doc<a>(
   data-arg-num: int,
   disc: 'int,
   x: '&a,
+  enable-ansi: 'bool,
 ) -> 'doc {
   constructor-switch(constructors, disc, quote {empty}, (cons) => {
-    _algebraic-constructor-doc(cons, header, data-arg-num, x)
+    _algebraic-constructor-doc(cons, header, data-arg-num, x, enable-ansi)
   })
 }
 
-define-meta to-doc<a>(x: '&a) -> 'doc {
+define-meta to-doc<a>(x: '&a, enable-ansi: 'bool) -> 'doc {
   let k = magic inspect-type(a);
   match k {
   | Algebraic(_, data-args, !cons-info) =>
@@ -209,14 +224,14 @@ define-meta to-doc<a>(x: '&a) -> 'doc {
     let header = algebraic-header-slot-count(cons-info);
     quote {
       let discriminant-x = unquote {algebraic-discriminant(cons-info, x)};
-      unquote {_algebraic-doc(cons-info, header, data-arg-num, quote {discriminant-x}, x)}
+      unquote {_algebraic-doc(cons-info, header, data-arg-num, quote {discriminant-x}, x, enable-ansi)}
     }
   | Enum(names) =>
     quote {
       let discriminant-x = cast-inline<&a, int>(unquote {x});
       unquote {
         enum-switch(names, quote {discriminant-x}, quote {empty}, (name) => {
-          quote {_constructor-doc(unquote {promote {name}})}
+          quote {_constructor-doc(unquote {promote {name}}, unquote {enable-ansi})}
         })
       }
     }
@@ -248,7 +263,7 @@ define-meta to-doc<a>(x: '&a) -> 'doc {
         atom-N("`"),
         atom-rune(magic cast(&a, rune, unquote {x})),
         atom-N("`"),
-      ])
+      ], unquote {enable-ansi})
     }
   | Binary =>
     quote {
@@ -256,45 +271,48 @@ define-meta to-doc<a>(x: '&a) -> 'doc {
         atom-N("\""),
         atom-N(magic cast(&a, &string, unquote {x})),
         atom-N("\""),
-      ])
+      ], unquote {enable-ansi})
     }
   | Wrapper(t) =>
     unpack-type t = t;
     quote {
       let x-unwrapped: &t = cast-inline<&a, &t>(unquote {x});
-      unquote {to-doc<t>(quote {x-unwrapped})}
+      unquote {to-doc<t>(quote {x-unwrapped}, enable-ansi)}
     }
   | Vector(t) =>
     unpack-type t = t;
     quote {
       let x: &vector(t) = cast-inline<&a, &vector(t)>(unquote {x});
-      unquote {_vector-doc<t>(quote {x})}
+      unquote {_vector-doc<t>(quote {x}, enable-ansi)}
     }
   | Noema(t) =>
     unpack-type t = t;
     quote {
       let x-unwrapped: &t = cast-inline<&a, &t>(unquote {x});
-      unquote {to-doc<t>(quote {x-unwrapped})}
+      unquote {to-doc<t>(quote {x-unwrapped}, enable-ansi)}
     }
   | Box-T(t) =>
     unpack-type t = t;
     quote {
       let x-unwrapped: &t = cast-inline<&a, &t>(unquote {x});
-      unquote {to-doc<t>(quote {x-unwrapped})}
+      unquote {to-doc<t>(quote {x-unwrapped}, enable-ansi)}
     }
   | Pointer =>
     quote {atom-int(magic cast(&a, int64, unquote {x}))}
   | _ =>
-    quote {_literal-doc(atom-N("_"))}
+    quote {_literal-doc(atom-N("_"), unquote {enable-ansi})}
   }
 }
 
-define-meta derive<a>(max-ribbon-width: 'int) -> 'show(a) {
+inline-meta derive<a>()[
+  max-ribbon-width: 'int := quote {50},
+  enable-ansi: 'bool := quote {True},
+] -> 'show(a) {
   quote {
     Show{
       render := {
         (x) => {
-          pin d = to-doc::(x);
+          pin d = unquote {to-doc(quote {x}, enable-ansi)};
           show-doc(d, unquote {max-ribbon-width})
         }
       },

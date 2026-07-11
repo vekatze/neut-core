@@ -1,5 +1,6 @@
 import {
   binary,
+  bool {True, bool},
   doc.show {show-doc},
   show.generic {to-doc},
   string,
@@ -7,9 +8,12 @@ import {
   unit {unit},
 }
 
-inline-meta vet<a>(x: '&a)[ribbon-length := quote {50}] -> 'unit {
+inline-meta vet<a>(x: '&a)[
+  ribbon-length: 'int := quote {50},
+  enable-ansi: 'bool := quote {True},
+] -> 'unit {
   quote {
-    pin tmp = unquote {to-doc(x)};
+    pin tmp = unquote {to-doc(x, enable-ansi)};
     pin item = show-doc(tmp, unquote {ribbon-length});
     print(item);
     print("\n");

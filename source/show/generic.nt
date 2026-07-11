@@ -8,7 +8,7 @@ import {
     Chunk-Empty,
     Chunk-Join,
     Chunk-Line,
-    Chunk-String-N,
+    Chunk-Text,
     Group,
     Nest,
     ansi-bold,
@@ -29,7 +29,7 @@ import {
   list {Cons, Nil, list},
   pair {Pair, pair},
   show {Show, show},
-  string {string},
+  string,
   type-value {
     Algebraic,
     Binary,
@@ -88,7 +88,7 @@ nominal {
   ) -> 'doc,
 }
 
-define _constructor-doc(x: &string, enable-ansi: bool) -> doc {
+define _constructor-doc(x: text, enable-ansi: bool) -> doc {
   if enable-ansi {
     join::[
       ansi-fg(Blue),
@@ -111,7 +111,7 @@ define _nested-comma-seq(prefix: doc, body: doc, suffix: doc) -> doc {
         Group(body),
       ],
     ),
-    Chunk(Chunk-Choose(Chunk-Empty, Chunk-Join(Chunk-String-N(","), Chunk-Line))),
+    Chunk(Chunk-Choose(Chunk-Empty, Chunk-Join(Chunk-Text(","), Chunk-Line))),
     suffix,
   ]
 }
@@ -259,19 +259,25 @@ define-meta to-doc<a>(x: '&a, enable-ansi: 'bool) -> 'doc {
     quote {atom-N("null")}
   | Rune =>
     quote {
-      _literal-doc(join::[
-        atom-N("`"),
-        atom-rune(magic cast(&a, rune, unquote {x})),
-        atom-N("`"),
-      ], unquote {enable-ansi})
+      _literal-doc(
+        join::[
+          atom-N("`"),
+          atom-rune(magic cast(&a, rune, unquote {x})),
+          atom-N("`"),
+        ],
+        unquote {enable-ansi},
+      )
     }
   | Binary =>
     quote {
-      _literal-doc(join::[
-        atom-N("\""),
-        atom-N(magic cast(&a, &string, unquote {x})),
-        atom-N("\""),
-      ], unquote {enable-ansi})
+      _literal-doc(
+        join::[
+          atom-N("\""),
+          atom-N(magic cast(&a, text, unquote {x})),
+          atom-N("\""),
+        ],
+        unquote {enable-ansi},
+      )
     }
   | Wrapper(t) =>
     unpack-type t = t;

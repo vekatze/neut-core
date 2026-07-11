@@ -12,9 +12,9 @@ import {
     Chunk-Line,
     Chunk-Rune,
     Chunk-String,
-    Chunk-String-N,
     Chunk-Style,
-    Chunk-Style-N,
+    Chunk-Style-Text,
+    Chunk-Text,
     Group,
     Nest,
     Seq,
@@ -24,7 +24,7 @@ import {
   float.show {show-float},
   int.show {show-int},
   layer,
-  string {string},
+  string {from-text, string},
   unit {unit},
 }
 
@@ -109,11 +109,11 @@ define _size-chunk(c: &chunk) -> int {
     0
   | Chunk-String(content) =>
     string.length(content)
-  | Chunk-String-N(content) =>
-    string.length(*content)
+  | Chunk-Text(content) =>
+    string.length(from-text(*content))
   | Chunk-Style(_) =>
     0
-  | Chunk-Style-N(_) =>
+  | Chunk-Style-Text(_) =>
     0
   | Chunk-Int(x) =>
     magic external neut_core_v0_55_int64_strlen(*x)
@@ -137,13 +137,13 @@ define _layout-chunk(k: &_doc-kit, c: &chunk) -> string {
   | Chunk-String(t) =>
     _shift-column(k, string.length(t));
     *t
-  | Chunk-String-N(t) =>
-    _shift-column(k, string.length(*t));
-    **t
+  | Chunk-Text(t) =>
+    _shift-column(k, string.length(from-text(*t)));
+    *from-text(*t)
   | Chunk-Style(t) =>
     *t
-  | Chunk-Style-N(t) =>
-    **t
+  | Chunk-Style-Text(t) =>
+    *from-text(*t)
   | Chunk-Int(x) =>
     show-int(*x)
   | Chunk-Float(x) =>

@@ -1,7 +1,6 @@
 import {
   bool {bool},
   list {list},
-  string {string},
 }
 
 data field-layout {
@@ -11,23 +10,23 @@ data field-layout {
 
 data field {
 | Field(
-    name: &string,
+    name: text,
     field-type: type,
     layout: field-layout,
   )
 }
 
 data constructor {
-| Constructor(&string, bool, list(field))
+| Constructor(text, bool, list(field))
 }
 
 data type-value {
 | Opaque
 | Type
 | Function
-| Algebraic(data-name: &string, data-param-types: list(type), constructors: list(constructor))
+| Algebraic(data-name: text, data-param-types: list(type), constructors: list(constructor))
 | Noema(type)
-| Enum(constructors: list(&string))
+| Enum(constructors: list(text))
 | Int1
 | Int2
 | Int4

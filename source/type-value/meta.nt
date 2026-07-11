@@ -6,7 +6,6 @@ import {
   memory.unsafe {load-int, load-pointer},
   pair {Pair, pair},
   pointer {shift},
-  string {string},
   type-value {
     Algebraic,
     Constructor,
@@ -23,7 +22,7 @@ import {
   word,
 }
 
-inline-meta field-name(f: field) -> &string {
+inline-meta field-name(f: field) -> text {
   let Field(name, _, _) = f;
   name
 }
@@ -69,7 +68,7 @@ inline-meta field-storage-slot-count(f: field) -> int {
   field-slot-count(field-layout-of(f))
 }
 
-inline-meta constructor-name(c: constructor) -> &string {
+inline-meta constructor-name(c: constructor) -> text {
   let Constructor(name, _, _) = c;
   name
 }
@@ -146,9 +145,9 @@ inline-meta constructor-switch<a>(
 }
 
 inline-meta _enum-switch-clauses<a>(
-  names: list(&string),
+  names: list(text),
   cons-index: int,
-  !on-hit: (&string) -> 'a,
+  !on-hit: (text) -> 'a,
 ) -> list(pair(int, 'a)) {
   match names {
   | Nil =>
@@ -164,10 +163,10 @@ inline-meta _enum-switch-clauses<a>(
 // Generates a runtime switch over an enum discriminant while traversing the
 // constructor names at meta-time.
 inline-meta enum-switch<a>(
-  names: list(&string),
+  names: list(text),
   disc: 'int,
   fallback: 'a,
-  !on-hit: (&string) -> 'a,
+  !on-hit: (text) -> 'a,
 ) -> 'a {
   let clauses = _enum-switch-clauses(names, 0, on-hit);
   magic make-switch(disc, fallback, clauses)

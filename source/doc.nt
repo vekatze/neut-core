@@ -31,9 +31,9 @@ import {
 data chunk {
 | Chunk-Empty
 | Chunk-String(content: string)
-| Chunk-String-N(content: &string)
+| Chunk-Text(content: text)
 | Chunk-Style(content: string)
-| Chunk-Style-N(content: &string)
+| Chunk-Style-Text(content: text)
 | Chunk-Int(content: int)
 | Chunk-Float(content: float)
 | Chunk-Rune(content: rune)
@@ -57,16 +57,16 @@ inline atom(t: string) -> doc {
   Chunk(Chunk-String(t))
 }
 
-inline atom-N(t: &string) -> doc {
-  Chunk(Chunk-String-N(t))
+inline atom-N(t: text) -> doc {
+  Chunk(Chunk-Text(t))
 }
 
 inline atom-style(t: string) -> doc {
   Chunk(Chunk-Style(t))
 }
 
-inline atom-style-N(t: &string) -> doc {
-  Chunk(Chunk-Style-N(t))
+inline atom-style-N(t: text) -> doc {
+  Chunk(Chunk-Style-Text(t))
 }
 
 inline atom-int(x: int) -> doc {
@@ -81,8 +81,8 @@ inline atom-rune(x: rune) -> doc {
   Chunk(Chunk-Rune(x))
 }
 
-inline break(t: &string) -> doc {
-  Chunk(Chunk-Choose(Chunk-String-N(t), Chunk-Line))
+inline break(t: text) -> doc {
+  Chunk(Chunk-Choose(Chunk-Text(t), Chunk-Line))
 }
 
 rule-right join {
@@ -98,7 +98,7 @@ rule-right join {
 }
 
 constant newline: doc {
-  Chunk(Chunk-Choose(Chunk-String-N(""), Chunk-Line))
+  Chunk(Chunk-Choose(Chunk-Text(""), Chunk-Line))
 }
 
 inline ansi-doc(s: style) -> doc {

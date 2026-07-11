@@ -144,15 +144,6 @@ define with-cell(i: int) -> int {
   axiom-T(cell.extract(c))
 }
 
-inline loop<a>(xs: list(a)) -> list(a) {
-  match xs {
-  | Nil =>
-    Nil
-  | Cons(y, ys) =>
-    Cons(y, loop(ys))
-  }
-}
-
 define-meta sample<a>() -> 'int {
   let b = magic eq-type(list(int), a);
   if b {
@@ -177,23 +168,6 @@ inline my-loop-func(x: int) ->> either(int, bool) {
       }
     };
   inner(x)
-}
-
-define joker-tail-list(xs: list(int), acc: int) ->> int {
-  match xs {
-  | Nil =>
-    acc
-  | Cons(y, ys) =>
-    joker-tail-list(ys, add-int(y, acc))
-  }
-}
-
-define joker-tail(x: int, acc: int) ->> int {
-  if eq-int(x, 0) {
-    acc
-  } else {
-    joker-tail(sub-int(x, 1), add-int(x, acc))
-  }
 }
 
 define my-func(x: int) ->> int {
@@ -389,12 +363,4 @@ define main() -> unit {
   print-int-line(tdm-hc::(99));
   use-item(1234);
   Unit
-}
-
-define foo(x: int, acc: int) -> int {
-  if eq-int(x, 0) {
-    acc
-  } else {
-    foo(sub-int(x, 1), add-int(x, acc))
-  }
 }

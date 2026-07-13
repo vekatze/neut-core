@@ -1,0 +1,167 @@
+import {
+  ansi {command},
+  binary {allocate, binary, take},
+  binary.builder {
+    _Binary-Builder,
+    _append-ansi,
+    _append-binary,
+    _append-float16,
+    _append-float32,
+    _append-float64,
+    _append-float64-UTF8,
+    _append-int16,
+    _append-int32,
+    _append-int64,
+    _append-int64-UTF8,
+    _append-int8,
+    _append-rune-UTF8,
+    _append-string,
+    _binary-builder,
+  },
+  layer {axiom-T},
+  rune {to-int32},
+  string {string},
+  sync.cell {cell, make-cell, mutate},
+  unit {unit},
+}
+
+data binary-builder {
+| _Binary-Builder-Sync-Ref(cell(_binary-builder))
+}
+
+inline _to-cell(b: binary-builder) -> cell(_binary-builder) {
+  let _Binary-Builder-Sync-Ref(b) = b;
+  b
+}
+
+inline _to-cell-N(b: &binary-builder) -> &cell(_binary-builder) {
+  tie _Binary-Builder-Sync-Ref(b) = b;
+  b
+}
+
+inline _mutate(
+  b: &binary-builder,
+  f: (+_binary-builder) -> +_binary-builder,
+) -> unit {
+  mutate(_to-cell-N(b), f)
+}
+
+define make-binary-builder(size: int) -> binary-builder {
+  _Binary-Builder-Sync-Ref(
+    make-cell(
+      lift {
+        _Binary-Builder{
+          cursor := 0,
+          content := allocate(size),
+        }
+      },
+    ),
+  )
+}
+
+define extract(b: binary-builder) -> binary {
+  let _Binary-Builder{cursor, content} = axiom-T(sync.cell.extract(_to-cell(b)));
+  take(content, cursor)
+}
+
+define append-int64(b: &binary-builder, x: int) -> unit {
+  _mutate(b, (b) => {
+    _append-int64(b, x)
+  })
+}
+
+define append-int64-UTF8(b: &binary-builder, x: int64) -> unit {
+  _mutate(b, (b) => {
+    _append-int64-UTF8(b, x)
+  })
+}
+
+define append-int32(b: &binary-builder, x: int32) -> unit {
+  _mutate(b, (b) => {
+    _append-int32(b, x)
+  })
+}
+
+define append-int32-UTF8(b: &binary-builder, x: int32) -> unit {
+  append-int64-UTF8(b, sext-int32-int64(x))
+}
+
+define append-int16(b: &binary-builder, x: int16) -> unit {
+  _mutate(b, (b) => {
+    _append-int16(b, x)
+  })
+}
+
+define append-int16-UTF8(b: &binary-builder, x: int16) -> unit {
+  append-int64-UTF8(b, sext-int16-int64(x))
+}
+
+define append-int8(b: &binary-builder, x: int8) -> unit {
+  _mutate(b, (b) => {
+    _append-int8(b, x)
+  })
+}
+
+define append-int8-UTF8(b: &binary-builder, x: int8) -> unit {
+  append-int64-UTF8(b, sext-int8-int64(x))
+}
+
+define append-float64(b: &binary-builder, x: float) -> unit {
+  _mutate(b, (b) => {
+    _append-float64(b, x)
+  })
+}
+
+define append-float64-UTF8(b: &binary-builder, x: float64) -> unit {
+  _mutate(b, (b) => {
+    _append-float64-UTF8(b, x)
+  })
+}
+
+define append-float32(b: &binary-builder, x: float32) -> unit {
+  _mutate(b, (b) => {
+    _append-float32(b, x)
+  })
+}
+
+define append-float32-UTF8(b: &binary-builder, x: float32) -> unit {
+  append-float64-UTF8(b, fpext-float32-float64(x))
+}
+
+define append-float16(b: &binary-builder, x: float16) -> unit {
+  _mutate(b, (b) => {
+    _append-float16(b, x)
+  })
+}
+
+define append-float16-UTF8(b: &binary-builder, x: float16) -> unit {
+  append-float64-UTF8(b, fpext-float16-float64(x))
+}
+
+define append-binary(b: &binary-builder, x: &binary) -> unit {
+  _mutate(b, (b) => {
+    _append-binary(b, x)
+  })
+}
+
+define append-string(b: &binary-builder, x: &string) -> unit {
+  _mutate(b, (b) => {
+    _append-string(b, x)
+  })
+}
+
+define append-rune(b: &binary-builder, x: rune) -> unit {
+  append-int32(b, to-int32(x))
+}
+
+define append-rune-UTF8(b: &binary-builder, x: rune) -> unit {
+  _mutate(b, (b) => {
+    _append-rune-UTF8(b, x)
+  })
+}
+
+inline append-ansi(b: &binary-builder, x: command) -> unit {
+  _mutate(b, (b) => {
+    _append-ansi(b, x)
+  })
+}

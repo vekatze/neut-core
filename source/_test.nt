@@ -15,6 +15,7 @@ import {
   platform {get-cpu-count},
   string {append, from-text, string, strip-prefix, strip-suffix},
   string.builder {String},
+  string.builder.sync,
   string.io {print, print-line},
   sync.mvar {make-mvar, receive, send},
   sync.pool {for-each-parallel},
@@ -49,6 +50,17 @@ data generic-mixed {
 define inspect-array-generics(xs: &array(pair(int, bool)), ys: &array(pair(int, bool))) -> bool {
   let _ on xs = vet::(xs);
   eq-data::(xs, ys)
+}
+
+define test-sync-string-builder() -> unit {
+  let b = string.builder.sync.make-string-builder(4);
+  let _ on b = {
+    string.builder.sync.append-string(b, "sync-");
+    string.builder.sync.append-int64-UTF8(b, 42);
+    string.builder.sync.append-rune-UTF8(b, `!`)
+  };
+  pin result = string.builder.sync.extract(b);
+  print-line(result)
 }
 
 define-meta inspect-sample-field-count() -> 'int {
@@ -186,6 +198,7 @@ define my-def-func<a>(t: a, x: int)[y: int := 42] -> pair(a, int) {
 }
 
 define zen() -> unit {
+  test-sync-string-builder();
   pin k = String::["hello\n", "yo\n", "hey"];
   print-line(k);
   pin v = int.parse.parse-octal("0o755");

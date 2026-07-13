@@ -1,0 +1,14 @@
+import {
+  binary.builder {_append},
+  binary.builder.sync {_mutate, binary-builder},
+  memory.unsafe {memcpy},
+  unit {unit},
+}
+
+define append-chunk(b: &binary-builder, ptr: pointer, size: int) -> unit {
+  _mutate(b, (b) => {
+    _append(b, size, (dest) => {
+      memcpy(dest, ptr, size)
+    })
+  })
+}

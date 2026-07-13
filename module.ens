@@ -37,7 +37,7 @@
     binary ["binary"],
     bool ["False", "True", "and", "bool", "not", "or"],
     c-size [],
-    debug [],
+    debug ["panic"],
     debug.dump ["trace", "vet"],
     either ["Left", "Right", "either", "none"],
     eq ["Eq", "eq"],

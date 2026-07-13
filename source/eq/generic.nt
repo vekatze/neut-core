@@ -1,4 +1,6 @@
 import {
+  array {array},
+  array.unsafe {access-unchecked},
   binary {binary},
   binary.eq {eq-binary},
   bool {False, True, bool},
@@ -9,6 +11,7 @@ import {
   text.meta,
   type-value {
     Algebraic,
+    Array,
     Binary,
     Constructor,
     Enum,
@@ -43,6 +46,33 @@ import {
 
 nominal {
   define-meta eq-data<a>(x: '&a, y: '&a) -> 'bool,
+}
+
+inline-meta _equal-array<a>(xs: '&array(a), ys: '&array(a)) -> 'bool {
+  quote {
+    let len-x = array.length(unquote {xs});
+    let len-y = array.length(unquote {ys});
+    if eq-int(len-x, len-y) {
+      let loop =
+        define self(index: int) -> bool {
+          if eq-int(index, len-x) {
+            True
+          } else {
+            let x = access-unchecked(unquote {xs}, index);
+            let y = access-unchecked(unquote {ys}, index);
+            let is-eq = unquote {eq-data(quote {x}, quote {y})};
+            if is-eq {
+              self(add-int(index, 1))
+            } else {
+              False
+            }
+          }
+        };
+      loop(0)
+    } else {
+      False
+    }
+  }
 }
 
 inline-meta _equal-vector<a>(xs: '&vector(a), ys: '&vector(a)) -> 'bool {
@@ -204,6 +234,13 @@ define-meta eq-data<a>(x: '&a, y: '&a) -> 'bool {
       let x: &vector(t) = cast<&a, &vector(t)>(unquote {x});
       let y: &vector(t) = cast<&a, &vector(t)>(unquote {y});
       unquote {_equal-vector<t>(quote {x}, quote {y})}
+    }
+  | Array(t) =>
+    unpack-type t = t;
+    quote {
+      let x: &array(t) = cast<&a, &array(t)>(unquote {x});
+      let y: &array(t) = cast<&a, &array(t)>(unquote {y});
+      unquote {_equal-array<t>(quote {x}, quote {y})}
     }
   | Wrapper(t) =>
     unpack-type t = t;

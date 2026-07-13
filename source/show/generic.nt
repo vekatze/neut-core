@@ -1,5 +1,7 @@
 import {
   ansi {Blue, Yellow},
+  array {array},
+  array.unsafe {access-unchecked},
   binary,
   bool {True, bool},
   doc {
@@ -32,6 +34,7 @@ import {
   string,
   type-value {
     Algebraic,
+    Array,
     Binary,
     Box-T,
     Constructor,
@@ -114,6 +117,33 @@ define _nested-comma-seq(prefix: doc, body: doc, suffix: doc) -> doc {
     Chunk(Chunk-Choose(Chunk-Empty, Chunk-Join(Chunk-Text(","), Chunk-Line))),
     suffix,
   ]
+}
+
+inline-meta _array-doc<a>(xs: '&array(a), enable-ansi: 'bool) -> 'doc {
+  quote {
+    let prefix = join::[_constructor-doc("Array", unquote {enable-ansi}), atom-N("[")];
+    let suffix = atom-N("]");
+    let len = array.length(unquote {xs});
+    let loop =
+      define self(index: int) -> doc {
+        if eq-int(index, len) {
+          empty
+        } else {
+          let x = access-unchecked(unquote {xs}, index);
+          let rest = self(add-int(index, 1));
+          if eq-int(add-int(index, 1), len) {
+            join::[unquote {to-doc(quote {x}, enable-ansi)}, rest]
+          } else {
+            join::[unquote {to-doc(quote {x}, enable-ansi)}, atom-N(","), break(" "), rest]
+          }
+        }
+      };
+    Group(_nested-comma-seq(
+      prefix,
+      loop(0),
+      suffix,
+    ))
+  }
 }
 
 inline-meta _vector-doc<a>(xs: '&vector(a), enable-ansi: 'bool) -> 'doc {
@@ -290,6 +320,12 @@ define-meta to-doc<a>(x: '&a, enable-ansi: 'bool) -> 'doc {
     quote {
       let x: &vector(t) = cast-inline<&a, &vector(t)>(unquote {x});
       unquote {_vector-doc<t>(quote {x}, enable-ansi)}
+    }
+  | Array(t) =>
+    unpack-type t = t;
+    quote {
+      let x: &array(t) = cast-inline<&a, &array(t)>(unquote {x});
+      unquote {_array-doc<t>(quote {x}, enable-ansi)}
     }
   | Noema(t) =>
     unpack-type t = t;

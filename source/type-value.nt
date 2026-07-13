@@ -42,6 +42,7 @@ data type-value {
 | Rune
 | Binary
 | Vector(type)
+| Array(type)
 | Wrapper(type)
 | Box-T(type)
 }

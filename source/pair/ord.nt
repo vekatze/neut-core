@@ -1,7 +1,7 @@
 import {
-  ord {Ord, ord},
-  ordering {EQ, GT, LT},
-  pair {Pair, pair},
+  this::ord {Ord, ord},
+  this::ordering {EQ, GT, LT},
+  this::pair {Pair, pair},
 }
 
 inline as-ord<a, b>(f: ord(a), g: ord(b)) -> ord(pair(a, b)) {

@@ -1,9 +1,9 @@
 import {
-  bool,
-  memory.unsafe {load-int8, store-int8},
-  pointer {shift},
-  rune {size, to-int32},
-  unit,
+  this::bool,
+  this::memory.unsafe {load-int8, store-int8},
+  this::pointer {shift},
+  this::rune {size, to-int32},
+  this::unit,
 }
 
 define from-int32(r: int32) -> rune {

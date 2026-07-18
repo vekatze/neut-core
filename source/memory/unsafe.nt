@@ -1,7 +1,7 @@
 import {
-  c-int {c-int},
-  c-size {c-size},
-  unit {Unit, unit},
+  this::c-int {c-int},
+  this::c-size {c-size},
+  this::unit {Unit, unit},
 }
 
 inline free(ptr: pointer) -> unit {

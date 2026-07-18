@@ -1,34 +1,41 @@
 import {
-  array {array},
-  binary,
-  bool {False, True, all, and, any, bool, or},
-  cell,
-  debug.dump {trace, vet},
-  either {Right, either},
-  eq.generic {eq-data},
-  int.io {print-int-line},
-  int.parse,
-  layer {axiom-T},
-  list {Cons, Nil, list},
-  list.meta,
-  pair {Pair, pair},
-  platform {get-cpu-count},
-  string {append, from-text, string, strip-prefix, strip-suffix},
-  string.builder {String},
-  string.builder.sync,
-  string.io {print, print-line},
-  sync.mvar {make-mvar, receive, send},
-  sync.pool {for-each-parallel},
-  type-value {Algebraic, Constructor},
-  type-value.meta {
+  this::_test-namespace {
+    * as nsc,
+    boxed,
+    calc,
+    calc as calc2,
+    plain-add as renamed-add,
+  },
+  this::array {array},
+  this::binary,
+  this::bool {False, True, all, and, any, bool, or},
+  this::cell,
+  this::debug.dump {trace, vet},
+  this::either {Right, either},
+  this::eq.generic {eq-data},
+  this::int.io {print-int-line},
+  this::int.parse,
+  this::layer {axiom-T},
+  this::list {Cons, Nil, list},
+  this::list.meta,
+  this::pair {Pair, pair},
+  this::platform {get-cpu-count},
+  this::string {append, from-text, string, strip-prefix, strip-suffix},
+  this::string.builder {String},
+  this::string.builder.sync {* as string-builder-sync},
+  this::string.io {print, print-line},
+  this::sync.mvar {make-mvar, receive, send},
+  this::sync.pool {for-each-parallel},
+  this::type-value {Algebraic, Constructor},
+  this::type-value.meta {
     algebraic-header-slot-count,
     constructor-field-count,
     constructor-fields-with-cursors,
     field-storage-slot-count,
     field-type,
   },
-  unit {Unit, unit},
-  vector {Vector, product, push-back, vector},
+  this::unit {Unit, unit},
+  this::vector {Vector, product, push-back, vector},
 }
 
 data adt-with-text {
@@ -53,13 +60,13 @@ define inspect-array-generics(xs: &array(pair(int, bool)), ys: &array(pair(int, 
 }
 
 define test-sync-string-builder() -> unit {
-  let b = string.builder.sync.make-string-builder(4);
+  let b = string-builder-sync.make-string-builder(4);
   let _ on b = {
-    string.builder.sync.append-string(b, "sync-");
-    string.builder.sync.append-int64-UTF8(b, 42);
-    string.builder.sync.append-rune-UTF8(b, `!`)
+    string-builder-sync.append-string(b, "sync-");
+    string-builder-sync.append-int64-UTF8(b, 42);
+    string-builder-sync.append-rune-UTF8(b, `!`)
   };
-  pin result = string.builder.sync.extract(b);
+  pin result = string-builder-sync.extract(b);
   print-line(result)
 }
 
@@ -130,9 +137,9 @@ define-meta inspect-mixed-slot-summary() -> 'int {
 
 define-meta meta-list-sample() -> 'int {
   let !xs = Cons(1, Cons(2, Cons(3, Nil)));
-  let len = list.meta.length(xs);
+  let len = this::list.meta::length(xs);
   let sum =
-    list.meta.fold-left(0, xs, (acc, x) => {
+    this::list.meta::fold-left(0, xs, (acc, x) => {
       add-int(acc, x)
     });
   let value = add-int(mul-int(len, 10), sum);
@@ -154,12 +161,12 @@ define use-text(t: text) -> unit {
 }
 
 define with-cell(i: int) -> int {
-  let c = cell.make-cell(lift {i});
+  let c = this::cell::make-cell(lift {i});
   let _ on c =
-    cell.mutate(c, (x) => {
+    this::cell::mutate(c, (x) => {
       lift {add-int(axiom-T(x), 1)}
     });
-  axiom-T(cell.extract(c))
+  axiom-T(this::cell::extract(c))
 }
 
 define-meta sample<a>() -> 'int {
@@ -201,7 +208,7 @@ define zen() -> unit {
   test-sync-string-builder();
   pin k = String::["hello\n", "yo\n", "hey"];
   print-line(k);
-  pin v = int.parse.parse-octal("0o755");
+  pin v = this::int.parse::parse-octal("0o755");
   vet::(v);
   use-text("sample");
   let t1 = "abcde";
@@ -243,9 +250,9 @@ define zen() -> unit {
       lift {add-int(x, 10)}
     });
   vet::(result);
-  pin xs = vector.range(1, 10);
+  pin xs = this::vector::range(1, 10);
   vet::(xs);
-  let xs: vector(string) = vector.make(5);
+  let xs: vector(string) = this::vector::make(5);
   let xs = push-back(xs, *"a");
   let xs = push-back(xs, *"b");
   let !xs = trace::(push-back(xs, *"c"));
@@ -267,12 +274,12 @@ define zen() -> unit {
   } else {
     print-line("generic-mix-ok");
   };
-  let array-xs: array(pair(int, bool)) = array.make::(0);
-  let array-xs = array.push-back(array-xs, Pair(10, True));
-  let array-xs = array.push-back(array-xs, Pair(20, False));
-  let array-ys: array(pair(int, bool)) = array.make::(0);
-  let array-ys = array.push-back(array-ys, Pair(10, True));
-  let array-ys = array.push-back(array-ys, Pair(20, False));
+  let array-xs: array(pair(int, bool)) = this::array::make::(0);
+  let array-xs = this::array::push-back(array-xs, Pair(10, True));
+  let array-xs = this::array::push-back(array-xs, Pair(20, False));
+  let array-ys: array(pair(int, bool)) = this::array::make::(0);
+  let array-ys = this::array::push-back(array-ys, Pair(10, True));
+  let array-ys = this::array::push-back(array-ys, Pair(20, False));
   let is-generic-array-equal on array-xs, array-ys = inspect-array-generics(array-xs, array-ys);
   if is-generic-array-equal {
     print-line("generic-array-ok");
@@ -388,8 +395,36 @@ define use-item(c: int) -> unit {
   Unit
 }
 
+define ns-feature-check() -> unit {
+  // imported real namespaces through {}
+  print-int-line(calc.increment(41)); // 42
+  print-int-line(calc.deep.decrement(45)); // 44
+  print-int-line(boxed.unbox(boxed.Box(44))); // 44
+  // consumer-named namespace view (as)
+  print-int-line(nsc.plain-add(40, 5)); // 45
+  print-int-line(nsc.calc.increment(45)); // 46
+  print-int-line(nsc.boxed.unbox(nsc.boxed.Box(47))); // 47
+  // addressed spellings: current-module and identity-routed
+  print-int-line(this::_test-namespace::plain-add(40, 8)); // 48
+  print-int-line(this::_test-namespace::calc.quadruple(12)); // 48
+  print-int-line(this::_test-namespace::calc.increment(49)); // 50
+  // pattern matching through a view
+  match nsc.boxed.Box(51) {
+  | nsc.boxed.Box(x) =>
+    print-int-line(x) // 51
+  };
+  // per-name aliases
+  print-int-line(renamed-add(50, 2)); // 52
+  print-int-line(renamed-add(50, 2)); // 52
+  print-int-line(calc2.increment(52)); // 53
+  print-int-line(calc2.deep.decrement(55)); // 54
+  nsc.run-internal-checks();
+  Unit
+}
+
 define main() -> unit {
   zen();
+  ns-feature-check();
   print-int-line(tdm-add-one::(41));
   print-int-line(tdm-memo::(21));
   print-int-line(tdm-knot::(77));

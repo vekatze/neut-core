@@ -1,12 +1,12 @@
 import {
-  bool {False, True, bool},
-  either {Left, Right},
-  list {Cons, Nil, list},
-  list.meta {fold-left, length},
-  memory.unsafe {load-int, load-pointer},
-  pair {Pair, pair},
-  pointer {shift},
-  type-value {
+  this::bool {False, True, bool},
+  this::either {Left, Right},
+  this::list {Cons, Nil, list},
+  this::list.meta {fold-left, length},
+  this::memory.unsafe {load-int, load-pointer},
+  this::pair {Pair, pair},
+  this::pointer {shift},
+  this::type-value {
     Algebraic,
     Constructor,
     Direct,
@@ -17,9 +17,9 @@ import {
     field-layout,
     type-value,
   },
-  unit {Unit},
-  unsafe {cast-inline},
-  word,
+  this::unit {Unit},
+  this::unsafe {cast-inline},
+  this::word,
 }
 
 inline-meta field-name(f: field) -> text {
@@ -217,7 +217,7 @@ inline-meta constructor-fields-with-cursors(c: constructor, cursor: int) -> list
 }
 
 inline nth-field-slot-pointer(header: int, data-arg-num: int, cursor: int, x: pointer) -> pointer {
-  let u = word.size;
+  let u = this::word::size;
   let offset = mul-int(u, add-int(header, add-int(data-arg-num, cursor)));
   shift(x, offset)
 }

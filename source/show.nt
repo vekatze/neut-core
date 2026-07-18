@@ -1,5 +1,5 @@
 import {
-  string {string},
+  this::string {string},
 }
 
 data show(a) {

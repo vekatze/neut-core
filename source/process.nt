@@ -1,25 +1,25 @@
 import {
-  bool {bool},
-  c-int {c-int, lt-c-int, ne-c-int},
-  c-pid {c-pid, eq-c-pid},
-  c-size {C-Size},
-  c-string {c-string, from-string, to-string},
-  control {discard},
-  either {Left, Right},
-  file.descriptor {close, descriptor, dup2, pipe, stderr, stdin, stdout},
-  list {Cons, List, Nil, fold-left-with-index, length, list},
-  memory {malloc},
-  memory.unsafe {free, load-c-int, load-int, load-pointer, store-int},
-  pair {Pair},
-  pointer {extract, null-pointer, shift},
-  process._posix,
-  string {string},
-  string.io {read, write},
-  string.pointer,
-  system {get-error-message, get-system-error, report-system-error, system},
-  unit {Unit, unit},
-  unsafe {cast},
-  word,
+  this::bool {bool},
+  this::c-int {c-int, lt-c-int, ne-c-int},
+  this::c-pid {c-pid, eq-c-pid},
+  this::c-size {C-Size},
+  this::c-string {c-string, from-string, to-string},
+  this::control {discard},
+  this::either {Left, Right},
+  this::file.descriptor {close, descriptor, dup2, pipe, stderr, stdin, stdout},
+  this::list {Cons, List, Nil, fold-left-with-index, length, list},
+  this::memory {malloc},
+  this::memory.unsafe {free, load-c-int, load-int, load-pointer, store-int},
+  this::pair {Pair},
+  this::pointer {extract, null-pointer, shift},
+  this::process._posix {* as _posix},
+  this::string {string},
+  this::string.io {read, write},
+  this::string.pointer,
+  this::system {get-error-message, get-system-error, report-system-error, system},
+  this::unit {Unit, unit},
+  this::unsafe {cast},
+  this::word,
 }
 
 foreign {
@@ -46,7 +46,7 @@ define get-argv() -> list(string) {
   let argc = get-argc();
   let argv-ptr = magic global("neut-unsafe-argv", pointer);
   let argv = load-pointer(argv-ptr);
-  let u = word.size;
+  let u = this::word::size;
   let f =
     define get-argv-helper(i: int) -> list(string) {
       if eq-int(i, argc) {
@@ -67,31 +67,31 @@ inline _is-not-zero(x: c-int) -> bool {
 }
 
 define _wifexited(ptr: c-int) -> bool {
-  _is-not-zero(process._posix.wifexited(ptr))
+  _is-not-zero(_posix.wifexited(ptr))
 }
 
 define _wifsignaled(ptr: c-int) -> bool {
-  _is-not-zero(process._posix.wifsignaled(ptr))
+  _is-not-zero(_posix.wifsignaled(ptr))
 }
 
 define _wifstopped(ptr: c-int) -> bool {
-  _is-not-zero(process._posix.wifstopped(ptr))
+  _is-not-zero(_posix.wifstopped(ptr))
 }
 
 define _wexitstatus(ptr: c-int) -> c-int {
-  process._posix.wexitstatus(ptr)
+  _posix.wexitstatus(ptr)
 }
 
 define _wtermsig(ptr: c-int) -> c-int {
-  process._posix.wtermsig(ptr)
+  _posix.wtermsig(ptr)
 }
 
 define _wcoredump(ptr: c-int) -> bool {
-  _is-not-zero(process._posix.wcoredump(ptr))
+  _is-not-zero(_posix.wcoredump(ptr))
 }
 
 define _wstopsig(ptr: c-int) -> c-int {
-  process._posix.wstopsig(ptr)
+  _posix.wstopsig(ptr)
 }
 
 data process-status {
@@ -101,8 +101,8 @@ data process-status {
 }
 
 define _waitpid(pid: c-pid) ->> system(process-status) {
-  let status-ptr = malloc(C-Size(word.size));
-  let result = process._posix.waitpid(pid, status-ptr, 0);
+  let status-ptr = malloc(C-Size(this::word::size));
+  let result = _posix.waitpid(pid, status-ptr, 0);
   if eq-c-pid(result, -1) {
     free(status-ptr);
     report-system-error()
@@ -128,15 +128,15 @@ define _waitpid(pid: c-pid) ->> system(process-status) {
 
 define _make-argv(xs: list(pointer)) -> pointer {
   let len on xs = length(xs);
-  let ptr = malloc(C-Size(mul-int(word.size, len)));
+  let ptr = malloc(C-Size(mul-int(this::word::size, len)));
   fold-left-with-index(Unit, xs, (_, x, i) => {
-    store-int(extract(x), shift(ptr, mul-int(word.size, i)))
+    store-int(extract(x), shift(ptr, mul-int(this::word::size, i)))
   });
   ptr
 }
 
 define _fork() ->> system(c-pid) {
-  let result = process._posix.fork();
+  let result = _posix.fork();
   if eq-c-pid(result, -1) {
     report-system-error()
   } else {
@@ -162,11 +162,11 @@ data process-result {
 }
 
 define _exec(command: string, args: list(string), error-writer: descriptor) -> system(process-result) {
-  let cmd on command = string.pointer.get-content-pointer(command);
+  let cmd on command = this::string.pointer::get-content-pointer(command);
   pin tmp = Cons(command, args);
-  let raw-args = list.for-each-N(tmp, string.pointer.get-content-pointer);
-  let cmd-args = _make-argv(list.append(raw-args, List::[null-pointer]));
-  let v = process._posix.execvp(cmd, cmd-args);
+  let raw-args = this::list::for-each-N(tmp, this::string.pointer::get-content-pointer);
+  let cmd-args = _make-argv(this::list::append(raw-args, List::[null-pointer]));
+  let v = _posix.execvp(cmd, cmd-args);
   pin message = get-error-message(get-system-error());
   let _ = write(error-writer, message);
   exit(v)
@@ -197,7 +197,7 @@ define run(
     | Right(dir) =>
       let s on dir = from-string(dir);
       discard(dir);
-      let result on s = process._posix.chdir(magic cast(&c-string, pointer, s));
+      let result on s = _posix.chdir(magic cast(&c-string, pointer, s));
       let _ = s;
       if lt-c-int(result, 0) {
         let message = get-error-message(get-system-error());

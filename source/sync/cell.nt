@@ -1,20 +1,20 @@
 import {
-  c-size {C-Size, from-c-size},
-  layer {axiom-T},
-  memory {malloc},
-  memory.unsafe {free, load-int, store-int},
-  pair {Pair, pair},
-  pointer {null-pointer, shift},
-  sync._posix {
+  this::c-size {C-Size, from-c-size},
+  this::layer {axiom-T},
+  this::memory {malloc},
+  this::memory.unsafe {free, load-int, store-int},
+  this::pair {Pair, pair},
+  this::pointer {null-pointer, shift},
+  this::sync._posix {
     THREAD_MUTEX_SIZE,
     thread-mutex-destroy,
     thread-mutex-init,
     thread-mutex-lock,
     thread-mutex-unlock,
   },
-  unit {Unit, unit},
-  unsafe {cast, cast-inline},
-  word,
+  this::unit {Unit, unit},
+  this::unsafe {cast, cast-inline},
+  this::word,
 }
 
 nominal {
@@ -23,7 +23,7 @@ nominal {
 
 inline _new<a>(val: a) -> _cell {
   let mutex-size = from-c-size(THREAD_MUTEX_SIZE);
-  let u = word.size;
+  let u = this::word::size;
   let ptr = malloc(C-Size(add-int(u, add-int(mutex-size, u))));
   store-int(cast<a, int>(val), ptr);
   let _ = thread-mutex-init(shift(ptr, u));
@@ -34,7 +34,7 @@ inline _new<a>(val: a) -> _cell {
 // (content, thread-mutex, type)
 resource _cell {
   (ch: pointer, _: int) => {
-    let u = word.size;
+    let u = this::word::size;
     let mutex-size = from-c-size(THREAD_MUTEX_SIZE);
     let type-offset = add-int(u, mutex-size);
     let a = cast<int, type>(load-int(shift(ch, type-offset)));
@@ -43,7 +43,7 @@ resource _cell {
     free(ch)
   },
   (ch: pointer, _: pointer) => {
-    let u = word.size;
+    let u = this::word::size;
     let mutex-size = from-c-size(THREAD_MUTEX_SIZE);
     let mutex-ptr = shift(ch, u);
     let type-offset = add-int(u, mutex-size);
@@ -66,7 +66,7 @@ inline make-cell<a>(initial-value: +a) -> cell(a) {
 
 inline modify<a, b>(ch: &cell(a), f: (+a) -> pair(+a, b)) -> b {
   let ch = cast<&cell(a), pointer>(ch);
-  let u = word.size;
+  let u = this::word::size;
   let mutex-ptr = shift(ch, u);
   thread-mutex-lock(mutex-ptr);
   let val-base: int = load-int(ch);
@@ -85,7 +85,7 @@ inline mutate<a>(ch: &cell(a), f: (+a) -> +a) -> unit {
 
 inline borrow<a, b>(ch: &cell(a), f: (&a) -> +b) -> b {
   let ch = cast<&cell(a), pointer>(ch);
-  let u = word.size;
+  let u = this::word::size;
   let mutex-ptr = shift(ch, u);
   thread-mutex-lock(mutex-ptr);
   let val-base: int = load-int(ch);
@@ -102,7 +102,7 @@ define clone<a>(ch: &cell(a)) -> a {
 }
 
 inline extract<a>(c: cell(a)) -> +a {
-  let u = word.size;
+  let u = this::word::size;
   letbox-T result on c = {
     let ch = cast<&cell(a), pointer>(c);
     let result = cast<int, ++a>(load-int(ch));

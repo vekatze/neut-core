@@ -1,5 +1,5 @@
 import {
-  ordering {ordering},
+  this::ordering {ordering},
 }
 
 data ord(a) {

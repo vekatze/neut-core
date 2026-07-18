@@ -1,11 +1,11 @@
 import {
-  binary,
-  bool {and, bool, not},
-  debug {panic},
-  layer,
-  list {List},
-  pair {Pair},
-  path {
+  this::binary,
+  this::bool {and, bool, not},
+  this::debug {panic},
+  this::layer,
+  this::list {List},
+  this::pair {Pair},
+  this::path {
     append,
     clean,
     drop-last,
@@ -13,10 +13,10 @@ import {
     split-extension,
     take-last,
   },
-  string {format, string},
-  string.eq {eq-string},
-  string.io {print-line},
-  unit {Unit, unit},
+  this::string {format, string},
+  this::string.eq {eq-string},
+  this::string.io {print-line},
+  this::unit {Unit, unit},
 }
 
 inline _ensure(message: &string, check: bool) -> unit {

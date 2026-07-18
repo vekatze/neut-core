@@ -1,7 +1,7 @@
 import {
-  bool {True},
-  eq {Eq, eq},
-  unit {Unit, unit},
+  this::bool {True},
+  this::eq {Eq, eq},
+  this::unit {Unit, unit},
 }
 
 constant as-eq: eq(unit) {

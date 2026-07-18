@@ -1,7 +1,7 @@
 import {
-  bool {False, True, bool},
-  eq {Eq, eq},
-  list {Cons, Nil, list},
+  this::bool {False, True, bool},
+  this::eq {Eq, eq},
+  this::list {Cons, Nil, list},
 }
 
 inline as-eq<a>(f: eq(a)) -> eq(list(a)) {

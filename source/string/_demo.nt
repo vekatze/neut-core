@@ -1,13 +1,13 @@
 import {
-  binary,
-  bool,
-  debug {assert, panic},
-  either {Left, Right},
-  int.parse {parse-int},
-  string {byte-length, length, string, take-N, with-byte-slice, with-slice},
-  string.eq {eq-string},
-  string.io {print-line},
-  unit {unit},
+  this::binary,
+  this::bool,
+  this::debug {assert, panic},
+  this::either {Left, Right},
+  this::int.parse {parse-int},
+  this::string {byte-length, length, string, take-N, with-byte-slice, with-slice},
+  this::string.eq {eq-string},
+  this::string.io {print-line},
+  this::unit {unit},
 }
 
 define _expect-slice(label: &string, source: &string, start: int, size: int, expected: &string) -> unit {
@@ -57,18 +57,18 @@ define _expect-materialized-copy(label: &string, source: &string, start: int, si
 }
 
 define zen() -> unit {
-  _expect-slice("string.with-slice: ascii middle\n", "hello world", 6, 5, "world");
-  _expect-slice("string.with-slice: negative start clamps to zero\n", "abcdef", -10, 2, "ab");
-  _expect-slice("string.with-slice: oversized start clamps to end\n", "abcdef", 99, 4, "");
-  _expect-slice("string.with-slice: oversized size clamps to end\n", "abcdef", 2, 99, "cdef");
-  _expect-slice("string.with-slice: negative size clamps to zero\n", "abcdef", 2, -5, "");
-  _expect-slice("string.with-slice: empty source\n", "", 0, 10, "");
-  _expect-slice("string.with-slice: utf8 rune unit\n", "aあbc", 1, 1, "あ");
-  _expect-slice("string.with-slice: utf8 multiple runes\n", "aあbc", 1, 2, "あb");
-  _expect-byte-slice("string.with-byte-slice: utf8 byte unit\n", "aあbc", 1, 3, "あ");
-  _expect-byte-length("string.with-slice: utf8 byte length\n", "aあbc", 1, 1, 3);
-  _expect-rune-length("string.with-slice: utf8 rune length\n", "aあbc", 1, 1, 1);
-  _expect-parse-int("string.with-slice: parse int from borrowed slice\n", "ab-123xy", 2, 4, -123);
-  _expect-materialized-copy("string.with-slice: materialized copy\n", "0123456789", 3, 4, "3456");
+  _expect-slice("string::with-slice: ascii middle\n", "hello world", 6, 5, "world");
+  _expect-slice("string::with-slice: negative start clamps to zero\n", "abcdef", -10, 2, "ab");
+  _expect-slice("string::with-slice: oversized start clamps to end\n", "abcdef", 99, 4, "");
+  _expect-slice("string::with-slice: oversized size clamps to end\n", "abcdef", 2, 99, "cdef");
+  _expect-slice("string::with-slice: negative size clamps to zero\n", "abcdef", 2, -5, "");
+  _expect-slice("string::with-slice: empty source\n", "", 0, 10, "");
+  _expect-slice("string::with-slice: utf8 rune unit\n", "aあbc", 1, 1, "あ");
+  _expect-slice("string::with-slice: utf8 multiple runes\n", "aあbc", 1, 2, "あb");
+  _expect-byte-slice("string::with-byte-slice: utf8 byte unit\n", "aあbc", 1, 3, "あ");
+  _expect-byte-length("string::with-slice: utf8 byte length\n", "aあbc", 1, 1, 3);
+  _expect-rune-length("string::with-slice: utf8 rune length\n", "aあbc", 1, 1, 1);
+  _expect-parse-int("string::with-slice: parse int from borrowed slice\n", "ab-123xy", 2, 4, -123);
+  _expect-materialized-copy("string::with-slice: materialized copy\n", "0123456789", 3, 4, "3456");
   print-line("all string assertions passed")
 }

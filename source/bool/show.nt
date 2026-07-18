@@ -1,13 +1,13 @@
 import {
-  binary,
-  bool {bool},
-  layer,
-  show {Show, show},
-  string {string},
+  this::binary,
+  this::bool {bool},
+  this::layer,
+  this::show {* as s},
+  this::string {string},
 }
 
-constant as-show: show(bool) {
-  Show((b) => {
+constant as-show: s.show(bool) {
+  s.Show((b) => {
     if *b {
       *"True"
     } else {
@@ -17,11 +17,11 @@ constant as-show: show(bool) {
 }
 
 define show(b: bool) -> string {
-  let Show{render} = as-show;
+  let s.Show{render} = as-show;
   pin b = b;
   render(b)
 }
 
 define show-bool(b: bool) -> string {
-  bool.show.show(b)
+  show(b)
 }

@@ -1,11 +1,11 @@
 import {
-  binary,
-  bool {False, True, bool},
-  either {Left, Right},
-  list {Cons, Nil, list},
-  pair {Pair, pair},
-  string,
-  unit {Unit},
+  this::binary,
+  this::bool {False, True, bool},
+  this::either {Left, Right},
+  this::list {Cons, Nil, list},
+  this::pair {Pair, pair},
+  this::string,
+  this::unit {Unit},
 }
 
 inline-meta singleton(r: rune) -> text {

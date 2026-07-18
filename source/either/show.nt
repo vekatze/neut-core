@@ -1,9 +1,9 @@
 import {
-  binary,
-  either {Left, Right, either},
-  list {List},
-  show {Show, show},
-  string {format},
+  this::binary,
+  this::either {Left, Right, either},
+  this::list {List},
+  this::show {Show, show},
+  this::string {format},
 }
 
 inline as-show<a, b>(s1: show(a), s2: show(b)) -> show(either(a, b)) {

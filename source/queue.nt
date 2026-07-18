@@ -1,9 +1,9 @@
 import {
-  bool {False, True, bool},
-  either {Right, none},
-  list {Cons, Nil, length, list, reverse},
-  pair {Pair, pair},
-  unit,
+  this::bool {False, True, bool},
+  this::either {Right, none},
+  this::list {Cons, Nil, length, list, reverse},
+  this::pair {Pair, pair},
+  this::unit,
 }
 
 // naive queue

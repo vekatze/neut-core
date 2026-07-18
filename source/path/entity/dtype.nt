@@ -1,6 +1,6 @@
 import {
-  bool,
-  path.entity._dtype-constant {
+  this::bool,
+  this::path.entity._dtype-constant {
     dt-blk,
     dt-chr,
     dt-dir,

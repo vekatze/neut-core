@@ -1,6 +1,6 @@
 import {
-  eq {eq, from-ord},
-  float.ord {as-ord},
+  this::eq {eq, from-ord},
+  this::float.ord {as-ord},
 }
 
 constant as-eq: eq(float) {

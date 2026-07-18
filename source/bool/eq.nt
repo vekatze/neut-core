@@ -1,7 +1,7 @@
 import {
-  bool {False, True, bool},
-  eq {Eq, eq},
-  layer,
+  this::bool {False, True, bool},
+  this::eq {Eq, eq},
+  this::layer,
 }
 
 define eq-bool(b1: bool, b2: bool) -> bool {

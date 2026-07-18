@@ -1,9 +1,9 @@
 import {
-  binary,
-  layer,
-  list {List, for-each-N, list},
-  show {Show, show},
-  string {intercalate, join},
+  this::binary,
+  this::layer,
+  this::list {List, for-each-N, list},
+  this::show {Show, show},
+  this::string {intercalate, join},
 }
 
 inline as-show<a>(s: show(a)) -> show(list(a)) {

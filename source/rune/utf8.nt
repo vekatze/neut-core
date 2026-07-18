@@ -1,5 +1,5 @@
 import {
-  bool,
+  this::bool,
 }
 
 define size-by-head-byte(head-byte: int8) -> int {

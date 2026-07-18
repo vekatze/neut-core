@@ -1,8 +1,8 @@
 import {
-  bool {False, bool},
-  layer,
-  list {list},
-  word,
+  this::bool {False, bool},
+  this::layer,
+  this::list {list},
+  this::word,
 }
 
 foreign {
@@ -62,7 +62,7 @@ inline _link-with-mask(m: _Mask, p1: _Prefix, t1: intset, t2: intset) -> intset 
 }
 
 inline _highest-bit-mask(w: int) -> int {
-  let size-in-bits = mul-int(word.size, 8);
+  let size-in-bits = mul-int(this::word::size, 8);
   shl-int(1, sub-int(sub-int(size-in-bits, 1), magic external llvm.ctlz.i64(w)))
 }
 
@@ -153,9 +153,9 @@ define from-list(ks: list(int)) -> intset {
   let f =
     define self(ks: list(int), acc: intset) -> intset {
       match ks {
-      | list.Nil =>
+      | this::list::Nil =>
         acc
-      | list.Cons(k, rest) =>
+      | this::list::Cons(k, rest) =>
         self(rest, insert(acc, k))
       }
     };
@@ -167,7 +167,7 @@ define _to-list-aux(s: intset, acc: list(int)) -> list(int) {
   | _Nil =>
     acc
   | _Tip(k) =>
-    list.Cons(k, acc)
+    this::list::Cons(k, acc)
   | _Bin(_, _, s1, s2) =>
     _to-list-aux(s1, _to-list-aux(s2, acc))
   }
@@ -176,14 +176,14 @@ define _to-list-aux(s: intset, acc: list(int)) -> list(int) {
 define to-list(s: intset) -> list(int) {
   match s {
   | _Nil =>
-    list.Nil
+    this::list::Nil
   | _Tip(k) =>
-    list.Cons(k, list.Nil)
+    this::list::Cons(k, this::list::Nil)
   | _Bin(_, m, s1, s2) =>
     if lt-int(m, 0) {
-      _to-list-aux(s2, _to-list-aux(s1, list.Nil))
+      _to-list-aux(s2, _to-list-aux(s1, this::list::Nil))
     } else {
-      _to-list-aux(s1, _to-list-aux(s2, list.Nil))
+      _to-list-aux(s1, _to-list-aux(s2, this::list::Nil))
     }
   }
 }

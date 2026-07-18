@@ -1,13 +1,13 @@
 import {
-  binary,
-  bool {and, any, bool},
-  either {Left, Right, either},
-  int.parse {parse-hex-digits},
-  layer,
-  list {Cons, List, Nil, concat, for-each-E, for-each-EN, intercalate, list},
-  pair {Pair},
-  rune,
-  string {
+  this::binary,
+  this::bool {and, any, bool},
+  this::either {Left, Right, either},
+  this::int.parse {parse-hex-digits},
+  this::layer,
+  this::list {Cons, List, Nil, concat, for-each-E, for-each-EN, intercalate, list},
+  this::pair {Pair},
+  this::rune,
+  this::string {
     drop,
     format,
     length,
@@ -30,7 +30,7 @@ data error {
 }
 
 define _read-char(r: rune, t: string) -> either(error, string) {
-  match string.uncons(t) {
+  match this::string::uncons(t) {
   | Right(Pair(r-found, rest)) =>
     if eq-rune(r, r-found) {
       Right(rest)
@@ -47,7 +47,7 @@ define _read-unicode-scalar-value(t: &string) -> either(error, rune) {
   | Left(_) =>
     Left(Parse-Error(format("Could not parse `{}` as a hexadecimal integer", List::[*t])))
   | Right(v) =>
-    match rune.from-int(v) {
+    match this::rune::from-int(v) {
     | Right(r) =>
       Right(r)
     | Left(_) =>
@@ -57,7 +57,7 @@ define _read-unicode-scalar-value(t: &string) -> either(error, rune) {
 }
 
 define _unquote-string(t: string) -> either(error, list(string)) {
-  match string.uncons(t) {
+  match this::string::uncons(t) {
   | Left(_) =>
     Left(Parse-Error(*"Unexpected end of string after a backslash"))
   | Right(Pair(c, rest)) =>
@@ -104,5 +104,5 @@ define _parse-string-fragment(t: &string) -> either(error, list(string)) {
 define parse-string(t: &string) -> either(error, string) {
   pin ts = split(t, "\\\\");
   try tss = for-each-EN(ts, _parse-string-fragment);
-  Right(string.join(list.concat(intercalate(tss, List::[*"\\"]))))
+  Right(this::string::join(this::list::concat(intercalate(tss, List::[*"\\"]))))
 }

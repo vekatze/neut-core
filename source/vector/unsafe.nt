@@ -1,11 +1,29 @@
 import {
-  vector,
+  this::memory.unsafe {load-int, load-pointer, store-int},
+  this::pointer {shift},
+  this::unit,
+  this::unsafe {cast},
+  this::vector {vector},
+  this::word,
 }
 
-constant access-unchecked: _ {
-  vector._access-unchecked
+inline _get-element-pointer<a>(xs: &vector(a), index: int) -> pointer {
+  let vector-pointer = cast<&vector(a), pointer>(xs);
+  let from = load-int(shift(vector-pointer, this::word::size));
+  let buffer-pointer = load-pointer(shift(vector-pointer, mul-int(this::word::size, 4)));
+  shift(buffer-pointer, mul-int(this::word::size, add-int(from, index)))
 }
 
-constant swap-unchecked: _ {
-  vector._swap-unchecked
+inline access-unchecked<a>(xs: &vector(a), index: int) -> &a {
+  cast<int, &a>(load-int(_get-element-pointer(xs, index)))
+}
+
+define swap-unchecked<a>(xs: vector(a), i: int, j: int) -> vector(a) {
+  let value-i-pointer on xs = _get-element-pointer(xs, i);
+  let value-j-pointer on xs = _get-element-pointer(xs, j);
+  let value-i = load-int(value-i-pointer);
+  let value-j = load-int(value-j-pointer);
+  store-int(value-j, value-i-pointer);
+  store-int(value-i, value-j-pointer);
+  xs
 }

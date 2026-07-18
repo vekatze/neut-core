@@ -1,6 +1,6 @@
 import {
-  bool,
-  memory.unsafe {load-int},
+  this::bool,
+  this::memory.unsafe {load-int},
 }
 
 foreign {

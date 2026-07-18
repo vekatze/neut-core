@@ -1,8 +1,8 @@
 import {
-  c-int {c-int},
-  c-size {c-size},
-  pointer {null-pointer},
-  unit {Unit, unit},
+  this::c-int {c-int},
+  this::c-size {c-size},
+  this::pointer {null-pointer},
+  this::unit {Unit, unit},
 }
 
 foreign {

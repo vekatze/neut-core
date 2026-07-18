@@ -1,25 +1,25 @@
 import {
-  binary,
-  debug.dump {vet},
-  either {Left, Right},
-  list {for},
-  path {drop-last},
-  path.entity.dirent.show {show-dirent},
-  path.io {
+  this::binary,
+  this::debug.dump {vet},
+  this::either {Left, Right},
+  this::list {for},
+  this::path {drop-last},
+  this::path.entity.dirent.show {show-dirent},
+  this::path.io {
     get-current-directory,
     get-modification-time,
     is-directory,
     is-regular-file,
     read-directory,
   },
-  string,
-  string.io {print, print-line},
-  system {get-error-message, system},
-  time {to-ISO8601-local},
-  unit {Unit, unit},
+  this::string,
+  this::string.io {print, print-line},
+  this::system {get-error-message, system},
+  this::time {to-ISO8601-local},
+  this::unit {Unit, unit},
 }
 
-define test-zen() -> system(unit.unit) {
+define test-zen() -> system(this::unit::unit) {
   try out = read-directory("/Users/");
   for(out, (item) => {
     pin t = show-dirent(item);

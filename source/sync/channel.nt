@@ -1,15 +1,15 @@
 import {
-  c-size {C-Size, from-c-size},
-  either {Left, Right},
-  int {sum-int},
-  layer,
-  list {List},
-  memory {malloc},
-  memory.unsafe {free, load-int, store-int},
-  pair {Pair},
-  pointer {shift},
-  queue {dequeue, empty, enqueue, queue},
-  sync._posix {
+  this::c-size {C-Size, from-c-size},
+  this::either {Left, Right},
+  this::int {sum-int},
+  this::layer,
+  this::list {List},
+  this::memory {malloc},
+  this::memory.unsafe {free, load-int, store-int},
+  this::pair {Pair},
+  this::pointer {shift},
+  this::queue {dequeue, empty, enqueue, queue},
+  this::sync._posix {
     THREAD_COND_SIZE,
     THREAD_MUTEX_SIZE,
     thread-cond-destroy,
@@ -21,9 +21,9 @@ import {
     thread-mutex-lock,
     thread-mutex-unlock,
   },
-  unit {unit},
-  unsafe {cast},
-  word,
+  this::unit {unit},
+  this::unsafe {cast},
+  this::word,
 }
 
 inline _get-clone<a>(x: &a) -> a {
@@ -41,7 +41,7 @@ data channel(_: type) {
 define _new<a>(q: queue(a)) -> channel(a) {
   let mutex-size = from-c-size(THREAD_MUTEX_SIZE);
   let cond-size = from-c-size(THREAD_COND_SIZE);
-  let u = word.size;
+  let u = this::word::size;
   let ptr = malloc(C-Size(sum-int(List::[u, mutex-size, cond-size, u])));
   store-int(cast<queue(a), int>(q), ptr);
   let _ = thread-mutex-init(shift(ptr, u));
@@ -53,7 +53,7 @@ define _new<a>(q: queue(a)) -> channel(a) {
 // (queue, thread-mutex, thread-cond)
 resource _channel {
   (ch: pointer, _: int) => {
-    let u = word.size;
+    let u = this::word::size;
     let mutex-size = from-c-size(THREAD_MUTEX_SIZE);
     let cond-size = from-c-size(THREAD_COND_SIZE);
     let cond-offset = add-int(u, mutex-size);
@@ -65,7 +65,7 @@ resource _channel {
     free(ch)
   },
   (ch: pointer, _: pointer) => {
-    let u = word.size;
+    let u = this::word::size;
     let mutex-size = from-c-size(THREAD_MUTEX_SIZE);
     let cond-size = from-c-size(THREAD_COND_SIZE);
     let mutex-ptr = shift(ch, u);
@@ -86,7 +86,7 @@ inline make-channel<a>() -> channel(a) {
 
 define send<a>(ch: &channel(a), x: +a) -> unit {
   let ch = cast<&channel(a), pointer>(ch);
-  let u = word.size;
+  let u = this::word::size;
   let mutex-ptr = shift(ch, u);
   thread-mutex-lock(mutex-ptr);
   let q-base: int = load-int(ch);
@@ -107,7 +107,7 @@ define _receive-from-channel<a>(ch: pointer, mutex-ptr: pointer) -> +a {
     v
   | Left(_) =>
     store-int(cast<queue(int), int>(empty), ch);
-    let u = word.size;
+    let u = this::word::size;
     let mutex-size = from-c-size(THREAD_MUTEX_SIZE);
     let cond-ptr = shift(ch, add-int(u, mutex-size));
     thread-cond-wait(cond-ptr, mutex-ptr);
@@ -117,7 +117,7 @@ define _receive-from-channel<a>(ch: pointer, mutex-ptr: pointer) -> +a {
 
 define receive<a>(ch: &channel(a)) -> +a {
   let ch = cast<&channel(a), pointer>(ch);
-  let u = word.size;
+  let u = this::word::size;
   let mutex-ptr = shift(ch, u);
   thread-mutex-lock(mutex-ptr);
   let result = _receive-from-channel<a>(ch, mutex-ptr);

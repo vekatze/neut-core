@@ -1,7 +1,7 @@
 import {
-  ansi {command},
-  binary {allocate, binary, take},
-  binary.builder {
+  this::ansi {command},
+  this::binary {allocate, binary, take},
+  this::binary.builder {
     _Binary-Builder,
     _append-ansi,
     _append-binary,
@@ -18,11 +18,11 @@ import {
     _append-string,
     _binary-builder,
   },
-  layer {axiom-T},
-  rune {to-int32},
-  string {string},
-  sync.cell {cell, make-cell, mutate},
-  unit {unit},
+  this::layer {axiom-T},
+  this::rune {to-int32},
+  this::string {string},
+  this::sync.cell {cell, make-cell, mutate},
+  this::unit {unit},
 }
 
 data binary-builder {
@@ -60,7 +60,7 @@ define make-binary-builder(size: int) -> binary-builder {
 }
 
 define extract(b: binary-builder) -> binary {
-  let _Binary-Builder{cursor, content} = axiom-T(sync.cell.extract(_to-cell(b)));
+  let _Binary-Builder{cursor, content} = axiom-T(this::sync.cell::extract(_to-cell(b)));
   take(content, cursor)
 }
 

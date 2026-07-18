@@ -1,35 +1,49 @@
 import {
-  string,
+  this::binary {binary},
+  this::binary.unsafe {access-unchecked},
+  this::pointer {shift},
+  this::rune.unsafe {load-rune},
+  this::string {string},
+  this::string.pointer {get-content-pointer},
 }
 
-constant from-binary: _ {
-  string._String
+inline from-binary(t: binary) -> string {
+  magic cast(binary, string, t)
 }
 
-constant drop: _ {
-  string._drop
+inline drop(t: string, offset: int) -> string {
+  let t = magic cast(string, binary, t);
+  magic cast(binary, string, this::binary::drop(t, offset))
 }
 
-constant take: _ {
-  string._take
+inline take(t: string, offset: int) -> string {
+  let t = magic cast(string, binary, t);
+  magic cast(binary, string, this::binary::take(t, offset))
 }
 
-constant slice: _ {
-  string._slice
+inline slice(t: string, start: int, size: int) -> string {
+  take(drop(t, start), size)
 }
 
-constant drop-N: _ {
-  string._drop-N
+inline drop-N(t: &string, offset: int) -> string {
+  let t = magic cast(&string, &binary, t);
+  magic cast(binary, string, this::binary::drop-N(t, offset))
 }
 
-constant take-N: _ {
-  string._take-N
+inline take-N(t: &string, offset: int) -> string {
+  let t = magic cast(&string, &binary, t);
+  magic cast(binary, string, this::binary::take-N(t, offset))
 }
 
-constant slice-N: _ {
-  string._slice-N
+inline slice-N(t: &string, start: int, size: int) -> string {
+  let t = magic cast(&string, &binary, t);
+  magic cast(binary, string, this::binary::slice-N(t, start, size))
 }
 
-constant get-rune-unchecked: _ {
-  string._get-rune
+inline get-byte-unchecked(t: &string, index: int) -> int8 {
+  access-unchecked(magic cast(&string, &binary, t), index)
+}
+
+inline get-rune-unchecked(t: &string, index: int) -> rune {
+  load-rune(shift(get-content-pointer(t), index))
 }

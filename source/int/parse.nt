@@ -1,10 +1,10 @@
 import {
-  bool,
-  either {Left, Right},
-  memory.unsafe {load-int},
-  string {string},
-  string.pointer {get-content-pointer},
-  unit {Unit},
+  this::bool,
+  this::either {Left, Right},
+  this::memory.unsafe {load-int},
+  this::string {string},
+  this::string.pointer {get-content-pointer},
+  this::unit {Unit},
 }
 
 foreign {
@@ -52,7 +52,7 @@ inline _parse_hex_digits(num-str-ptr: pointer, len: int, result-ptr: pointer) ->
 
 define parse-binary(t: &string) ->> ?int {
   let c-int-str = get-content-pointer(t);
-  let len = string.byte-length(t);
+  let len = this::string::byte-length(t);
   let result-ptr = magic alloca(int, 1);
   let result-status = _parse_binary(c-int-str, len, result-ptr);
   if lt-int(result-status, 0) {
@@ -65,7 +65,7 @@ define parse-binary(t: &string) ->> ?int {
 
 define parse-octal(t: &string) ->> ?int {
   let c-int-str = get-content-pointer(t);
-  let len = string.byte-length(t);
+  let len = this::string::byte-length(t);
   let result-ptr = magic alloca(int, 1);
   let result-status = _parse_octal(c-int-str, len, result-ptr);
   if lt-int(result-status, 0) {
@@ -78,7 +78,7 @@ define parse-octal(t: &string) ->> ?int {
 
 define parse-int(t: &string) ->> ?int {
   let c-int-str = get-content-pointer(t);
-  let len = string.byte-length(t);
+  let len = this::string::byte-length(t);
   let result-ptr = magic alloca(int, 1);
   let result-status = _parse_decimal(c-int-str, len, result-ptr);
   if lt-int(result-status, 0) {
@@ -91,7 +91,7 @@ define parse-int(t: &string) ->> ?int {
 
 define parse-hex(t: &string) ->> ?int {
   let c-int-str = get-content-pointer(t);
-  let len = string.byte-length(t);
+  let len = this::string::byte-length(t);
   let result-ptr = magic alloca(int, 1);
   let result-status = _parse_hex(c-int-str, len, result-ptr);
   if lt-int(result-status, 0) {
@@ -104,7 +104,7 @@ define parse-hex(t: &string) ->> ?int {
 
 define parse-binary-digits(t: &string) ->> ?int {
   let c-int-str = get-content-pointer(t);
-  let len = string.byte-length(t);
+  let len = this::string::byte-length(t);
   let result-ptr = magic alloca(int, 1);
   let result-status = _parse_binary_digits(c-int-str, len, result-ptr);
   if lt-int(result-status, 0) {
@@ -117,7 +117,7 @@ define parse-binary-digits(t: &string) ->> ?int {
 
 define parse-octal-digits(t: &string) ->> ?int {
   let c-int-str = get-content-pointer(t);
-  let len = string.byte-length(t);
+  let len = this::string::byte-length(t);
   let result-ptr = magic alloca(int, 1);
   let result-status = _parse_octal_digits(c-int-str, len, result-ptr);
   if lt-int(result-status, 0) {
@@ -130,7 +130,7 @@ define parse-octal-digits(t: &string) ->> ?int {
 
 define parse-decimal-digits(t: &string) ->> ?int {
   let c-int-str = get-content-pointer(t);
-  let len = string.byte-length(t);
+  let len = this::string::byte-length(t);
   let result-ptr = magic alloca(int, 1);
   let result-status = _parse_decimal_digits(c-int-str, len, result-ptr);
   if lt-int(result-status, 0) {
@@ -143,7 +143,7 @@ define parse-decimal-digits(t: &string) ->> ?int {
 
 define parse-hex-digits(t: &string) ->> ?int {
   let c-int-str = get-content-pointer(t);
-  let len = string.byte-length(t);
+  let len = this::string::byte-length(t);
   let result-ptr = magic alloca(int, 1);
   let result-status = _parse_hex_digits(c-int-str, len, result-ptr);
   if lt-int(result-status, 0) {

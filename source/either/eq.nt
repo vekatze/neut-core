@@ -1,7 +1,7 @@
 import {
-  bool {False},
-  either {Left, Right, either},
-  eq {Eq, eq},
+  this::bool {False},
+  this::either {Left, Right, either},
+  this::eq {Eq, eq},
 }
 
 inline as-eq<a, b>(f: eq(a), g: eq(b)) -> eq(either(a, b)) {

@@ -1,10 +1,10 @@
 import {
-  binary {binary, length},
-  binary.pointer {get-content-pointer},
-  bool {False, True, bool, not},
-  c-size {C-Size, c-size},
-  eq {Eq, eq},
-  pointer {shift},
+  this::binary {binary, length},
+  this::binary.pointer {get-content-pointer},
+  this::bool {False, True, bool, not},
+  this::c-size {C-Size, c-size},
+  this::eq {Eq, eq},
+  this::pointer {shift},
 }
 
 foreign {

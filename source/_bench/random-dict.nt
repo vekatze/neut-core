@@ -1,17 +1,17 @@
 import {
-  control {grow},
-  dictionary {dictionary, insert, lookup},
-  either {Left, Right},
-  int.io {print-int-line},
-  int.ord,
-  layer,
-  ord {ord},
-  random {random-int},
-  unit {Unit, unit},
+  this::control {grow},
+  this::dictionary {dictionary, insert, lookup},
+  this::either {Left, Right},
+  this::int.io {print-int-line},
+  this::int.ord,
+  this::layer,
+  this::ord {ord},
+  this::random {random-int},
+  this::unit {Unit, unit},
 }
 
 define _make-big-dictionary(o: &ord(int)) -> dictionary(int, int) {
-  grow(dictionary.empty, 700000, (acc, _) => {
+  grow(this::dictionary::empty, 700000, (acc, _) => {
     let key = random-int(1000000);
     let val = random-int(1000000);
     insert(o, acc, key, val)
@@ -19,7 +19,7 @@ define _make-big-dictionary(o: &ord(int)) -> dictionary(int, int) {
 }
 
 define make-big-dictionary() -> dictionary(int, int) {
-  pin o = int.ord.as-ord;
+  pin o = this::int.ord::as-ord;
   _make-big-dictionary(o)
 }
 
@@ -41,7 +41,7 @@ define _random-lookup-sum(o: &ord(int), d: &dictionary(int, int)) -> unit {
 }
 
 define random-lookup-sum(d: &dictionary(int, int)) -> unit {
-  pin o = int.ord.as-ord;
+  pin o = this::int.ord::as-ord;
   _random-lookup-sum(o, d)
 }
 

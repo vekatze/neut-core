@@ -1,10 +1,10 @@
 import {
-  binary,
-  layer,
-  list {List},
-  pair {Pair, pair},
-  show {Show, show},
-  string {intercalate, join},
+  this::binary,
+  this::layer,
+  this::list {List},
+  this::pair {Pair, pair},
+  this::show {Show, show},
+  this::string {intercalate, join},
 }
 
 inline as-show<a, b>(s1: show(a), s2: show(b)) -> show(pair(a, b)) {

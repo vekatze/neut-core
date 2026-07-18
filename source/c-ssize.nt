@@ -1,5 +1,5 @@
 import {
-  bool {bool},
+  this::bool {bool},
 }
 
 data c-ssize {

@@ -1,16 +1,16 @@
 import {
-  bool {False, True, and, bool},
-  c-size {C-Size},
-  either {Right, none},
-  int {abs-int, max-int, min-int},
-  list {Cons, Nil, list},
-  memory {malloc},
-  memory.unsafe {free, load-int, load-pointer, memcpy, memmove, realloc, store-int, store-pointer},
-  pair {Pair, pair},
-  pointer {null-pointer, shift},
-  unit {Unit, unit},
-  unsafe {cast, cast-inline},
-  word,
+  this::bool {False, True, and, bool},
+  this::c-size {C-Size},
+  this::either {Right, none},
+  this::int {abs-int, max-int, min-int},
+  this::list {Cons, Nil, list},
+  this::memory {malloc},
+  this::memory.unsafe {free, load-int, load-pointer, memcpy, memmove, realloc, store-int, store-pointer},
+  this::pair {Pair, pair},
+  this::pointer {null-pointer, shift},
+  this::unit {Unit, unit},
+  this::unsafe {cast, cast-inline},
+  this::word,
 }
 
 nominal {
@@ -23,7 +23,7 @@ data array(_: type) {
 }
 
 inline _header-size() -> int {
-  mul-int(word.size, 5)
+  mul-int(this::word::size, 5)
 }
 
 inline _allocation-size(capacity: int, stride: int) -> int {
@@ -41,17 +41,17 @@ define get-capacity<a>(xs: &array(a)) -> int {
 
 inline _get-from<a>(xs: &array(a)) -> int {
   let array-ptr = cast-inline<&array(a), pointer>(xs);
-  load-int(shift(array-ptr, word.size))
+  load-int(shift(array-ptr, this::word::size))
 }
 
 define _get-to<a>(xs: &array(a)) -> int {
   let array-ptr = cast-inline<&array(a), pointer>(xs);
-  load-int(shift(array-ptr, mul-int(word.size, 2)))
+  load-int(shift(array-ptr, mul-int(this::word::size, 2)))
 }
 
 inline _get-elem-type<a>(xs: &array(a)) -> type {
   let array-ptr = cast-inline<&array(a), pointer>(xs);
-  cast-inline<int, type>(load-int(shift(array-ptr, mul-int(word.size, 3))))
+  cast-inline<int, type>(load-int(shift(array-ptr, mul-int(this::word::size, 3))))
 }
 
 inline-meta _get-stride<a>() -> 'int {
@@ -60,12 +60,12 @@ inline-meta _get-stride<a>() -> 'int {
 
 inline _get-buffer-ptr<a>(xs: &array(a)) -> pointer {
   let array-ptr = cast-inline<&array(a), pointer>(xs);
-  load-pointer(shift(array-ptr, mul-int(word.size, 4)))
+  load-pointer(shift(array-ptr, mul-int(this::word::size, 4)))
 }
 
 define _set-buffer-ptr<a>(xs: &array(a), buffer-ptr: pointer) -> unit {
   let array-ptr = cast-inline<&array(a), pointer>(xs);
-  store-pointer(buffer-ptr, shift(array-ptr, mul-int(word.size, 4)))
+  store-pointer(buffer-ptr, shift(array-ptr, mul-int(this::word::size, 4)))
 }
 
 define _set-capacity<a>(xs: &array(a), capacity: int) -> unit {
@@ -99,7 +99,7 @@ define setup-slice-ptr<a>(xs: &array(a), start: int, size: int, slice-ptr: point
   let from = _get-from(xs);
   let slice-from = add-int(from, start);
   let slice-to = add-int(slice-from, size);
-  let word-size = word.size;
+  let word-size = this::word::size;
   store-int(get-capacity(xs), slice-ptr);
   store-int(slice-from, shift(slice-ptr, word-size));
   store-int(slice-to, shift(slice-ptr, mul-int(word-size, 2)));
@@ -117,27 +117,27 @@ inline with-slice<a, b>(xs: &array(a), start: int, size: int, f: (&array(a)) -> 
 
 define _shift-from<a>(xs: &array(a), offset: int) -> unit {
   let array-ptr = cast-inline<&array(a), pointer>(xs);
-  let from-ptr = shift(array-ptr, mul-int(word.size, 1));
+  let from-ptr = shift(array-ptr, mul-int(this::word::size, 1));
   let current-value = load-int(from-ptr);
   store-int(add-int(current-value, offset), from-ptr)
 }
 
 inline _shift-to<a>(xs: &array(a), offset: int) -> unit {
   let array-ptr = cast-inline<&array(a), pointer>(xs);
-  let to-ptr = shift(array-ptr, mul-int(word.size, 2));
+  let to-ptr = shift(array-ptr, mul-int(this::word::size, 2));
   let current-value = load-int(to-ptr);
   store-int(add-int(current-value, offset), to-ptr)
 }
 
 define _set-to<a>(xs: &array(a), to: int) -> unit {
   let array-ptr = cast-inline<&array(a), pointer>(xs);
-  store-int(to, shift(array-ptr, mul-int(word.size, 2)))
+  store-int(to, shift(array-ptr, mul-int(this::word::size, 2)))
 }
 
 define _make-raw<a>(capacity: int, initial-cursor: int, elem-type: type, stride: int) -> array(a) {
   let array-ptr = malloc(C-Size(_allocation-size(capacity, stride)));
   let buffer-ptr = _inline-buffer-ptr(array-ptr);
-  let word-size = word.size;
+  let word-size = this::word::size;
   store-int(capacity, array-ptr);
   store-int(initial-cursor, shift(array-ptr, mul-int(word-size, 1)));
   store-int(initial-cursor, shift(array-ptr, mul-int(word-size, 2)));

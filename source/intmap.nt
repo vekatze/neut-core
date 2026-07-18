@@ -1,11 +1,11 @@
 import {
-  bool {bool},
-  either {Right, none},
-  layer,
-  list {list},
-  pair {Pair, pair},
-  unit,
-  word,
+  this::bool {bool},
+  this::either {Right, none},
+  this::layer,
+  this::list {list},
+  this::pair {Pair, pair},
+  this::unit,
+  this::word,
 }
 
 foreign {
@@ -71,7 +71,7 @@ inline _link-with-mask<a>(m: _Mask, p1: _Prefix, t1: intmap(a), t2: intmap(a)) -
 
 // from `Utils.Containers.Internal.BitUtil`
 inline _highest-bit-mask(w: int) -> int {
-  let size-in-bits = mul-int(word.size, 8);
+  let size-in-bits = mul-int(this::word::size, 8);
   shl-int(1, sub-int(sub-int(size-in-bits, 1), magic external llvm.ctlz.i64(w)))
 }
 
@@ -166,9 +166,9 @@ inline from-list<v>(kvs: list(pair(int, v))) -> intmap(v) {
   let f =
     define self(kvs: list(pair(int, v)), acc: intmap(v)) -> intmap(v) {
       match kvs {
-      | list.Nil =>
+      | this::list::Nil =>
         acc
-      | list.Cons(Pair(k, v), rest) =>
+      | this::list::Cons(Pair(k, v), rest) =>
         self(rest, insert(acc, k, v))
       }
     };
@@ -180,7 +180,7 @@ define _to-list-aux<v>(kvs: intmap(v), acc: list(pair(int, v))) -> list(pair(int
   | _Nil =>
     acc
   | _Tip(k, v) =>
-    list.Cons(Pair(k, v), acc)
+    this::list::Cons(Pair(k, v), acc)
   | _Bin(_, _, d1, d2) =>
     _to-list-aux(d1, _to-list-aux(d2, acc))
   }
@@ -189,14 +189,14 @@ define _to-list-aux<v>(kvs: intmap(v), acc: list(pair(int, v))) -> list(pair(int
 define to-list<v>(kvs: intmap(v)) -> list(pair(int, v)) {
   match kvs {
   | _Nil =>
-    list.Nil
+    this::list::Nil
   | _Tip(k, v) =>
-    list.Cons(Pair(k, v), list.Nil)
+    this::list::Cons(Pair(k, v), this::list::Nil)
   | _Bin(_, m, d1, d2) =>
     if lt-int(m, 0) {
-      _to-list-aux(d2, _to-list-aux(d1, list.Nil))
+      _to-list-aux(d2, _to-list-aux(d1, this::list::Nil))
     } else {
-      _to-list-aux(d1, _to-list-aux(d2, list.Nil))
+      _to-list-aux(d1, _to-list-aux(d2, this::list::Nil))
     }
   }
 }

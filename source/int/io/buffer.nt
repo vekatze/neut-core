@@ -1,10 +1,10 @@
 import {
-  control {nop},
-  file.buffer {buffer},
-  file.buffer.unsafe {append},
-  pointer {shift},
-  system {system},
-  unit {unit},
+  this::control {nop},
+  this::file.buffer {buffer},
+  this::file.buffer.unsafe {append},
+  this::pointer {shift},
+  this::system {system},
+  this::unit {unit},
 }
 
 foreign {

@@ -1,9 +1,9 @@
 import {
-  binary,
-  layer,
-  show {Show, show},
-  string,
-  unit {Unit, unit},
+  this::binary,
+  this::layer,
+  this::show {Show, show},
+  this::string,
+  this::unit {Unit, unit},
 }
 
 constant as-show: show(unit) {

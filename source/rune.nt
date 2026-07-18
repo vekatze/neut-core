@@ -1,7 +1,7 @@
 import {
-  bool {and},
-  either {Left, Right},
-  unit {Unit},
+  this::bool {and},
+  this::either {Left, Right},
+  this::unit {Unit},
 }
 
 define to-int32(r: rune) -> int32 {

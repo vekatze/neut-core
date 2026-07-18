@@ -1,10 +1,10 @@
 import {
-  binary,
-  layer,
-  rc {borrow, new},
-  string,
-  string.io {print, print-line},
-  unit {Unit, unit},
+  this::binary,
+  this::layer,
+  this::rc {borrow, new},
+  this::string,
+  this::string.io {print, print-line},
+  this::unit {Unit, unit},
 }
 
 define zen() -> unit {

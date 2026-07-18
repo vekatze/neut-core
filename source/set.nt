@@ -1,11 +1,11 @@
 import {
-  bool {False, True, bool},
-  dictionary {dictionary},
-  either {Left, Right},
-  list {Cons, Nil, fold-left, list},
-  ord {ord},
-  pair {Pair, pair},
-  unit {Unit, unit},
+  this::bool {False, True, bool},
+  this::dictionary {dictionary},
+  this::either {Left, Right},
+  this::list {Cons, Nil, fold-left, list},
+  this::ord {ord},
+  this::pair {Pair, pair},
+  this::unit {Unit, unit},
 }
 
 data set(a) {
@@ -13,12 +13,12 @@ data set(a) {
 }
 
 constant empty<a>: set(a) {
-  _Set(dictionary.empty)
+  _Set(this::dictionary::empty)
 }
 
 define size<a>(s: &set(a)) -> int {
   tie _Set(s) = s;
-  dictionary.size(s)
+  this::dictionary::size(s)
 }
 
 define is-empty<a>(s: &set(a)) -> bool {
@@ -26,22 +26,22 @@ define is-empty<a>(s: &set(a)) -> bool {
 }
 
 define singleton<a>(x: a) -> set(a) {
-  _Set(dictionary.singleton(x, Unit))
+  _Set(this::dictionary::singleton(x, Unit))
 }
 
 define insert<a>(o: &ord(a), s: set(a), x: a) -> set(a) {
   let _Set(s) = s;
-  _Set(dictionary.insert(o, s, x, Unit))
+  _Set(this::dictionary::insert(o, s, x, Unit))
 }
 
 define delete<a>(o: &ord(a), s: set(a), x: a) -> set(a) {
   let _Set(s) = s;
-  _Set(dictionary.delete(o, s, x))
+  _Set(this::dictionary::delete(o, s, x))
 }
 
 define member<a>(o: &ord(a), s: &set(a), x: &a) -> bool {
   tie _Set(s) = s;
-  match dictionary.lookup(o, s, x) {
+  match this::dictionary::lookup(o, s, x) {
   | Right(_) =>
     True
   | Left(_) =>
@@ -66,5 +66,5 @@ define _to-list-aux<a>(kvs: list(pair(a, unit)), acc: list(a)) -> list(a) {
 
 define to-list<a>(s: set(a)) -> list(a) {
   let _Set(s) = s;
-  _to-list-aux(dictionary.to-list(s), Nil)
+  _to-list-aux(this::dictionary::to-list(s), Nil)
 }

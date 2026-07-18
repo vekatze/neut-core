@@ -1,8 +1,8 @@
 import {
-  bool,
-  layer,
-  ord {Ord, ord},
-  ordering {EQ, GT, LT},
+  this::bool,
+  this::layer,
+  this::ord {Ord, ord},
+  this::ordering {EQ, GT, LT},
 }
 
 constant as-ord: ord(float) {

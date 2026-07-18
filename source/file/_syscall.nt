@@ -1,6 +1,6 @@
 import {
-  c-int {c-int},
-  c-offset {c-offset},
+  this::c-int {c-int},
+  this::c-offset {c-offset},
 }
 
 foreign {

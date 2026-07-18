@@ -1,7 +1,7 @@
 import {
-  ansi {Blue, Bold, Color, Color-16, Foreground, Normal, Set-Style, Vivid},
-  binary,
-  binary.builder {
+  this::ansi {Blue, Bold, Color, Color-16, Foreground, Normal, Set-Style, Vivid},
+  this::binary,
+  this::binary.builder {
     append-ansi,
     append-int64-UTF8,
     append-rune-UTF8,
@@ -9,10 +9,10 @@ import {
     extract,
     make-binary-builder,
   },
-  string,
-  string.io {print-line},
-  string.unsafe {from-binary},
-  unit {unit},
+  this::string,
+  this::string.io {print-line},
+  this::string.unsafe {from-binary},
+  this::unit {unit},
 }
 
 define zen() -> unit {

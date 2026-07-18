@@ -1,11 +1,11 @@
 import {
-  binary,
-  bool {bool},
-  file.buffer {buffer},
-  string,
-  string.io.buffer {write, write-line},
-  system {system},
-  unit {unit},
+  this::binary,
+  this::bool {bool},
+  this::file.buffer {buffer},
+  this::string,
+  this::string.io.buffer {write, write-line},
+  this::system {system},
+  this::unit {unit},
 }
 
 define write-bool(k: &buffer, x: bool) ->> system(unit) {

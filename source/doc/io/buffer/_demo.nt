@@ -1,15 +1,15 @@
 import {
-  ansi {Blue, Yellow},
-  binary,
-  doc {Group, Nest, ansi-fg, ansi-reset, atom, break, join},
-  doc.io.buffer {write-doc-line},
-  either {Right},
-  file.buffer {flush, make-buffer},
-  file.descriptor {stdout},
-  layer,
-  string,
-  system {system},
-  unit {Unit, unit},
+  this::ansi {Blue, Yellow},
+  this::binary,
+  this::doc {Group, Nest, ansi-fg, ansi-reset, atom, break, join},
+  this::doc.io.buffer {write-doc-line},
+  this::either {Right},
+  this::file.buffer {flush, make-buffer},
+  this::file.descriptor {stdout},
+  this::layer,
+  this::string,
+  this::system {system},
+  this::unit {Unit, unit},
 }
 
 define zen() -> unit {

@@ -1,12 +1,12 @@
 import {
-  bool {bool},
-  c-int {C-Int, c-int, or-c-int},
-  either {Left, Right},
-  file.access-mode {Read, Read-Write, Write, access-mode},
-  file.mode {Mode, mode},
-  file.seek {Current, End, Start, seek-origin},
-  pair {Pair, pair},
-  unit,
+  this::bool {bool},
+  this::c-int {C-Int, c-int, or-c-int},
+  this::either {Left, Right},
+  this::file.access-mode {Read, Read-Write, Write, access-mode},
+  this::file.mode {Mode, mode},
+  this::file.seek {Current, End, Start, seek-origin},
+  this::pair {Pair, pair},
+  this::unit,
 }
 
 foreign {

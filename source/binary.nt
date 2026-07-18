@@ -1,32 +1,32 @@
 import {
-  bool {bool},
-  c-size {C-Size},
-  control {discard},
-  either {Right, none},
-  int {max-int, min-int},
-  list {Cons, Nil, fold-left-N, list},
-  memory {malloc},
-  memory.unsafe {free, load-int, load-int8, load-pointer, memcpy, store-int, store-int8, store-pointer},
-  pointer {shift},
-  unit {Unit, unit},
-  unsafe {cast},
-  word,
+  this::bool {bool},
+  this::c-size {C-Size},
+  this::control {discard},
+  this::either {Right, none},
+  this::int {max-int, min-int},
+  this::list {Cons, Nil, fold-left-N, list},
+  this::memory {malloc},
+  this::memory.unsafe {free, load-int, load-int8, load-pointer, memcpy, store-int, store-int8, store-pointer},
+  this::pointer {shift},
+  this::unit {Unit, unit},
+  this::unsafe {cast},
+  this::word,
 }
 
 // int8-array
 // internal representation: (head-index, last-index, content-pointer, byte-0, byte-1, ..., byte-n)
 inline _content-pointer-offset() -> int {
-  mul-int(word.size, 2)
+  mul-int(this::word::size, 2)
 }
 
 inline _header-size() -> int {
-  mul-int(word.size, 3)
+  mul-int(this::word::size, 3)
 }
 
 inline _initialize-header(base-pointer: pointer, len: int) -> pointer {
   let content-pointer = shift(base-pointer, _header-size());
   store-int(0, base-pointer);
-  store-int(len, shift(base-pointer, word.size));
+  store-int(len, shift(base-pointer, this::word::size));
   store-pointer(content-pointer, shift(base-pointer, _content-pointer-offset()));
   content-pointer
 }
@@ -36,7 +36,7 @@ resource binary {
     free(x)
   },
   (source-pointer: pointer, _: pointer) => {
-    let u = word.size;
+    let u = this::word::size;
     let from = load-int(source-pointer);
     let to = load-int(shift(source-pointer, u));
     let length = sub-int(to, from);
@@ -55,7 +55,7 @@ inline from-blob(t: blob) -> &binary {
 
 define length(xs: &binary) -> int {
   let source-pointer = magic cast(&binary, pointer, xs);
-  let u = word.size;
+  let u = this::word::size;
   let from = load-int(source-pointer);
   let to = load-int(shift(source-pointer, u));
   sub-int(to, from)
@@ -63,7 +63,7 @@ define length(xs: &binary) -> int {
 
 inline with-slice<a>(xs: &binary, start: int, size: int, f: (&binary) -> +a) -> a {
   let ptr = cast<&binary, pointer>(xs);
-  let u = word.size;
+  let u = this::word::size;
   let from = load-int(ptr);
   let to = load-int(shift(ptr, u));
   let len = sub-int(to, from);
@@ -99,7 +99,7 @@ define allocate(len: int) -> binary {
 }
 
 define from-list(xs: list(int8)) -> binary {
-  let len on xs = list.length(xs);
+  let len on xs = this::list::length(xs);
   let base-pointer = malloc(C-Size(add-int(len, _header-size())));
   let content-pointer = _initialize-header(base-pointer, len);
   let store-values =
@@ -205,7 +205,7 @@ define append(t1: &binary, t2: &binary) -> binary {
   let p2 = cast<&binary, pointer>(t2);
   let from1 = load-int(p1);
   let from2 = load-int(p2);
-  let u = word.size;
+  let u = this::word::size;
   let to1 = load-int(shift(p1, u));
   let to2 = load-int(shift(p2, u));
   let len1 = sub-int(to1, from1);
@@ -236,7 +236,7 @@ define drop(t: binary, offset: int) -> binary {
   let _ on t = {
     let ptr = cast<&binary, pointer>(t);
     let from = load-int(ptr);
-    let to-ptr = shift(ptr, word.size);
+    let to-ptr = shift(ptr, this::word::size);
     let to = load-int(to-ptr);
     store-int(min-int(to, add-int(from, offset)), ptr)
   };
@@ -249,7 +249,7 @@ define take(t: binary, offset: int) -> binary {
   let _ on t = {
     let ptr = cast<&binary, pointer>(t);
     let from = load-int(ptr);
-    let to-ptr = shift(ptr, word.size);
+    let to-ptr = shift(ptr, this::word::size);
     let to = load-int(to-ptr);
     store-int(min-int(to, add-int(from, offset)), to-ptr)
   };
@@ -316,7 +316,7 @@ define drop-end-N(t: &binary, offset: int) -> binary {
 }
 
 define intercalate(xs: list(binary), sep: binary) -> binary {
-  join(list.intercalate(xs, sep))
+  join(this::list::intercalate(xs, sep))
 }
 
 define intercalate-N(xs: &list(binary), sep: &binary) -> binary {
@@ -324,7 +324,7 @@ define intercalate-N(xs: &list(binary), sep: &binary) -> binary {
     fold-left-N(0, xs, (acc, x) => {
       add-int(acc, length(x))
     });
-  let xs-len = list.length(xs);
+  let xs-len = this::list::length(xs);
   let sep-num = max-int(0, sub-int(xs-len, 1));
   let len = add-int(base-len, mul-int(length(sep), sep-num));
   let new-binary = malloc(C-Size(add-int(len, _header-size())));

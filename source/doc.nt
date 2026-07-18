@@ -1,5 +1,5 @@
 import {
-  ansi {
+  this::ansi {
     Background,
     Black,
     Blue,
@@ -24,8 +24,8 @@ import {
     color-ansi,
     style,
   },
-  binary,
-  string {string},
+  this::binary,
+  this::string {string},
 }
 
 data chunk {

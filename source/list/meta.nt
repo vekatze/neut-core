@@ -1,9 +1,9 @@
 import {
-  bool {False, True, bool},
-  either {Left, Right},
-  list {Cons, Nil, list},
-  pair {Pair, pair},
-  unit {Unit},
+  this::bool {False, True, bool},
+  this::either {Left, Right},
+  this::list {Cons, Nil, list},
+  this::pair {Pair, pair},
+  this::unit {Unit},
 }
 
 inline-meta length<a>(xs: list(a)) -> int {

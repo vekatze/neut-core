@@ -1,10 +1,10 @@
 import {
-  ansi {Blue, Yellow},
-  array {array},
-  array.unsafe {access-unchecked},
-  binary,
-  bool {True, bool},
-  doc {
+  this::ansi {Blue, Yellow},
+  this::array {array},
+  this::array.unsafe {access-unchecked},
+  this::binary,
+  this::bool {True, bool},
+  this::doc {
     Chunk,
     Chunk-Choose,
     Chunk-Empty,
@@ -26,13 +26,13 @@ import {
     empty,
     join,
   },
-  doc.show {show-doc},
-  float.show {show-float32},
-  list {Cons, Nil, list},
-  pair {Pair, pair},
-  show {Show, show},
-  string,
-  type-value {
+  this::doc.show {show-doc},
+  this::float.show {show-float32},
+  this::list {Cons, Nil, list},
+  this::pair {Pair, pair},
+  this::show {Show, show},
+  this::string,
+  this::type-value {
     Algebraic,
     Array,
     Binary,
@@ -59,7 +59,7 @@ import {
     constructor,
     field,
   },
-  type-value.meta {
+  this::type-value.meta {
     algebraic-discriminant,
     algebraic-header-slot-count,
     constructor-switch,
@@ -68,8 +68,8 @@ import {
     field-pointer,
     fields-with-cursors,
   },
-  unsafe {cast-inline},
-  vector {vector},
+  this::unsafe {cast-inline},
+  this::vector {vector},
 }
 
 define _literal-doc(d: doc, enable-ansi: bool) -> doc {
@@ -123,7 +123,7 @@ inline-meta _array-doc<a>(xs: '&array(a), enable-ansi: 'bool) -> 'doc {
   quote {
     let prefix = join::[_constructor-doc("Array", unquote {enable-ansi}), atom-N("[")];
     let suffix = atom-N("]");
-    let len = array.length(unquote {xs});
+    let len = this::array::length(unquote {xs});
     let loop =
       define self(index: int) -> doc {
         if eq-int(index, len) {
@@ -150,9 +150,9 @@ inline-meta _vector-doc<a>(xs: '&vector(a), enable-ansi: 'bool) -> 'doc {
   quote {
     let prefix = join::[_constructor-doc("Vector", unquote {enable-ansi}), atom-N("[")];
     let suffix = atom-N("]");
-    let len = vector.length(unquote {xs});
+    let len = this::vector::length(unquote {xs});
     let content =
-      vector.fold-right-N(unquote {xs}, empty, (x: &a, acc: doc, i: int) => {
+      this::vector::fold-right-N(unquote {xs}, empty, (x: &a, acc: doc, i: int) => {
         if eq-int(add-int(i, 1), len) {
           join::[unquote {to-doc(quote {x}, enable-ansi)}, acc]
         } else {

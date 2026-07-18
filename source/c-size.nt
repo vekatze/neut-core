@@ -1,6 +1,6 @@
 import {
-  bool {bool},
-  c-ssize {C-SSize, c-ssize},
+  this::bool {bool},
+  this::c-ssize {C-SSize, c-ssize},
 }
 
 data c-size {

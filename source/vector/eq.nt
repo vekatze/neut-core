@@ -1,8 +1,8 @@
 import {
-  bool {False, True, bool},
-  eq {Eq, eq},
-  vector {length, vector},
-  vector.unsafe {access-unchecked},
+  this::bool {False, True, bool},
+  this::eq {Eq, eq},
+  this::vector {length, vector},
+  this::vector.unsafe {access-unchecked},
 }
 
 inline as-eq<a>(class: eq(a)) -> eq(vector(a)) {

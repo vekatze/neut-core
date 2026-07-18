@@ -1,9 +1,9 @@
 import {
-  binary,
-  list {List},
-  path.entity.dirent {Dirent, dirent},
-  path.entity.dtype {DT_DIR},
-  string {format, string},
+  this::binary,
+  this::list {List},
+  this::path.entity.dirent {Dirent, dirent},
+  this::path.entity.dtype {DT_DIR},
+  this::string {format, string},
 }
 
 define show-dirent(e: dirent) -> string {

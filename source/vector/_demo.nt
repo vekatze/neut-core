@@ -1,16 +1,16 @@
 import {
-  binary,
-  bool,
-  debug {assert, panic},
-  either {Left, Right},
-  int.io {print-int-line},
-  layer,
-  list {List},
-  pair {Pair},
-  string {replicate, string},
-  string.io {print, print-line},
-  unit {Unit, unit},
-  vector {
+  this::binary,
+  this::bool,
+  this::debug {assert, panic},
+  this::either {Left, Right},
+  this::int.io {print-int-line},
+  this::layer,
+  this::list {List},
+  this::pair {Pair},
+  this::string {replicate, string},
+  this::string.io {print, print-line},
+  this::unit {Unit, unit},
+  this::vector {
     access,
     delete,
     drop,
@@ -107,21 +107,21 @@ define _assert-vector-layout() -> unit {
   _expect-access("vector inline buffer: front growth\n", xs, 0, 0);
   _expect-access("vector inline buffer: middle after growth\n", xs, 3, 30);
   _expect-access("vector inline buffer: back growth\n", xs, 5, 50);
-  _expect-slice-3("vector.with-slice: middle\n", xs, 2, 3, 20, 30, 40);
-  _expect-slice-2("vector.with-slice: negative start clamps to zero\n", xs, -10, 2, 0, 10);
-  _expect-slice-3("vector.with-slice: oversized size clamps to end\n", xs, 3, 99, 30, 40, 50);
-  _expect-empty-slice("vector.with-slice: oversized start clamps to end\n", xs, 99, 4);
-  _expect-empty-slice("vector.with-slice: negative size clamps to zero\n", xs, 2, -5);
-  _expect-materialized-copy("vector.with-slice: materialized copy\n", xs, 2, 3, 20, 30, 40);
+  _expect-slice-3("vector::with-slice: middle\n", xs, 2, 3, 20, 30, 40);
+  _expect-slice-2("vector::with-slice: negative start clamps to zero\n", xs, -10, 2, 0, 10);
+  _expect-slice-3("vector::with-slice: oversized size clamps to end\n", xs, 3, 99, 30, 40, 50);
+  _expect-empty-slice("vector::with-slice: oversized start clamps to end\n", xs, 99, 4);
+  _expect-empty-slice("vector::with-slice: negative size clamps to zero\n", xs, 2, -5);
+  _expect-materialized-copy("vector::with-slice: materialized copy\n", xs, 2, 3, 20, 30, 40);
   let shifted = drop(from-list(List::[0, 1, 2, 3, 4, 5, 6]), 2);
   pin shifted = take(shifted, 4);
-  _expect-slice-2("vector.with-slice: non-zero from\n", shifted, 1, 2, 3, 4)
+  _expect-slice-2("vector::with-slice: non-zero from\n", shifted, 1, 2, 3, 4)
 }
 
 define zen() -> unit {
   _assert-vector-layout();
   // find
-  let xs = vector.make(5);
+  let xs = this::vector::make(5);
   let xs = push-back(xs, 1);
   let xs = push-back(xs, 2);
   let xs = push-back(xs, 3);

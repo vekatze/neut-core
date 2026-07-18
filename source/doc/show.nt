@@ -1,8 +1,8 @@
 import {
-  binary,
-  bool,
-  cell {cell, make-cell},
-  doc {
+  this::binary,
+  this::bool,
+  this::cell {cell, make-cell},
+  this::doc {
     Chunk,
     Chunk-Choose,
     Chunk-Empty,
@@ -21,11 +21,11 @@ import {
     chunk,
     doc,
   },
-  float.show {show-float},
-  int.show {show-int},
-  layer,
-  string {from-text, string},
-  unit {unit},
+  this::float.show {show-float},
+  this::int.show {show-int},
+  this::layer,
+  this::string {from-text, string},
+  this::unit {unit},
 }
 
 foreign {
@@ -49,24 +49,24 @@ data _doc-kit {
 
 define _set-mode(k: &_doc-kit, m: _mode) -> unit {
   tie _Doc-Kit{layout-mode-cell} = k;
-  cell.mutate(layout-mode-cell, (_) => {
+  this::cell::mutate(layout-mode-cell, (_) => {
     lift {m}
   });
 }
 
 define _get-mode(k: &_doc-kit) -> _mode {
   tie _Doc-Kit{layout-mode-cell} = k;
-  cell.clone(layout-mode-cell)
+  this::cell::clone(layout-mode-cell)
 }
 
 define _get-indentation(k: &_doc-kit) -> int {
   tie _Doc-Kit{indentation-cell} = k;
-  cell.clone(indentation-cell)
+  this::cell::clone(indentation-cell)
 }
 
 define _set-indentation(k: &_doc-kit, x: int) -> unit {
   tie _Doc-Kit{indentation-cell} = k;
-  cell.mutate(indentation-cell, (_) => {
+  this::cell::mutate(indentation-cell, (_) => {
     lift {x}
   });
 }
@@ -78,12 +78,12 @@ define _shift-indentation(k: &_doc-kit, diff: int) -> unit {
 
 define _get-column(k: &_doc-kit) -> int {
   tie _Doc-Kit{column-cell} = k;
-  cell.clone(column-cell)
+  this::cell::clone(column-cell)
 }
 
 define _set-column(k: &_doc-kit, x: int) -> unit {
   tie _Doc-Kit{column-cell} = k;
-  cell.mutate(column-cell, (_) => {
+  this::cell::mutate(column-cell, (_) => {
     lift {x}
   });
 }
@@ -108,9 +108,9 @@ define _size-chunk(c: &chunk) -> int {
   | Chunk-Empty =>
     0
   | Chunk-String(content) =>
-    string.length(content)
+    this::string::length(content)
   | Chunk-Text(content) =>
-    string.length(from-text(*content))
+    this::string::length(from-text(*content))
   | Chunk-Style(_) =>
     0
   | Chunk-Style-Text(_) =>
@@ -135,10 +135,10 @@ define _layout-chunk(k: &_doc-kit, c: &chunk) -> string {
   | Chunk-Empty =>
     *""
   | Chunk-String(t) =>
-    _shift-column(k, string.length(t));
+    _shift-column(k, this::string::length(t));
     *t
   | Chunk-Text(t) =>
-    _shift-column(k, string.length(from-text(*t)));
+    _shift-column(k, this::string::length(from-text(*t)));
     *from-text(*t)
   | Chunk-Style(t) =>
     *t
@@ -149,15 +149,15 @@ define _layout-chunk(k: &_doc-kit, c: &chunk) -> string {
   | Chunk-Float(x) =>
     show-float(*x)
   | Chunk-Rune(r) =>
-    string.singleton(*r)
+    this::string::singleton(*r)
   | Chunk-Line =>
-    pin tmp = string.replicate(" ", _get-indentation(k));
+    pin tmp = this::string::replicate(" ", _get-indentation(k));
     _set-column(k, _get-indentation(k));
-    string.append("\n", tmp)
+    this::string::append("\n", tmp)
   | Chunk-Join(c1, c2) =>
     pin t1 = _layout-chunk(k, c1);
     pin t2 = _layout-chunk(k, c2);
-    string.append(t1, t2)
+    this::string::append(t1, t2)
   | Chunk-Choose(dh, dv) =>
     match _get-mode(k) {
     | _Horizontal =>
@@ -190,7 +190,7 @@ define _layout(k: &_doc-kit, target: &doc) -> string {
   | Seq(d1, d2) =>
     pin t1 = _layout(k, d1);
     pin t2 = _layout(k, d2);
-    string.append(t1, t2)
+    this::string::append(t1, t2)
   | Nest(i, cont) =>
     _shift-indentation(k, *i);
     let result = _layout(k, cont);

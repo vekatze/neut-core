@@ -1,12 +1,12 @@
 import {
-  bool {False, True, and, bool, or},
-  either {Left, Right, either, none},
-  layer,
-  monoid {Monoid, monoid},
-  ord {Ord, ord},
-  ordering {GT, LT},
-  pair {Pair, pair},
-  unit {Unit, unit},
+  this::bool {False, True, and, bool, or},
+  this::either {Left, Right, either, none},
+  this::layer,
+  this::monoid {Monoid, monoid},
+  this::ord {Ord, ord},
+  this::ordering {GT, LT},
+  this::pair {Pair, pair},
+  this::unit {Unit, unit},
 }
 
 data list(a: type) {

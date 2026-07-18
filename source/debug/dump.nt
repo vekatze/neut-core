@@ -1,11 +1,11 @@
 import {
-  binary,
-  bool {True, bool},
-  doc.show {show-doc},
-  show.generic {to-doc},
-  string,
-  string.io {print},
-  unit {unit},
+  this::binary,
+  this::bool {True, bool},
+  this::doc.show {show-doc},
+  this::show.generic {to-doc},
+  this::string,
+  this::string.io {print},
+  this::unit {unit},
 }
 
 inline-meta vet<a>(x: '&a)[

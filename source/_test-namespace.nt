@@ -1,0 +1,57 @@
+import {
+  this::int.io {print-int-line},
+  this::unit {Unit, unit},
+}
+
+define plain-add(x: int, y: int) -> int {
+  add-int(x, y)
+}
+
+namespace _impl {
+  define double(x: int) -> int {
+    mul-int(x, 2)
+  }
+}
+
+namespace calc {
+  define increment(x: int) -> int {
+    plain-add(x, 1)
+  }
+
+  define quadruple(x: int) -> int {
+    _impl.double(_impl.double(x))
+  }
+
+  namespace deep {
+    define decrement(x: int) -> int {
+      sub-int(increment(x), 2)
+    }
+  }
+}
+
+namespace boxed {
+  data box {
+  | Box(int)
+  }
+
+  define unbox(b: box) -> int {
+    match b {
+    | Box(x) =>
+      x
+    }
+  }
+}
+
+define run-internal-checks() -> unit {
+  // vocabulary: own namespace members via dot descent
+  print-int-line(calc.increment(9)); // 10
+  print-int-line(calc.quadruple(3)); // 12
+  print-int-line(calc.deep.decrement(3)); // 2
+  // constructors inside a namespace
+  print-int-line(boxed.unbox(boxed.Box(30))); // 30
+  match boxed.Box(2) {
+  | boxed.Box(x) =>
+    print-int-line(x) // 2
+  };
+  Unit
+}

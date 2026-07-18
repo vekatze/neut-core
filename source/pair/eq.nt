@@ -1,7 +1,7 @@
 import {
-  bool {and},
-  eq {Eq, eq},
-  pair {Pair, pair},
+  this::bool {and},
+  this::eq {Eq, eq},
+  this::pair {Pair, pair},
 }
 
 inline as-eq<a, b>(f: eq(a), g: eq(b)) -> eq(pair(a, b)) {

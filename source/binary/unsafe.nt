@@ -1,7 +1,7 @@
 import {
-  binary,
+  this::binary,
 }
 
 constant access-unchecked: _ {
-  binary._access
+  this::binary::_access
 }

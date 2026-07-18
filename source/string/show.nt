@@ -1,17 +1,19 @@
 import {
-  binary,
-  bool {and, any, bool},
-  layer,
-  list {Cons, List, concat, list},
-  rune.utf8 {size-by-head-byte},
-  show {Show, show},
-  string {
-    _drop-N,
-    _get-byte,
-    _slice-N,
+  this::binary,
+  this::bool {and, any, bool},
+  this::layer,
+  this::list {Cons, List, concat, list},
+  this::rune.utf8 {size-by-head-byte},
+  this::show {Show, show},
+  this::string {
     byte-length,
     join,
     string,
+  },
+  this::string.unsafe {
+    drop-N as _drop-N,
+    get-byte-unchecked as _get-byte,
+    slice-N as _slice-N,
   },
 }
 

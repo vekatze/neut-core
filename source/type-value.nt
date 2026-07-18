@@ -1,6 +1,6 @@
 import {
-  bool {bool},
-  list {list},
+  this::bool {bool},
+  this::list {list},
 }
 
 data field-layout {

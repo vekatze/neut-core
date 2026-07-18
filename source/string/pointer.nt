@@ -1,7 +1,8 @@
 import {
-  string,
+  this::binary.pointer {get-content-pointer as get-binary-content-pointer},
+  this::string {string, to-binary},
 }
 
-constant get-content-pointer: _ {
-  string._get-content-pointer
+inline get-content-pointer(t: &string) -> pointer {
+  get-binary-content-pointer(to-binary(t))
 }

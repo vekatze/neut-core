@@ -1,13 +1,13 @@
 import {
-  bool,
-  c-size {C-Size},
-  either {Right, none},
-  memory {malloc},
-  memory.unsafe {free, load-int, store-int},
-  pointer {shift},
-  unit {Unit, unit},
-  unsafe {cast},
-  word,
+  this::bool,
+  this::c-size {C-Size},
+  this::either {Right, none},
+  this::memory {malloc},
+  this::memory.unsafe {free, load-int, store-int},
+  this::pointer {shift},
+  this::unit {Unit, unit},
+  this::unsafe {cast},
+  this::word,
 }
 
 nominal {
@@ -18,19 +18,19 @@ nominal {
 }
 
 inline _header-size() -> int {
-  mul-int(word.size, 4)
+  mul-int(this::word::size, 4)
 }
 
 inline _weak-ptr(ptr: pointer) -> pointer {
-  shift(ptr, word.size)
+  shift(ptr, this::word::size)
 }
 
 inline _type-ptr(ptr: pointer) -> pointer {
-  shift(ptr, mul-int(word.size, 2))
+  shift(ptr, mul-int(this::word::size, 2))
 }
 
 inline _value-ptr(ptr: pointer) -> pointer {
-  shift(ptr, mul-int(word.size, 3))
+  shift(ptr, mul-int(this::word::size, 3))
 }
 
 inline _increment-strong(ptr: pointer) -> unit {

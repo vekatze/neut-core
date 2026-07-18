@@ -1,21 +1,21 @@
 import {
-  binary,
-  bool {False, True, and, bool, or},
-  c-int {c-int, from-c-int},
-  c-size {C-Size, c-size, from-c-size},
-  c-string {c-string, from-string, to-string},
-  debug {panic},
-  either {Right, none},
-  int.show {show-int},
-  layer,
-  list {List},
-  memory {malloc},
-  memory.unsafe {store-int, store-pointer},
-  pointer {is-null-pointer, null-pointer, shift},
-  string {format, string, take},
-  system {report-system-error, system},
-  unit {Unit, unit},
-  word,
+  this::binary,
+  this::bool {False, True, and, bool, or},
+  this::c-int {c-int, from-c-int},
+  this::c-size {C-Size, c-size, from-c-size},
+  this::c-string {c-string, from-string, to-string},
+  this::debug {panic},
+  this::either {Right, none},
+  this::int.show {show-int},
+  this::layer,
+  this::list {List},
+  this::memory {malloc},
+  this::memory.unsafe {store-int, store-pointer},
+  this::pointer {is-null-pointer, null-pointer, shift},
+  this::string {format, string, take},
+  this::system {report-system-error, system},
+  this::unit {Unit, unit},
+  this::word,
 }
 
 foreign {
@@ -139,7 +139,7 @@ define get-time() -> time {
   let struct = magic alloca(int8, size);
   let result = from-c-int(magic external clock_gettime(CLOCK_REALTIME, struct));
   if lt-int(result, 0) {
-    panic("time.time.get-time(); `clock_gettime` failed\n")
+    panic("get-time(); `clock_gettime` failed\n")
   } else {
     let seconds: int = magic external neut_core_v0_55_timespec_sec(struct);
     let nanoseconds: int = magic external neut_core_v0_55_timespec_nsec(struct);
@@ -179,7 +179,7 @@ define _zeropad(x: int, format-string: &string) -> string {
   pin fmt = from-string(format-string);
   let fmt = magic cast(&c-string, pointer, fmt);
   let size = from-c-int(magic external snprintf(null-pointer, 0, fmt)(x: int));
-  let u = word.size;
+  let u = this::word::size;
   let u2 = mul-int(u, 2);
   let u3 = mul-int(u, 3);
   let ptr = malloc(C-Size(add-int(size, add-int(1, u3))));
@@ -208,7 +208,7 @@ define _format-nanoseconds(nanoseconds: int, digits: int) -> string {
     let result = _zeropad9(nanoseconds);
     format(".{}", List::[take(result, digits)])
   } else {
-    string.empty()
+    this::string::empty()
   }
 }
 

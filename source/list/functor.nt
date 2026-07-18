@@ -1,6 +1,6 @@
 import {
-  functor {Functor, functor},
-  list {for-each, list},
+  this::functor {Functor, functor},
+  this::list {for-each, list},
 }
 
 constant as-functor: functor(list) {

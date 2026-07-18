@@ -1,15 +1,51 @@
 import {
-  array {array},
+  this::array {array},
+  this::memory.unsafe {free, load-int, load-pointer, memcpy, store-int},
+  this::pointer {null-pointer, shift},
+  this::unit,
+  this::unsafe {cast-inline},
+  this::word,
 }
 
-constant access-unchecked: _ {
-  array._access-unchecked
+inline-meta _get-stride<a>() -> 'int {
+  quote {magic call-type(pack-type {a}, 2, null-pointer, null-pointer)}
 }
 
-constant swap-unchecked: _ {
-  array._swap-unchecked
+inline _get-element-pointer<a>(xs: &array(a), index: int) -> pointer {
+  let array-pointer = cast-inline<&array(a), pointer>(xs);
+  let from = load-int(shift(array-pointer, this::word::size));
+  let buffer-pointer = load-pointer(shift(array-pointer, mul-int(this::word::size, 4)));
+  shift(buffer-pointer, mul-int(_get-stride::<a>(), add-int(from, index)))
+}
+
+inline access-unchecked<a>(xs: &array(a), index: int) -> &a {
+  cast-inline<pointer, &a>(_get-element-pointer(xs, index))
+}
+
+define swap-unchecked<a>(xs: array(a), i: int, j: int) -> array(a) {
+  let value-i-pointer on xs = _get-element-pointer(xs, i);
+  let value-j-pointer on xs = _get-element-pointer(xs, j);
+  let value-i = load-int(value-i-pointer);
+  let value-j = load-int(value-j-pointer);
+  store-int(value-j, value-i-pointer);
+  store-int(value-i, value-j-pointer);
+  xs
 }
 
 inline-meta put-unchecked<a>(xs: 'array(a), i: 'int, x: 'a) -> 'array(a) {
-  array._put-unchecked(xs, i, x)
+  quote {
+    let xs = unquote {xs};
+    let i = unquote {i};
+    let x = unquote {x};
+    let stride = _get-stride::<a>();
+    let element-pointer on xs = _get-element-pointer(xs, i);
+    magic call-type(pack-type {a}, 0, element-pointer, null-pointer);
+    let _ on x = {
+      let new-pointer = cast-inline<&a, pointer>(x);
+      memcpy(element-pointer, new-pointer, stride);
+      free(new-pointer);
+    };
+    magic call-type(pack-type {pointer}, 0, x, add-int(0, 1));
+    xs
+  }
 }

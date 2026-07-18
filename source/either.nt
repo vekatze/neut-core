@@ -1,6 +1,6 @@
 import {
-  bool {False, True, bool},
-  unit {Unit},
+  this::bool {False, True, bool},
+  this::unit {Unit},
 }
 
 data either(a, b) {

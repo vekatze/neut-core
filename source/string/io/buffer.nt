@@ -1,15 +1,15 @@
 import {
-  binary.io.buffer,
-  either,
-  file.buffer {buffer},
-  rune.io.buffer {write-rune},
-  string {string, to-binary},
-  system {system},
-  unit {unit},
+  this::binary.io.buffer,
+  this::either,
+  this::file.buffer {buffer},
+  this::rune.io.buffer {write-rune},
+  this::string {string, to-binary},
+  this::system {system},
+  this::unit {unit},
 }
 
 define write(b: &buffer, content: &string) ->> system(unit) {
-  binary.io.buffer.write-binary(b, to-binary(content))
+  this::binary.io.buffer::write-binary(b, to-binary(content))
 }
 
 define write-line(b: &buffer, content: &string) ->> system(unit) {

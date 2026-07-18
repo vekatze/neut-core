@@ -1,9 +1,9 @@
 import {
-  binary,
-  float.io {print-float, print-float-line},
-  string,
-  string.io {print},
-  unit {unit},
+  this::binary,
+  this::float.io {print-float, print-float-line},
+  this::string,
+  this::string.io {print},
+  this::unit {unit},
 }
 
 define zen() -> unit {

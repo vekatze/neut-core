@@ -1,7 +1,7 @@
 import {
-  file.descriptor {stdout},
-  rune.io {print-rune, print-rune-line, write-rune, write-rune-line},
-  unit {Unit, unit},
+  this::file.descriptor {stdout},
+  this::rune.io {print-rune, print-rune-line, write-rune, write-rune-line},
+  this::unit {Unit, unit},
 }
 
 define zen() -> unit {

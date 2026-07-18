@@ -1,7 +1,7 @@
 import {
-  bool,
-  eq {Eq, eq},
-  layer,
+  this::bool,
+  this::eq {Eq, eq},
+  this::layer,
 }
 
 constant as-eq: eq(rune) {

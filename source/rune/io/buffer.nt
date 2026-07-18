@@ -1,11 +1,11 @@
 import {
-  control {nop},
-  either {Right},
-  file.buffer {buffer},
-  file.buffer.unsafe {append},
-  rune.unsafe {store-rune},
-  system {system},
-  unit {Unit, unit},
+  this::control {nop},
+  this::either {Right},
+  this::file.buffer {buffer},
+  this::file.buffer.unsafe {append},
+  this::rune.unsafe {store-rune},
+  this::system {system},
+  this::unit {Unit, unit},
 }
 
 define write-rune(k: &buffer, x: rune) ->> system(unit) {

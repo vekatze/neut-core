@@ -1,23 +1,23 @@
 import {
-  bool,
-  c-size {C-Size},
-  layer {axiom-T},
-  memory {malloc},
-  memory.unsafe {free, load-int, store-int},
-  pair {Pair, pair},
-  pointer {is-null-pointer, shift},
-  unit {Unit, unit},
-  unsafe {cast-inline},
-  word,
+  this::bool,
+  this::c-size {C-Size},
+  this::layer {axiom-T},
+  this::memory {malloc},
+  this::memory.unsafe {free, load-int, store-int},
+  this::pair {Pair, pair},
+  this::pointer {is-null-pointer, shift},
+  this::unit {Unit, unit},
+  this::unsafe {cast-inline},
+  this::word,
 }
 
 constant _cell-size: int {
-  mul-int(2, word.size)
+  mul-int(2, this::word::size)
 }
 
 resource _cell {
   (ch: pointer, flag: int) => {
-    let a = load-int(shift(ch, word.size));
+    let a = load-int(shift(ch, this::word::size));
     magic call-type(a, 0, load-int(ch), add-int(0, 1));
     if eq-int(flag, 1) {
       free(ch)
@@ -26,10 +26,10 @@ resource _cell {
     }
   },
   (ch: pointer, dest: pointer) => {
-    let u = word.size;
+    let u = this::word::size;
     unpack-type a = cast-inline<int, type>(load-int(shift(ch, u)));
     let val: &a = cast-inline<int, &a>(load-int(ch));
-    let u = word.size;
+    let u = this::word::size;
     let ptr =
       if is-null-pointer(dest) {
         malloc(C-Size(_cell-size))
@@ -48,7 +48,7 @@ data cell(_: type) {
 }
 
 inline make-cell<a>(initial-value: +a) -> cell(a) {
-  let u = word.size;
+  let u = this::word::size;
   let ptr = malloc(C-Size(_cell-size));
   store-int(cast-inline<a, int>(axiom-T(initial-value)), ptr);
   store-int(cast-inline<type, int>(pack-type {a}), shift(ptr, u));

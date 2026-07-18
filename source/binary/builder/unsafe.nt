@@ -1,11 +1,18 @@
 import {
-  binary.builder {_get-head-ptr, _proceed, binary-builder},
-  memory.unsafe {memcpy},
-  unit {unit},
+  this::binary.builder {
+    _append,
+    _to-cell-N,
+    binary-builder,
+  },
+  this::cell {mutate},
+  this::memory.unsafe {memcpy},
+  this::unit {unit},
 }
 
 define append-chunk(b: &binary-builder, ptr: pointer, size: int) -> unit {
-  let content-head-ptr = _get-head-ptr(b, size);
-  memcpy(content-head-ptr, ptr, size);
-  _proceed(b, size)
+  mutate(_to-cell-N(b), (b) => {
+    _append(b, size, (dest) => {
+      memcpy(dest, ptr, size)
+    })
+  })
 }

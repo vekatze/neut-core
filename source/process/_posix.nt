@@ -8,13 +8,13 @@ foreign {
   fork() -> c-pid,
   waitpid(c-pid, pointer, c-int) -> c-pid,
   chdir(pointer) -> c-int,
-  neut_core_v0_55_wifexited(c-int) -> c-int,
-  neut_core_v0_55_wifsignaled(c-int) -> c-int,
-  neut_core_v0_55_wifstopped(c-int) -> c-int,
-  neut_core_v0_55_wexitstatus(c-int) -> c-int,
-  neut_core_v0_55_wtermsig(c-int) -> c-int,
-  neut_core_v0_55_wcoredump(c-int) -> c-int,
-  neut_core_v0_55_wstopsig(c-int) -> c-int,
+  neut_core_v0_56_wifexited(c-int) -> c-int,
+  neut_core_v0_56_wifsignaled(c-int) -> c-int,
+  neut_core_v0_56_wifstopped(c-int) -> c-int,
+  neut_core_v0_56_wexitstatus(c-int) -> c-int,
+  neut_core_v0_56_wtermsig(c-int) -> c-int,
+  neut_core_v0_56_wcoredump(c-int) -> c-int,
+  neut_core_v0_56_wstopsig(c-int) -> c-int,
 }
 
 define execvp(cmd: pointer, args: pointer) -> c-int {
@@ -34,29 +34,29 @@ define chdir(path: pointer) -> c-int {
 }
 
 define wifexited(stat: c-int) -> c-int {
-  magic external neut_core_v0_55_wifexited(stat)
+  magic external neut_core_v0_56_wifexited(stat)
 }
 
 define wifsignaled(stat: c-int) -> c-int {
-  magic external neut_core_v0_55_wifsignaled(stat)
+  magic external neut_core_v0_56_wifsignaled(stat)
 }
 
 define wifstopped(stat: c-int) -> c-int {
-  magic external neut_core_v0_55_wifstopped(stat)
+  magic external neut_core_v0_56_wifstopped(stat)
 }
 
 define wexitstatus(stat: c-int) -> c-int {
-  magic external neut_core_v0_55_wexitstatus(stat)
+  magic external neut_core_v0_56_wexitstatus(stat)
 }
 
 define wtermsig(stat: c-int) -> c-int {
-  magic external neut_core_v0_55_wtermsig(stat)
+  magic external neut_core_v0_56_wtermsig(stat)
 }
 
 define wcoredump(stat: c-int) -> c-int {
-  magic external neut_core_v0_55_wcoredump(stat)
+  magic external neut_core_v0_56_wcoredump(stat)
 }
 
 define wstopsig(stat: c-int) -> c-int {
-  magic external neut_core_v0_55_wstopsig(stat)
+  magic external neut_core_v0_56_wstopsig(stat)
 }

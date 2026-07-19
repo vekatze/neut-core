@@ -7,11 +7,11 @@ import {
 }
 
 foreign {
-  neut_core_v0_55_errno() -> c-int,
+  neut_core_v0_56_errno() -> c-int,
 }
 
 define _get-errno() -> c-int {
-  magic external neut_core_v0_55_errno()
+  magic external neut_core_v0_56_errno()
 }
 
 alias errno {

@@ -11,8 +11,8 @@ import {
 }
 
 foreign {
-  neut_core_v0_55_build_float_buf(pointer, int, float, int) -> int,
-  neut_core_v0_55_build_float32_buf(pointer, int, float32, int) -> int,
+  neut_core_v0_56_build_float_buf(pointer, int, float, int) -> int,
+  neut_core_v0_56_build_float32_buf(pointer, int, float32, int) -> int,
 }
 
 define show-float(x: float) -> string {
@@ -23,7 +23,7 @@ define show-float(x: float) -> string {
   let u3 = mul-int(word-size, 3);
   let string-ptr = malloc(C-Size(add-int(size, u3)));
   let buffer-ptr = shift(string-ptr, u3);
-  let len = magic external neut_core_v0_55_build_float_buf(buffer-ptr, size, x, add-newline);
+  let len = magic external neut_core_v0_56_build_float_buf(buffer-ptr, size, x, add-newline);
   store-int(0, string-ptr);
   store-int(len, shift(string-ptr, word-size));
   store-pointer(buffer-ptr, shift(string-ptr, u2));
@@ -38,7 +38,7 @@ define show-float32(x: float32) -> string {
   let u3 = mul-int(word-size, 3);
   let string-ptr = malloc(C-Size(add-int(size, u3)));
   let buffer-ptr = shift(string-ptr, u3);
-  let len = magic external neut_core_v0_55_build_float32_buf(buffer-ptr, size, x, add-newline);
+  let len = magic external neut_core_v0_56_build_float32_buf(buffer-ptr, size, x, add-newline);
   store-int(0, string-ptr);
   store-int(len, shift(string-ptr, word-size));
   store-pointer(buffer-ptr, shift(string-ptr, u2));

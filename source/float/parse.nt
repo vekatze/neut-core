@@ -8,11 +8,11 @@ import {
 }
 
 foreign {
-  neut_core_v0_55_parse_double(pointer, int, pointer) -> int,
+  neut_core_v0_56_parse_double(pointer, int, pointer) -> int,
 }
 
 inline _parse_double(num-str-ptr: pointer, len: int, result-ptr: pointer) -> int {
-  magic external neut_core_v0_55_parse_double(num-str-ptr, len, result-ptr)
+  magic external neut_core_v0_56_parse_double(num-str-ptr, len, result-ptr)
 }
 
 inline parse-float(t: &string) ->> ?float {

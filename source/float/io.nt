@@ -7,12 +7,12 @@ import {
 }
 
 foreign {
-  neut_core_v0_55_write_double(descriptor, float) -> int,
-  neut_core_v0_55_write_double_line(descriptor, float) -> int,
+  neut_core_v0_56_write_double(descriptor, float) -> int,
+  neut_core_v0_56_write_double_line(descriptor, float) -> int,
 }
 
 define write-float(d: descriptor, x: float) ->> system(unit) {
-  let result = magic external neut_core_v0_55_write_double(d, x);
+  let result = magic external neut_core_v0_56_write_double(d, x);
   if lt-int(result, 0) {
     report-system-error()
   } else {
@@ -21,7 +21,7 @@ define write-float(d: descriptor, x: float) ->> system(unit) {
 }
 
 define write-float-line(d: descriptor, x: float) ->> system(unit) {
-  let result = magic external neut_core_v0_55_write_double_line(d, x);
+  let result = magic external neut_core_v0_56_write_double_line(d, x);
   if lt-int(result, 0) {
     report-system-error()
   } else {

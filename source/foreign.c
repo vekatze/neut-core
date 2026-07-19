@@ -26,97 +26,97 @@
 #include "foreign/ryu/f2s.c"
 #undef to_chars
 
-__attribute__((always_inline)) int neut_core_v0_55_wifexited(int stat) {
+__attribute__((always_inline)) int neut_core_v0_56_wifexited(int stat) {
   return WIFEXITED(stat);
 }
 
-__attribute__((always_inline)) int neut_core_v0_55_wifsignaled(int stat) {
+__attribute__((always_inline)) int neut_core_v0_56_wifsignaled(int stat) {
   return WIFSIGNALED(stat);
 }
 
-__attribute__((always_inline)) int neut_core_v0_55_wifstopped(int stat) {
+__attribute__((always_inline)) int neut_core_v0_56_wifstopped(int stat) {
   return WIFSTOPPED(stat);
 }
 
-__attribute__((always_inline)) int neut_core_v0_55_wexitstatus(int stat) {
+__attribute__((always_inline)) int neut_core_v0_56_wexitstatus(int stat) {
   return WEXITSTATUS(stat);
 }
 
-__attribute__((always_inline)) int neut_core_v0_55_wtermsig(int stat) {
+__attribute__((always_inline)) int neut_core_v0_56_wtermsig(int stat) {
   return WTERMSIG(stat);
 }
 
-__attribute__((always_inline)) int neut_core_v0_55_wcoredump(int stat) {
+__attribute__((always_inline)) int neut_core_v0_56_wcoredump(int stat) {
   return WCOREDUMP(stat);
 }
 
-__attribute__((always_inline)) int neut_core_v0_55_wstopsig(int stat) {
+__attribute__((always_inline)) int neut_core_v0_56_wstopsig(int stat) {
   return WSTOPSIG(stat);
 }
 
-__attribute__((always_inline)) size_t neut_core_v0_55_word_size() {
+__attribute__((always_inline)) size_t neut_core_v0_56_word_size() {
   return sizeof(void *);
 }
 
-__attribute__((always_inline)) int neut_core_v0_55_O_RDONLY() {
+__attribute__((always_inline)) int neut_core_v0_56_O_RDONLY() {
   return O_RDONLY;
 }
 
-__attribute__((always_inline)) int neut_core_v0_55_O_WRONLY() {
+__attribute__((always_inline)) int neut_core_v0_56_O_WRONLY() {
   return O_WRONLY;
 }
 
-__attribute__((always_inline)) int neut_core_v0_55_O_RDWR() { return O_RDWR; }
+__attribute__((always_inline)) int neut_core_v0_56_O_RDWR() { return O_RDWR; }
 
-__attribute__((always_inline)) int neut_core_v0_55_O_CREAT() { return O_CREAT; }
+__attribute__((always_inline)) int neut_core_v0_56_O_CREAT() { return O_CREAT; }
 
-__attribute__((always_inline)) int neut_core_v0_55_O_APPEND() {
+__attribute__((always_inline)) int neut_core_v0_56_O_APPEND() {
   return O_APPEND;
 }
 
-__attribute__((always_inline)) int neut_core_v0_55_O_TRUNC() { return O_TRUNC; }
+__attribute__((always_inline)) int neut_core_v0_56_O_TRUNC() { return O_TRUNC; }
 
-__attribute__((always_inline)) int neut_core_v0_55_SEEK_SET() {
+__attribute__((always_inline)) int neut_core_v0_56_SEEK_SET() {
   return SEEK_SET;
 }
 
-__attribute__((always_inline)) int neut_core_v0_55_SEEK_CUR() {
+__attribute__((always_inline)) int neut_core_v0_56_SEEK_CUR() {
   return SEEK_CUR;
 }
 
-__attribute__((always_inline)) int neut_core_v0_55_SEEK_END() {
+__attribute__((always_inline)) int neut_core_v0_56_SEEK_END() {
   return SEEK_END;
 }
 
-__attribute__((always_inline)) size_t neut_core_v0_55_thread_size() {
+__attribute__((always_inline)) size_t neut_core_v0_56_thread_size() {
   return sizeof(pthread_t);
 }
 
-__attribute__((always_inline)) size_t neut_core_v0_55_thread_mutex_size() {
+__attribute__((always_inline)) size_t neut_core_v0_56_thread_mutex_size() {
   return sizeof(pthread_mutex_t);
 }
 
-__attribute__((always_inline)) size_t neut_core_v0_55_thread_cond_size() {
+__attribute__((always_inline)) size_t neut_core_v0_56_thread_cond_size() {
   return sizeof(pthread_cond_t);
 }
 
 __attribute__((always_inline)) int64_t
-neut_core_v0_55_atomic_load_int(int64_t *ptr) {
+neut_core_v0_56_atomic_load_int(int64_t *ptr) {
   return __atomic_load_n(ptr, __ATOMIC_ACQUIRE);
 }
 
 __attribute__((always_inline)) int64_t
-neut_core_v0_55_atomic_fetch_add_int(int64_t *ptr, int64_t value) {
+neut_core_v0_56_atomic_fetch_add_int(int64_t *ptr, int64_t value) {
   return __atomic_fetch_add(ptr, value, __ATOMIC_ACQ_REL);
 }
 
 __attribute__((always_inline)) int64_t
-neut_core_v0_55_atomic_fetch_sub_int(int64_t *ptr, int64_t value) {
+neut_core_v0_56_atomic_fetch_sub_int(int64_t *ptr, int64_t value) {
   return __atomic_fetch_sub(ptr, value, __ATOMIC_ACQ_REL);
 }
 
 __attribute__((always_inline)) int64_t
-neut_core_v0_55_atomic_increment_if_positive_int(int64_t *ptr) {
+neut_core_v0_56_atomic_increment_if_positive_int(int64_t *ptr) {
   int64_t current = __atomic_load_n(ptr, __ATOMIC_ACQUIRE);
   while (current > 0) {
     if (__atomic_compare_exchange_n(ptr, &current, current + 1, 1,
@@ -127,13 +127,13 @@ neut_core_v0_55_atomic_increment_if_positive_int(int64_t *ptr) {
   return 0;
 }
 
-__attribute__((always_inline)) int neut_core_v0_55_errno() { return errno; }
+__attribute__((always_inline)) int neut_core_v0_56_errno() { return errno; }
 
-__attribute__((always_inline)) uint32_t neut_core_v0_55_UINT32_MAX() {
+__attribute__((always_inline)) uint32_t neut_core_v0_56_UINT32_MAX() {
   return UINT32_MAX;
 }
 
-static int64_t neut_core_v0_55_skip_underscores(const char *str,
+static int64_t neut_core_v0_56_skip_underscores(const char *str,
                                                 int64_t length, int64_t i) {
   while (i < length && str[i] == '_') {
     i++;
@@ -141,9 +141,9 @@ static int64_t neut_core_v0_55_skip_underscores(const char *str,
   return i;
 }
 
-static void neut_core_v0_55_read_int_sign(const char *str, int64_t length,
+static void neut_core_v0_56_read_int_sign(const char *str, int64_t length,
                                           int64_t *i, int64_t *out_sign) {
-  *i = neut_core_v0_55_skip_underscores(str, length, *i);
+  *i = neut_core_v0_56_skip_underscores(str, length, *i);
   *out_sign = 1;
   if (*i < length) {
     if (str[*i] == '-') {
@@ -153,12 +153,12 @@ static void neut_core_v0_55_read_int_sign(const char *str, int64_t length,
   }
 }
 
-static int neut_core_v0_55_read_prefix(const char *str, int64_t length,
+static int neut_core_v0_56_read_prefix(const char *str, int64_t length,
                                        int64_t *i, const char *prefix,
                                        int64_t prefix_length) {
   int64_t j = *i;
   for (int64_t k = 0; k < prefix_length; k++) {
-    j = neut_core_v0_55_skip_underscores(str, length, j);
+    j = neut_core_v0_56_skip_underscores(str, length, j);
     if (j >= length || str[j] != prefix[k]) {
       return 0;
     }
@@ -168,7 +168,7 @@ static int neut_core_v0_55_read_prefix(const char *str, int64_t length,
   return 1;
 }
 
-static int neut_core_v0_55_decimal_digit(unsigned char ch, int *out_digit) {
+static int neut_core_v0_56_decimal_digit(unsigned char ch, int *out_digit) {
   if ('0' <= ch && ch <= '9') {
     *out_digit = ch - '0';
     return 1;
@@ -176,7 +176,7 @@ static int neut_core_v0_55_decimal_digit(unsigned char ch, int *out_digit) {
   return 0;
 }
 
-static int neut_core_v0_55_binary_digit(unsigned char ch, int *out_digit) {
+static int neut_core_v0_56_binary_digit(unsigned char ch, int *out_digit) {
   if (ch == '0' || ch == '1') {
     *out_digit = ch - '0';
     return 1;
@@ -184,7 +184,7 @@ static int neut_core_v0_55_binary_digit(unsigned char ch, int *out_digit) {
   return 0;
 }
 
-static int neut_core_v0_55_octal_digit(unsigned char ch, int *out_digit) {
+static int neut_core_v0_56_octal_digit(unsigned char ch, int *out_digit) {
   if ('0' <= ch && ch <= '7') {
     *out_digit = ch - '0';
     return 1;
@@ -192,7 +192,7 @@ static int neut_core_v0_55_octal_digit(unsigned char ch, int *out_digit) {
   return 0;
 }
 
-static int neut_core_v0_55_hex_digit(unsigned char ch, int *out_digit) {
+static int neut_core_v0_56_hex_digit(unsigned char ch, int *out_digit) {
   if ('0' <= ch && ch <= '9') {
     *out_digit = ch - '0';
     return 1;
@@ -204,14 +204,14 @@ static int neut_core_v0_55_hex_digit(unsigned char ch, int *out_digit) {
   return 0;
 }
 
-static int neut_core_v0_55_read_required_digits(
+static int neut_core_v0_56_read_required_digits(
     const char *str, int64_t length, int64_t *i,
     int (*read_digit)(unsigned char, int *), int base, uint64_t *out_value) {
   uint64_t result = 0;
   int has_digits = 0;
   while (1) {
     int digit = 0;
-    *i = neut_core_v0_55_skip_underscores(str, length, *i);
+    *i = neut_core_v0_56_skip_underscores(str, length, *i);
     if (*i >= length || !read_digit((unsigned char)str[*i], &digit)) {
       break;
     }
@@ -226,21 +226,21 @@ static int neut_core_v0_55_read_required_digits(
   return 1;
 }
 
-static int64_t neut_core_v0_55_parse_integer_literal(
+static int64_t neut_core_v0_56_parse_integer_literal(
     const char *str, int64_t length, const char *prefix, int64_t prefix_length,
     int (*read_digit)(unsigned char, int *), int base, int64_t *out_value) {
   int64_t i = 0;
   int64_t sign = 1;
   uint64_t result = 0;
-  neut_core_v0_55_read_int_sign(str, length, &i, &sign);
-  if (!neut_core_v0_55_read_prefix(str, length, &i, prefix, prefix_length)) {
+  neut_core_v0_56_read_int_sign(str, length, &i, &sign);
+  if (!neut_core_v0_56_read_prefix(str, length, &i, prefix, prefix_length)) {
     return -1;
   }
-  if (!neut_core_v0_55_read_required_digits(str, length, &i, read_digit, base,
+  if (!neut_core_v0_56_read_required_digits(str, length, &i, read_digit, base,
                                             &result)) {
     return -1;
   }
-  i = neut_core_v0_55_skip_underscores(str, length, i);
+  i = neut_core_v0_56_skip_underscores(str, length, i);
   if (i != length) {
     return -1;
   }
@@ -252,16 +252,16 @@ static int64_t neut_core_v0_55_parse_integer_literal(
   return 1;
 }
 
-static int64_t neut_core_v0_55_parse_integer_digits(
+static int64_t neut_core_v0_56_parse_integer_digits(
     const char *str, int64_t length, int (*read_digit)(unsigned char, int *),
     int base, int64_t *out_value) {
   int64_t i = 0;
   uint64_t result = 0;
-  if (!neut_core_v0_55_read_required_digits(str, length, &i, read_digit, base,
+  if (!neut_core_v0_56_read_required_digits(str, length, &i, read_digit, base,
                                             &result)) {
     return -1;
   }
-  i = neut_core_v0_55_skip_underscores(str, length, i);
+  i = neut_core_v0_56_skip_underscores(str, length, i);
   if (i != length) {
     return -1;
   }
@@ -269,7 +269,7 @@ static int64_t neut_core_v0_55_parse_integer_digits(
   return 1;
 }
 
-static int neut_core_v0_55_parse_normalized_double(const char *str,
+static int neut_core_v0_56_parse_normalized_double(const char *str,
                                                    int64_t length,
                                                    double *out_value) {
   if (length < 0) {
@@ -298,7 +298,7 @@ static int neut_core_v0_55_parse_normalized_double(const char *str,
   return 1;
 }
 
-int neut_core_v0_55_sleep(double duration) {
+int neut_core_v0_56_sleep(double duration) {
   struct timespec request;
   struct timespec remaining;
   request.tv_sec = (time_t)duration;
@@ -314,63 +314,63 @@ int neut_core_v0_55_sleep(double duration) {
   return 0;
 }
 
-int64_t neut_core_v0_55_parse_binary(const char *str, int64_t length,
+int64_t neut_core_v0_56_parse_binary(const char *str, int64_t length,
                                      int64_t *out_value) {
-  return neut_core_v0_55_parse_integer_literal(
-      str, length, "0b", 2, neut_core_v0_55_binary_digit, 2, out_value);
+  return neut_core_v0_56_parse_integer_literal(
+      str, length, "0b", 2, neut_core_v0_56_binary_digit, 2, out_value);
 }
 
-int64_t neut_core_v0_55_parse_binary_digits(const char *str, int64_t length,
+int64_t neut_core_v0_56_parse_binary_digits(const char *str, int64_t length,
                                             int64_t *out_value) {
-  return neut_core_v0_55_parse_integer_digits(
-      str, length, neut_core_v0_55_binary_digit, 2, out_value);
+  return neut_core_v0_56_parse_integer_digits(
+      str, length, neut_core_v0_56_binary_digit, 2, out_value);
 }
 
-int64_t neut_core_v0_55_parse_octal(const char *str, int64_t length,
+int64_t neut_core_v0_56_parse_octal(const char *str, int64_t length,
                                     int64_t *out_value) {
-  return neut_core_v0_55_parse_integer_literal(
-      str, length, "0o", 2, neut_core_v0_55_octal_digit, 8, out_value);
+  return neut_core_v0_56_parse_integer_literal(
+      str, length, "0o", 2, neut_core_v0_56_octal_digit, 8, out_value);
 }
 
-int64_t neut_core_v0_55_parse_octal_digits(const char *str, int64_t length,
+int64_t neut_core_v0_56_parse_octal_digits(const char *str, int64_t length,
                                            int64_t *out_value) {
-  return neut_core_v0_55_parse_integer_digits(
-      str, length, neut_core_v0_55_octal_digit, 8, out_value);
+  return neut_core_v0_56_parse_integer_digits(
+      str, length, neut_core_v0_56_octal_digit, 8, out_value);
 }
 
-int64_t neut_core_v0_55_parse_decimal(const char *str, int64_t length,
+int64_t neut_core_v0_56_parse_decimal(const char *str, int64_t length,
                                       int64_t *out_value) {
-  return neut_core_v0_55_parse_integer_literal(
-      str, length, "", 0, neut_core_v0_55_decimal_digit, 10, out_value);
+  return neut_core_v0_56_parse_integer_literal(
+      str, length, "", 0, neut_core_v0_56_decimal_digit, 10, out_value);
 }
 
-int64_t neut_core_v0_55_parse_decimal_digits(const char *str, int64_t length,
+int64_t neut_core_v0_56_parse_decimal_digits(const char *str, int64_t length,
                                              int64_t *out_value) {
-  return neut_core_v0_55_parse_integer_digits(
-      str, length, neut_core_v0_55_decimal_digit, 10, out_value);
+  return neut_core_v0_56_parse_integer_digits(
+      str, length, neut_core_v0_56_decimal_digit, 10, out_value);
 }
 
-int64_t neut_core_v0_55_parse_hex(const char *str, int64_t length,
+int64_t neut_core_v0_56_parse_hex(const char *str, int64_t length,
                                   int64_t *out_value) {
-  return neut_core_v0_55_parse_integer_literal(
-      str, length, "0x", 2, neut_core_v0_55_hex_digit, 16, out_value);
+  return neut_core_v0_56_parse_integer_literal(
+      str, length, "0x", 2, neut_core_v0_56_hex_digit, 16, out_value);
 }
 
-int64_t neut_core_v0_55_parse_hex_digits(const char *str, int64_t length,
+int64_t neut_core_v0_56_parse_hex_digits(const char *str, int64_t length,
                                          int64_t *out_value) {
-  return neut_core_v0_55_parse_integer_digits(
-      str, length, neut_core_v0_55_hex_digit, 16, out_value);
+  return neut_core_v0_56_parse_integer_digits(
+      str, length, neut_core_v0_56_hex_digit, 16, out_value);
 }
 
-static int neut_core_v0_55_read_float_exponent(const char *str, int64_t length,
+static int neut_core_v0_56_read_float_exponent(const char *str, int64_t length,
                                                int64_t *i, char marker) {
   int has_digits = 0;
-  *i = neut_core_v0_55_skip_underscores(str, length, *i);
+  *i = neut_core_v0_56_skip_underscores(str, length, *i);
   if (*i >= length || str[*i] != marker) {
     return 1;
   }
   (*i)++;
-  *i = neut_core_v0_55_skip_underscores(str, length, *i);
+  *i = neut_core_v0_56_skip_underscores(str, length, *i);
   if (*i < length) {
     if (str[*i] == '-') {
       (*i)++;
@@ -378,9 +378,9 @@ static int neut_core_v0_55_read_float_exponent(const char *str, int64_t length,
   }
   while (1) {
     int digit = 0;
-    *i = neut_core_v0_55_skip_underscores(str, length, *i);
+    *i = neut_core_v0_56_skip_underscores(str, length, *i);
     if (*i >= length ||
-        !neut_core_v0_55_decimal_digit((unsigned char)str[*i], &digit)) {
+        !neut_core_v0_56_decimal_digit((unsigned char)str[*i], &digit)) {
       break;
     }
     (*i)++;
@@ -392,7 +392,7 @@ static int neut_core_v0_55_read_float_exponent(const char *str, int64_t length,
   return 1;
 }
 
-static int64_t neut_core_v0_55_parse_decimal_double(const char *str,
+static int64_t neut_core_v0_56_parse_decimal_double(const char *str,
                                                     int64_t length,
                                                     double *out_value) {
   int64_t i = 0;
@@ -400,87 +400,87 @@ static int64_t neut_core_v0_55_parse_decimal_double(const char *str,
   int has_fraction = 0;
   int has_exponent = 0;
   uint64_t ignored = 0;
-  neut_core_v0_55_read_int_sign(str, length, &i, &sign);
-  if (!neut_core_v0_55_read_required_digits(
-          str, length, &i, neut_core_v0_55_decimal_digit, 10, &ignored)) {
+  neut_core_v0_56_read_int_sign(str, length, &i, &sign);
+  if (!neut_core_v0_56_read_required_digits(
+          str, length, &i, neut_core_v0_56_decimal_digit, 10, &ignored)) {
     return -1;
   }
-  i = neut_core_v0_55_skip_underscores(str, length, i);
+  i = neut_core_v0_56_skip_underscores(str, length, i);
   if (i < length && str[i] == '.') {
     has_fraction = 1;
     i++;
-    if (!neut_core_v0_55_read_required_digits(
-            str, length, &i, neut_core_v0_55_decimal_digit, 10, &ignored)) {
+    if (!neut_core_v0_56_read_required_digits(
+            str, length, &i, neut_core_v0_56_decimal_digit, 10, &ignored)) {
       return -1;
     }
-    i = neut_core_v0_55_skip_underscores(str, length, i);
+    i = neut_core_v0_56_skip_underscores(str, length, i);
   }
   has_exponent = i < length && str[i] == 'e';
   if (has_exponent) {
-    if (!neut_core_v0_55_read_float_exponent(str, length, &i, 'e')) {
+    if (!neut_core_v0_56_read_float_exponent(str, length, &i, 'e')) {
       return -1;
     }
   }
   if (!has_fraction && !has_exponent) {
     return -1;
   }
-  i = neut_core_v0_55_skip_underscores(str, length, i);
+  i = neut_core_v0_56_skip_underscores(str, length, i);
   if (i != length) {
     return -1;
   }
   double value = 0.0;
-  if (!neut_core_v0_55_parse_normalized_double(str, length, &value)) {
+  if (!neut_core_v0_56_parse_normalized_double(str, length, &value)) {
     return -1;
   }
   *out_value = value;
   return 1;
 }
 
-static int64_t neut_core_v0_55_parse_hex_double(const char *str, int64_t length,
+static int64_t neut_core_v0_56_parse_hex_double(const char *str, int64_t length,
                                                 double *out_value) {
   int64_t i = 0;
   int64_t sign = 1;
   uint64_t ignored = 0;
-  neut_core_v0_55_read_int_sign(str, length, &i, &sign);
-  if (!neut_core_v0_55_read_prefix(str, length, &i, "0x", 2)) {
+  neut_core_v0_56_read_int_sign(str, length, &i, &sign);
+  if (!neut_core_v0_56_read_prefix(str, length, &i, "0x", 2)) {
     return -1;
   }
-  if (!neut_core_v0_55_read_required_digits(
-          str, length, &i, neut_core_v0_55_hex_digit, 16, &ignored)) {
+  if (!neut_core_v0_56_read_required_digits(
+          str, length, &i, neut_core_v0_56_hex_digit, 16, &ignored)) {
     return -1;
   }
-  i = neut_core_v0_55_skip_underscores(str, length, i);
+  i = neut_core_v0_56_skip_underscores(str, length, i);
   if (i < length && str[i] == '.') {
     i++;
   } else {
     return -1;
   }
-  if (!neut_core_v0_55_read_required_digits(
-          str, length, &i, neut_core_v0_55_hex_digit, 16, &ignored)) {
+  if (!neut_core_v0_56_read_required_digits(
+          str, length, &i, neut_core_v0_56_hex_digit, 16, &ignored)) {
     return -1;
   }
-  if (!neut_core_v0_55_read_float_exponent(str, length, &i, 'p')) {
+  if (!neut_core_v0_56_read_float_exponent(str, length, &i, 'p')) {
     return -1;
   }
-  i = neut_core_v0_55_skip_underscores(str, length, i);
+  i = neut_core_v0_56_skip_underscores(str, length, i);
   if (i != length) {
     return -1;
   }
   double value = 0.0;
-  if (!neut_core_v0_55_parse_normalized_double(str, length, &value)) {
+  if (!neut_core_v0_56_parse_normalized_double(str, length, &value)) {
     return -1;
   }
   *out_value = value;
   return 1;
 }
 
-static int neut_core_v0_55_match(const char *str, int64_t length, int64_t start,
+static int neut_core_v0_56_match(const char *str, int64_t length, int64_t start,
                                  const char *word, int64_t word_len) {
   return start + word_len == length &&
          memcmp(str + start, word, (size_t)word_len) == 0;
 }
 
-static int64_t neut_core_v0_55_parse_special_double(const char *str,
+static int64_t neut_core_v0_56_parse_special_double(const char *str,
                                                     int64_t length,
                                                     double *out_value) {
   int64_t i = 0;
@@ -489,29 +489,29 @@ static int64_t neut_core_v0_55_parse_special_double(const char *str,
     negative = 1;
     i++;
   }
-  if (neut_core_v0_55_match(str, length, i, "inf", 3)) {
+  if (neut_core_v0_56_match(str, length, i, "inf", 3)) {
     *out_value = negative ? -INFINITY : INFINITY;
     return 1;
   }
-  if (!negative && neut_core_v0_55_match(str, length, i, "nan", 3)) {
+  if (!negative && neut_core_v0_56_match(str, length, i, "nan", 3)) {
     *out_value = NAN;
     return 1;
   }
   return -1;
 }
 
-int64_t neut_core_v0_55_parse_double(const char *str, int64_t length,
+int64_t neut_core_v0_56_parse_double(const char *str, int64_t length,
                                      double *out_value) {
-  if (neut_core_v0_55_parse_special_double(str, length, out_value) > 0) {
+  if (neut_core_v0_56_parse_special_double(str, length, out_value) > 0) {
     return 1;
   }
-  if (neut_core_v0_55_parse_hex_double(str, length, out_value) > 0) {
+  if (neut_core_v0_56_parse_hex_double(str, length, out_value) > 0) {
     return 1;
   }
-  return neut_core_v0_55_parse_decimal_double(str, length, out_value);
+  return neut_core_v0_56_parse_decimal_double(str, length, out_value);
 }
 
-int64_t neut_core_v0_55_write_loop(int fd, const char *buf, size_t len) {
+int64_t neut_core_v0_56_write_loop(int fd, const char *buf, size_t len) {
   size_t off = 0;
   while (off < len) {
     ssize_t w = write(fd, buf + off, len - off);
@@ -526,13 +526,13 @@ int64_t neut_core_v0_55_write_loop(int fd, const char *buf, size_t len) {
   return (int64_t)len;
 }
 
-ssize_t neut_core_v0_55_write_line(int fd, size_t len, const char *s) {
+ssize_t neut_core_v0_56_write_line(int fd, size_t len, const char *s) {
   struct iovec iov[2] = {{.iov_base = (void *)s, .iov_len = len},
                          {.iov_base = (void *)"\n", .iov_len = 1}};
   return writev(fd, iov, 2);
 }
 
-int neut_core_v0_55_write_int64_core(char *buf_end, int64_t v, int add_nl) {
+int neut_core_v0_56_write_int64_core(char *buf_end, int64_t v, int add_nl) {
   char *p = buf_end;
   if (add_nl) {
     *--p = '\n';
@@ -557,21 +557,21 @@ int neut_core_v0_55_write_int64_core(char *buf_end, int64_t v, int add_nl) {
   return (int)(buf_end - p);
 }
 
-int64_t neut_core_v0_55_write_int64(int fd, int64_t v) {
+int64_t neut_core_v0_56_write_int64(int fd, int64_t v) {
   char buf[22];
   char *end = buf + sizeof(buf);
-  int len = neut_core_v0_55_write_int64_core(end, v, 0);
-  return neut_core_v0_55_write_loop(fd, end - len, (size_t)len);
+  int len = neut_core_v0_56_write_int64_core(end, v, 0);
+  return neut_core_v0_56_write_loop(fd, end - len, (size_t)len);
 }
 
-int64_t neut_core_v0_55_write_int64_nl(int fd, int64_t v) {
+int64_t neut_core_v0_56_write_int64_nl(int fd, int64_t v) {
   char buf[22];
   char *end = buf + sizeof(buf);
-  int len = neut_core_v0_55_write_int64_core(end, v, 1);
-  return neut_core_v0_55_write_loop(fd, end - len, (size_t)len);
+  int len = neut_core_v0_56_write_int64_core(end, v, 1);
+  return neut_core_v0_56_write_loop(fd, end - len, (size_t)len);
 }
 
-size_t neut_core_v0_55_build_float_buf(char *buf, size_t cap, double value,
+size_t neut_core_v0_56_build_float_buf(char *buf, size_t cap, double value,
                                        int add_nl) {
   if (cap < 32) {
     errno = EOVERFLOW;
@@ -595,7 +595,7 @@ size_t neut_core_v0_55_build_float_buf(char *buf, size_t cap, double value,
   return (size_t)n;
 }
 
-size_t neut_core_v0_55_build_float32_buf(char *buf, size_t cap, float value,
+size_t neut_core_v0_56_build_float32_buf(char *buf, size_t cap, float value,
                                          int add_nl) {
   if (cap < 32) {
     errno = EOVERFLOW;
@@ -619,7 +619,7 @@ size_t neut_core_v0_55_build_float32_buf(char *buf, size_t cap, float value,
   return (size_t)n;
 }
 
-int64_t neut_core_v0_55_decompose_double(double value, int64_t *out_sign,
+int64_t neut_core_v0_56_decompose_double(double value, int64_t *out_sign,
                                          int64_t *out_mantissa,
                                          int64_t *out_exponent) {
   const uint64_t bits = double_to_bits(value);
@@ -660,7 +660,7 @@ int64_t neut_core_v0_55_decompose_double(double value, int64_t *out_sign,
   return 0;
 }
 
-int64_t neut_core_v0_55_decompose_float32(float value, int64_t *out_sign,
+int64_t neut_core_v0_56_decompose_float32(float value, int64_t *out_sign,
                                           int64_t *out_mantissa,
                                           int64_t *out_exponent) {
   const uint32_t bits = float_to_bits(value);
@@ -686,27 +686,27 @@ int64_t neut_core_v0_55_decompose_float32(float value, int64_t *out_sign,
   return 0;
 }
 
-int64_t neut_core_v0_55_write_double(int fd, double value) {
+int64_t neut_core_v0_56_write_double(int fd, double value) {
   char buf[32];
-  size_t len = neut_core_v0_55_build_float_buf(buf, sizeof buf, value, 0);
+  size_t len = neut_core_v0_56_build_float_buf(buf, sizeof buf, value, 0);
   if (!len) {
     return -1;
   }
 
-  return neut_core_v0_55_write_loop(fd, buf, len);
+  return neut_core_v0_56_write_loop(fd, buf, len);
 }
 
-int64_t neut_core_v0_55_write_double_line(int fd, double value) {
+int64_t neut_core_v0_56_write_double_line(int fd, double value) {
   char buf[32];
-  size_t len = neut_core_v0_55_build_float_buf(buf, sizeof buf, value, 1);
+  size_t len = neut_core_v0_56_build_float_buf(buf, sizeof buf, value, 1);
   if (!len) {
     return -1;
   }
 
-  return neut_core_v0_55_write_loop(fd, buf, len);
+  return neut_core_v0_56_write_loop(fd, buf, len);
 }
 
-ssize_t neut_core_v0_55_int64_strlen(int64_t v) {
+ssize_t neut_core_v0_56_int64_strlen(int64_t v) {
   uint64_t u = (v < 0) ? (uint64_t)(-v) : (uint64_t)v;
   int len = 0;
   if (u == 0) {
@@ -723,7 +723,7 @@ ssize_t neut_core_v0_55_int64_strlen(int64_t v) {
   return len;
 }
 
-size_t neut_core_v0_55_double_strlen(double value) {
+size_t neut_core_v0_56_double_strlen(double value) {
   char buf[32];
   int n = d2s_buffered_n(value, buf);
   if (n < 0) {
@@ -734,7 +734,7 @@ size_t neut_core_v0_55_double_strlen(double value) {
 }
 
 __attribute__((always_inline)) int64_t
-neut_core_v0_55_get_online_cpu_count(void) {
+neut_core_v0_56_get_online_cpu_count(void) {
   int64_t n = (int64_t)sysconf(_SC_NPROCESSORS_ONLN);
   return (n > 0) ? n : 1;
 }
@@ -754,30 +754,30 @@ typedef enum {
 #define ARCH_TAG ARCH_NONE
 #endif
 
-__attribute__((always_inline)) arch_tag_t neut_core_v0_55_get_arch_tag() {
+__attribute__((always_inline)) arch_tag_t neut_core_v0_56_get_arch_tag() {
   return ARCH_TAG;
 }
 
 __attribute__((always_inline))
-clockid_t neut_core_v0_55_CLOCK_REALTIME() {
+clockid_t neut_core_v0_56_CLOCK_REALTIME() {
   return CLOCK_REALTIME;
 }
 
-__attribute__((always_inline)) size_t neut_core_v0_55_sizeof_timespec() {
+__attribute__((always_inline)) size_t neut_core_v0_56_sizeof_timespec() {
   return sizeof(struct timespec);
 }
 
 __attribute__((always_inline)) int64_t
-neut_core_v0_55_timespec_sec(struct timespec *ts) {
+neut_core_v0_56_timespec_sec(struct timespec *ts) {
   return (int64_t)ts->tv_sec;
 }
 
 __attribute__((always_inline)) int64_t
-neut_core_v0_55_timespec_nsec(struct timespec *ts) {
+neut_core_v0_56_timespec_nsec(struct timespec *ts) {
   return (int64_t)ts->tv_nsec;
 }
 
-static int64_t neut_core_v0_55_days_from_civil(int64_t y, int64_t m,
+static int64_t neut_core_v0_56_days_from_civil(int64_t y, int64_t m,
                                                int64_t d) {
   y -= m <= 2;
   int64_t era = (y >= 0 ? y : y - 399) / 400;
@@ -787,7 +787,7 @@ static int64_t neut_core_v0_55_days_from_civil(int64_t y, int64_t m,
   return era * 146097 + doe - 719468;
 }
 
-static void neut_core_v0_55_civil_from_days(int64_t z, int64_t *y, int64_t *m,
+static void neut_core_v0_56_civil_from_days(int64_t z, int64_t *y, int64_t *m,
                                             int64_t *d) {
   z += 719468;
   int64_t era = (z >= 0 ? z : z - 146096) / 146097;
@@ -801,14 +801,14 @@ static void neut_core_v0_55_civil_from_days(int64_t z, int64_t *y, int64_t *m,
   *y = y0 + (*m <= 2);
 }
 
-int64_t neut_core_v0_55_civil_to_utc(int64_t y, int64_t mo, int64_t d,
+int64_t neut_core_v0_56_civil_to_utc(int64_t y, int64_t mo, int64_t d,
                                      int64_t h, int64_t mi, int64_t s) {
-  return neut_core_v0_55_days_from_civil(y, mo, d) * 86400 + h * 3600 +
+  return neut_core_v0_56_days_from_civil(y, mo, d) * 86400 + h * 3600 +
          mi * 60 + s;
 }
 
-static int64_t neut_core_v0_55_tm_to_utc(const struct tm *tm) {
-  return neut_core_v0_55_civil_to_utc(
+static int64_t neut_core_v0_56_tm_to_utc(const struct tm *tm) {
+  return neut_core_v0_56_civil_to_utc(
       (int64_t)tm->tm_year + 1900, (int64_t)tm->tm_mon + 1, (int64_t)tm->tm_mday,
       (int64_t)tm->tm_hour, (int64_t)tm->tm_min, (int64_t)tm->tm_sec);
 }
@@ -828,16 +828,16 @@ typedef struct {
 } neut_time_fields;
 
 __attribute__((always_inline))
-size_t neut_core_v0_55_sizeof_fields() {
+size_t neut_core_v0_56_sizeof_fields() {
   return sizeof(neut_time_fields);
 }
 
-static void neut_core_v0_55_fill_utc_fields(int64_t epoch,
+static void neut_core_v0_56_fill_utc_fields(int64_t epoch,
                                             neut_time_fields *f) {
   int64_t days = epoch >= 0 ? epoch / 86400 : (epoch - 86399) / 86400;
   int64_t secs = epoch - days * 86400;
   int64_t y, m, d;
-  neut_core_v0_55_civil_from_days(days, &y, &m, &d);
+  neut_core_v0_56_civil_from_days(days, &y, &m, &d);
   f->sec = secs % 60;
   f->min = (secs / 60) % 60;
   f->hour = secs / 3600;
@@ -846,13 +846,13 @@ static void neut_core_v0_55_fill_utc_fields(int64_t epoch,
   f->year = y;
   int64_t wd = (days % 7 + 4) % 7;
   f->wday = wd < 0 ? wd + 7 : wd;
-  f->yday = days - neut_core_v0_55_days_from_civil(y, 1, 1);
+  f->yday = days - neut_core_v0_56_days_from_civil(y, 1, 1);
   f->isdst = 0;
   f->gmtoff = 0;
   f->zone = "UTC";
 }
 
-neut_time_fields *neut_core_v0_55_decompose(int64_t epoch, int64_t is_local,
+neut_time_fields *neut_core_v0_56_decompose(int64_t epoch, int64_t is_local,
                                             neut_time_fields *f) {
   if (is_local) {
     time_t t = (time_t)epoch;
@@ -861,40 +861,40 @@ neut_time_fields *neut_core_v0_55_decompose(int64_t epoch, int64_t is_local,
       return NULL;
     }
     int64_t off = (int64_t)tm.tm_gmtoff;
-    neut_core_v0_55_fill_utc_fields(epoch + off, f);
+    neut_core_v0_56_fill_utc_fields(epoch + off, f);
     f->isdst = (int64_t)tm.tm_isdst;
     f->gmtoff = off;
     f->zone = tm.tm_zone;
     return f;
   }
-  neut_core_v0_55_fill_utc_fields(epoch, f);
+  neut_core_v0_56_fill_utc_fields(epoch, f);
   return f;
 }
 
 __attribute__((always_inline)) int64_t
-neut_core_v0_55_field_sec(neut_time_fields *f) { return f->sec; }
+neut_core_v0_56_field_sec(neut_time_fields *f) { return f->sec; }
 __attribute__((always_inline)) int64_t
-neut_core_v0_55_field_min(neut_time_fields *f) { return f->min; }
+neut_core_v0_56_field_min(neut_time_fields *f) { return f->min; }
 __attribute__((always_inline)) int64_t
-neut_core_v0_55_field_hour(neut_time_fields *f) { return f->hour; }
+neut_core_v0_56_field_hour(neut_time_fields *f) { return f->hour; }
 __attribute__((always_inline)) int64_t
-neut_core_v0_55_field_mday(neut_time_fields *f) { return f->mday; }
+neut_core_v0_56_field_mday(neut_time_fields *f) { return f->mday; }
 __attribute__((always_inline)) int64_t
-neut_core_v0_55_field_mon(neut_time_fields *f) { return f->mon; }
+neut_core_v0_56_field_mon(neut_time_fields *f) { return f->mon; }
 __attribute__((always_inline)) int64_t
-neut_core_v0_55_field_year(neut_time_fields *f) { return f->year; }
+neut_core_v0_56_field_year(neut_time_fields *f) { return f->year; }
 __attribute__((always_inline)) int64_t
-neut_core_v0_55_field_wday(neut_time_fields *f) { return f->wday; }
+neut_core_v0_56_field_wday(neut_time_fields *f) { return f->wday; }
 __attribute__((always_inline)) int64_t
-neut_core_v0_55_field_yday(neut_time_fields *f) { return f->yday; }
+neut_core_v0_56_field_yday(neut_time_fields *f) { return f->yday; }
 __attribute__((always_inline)) int64_t
-neut_core_v0_55_field_isdst(neut_time_fields *f) { return f->isdst; }
+neut_core_v0_56_field_isdst(neut_time_fields *f) { return f->isdst; }
 __attribute__((always_inline)) int64_t
-neut_core_v0_55_field_gmtoff(neut_time_fields *f) { return f->gmtoff; }
+neut_core_v0_56_field_gmtoff(neut_time_fields *f) { return f->gmtoff; }
 __attribute__((always_inline)) const char *
-neut_core_v0_55_field_zone(neut_time_fields *f) { return f->zone; }
+neut_core_v0_56_field_zone(neut_time_fields *f) { return f->zone; }
 
-static int neut_core_v0_55_days_in_month(int64_t year, int month) {
+static int neut_core_v0_56_days_in_month(int64_t year, int month) {
   static const int dim[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
   if (month < 1 || month > 12) {
     return 0;
@@ -905,7 +905,7 @@ static int neut_core_v0_55_days_in_month(int64_t year, int month) {
   return dim[month - 1];
 }
 
-int32_t neut_core_v0_55_parse_iso8601(const char *datetime_str,
+int32_t neut_core_v0_56_parse_iso8601(const char *datetime_str,
                                       struct timespec *ts) {
   struct tm tm = {0};
   char *rest = strptime(datetime_str, "%Y-%m-%dT%H:%M:%S", &tm);
@@ -914,7 +914,7 @@ int32_t neut_core_v0_55_parse_iso8601(const char *datetime_str,
   }
   if (tm.tm_mday < 1 ||
       tm.tm_mday >
-          neut_core_v0_55_days_in_month((int64_t)tm.tm_year + 1900,
+          neut_core_v0_56_days_in_month((int64_t)tm.tm_year + 1900,
                                         tm.tm_mon + 1) ||
       tm.tm_hour < 0 || tm.tm_hour > 23 || tm.tm_min < 0 || tm.tm_min > 59 ||
       tm.tm_sec < 0 || tm.tm_sec > 59) {
@@ -940,7 +940,7 @@ int32_t neut_core_v0_55_parse_iso8601(const char *datetime_str,
     }
   }
   if (strcmp(rest, "Z") == 0) {
-    ts->tv_sec = (time_t)neut_core_v0_55_tm_to_utc(&tm);
+    ts->tv_sec = (time_t)neut_core_v0_56_tm_to_utc(&tm);
     ts->tv_nsec = fraction;
     return 0;
   } else {
@@ -976,23 +976,23 @@ int32_t neut_core_v0_55_parse_iso8601(const char *datetime_str,
           mini_tm.tm_hour * 3600 + mini_tm.tm_min * 60 + mini_tm.tm_sec;
     }
     int gmtoff_sec = gmtoff_sign * gmtoff_abssec;
-    ts->tv_sec = (time_t)neut_core_v0_55_tm_to_utc(&tm) - gmtoff_sec;
+    ts->tv_sec = (time_t)neut_core_v0_56_tm_to_utc(&tm) - gmtoff_sec;
     ts->tv_nsec = fraction;
     return 0;
   }
 }
 
 __attribute__((always_inline)) char *
-neut_core_v0_55_GET_DNAME(struct dirent *d) {
+neut_core_v0_56_GET_DNAME(struct dirent *d) {
   return d->d_name;
 }
 
 __attribute__((always_inline)) uint8_t
-neut_core_v0_55_GET_DTYPE(struct dirent *d) {
+neut_core_v0_56_GET_DTYPE(struct dirent *d) {
   return d->d_type;
 }
 
-int64_t neut_core_v0_55_readdir(DIR *dir, struct dirent **entry) {
+int64_t neut_core_v0_56_readdir(DIR *dir, struct dirent **entry) {
   errno = 0;
   *entry = readdir(dir);
   if (*entry == NULL) {
@@ -1001,35 +1001,35 @@ int64_t neut_core_v0_55_readdir(DIR *dir, struct dirent **entry) {
   return 1;
 }
 
-__attribute__((always_inline)) uint8_t neut_core_v0_55_DT_FIFO() {
+__attribute__((always_inline)) uint8_t neut_core_v0_56_DT_FIFO() {
   return DT_FIFO;
 }
 
-__attribute__((always_inline)) uint8_t neut_core_v0_55_DT_CHR() {
+__attribute__((always_inline)) uint8_t neut_core_v0_56_DT_CHR() {
   return DT_CHR;
 }
 
-__attribute__((always_inline)) uint8_t neut_core_v0_55_DT_DIR() {
+__attribute__((always_inline)) uint8_t neut_core_v0_56_DT_DIR() {
   return DT_DIR;
 }
 
-__attribute__((always_inline)) uint8_t neut_core_v0_55_DT_BLK() {
+__attribute__((always_inline)) uint8_t neut_core_v0_56_DT_BLK() {
   return DT_BLK;
 }
 
-__attribute__((always_inline)) uint8_t neut_core_v0_55_DT_REG() {
+__attribute__((always_inline)) uint8_t neut_core_v0_56_DT_REG() {
   return DT_REG;
 }
 
-__attribute__((always_inline)) uint8_t neut_core_v0_55_DT_LNK() {
+__attribute__((always_inline)) uint8_t neut_core_v0_56_DT_LNK() {
   return DT_LNK;
 }
 
-__attribute__((always_inline)) uint8_t neut_core_v0_55_DT_SOCK() {
+__attribute__((always_inline)) uint8_t neut_core_v0_56_DT_SOCK() {
   return DT_SOCK;
 }
 
-int64_t neut_core_v0_55_is_regular_file(const char *path) {
+int64_t neut_core_v0_56_is_regular_file(const char *path) {
   struct stat st;
   if (stat(path, &st) != 0) {
     return false;
@@ -1037,7 +1037,7 @@ int64_t neut_core_v0_55_is_regular_file(const char *path) {
   return S_ISREG(st.st_mode) ? 1 : 0;
 }
 
-int64_t neut_core_v0_55_is_directory(const char *path) {
+int64_t neut_core_v0_56_is_directory(const char *path) {
   struct stat st;
   if (stat(path, &st) != 0) {
     return false;
@@ -1045,11 +1045,11 @@ int64_t neut_core_v0_55_is_directory(const char *path) {
   return S_ISDIR(st.st_mode) ? 1 : 0;
 }
 
-int64_t neut_core_v0_55_mkdir(const char *path, mode_t mode) {
+int64_t neut_core_v0_56_mkdir(const char *path, mode_t mode) {
   return (int64_t)mkdir(path, mode);
 }
 
-int64_t neut_core_v0_55_get_modification_time(const char *path, int64_t *sec,
+int64_t neut_core_v0_56_get_modification_time(const char *path, int64_t *sec,
                                               int64_t *nsec) {
   struct stat st;
   if (stat(path, &st) != 0) {
@@ -1068,15 +1068,15 @@ int64_t neut_core_v0_55_get_modification_time(const char *path, int64_t *sec,
   return 0;
 }
 
-int64_t neut_core_v0_55_unlink(const char *path) {
+int64_t neut_core_v0_56_unlink(const char *path) {
   return (int64_t)unlink(path);
 }
 
-int64_t neut_core_v0_55_rmdir(const char *path) {
+int64_t neut_core_v0_56_rmdir(const char *path) {
   return (int64_t)rmdir(path);
 }
 
-static int neut_core_v0_55_open_directory_nofollow(int parent_fd,
+static int neut_core_v0_56_open_directory_nofollow(int parent_fd,
                                                    const char *path) {
   int flags = O_RDONLY;
 #ifdef O_CLOEXEC
@@ -1110,7 +1110,7 @@ static int neut_core_v0_55_open_directory_nofollow(int parent_fd,
   return fd;
 }
 
-static int neut_core_v0_55_remove_directory_contents(int fd) {
+static int neut_core_v0_56_remove_directory_contents(int fd) {
   DIR *dir = fdopendir(fd);
   if (dir == NULL) {
     int saved_errno = errno;
@@ -1147,14 +1147,14 @@ static int neut_core_v0_55_remove_directory_contents(int fd) {
 
     if (S_ISDIR(st.st_mode)) {
       int child_fd =
-          neut_core_v0_55_open_directory_nofollow(dir_fd, entry->d_name);
+          neut_core_v0_56_open_directory_nofollow(dir_fd, entry->d_name);
       if (child_fd < 0) {
         int saved_errno = errno;
         closedir(dir);
         errno = saved_errno;
         return -1;
       }
-      if (neut_core_v0_55_remove_directory_contents(child_fd) != 0) {
+      if (neut_core_v0_56_remove_directory_contents(child_fd) != 0) {
         int saved_errno = errno;
         closedir(dir);
         errno = saved_errno;
@@ -1177,13 +1177,13 @@ static int neut_core_v0_55_remove_directory_contents(int fd) {
   return closedir(dir);
 }
 
-int64_t neut_core_v0_55_remove_directory(const char *path) {
-  int fd = neut_core_v0_55_open_directory_nofollow(-1, path);
+int64_t neut_core_v0_56_remove_directory(const char *path) {
+  int fd = neut_core_v0_56_open_directory_nofollow(-1, path);
   if (fd < 0) {
     return -1;
   }
 
-  if (neut_core_v0_55_remove_directory_contents(fd) != 0) {
+  if (neut_core_v0_56_remove_directory_contents(fd) != 0) {
     return -1;
   }
 

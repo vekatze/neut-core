@@ -29,8 +29,8 @@ import {
 }
 
 foreign {
-  neut_core_v0_55_int64_strlen(int) -> int,
-  neut_core_v0_55_double_strlen(float) -> int,
+  neut_core_v0_56_int64_strlen(int) -> int,
+  neut_core_v0_56_double_strlen(float) -> int,
 }
 
 data _mode {
@@ -116,9 +116,9 @@ define _size-chunk(c: &chunk) -> int {
   | Chunk-Style-Text(_) =>
     0
   | Chunk-Int(x) =>
-    magic external neut_core_v0_55_int64_strlen(*x)
+    magic external neut_core_v0_56_int64_strlen(*x)
   | Chunk-Float(x) =>
-    magic external neut_core_v0_55_double_strlen(*x)
+    magic external neut_core_v0_56_double_strlen(*x)
   | Chunk-Rune(_) =>
     1
   | Chunk-Line =>

@@ -100,12 +100,12 @@ data process-status {
 | Stopped(stopsig: c-int)
 }
 
-define _waitpid(pid: c-pid) ->> system(process-status) {
+define _waitpid@(pid: c-pid) -> system(process-status) {
   let status-ptr = malloc(C-Size(this::word::size));
   let result = _posix.waitpid(pid, status-ptr, 0);
   if eq-c-pid(result, -1) {
     free(status-ptr);
-    report-system-error()
+    report-system-error@()
   } else {
     let stat-loc = load-c-int(status-ptr);
     free(status-ptr);
@@ -121,7 +121,7 @@ define _waitpid(pid: c-pid) ->> system(process-status) {
       Right(Stopped(stopsig))
     } else {
       // unreachable
-      report-system-error()
+      report-system-error@()
     }
   }
 }
@@ -135,10 +135,10 @@ define _make-argv(xs: list(pointer)) -> pointer {
   ptr
 }
 
-define _fork() ->> system(c-pid) {
+define _fork@() -> system(c-pid) {
   let result = _posix.fork();
   if eq-c-pid(result, -1) {
-    report-system-error()
+    report-system-error@()
   } else {
     Right(result)
   }
@@ -161,35 +161,39 @@ data process-result {
   )
 }
 
-define _exec(command: string, args: list(string), error-writer: descriptor) -> system(process-result) {
-  let cmd on command = this::string.pointer::get-content-pointer(command);
-  pin tmp = Cons(command, args);
-  let raw-args = this::list::for-each-N(tmp, this::string.pointer::get-content-pointer);
-  let cmd-args = _make-argv(this::list::append(raw-args, List::[null-pointer]));
-  let v = _posix.execvp(cmd, cmd-args);
-  pin message = get-error-message(get-system-error());
-  let _ = write(error-writer, message);
+define _exec<a>(command: string, args: list(string), error-writer: descriptor) -> a {
+  let v = {
+    let cmd on command = this::string.pointer::get-content-pointer(command);
+    pin tmp = Cons(command, args);
+    let raw-args = this::list::for-each-N(tmp, this::string.pointer::get-content-pointer);
+    let cmd-args = _make-argv(this::list::append(raw-args, List::[null-pointer]));
+    _posix.execvp(cmd, cmd-args)
+  };
+  let _ = {
+    pin message = get-error-message(get-system-error@());
+    write@(error-writer, message)
+  };
   exit(v)
 }
 
-define run(
+define run@(
   ps: process-spec,
   stdout-initial-buffer-size: int,
   stderr-initial-buffer-size: int,
-) ->> system(process-result) {
-  try Pair(in-reader, in-writer) = pipe();
-  try Pair(out-reader, out-writer) = pipe();
-  try Pair(error-reader, error-writer) = pipe();
-  try pid = _fork();
+) -> system(process-result) {
+  try Pair(in-reader, in-writer) = pipe@();
+  try Pair(out-reader, out-writer) = pipe@();
+  try Pair(error-reader, error-writer) = pipe@();
+  try pid = _fork@();
   if eq-c-pid(pid, -1) {
-    report-system-error()
+    report-system-error@()
   } else-if eq-c-pid(pid, 0) {
-    try _ = close(in-writer);
-    try _ = close(out-reader);
-    try _ = close(error-reader);
-    try _ = dup2(in-reader, stdin);
-    try _ = dup2(out-writer, stdout);
-    try _ = dup2(error-writer, stderr);
+    try _ = close@(in-writer);
+    try _ = close@(out-reader);
+    try _ = close@(error-reader);
+    try _ = dup2@(in-reader, stdin);
+    try _ = dup2@(out-writer, stdout);
+    try _ = dup2@(error-writer, stderr);
     let Process-Spec{command, args, cwd} = ps;
     match cwd {
     | Left(_) =>
@@ -200,8 +204,8 @@ define run(
       let result on s = _posix.chdir(magic cast(&c-string, pointer, s));
       let _ = s;
       if lt-c-int(result, 0) {
-        let message = get-error-message(get-system-error());
-        let _ on message = write(stderr, message);
+        let message = get-error-message(get-system-error@());
+        let _ on message = write@(stderr, message);
         let _ = message;
         exit(result)
       } else {
@@ -209,16 +213,16 @@ define run(
       }
     }
   } else {
-    try _ = close(in-reader);
-    try _ = close(out-writer);
-    try _ = close(error-writer);
+    try _ = close@(in-reader);
+    try _ = close@(out-writer);
+    try _ = close@(error-writer);
     let Process-Spec{input} = ps;
-    try _ on input = write(in-writer, input);
+    try _ on input = write@(in-writer, input);
     let _ = input;
-    try _ = close(in-writer);
-    try stdout-string = read(out-reader, stdout-initial-buffer-size);
-    try stderr-string = read(error-reader, stderr-initial-buffer-size);
-    try status = _waitpid(pid);
+    try _ = close@(in-writer);
+    try stdout-string = read@(out-reader, stdout-initial-buffer-size);
+    try stderr-string = read@(error-reader, stderr-initial-buffer-size);
+    try status = _waitpid@(pid);
     Right(Process-Result{
       status,
       stdout-string,

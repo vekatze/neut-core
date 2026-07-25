@@ -37,7 +37,7 @@ define _expect-rune-length(label: &string, source: &string, start: int, size: in
 define _expect-parse-int(label: &string, source: &string, start: int, size: int, expected: int) -> unit {
   with-slice(source, start, size, (slice) => {
     lift {
-      match parse-int(slice) {
+      match parse-int@(slice) {
       | Left(_) =>
         panic(label)
       | Right(actual) =>

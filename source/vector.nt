@@ -271,7 +271,7 @@ define push-back<a>(xs: vector(a), x: a) -> vector(a) {
   }
 }
 
-define pop-front<a>(xs: vector(a)) ->> ?pair(a, vector(a)) {
+define pop-front@<a>(xs: vector(a)) -> ?pair(a, vector(a)) {
   let len on xs = length(xs);
   if eq-int(len, 0) {
     none
@@ -283,7 +283,7 @@ define pop-front<a>(xs: vector(a)) ->> ?pair(a, vector(a)) {
   }
 }
 
-define pop-back<a>(xs: vector(a)) ->> ?pair(vector(a), a) {
+define pop-back@<a>(xs: vector(a)) -> ?pair(vector(a), a) {
   let len on xs = length(xs);
   if eq-int(len, 0) {
     none
@@ -317,7 +317,7 @@ inline _access-unchecked<a>(xs: &vector(a), i: int) -> &a {
   cast<int, &a>(load-int(element-pointer))
 }
 
-define access<a>(xs: &vector(a), i: int) ->> ?&a {
+define access@<a>(xs: &vector(a), i: int) -> ?&a {
   if and::(le-int(0, i), lt-int(i, length(xs))) {
     Right(_access-unchecked(xs, i))
   } else {
@@ -765,7 +765,7 @@ inline find-index-end<a>(xs: &vector(a), !pred: (&a) -> bool) -> int {
   f(sub-int(len, 1))
 }
 
-inline take-while<a>(xs: vector(a), !pred: (&a) -> bool) -> vector(a) {
+inline take-while<a>(xs: vector(a), pred: (&a) -> bool) -> vector(a) {
   let pivot-index on xs = find-index(xs, compose(not, pred));
   if lt-int(pivot-index, 0) {
     xs
@@ -774,7 +774,7 @@ inline take-while<a>(xs: vector(a), !pred: (&a) -> bool) -> vector(a) {
   }
 }
 
-inline drop-while<a>(xs: vector(a), !pred: (&a) -> bool) -> vector(a) {
+inline drop-while<a>(xs: vector(a), pred: (&a) -> bool) -> vector(a) {
   let pivot-index on xs = find-index(xs, compose(not, pred));
   if lt-int(pivot-index, 0) {
     make(0)
@@ -783,7 +783,7 @@ inline drop-while<a>(xs: vector(a), !pred: (&a) -> bool) -> vector(a) {
   }
 }
 
-inline take-while-end<a>(xs: vector(a), !pred: (&a) -> bool) -> vector(a) {
+inline take-while-end<a>(xs: vector(a), pred: (&a) -> bool) -> vector(a) {
   let pivot-index on xs = find-index-end(xs, compose(not, pred));
   if lt-int(pivot-index, 0) {
     xs
@@ -792,7 +792,7 @@ inline take-while-end<a>(xs: vector(a), !pred: (&a) -> bool) -> vector(a) {
   }
 }
 
-inline drop-while-end<a>(xs: vector(a), !pred: (&a) -> bool) -> vector(a) {
+inline drop-while-end<a>(xs: vector(a), pred: (&a) -> bool) -> vector(a) {
   let pivot-index on xs = find-index-end(xs, compose(not, pred));
   if lt-int(pivot-index, 0) {
     make(0)
@@ -971,10 +971,10 @@ define filter-some<a>(xs: vector(?a)) -> vector(a) {
   helper(0, 0, xs)
 }
 
-inline find<a>(xs: &vector(a), !pred: (&a) -> bool) ->> ?&a {
+inline find@<a>(xs: &vector(a), !pred: (&a) -> bool) -> ?&a {
   let len = length(xs);
   let f =
-    define self(index: int) ->> ?&a {
+    define self@(index: int) -> ?&a {
       if ge-int(index, len) {
         none
       } else {
@@ -982,14 +982,14 @@ inline find<a>(xs: &vector(a), !pred: (&a) -> bool) ->> ?&a {
         if pred(value) {
           Right(value)
         } else {
-          self(add-int(index, 1))
+          self@(add-int(index, 1))
         }
       }
     };
-  f(0)
+  f@(0)
 }
 
-inline span<a>(xs: vector(a), !pred: (&a) -> bool) -> pair(vector(a), vector(a)) {
+inline span<a>(xs: vector(a), pred: (&a) -> bool) -> pair(vector(a), vector(a)) {
   let i on xs =
     find-index(xs, (x) => {
       not(pred(x))

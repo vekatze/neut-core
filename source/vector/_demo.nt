@@ -33,7 +33,7 @@ import {
 }
 
 define _expect-access(label: &string, xs: &vector(int), index: int, expected: int) -> unit {
-  match access(xs, index) {
+  match access@(xs, index) {
   | Left(_) =>
     panic(label)
   | Right(actual) =>
@@ -42,7 +42,7 @@ define _expect-access(label: &string, xs: &vector(int), index: int, expected: in
 }
 
 define _expect-no-access(label: &string, xs: &vector(int), index: int) -> unit {
-  match access(xs, index) {
+  match access@(xs, index) {
   | Left(_) =>
     Unit
   | Right(_) =>
@@ -128,7 +128,7 @@ define zen() -> unit {
   let xs = push-back(xs, 4);
   pin xs = push-back(xs, 5);
   let item =
-    find(xs, (x) => {
+    find@(xs, (x) => {
       eq-int(*x, -1)
     });
   match item {
@@ -182,7 +182,7 @@ define zen() -> unit {
   let !zs = delete(reverse(zs), 100);
   let _ = zs;
   let _ = zs;
-  match pop-back(zs) {
+  match pop-back@(zs) {
   | Left(_) =>
     print("left\n")
   | Right(Pair(!rest, z)) =>

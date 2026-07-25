@@ -31,7 +31,7 @@ define zen() -> unit {
       cwd := Right(*"/etc"),
       input := *"",
     };
-  match run(cmd, 1024, 1024) {
+  match run@(cmd, 1024, 1024) {
   | Right(result) =>
     let Process-Result{stdout-string, stderr-string, status} = result;
     print("stdout:\n");

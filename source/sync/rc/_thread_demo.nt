@@ -20,8 +20,8 @@ define print-in-thread(value: rc(string)) -> unit {
 
 define zen() -> unit {
   let !value = new(*"shared");
-  let !thread-value-1 = value;
-  let !thread-value-2 = value;
+  let thread-value-1 = value;
+  let thread-value-2 = value;
   letbox-T weak on value = downgrade(value);
   let t1 =
     spawn(() => {

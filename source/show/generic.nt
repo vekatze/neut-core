@@ -196,7 +196,7 @@ inline-meta _constructor-args-doc<a>(
   | Cons(entry, Nil) =>
     let Pair(f, cursor) = entry;
     _constructor-arg-doc(f, cursor, header, data-arg-num, x, enable-ansi)
-  | Cons(!entry, rest) =>
+  | Cons(entry, rest) =>
     let Pair(f, cursor) = entry;
     let d1 = _constructor-arg-doc(f, cursor, header, data-arg-num, x, enable-ansi);
     let d2 = _constructor-args-doc(rest, header, data-arg-num, x, enable-ansi);

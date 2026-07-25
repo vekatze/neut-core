@@ -15,15 +15,15 @@ define zen() -> unit {
   let _ = k;
   pin k = k;
   let _: system(unit) = {
-    try _ = write-binary(k, to-binary("hello\n"));
-    try _ = write-binary(k, to-binary("hello\n"));
-    try _ = write-binary(k, to-binary("hello\n"));
-    try _ = write-binary(k, to-binary("hello\n"));
-    try _ = write-binary(k, to-binary("hello\n"));
-    try _ = write-binary(k, to-binary("hello\n"));
-    try _ = write-binary(k, to-binary("hello\n"));
-    try _ = write-binary(k, to-binary("hello\n"));
-    flush(k)
+    try _ = write-binary@(k, to-binary("hello\n"));
+    try _ = write-binary@(k, to-binary("hello\n"));
+    try _ = write-binary@(k, to-binary("hello\n"));
+    try _ = write-binary@(k, to-binary("hello\n"));
+    try _ = write-binary@(k, to-binary("hello\n"));
+    try _ = write-binary@(k, to-binary("hello\n"));
+    try _ = write-binary@(k, to-binary("hello\n"));
+    try _ = write-binary@(k, to-binary("hello\n"));
+    flush@(k)
   };
   Unit
 }

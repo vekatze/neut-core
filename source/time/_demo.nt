@@ -243,7 +243,7 @@ define _expect-local-roundtrip(sec: int) -> unit {
 }
 
 define _set-time-zone(name: &string) -> unit {
-  match set-env("TZ", name, True) {
+  match set-env@("TZ", name, True) {
   | Right(_) =>
     let _ = magic external tzset();
     Unit

@@ -35,7 +35,7 @@ define test-zen() -> system(this::unit::unit) {
 }
 
 define zen() -> unit {
-  match get-modification-time("/bin/ls") {
+  match get-modification-time@("/bin/ls") {
   | Left(_) =>
     Unit
   | Right(t) =>

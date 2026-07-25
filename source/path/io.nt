@@ -37,7 +37,7 @@ data _directory {}
 define get-current-directory() -> system(string) {
   let result = magic external getcwd(null-pointer, 0);
   if is-null-pointer(result) {
-    report-system-error()
+    report-system-error@()
   } else {
     pin cwd = magic cast(pointer, c-string, result);
     Right(to-string(cwd))
@@ -48,7 +48,7 @@ define _open-directory(p: &string) -> system(_directory) {
   pin c-str = from-string(p);
   let result = magic external opendir(magic cast(&c-string, pointer, c-str));
   if is-null-pointer(result) {
-    report-system-error()
+    report-system-error@()
   } else {
     Right(magic cast(pointer, _directory, result))
   }
@@ -58,7 +58,7 @@ define _read-directory(d: _directory) -> system(list(dirent)) {
   let result-ptr = magic alloca(pointer, 1);
   let status = magic external neut_core_v0_56_readdir(magic cast(_directory, pointer, d), result-ptr);
   if lt-int(status, 0) {
-    report-system-error()
+    report-system-error@()
   } else-if eq-int(status, 0) {
     Right(Nil)
   } else {
@@ -73,7 +73,7 @@ define _read-directory(d: _directory) -> system(list(dirent)) {
 define _close-directory(d: _directory) -> system(unit) {
   let result = magic external closedir(magic cast(_directory, pointer, d));
   if eq-int(from-c-int(result), -1) {
-    report-system-error()
+    report-system-error@()
   } else {
     Right(Unit)
   }
@@ -131,7 +131,7 @@ define create-directory(t: &string)[mode := 0o777] -> system(unit) {
   pin c-str = from-string(t);
   let result = magic external neut_core_v0_56_mkdir(magic cast(&c-string, pointer, c-str), mode);
   if lt-int(result, 0) {
-    report-system-error()
+    report-system-error@()
   } else {
     Right(Unit)
   }
@@ -141,7 +141,7 @@ define unlink(path: &string) -> system(unit) {
   pin c-str = from-string(path);
   let result = magic external neut_core_v0_56_unlink(magic cast(&c-string, pointer, c-str));
   if lt-int(result, 0) {
-    report-system-error()
+    report-system-error@()
   } else {
     Right(Unit)
   }
@@ -151,7 +151,7 @@ define remove-empty-directory(path: &string) -> system(unit) {
   pin c-str = from-string(path);
   let result = magic external neut_core_v0_56_rmdir(magic cast(&c-string, pointer, c-str));
   if lt-int(result, 0) {
-    report-system-error()
+    report-system-error@()
   } else {
     Right(Unit)
   }
@@ -161,13 +161,13 @@ define remove-directory(dir-path: &string) -> system(unit) {
   pin c-str = from-string(dir-path);
   let result = magic external neut_core_v0_56_remove_directory(magic cast(&c-string, pointer, c-str));
   if lt-int(result, 0) {
-    report-system-error()
+    report-system-error@()
   } else {
     Right(Unit)
   }
 }
 
-define get-modification-time(path: &string) ->> system(time) {
+define get-modification-time@(path: &string) -> system(time) {
   pin c-str = from-string(path);
   let sec = magic alloca(int, 1);
   let nsec = magic alloca(int, 1);
@@ -178,7 +178,7 @@ define get-modification-time(path: &string) ->> system(time) {
       nsec,
     );
   if lt-int(result, 0) {
-    report-system-error()
+    report-system-error@()
   } else {
     let sec = load-int(sec);
     let nsec = load-int(nsec);

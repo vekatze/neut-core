@@ -20,7 +20,7 @@ foreign {
 
 define _show(c-fmt: &string, x: int) -> string {
   let fmt = get-content-pointer(c-fmt);
-  let size = from-c-int(magic external snprintf(null-pointer, C-Size(0), fmt)(x: int));
+  let size = from-c-int(magic external snprintf(null-pointer, C-Size(0), fmt)(int x));
   let u = this::word::size;
   let u2 = mul-int(u, 2);
   let u3 = mul-int(u, 3);
@@ -30,7 +30,7 @@ define _show(c-fmt: &string, x: int) -> string {
   store-int(size, shift(ptr, u));
   let buffer = shift(ptr, u3);
   store-pointer(buffer, shift(ptr, u2));
-  let _ = magic external sprintf(buffer, fmt)(x: int);
+  let _ = magic external sprintf(buffer, fmt)(int x);
   magic cast(pointer, string, ptr)
 }
 

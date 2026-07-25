@@ -51,7 +51,7 @@ data generic-point {
 }
 
 data generic-mixed {
-| Generic-Mixed(generic-point mix, int)
+| Generic-Mixed(~generic-point, int)
 }
 
 define inspect-array-generics(xs: &array(pair(int, bool)), ys: &array(pair(int, bool))) -> bool {
@@ -178,24 +178,24 @@ define-meta sample<a>() -> 'int {
   }
 }
 
-define string-by-dest(x: &string) ->> string {
+define string-by-dest(x: &string) -> string {
   let result = append(x, "test");
   result
 }
 
-inline my-loop-func(x: int) ->> either(int, bool) {
+inline my-loop-func@(x: int) -> either(int, bool) {
   let inner =
-    define loop(n: int) ->> either(int, bool) {
+    define loop@(n: int) -> either(int, bool) {
       if eq-int(n, 0) {
         Right(True)
       } else {
-        loop(sub-int(n, 1))
+        loop@(sub-int(n, 1))
       }
     };
-  inner(x)
+  inner@(x)
 }
 
-define my-func(x: int) ->> int {
+define my-func(x: int) -> int {
   let y = 30;
   add-int(x, y)
 }
@@ -208,7 +208,7 @@ define zen() -> unit {
   test-sync-string-builder();
   pin k = String::["hello\n", "yo\n", "hey"];
   print-line(k);
-  pin v = this::int.parse::parse-octal("0o755");
+  pin v = this::int.parse::parse-octal@("0o755");
   vet::(v);
   use-text("sample");
   let t1 = "abcde";
@@ -226,7 +226,7 @@ define zen() -> unit {
   vet::(v);
   pin val = string-by-dest("hello");
   print-line(val);
-  pin v = my-loop-func(3);
+  pin v = my-loop-func@(3);
   vet::(v);
   let result = my-func(20);
   print-int-line(result);
@@ -265,21 +265,21 @@ define zen() -> unit {
   print-int-line(inspect-sample-field-count::());
   print-int-line(inspect-mixed-slot-summary::());
   print-int-line(meta-list-sample::());
-  pin m0 = Generic-Mixed(Generic-Point(1, 2), 3);
+  pin m0 = Generic-Mixed(~Generic-Point(1, 2), 3);
   vet::(m0);
-  pin m1 = Generic-Mixed(Generic-Point(1, 2), 3);
-  pin m2 = Generic-Mixed(Generic-Point(1, 2), 4);
+  pin m1 = Generic-Mixed(~Generic-Point(1, 2), 3);
+  pin m2 = Generic-Mixed(~Generic-Point(1, 2), 4);
   if eq-data::(m1, m2) {
     print-line("generic-mix-broken");
   } else {
     print-line("generic-mix-ok");
   };
-  let array-xs: array(pair(int, bool)) = this::array::make::(0);
-  let array-xs = this::array::push-back(array-xs, Pair(10, True));
-  let array-xs = this::array::push-back(array-xs, Pair(20, False));
-  let array-ys: array(pair(int, bool)) = this::array::make::(0);
-  let array-ys = this::array::push-back(array-ys, Pair(10, True));
-  let array-ys = this::array::push-back(array-ys, Pair(20, False));
+  let array-xs: array(pair(int, bool)) = this::array::make(0);
+  let array-xs = this::array::push-back(array-xs, ~Pair(10, True));
+  let array-xs = this::array::push-back(array-xs, ~Pair(20, False));
+  let array-ys: array(pair(int, bool)) = this::array::make(0);
+  let array-ys = this::array::push-back(array-ys, ~Pair(10, True));
+  let array-ys = this::array::push-back(array-ys, ~Pair(20, False));
   let is-generic-array-equal on array-xs, array-ys = inspect-array-generics(array-xs, array-ys);
   if is-generic-array-equal {
     print-line("generic-array-ok");
@@ -354,7 +354,7 @@ inline-meta tdm-add-one(x: 'int) -> 'int {
   helper(x)
 }
 
-inline-meta tdm-memo(!x: 'int) -> 'int {
+inline-meta tdm-memo(x: 'int) -> 'int {
   let !helper =
     define-meta dup<a>(y: 'a) -> 'a {
       y
@@ -366,7 +366,7 @@ inline-meta tdm-memo(!x: 'int) -> 'int {
 
 inline-meta tdm-knot(x: 'int) -> 'int {
   let helper =
-    define-meta go<a>(!flag: 'bool, base: 'a) -> 'a {
+    define-meta go<a>(flag: 'bool, base: 'a) -> 'a {
       quote {
         let f = unquote {flag};
         if f {
@@ -379,7 +379,7 @@ inline-meta tdm-knot(x: 'int) -> 'int {
   helper(quote {True}, x)
 }
 
-inline-meta tdm-hc(!c: 'int) -> 'int {
+inline-meta tdm-hc(c: 'int) -> 'int {
   let !helper =
     define-meta rec<a>(tag: 'a) -> 'int {
       let _ = tag;

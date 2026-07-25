@@ -103,7 +103,7 @@ inline-meta _eq-data-adt-fields<a>(
   match field-cursors {
   | Nil =>
     quote {True}
-  | Cons(!entry, rest) =>
+  | Cons(entry, rest) =>
     let Pair(f-raw, cursor) = entry;
     let !f = f-raw;
     let Field(_, t, _) = f;

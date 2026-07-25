@@ -11,8 +11,8 @@ import {
 define zen() -> unit {
   // print("hey\n");
   // Unit
-  let _ = write(stdout, "hello.\n");
-  let value = read(stdin, 10);
+  let _ = write@(stdout, "hello.\n");
+  let value = read@(stdin, 10);
   match value {
   | Right(sample) =>
     pin sample = sample;

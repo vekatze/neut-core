@@ -11,18 +11,18 @@ import {
 }
 
 define zen() -> unit {
-  let !k = make-buffer(stdout, 4);
+  let k = make-buffer(stdout, 4);
   pin k = k;
   let test: system(unit) = {
-    try _ = write-rune(k, `a`);
-    try _ = write-rune(k, `b`);
-    try _ = write-rune(k, `あ`);
-    try _ = write-rune-line(k, `α`);
-    try _ = write-rune(k, `a`);
-    try _ = write-rune(k, `b`);
-    try _ = write-rune(k, `あ`);
-    try _ = write-rune-line(k, `α`);
-    try _ = flush(k);
+    try _ = write-rune@(k, `a`);
+    try _ = write-rune@(k, `b`);
+    try _ = write-rune@(k, `あ`);
+    try _ = write-rune-line@(k, `α`);
+    try _ = write-rune@(k, `a`);
+    try _ = write-rune@(k, `b`);
+    try _ = write-rune@(k, `あ`);
+    try _ = write-rune-line@(k, `α`);
+    try _ = flush@(k);
     Right(Unit)
   };
   match test {

@@ -113,9 +113,9 @@ inline _append-int64(b: +_binary-builder, x: int) -> +_binary-builder {
 
 inline _append-int64-UTF8(b: +_binary-builder, x: int64) -> +_binary-builder {
   let fmt = this::string.pointer::get-content-pointer("%ld\0");
-  let fragment-size = from-c-int(magic external snprintf(null-pointer, C-Size(0), fmt)(x: int64));
+  let fragment-size = from-c-int(magic external snprintf(null-pointer, C-Size(0), fmt)(int64 x));
   _append-with-reserve(b, add-int(fragment-size, 1), fragment-size, (ptr) => {
-    let _ = magic external sprintf(ptr, fmt)(x: int64);
+    let _ = magic external sprintf(ptr, fmt)(int64 x);
     Unit
   })
 }
@@ -146,9 +146,9 @@ inline _append-float64(b: +_binary-builder, x: float) -> +_binary-builder {
 
 inline _append-float64-UTF8(b: +_binary-builder, x: float64) -> +_binary-builder {
   let fmt = this::string.pointer::get-content-pointer("%lf\0");
-  let fragment-size = from-c-int(magic external snprintf(null-pointer, C-Size(0), fmt)(x: float64));
+  let fragment-size = from-c-int(magic external snprintf(null-pointer, C-Size(0), fmt)(float64 x));
   _append-with-reserve(b, add-int(fragment-size, 1), fragment-size, (ptr) => {
-    let _ = magic external sprintf(ptr, fmt)(x: float64);
+    let _ = magic external sprintf(ptr, fmt)(float64 x);
     Unit
   })
 }

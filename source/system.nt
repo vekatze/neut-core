@@ -27,12 +27,12 @@ alias system(a) {
   either(system-error, a)
 }
 
-inline get-system-error() ->> system-error {
+inline get-system-error@() -> system-error {
   OS-Error(_get-errno())
 }
 
-inline report-system-error<a>() ->> system(a) {
-  Left(get-system-error())
+inline report-system-error@<a>() -> system(a) {
+  Left(get-system-error@())
 }
 
 foreign {

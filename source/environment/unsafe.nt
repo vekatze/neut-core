@@ -13,7 +13,7 @@ foreign {
   setenv(pointer, pointer, c-int) -> c-int,
 }
 
-define set-env(name: &string, value: &string, overwrite: bool) ->> system(unit) {
+define set-env@(name: &string, value: &string, overwrite: bool) -> system(unit) {
   let name-c-str = from-string(name);
   let value-c-str = from-string(value);
   let flag =
@@ -33,6 +33,6 @@ define set-env(name: &string, value: &string, overwrite: bool) ->> system(unit) 
   if eq-c-int(result, 0) {
     Right(Unit)
   } else {
-    report-system-error()
+    report-system-error@()
   }
 }

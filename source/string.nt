@@ -369,7 +369,7 @@ define _get-rune(t: &string, index: int) -> rune {
   load-rune(ptr)
 }
 
-define get-first-rune(t: &string) ->> ?rune {
+define get-first-rune@(t: &string) -> ?rune {
   if gt-int(byte-length(t), 0) {
     Right(_get-rune(t, 0))
   } else {
@@ -377,7 +377,7 @@ define get-first-rune(t: &string) ->> ?rune {
   }
 }
 
-define uncons(t: string) ->> ?pair(rune, string) {
+define uncons@(t: string) -> ?pair(rune, string) {
   let len on t = byte-length(t);
   if eq-int(len, 0) {
     none
@@ -697,10 +697,10 @@ inline any(t: &string, !pred: (rune) -> bool) -> bool {
   f(0)
 }
 
-define find(t: &string, !pred: (rune) -> bool) ->> ?int {
+define find@(t: &string, !pred: (rune) -> bool) -> ?int {
   let len = byte-length(t);
   let f =
-    define self(byte-index: int, index: int) ->> ?int {
+    define self@(byte-index: int, index: int) -> ?int {
       if ge-int(byte-index, len) {
         none
       } else {
@@ -709,17 +709,17 @@ define find(t: &string, !pred: (rune) -> bool) ->> ?int {
           Right(index)
         } else {
           let char-len = this::rune::size(ch);
-          self(add-int(byte-index, char-len), add-int(index, 1))
+          self@(add-int(byte-index, char-len), add-int(index, 1))
         }
       }
     };
-  f(0, 0)
+  f@(0, 0)
 }
 
-define find-end(t: &string, !pred: (rune) -> bool) ->> ?int {
+define find-end@(t: &string, !pred: (rune) -> bool) -> ?int {
   let len = byte-length(t);
   let f =
-    define self(t: &string, byte-index: int, index: int) ->> ?int {
+    define self@(t: &string, byte-index: int, index: int) -> ?int {
       if lt-int(byte-index, 0) {
         none
       } else {
@@ -729,11 +729,11 @@ define find-end(t: &string, !pred: (rune) -> bool) ->> ?int {
         if pred(ch) {
           Right(index)
         } else {
-          self(t, sub-int(byte-index, rune-size), add-int(index, 1))
+          self@(t, sub-int(byte-index, rune-size), add-int(index, 1))
         }
       }
     };
-  f(t, sub-int(len, 1), 0)
+  f@(t, sub-int(len, 1), 0)
 }
 
 define strip-prefix(prefix: &string, haystack: string) -> string {

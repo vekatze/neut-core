@@ -30,7 +30,7 @@ data error {
 }
 
 define _read-char(r: rune, t: string) -> either(error, string) {
-  match this::string::uncons(t) {
+  match this::string::uncons@(t) {
   | Right(Pair(r-found, rest)) =>
     if eq-rune(r, r-found) {
       Right(rest)
@@ -43,11 +43,11 @@ define _read-char(r: rune, t: string) -> either(error, string) {
 }
 
 define _read-unicode-scalar-value(t: &string) -> either(error, rune) {
-  match parse-hex-digits(t) {
+  match parse-hex-digits@(t) {
   | Left(_) =>
     Left(Parse-Error(format("Could not parse `{}` as a hexadecimal integer", List::[*t])))
   | Right(v) =>
-    match this::rune::from-int(v) {
+    match this::rune::from-int@(v) {
     | Right(r) =>
       Right(r)
     | Left(_) =>
@@ -57,7 +57,7 @@ define _read-unicode-scalar-value(t: &string) -> either(error, rune) {
 }
 
 define _unquote-string(t: string) -> either(error, list(string)) {
-  match this::string::uncons(t) {
+  match this::string::uncons@(t) {
   | Left(_) =>
     Left(Parse-Error(*"Unexpected end of string after a backslash"))
   | Right(Pair(c, rest)) =>

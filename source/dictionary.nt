@@ -268,7 +268,7 @@ define insert<k, v>(o: &ord(k), d: dictionary(k, v), key-X: k, val-X: v) -> dict
   }
 }
 
-define insert-with<k, v>(o: &ord(k), !f: (v, v) -> v, d: dictionary(k, v), key-X: k, val-X: v) -> dictionary(k, v) {
+define insert-with<k, v>(o: &ord(k), f: (v, v) -> v, d: dictionary(k, v), key-X: k, val-X: v) -> dictionary(k, v) {
   tie Ord{compare} = o;
   match d {
   | _Tip =>
@@ -286,7 +286,7 @@ define insert-with<k, v>(o: &ord(k), !f: (v, v) -> v, d: dictionary(k, v), key-X
   }
 }
 
-define lookup<k, v>(o: &ord(k), d: &dictionary(k, v), needle: &k) ->> ?&v {
+define lookup@<k, v>(o: &ord(k), d: &dictionary(k, v), needle: &k) -> ?&v {
   tie Ord{compare} = o;
   case d {
   | _Tip =>
@@ -294,9 +294,9 @@ define lookup<k, v>(o: &ord(k), d: &dictionary(k, v), needle: &k) ->> ?&v {
   | _Bin(_, key, x, l, r) =>
     match compare(needle, key) {
     | LT =>
-      lookup(o, l, needle)
+      lookup@(o, l, needle)
     | GT =>
-      lookup(o, r, needle)
+      lookup@(o, r, needle)
     | EQ =>
       Right(x)
     }
@@ -320,7 +320,7 @@ define _lookup-LE-with-cand<k, v>(o: &ord(k), d: &dictionary(k, v), needle: &k, 
   }
 }
 
-define lookup-LE<k, v>(o: &ord(k), d: &dictionary(k, v), needle: &k) ->> ?pair(&k, &v) {
+define lookup-LE@<k, v>(o: &ord(k), d: &dictionary(k, v), needle: &k) -> ?pair(&k, &v) {
   tie Ord{compare} = o;
   case d {
   | _Tip =>
@@ -330,7 +330,7 @@ define lookup-LE<k, v>(o: &ord(k), d: &dictionary(k, v), needle: &k) ->> ?pair(&
     | GT =>
       Right(_lookup-LE-with-cand(o, r, needle, key, x))
     | LT =>
-      lookup-LE(o, l, needle)
+      lookup-LE@(o, l, needle)
     | _ =>
       Right(Pair(key, x))
     }
@@ -354,7 +354,7 @@ define _lookup-GE-with-cand<k, v>(o: &ord(k), d: &dictionary(k, v), needle: &k, 
   }
 }
 
-define lookup-GE<k, v>(o: &ord(k), d: &dictionary(k, v), needle: &k) ->> ?pair(&k, &v) {
+define lookup-GE@<k, v>(o: &ord(k), d: &dictionary(k, v), needle: &k) -> ?pair(&k, &v) {
   tie Ord{compare} = o;
   case d {
   | _Tip =>
@@ -362,7 +362,7 @@ define lookup-GE<k, v>(o: &ord(k), d: &dictionary(k, v), needle: &k) ->> ?pair(&
   | _Bin(_, key, x, l, r) =>
     match compare(needle, key) {
     | GT =>
-      lookup-GE(o, r, needle)
+      lookup-GE@(o, r, needle)
     | LT =>
       Right(_lookup-GE-with-cand(o, l, needle, key, x))
     | _ =>

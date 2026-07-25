@@ -117,13 +117,13 @@ define _expect-float-nan(label: &string, actual: float-decimal) -> unit {
 }
 
 define test-float() -> unit {
-  _expect-no-int("int.parse: reject leading plus decimal\n", this::int.parse::parse-int("+123"));
-  _expect-no-int("int.parse: reject leading plus hex\n", this::int.parse::parse-hex("+0xFF"));
-  _expect-no-float("float::parse: reject leading plus decimal\n", this::float.parse::parse-float("+1.0"));
-  _expect-no-float("float::parse: reject plus decimal exponent\n", this::float.parse::parse-float("1.0e+2"));
-  _expect-no-float("float::parse: reject plus hex exponent\n", this::float.parse::parse-float("0x1.0p+2"));
-  _expect-float("float::parse: accept Ryu zero\n", this::float.parse::parse-float("0e0"));
-  _expect-float("float::parse: accept Ryu integer form\n", this::float.parse::parse-float("1e0"));
+  _expect-no-int("int.parse: reject leading plus decimal\n", this::int.parse::parse-int@("+123"));
+  _expect-no-int("int.parse: reject leading plus hex\n", this::int.parse::parse-hex@("+0xFF"));
+  _expect-no-float("float::parse: reject leading plus decimal\n", this::float.parse::parse-float@("+1.0"));
+  _expect-no-float("float::parse: reject plus decimal exponent\n", this::float.parse::parse-float@("1.0e+2"));
+  _expect-no-float("float::parse: reject plus hex exponent\n", this::float.parse::parse-float@("0x1.0p+2"));
+  _expect-float("float::parse: accept Ryu zero\n", this::float.parse::parse-float@("0e0"));
+  _expect-float("float::parse: accept Ryu integer form\n", this::float.parse::parse-float@("1e0"));
   _expect-string("float::show: Ryu zero\n", show-float(0.0), "0e0");
   _expect-string("float::show: fixed integer form\n", show-float(1.0), "1.0");
   _expect-string("float::show: fixed decimal form\n", show-float(1.234), "1.234");
@@ -132,17 +132,17 @@ define test-float() -> unit {
   _expect-string("float::show: upper scientific boundary\n", show-float(100000000.0), "1e8");
   _expect-string("float::show: Ryu float32 integer form\n", show-float32(1.0), "1.0");
   _expect-string("float::show: Ryu float32 shortest form\n", show-float32(1.23456789), "1.2345679");
-  _expect-float-finite-positive("float::decompose: zero\n", decompose-float(0.0), 0, 0);
-  _expect-float-finite-negative("float::decompose: negative zero\n", decompose-float(-0.0), 0, 0);
-  _expect-float-finite-positive("float::decompose: decimal\n", decompose-float(1.234), 1234, -3);
-  _expect-float-finite-positive("float::decompose: exponent\n", decompose-float(10.0), 1, 1);
-  _expect-float-finite-positive("float::decompose: float32 shortest\n", decompose-float32(1.23456789), 12345679, -7);
-  _expect-float-infinity-positive("float::decompose: infinity\n", decompose-float(inf));
-  _expect-float-infinity-negative("float::decompose: negative infinity\n", decompose-float(-inf));
-  _expect-float-nan("float::decompose: nan\n", decompose-float(nan));
-  _expect-float-infinity-positive("float::decompose: float32 infinity\n", decompose-float32(inf));
-  _expect-float-infinity-negative("float::decompose: float32 negative infinity\n", decompose-float32(-inf));
-  _expect-float-nan("float::decompose: float32 nan\n", decompose-float32(nan))
+  _expect-float-finite-positive("float::decompose: zero\n", decompose-float@(0.0), 0, 0);
+  _expect-float-finite-negative("float::decompose: negative zero\n", decompose-float@(-0.0), 0, 0);
+  _expect-float-finite-positive("float::decompose: decimal\n", decompose-float@(1.234), 1234, -3);
+  _expect-float-finite-positive("float::decompose: exponent\n", decompose-float@(10.0), 1, 1);
+  _expect-float-finite-positive("float::decompose: float32 shortest\n", decompose-float32@(1.23456789), 12345679, -7);
+  _expect-float-infinity-positive("float::decompose: infinity\n", decompose-float@(inf));
+  _expect-float-infinity-negative("float::decompose: negative infinity\n", decompose-float@(-inf));
+  _expect-float-nan("float::decompose: nan\n", decompose-float@(nan));
+  _expect-float-infinity-positive("float::decompose: float32 infinity\n", decompose-float32@(inf));
+  _expect-float-infinity-negative("float::decompose: float32 negative infinity\n", decompose-float32@(-inf));
+  _expect-float-nan("float::decompose: float32 nan\n", decompose-float32@(nan))
 }
 
 define zen() -> unit {

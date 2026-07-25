@@ -135,6 +135,7 @@ define _set-to<a>(xs: &array(a), to: int) -> unit {
 }
 
 define _make-raw<a>(capacity: int, initial-cursor: int, elem-type: type, stride: int) -> array(a) {
+  let stride = max-int(stride, 0);
   let array-ptr = malloc(C-Size(_allocation-size(capacity, stride)));
   let buffer-ptr = _inline-buffer-ptr(array-ptr);
   let word-size = this::word::size;
@@ -154,9 +155,8 @@ define _make-inner<a>(initial-capacity: int) -> array(a) {
   _make-raw<a>(abs-capacity, initial-cursor, pack-type {a}, stride)
 }
 
-inline-meta make<a>(initial-capacity: 'int) -> 'array(a) {
-  magic assert-mixable(a);
-  quote {_make-inner(unquote {initial-capacity})}
+inline make<a>(initial-capacity: int) -> array(a) {
+  _make-inner(initial-capacity)
 }
 
 define _discard-array-content<a>(xs: &array(pointer), stride: int, index: int, len: int) -> unit {
@@ -284,7 +284,7 @@ define _extend-front-if-necessary<a>(xs: array(a)) -> array(a) {
   }
 }
 
-inline push-front<a>(xs: array(a), x: a) -> array(a) {
+define push-front<sized a>(xs: array(a), ~x: a) -> array(a) {
   let xs = _extend-front-if-necessary(xs);
   let _ on xs, x = _store-front-element-without-free(xs, x);
   free(cast-inline<a, pointer>(x));
@@ -310,7 +310,7 @@ define _store-back-element-without-free<a>(xs: &array(a), x: &a) -> unit {
   memcpy(element-ptr, value-ptr, stride);
 }
 
-inline push-back<a>(xs: array(a), x: a) -> array(a) {
+define push-back<sized a>(xs: array(a), ~x: a) -> array(a) {
   let xs = _extend-back-if-necessary(xs);
   let _ on xs, x = _store-back-element-without-free(xs, x);
   free(cast-inline<a, pointer>(x));
@@ -356,7 +356,7 @@ inline-meta put<a>(xs: 'array(a), i: 'int, x: 'a) -> 'array(a) {
   }
 }
 
-define pop-front<a>(xs: array(a)) ->> ?pair(a, array(a)) {
+define pop-front@<a>(xs: array(a)) -> ?pair(a, array(a)) {
   let len on xs = length(xs);
   if eq-int(len, 0) {
     none
@@ -369,7 +369,7 @@ define pop-front<a>(xs: array(a)) ->> ?pair(a, array(a)) {
   }
 }
 
-define pop-back<a>(xs: array(a)) ->> ?pair(array(a), a) {
+define pop-back@<a>(xs: array(a)) -> ?pair(array(a), a) {
   let len on xs = length(xs);
   if eq-int(len, 0) {
     none
@@ -387,7 +387,7 @@ inline _access-unchecked<a>(xs: &array(a), i: int) -> &a {
   cast-inline<pointer, &a>(element-pointer)
 }
 
-define access<a>(xs: &array(a), i: int) ->> ?&a {
+define access@<a>(xs: &array(a), i: int) -> ?&a {
   if and::(le-int(0, i), lt-int(i, length(xs))) {
     Right(_access-unchecked(xs, i))
   } else {

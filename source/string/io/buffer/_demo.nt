@@ -10,12 +10,12 @@ import {
 }
 
 define zen() -> unit {
-  let !k = make-buffer(stdout, 4096);
+  let k = make-buffer(stdout, 4096);
   pin k = k;
   let _: system(unit) = {
-    try _ = write-line(k, "hello!");
-    try _ = write-line(k, "hello!");
-    try _ = flush(k);
+    try _ = write-line@(k, "hello!");
+    try _ = write-line@(k, "hello!");
+    try _ = flush@(k);
     Right(Unit)
   };
   Unit

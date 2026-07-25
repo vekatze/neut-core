@@ -41,7 +41,7 @@ define delete<a>(o: &ord(a), s: set(a), x: a) -> set(a) {
 
 define member<a>(o: &ord(a), s: &set(a), x: &a) -> bool {
   tie _Set(s) = s;
-  match this::dictionary::lookup(o, s, x) {
+  match this::dictionary::lookup@(o, s, x) {
   | Right(_) =>
     True
   | Left(_) =>

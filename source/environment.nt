@@ -13,7 +13,7 @@ foreign {
   getenv(pointer) -> pointer,
 }
 
-define get-env(name: &string) ->> ?string {
+define get-env@(name: &string) -> ?string {
   let c-str = get-content-pointer(name);
   let tmp = magic external getenv(c-str);
   if is-null-pointer(tmp) {

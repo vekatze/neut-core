@@ -14,9 +14,9 @@ foreign {
 define open(path-address: pointer, oflag: c-int, mode: c-int) -> c-int {
   introspect target-os {
   | darwin =>
-    magic external open(path-address, oflag)(mode: c-int)
+    magic external open(path-address, oflag)(c-int mode)
   | linux =>
-    magic external open(path-address, oflag)(mode: c-int)
+    magic external open(path-address, oflag)(c-int mode)
   }
 }
 

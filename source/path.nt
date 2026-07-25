@@ -146,11 +146,11 @@ define _split-extension(path: &string, pivot: int) -> pair(string, string) {
 
 define split-extension(path: &string) -> pair(string, string) {
   let dot-pos-or-none =
-    this::string::find-end(path, (r) => {
+    this::string::find-end@(path, (r) => {
       eq-rune(r, `.`)
     });
   let slash-pos-or-none =
-    this::string::find-end(path, (r) => {
+    this::string::find-end@(path, (r) => {
       eq-rune(r, `/`)
     });
   match dot-pos-or-none {

@@ -19,18 +19,18 @@ import {
   this::word,
 }
 
-define write(d: descriptor, b: &binary) ->> system(unit) {
+define write@(d: descriptor, b: &binary) -> system(unit) {
   let content-pointer = get-content-pointer(b);
   let len = length(b);
-  write-all(d, content-pointer, len)
+  write-all@(d, content-pointer, len)
 }
 
-define _read-inner(
+define _read-inner@(
   data-source: descriptor,
   base-ptr: pointer,
   current-length: int,
   buffer-size: int,
-) ->> system(binary) {
+) -> system(binary) {
   let u = this::word::size;
   let u2 = mul-int(u, 2);
   let u3 = mul-int(u, 3);
@@ -41,26 +41,26 @@ define _read-inner(
   let C-SSize(bytes) = this::file.descriptor.unsafe::read(data-source, content-ptr, C-Size(readable-size));
   let next-length = add-int(current-length, bytes);
   if lt-int(bytes, 0) {
-    report-system-error()
+    report-system-error@()
   } else-if eq-int(bytes, 0) {
     store-int(next-length, shift(base-ptr, u));
     Right(cast<pointer, binary>(base-ptr))
   } else-if lt-int(bytes, readable-size) {
-    _read-inner(data-source, base-ptr, next-length, buffer-size)
+    _read-inner@(data-source, base-ptr, next-length, buffer-size)
   } else {
     let new-buffer-size = mul-int(buffer-size, 2);
     let new-size = add-int(u3, new-buffer-size);
     let new-base-ptr = realloc(base-ptr, C-Size(new-size));
     if eq-int(extract(new-base-ptr), 0) {
-      report-system-error()
+      report-system-error@()
     } else {
       store-pointer(shift(new-base-ptr, u3), shift(new-base-ptr, u2));
-      _read-inner(data-source, new-base-ptr, next-length, new-buffer-size)
+      _read-inner@(data-source, new-base-ptr, next-length, new-buffer-size)
     }
   }
 }
 
-define read(from: descriptor, initial-buffer-size: int) ->> system(binary) {
+define read@(from: descriptor, initial-buffer-size: int) -> system(binary) {
   if le-int(initial-buffer-size, 0) {
     Left(Application-Error(format(
       "core.binary.io.read: initial-buffer-size must be positive, but got: {}",
@@ -74,6 +74,6 @@ define read(from: descriptor, initial-buffer-size: int) ->> system(binary) {
     let ptr = malloc(C-Size(ptr-size));
     store-int(0, ptr);
     store-pointer(shift(ptr, u3), shift(ptr, u2));
-    _read-inner(from, ptr, 0, initial-buffer-size)
+    _read-inner@(from, ptr, 0, initial-buffer-size)
   }
 }

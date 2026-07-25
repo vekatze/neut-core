@@ -183,7 +183,7 @@ inline-meta _take-while-count(t: text, !pred: (rune) -> bool) -> int {
   }
 }
 
-inline-meta drop-while(t: text, !pred: (rune) -> bool) -> text {
+inline-meta drop-while(t: text, pred: (rune) -> bool) -> text {
   drop(t, _take-while-count(t, pred))
 }
 

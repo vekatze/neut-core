@@ -5,13 +5,13 @@ import {
 }
 
 define zen() -> unit {
-  let _ = write-rune(stdout, `a`);
-  let _ = write-rune(stdout, `b`);
-  let _ = write-rune(stdout, `c`);
-  let _ = write-rune(stdout, `\n`);
-  let _ = write-rune-line(stdout, `a`);
-  let _ = write-rune-line(stdout, `b`);
-  let _ = write-rune-line(stdout, `c`);
+  let _ = write-rune@(stdout, `a`);
+  let _ = write-rune@(stdout, `b`);
+  let _ = write-rune@(stdout, `c`);
+  let _ = write-rune@(stdout, `\n`);
+  let _ = write-rune-line@(stdout, `a`);
+  let _ = write-rune-line@(stdout, `b`);
+  let _ = write-rune-line@(stdout, `c`);
   let _ = print-rune(`a`);
   let _ = print-rune(`b`);
   let _ = print-rune(`c`);

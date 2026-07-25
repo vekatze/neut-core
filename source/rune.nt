@@ -27,7 +27,7 @@ define size(c: rune) -> int {
   }
 }
 
-define from-int(value: int) ->> ?rune {
+define from-int@(value: int) -> ?rune {
   if le-int(0, value) {
     if le-int(value, 0x7F) {
       Right(magic cast(int, rune, value))

@@ -104,7 +104,7 @@ define insert<a>(t: intmap(a), k: int, x: a) -> intmap(a) {
   }
 }
 
-define lookup<a>(t: &intmap(a), k: int) ->> ?&a {
+define lookup@<a>(t: &intmap(a), k: int) -> ?&a {
   case t {
   | _Nil =>
     none
@@ -116,9 +116,9 @@ define lookup<a>(t: &intmap(a), k: int) ->> ?&a {
     }
   | _Bin(_, m, left, right) =>
     if _zero(k, *m) {
-      lookup(left, k)
+      lookup@(left, k)
     } else {
-      lookup(right, k)
+      lookup@(right, k)
     }
   }
 }

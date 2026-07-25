@@ -9,33 +9,33 @@ import {
   this::unit {Unit, unit},
 }
 
-define write-rune(k: descriptor, x: rune) ->> system(unit) {
+define write-rune@(k: descriptor, x: rune) -> system(unit) {
   let s = size(x);
   let buffer-ptr = magic alloca(int32, 1);
   let _ = store-rune(x, buffer-ptr);
-  let result = write-all(k, buffer-ptr, s);
+  let result = write-all@(k, buffer-ptr, s);
   // avoid tail-calling `write-all` (which relies on `alloca`)
   nop();
   result
 }
 
-define write-rune-line(k: descriptor, x: rune) ->> system(unit) {
+define write-rune-line@(k: descriptor, x: rune) -> system(unit) {
   let s = size(x);
   let buffer-ptr = magic alloca(int32, 2);
   let _ = store-rune(x, buffer-ptr);
   let _ = store-rune(`\n`, shift(buffer-ptr, s));
-  let result = write-all(k, buffer-ptr, add-int(s, 1));
+  let result = write-all@(k, buffer-ptr, add-int(s, 1));
   // avoid tail-calling
   nop();
   result
 }
 
 define print-rune(x: rune) -> unit {
-  let _ = write-rune(stdout, x);
+  let _ = write-rune@(stdout, x);
   Unit
 }
 
 define print-rune-line(x: rune) -> unit {
-  let _ = write-rune-line(stdout, x);
+  let _ = write-rune-line@(stdout, x);
   Unit
 }

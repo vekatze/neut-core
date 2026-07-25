@@ -124,7 +124,7 @@ inline-meta _constructor-switch-clauses<a>(
   match constructors {
   | Nil =>
     Nil
-  | Cons(!c, rest) =>
+  | Cons(c, rest) =>
     Cons(
       Pair(cons-index, on-hit(c)),
       _constructor-switch-clauses(rest, add-int(cons-index, 1), on-hit),
@@ -138,7 +138,7 @@ inline-meta constructor-switch<a>(
   constructors: list(constructor),
   disc: 'int,
   fallback: 'a,
-  !on-hit: (constructor) -> 'a,
+  on-hit: (constructor) -> 'a,
 ) -> 'a {
   let clauses = _constructor-switch-clauses(constructors, 0, on-hit);
   magic make-switch(disc, fallback, clauses)
@@ -166,7 +166,7 @@ inline-meta enum-switch<a>(
   names: list(text),
   disc: 'int,
   fallback: 'a,
-  !on-hit: (text) -> 'a,
+  on-hit: (text) -> 'a,
 ) -> 'a {
   let clauses = _enum-switch-clauses(names, 0, on-hit);
   magic make-switch(disc, fallback, clauses)

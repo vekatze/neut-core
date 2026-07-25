@@ -331,7 +331,7 @@ define partition<a, b>(xs: list(either(a, b))) -> pair(list(a), list(b)) {
   })
 }
 
-define uncons<a>(xs: list(a)) ->> ?pair(a, list(a)) {
+define uncons@<a>(xs: list(a)) -> ?pair(a, list(a)) {
   match xs {
   | Nil =>
     none
@@ -340,19 +340,19 @@ define uncons<a>(xs: list(a)) ->> ?pair(a, list(a)) {
   }
 }
 
-define unsnoc<a>(xs: list(a)) ->> ?pair(list(a), a) {
+define unsnoc@<a>(xs: list(a)) -> ?pair(list(a), a) {
   let f =
-    define _unsnoc(xs: list(a), acc: list(a)) ->> ?pair(list(a), a) {
+    define _unsnoc@(xs: list(a), acc: list(a)) -> ?pair(list(a), a) {
       match xs {
       | Nil =>
         Left(Unit)
       | Cons(y, Nil) =>
         Right(Pair(reverse(acc), y))
       | Cons(y, ys) =>
-        _unsnoc(ys, Cons(y, acc))
+        _unsnoc@(ys, Cons(y, acc))
       }
     };
-  f(xs, Nil)
+  f@(xs, Nil)
 }
 
 define all(xs: &list(bool)) -> bool {
@@ -376,9 +376,9 @@ define range(from: int, to: int) -> list(int) {
   }
 }
 
-inline find<a>(xs: &list(a), pred: &(&a) -> bool) ->> ?&a {
+inline find@<a>(xs: &list(a), pred: &(&a) -> bool) -> ?&a {
   let f =
-    define self(ys: &list(a)) ->> ?&a {
+    define self@(ys: &list(a)) -> ?&a {
       case ys {
       | Nil =>
         none
@@ -386,11 +386,11 @@ inline find<a>(xs: &list(a), pred: &(&a) -> bool) ->> ?&a {
         if pred(z) {
           Right(z)
         } else {
-          self(zs)
+          self@(zs)
         }
       }
     };
-  f(xs)
+  f@(xs)
 }
 
 inline filter<a>(xs: list(a), !pred: (&a) -> bool) -> list(a) {

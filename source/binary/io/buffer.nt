@@ -7,6 +7,6 @@ import {
   this::unit {unit},
 }
 
-define write-binary(b: &buffer, content: &binary) ->> system(unit) {
-  append(b, get-content-pointer(content), length(content))
+define write-binary@(b: &buffer, content: &binary) -> system(unit) {
+  append@(b, get-content-pointer(content), length(content))
 }

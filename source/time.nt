@@ -22,10 +22,10 @@ foreign {
   neut_core_v0_56_sleep(float64) -> int,
 }
 
-define sleep(duration: float64) ->> system(unit) {
+define sleep@(duration: float64) -> system(unit) {
   let result = magic external neut_core_v0_56_sleep(duration);
   if lt-int(result, 0) {
-    report-system-error()
+    report-system-error@()
   } else {
     Right(Unit)
   }
@@ -178,7 +178,7 @@ define to-UTC-clock(t: time) -> clock {
 define _zeropad(x: int, format-string: &string) -> string {
   pin fmt = from-string(format-string);
   let fmt = magic cast(&c-string, pointer, fmt);
-  let size = from-c-int(magic external snprintf(null-pointer, 0, fmt)(x: int));
+  let size = from-c-int(magic external snprintf(null-pointer, 0, fmt)(int x));
   let u = this::word::size;
   let u2 = mul-int(u, 2);
   let u3 = mul-int(u, 3);
@@ -187,7 +187,7 @@ define _zeropad(x: int, format-string: &string) -> string {
   store-int(size, shift(ptr, u));
   let buffer = shift(ptr, u3);
   store-pointer(buffer, shift(ptr, u2));
-  let _ = magic external sprintf(buffer, fmt)(x: int);
+  let _ = magic external sprintf(buffer, fmt)(int x);
   magic cast(pointer, string, ptr)
 }
 

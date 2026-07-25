@@ -28,7 +28,7 @@ inline-meta fold-left<a, b>(acc: b, xs: list(a), !f: (b, a) -> b) -> b {
   match xs {
   | Nil =>
     acc
-  | Cons(!y, ys) =>
+  | Cons(y, ys) =>
     fold-left(f(acc, y), ys, f)
   }
 }
@@ -37,7 +37,7 @@ inline-meta fold-right<a, b>(xs: list(a), acc: b, !f: (a, b) -> b) -> b {
   match xs {
   | Nil =>
     acc
-  | Cons(!y, ys) =>
+  | Cons(y, ys) =>
     f(y, fold-right(ys, acc, f))
   }
 }
@@ -46,7 +46,7 @@ inline-meta for-each<a, b>(xs: list(a), !f: (a) -> b) -> list(b) {
   match xs {
   | Nil =>
     Nil
-  | Cons(!y, ys) =>
+  | Cons(y, ys) =>
     Cons(f(y), for-each(ys, f))
   }
 }
@@ -74,7 +74,7 @@ inline-meta any<a>(xs: list(a), !pred: (a) -> bool) -> bool {
   match xs {
   | Nil =>
     False
-  | Cons(!y, ys) =>
+  | Cons(y, ys) =>
     if pred(y) {
       True
     } else {
@@ -113,7 +113,7 @@ inline-meta nth<a>(xs: list(a), index: int) -> ?a {
   match xs {
   | Nil =>
     Left(Unit)
-  | Cons(!y, ys) =>
+  | Cons(y, ys) =>
     if eq-int(index, 0) {
       Right(y)
     } else {

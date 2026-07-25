@@ -9,8 +9,8 @@ import {
 }
 
 define zen() -> unit {
-  let !value = new(*"hello");
-  letbox-T !weak on value = downgrade(value);
+  let value = new(*"hello");
+  letbox-T weak on value = downgrade(value);
   letbox-T result on weak = upgrade(weak);
   match result {
   | Left(_) =>

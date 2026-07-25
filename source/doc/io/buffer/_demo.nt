@@ -37,12 +37,12 @@ define zen() -> unit {
       atom(*"end"),
       ansi-reset,
     ]);
-  let !k = make-buffer(stdout, 4096);
+  let k = make-buffer(stdout, 4096);
   pin k = k;
   let _: system(unit) = {
-    try _ = write-doc-line(k, item, 32);
-    try _ = write-doc-line(k, item, 16);
-    try _ = flush(k);
+    try _ = write-doc-line@(k, item, 32);
+    try _ = write-doc-line@(k, item, 16);
+    try _ = flush@(k);
     Right(Unit)
   };
   Unit

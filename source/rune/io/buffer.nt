@@ -8,16 +8,16 @@ import {
   this::unit {Unit, unit},
 }
 
-define write-rune(k: &buffer, x: rune) ->> system(unit) {
+define write-rune@(k: &buffer, x: rune) -> system(unit) {
   let buffer-ptr = magic alloca(int32, 1);
   let size = store-rune(x, buffer-ptr);
-  let result = append(k, buffer-ptr, size);
+  let result = append@(k, buffer-ptr, size);
   nop();
   result
 }
 
-define write-rune-line(k: &buffer, x: rune) ->> system(unit) {
-  try _ = write-rune(k, x);
-  try _ = write-rune(k, `\n`);
+define write-rune-line@(k: &buffer, x: rune) -> system(unit) {
+  try _ = write-rune@(k, x);
+  try _ = write-rune@(k, `\n`);
   Right(Unit)
 }

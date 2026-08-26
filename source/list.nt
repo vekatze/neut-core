@@ -580,14 +580,18 @@ define is-empty<a>(xs: &list(a)) -> bool {
 }
 
 define nth<a>(xs: &list(a), n: int) -> ?a {
-  case xs {
-  | Nil =>
+  if lt-int(n, 0) {
     none
-  | Cons(y, ys) =>
-    if le-int(n, 0) {
-      Right(*y)
-    } else {
-      nth(ys, sub-int(n, 1))
+  } else {
+    case xs {
+    | Nil =>
+      none
+    | Cons(y, ys) =>
+      if eq-int(n, 0) {
+        Right(*y)
+      } else {
+        nth(ys, sub-int(n, 1))
+      }
     }
   }
 }

@@ -1,4 +1,5 @@
 import {
+  this::binary,
   this::bool {bool},
   this::c-int {c-int, lt-c-int, ne-c-int},
   this::c-pid {c-pid, eq-c-pid},
@@ -163,8 +164,18 @@ data process-result {
 
 define _exec<a>(command: string, args: list(string), error-writer: descriptor) -> a {
   let v = {
-    let cmd on command = this::string.pointer::get-content-pointer(command);
-    pin tmp = Cons(command, args);
+    pin tmp =
+      this::list::for-each(Cons(command, args), (s) => {
+        pin s = s;
+        this::string::append(s, "\0")
+      });
+    let cmd =
+      case tmp {
+      | Nil =>
+        null-pointer
+      | Cons(c, _) =>
+        this::string.pointer::get-content-pointer(c)
+      };
     let raw-args = this::list::for-each-N(tmp, this::string.pointer::get-content-pointer);
     let cmd-args = _make-argv(this::list::append(raw-args, List::[null-pointer]));
     _posix.execvp(cmd, cmd-args)

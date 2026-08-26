@@ -1,10 +1,10 @@
 import {
   this::bool,
-  this::c-string {c-string, to-string},
+  this::c-string {c-string, from-string, to-string},
+  this::control {discard},
   this::either {Right, none},
   this::pointer {is-null-pointer},
   this::string {string},
-  this::string.pointer {get-content-pointer},
   this::unit,
   this::unsafe {cast},
 }
@@ -14,8 +14,9 @@ foreign {
 }
 
 define get-env@(name: &string) -> ?string {
-  let c-str = get-content-pointer(name);
-  let tmp = magic external getenv(c-str);
+  let name-c-str = from-string(name);
+  let tmp on name-c-str = magic external getenv(magic cast(&c-string, pointer, name-c-str));
+  discard(name-c-str);
   if is-null-pointer(tmp) {
     none
   } else {

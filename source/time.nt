@@ -18,11 +18,11 @@ import {
 }
 
 foreign {
-  neut_core_v0_56_sleep(float) -> int,
+  neut_core_v0_57_sleep(float) -> int,
 }
 
 define sleep@(duration: float) -> system(unit) {
-  let result = magic external neut_core_v0_56_sleep(duration);
+  let result = magic external neut_core_v0_57_sleep(duration);
   if lt-int(result, 0) {
     report-system-error@()
   } else {
@@ -38,42 +38,42 @@ foreign {
   clock_gettime(clockid-t, pointer) -> c-int,
   snprintf(pointer, c-size, pointer) -> c-int,
   sprintf(pointer, pointer) -> c-int,
-  neut_core_v0_56_parse_iso8601(pointer, pointer) -> int32,
-  neut_core_v0_56_CLOCK_REALTIME() -> clockid-t,
-  neut_core_v0_56_civil_to_utc(int, int, int, int, int, int) -> int,
-  neut_core_v0_56_sizeof_fields() -> c-size,
-  neut_core_v0_56_sizeof_timespec() -> c-size,
-  neut_core_v0_56_timespec_sec(pointer) -> int,
-  neut_core_v0_56_timespec_nsec(pointer) -> int,
-  neut_core_v0_56_decompose(int, int, pointer) -> pointer,
-  neut_core_v0_56_field_sec(pointer) -> int,
-  neut_core_v0_56_field_min(pointer) -> int,
-  neut_core_v0_56_field_hour(pointer) -> int,
-  neut_core_v0_56_field_mday(pointer) -> int,
-  neut_core_v0_56_field_mon(pointer) -> int,
-  neut_core_v0_56_field_year(pointer) -> int,
-  neut_core_v0_56_field_wday(pointer) -> int,
-  neut_core_v0_56_field_yday(pointer) -> int,
-  neut_core_v0_56_field_isdst(pointer) -> int,
-  neut_core_v0_56_field_gmtoff(pointer) -> int,
-  neut_core_v0_56_field_zone(pointer) -> pointer,
+  neut_core_v0_57_parse_iso8601(pointer, pointer) -> int32,
+  neut_core_v0_57_CLOCK_REALTIME() -> clockid-t,
+  neut_core_v0_57_civil_to_utc(int, int, int, int, int, int) -> int,
+  neut_core_v0_57_sizeof_fields() -> c-size,
+  neut_core_v0_57_sizeof_timespec() -> c-size,
+  neut_core_v0_57_timespec_sec(pointer) -> int,
+  neut_core_v0_57_timespec_nsec(pointer) -> int,
+  neut_core_v0_57_decompose(int, int, pointer) -> pointer,
+  neut_core_v0_57_field_sec(pointer) -> int,
+  neut_core_v0_57_field_min(pointer) -> int,
+  neut_core_v0_57_field_hour(pointer) -> int,
+  neut_core_v0_57_field_mday(pointer) -> int,
+  neut_core_v0_57_field_mon(pointer) -> int,
+  neut_core_v0_57_field_year(pointer) -> int,
+  neut_core_v0_57_field_wday(pointer) -> int,
+  neut_core_v0_57_field_yday(pointer) -> int,
+  neut_core_v0_57_field_isdst(pointer) -> int,
+  neut_core_v0_57_field_gmtoff(pointer) -> int,
+  neut_core_v0_57_field_zone(pointer) -> pointer,
 }
 
 constant SIZEOF_FIELDS: c-size {
   magic opaque-value {
-    magic external neut_core_v0_56_sizeof_fields()
+    magic external neut_core_v0_57_sizeof_fields()
   }
 }
 
 constant SIZEOF_TIMESPEC: c-size {
   magic opaque-value {
-    magic external neut_core_v0_56_sizeof_timespec()
+    magic external neut_core_v0_57_sizeof_timespec()
   }
 }
 
 constant CLOCK_REALTIME: clockid-t {
   magic opaque-value {
-    magic external neut_core_v0_56_CLOCK_REALTIME()
+    magic external neut_core_v0_57_CLOCK_REALTIME()
   }
 }
 
@@ -112,29 +112,29 @@ define _encode-dst(x: int) -> bool {
 define _from-time(t: time, is-local: int) -> clock {
   let _Time{seconds, nanoseconds} = t;
   let size = from-c-size(SIZEOF_FIELDS);
-  let f = magic external neut_core_v0_56_decompose(seconds, is-local, magic alloca(int8, size));
+  let f = magic external neut_core_v0_57_decompose(seconds, is-local, magic alloca(int8, size));
   if is-null-pointer(f) {
     panic("time: instant is out of range for local-time conversion\n")
   } else {
     Clock{
       nanoseconds,
-      seconds := magic external neut_core_v0_56_field_sec(f),
-      minutes := magic external neut_core_v0_56_field_min(f),
-      hours := magic external neut_core_v0_56_field_hour(f),
-      day := magic external neut_core_v0_56_field_mday(f),
-      month := magic external neut_core_v0_56_field_mon(f),
-      year := magic external neut_core_v0_56_field_year(f),
-      weekday := magic external neut_core_v0_56_field_wday(f),
-      yearday := magic external neut_core_v0_56_field_yday(f),
-      is-dst := _encode-dst(magic external neut_core_v0_56_field_isdst(f)),
-      gmt-offset := magic external neut_core_v0_56_field_gmtoff(f),
-      timezone := to-string(magic cast(pointer, &c-string, magic external neut_core_v0_56_field_zone(f))),
+      seconds := magic external neut_core_v0_57_field_sec(f),
+      minutes := magic external neut_core_v0_57_field_min(f),
+      hours := magic external neut_core_v0_57_field_hour(f),
+      day := magic external neut_core_v0_57_field_mday(f),
+      month := magic external neut_core_v0_57_field_mon(f),
+      year := magic external neut_core_v0_57_field_year(f),
+      weekday := magic external neut_core_v0_57_field_wday(f),
+      yearday := magic external neut_core_v0_57_field_yday(f),
+      is-dst := _encode-dst(magic external neut_core_v0_57_field_isdst(f)),
+      gmt-offset := magic external neut_core_v0_57_field_gmtoff(f),
+      timezone := to-string(magic cast(pointer, &c-string, magic external neut_core_v0_57_field_zone(f))),
     }
   }
 }
 
 define _timespec-seconds(struct: pointer) -> int {
-  magic external neut_core_v0_56_timespec_sec(struct)
+  magic external neut_core_v0_57_timespec_sec(struct)
 }
 
 define get-time() -> time {
@@ -145,7 +145,7 @@ define get-time() -> time {
     panic("get-time(); `clock_gettime` failed\n")
   } else {
     let seconds = _timespec-seconds(struct);
-    let nanoseconds: int = magic external neut_core_v0_56_timespec_nsec(struct);
+    let nanoseconds: int = magic external neut_core_v0_57_timespec_nsec(struct);
     _Time{seconds, nanoseconds}
   }
 }
@@ -162,7 +162,7 @@ define _normalize(s: int, n: int) -> time {
 
 define from-clock(t: clock) -> time {
   let Clock{nanoseconds, seconds, minutes, hours, day, month, year, gmt-offset} = t;
-  let epoch = magic external neut_core_v0_56_civil_to_utc(year, month, day, hours, minutes, seconds);
+  let epoch = magic external neut_core_v0_57_civil_to_utc(year, month, day, hours, minutes, seconds);
   _normalize(sub-int(epoch, gmt-offset), nanoseconds)
 }
 
@@ -260,10 +260,10 @@ define from-ISO8601(datetime-string: &string) -> ?time {
   let time-struct = magic alloca(int8, size);
   pin datetime-string = from-string(datetime-string);
   let datetime-string = magic cast(&c-string, pointer, datetime-string);
-  let result: int32 = magic external neut_core_v0_56_parse_iso8601(datetime-string, time-struct);
+  let result: int32 = magic external neut_core_v0_57_parse_iso8601(datetime-string, time-struct);
   if ge-int32(result, 0) {
     let seconds = _timespec-seconds(time-struct);
-    let nanoseconds = magic external neut_core_v0_56_timespec_nsec(time-struct);
+    let nanoseconds = magic external neut_core_v0_57_timespec_nsec(time-struct);
     Right(_Time{seconds, nanoseconds})
   } else {
     none

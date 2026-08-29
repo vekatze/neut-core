@@ -21,26 +21,26 @@ foreign {
   pthread_cond_destroy(pointer) -> c-int,
   pthread_cond_signal(pointer) -> c-int,
   pthread_cond_wait(pointer, pointer) -> c-int,
-  neut_core_v0_56_thread_size() -> c-size,
-  neut_core_v0_56_thread_mutex_size() -> c-size,
-  neut_core_v0_56_thread_cond_size() -> c-size,
+  neut_core_v0_57_thread_size() -> c-size,
+  neut_core_v0_57_thread_mutex_size() -> c-size,
+  neut_core_v0_57_thread_cond_size() -> c-size,
 }
 
 constant THREAD_SIZE: c-size {
   magic opaque-value {
-    magic external neut_core_v0_56_thread_size()
+    magic external neut_core_v0_57_thread_size()
   }
 }
 
 constant THREAD_MUTEX_SIZE: c-size {
   magic opaque-value {
-    magic external neut_core_v0_56_thread_mutex_size()
+    magic external neut_core_v0_57_thread_mutex_size()
   }
 }
 
 constant THREAD_COND_SIZE: c-size {
   magic opaque-value {
-    magic external neut_core_v0_56_thread_cond_size()
+    magic external neut_core_v0_57_thread_cond_size()
   }
 }
 

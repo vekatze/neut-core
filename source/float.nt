@@ -21,8 +21,8 @@ foreign {
   llvm.sin.f64(float) -> float,
   llvm.sqrt.f64(float) -> float,
   llvm.trunc.f64(float) -> float,
-  neut_core_v0_56_decompose_double(float, pointer, pointer, pointer) -> int,
-  neut_core_v0_56_decompose_float32(float32, pointer, pointer, pointer) -> int,
+  neut_core_v0_57_decompose_double(float, pointer, pointer, pointer) -> int,
+  neut_core_v0_57_decompose_float32(float32, pointer, pointer, pointer) -> int,
 }
 
 define sqrt(x: float) -> float {
@@ -132,7 +132,7 @@ define decompose-float@(x: float) -> float-decimal {
   let sign-ptr = magic alloca(int, 1);
   let mantissa-ptr = magic alloca(int, 1);
   let exponent-ptr = magic alloca(int, 1);
-  let status = magic external neut_core_v0_56_decompose_double(x, sign-ptr, mantissa-ptr, exponent-ptr);
+  let status = magic external neut_core_v0_57_decompose_double(x, sign-ptr, mantissa-ptr, exponent-ptr);
   _decimal-from-slots@(status, sign-ptr, mantissa-ptr, exponent-ptr)
 }
 
@@ -140,6 +140,6 @@ define decompose-float32@(x: float32) -> float-decimal {
   let sign-ptr = magic alloca(int, 1);
   let mantissa-ptr = magic alloca(int, 1);
   let exponent-ptr = magic alloca(int, 1);
-  let status = magic external neut_core_v0_56_decompose_float32(x, sign-ptr, mantissa-ptr, exponent-ptr);
+  let status = magic external neut_core_v0_57_decompose_float32(x, sign-ptr, mantissa-ptr, exponent-ptr);
   _decimal-from-slots@(status, sign-ptr, mantissa-ptr, exponent-ptr)
 }

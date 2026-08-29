@@ -10,68 +10,68 @@ import {
 }
 
 foreign {
-  neut_core_v0_56_O_RDONLY() -> c-int,
-  neut_core_v0_56_O_WRONLY() -> c-int,
-  neut_core_v0_56_O_RDWR() -> c-int,
-  neut_core_v0_56_O_CREAT() -> c-int,
-  neut_core_v0_56_O_APPEND() -> c-int,
-  neut_core_v0_56_O_TRUNC() -> c-int,
-  neut_core_v0_56_SEEK_SET() -> c-int,
-  neut_core_v0_56_SEEK_CUR() -> c-int,
-  neut_core_v0_56_SEEK_END() -> c-int,
+  neut_core_v0_57_O_RDONLY() -> c-int,
+  neut_core_v0_57_O_WRONLY() -> c-int,
+  neut_core_v0_57_O_RDWR() -> c-int,
+  neut_core_v0_57_O_CREAT() -> c-int,
+  neut_core_v0_57_O_APPEND() -> c-int,
+  neut_core_v0_57_O_TRUNC() -> c-int,
+  neut_core_v0_57_SEEK_SET() -> c-int,
+  neut_core_v0_57_SEEK_CUR() -> c-int,
+  neut_core_v0_57_SEEK_END() -> c-int,
 }
 
 constant _O_RDONLY: c-int {
   magic opaque-value {
-    magic external neut_core_v0_56_O_RDONLY()
+    magic external neut_core_v0_57_O_RDONLY()
   }
 }
 
 constant _O_WRONLY: c-int {
   magic opaque-value {
-    magic external neut_core_v0_56_O_WRONLY()
+    magic external neut_core_v0_57_O_WRONLY()
   }
 }
 
 constant _O_RDWR: c-int {
   magic opaque-value {
-    magic external neut_core_v0_56_O_RDWR()
+    magic external neut_core_v0_57_O_RDWR()
   }
 }
 
 constant _O_CREAT: c-int {
   magic opaque-value {
-    magic external neut_core_v0_56_O_CREAT()
+    magic external neut_core_v0_57_O_CREAT()
   }
 }
 
 constant _O_APPEND: c-int {
   magic opaque-value {
-    magic external neut_core_v0_56_O_APPEND()
+    magic external neut_core_v0_57_O_APPEND()
   }
 }
 
 constant _O_TRUNC: c-int {
   magic opaque-value {
-    magic external neut_core_v0_56_O_TRUNC()
+    magic external neut_core_v0_57_O_TRUNC()
   }
 }
 
 constant _SEEK_SET: c-int {
   magic opaque-value {
-    magic external neut_core_v0_56_SEEK_SET()
+    magic external neut_core_v0_57_SEEK_SET()
   }
 }
 
 constant _SEEK_CUR: c-int {
   magic opaque-value {
-    magic external neut_core_v0_56_SEEK_CUR()
+    magic external neut_core_v0_57_SEEK_CUR()
   }
 }
 
 constant _SEEK_END: c-int {
   magic opaque-value {
-    magic external neut_core_v0_56_SEEK_END()
+    magic external neut_core_v0_57_SEEK_END()
   }
 }
 

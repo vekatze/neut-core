@@ -5,7 +5,7 @@ import {
 }
 
 foreign {
-  neut_core_v0_56_ctlz_word(int) -> int,
+  neut_core_v0_57_ctlz_word(int) -> int,
 }
 
 data intset {
@@ -62,7 +62,7 @@ inline _link-with-mask(m: _Mask, p1: _Prefix, t1: intset, t2: intset) -> intset 
 
 inline _highest-bit-mask(w: int) -> int {
   let size-in-bits = mul-int(this::word::size, 8);
-  shl-int(1, sub-int(sub-int(size-in-bits, 1), magic external neut_core_v0_56_ctlz_word(w)))
+  shl-int(1, sub-int(sub-int(size-in-bits, 1), magic external neut_core_v0_57_ctlz_word(w)))
 }
 
 inline _branch-mask(p1: _Prefix, p2: _Prefix) -> _Mask {

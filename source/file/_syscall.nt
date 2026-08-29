@@ -5,7 +5,7 @@ import {
 
 foreign {
   close(c-int) -> c-int,
-  neut_core_v0_56_lseek(c-int, int, c-int) -> int,
+  neut_core_v0_57_lseek(c-int, int, c-int) -> int,
   dup2(c-int, c-int) -> c-int,
 }
 
@@ -15,7 +15,7 @@ define close(fd: c-int) -> c-int {
 
 define lseek(fd: c-int, offset: c-offset, origin: c-int) -> c-offset {
   let C-Offset(offset) = offset;
-  C-Offset(magic external neut_core_v0_56_lseek(fd, offset, origin))
+  C-Offset(magic external neut_core_v0_57_lseek(fd, offset, origin))
 }
 
 define dup2(fd1: c-int, fd2: c-int) -> c-int {

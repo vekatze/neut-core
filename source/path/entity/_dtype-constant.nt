@@ -1,51 +1,51 @@
 foreign {
-  neut_core_v0_56_DT_BLK() -> int8,
-  neut_core_v0_56_DT_CHR() -> int8,
-  neut_core_v0_56_DT_DIR() -> int8,
-  neut_core_v0_56_DT_FIFO() -> int8,
-  neut_core_v0_56_DT_LNK() -> int8,
-  neut_core_v0_56_DT_REG() -> int8,
-  neut_core_v0_56_DT_SOCK() -> int8,
+  neut_core_v0_57_DT_BLK() -> int8,
+  neut_core_v0_57_DT_CHR() -> int8,
+  neut_core_v0_57_DT_DIR() -> int8,
+  neut_core_v0_57_DT_FIFO() -> int8,
+  neut_core_v0_57_DT_LNK() -> int8,
+  neut_core_v0_57_DT_REG() -> int8,
+  neut_core_v0_57_DT_SOCK() -> int8,
 }
 
 constant dt-blk: int8 {
   magic opaque-value {
-    magic external neut_core_v0_56_DT_BLK()
+    magic external neut_core_v0_57_DT_BLK()
   }
 }
 
 constant dt-chr: int8 {
   magic opaque-value {
-    magic external neut_core_v0_56_DT_CHR()
+    magic external neut_core_v0_57_DT_CHR()
   }
 }
 
 constant dt-dir: int8 {
   magic opaque-value {
-    magic external neut_core_v0_56_DT_DIR()
+    magic external neut_core_v0_57_DT_DIR()
   }
 }
 
 constant dt-fifo: int8 {
   magic opaque-value {
-    magic external neut_core_v0_56_DT_FIFO()
+    magic external neut_core_v0_57_DT_FIFO()
   }
 }
 
 constant dt-lnk: int8 {
   magic opaque-value {
-    magic external neut_core_v0_56_DT_LNK()
+    magic external neut_core_v0_57_DT_LNK()
   }
 }
 
 constant dt-reg: int8 {
   magic opaque-value {
-    magic external neut_core_v0_56_DT_REG()
+    magic external neut_core_v0_57_DT_REG()
   }
 }
 
 constant dt-sock: int8 {
   magic opaque-value {
-    magic external neut_core_v0_56_DT_SOCK()
+    magic external neut_core_v0_57_DT_SOCK()
   }
 }

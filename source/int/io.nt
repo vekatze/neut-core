@@ -7,8 +7,8 @@ import {
 }
 
 foreign {
-  neut_core_v0_56_write_int64(descriptor, int64) -> int,
-  neut_core_v0_56_write_int64_nl(descriptor, int64) -> int,
+  neut_core_v0_56_write_int64(descriptor, int) -> int,
+  neut_core_v0_56_write_int64_nl(descriptor, int) -> int,
 }
 
 define write-int@(d: descriptor, x: int) -> system(unit) {

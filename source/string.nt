@@ -2,9 +2,9 @@ import {
   this::binary {binary, from-list},
   this::binary.pointer {get-content-pointer as get-binary-content-pointer},
   this::bool {False, True, bool},
-  this::c-size {C-Size, c-size},
+  this::c-int {C-Int, c-int, eq-c-int},
+  this::c-size {c-size, to-c-size},
   this::either {Right, none},
-  this::layer,
   this::list {Cons, List, Nil, list},
   this::memory {malloc},
   this::memory.unsafe {load-int8, store-int, store-pointer},
@@ -109,12 +109,12 @@ define _slice-N(t: &string, start: int, size: int) -> string {
 }
 
 foreign {
-  memcmp(pointer, pointer, c-size) -> int,
+  memcmp(pointer, pointer, c-size) -> c-int,
 }
 
 define _match-string-content(ptr1: pointer, ptr2: pointer, len: int) -> bool {
-  let result = magic external memcmp(ptr1, ptr2, C-Size(len));
-  eq-int(result, 0)
+  let result = magic external memcmp(ptr1, ptr2, to-c-size(len));
+  eq-c-int(result, C-Int(0))
 }
 
 define break(haystack: &string, needle: &string) -> pair(string, string) {
@@ -338,7 +338,7 @@ define pack(xs: &list(rune)) -> string {
   let u = this::word::size;
   let u2 = mul-int(u, 2);
   let u3 = mul-int(u, 3);
-  let new-string = malloc(C-Size(add-int(len, u3)));
+  let new-string = malloc(to-c-size(add-int(len, u3)));
   store-int(0, new-string);
   store-int(len, shift(new-string, u));
   let content-ptr = shift(new-string, u3);

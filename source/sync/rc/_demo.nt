@@ -1,7 +1,6 @@
 import {
   this::binary,
   this::either {Left, Right},
-  this::layer,
   this::string,
   this::string.io {print, print-line},
   this::sync.rc {borrow, downgrade, new, upgrade},

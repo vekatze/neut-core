@@ -1,6 +1,5 @@
 import {
   this::binary,
-  this::layer,
   this::list {List, for-each-N, list},
   this::show {Show, show},
   this::string {intercalate, join},

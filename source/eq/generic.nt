@@ -37,7 +37,7 @@ import {
     algebraic-header-slot-count,
     constructor-switch,
     data-arg-count,
-    field-pointer,
+    field-slot,
     fields-with-cursors,
   },
   this::unsafe {cast, cast-inline},
@@ -109,8 +109,8 @@ inline-meta _eq-data-adt-fields<a>(
     let Field(_, t, _) = f;
     unpack-type t = t;
     quote {
-      let x-elem-ptr = cast-inline<pointer, &t>(unquote {field-pointer(f, header, data-arg-num, cursor, x)});
-      let y-elem-ptr = cast-inline<pointer, &t>(unquote {field-pointer(f, header, data-arg-num, cursor, y)});
+      let x-elem-ptr = cast-inline<int, &t>(unquote {field-slot(f, header, data-arg-num, cursor, x)});
+      let y-elem-ptr = cast-inline<int, &t>(unquote {field-slot(f, header, data-arg-num, cursor, y)});
       let is-eq = unquote {eq-data(quote {x-elem-ptr}, quote {y-elem-ptr})};
       if is-eq {
         unquote {_eq-data-adt-fields(rest, data-arg-num, header, x, y)}

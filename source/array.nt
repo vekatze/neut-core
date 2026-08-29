@@ -1,6 +1,6 @@
 import {
   this::bool {False, True, and, bool},
-  this::c-size {C-Size},
+  this::c-size {to-c-size},
   this::either {Right, none},
   this::int {abs-int, max-int, min-int},
   this::list {Cons, Nil, list},
@@ -136,7 +136,7 @@ define _set-to<a>(xs: &array(a), to: int) -> unit {
 
 define _make-raw<a>(capacity: int, initial-cursor: int, elem-type: type, stride: int) -> array(a) {
   let stride = max-int(stride, 0);
-  let array-ptr = malloc(C-Size(_allocation-size(capacity, stride)));
+  let array-ptr = malloc(to-c-size(_allocation-size(capacity, stride)));
   let buffer-ptr = _inline-buffer-ptr(array-ptr);
   let word-size = this::word::size;
   store-int(capacity, array-ptr);
@@ -232,7 +232,7 @@ define _extend-front<a>(xs: array(a)) -> array(a) {
   let growth-base = max-int(old-capacity, 1);
   let new-capacity = mul-int(growth-base, _extend-factor);
   let array-ptr = cast<array(a), pointer>(xs);
-  let new-array-ptr = realloc(array-ptr, C-Size(_allocation-size(new-capacity, stride)));
+  let new-array-ptr = realloc(array-ptr, to-c-size(_allocation-size(new-capacity, stride)));
   let new-buffer-ptr = _inline-buffer-ptr(new-array-ptr);
   let new-head-ptr = shift(new-buffer-ptr, mul-int(stride, growth-base));
   memmove(new-head-ptr, new-buffer-ptr, mul-int(stride, old-capacity));
@@ -252,7 +252,7 @@ define _extend-back<a>(xs: array(a)) -> array(a) {
   let current-capacity = max-int(old-capacity, 1);
   let new-capacity = mul-int(current-capacity, _extend-factor);
   let array-ptr = cast<array(a), pointer>(xs);
-  let new-array-ptr = realloc(array-ptr, C-Size(_allocation-size(new-capacity, stride)));
+  let new-array-ptr = realloc(array-ptr, to-c-size(_allocation-size(new-capacity, stride)));
   let new-buffer-ptr = _inline-buffer-ptr(new-array-ptr);
   let xs = cast<pointer, array(a)>(new-array-ptr);
   let _ on xs = {
@@ -263,7 +263,7 @@ define _extend-back<a>(xs: array(a)) -> array(a) {
 }
 
 inline _load-element<a>(element-ptr: pointer, stride: int) -> a {
-  let value-ptr = malloc(C-Size(stride));
+  let value-ptr = malloc(to-c-size(stride));
   memcpy(value-ptr, element-ptr, stride);
   cast<pointer, a>(value-ptr)
 }
@@ -400,7 +400,7 @@ define _swap-unchecked<a>(xs: array(a), i: int, j: int) -> array(a) {
   let _ on xs = {
     let value-i-ptr = _get-element-pointer(xs, i);
     let value-j-ptr = _get-element-pointer(xs, j);
-    let tmp-ptr = malloc(C-Size(stride));
+    let tmp-ptr = malloc(to-c-size(stride));
     memcpy(tmp-ptr, value-i-ptr, stride);
     memcpy(value-i-ptr, value-j-ptr, stride);
     memcpy(value-j-ptr, tmp-ptr, stride);

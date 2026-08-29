@@ -4,7 +4,6 @@ import {
   this::either {Left, Right},
   this::int.io {print-int-line},
   this::int.ord,
-  this::layer,
   this::ord {ord},
   this::random {random-int},
   this::unit {Unit, unit},

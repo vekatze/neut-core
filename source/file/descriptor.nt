@@ -3,7 +3,7 @@ import {
   this::bool {False, bool, not},
   this::c-int {C-Int, c-int, eq-c-int, ge-c-int},
   this::c-offset {C-Offset},
-  this::c-size {C-Size},
+  this::c-size {to-c-size},
   this::either {Right, none},
   this::file._descriptor-option,
   this::file._syscall,
@@ -84,6 +84,7 @@ define seek@(f: descriptor, offset: int, origin: seek-origin) -> system(int) {
       C-Offset(offset),
       this::file._descriptor-option::seek-origin-to-c-int(origin),
     );
+  let result = result;
   if lt-int(result, 0) {
     report-system-error@()
   } else {
@@ -92,7 +93,7 @@ define seek@(f: descriptor, offset: int, origin: seek-origin) -> system(int) {
 }
 
 define pipe@() -> system(pair(descriptor, descriptor)) {
-  let ptr = malloc(C-Size(mul-int(this::word::size, 2)));
+  let ptr = malloc(to-c-size(mul-int(this::word::size, 2)));
   let result = this::file._syscall.unsafe::pipe(ptr);
   if eq-c-int(result, -1) {
     free(ptr);

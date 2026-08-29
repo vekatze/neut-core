@@ -43,7 +43,7 @@ import {
   this::binary.pointer {get-content-pointer},
   this::bool,
   this::c-int {c-int, from-c-int},
-  this::c-size {C-Size, c-size},
+  this::c-size {c-size, to-c-size},
   this::cell {cell, make-cell, mutate},
   this::control {discard},
   this::int {max-int},
@@ -55,6 +55,7 @@ import {
   this::string {string},
   this::string.pointer,
   this::unit {Unit, unit},
+  this::word,
 }
 
 foreign {
@@ -106,16 +107,16 @@ inline _append(
 }
 
 inline _append-int64(b: +_binary-builder, x: int) -> +_binary-builder {
-  _append(b, 8, (ptr) => {
+  _append(b, this::word::size, (ptr) => {
     store-int(x, ptr)
   })
 }
 
-inline _append-int64-UTF8(b: +_binary-builder, x: int64) -> +_binary-builder {
-  let fmt = this::string.pointer::get-content-pointer("%ld\0");
-  let fragment-size = from-c-int(magic external snprintf(null-pointer, C-Size(0), fmt)(int64 x));
+inline _append-int64-UTF8(b: +_binary-builder, x: int) -> +_binary-builder {
+  let fmt = this::string.pointer::get-content-pointer("%lld\0");
+  let fragment-size = from-c-int(magic external snprintf(null-pointer, to-c-size(0), fmt)(int x));
   _append-with-reserve(b, add-int(fragment-size, 1), fragment-size, (ptr) => {
-    let _ = magic external sprintf(ptr, fmt)(int64 x);
+    let _ = magic external sprintf(ptr, fmt)(int x);
     Unit
   })
 }
@@ -139,16 +140,16 @@ inline _append-int8(b: +_binary-builder, x: int8) -> +_binary-builder {
 }
 
 inline _append-float64(b: +_binary-builder, x: float) -> +_binary-builder {
-  _append(b, 8, (ptr) => {
+  _append(b, this::word::size, (ptr) => {
     store-float(x, ptr)
   })
 }
 
-inline _append-float64-UTF8(b: +_binary-builder, x: float64) -> +_binary-builder {
+inline _append-float64-UTF8(b: +_binary-builder, x: float) -> +_binary-builder {
   let fmt = this::string.pointer::get-content-pointer("%lf\0");
-  let fragment-size = from-c-int(magic external snprintf(null-pointer, C-Size(0), fmt)(float64 x));
+  let fragment-size = from-c-int(magic external snprintf(null-pointer, to-c-size(0), fmt)(float x));
   _append-with-reserve(b, add-int(fragment-size, 1), fragment-size, (ptr) => {
-    let _ = magic external sprintf(ptr, fmt)(float64 x);
+    let _ = magic external sprintf(ptr, fmt)(float x);
     Unit
   })
 }
@@ -415,7 +416,7 @@ define append-int64(b: &binary-builder, x: int) -> unit {
   })
 }
 
-define append-int64-UTF8(b: &binary-builder, x: int64) -> unit {
+define append-int64-UTF8(b: &binary-builder, x: int) -> unit {
   mutate(_to-cell-N(b), (b) => {
     _append-int64-UTF8(b, x)
   })
@@ -428,7 +429,7 @@ define append-int32(b: &binary-builder, x: int32) -> unit {
 }
 
 define append-int32-UTF8(b: &binary-builder, x: int32) -> unit {
-  append-int64-UTF8(b, sext-int32-int64(x))
+  append-int64-UTF8(b, sext-int32-int(x))
 }
 
 define append-int16(b: &binary-builder, x: int16) -> unit {
@@ -438,7 +439,7 @@ define append-int16(b: &binary-builder, x: int16) -> unit {
 }
 
 define append-int16-UTF8(b: &binary-builder, x: int16) -> unit {
-  append-int64-UTF8(b, sext-int16-int64(x))
+  append-int64-UTF8(b, sext-int16-int(x))
 }
 
 define append-int8(b: &binary-builder, x: int8) -> unit {
@@ -448,7 +449,7 @@ define append-int8(b: &binary-builder, x: int8) -> unit {
 }
 
 define append-int8-UTF8(b: &binary-builder, x: int8) -> unit {
-  append-int64-UTF8(b, sext-int8-int64(x))
+  append-int64-UTF8(b, sext-int8-int(x))
 }
 
 define append-float64(b: &binary-builder, x: float) -> unit {
@@ -457,7 +458,7 @@ define append-float64(b: &binary-builder, x: float) -> unit {
   })
 }
 
-define append-float64-UTF8(b: &binary-builder, x: float64) -> unit {
+define append-float64-UTF8(b: &binary-builder, x: float) -> unit {
   mutate(_to-cell-N(b), (b) => {
     _append-float64-UTF8(b, x)
   })

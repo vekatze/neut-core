@@ -1,8 +1,3 @@
 constant size: int {
-  introspect target-arch {
-  | arm64 =>
-    8
-  | amd64 =>
-    8
-  }
+  8
 }

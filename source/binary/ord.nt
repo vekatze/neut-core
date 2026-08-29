@@ -2,18 +2,19 @@ import {
   this::binary {binary, length},
   this::binary.pointer {get-content-pointer},
   this::bool {False, True, bool},
-  this::c-size {C-Size, c-size},
+  this::c-int {c-int, from-c-int},
+  this::c-size {c-size, to-c-size},
   this::int {min-int},
   this::ord {Ord, ord},
   this::ordering {EQ, GT, LT, ordering},
 }
 
 foreign {
-  memcmp(pointer, pointer, c-size) -> int,
+  memcmp(pointer, pointer, c-size) -> c-int,
 }
 
 define _cmp-binary(ptr1: pointer, ptr2: pointer, len: int, fallback: ordering) -> ordering {
-  let result = magic external memcmp(ptr1, ptr2, C-Size(len));
+  let result = from-c-int(magic external memcmp(ptr1, ptr2, to-c-size(len)));
   if gt-int(result, 0) {
     GT
   } else-if lt-int(result, 0) {

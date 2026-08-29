@@ -1,7 +1,6 @@
 import {
   this::bool {False, True, and, bool, or},
   this::either {Left, Right, either, none},
-  this::layer,
   this::monoid {Monoid, monoid},
   this::ord {Ord, ord},
   this::ordering {GT, LT},

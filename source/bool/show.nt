@@ -1,7 +1,6 @@
 import {
   this::binary,
   this::bool {bool},
-  this::layer,
   this::show {* as s},
   this::string {string},
 }

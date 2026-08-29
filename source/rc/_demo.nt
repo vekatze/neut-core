@@ -1,6 +1,5 @@
 import {
   this::binary,
-  this::layer,
   this::rc {borrow, new},
   this::string,
   this::string.io {print, print-line},

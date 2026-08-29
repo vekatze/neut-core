@@ -1,6 +1,5 @@
 import {
   this::binary,
-  this::layer,
   this::show {Show, show},
   this::string,
   this::unit {Unit, unit},

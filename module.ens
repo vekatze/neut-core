@@ -6,6 +6,14 @@
         "-fsanitize=address",
       ],
     },
+    test-wasm {
+      main "_test-wasm.nt",
+      platform "wasm32",
+      execute ["wasmtime", "{{executable}}"],
+    },
+    test-wasm-host {
+      main "_test-wasm.nt",
+    },
     bench-random-dict {
       main "_bench/random-dict.nt",
       build-option [
@@ -13,6 +21,7 @@
       ],
     },
   },
+  universal false,
   foreign {
     input [
       "source/foreign.c",

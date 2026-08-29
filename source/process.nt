@@ -1,26 +1,13 @@
 import {
-  this::binary,
-  this::bool {bool},
-  this::c-int {c-int, lt-c-int, ne-c-int},
-  this::c-pid {c-pid, eq-c-pid},
-  this::c-size {C-Size},
-  this::c-string {c-string, from-string, to-string},
-  this::control {discard},
-  this::either {Left, Right},
-  this::file.descriptor {close, descriptor, dup2, pipe, stderr, stdin, stdout},
-  this::list {Cons, List, Nil, fold-left-with-index, length, list},
-  this::memory {malloc},
-  this::memory.unsafe {free, load-c-int, load-int, load-pointer, store-int},
-  this::pair {Pair},
-  this::pointer {extract, null-pointer, shift},
-  this::process._posix {* as _posix},
+  this::bool,
+  this::c-int {c-int},
+  this::c-string {c-string, to-string},
+  this::list {Cons, Nil, list},
+  this::memory.unsafe {load-int, load-pointer},
+  this::pointer {shift},
   this::string {string},
-  this::string.io {read, write},
-  this::string.pointer,
-  this::system {get-error-message, get-system-error, report-system-error, system},
-  this::unit {Unit, unit},
+  this::unit {unit},
   this::unsafe {cast},
-  this::word,
 }
 
 foreign {
@@ -28,14 +15,8 @@ foreign {
 }
 
 define exit<a>(status: c-int) -> a {
-  introspect target-os {
-  | darwin =>
-    let _ = magic external exit(status);
-    magic cast(type, a, pack-type {unit})
-  | linux =>
-    let _ = magic external exit(status);
-    magic cast(type, a, pack-type {unit})
-  }
+  let _ = magic external exit(status);
+  magic cast(type, a, pack-type {unit})
 }
 
 define get-argc() -> int {
@@ -47,7 +28,7 @@ define get-argv() -> list(string) {
   let argc = get-argc();
   let argv-ptr = magic global("neut-unsafe-argv", pointer);
   let argv = load-pointer(argv-ptr);
-  let u = this::word::size;
+  let u = this::pointer::size;
   let f =
     define get-argv-helper(i: int) -> list(string) {
       if eq-int(i, argc) {
@@ -55,189 +36,10 @@ define get-argv() -> list(string) {
       } else {
         let rest = get-argv-helper(add-int(i, 1));
         let str-ptr-ptr = shift(argv, mul-int(i, u));
-        let str-ptr = load-int(str-ptr-ptr);
-        let t = to-string(cast<int, &c-string>(str-ptr));
+        let str-ptr = load-pointer(str-ptr-ptr);
+        let t = to-string(cast<pointer, &c-string>(str-ptr));
         Cons(t, rest)
       }
     };
   f(0)
-}
-
-inline _is-not-zero(x: c-int) -> bool {
-  ne-c-int(x, 0)
-}
-
-define _wifexited(ptr: c-int) -> bool {
-  _is-not-zero(_posix.wifexited(ptr))
-}
-
-define _wifsignaled(ptr: c-int) -> bool {
-  _is-not-zero(_posix.wifsignaled(ptr))
-}
-
-define _wifstopped(ptr: c-int) -> bool {
-  _is-not-zero(_posix.wifstopped(ptr))
-}
-
-define _wexitstatus(ptr: c-int) -> c-int {
-  _posix.wexitstatus(ptr)
-}
-
-define _wtermsig(ptr: c-int) -> c-int {
-  _posix.wtermsig(ptr)
-}
-
-define _wcoredump(ptr: c-int) -> bool {
-  _is-not-zero(_posix.wcoredump(ptr))
-}
-
-define _wstopsig(ptr: c-int) -> c-int {
-  _posix.wstopsig(ptr)
-}
-
-data process-status {
-| Exited(status: c-int)
-| Signaled(termsig: c-int, coredump: bool)
-| Stopped(stopsig: c-int)
-}
-
-define _waitpid@(pid: c-pid) -> system(process-status) {
-  let status-ptr = malloc(C-Size(this::word::size));
-  let result = _posix.waitpid(pid, status-ptr, 0);
-  if eq-c-pid(result, -1) {
-    free(status-ptr);
-    report-system-error@()
-  } else {
-    let stat-loc = load-c-int(status-ptr);
-    free(status-ptr);
-    if _wifexited(stat-loc) {
-      let exit-status = _wexitstatus(stat-loc);
-      Right(Exited(exit-status))
-    } else-if _wifsignaled(stat-loc) {
-      let termsig = _wtermsig(stat-loc);
-      let coredump = _wcoredump(stat-loc);
-      Right(Signaled(termsig, coredump))
-    } else-if _wifstopped(stat-loc) {
-      let stopsig = _wstopsig(stat-loc);
-      Right(Stopped(stopsig))
-    } else {
-      // unreachable
-      report-system-error@()
-    }
-  }
-}
-
-define _make-argv(xs: list(pointer)) -> pointer {
-  let len on xs = length(xs);
-  let ptr = malloc(C-Size(mul-int(this::word::size, len)));
-  fold-left-with-index(Unit, xs, (_, x, i) => {
-    store-int(extract(x), shift(ptr, mul-int(this::word::size, i)))
-  });
-  ptr
-}
-
-define _fork@() -> system(c-pid) {
-  let result = _posix.fork();
-  if eq-c-pid(result, -1) {
-    report-system-error@()
-  } else {
-    Right(result)
-  }
-}
-
-data process-spec {
-| Process-Spec(
-    command: string,
-    args: list(string),
-    cwd: ?string,
-    input: string,
-  )
-}
-
-data process-result {
-| Process-Result(
-    status: process-status,
-    stdout-string: string,
-    stderr-string: string,
-  )
-}
-
-define _exec<a>(command: string, args: list(string), error-writer: descriptor) -> a {
-  let v = {
-    pin tmp =
-      this::list::for-each(Cons(command, args), (s) => {
-        pin s = s;
-        this::string::append(s, "\0")
-      });
-    let cmd =
-      case tmp {
-      | Nil =>
-        null-pointer
-      | Cons(c, _) =>
-        this::string.pointer::get-content-pointer(c)
-      };
-    let raw-args = this::list::for-each-N(tmp, this::string.pointer::get-content-pointer);
-    let cmd-args = _make-argv(this::list::append(raw-args, List::[null-pointer]));
-    _posix.execvp(cmd, cmd-args)
-  };
-  let _ = {
-    pin message = get-error-message(get-system-error@());
-    write@(error-writer, message)
-  };
-  exit(v)
-}
-
-define run@(
-  ps: process-spec,
-  stdout-initial-buffer-size: int,
-  stderr-initial-buffer-size: int,
-) -> system(process-result) {
-  try Pair(in-reader, in-writer) = pipe@();
-  try Pair(out-reader, out-writer) = pipe@();
-  try Pair(error-reader, error-writer) = pipe@();
-  try pid = _fork@();
-  if eq-c-pid(pid, -1) {
-    report-system-error@()
-  } else-if eq-c-pid(pid, 0) {
-    try _ = close@(in-writer);
-    try _ = close@(out-reader);
-    try _ = close@(error-reader);
-    try _ = dup2@(in-reader, stdin);
-    try _ = dup2@(out-writer, stdout);
-    try _ = dup2@(error-writer, stderr);
-    let Process-Spec{command, args, cwd} = ps;
-    match cwd {
-    | Left(_) =>
-      _exec(command, args, error-writer)
-    | Right(dir) =>
-      let s on dir = from-string(dir);
-      discard(dir);
-      let result on s = _posix.chdir(magic cast(&c-string, pointer, s));
-      let _ = s;
-      if lt-c-int(result, 0) {
-        let message = get-error-message(get-system-error@());
-        let _ on message = write@(stderr, message);
-        let _ = message;
-        exit(result)
-      } else {
-        _exec(command, args, error-writer)
-      }
-    }
-  } else {
-    try _ = close@(in-reader);
-    try _ = close@(out-writer);
-    try _ = close@(error-writer);
-    let Process-Spec{input} = ps;
-    try _ on input = write@(in-writer, input);
-    let _ = input;
-    try _ = close@(in-writer);
-    try stdout-string = read@(out-reader, stdout-initial-buffer-size);
-    try stderr-string = read@(error-reader, stderr-initial-buffer-size);
-    try status = _waitpid@(pid);
-    Right(Process-Result{
-      status,
-      stdout-string,
-      stderr-string,
-    })
-  }
 }

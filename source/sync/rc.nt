@@ -1,6 +1,6 @@
 import {
   this::bool,
-  this::c-size {C-Size},
+  this::c-size {to-c-size},
   this::either {Right, none},
   this::memory {malloc},
   this::memory.unsafe {free, load-int, store-int},
@@ -101,7 +101,7 @@ alias-opaque weak(_: type) {
 }
 
 define new<a>(value: a) -> rc(a) {
-  let ptr = malloc(C-Size(_header-size()));
+  let ptr = malloc(to-c-size(_header-size()));
   store-int(1, ptr);
   store-int(1, _weak-ptr(ptr));
   store-int(cast<type, int>(pack-type {a}), _type-ptr(ptr));

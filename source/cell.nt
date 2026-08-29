@@ -1,6 +1,6 @@
 import {
   this::bool,
-  this::c-size {C-Size},
+  this::c-size {to-c-size},
   this::layer {axiom-T},
   this::memory {malloc},
   this::memory.unsafe {free, load-int, store-int},
@@ -32,7 +32,7 @@ resource _cell {
     let u = this::word::size;
     let ptr =
       if is-null-pointer(dest) {
-        malloc(C-Size(_cell-size))
+        malloc(to-c-size(_cell-size))
       } else {
         dest
       };
@@ -49,7 +49,7 @@ data cell(_: type) {
 
 inline make-cell<a>(initial-value: +a) -> cell(a) {
   let u = this::word::size;
-  let ptr = malloc(C-Size(_cell-size));
+  let ptr = malloc(to-c-size(_cell-size));
   store-int(cast-inline<a, int>(axiom-T(initial-value)), ptr);
   store-int(cast-inline<type, int>(pack-type {a}), shift(ptr, u));
   _Cell(magic cast(pointer, _cell, ptr))

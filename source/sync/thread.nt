@@ -1,8 +1,7 @@
 import {
   this::bool,
   this::c-int {eq-c-int},
-  this::c-size {C-Size, add-c-size, c-size, from-c-size, mul-c-size},
-  this::layer,
+  this::c-size {add-c-size, c-size, from-c-size, mul-c-size, to-c-size},
   this::memory {malloc},
   this::memory.unsafe {free, load-int, load-int8, load-pointer, store-int, store-int8},
   this::pointer {shift},
@@ -28,7 +27,7 @@ inline _embody<a>(x: &a) -> a {
 
 inline _thread-size() -> c-size {
   let u = this::word::size;
-  add-c-size(add-c-size(mul-c-size(C-Size(u), C-Size(3)), THREAD_MUTEX_SIZE), C-Size(1))
+  add-c-size(add-c-size(mul-c-size(to-c-size(u), to-c-size(3)), THREAD_MUTEX_SIZE), to-c-size(1))
 }
 
 inline _get-mutex-ptr(addr: pointer) -> pointer {

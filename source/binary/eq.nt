@@ -2,17 +2,18 @@ import {
   this::binary {binary, length},
   this::binary.pointer {get-content-pointer},
   this::bool {False, True, bool, not},
-  this::c-size {C-Size, c-size},
+  this::c-int {c-int, from-c-int},
+  this::c-size {c-size, to-c-size},
   this::eq {Eq, eq},
   this::pointer {shift},
 }
 
 foreign {
-  memcmp(pointer, pointer, c-size) -> int,
+  memcmp(pointer, pointer, c-size) -> c-int,
 }
 
 define _eq-binary(ptr1: pointer, ptr2: pointer, len: int) -> bool {
-  let result = magic external memcmp(ptr1, ptr2, C-Size(len));
+  let result = from-c-int(magic external memcmp(ptr1, ptr2, to-c-size(len)));
   eq-int(result, 0)
 }
 

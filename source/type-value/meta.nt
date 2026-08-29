@@ -3,7 +3,7 @@ import {
   this::either {Left, Right},
   this::list {Cons, Nil, list},
   this::list.meta {fold-left, length},
-  this::memory.unsafe {load-int, load-pointer},
+  this::memory.unsafe {load-int},
   this::pair {Pair, pair},
   this::pointer {shift},
   this::type-value {
@@ -222,17 +222,17 @@ inline nth-field-slot-pointer(header: int, data-arg-num: int, cursor: int, x: po
   shift(x, offset)
 }
 
-inline load-direct-field-pointer(header: int, data-arg-num: int, cursor: int, x: pointer) -> pointer {
-  load-pointer(nth-field-slot-pointer(header, data-arg-num, cursor, x))
+inline load-direct-field-slot(header: int, data-arg-num: int, cursor: int, x: pointer) -> int {
+  load-int(nth-field-slot-pointer(header, data-arg-num, cursor, x))
 }
 
-inline-meta field-pointer<a>(
+inline-meta field-slot<a>(
   f: field,
   header: int,
   data-arg-num: int,
   cursor: int,
   x: '&a,
-) -> 'pointer {
+) -> 'int {
   match field-layout-of(f) {
   | Direct =>
     quote {
@@ -240,7 +240,7 @@ inline-meta field-pointer<a>(
       let data-arg-num-inner = unquote {promote {data-arg-num}};
       let low-cursor = unquote {promote {cursor}};
       let x-ptr = cast-inline<&a, pointer>(unquote {x});
-      load-direct-field-pointer(header-inner, data-arg-num-inner, low-cursor, x-ptr)
+      load-direct-field-slot(header-inner, data-arg-num-inner, low-cursor, x-ptr)
     }
   | Mixed(_) =>
     quote {
@@ -248,7 +248,7 @@ inline-meta field-pointer<a>(
       let data-arg-num-inner = unquote {promote {data-arg-num}};
       let low-cursor = unquote {promote {cursor}};
       let x-ptr = cast-inline<&a, pointer>(unquote {x});
-      nth-field-slot-pointer(header-inner, data-arg-num-inner, low-cursor, x-ptr)
+      cast-inline<pointer, int>(nth-field-slot-pointer(header-inner, data-arg-num-inner, low-cursor, x-ptr))
     }
   }
 }

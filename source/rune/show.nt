@@ -1,5 +1,4 @@
 import {
-  this::layer,
   this::show {Show, show},
   this::string {join, string},
   this::string.show {escape},

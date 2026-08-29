@@ -1,36 +1,33 @@
 import {
   this::bool {bool},
+  this::c-word {c-word},
 }
 
 data c-ssize {
-| C-SSize(int64)
+| C-SSize(c-word)
+}
+
+inline to-c-ssize(x: int) -> c-ssize {
+  C-SSize(this::c-word::from-int(x))
 }
 
 inline from-c-ssize(x: c-ssize) -> int {
   let C-SSize(x) = x;
-  x
+  this::c-word::to-int-signed(x)
 }
 
 inline add-c-ssize(x: c-ssize, y: c-ssize) -> c-ssize {
-  let C-SSize(x) = x;
-  let C-SSize(y) = y;
-  C-SSize(add-int(x, y))
+  to-c-ssize(add-int(from-c-ssize(x), from-c-ssize(y)))
 }
 
 inline mul-c-ssize(x: c-ssize, y: c-ssize) -> c-ssize {
-  let C-SSize(x) = x;
-  let C-SSize(y) = y;
-  C-SSize(mul-int(x, y))
+  to-c-ssize(mul-int(from-c-ssize(x), from-c-ssize(y)))
 }
 
 inline lt-c-ssize(x: c-ssize, y: c-ssize) -> bool {
-  let C-SSize(x) = x;
-  let C-SSize(y) = y;
-  lt-int(x, y)
+  lt-int(from-c-ssize(x), from-c-ssize(y))
 }
 
 inline eq-c-ssize(x: c-ssize, y: c-ssize) -> bool {
-  let C-SSize(x) = x;
-  let C-SSize(y) = y;
-  eq-int(x, y)
+  eq-int(from-c-ssize(x), from-c-ssize(y))
 }

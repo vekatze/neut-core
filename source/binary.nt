@@ -1,6 +1,6 @@
 import {
   this::bool {bool},
-  this::c-size {C-Size},
+  this::c-size {to-c-size},
   this::control {discard},
   this::either {Right, none},
   this::int {max-int, min-int},
@@ -40,7 +40,7 @@ resource binary {
     let from = load-int(source-pointer);
     let to = load-int(shift(source-pointer, u));
     let length = sub-int(to, from);
-    let target-pointer = malloc(C-Size(add-int(length, _header-size())));
+    let target-pointer = malloc(to-c-size(add-int(length, _header-size())));
     let target-content-pointer = _initialize-header(target-pointer, length);
     let source-content-pointer = load-pointer(shift(source-pointer, _content-pointer-offset()));
     memcpy(target-content-pointer, shift(source-content-pointer, from), length);
@@ -83,7 +83,7 @@ inline with-slice<a>(xs: &binary, start: int, size: int, f: (&binary) -> +a) -> 
 
 define allocate(len: int) -> binary {
   let len = max-int(0, len);
-  let base-pointer = malloc(C-Size(add-int(len, _header-size())));
+  let base-pointer = malloc(to-c-size(add-int(len, _header-size())));
   let content-pointer = _initialize-header(base-pointer, len);
   let store-values =
     define self(index: int) -> unit {
@@ -100,7 +100,7 @@ define allocate(len: int) -> binary {
 
 define from-list(xs: list(int8)) -> binary {
   let len on xs = this::list::length(xs);
-  let base-pointer = malloc(C-Size(add-int(len, _header-size())));
+  let base-pointer = malloc(to-c-size(add-int(len, _header-size())));
   let content-pointer = _initialize-header(base-pointer, len);
   let store-values =
     define self(values: list(int8), index: int) -> unit {
@@ -133,7 +133,7 @@ define replicate(t: &binary, n: int) -> binary {
   } else {
     let base-len = length(t);
     let len = mul-int(n, base-len);
-    let new-binary = malloc(C-Size(add-int(len, _header-size())));
+    let new-binary = malloc(to-c-size(add-int(len, _header-size())));
     let content-ptr = _initialize-header(new-binary, len);
     let loop =
       define self(count: int, t: &binary) -> unit {
@@ -156,7 +156,7 @@ define join(xs: list(binary)) -> binary {
     fold-left-N(0, xs, (acc, x) => {
       add-int(acc, length(x))
     });
-  let new-binary = malloc(C-Size(add-int(len, _header-size())));
+  let new-binary = malloc(to-c-size(add-int(len, _header-size())));
   let content-ptr = _initialize-header(new-binary, len);
   let loop =
     define self(offset: int, xs: list(binary)) -> unit {
@@ -181,7 +181,7 @@ define join-N(xs: &list(binary)) -> binary {
     fold-left-N(0, xs, (acc, x) => {
       add-int(acc, length(x))
     });
-  let new-binary = malloc(C-Size(add-int(len, _header-size())));
+  let new-binary = malloc(to-c-size(add-int(len, _header-size())));
   let content-ptr = _initialize-header(new-binary, len);
   let loop =
     define self(offset: int, xs: &list(binary)) -> unit {
@@ -213,7 +213,7 @@ define append(t1: &binary, t2: &binary) -> binary {
   let new-len = add-int(len1, len2);
   let content1 = load-pointer(shift(p1, _content-pointer-offset()));
   let content2 = load-pointer(shift(p2, _content-pointer-offset()));
-  let new-binary = malloc(C-Size(add-int(new-len, _header-size())));
+  let new-binary = malloc(to-c-size(add-int(new-len, _header-size())));
   let str-pointer = _initialize-header(new-binary, new-len);
   let !store-values =
     define store-values(target-pointer: pointer, content-array: pointer, current-index: int, array-length: int) -> unit {
@@ -266,7 +266,7 @@ define drop-N(t: &binary, offset: int) -> binary {
   let orig-size = length(t);
   let offset = min-int(max-int(0, offset), orig-size);
   let new-size = sub-int(orig-size, offset);
-  let new-ptr = malloc(C-Size(add-int(new-size, _header-size())));
+  let new-ptr = malloc(to-c-size(add-int(new-size, _header-size())));
   let new-content-ptr = _initialize-header(new-ptr, new-size);
   let content-ptr = shift(content-ptr, offset);
   memcpy(new-content-ptr, content-ptr, new-size);
@@ -276,7 +276,7 @@ define drop-N(t: &binary, offset: int) -> binary {
 define take-N(t: &binary, offset: int) -> binary {
   let len = length(t);
   let new-size = min-int(max-int(0, offset), len);
-  let new-ptr = malloc(C-Size(add-int(new-size, _header-size())));
+  let new-ptr = malloc(to-c-size(add-int(new-size, _header-size())));
   let new-content-ptr = _initialize-header(new-ptr, new-size);
   let content-ptr = _get-content-pointer(t);
   memcpy(new-content-ptr, content-ptr, new-size);
@@ -289,7 +289,7 @@ define slice-N(t: &binary, start: int, size: int) -> binary {
   let size = max-int(size, 0);
   let new-size = min-int(size, sub-int(len, start));
   let content-ptr = _get-content-pointer(t);
-  let new-ptr = malloc(C-Size(add-int(new-size, _header-size())));
+  let new-ptr = malloc(to-c-size(add-int(new-size, _header-size())));
   let new-content-ptr = _initialize-header(new-ptr, new-size);
   memcpy(new-content-ptr, shift(content-ptr, start), new-size);
   cast<pointer, binary>(new-ptr)
@@ -327,7 +327,7 @@ define intercalate-N(xs: &list(binary), sep: &binary) -> binary {
   let xs-len = this::list::length(xs);
   let sep-num = max-int(0, sub-int(xs-len, 1));
   let len = add-int(base-len, mul-int(length(sep), sep-num));
-  let new-binary = malloc(C-Size(add-int(len, _header-size())));
+  let new-binary = malloc(to-c-size(add-int(len, _header-size())));
   let content-ptr = _initialize-header(new-binary, len);
   let loop =
     define self(offset: int, xs: &list(binary)) -> unit {

@@ -6,7 +6,6 @@ import {
   this::either {Right},
   this::file.buffer {flush, make-buffer},
   this::file.descriptor {stdout},
-  this::layer,
   this::string,
   this::system {system},
   this::unit {Unit, unit},

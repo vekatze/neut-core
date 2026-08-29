@@ -3,7 +3,6 @@ import {
   this::binary,
   this::doc {Group, Nest, ansi-fg, ansi-reset, atom, break, join},
   this::doc.io {print-doc-line},
-  this::layer,
   this::string,
   this::unit {Unit, unit},
 }

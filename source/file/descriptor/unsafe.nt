@@ -1,7 +1,7 @@
 import {
   this::bool,
   this::c-int {c-int},
-  this::c-size {C-Size, c-size},
+  this::c-size {c-size, to-c-size},
   this::c-ssize {c-ssize, from-c-ssize, lt-c-ssize},
   this::either {Right},
   this::file._syscall.unsafe,
@@ -28,7 +28,7 @@ define write-all@(d: descriptor, p: pointer, size: int) -> system(unit) {
     define write-loop@(acc: int) -> system(unit) {
       let rest = sub-int(size, acc);
       let head-ptr = shift(p, acc);
-      let bytes = write(d, head-ptr, C-Size(rest));
+      let bytes = write(d, head-ptr, to-c-size(rest));
       if lt-c-ssize(bytes, 0) {
         report-system-error@()
       } else {

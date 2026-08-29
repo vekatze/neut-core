@@ -45,7 +45,6 @@ import {
   this::file.descriptor {descriptor},
   this::int.io,
   this::int.io.buffer,
-  this::layer,
   this::string {string},
   this::string.io,
   this::string.io.buffer,

@@ -23,7 +23,6 @@ import {
   },
   this::float.show {show-float},
   this::int.show {show-int},
-  this::layer,
   this::string {from-text, string},
   this::unit {unit},
 }

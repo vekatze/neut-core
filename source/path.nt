@@ -2,7 +2,6 @@ import {
   this::binary,
   this::bool {all, bool, not, or},
   this::either {Left, Right},
-  this::layer,
   this::list {Cons, List, Nil, filter, length, list, reverse},
   this::pair {Pair, pair},
   this::string {
@@ -23,12 +22,7 @@ constant separator-rune: rune {
 }
 
 constant separator: &string {
-  introspect target-os {
-  | linux =>
-    "/"
-  | darwin =>
-    "/"
-  }
+  "/"
 }
 
 define is-absolute(path: &string) -> bool {

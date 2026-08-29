@@ -1,6 +1,6 @@
 import {
   this::array {array},
-  this::c-size {C-Size},
+  this::c-size {to-c-size},
   this::memory {malloc},
   this::memory.unsafe {free, load-int, load-pointer, memcpy},
   this::pointer {null-pointer, shift},
@@ -29,7 +29,7 @@ define swap-unchecked<a>(xs: array(a), i: int, j: int) -> array(a) {
   let _ on xs = {
     let value-i-pointer = _get-element-pointer(xs, i);
     let value-j-pointer = _get-element-pointer(xs, j);
-    let tmp-pointer = malloc(C-Size(stride));
+    let tmp-pointer = malloc(to-c-size(stride));
     memcpy(tmp-pointer, value-i-pointer, stride);
     memcpy(value-i-pointer, value-j-pointer, stride);
     memcpy(value-j-pointer, tmp-pointer, stride);

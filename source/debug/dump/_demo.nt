@@ -3,7 +3,6 @@ import {
   this::bool {True, bool},
   this::debug.dump {vet},
   this::either {Left, either},
-  this::layer,
   this::list {list},
   this::pair {Pair, pair},
   this::string {string},

@@ -1,6 +1,6 @@
 import {
   this::c-int {c-int},
-  this::c-size {c-size},
+  this::c-size {c-size, to-c-size},
   this::unit {Unit, unit},
 }
 
@@ -81,16 +81,16 @@ inline load-c-int(p: pointer) -> c-int {
 }
 
 foreign {
-  llvm.memcpy.p0.p0.i64(pointer, pointer, int64, int1) -> void,
-  llvm.memmove.p0.p0.i64(pointer, pointer, int64, int1) -> void,
+  memcpy(pointer, pointer, c-size) -> pointer,
+  memmove(pointer, pointer, c-size) -> pointer,
 }
 
 inline memcpy(target-pointer: pointer, source-pointer: pointer, len: int) -> unit {
-  let _ = magic external llvm.memcpy.p0.p0.i64(target-pointer, source-pointer, len, 0);
+  let _ = magic external memcpy(target-pointer, source-pointer, to-c-size(len));
   Unit
 }
 
 inline memmove(target-pointer: pointer, source-pointer: pointer, len: int) -> unit {
-  let _ = magic external llvm.memmove.p0.p0.i64(target-pointer, source-pointer, len, 0);
+  let _ = magic external memmove(target-pointer, source-pointer, to-c-size(len));
   Unit
 }

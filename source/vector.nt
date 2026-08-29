@@ -1,11 +1,10 @@
 import {
   this::bool {False, True, and, bool, not, or},
-  this::c-size {C-Size},
+  this::c-size {to-c-size},
   this::control {grow, loop},
   this::either {Left, Right, either, none},
   this::function {compose},
   this::int {abs-int, max-int, min-int},
-  this::layer,
   this::list {Cons, Nil, list},
   this::memory {malloc},
   this::memory.unsafe {free, load-int, load-pointer, memmove, realloc, store-int, store-pointer},
@@ -135,7 +134,7 @@ inline _set-to<a>(xs: &vector(a), to: int) -> unit {
 define make<a>(initial-capacity: int) -> vector(a) {
   let abs-capacity = abs-int(initial-capacity);
   let word-size = this::word::size;
-  let vector-ptr = malloc(C-Size(_allocation-size(abs-capacity)));
+  let vector-ptr = malloc(to-c-size(_allocation-size(abs-capacity)));
   let buffer-ptr = _inline-buffer-ptr(vector-ptr);
   let initial-cursor = match gt-int(initial-capacity, 0) {True => 0 | False => abs-capacity};
   store-int(abs-capacity, vector-ptr);
@@ -215,7 +214,7 @@ define _extend-front<a>(xs: vector(a)) -> vector(a) {
   let growth-base = max-int(old-capacity, 1);
   let new-capacity = mul-int(growth-base, _extend-factor);
   let vector-ptr = cast<vector(a), pointer>(xs);
-  let new-vector-ptr = realloc(vector-ptr, C-Size(_allocation-size(new-capacity)));
+  let new-vector-ptr = realloc(vector-ptr, to-c-size(_allocation-size(new-capacity)));
   let new-buffer-ptr = _inline-buffer-ptr(new-vector-ptr);
   let new-head-ptr = shift(new-buffer-ptr, mul-int(this::word::size, growth-base));
   memmove(new-head-ptr, new-buffer-ptr, mul-int(this::word::size, old-capacity));
@@ -233,7 +232,7 @@ define _extend-back<a>(xs: vector(a)) -> vector(a) {
   let current-capacity on xs = max-int(get-capacity(xs), 1);
   let new-capacity = mul-int(current-capacity, _extend-factor);
   let vector-ptr = cast<vector(a), pointer>(xs);
-  let new-vector-ptr = realloc(vector-ptr, C-Size(_allocation-size(new-capacity)));
+  let new-vector-ptr = realloc(vector-ptr, to-c-size(_allocation-size(new-capacity)));
   let new-buffer-ptr = _inline-buffer-ptr(new-vector-ptr);
   let xs = cast<pointer, vector(a)>(new-vector-ptr);
   let _ on xs = {

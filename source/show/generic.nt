@@ -27,7 +27,8 @@ import {
     join,
   },
   this::doc.show {show-doc},
-  this::float.show {show-float32},
+  this::float.show {show-float32, show-float64},
+  this::int.show {show-int64},
   this::list {Cons, Nil, list},
   this::pair {Pair, pair},
   this::show {Show, show},
@@ -65,7 +66,7 @@ import {
     constructor-switch,
     data-arg-count,
     enum-switch,
-    field-pointer,
+    field-slot,
     fields-with-cursors,
   },
   this::unsafe {cast-inline},
@@ -178,7 +179,7 @@ inline-meta _constructor-arg-doc<a>(
   let Field(_, t, _) = f;
   unpack-type t = t;
   quote {
-    let x-elem-ptr = cast-inline<pointer, &t>(unquote {field-pointer(f, header, data-arg-num, cursor, x)});
+    let x-elem-ptr = cast-inline<int, &t>(unquote {field-slot(f, header, data-arg-num, cursor, x)});
     unquote {to-doc<t>(quote {x-elem-ptr}, enable-ansi)}
   }
 }
@@ -266,25 +267,25 @@ define-meta to-doc<a>(x: '&a, enable-ansi: 'bool) -> 'doc {
       }
     }
   | Int1 =>
-    quote {atom-int(magic cast(int1, int64, magic cast(&a, int1, unquote {x})))}
+    quote {atom-int(magic cast(int1, int, magic cast(&a, int1, unquote {x})))}
   | Int2 =>
-    quote {atom-int(magic cast(int2, int64, magic cast(&a, int2, unquote {x})))}
+    quote {atom-int(magic cast(int2, int, magic cast(&a, int2, unquote {x})))}
   | Int4 =>
-    quote {atom-int(magic cast(int4, int64, magic cast(&a, int4, unquote {x})))}
+    quote {atom-int(magic cast(int4, int, magic cast(&a, int4, unquote {x})))}
   | Int8 =>
-    quote {atom-int(magic cast(int8, int64, magic cast(&a, int8, unquote {x})))}
+    quote {atom-int(magic cast(int8, int, magic cast(&a, int8, unquote {x})))}
   | Int16 =>
-    quote {atom-int(magic cast(int16, int64, magic cast(&a, int16, unquote {x})))}
+    quote {atom-int(magic cast(int16, int, magic cast(&a, int16, unquote {x})))}
   | Int32 =>
-    quote {atom-int(magic cast(int32, int64, magic cast(&a, int32, unquote {x})))}
+    quote {atom-int(magic cast(int32, int, magic cast(&a, int32, unquote {x})))}
   | Int64 =>
-    quote {atom-int(magic cast(&a, int64, unquote {x}))}
+    quote {atom(show-int64(magic cast(&a, int64, unquote {x})))}
   | Float16 =>
-    quote {atom-float(magic cast(float16, float64, magic cast(&a, float16, unquote {x})))}
+    quote {atom-float(magic cast(float16, float, magic cast(&a, float16, unquote {x})))}
   | Float32 =>
     quote {atom(show-float32(magic cast(&a, float32, unquote {x})))}
   | Float64 =>
-    quote {atom-float(magic cast(&a, float64, unquote {x}))}
+    quote {atom(show-float64(magic cast(&a, float64, unquote {x})))}
   | Null =>
     quote {atom-N("null")}
   | Rune =>
@@ -340,7 +341,7 @@ define-meta to-doc<a>(x: '&a, enable-ansi: 'bool) -> 'doc {
       unquote {to-doc<t>(quote {x-unwrapped}, enable-ansi)}
     }
   | Pointer =>
-    quote {atom-int(magic cast(&a, int64, unquote {x}))}
+    quote {atom-int(magic cast(&a, int, unquote {x}))}
   | _ =>
     quote {_literal-doc(atom-N("_"), unquote {enable-ansi})}
   }

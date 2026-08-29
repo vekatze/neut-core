@@ -1,5 +1,5 @@
 import {
-  this::c-size {C-Size, from-c-size},
+  this::c-size {from-c-size, to-c-size},
   this::layer {axiom-T},
   this::memory {malloc},
   this::memory.unsafe {free, load-int, store-int},
@@ -24,7 +24,7 @@ nominal {
 inline _new<a>(val: a) -> _cell {
   let mutex-size = from-c-size(THREAD_MUTEX_SIZE);
   let u = this::word::size;
-  let ptr = malloc(C-Size(add-int(u, add-int(mutex-size, u))));
+  let ptr = malloc(to-c-size(add-int(u, add-int(mutex-size, u))));
   store-int(cast<a, int>(val), ptr);
   let _ = thread-mutex-init(shift(ptr, u));
   store-int(cast<type, int>(pack-type {a}), shift(ptr, add-int(u, mutex-size)));

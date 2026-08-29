@@ -1,3 +1,7 @@
+require {
+  subprocess,
+}
+
 import {
   this::c-int {c-int},
   this::c-pid {c-pid},

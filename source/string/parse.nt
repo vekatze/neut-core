@@ -3,7 +3,6 @@ import {
   this::bool {and, any, bool},
   this::either {Left, Right, either},
   this::int.parse {parse-hex-digits},
-  this::layer,
   this::list {Cons, List, Nil, concat, for-each-E, for-each-EN, intercalate, list},
   this::pair {Pair},
   this::rune,

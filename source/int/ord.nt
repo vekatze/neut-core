@@ -1,6 +1,5 @@
 import {
   this::bool,
-  this::layer,
   this::ord {Ord, ord},
   this::ordering {EQ, GT, LT},
 }

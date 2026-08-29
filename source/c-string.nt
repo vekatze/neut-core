@@ -1,5 +1,5 @@
 import {
-  this::c-size {C-Size},
+  this::c-size {c-size, from-c-size, to-c-size},
   this::memory {malloc},
   this::memory.unsafe {free, memcpy, store-int, store-int8, store-pointer},
   this::pointer {shift},
@@ -11,7 +11,7 @@ import {
 }
 
 foreign {
-  strlen(pointer) -> int,
+  strlen(pointer) -> c-size,
 }
 
 nominal {
@@ -19,7 +19,7 @@ nominal {
 }
 
 define _length-c-string(s: pointer) -> int {
-  magic external strlen(s)
+  from-c-size(magic external strlen(s))
 }
 
 // null-terminated string
@@ -29,7 +29,7 @@ resource c-string {
   },
   (ptr: pointer, _: pointer) => {
     let total = add-int(_length-c-string(ptr), 1);
-    let new-ptr = malloc(C-Size(total));
+    let new-ptr = malloc(to-c-size(total));
     memcpy(new-ptr, ptr, total);
     new-ptr
   },
@@ -42,7 +42,7 @@ define length(s: &c-string) -> int {
 
 define from-string(t: &string) -> c-string {
   let len = byte-length(t);
-  let new-ptr = malloc(C-Size(add-int(len, 1)));
+  let new-ptr = malloc(to-c-size(add-int(len, 1)));
   let src-ptr = this::string.pointer::get-content-pointer(t);
   memcpy(new-ptr, src-ptr, len);
   store-int8(0, shift(new-ptr, len));
@@ -54,7 +54,7 @@ define to-string(s: &c-string) -> string {
   let u2 = mul-int(u, 2);
   let u3 = mul-int(u, 3);
   let len = length(s);
-  let new-ptr = malloc(C-Size(add-int(len, u3)));
+  let new-ptr = malloc(to-c-size(add-int(len, u3)));
   store-int(0, new-ptr);
   store-int(len, shift(new-ptr, u));
   let content-ptr = shift(new-ptr, u3);

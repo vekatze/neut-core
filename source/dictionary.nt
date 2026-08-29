@@ -3,7 +3,6 @@ import {
   this::bool,
   this::debug {panic},
   this::either {Right, none},
-  this::layer,
   this::list {Cons, Nil, list},
   this::ord {Ord, ord},
   this::ordering {EQ, GT, LT},

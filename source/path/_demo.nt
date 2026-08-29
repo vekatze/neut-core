@@ -2,7 +2,6 @@ import {
   this::binary,
   this::bool {and, bool, not},
   this::debug {panic},
-  this::layer,
   this::list {List},
   this::pair {Pair},
   this::path {

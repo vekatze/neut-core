@@ -1,6 +1,5 @@
 import {
   this::binary,
-  this::layer,
   this::list {List},
   this::pair {Pair, pair},
   this::show {Show, show},

@@ -2,12 +2,11 @@ import {
   this::binary,
   this::bool {False, True, and, bool, or},
   this::c-int {c-int, from-c-int},
-  this::c-size {C-Size, c-size, from-c-size},
+  this::c-size {c-size, from-c-size, to-c-size},
   this::c-string {c-string, from-string, to-string},
   this::debug {panic},
   this::either {Right, none},
-  this::int.show {show-int},
-  this::layer,
+  this::int.show {show-int64},
   this::list {List},
   this::memory {malloc},
   this::memory.unsafe {store-int, store-pointer},
@@ -19,10 +18,10 @@ import {
 }
 
 foreign {
-  neut_core_v0_56_sleep(float64) -> int,
+  neut_core_v0_56_sleep(float) -> int,
 }
 
-define sleep@(duration: float64) -> system(unit) {
+define sleep@(duration: float) -> system(unit) {
   let result = magic external neut_core_v0_56_sleep(duration);
   if lt-int(result, 0) {
     report-system-error@()
@@ -134,6 +133,10 @@ define _from-time(t: time, is-local: int) -> clock {
   }
 }
 
+define _timespec-seconds(struct: pointer) -> int {
+  magic external neut_core_v0_56_timespec_sec(struct)
+}
+
 define get-time() -> time {
   let size = from-c-size(SIZEOF_TIMESPEC);
   let struct = magic alloca(int8, size);
@@ -141,7 +144,7 @@ define get-time() -> time {
   if lt-int(result, 0) {
     panic("get-time(); `clock_gettime` failed\n")
   } else {
-    let seconds: int = magic external neut_core_v0_56_timespec_sec(struct);
+    let seconds = _timespec-seconds(struct);
     let nanoseconds: int = magic external neut_core_v0_56_timespec_nsec(struct);
     _Time{seconds, nanoseconds}
   }
@@ -159,12 +162,8 @@ define _normalize(s: int, n: int) -> time {
 
 define from-clock(t: clock) -> time {
   let Clock{nanoseconds, seconds, minutes, hours, day, month, year, gmt-offset} = t;
-  let epoch =
-    sub-int(
-      magic external neut_core_v0_56_civil_to_utc(year, month, day, hours, minutes, seconds),
-      gmt-offset,
-    );
-  _normalize(epoch, nanoseconds)
+  let epoch = magic external neut_core_v0_56_civil_to_utc(year, month, day, hours, minutes, seconds);
+  _normalize(sub-int(epoch, gmt-offset), nanoseconds)
 }
 
 define to-local-clock(t: time) -> clock {
@@ -182,7 +181,7 @@ define _zeropad(x: int, format-string: &string) -> string {
   let u = this::word::size;
   let u2 = mul-int(u, 2);
   let u3 = mul-int(u, 3);
-  let ptr = malloc(C-Size(add-int(size, add-int(1, u3))));
+  let ptr = malloc(to-c-size(add-int(size, add-int(1, u3))));
   store-int(0, ptr);
   store-int(size, shift(ptr, u));
   let buffer = shift(ptr, u3);
@@ -192,15 +191,15 @@ define _zeropad(x: int, format-string: &string) -> string {
 }
 
 define _zeropad2(x: int) -> string {
-  _zeropad(x, "%02ld")
+  _zeropad(x, "%02lld")
 }
 
 define _zeropad4(x: int) -> string {
-  _zeropad(x, "%04ld")
+  _zeropad(x, "%04lld")
 }
 
 define _zeropad9(x: int) -> string {
-  _zeropad(x, "%09ld")
+  _zeropad(x, "%09lld")
 }
 
 define _format-nanoseconds(nanoseconds: int, digits: int) -> string {
@@ -263,7 +262,7 @@ define from-ISO8601(datetime-string: &string) -> ?time {
   let datetime-string = magic cast(&c-string, pointer, datetime-string);
   let result: int32 = magic external neut_core_v0_56_parse_iso8601(datetime-string, time-struct);
   if ge-int32(result, 0) {
-    let seconds = magic external neut_core_v0_56_timespec_sec(time-struct);
+    let seconds = _timespec-seconds(time-struct);
     let nanoseconds = magic external neut_core_v0_56_timespec_nsec(time-struct);
     Right(_Time{seconds, nanoseconds})
   } else {
@@ -273,12 +272,12 @@ define from-ISO8601(datetime-string: &string) -> ?time {
 
 define show-time(m: time, decimals: int) -> string {
   let _Time{seconds := s, nanoseconds := ns} = m;
-  if and::(lt-int(s, 0), gt-int(ns, 0)) {
-    let int-part = sub-int(mul-int(s, -1), 1);
+  if and::(lt-int64(s, 0), gt-int(ns, 0)) {
+    let int-part = sub-int64(sub-int64(0, s), 1);
     let frac = sub-int(1000000000, ns);
-    format("-{}{}", List::[show-int(int-part), _format-nanoseconds(frac, decimals)])
+    format("-{}{}", List::[show-int64(int-part), _format-nanoseconds(frac, decimals)])
   } else {
-    format("{}{}", List::[show-int(s), _format-nanoseconds(ns, decimals)])
+    format("{}{}", List::[show-int64(s), _format-nanoseconds(ns, decimals)])
   }
 }
 
@@ -299,27 +298,27 @@ define nanoseconds(t: &time) -> int {
 define add-time(m1: time, m2: time) -> time {
   let _Time{seconds := s1, nanoseconds := n1} = m1;
   let _Time{seconds := s2, nanoseconds := n2} = m2;
-  _normalize(add-int(s1, s2), add-int(n1, n2))
+  _normalize(add-int64(s1, s2), add-int(n1, n2))
 }
 
 define sub-time(m1: time, m2: time) -> time {
   let _Time{seconds := s1, nanoseconds := n1} = m1;
   let _Time{seconds := s2, nanoseconds := n2} = m2;
-  _normalize(sub-int(s1, s2), sub-int(n1, n2))
+  _normalize(sub-int64(s1, s2), sub-int(n1, n2))
 }
 
 define eq-time(m1: &time, m2: &time) -> bool {
   tie _Time{seconds := s1, nanoseconds := ns1} = m1;
   tie _Time{seconds := s2, nanoseconds := ns2} = m2;
-  and::(eq-int(*s1, *s2), eq-int(*ns1, *ns2))
+  and::(eq-int64(*s1, *s2), eq-int(*ns1, *ns2))
 }
 
 define lt-time(m1: &time, m2: &time) -> bool {
   tie _Time{seconds := s1, nanoseconds := ns1} = m1;
   tie _Time{seconds := s2, nanoseconds := ns2} = m2;
-  if lt-int(*s1, *s2) {
+  if lt-int64(*s1, *s2) {
     True
-  } else-if gt-int(*s1, *s2) {
+  } else-if gt-int64(*s1, *s2) {
     False
   } else {
     lt-int(*ns1, *ns2)

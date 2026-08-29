@@ -1,15 +1,20 @@
 import {
   this::bool {bool},
   this::c-ssize {C-SSize, c-ssize},
+  this::c-word {c-word},
 }
 
 data c-size {
-| C-Size(int64)
+| C-Size(c-word)
+}
+
+inline to-c-size(x: int) -> c-size {
+  C-Size(this::c-word::from-int(x))
 }
 
 inline from-c-size(x: c-size) -> int {
   let C-Size(x) = x;
-  x
+  this::c-word::to-int-unsigned(x)
 }
 
 inline from-positive-ssize(x: c-ssize) -> c-size {
@@ -18,49 +23,33 @@ inline from-positive-ssize(x: c-ssize) -> c-size {
 }
 
 inline add-c-size(x: c-size, y: c-size) -> c-size {
-  let C-Size(x) = x;
-  let C-Size(y) = y;
-  C-Size(add-int(x, y))
+  to-c-size(add-int(from-c-size(x), from-c-size(y)))
 }
 
 inline mul-c-size(x: c-size, y: c-size) -> c-size {
-  let C-Size(x) = x;
-  let C-Size(y) = y;
-  C-Size(mul-int(x, y))
+  to-c-size(mul-int(from-c-size(x), from-c-size(y)))
 }
 
 inline eq-c-size(x: c-size, y: c-size) -> bool {
-  let C-Size(x) = x;
-  let C-Size(y) = y;
-  eq-int(x, y)
+  eq-int(from-c-size(x), from-c-size(y))
 }
 
 inline ne-c-size(x: c-size, y: c-size) -> bool {
-  let C-Size(x) = x;
-  let C-Size(y) = y;
-  ne-int(x, y)
+  ne-int(from-c-size(x), from-c-size(y))
 }
 
 inline lt-c-size(x: c-size, y: c-size) -> bool {
-  let C-Size(x) = x;
-  let C-Size(y) = y;
-  ult-int(x, y)
+  ult-int(from-c-size(x), from-c-size(y))
 }
 
 inline le-c-size(x: c-size, y: c-size) -> bool {
-  let C-Size(x) = x;
-  let C-Size(y) = y;
-  ule-int(x, y)
+  ule-int(from-c-size(x), from-c-size(y))
 }
 
 inline gt-c-size(x: c-size, y: c-size) -> bool {
-  let C-Size(x) = x;
-  let C-Size(y) = y;
-  ugt-int(x, y)
+  ugt-int(from-c-size(x), from-c-size(y))
 }
 
 inline ge-c-size(x: c-size, y: c-size) -> bool {
-  let C-Size(x) = x;
-  let C-Size(y) = y;
-  uge-int(x, y)
+  uge-int(from-c-size(x), from-c-size(y))
 }

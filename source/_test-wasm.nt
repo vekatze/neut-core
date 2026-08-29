@@ -1,0 +1,425 @@
+import {
+  this::_test-namespace {
+    * as nsc,
+    boxed,
+    calc,
+    calc as calc2,
+    plain-add as renamed-add,
+  },
+  this::array {array},
+  this::binary,
+  this::bool {False, True, all, and, any, bool, or},
+  this::cell,
+  this::debug.dump {trace, vet},
+  this::either {Right, either},
+  this::eq.generic {eq-data},
+  this::int.io {print-int-line},
+  this::int.parse,
+  this::int.show {show-int64},
+  this::layer {axiom-T},
+  this::list {Cons, Nil, list},
+  this::list.meta,
+  this::pair {Pair, pair},
+  this::platform {get-cpu-count},
+  this::string {append, from-text, string, strip-prefix, strip-suffix},
+  this::string.builder {String},
+  this::string.io {print, print-line},
+  this::time {add-time, make-time, show-time},
+  this::type-value {Algebraic, Constructor},
+  this::type-value.meta {
+    algebraic-header-slot-count,
+    constructor-field-count,
+    constructor-fields-with-cursors,
+    field-storage-slot-count,
+    field-type,
+  },
+  this::unit {Unit, unit},
+  this::vector {product, push-back, vector},
+}
+
+data adt-with-text {
+| CBar(text)
+}
+
+data inspect-sample {
+| Inspect-Sample(int, bool)
+}
+
+data generic-point {
+| Generic-Point(int, int)
+}
+
+data generic-mixed {
+| Generic-Mixed(~generic-point, int)
+}
+
+define inspect-array-generics(xs: &array(pair(int, bool)), ys: &array(pair(int, bool))) -> bool {
+  let _ on xs = vet::(xs);
+  eq-data::(xs, ys)
+}
+
+define-meta inspect-sample-field-count() -> 'int {
+  let _ = Inspect-Sample;
+  let k = magic inspect-type(inspect-sample);
+  match k {
+  | Algebraic(_, _, Cons(Constructor(_, _, fields), Nil)) =>
+    match fields {
+    | Cons(f1, Cons(f2, Nil)) =>
+      unpack-type t1 = field-type(f1);
+      unpack-type t2 = field-type(f2);
+      let b1 = magic eq-type(t1, int);
+      let b2 = magic eq-type(t2, bool);
+      if b1 {
+        if b2 {
+          quote {2}
+        } else {
+          quote {-1}
+        }
+      } else {
+        quote {-2}
+      }
+    | _ =>
+      quote {-4}
+    }
+  | _ =>
+    quote {-3}
+  }
+}
+
+define-meta inspect-mixed-slot-summary() -> 'int {
+  let k = magic inspect-type(generic-mixed);
+  match k {
+  | Algebraic(_, _, !constructors) =>
+    let header = algebraic-header-slot-count(constructors);
+    match constructors {
+    | Cons(!c, Nil) =>
+      let field-count = constructor-field-count(c);
+      match constructor-fields-with-cursors(c, 0) {
+      | Cons(Pair(f1, cursor1), Cons(Pair(f2, cursor2), Nil)) =>
+        let first-slots = field-storage-slot-count(f1);
+        let second-slots = field-storage-slot-count(f2);
+        if eq-int(header, 0) {
+          if eq-int(cursor1, 0) {
+            if eq-int(cursor2, first-slots) {
+              let value = add-int(mul-int(field-count, 100), add-int(mul-int(first-slots, 10), second-slots));
+              quote {unquote {promote {value}}}
+            } else {
+              quote {-5}
+            }
+          } else {
+            quote {-4}
+          }
+        } else {
+          quote {-3}
+        }
+      | _ =>
+        quote {-1}
+      }
+    | _ =>
+      quote {-6}
+    }
+  | _ =>
+    quote {-2}
+  }
+}
+
+define-meta meta-list-sample() -> 'int {
+  let !xs = Cons(1, Cons(2, Cons(3, Nil)));
+  let len = this::list.meta::length(xs);
+  let sum =
+    this::list.meta::fold-left(0, xs, (acc, x) => {
+      add-int(acc, x)
+    });
+  let value = add-int(mul-int(len, 10), sum);
+  quote {unquote {promote {value}}}
+}
+
+define use-text(t: text) -> unit {
+  let t1 = t;
+  let t2 = t;
+  let v = "Hello, world!\n";
+  print(from-text(v));
+  print-line(from-text(t));
+  print-line(from-text(t1));
+  print-line(from-text(t2));
+  let v on t = CBar(*t);
+  let _ = t;
+  let _ = v;
+  Unit
+}
+
+define with-cell(i: int) -> int {
+  let c = this::cell::make-cell(lift {i});
+  let _ on c =
+    this::cell::mutate(c, (x) => {
+      lift {add-int(axiom-T(x), 1)}
+    });
+  axiom-T(this::cell::extract(c))
+}
+
+define-meta sample<a>() -> 'int {
+  let b = magic eq-type(list(int), a);
+  if b {
+    quote {10}
+  } else {
+    quote {20}
+  }
+}
+
+define string-by-dest(x: &string) -> string {
+  let result = append(x, "test");
+  result
+}
+
+inline my-loop-func@(x: int) -> either(int, bool) {
+  let inner =
+    define loop@(n: int) -> either(int, bool) {
+      if eq-int(n, 0) {
+        Right(True)
+      } else {
+        loop@(sub-int(n, 1))
+      }
+    };
+  inner@(x)
+}
+
+define my-func(x: int) -> int {
+  let y = 30;
+  add-int(x, y)
+}
+
+define my-def-func<a>(t: a, x: int)[y: int := 42] -> pair(a, int) {
+  Pair(t, add-int(x, y))
+}
+
+define zen() -> unit {
+  pin k = String::["hello\n", "yo\n", "hey"];
+  print-line(k);
+  pin v = this::int.parse::parse-octal@("0o755");
+  vet::(v);
+  use-text("sample");
+  let t1 = "abcde";
+  let t2 = "abcdef";
+  pin t3 = strip-prefix(t2, *t1);
+  print-line(t3);
+  let t1 = "abcあde";
+  let t2 = "de";
+  pin t3 = strip-suffix(t2, *t1);
+  print-line(t3);
+  let out = with-cell(123);
+  print-int-line(out);
+  let f = exact my-def-func;
+  pin v = f(True, 3);
+  vet::(v);
+  pin val = string-by-dest("hello");
+  print-line(val);
+  pin v = my-loop-func@(3);
+  vet::(v);
+  let result = my-func(20);
+  print-int-line(result);
+  let x = sample::<bool>();
+  print-int-line(x);
+  pin count = get-cpu-count();
+  vet::(count);
+  pin xs = this::vector::range(1, 10);
+  vet::(xs);
+  let xs: vector(string) = this::vector::make(5);
+  let xs = push-back(xs, *"a");
+  let xs = push-back(xs, *"b");
+  let !xs = trace::(push-back(xs, *"c"));
+  pin xss = product(xs, xs);
+  vet::(xss);
+  pin ys = Cons(`a`, Cons(`あ`, Nil));
+  vet::(ys);
+  pin sample: either(unit, _) = Right(Pair(Unit, True));
+  vet::(sample);
+  print-int-line(inspect-sample-field-count::());
+  print-int-line(inspect-mixed-slot-summary::());
+  print-int-line(meta-list-sample::());
+  pin m0 = Generic-Mixed(~Generic-Point(1, 2), 3);
+  vet::(m0);
+  pin m1 = Generic-Mixed(~Generic-Point(1, 2), 3);
+  pin m2 = Generic-Mixed(~Generic-Point(1, 2), 4);
+  if eq-data::(m1, m2) {
+    print-line("generic-mix-broken");
+  } else {
+    print-line("generic-mix-ok");
+  };
+  let array-xs: array(pair(int, bool)) = this::array::make(0);
+  let array-xs = this::array::push-back(array-xs, ~Pair(10, True));
+  let array-xs = this::array::push-back(array-xs, ~Pair(20, False));
+  let array-ys: array(pair(int, bool)) = this::array::make(0);
+  let array-ys = this::array::push-back(array-ys, ~Pair(10, True));
+  let array-ys = this::array::push-back(array-ys, ~Pair(20, False));
+  let is-generic-array-equal on array-xs, array-ys = inspect-array-generics(array-xs, array-ys);
+  if is-generic-array-equal {
+    print-line("generic-array-ok");
+  } else {
+    print-line("generic-array-broken");
+  };
+  let _ = array-xs;
+  let _ = array-ys;
+  pin v1 = add-int(10, 201);
+  pin v2 = add-int(10, 1);
+  if eq-data::(v1, v2) {
+    print-line("yo");
+  } else {
+    print-line("YO");
+  };
+  let _ =
+    and::({
+      print-line("and1");
+      False
+    }, {
+      print-line("and2");
+      True
+    });
+  let _ =
+    or::({
+      print-line("or1");
+      True
+    }, {
+      print-line("or2");
+      False
+    });
+  let _ =
+    // short-circuiting
+    all::[
+      {
+        print-line("all1");
+        True
+      },
+      {
+        print-line("all2");
+        False
+      },
+      {
+        print-line("all3");
+        True
+      },
+    ];
+  let _ =
+    // short-circuiting
+    any::[
+      {
+        print-line("any1");
+        False
+      },
+      {
+        print-line("any2");
+        True
+      },
+      {
+        print-line("any3");
+        False
+      },
+    ];
+  Unit
+}
+
+inline-meta tdm-add-one(x: 'int) -> 'int {
+  let helper =
+    define-meta rec(y: 'int) -> 'int {
+      quote {add-int(1, unquote {y})}
+    };
+  helper(x)
+}
+
+inline-meta tdm-memo(x: 'int) -> 'int {
+  let !helper =
+    define-meta dup<a>(y: 'a) -> 'a {
+      y
+    };
+  let a = helper<int>(x);
+  let b = helper<int>(x);
+  quote {add-int(unquote {a}, unquote {b})}
+}
+
+inline-meta tdm-knot(x: 'int) -> 'int {
+  let helper =
+    define-meta go<a>(flag: 'bool, base: 'a) -> 'a {
+      quote {
+        let f = unquote {flag};
+        if f {
+          unquote {base}
+        } else {
+          unquote {go(flag, base)}
+        }
+      }
+    };
+  helper(quote {True}, x)
+}
+
+inline-meta tdm-hc(c: 'int) -> 'int {
+  let !helper =
+    define-meta rec<a>(tag: 'a) -> 'int {
+      let _ = tag;
+      c
+    };
+  let _ = helper<bool>(quote {True});
+  helper<int>(quote {1})
+}
+
+define use-item(c: int) -> unit {
+  let v = tdm-hc::(c);
+  print-int-line(v);
+  Unit
+}
+
+define ns-feature-check() -> unit {
+  // imported real namespaces through {}
+  print-int-line(calc.increment(41)); // 42
+  print-int-line(calc.deep.decrement(45)); // 44
+  print-int-line(boxed.unbox(boxed.Box(44))); // 44
+  // consumer-named namespace view (as)
+  print-int-line(nsc.plain-add(40, 5)); // 45
+  print-int-line(nsc.calc.increment(45)); // 46
+  print-int-line(nsc.boxed.unbox(nsc.boxed.Box(47))); // 47
+  // addressed spellings: current-module and identity-routed
+  print-int-line(this::_test-namespace::plain-add(40, 8)); // 48
+  print-int-line(this::_test-namespace::calc.quadruple(12)); // 48
+  print-int-line(this::_test-namespace::calc.increment(49)); // 50
+  // pattern matching through a view
+  match nsc.boxed.Box(51) {
+  | nsc.boxed.Box(x) =>
+    print-int-line(x) // 51
+  };
+  // per-name aliases
+  print-int-line(renamed-add(50, 2)); // 52
+  print-int-line(renamed-add(50, 2)); // 52
+  print-int-line(calc2.increment(52)); // 53
+  print-int-line(calc2.deep.decrement(55)); // 54
+  nsc.run-internal-checks();
+  Unit
+}
+
+define test-int64() -> unit {
+  let big2 = add-int64(2000000000, 2000000000);
+  print-int-line(sext-int32-int64(trunc-int64-int32(big2)));
+  print-int-line(ashr-int64(big2, 32));
+  pin s = show-int64(big2);
+  print-line(s);
+  pin s2 = show-int64(mul-int64(123456, 789012));
+  print-line(s2);
+  pin s3 = show-int64(sub-int64(0, 5));
+  print-line(s3);
+  if lt-int64(sub-int64(0, 1), 0) {
+    print-line("i64-lt-ok")
+  } else {
+    print-line("i64-lt-broken")
+  };
+  pin s4 = show-time(add-time(make-time(2000000000, 0), make-time(2000000000, 500000000)), 1);
+  print-line(s4)
+}
+
+define main() -> unit {
+  test-int64();
+  zen();
+  ns-feature-check();
+  print-int-line(tdm-add-one::(41));
+  print-int-line(tdm-memo::(21));
+  print-int-line(tdm-knot::(77));
+  print-int-line(tdm-hc::(99));
+  use-item(1234);
+  Unit
+}

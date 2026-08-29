@@ -15,6 +15,7 @@ import {
   this::eq.generic {eq-data},
   this::int.io {print-int-line},
   this::int.parse,
+  this::int.show {show-int64},
   this::layer {axiom-T},
   this::list {Cons, Nil, list},
   this::list.meta,
@@ -26,6 +27,7 @@ import {
   this::string.io {print, print-line},
   this::sync.mvar {make-mvar, receive, send},
   this::sync.pool {for-each-parallel},
+  this::time {add-time, make-time, show-time},
   this::type-value {Algebraic, Constructor},
   this::type-value.meta {
     algebraic-header-slot-count,
@@ -422,7 +424,27 @@ define ns-feature-check() -> unit {
   Unit
 }
 
+define test-int64() -> unit {
+  let big2 = add-int64(2000000000, 2000000000);
+  print-int-line(sext-int32-int64(trunc-int64-int32(big2)));
+  print-int-line(ashr-int64(big2, 32));
+  pin s = show-int64(big2);
+  print-line(s);
+  pin s2 = show-int64(mul-int64(123456, 789012));
+  print-line(s2);
+  pin s3 = show-int64(sub-int64(0, 5));
+  print-line(s3);
+  if lt-int64(sub-int64(0, 1), 0) {
+    print-line("i64-lt-ok")
+  } else {
+    print-line("i64-lt-broken")
+  };
+  pin s4 = show-time(add-time(make-time(2000000000, 0), make-time(2000000000, 500000000)), 1);
+  print-line(s4)
+}
+
 define main() -> unit {
+  test-int64();
   zen();
   ns-feature-check();
   print-int-line(tdm-add-one::(41));

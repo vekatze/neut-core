@@ -70,7 +70,7 @@ define append-int64(b: &binary-builder, x: int) -> unit {
   })
 }
 
-define append-int64-UTF8(b: &binary-builder, x: int64) -> unit {
+define append-int64-UTF8(b: &binary-builder, x: int) -> unit {
   _mutate(b, (b) => {
     _append-int64-UTF8(b, x)
   })
@@ -83,7 +83,7 @@ define append-int32(b: &binary-builder, x: int32) -> unit {
 }
 
 define append-int32-UTF8(b: &binary-builder, x: int32) -> unit {
-  append-int64-UTF8(b, sext-int32-int64(x))
+  append-int64-UTF8(b, sext-int32-int(x))
 }
 
 define append-int16(b: &binary-builder, x: int16) -> unit {
@@ -93,7 +93,7 @@ define append-int16(b: &binary-builder, x: int16) -> unit {
 }
 
 define append-int16-UTF8(b: &binary-builder, x: int16) -> unit {
-  append-int64-UTF8(b, sext-int16-int64(x))
+  append-int64-UTF8(b, sext-int16-int(x))
 }
 
 define append-int8(b: &binary-builder, x: int8) -> unit {
@@ -103,7 +103,7 @@ define append-int8(b: &binary-builder, x: int8) -> unit {
 }
 
 define append-int8-UTF8(b: &binary-builder, x: int8) -> unit {
-  append-int64-UTF8(b, sext-int8-int64(x))
+  append-int64-UTF8(b, sext-int8-int(x))
 }
 
 define append-float64(b: &binary-builder, x: float) -> unit {
@@ -112,7 +112,7 @@ define append-float64(b: &binary-builder, x: float) -> unit {
   })
 }
 
-define append-float64-UTF8(b: &binary-builder, x: float64) -> unit {
+define append-float64-UTF8(b: &binary-builder, x: float) -> unit {
   _mutate(b, (b) => {
     _append-float64-UTF8(b, x)
   })

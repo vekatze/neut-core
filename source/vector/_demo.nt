@@ -4,7 +4,6 @@ import {
   this::debug {assert, panic},
   this::either {Left, Right},
   this::int.io {print-int-line},
-  this::layer,
   this::list {List},
   this::pair {Pair},
   this::string {replicate, string},

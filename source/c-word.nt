@@ -1,0 +1,35 @@
+alias c-word {
+  introspect target-arch {
+  | wasm32 =>
+    int32
+  | default =>
+    int64
+  }
+}
+
+inline from-int(x: int) -> c-word {
+  introspect target-arch {
+  | wasm32 =>
+    trunc-int-int32(x)
+  | default =>
+    x
+  }
+}
+
+inline to-int-signed(x: c-word) -> int {
+  introspect target-arch {
+  | wasm32 =>
+    sext-int32-int(x)
+  | default =>
+    x
+  }
+}
+
+inline to-int-unsigned(x: c-word) -> int {
+  introspect target-arch {
+  | wasm32 =>
+    zext-int32-int(x)
+  | default =>
+    x
+  }
+}

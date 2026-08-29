@@ -1,7 +1,7 @@
 import {
   this::bool,
   this::c-int {C-Int},
-  this::c-size {C-Size},
+  this::c-size {to-c-size},
   this::either {Right},
   this::file.descriptor {descriptor, to-c-int},
   this::file.descriptor.unsafe {from-c-int, write-all},
@@ -27,7 +27,7 @@ resource _buffer-internal {
     let u = this::word::size;
     let capacity = load-int(shift(source-pointer, u));
     let pointer-size = _get-pointer-size-from-capacity(capacity);
-    let new-pointer = malloc(C-Size(pointer-size));
+    let new-pointer = malloc(to-c-size(pointer-size));
     memcpy(new-pointer, source-pointer, pointer-size);
     new-pointer
   },
@@ -47,7 +47,7 @@ define make-buffer(d: descriptor, capacity: int) -> buffer {
     };
   let word-size = this::word::size;
   let pointer-size = _get-pointer-size-from-capacity(capacity);
-  let buffer-ptr = malloc(C-Size(pointer-size));
+  let buffer-ptr = malloc(to-c-size(pointer-size));
   store-int(0, buffer-ptr);
   store-int(capacity, shift(buffer-ptr, word-size));
   let c = to-c-int(d);

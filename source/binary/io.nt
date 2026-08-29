@@ -2,8 +2,8 @@ import {
   this::binary {binary, length},
   this::binary.pointer {get-content-pointer},
   this::bool,
-  this::c-size {C-Size},
-  this::c-ssize {C-SSize},
+  this::c-size {to-c-size},
+  this::c-ssize {from-c-ssize},
   this::either {Left, Right},
   this::file.descriptor {descriptor},
   this::file.descriptor.unsafe {write-all},
@@ -38,7 +38,7 @@ define _read-inner@(
   let content-base-ptr = load-pointer(content-head-ptr);
   let content-ptr = shift(content-base-ptr, current-length);
   let readable-size = sub-int(buffer-size, current-length);
-  let C-SSize(bytes) = this::file.descriptor.unsafe::read(data-source, content-ptr, C-Size(readable-size));
+  let bytes = from-c-ssize(this::file.descriptor.unsafe::read(data-source, content-ptr, to-c-size(readable-size)));
   let next-length = add-int(current-length, bytes);
   if lt-int(bytes, 0) {
     report-system-error@()
@@ -50,7 +50,7 @@ define _read-inner@(
   } else {
     let new-buffer-size = mul-int(buffer-size, 2);
     let new-size = add-int(u3, new-buffer-size);
-    let new-base-ptr = realloc(base-ptr, C-Size(new-size));
+    let new-base-ptr = realloc(base-ptr, to-c-size(new-size));
     if eq-int(extract(new-base-ptr), 0) {
       report-system-error@()
     } else {
@@ -71,7 +71,7 @@ define read@(from: descriptor, initial-buffer-size: int) -> system(binary) {
     let u2 = mul-int(u, 2);
     let u3 = mul-int(u, 3);
     let ptr-size = add-int(u3, initial-buffer-size);
-    let ptr = malloc(C-Size(ptr-size));
+    let ptr = malloc(to-c-size(ptr-size));
     store-int(0, ptr);
     store-pointer(shift(ptr, u3), shift(ptr, u2));
     _read-inner@(from, ptr, 0, initial-buffer-size)

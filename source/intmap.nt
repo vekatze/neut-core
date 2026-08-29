@@ -1,7 +1,6 @@
 import {
   this::bool {bool},
   this::either {Right, none},
-  this::layer,
   this::list {list},
   this::pair {Pair, pair},
   this::unit,
@@ -9,7 +8,7 @@ import {
 }
 
 foreign {
-  llvm.ctlz.i64(int64) -> int64,
+  neut_core_v0_56_ctlz_word(int) -> int,
 }
 
 // Data.IntMap.Strict in Haskell
@@ -72,7 +71,7 @@ inline _link-with-mask<a>(m: _Mask, p1: _Prefix, t1: intmap(a), t2: intmap(a)) -
 // from `Utils.Containers.Internal.BitUtil`
 inline _highest-bit-mask(w: int) -> int {
   let size-in-bits = mul-int(this::word::size, 8);
-  shl-int(1, sub-int(sub-int(size-in-bits, 1), magic external llvm.ctlz.i64(w)))
+  shl-int(1, sub-int(sub-int(size-in-bits, 1), magic external neut_core_v0_56_ctlz_word(w)))
 }
 
 inline _branch-mask(p1: _Prefix, p2: _Prefix) -> _Mask {

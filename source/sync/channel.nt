@@ -1,8 +1,7 @@
 import {
-  this::c-size {C-Size, from-c-size},
+  this::c-size {from-c-size, to-c-size},
   this::either {Left, Right},
   this::int {sum-int},
-  this::layer,
   this::list {List},
   this::memory {malloc},
   this::memory.unsafe {free, load-int, store-int},
@@ -42,7 +41,7 @@ define _new<a>(q: queue(a)) -> channel(a) {
   let mutex-size = from-c-size(THREAD_MUTEX_SIZE);
   let cond-size = from-c-size(THREAD_COND_SIZE);
   let u = this::word::size;
-  let ptr = malloc(C-Size(sum-int(List::[u, mutex-size, cond-size, u])));
+  let ptr = malloc(to-c-size(sum-int(List::[u, mutex-size, cond-size, u])));
   store-int(cast<queue(a), int>(q), ptr);
   let _ = thread-mutex-init(shift(ptr, u));
   thread-cond-init(shift(ptr, add-int(u, mutex-size)));

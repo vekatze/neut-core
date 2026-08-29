@@ -28,7 +28,7 @@ define extract(b: string-builder) -> string {
   from-binary(this::binary.builder::extract(_to-binary-builder(b)))
 }
 
-define append-int64-UTF8(b: &string-builder, x: int64) -> unit {
+define append-int64-UTF8(b: &string-builder, x: int) -> unit {
   this::binary.builder::append-int64-UTF8(_to-binary-builder-N(b), x)
 }
 
@@ -44,7 +44,7 @@ define append-int8-UTF8(b: &string-builder, x: int8) -> unit {
   this::binary.builder::append-int8-UTF8(_to-binary-builder-N(b), x)
 }
 
-define append-float64-UTF8(b: &string-builder, x: float64) -> unit {
+define append-float64-UTF8(b: &string-builder, x: float) -> unit {
   this::binary.builder::append-float64-UTF8(_to-binary-builder-N(b), x)
 }
 

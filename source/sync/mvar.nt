@@ -1,6 +1,6 @@
 import {
   this::bool,
-  this::c-size {C-Size, from-c-size},
+  this::c-size {from-c-size, to-c-size},
   this::int {sum-int},
   this::layer {embody},
   this::list {List},
@@ -60,7 +60,7 @@ define _new<a>() -> mvar(a) {
   let mutex-size = from-c-size(THREAD_MUTEX_SIZE);
   let cond-size = from-c-size(THREAD_COND_SIZE);
   let u = this::word::size;
-  let ptr = malloc(C-Size(sum-int(List::[u, u, mutex-size, cond-size, cond-size, u])));
+  let ptr = malloc(to-c-size(sum-int(List::[u, u, mutex-size, cond-size, cond-size, u])));
   let ch = cast<pointer, &mvar(a)>(ptr);
   let _MVar-Info{flag-ptr, mutex-ptr, readable-cond-ptr, writable-cond-ptr, type-ptr} = _get-info(ch);
   store-int(0, flag-ptr);

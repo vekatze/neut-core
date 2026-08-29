@@ -5,7 +5,6 @@ import {
   this::either {Left, Right},
   this::environment.unsafe {set-env},
   this::int.io {print-int, print-int-line},
-  this::layer,
   this::list {List},
   this::string {format, string},
   this::string.eq {eq-string},

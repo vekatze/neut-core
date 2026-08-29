@@ -1,90 +1,69 @@
 import {
   this::bool {bool},
+  this::c-word {c-word},
 }
 
 data c-long {
-| C-Long(int64)
+| C-Long(c-word)
 }
 
-inline add-c-long(x: c-long, y: c-long) -> c-long {
-  let C-Long(x) = x;
-  let C-Long(y) = y;
-  C-Long(add-int64(x, y))
-}
-
-inline sub-c-long(x: c-long, y: c-long) -> c-long {
-  let C-Long(x) = x;
-  let C-Long(y) = y;
-  C-Long(sub-int64(x, y))
-}
-
-inline mul-c-long(x: c-long, y: c-long) -> c-long {
-  let C-Long(x) = x;
-  let C-Long(y) = y;
-  C-Long(mul-int64(x, y))
-}
-
-inline div-c-long(x: c-long, y: c-long) -> c-long {
-  let C-Long(x) = x;
-  let C-Long(y) = y;
-  C-Long(div-int64(x, y))
-}
-
-inline and-c-long(x: c-long, y: c-long) -> c-long {
-  let C-Long(x) = x;
-  let C-Long(y) = y;
-  C-Long(and-int64(x, y))
-}
-
-inline or-c-long(x: c-long, y: c-long) -> c-long {
-  let C-Long(x) = x;
-  let C-Long(y) = y;
-  C-Long(or-int64(x, y))
-}
-
-inline xor-c-long(x: c-long, y: c-long) -> c-long {
-  let C-Long(x) = x;
-  let C-Long(y) = y;
-  C-Long(xor-int64(x, y))
-}
-
-inline eq-c-long(x: c-long, y: c-long) -> bool {
-  let C-Long(x) = x;
-  let C-Long(y) = y;
-  eq-int64(x, y)
-}
-
-inline ne-c-long(x: c-long, y: c-long) -> bool {
-  let C-Long(x) = x;
-  let C-Long(y) = y;
-  ne-int64(x, y)
-}
-
-inline lt-c-long(x: c-long, y: c-long) -> bool {
-  let C-Long(x) = x;
-  let C-Long(y) = y;
-  lt-int64(x, y)
-}
-
-inline le-c-long(x: c-long, y: c-long) -> bool {
-  let C-Long(x) = x;
-  let C-Long(y) = y;
-  le-int64(x, y)
-}
-
-inline gt-c-long(x: c-long, y: c-long) -> bool {
-  let C-Long(x) = x;
-  let C-Long(y) = y;
-  gt-int64(x, y)
-}
-
-inline ge-c-long(x: c-long, y: c-long) -> bool {
-  let C-Long(x) = x;
-  let C-Long(y) = y;
-  ge-int64(x, y)
+inline to-c-long(x: int) -> c-long {
+  C-Long(this::c-word::from-int(x))
 }
 
 inline from-c-long(x: c-long) -> int {
   let C-Long(x) = x;
-  x
+  this::c-word::to-int-signed(x)
+}
+
+inline add-c-long(x: c-long, y: c-long) -> c-long {
+  to-c-long(add-int(from-c-long(x), from-c-long(y)))
+}
+
+inline sub-c-long(x: c-long, y: c-long) -> c-long {
+  to-c-long(sub-int(from-c-long(x), from-c-long(y)))
+}
+
+inline mul-c-long(x: c-long, y: c-long) -> c-long {
+  to-c-long(mul-int(from-c-long(x), from-c-long(y)))
+}
+
+inline div-c-long(x: c-long, y: c-long) -> c-long {
+  to-c-long(div-int(from-c-long(x), from-c-long(y)))
+}
+
+inline and-c-long(x: c-long, y: c-long) -> c-long {
+  to-c-long(and-int(from-c-long(x), from-c-long(y)))
+}
+
+inline or-c-long(x: c-long, y: c-long) -> c-long {
+  to-c-long(or-int(from-c-long(x), from-c-long(y)))
+}
+
+inline xor-c-long(x: c-long, y: c-long) -> c-long {
+  to-c-long(xor-int(from-c-long(x), from-c-long(y)))
+}
+
+inline eq-c-long(x: c-long, y: c-long) -> bool {
+  eq-int(from-c-long(x), from-c-long(y))
+}
+
+inline ne-c-long(x: c-long, y: c-long) -> bool {
+  ne-int(from-c-long(x), from-c-long(y))
+}
+
+inline lt-c-long(x: c-long, y: c-long) -> bool {
+  lt-int(from-c-long(x), from-c-long(y))
+}
+
+inline le-c-long(x: c-long, y: c-long) -> bool {
+  le-int(from-c-long(x), from-c-long(y))
+}
+
+inline gt-c-long(x: c-long, y: c-long) -> bool {
+  gt-int(from-c-long(x), from-c-long(y))
+}
+
+inline ge-c-long(x: c-long, y: c-long) -> bool {
+  ge-int(from-c-long(x), from-c-long(y))
 }

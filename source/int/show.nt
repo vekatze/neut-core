@@ -3,13 +3,12 @@ import {
   this::c-int {c-int, from-c-int},
   this::c-size {c-size, to-c-size},
   this::memory {malloc},
-  this::memory.unsafe {store-int, store-pointer},
+  this::memory.unsafe {store-address-int, store-pointer},
   this::pointer {null-pointer, shift},
   this::show {Show, show},
   this::string {string},
   this::string.pointer {get-content-pointer},
   this::unit,
-  this::word,
 }
 
 foreign {
@@ -20,13 +19,13 @@ foreign {
 define _show(c-fmt: &string, x: int) -> string {
   let fmt = get-content-pointer(c-fmt);
   let size = from-c-int(magic external snprintf(null-pointer, to-c-size(0), fmt)(int x));
-  let u = this::word::size;
+  let u = this::pointer::size;
   let u2 = mul-int(u, 2);
   let u3 = mul-int(u, 3);
   let ptr = malloc(to-c-size(add-int(size, add-int(1, u3))));
-  store-int(0, ptr);
+  store-address-int(0, ptr);
   // ignore the trailing null character
-  store-int(size, shift(ptr, u));
+  store-address-int(size, shift(ptr, u));
   let buffer = shift(ptr, u3);
   store-pointer(buffer, shift(ptr, u2));
   let _ = magic external sprintf(buffer, fmt)(int x);
@@ -49,12 +48,12 @@ define show-int64(x: int) -> string {
   pin fmt = *"%lld\0";
   let fmt = get-content-pointer(fmt);
   let size = from-c-int(magic external snprintf(null-pointer, to-c-size(0), fmt)(int x));
-  let u = this::word::size;
+  let u = this::pointer::size;
   let u2 = mul-int(u, 2);
   let u3 = mul-int(u, 3);
   let ptr = malloc(to-c-size(add-int(size, add-int(1, u3))));
-  store-int(0, ptr);
-  store-int(size, shift(ptr, u));
+  store-address-int(0, ptr);
+  store-address-int(size, shift(ptr, u));
   let buffer = shift(ptr, u3);
   store-pointer(buffer, shift(ptr, u2));
   let _ = magic external sprintf(buffer, fmt)(int x);

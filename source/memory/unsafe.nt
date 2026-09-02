@@ -48,6 +48,24 @@ inline load-pointer(p: pointer) -> pointer {
   magic load(pointer, p)
 }
 
+inline store-address-int(value: int, p: pointer) -> unit {
+  introspect target-arch {
+  | wasm32 =>
+    magic store(int32, trunc-int-int32(value), p)
+  | default =>
+    magic store(int, value, p)
+  }
+}
+
+inline load-address-int(p: pointer) -> int {
+  introspect target-arch {
+  | wasm32 =>
+    zext-int32-int(magic load(int32, p))
+  | default =>
+    magic load(int, p)
+  }
+}
+
 inline load-int(p: pointer) -> int {
   magic load(int, p)
 }

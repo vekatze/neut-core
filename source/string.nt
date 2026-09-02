@@ -7,14 +7,13 @@ import {
   this::either {Right, none},
   this::list {Cons, List, Nil, list},
   this::memory {malloc},
-  this::memory.unsafe {load-int8, store-int, store-pointer},
+  this::memory.unsafe {load-int8, store-address-int, store-pointer},
   this::pair {Pair, pair},
   this::pointer {shift},
   this::rune {to-int32},
   this::rune.unsafe {load-rune, store-rune},
   this::rune.utf8 {size-by-head-byte},
   this::unit {Unit, unit},
-  this::word,
 }
 
 data string {
@@ -335,12 +334,12 @@ define _char-list-length(xs: &list(rune), acc: int) -> int {
 
 define pack(xs: &list(rune)) -> string {
   let len = _char-list-length(xs, 0);
-  let u = this::word::size;
+  let u = this::pointer::size;
   let u2 = mul-int(u, 2);
   let u3 = mul-int(u, 3);
   let new-string = malloc(to-c-size(add-int(len, u3)));
-  store-int(0, new-string);
-  store-int(len, shift(new-string, u));
+  store-address-int(0, new-string);
+  store-address-int(len, shift(new-string, u));
   let content-ptr = shift(new-string, u3);
   store-pointer(content-ptr, shift(new-string, u2));
   let loop =

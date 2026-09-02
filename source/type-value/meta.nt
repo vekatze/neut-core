@@ -3,7 +3,7 @@ import {
   this::either {Left, Right},
   this::list {Cons, Nil, list},
   this::list.meta {fold-left, length},
-  this::memory.unsafe {load-int},
+  this::memory.unsafe {load-int, load-int16, load-int32, load-int8, load-pointer},
   this::pair {Pair, pair},
   this::pointer {shift},
   this::type-value {
@@ -12,14 +12,19 @@ import {
     Direct,
     Field,
     Mixed,
+    Width-Pointer,
+    Width16,
+    Width32,
+    Width64,
+    Width8,
     constructor,
     field,
     field-layout,
+    storage-width,
     type-value,
   },
   this::unit {Unit},
   this::unsafe {cast-inline},
-  this::word,
 }
 
 inline-meta field-name(f: field) -> text {
@@ -39,7 +44,7 @@ inline-meta field-layout-of(f: field) -> field-layout {
 
 inline-meta is-direct(layout: field-layout) -> bool {
   match layout {
-  | Direct =>
+  | Direct(_) =>
     True
   | Mixed(_) =>
     False
@@ -48,24 +53,85 @@ inline-meta is-direct(layout: field-layout) -> bool {
 
 inline-meta is-mixed(layout: field-layout) -> bool {
   match layout {
-  | Direct =>
+  | Direct(_) =>
     False
   | Mixed(_) =>
     True
   }
 }
 
-inline-meta field-slot-count(layout: field-layout) -> int {
-  match layout {
-  | Direct =>
-    1
-  | Mixed(slot-count) =>
-    slot-count
+inline-meta pointer-byte-size() -> int {
+  introspect target-arch {
+  | wasm32 =>
+    4
+  | default =>
+    8
   }
 }
 
-inline-meta field-storage-slot-count(f: field) -> int {
-  field-slot-count(field-layout-of(f))
+inline-meta storage-width-byte-size(width: storage-width) -> int {
+  match width {
+  | Width8 =>
+    1
+  | Width16 =>
+    2
+  | Width32 =>
+    4
+  | Width64 =>
+    8
+  | Width-Pointer =>
+    pointer-byte-size()
+  }
+}
+
+inline-meta field-layout-byte-size(layout: field-layout) -> int {
+  match layout {
+  | Direct(width) =>
+    storage-width-byte-size(width)
+  | Mixed(chunks) =>
+    fold-left(0, chunks, (acc, c) => {
+      add-int(acc, c)
+    })
+  }
+}
+
+inline-meta field-storage-byte-size(f: field) -> int {
+  field-layout-byte-size(field-layout-of(f))
+}
+
+inline-meta _smaller(x: int, y: int) -> int {
+  if lt-int(x, y) {
+    x
+  } else {
+    y
+  }
+}
+
+inline-meta _larger(x: int, y: int) -> int {
+  if gt-int(x, y) {
+    x
+  } else {
+    y
+  }
+}
+
+inline-meta align-up(alignment: int, value: int) -> int {
+  add-int(value, rem-int(sub-int(alignment, rem-int(value, alignment)), alignment))
+}
+
+inline-meta field-layout-alignment(layout: field-layout) -> int {
+  match layout {
+  | Direct(width) =>
+    storage-width-byte-size(width)
+  | Mixed(chunks) =>
+    fold-left(1, chunks, (acc, c) => {
+      _larger(c, acc)
+    })
+  }
+}
+
+inline-meta field-alignment(f: field) -> int {
+  field-layout-alignment(field-layout-of(f))
 }
 
 inline-meta constructor-name(c: constructor) -> text {
@@ -87,29 +153,108 @@ inline-meta constructor-field-count(c: constructor) -> int {
   length(constructor-fields(c))
 }
 
-inline-meta constructor-payload-slot-count(c: constructor) -> int {
-  fold-left(0, constructor-fields(c), (acc, f) => {
-    add-int(acc, field-storage-slot-count(f))
+inline-meta constructor-payload-end(c: constructor, start: int) -> int {
+  fold-left(start, constructor-fields(c), (acc, !f) => {
+    add-int(align-up(field-alignment(f), acc), field-storage-byte-size(f))
   })
 }
 
-inline-meta header-slot-count(constructors: list(constructor)) -> int {
+inline-meta constructor-alignment(c: constructor) -> int {
+  fold-left(1, constructor-fields(c), (acc, f) => {
+    _larger(field-alignment(f), acc)
+  })
+}
+
+inline-meta discriminant-width(constructors: list(constructor)) -> storage-width {
+  let n = length(constructors);
+  if le-int(n, 256) {
+    Width8
+  } else {
+    if le-int(n, 65536) {
+      Width16
+    } else {
+      Width32
+    }
+  }
+}
+
+inline-meta _widest-within(at-least: int, within: int) -> int {
+  if ge-int(within, 8) {
+    8
+  } else-if ge-int(within, 4) {
+    _larger(4, at-least)
+  } else-if ge-int(within, 2) {
+    _larger(2, at-least)
+  } else {
+    at-least
+  }
+}
+
+inline-meta _first-field-start(narrow: int, c: constructor) -> int {
+  match constructor-fields(c) {
+  | Nil =>
+    8
+  | Cons(f, _) =>
+    align-up(field-alignment(f), narrow)
+  }
+}
+
+inline-meta _payload-reach(constructors: list(constructor), data-arg-num: int, narrow: int) -> int {
+  if gt-int(data-arg-num, 0) {
+    align-up(pointer-byte-size(), narrow)
+  } else {
+    fold-left(8, constructors, (acc, c) => {
+      _smaller(_first-field-start(narrow, c), acc)
+    })
+  }
+}
+
+inline-meta header-byte-size(!constructors: list(constructor), data-arg-num: int) -> int {
   if gt-int(length(constructors), 1) {
-    1
+    let narrow = storage-width-byte-size(discriminant-width(constructors));
+    _widest-within(narrow, _payload-reach(constructors, data-arg-num, narrow))
   } else {
     0
   }
 }
 
-inline-meta algebraic-header-slot-count(constructors: list(constructor)) -> int {
-  header-slot-count(constructors)
+inline-meta algebraic-header-byte-size(constructors: list(constructor), data-arg-num: int) -> int {
+  header-byte-size(constructors, data-arg-num)
 }
 
-inline-meta algebraic-discriminant<a>(constructors: list(constructor), x: '&a) -> 'int {
+inline-meta width-of-byte-size(byte-size: int) -> storage-width {
+  if eq-int(byte-size, 8) {
+    Width64
+  } else-if eq-int(byte-size, 4) {
+    Width32
+  } else-if eq-int(byte-size, 2) {
+    Width16
+  } else {
+    Width8
+  }
+}
+
+inline-meta load-at-width(width: storage-width, addr: 'pointer) -> 'int {
+  match width {
+  | Width8 =>
+    quote {zext-int8-int(load-int8(unquote {addr}))}
+  | Width16 =>
+    quote {zext-int16-int(load-int16(unquote {addr}))}
+  | Width32 =>
+    quote {zext-int32-int(load-int32(unquote {addr}))}
+  | Width64 =>
+    quote {load-int(unquote {addr})}
+  | Width-Pointer =>
+    quote {cast-inline<pointer, int>(load-pointer(unquote {addr}))}
+  }
+}
+
+inline-meta algebraic-discriminant<a>(!constructors: list(constructor), data-arg-num: int, x: '&a) -> 'int {
   if gt-int(length(constructors), 1) {
+    let width = width-of-byte-size(header-byte-size(constructors, data-arg-num));
     quote {
       let x-ptr = cast-inline<&a, pointer>(unquote {x});
-      load-int(x-ptr)
+      unquote {load-at-width(width, quote {x-ptr})}
     }
   } else {
     quote {0}
@@ -208,7 +353,8 @@ inline-meta fields-with-cursors(fields: list(field), cursor: int) -> list(pair(f
   | Nil =>
     Nil
   | Cons(!f, rest) =>
-    Cons(Pair(f, cursor), fields-with-cursors(rest, add-int(cursor, field-storage-slot-count(f))))
+    let start = align-up(field-alignment(f), cursor);
+    Cons(Pair(f, start), fields-with-cursors(rest, add-int(start, field-storage-byte-size(f))))
   }
 }
 
@@ -216,39 +362,56 @@ inline-meta constructor-fields-with-cursors(c: constructor, cursor: int) -> list
   fields-with-cursors(constructor-fields(c), cursor)
 }
 
-inline nth-field-slot-pointer(header: int, data-arg-num: int, cursor: int, x: pointer) -> pointer {
-  let u = this::word::size;
-  let offset = mul-int(u, add-int(header, add-int(data-arg-num, cursor)));
+inline-meta payload-start(constructors: list(constructor), data-arg-num: int) -> int {
+  let header = header-byte-size(constructors, data-arg-num);
+  if eq-int(data-arg-num, 0) {
+    header
+  } else {
+    let width = pointer-byte-size();
+    add-int(align-up(width, header), mul-int(width, data-arg-num))
+  }
+}
+
+inline-meta algebraic-cell-alignment(!constructors: list(constructor), data-arg-num: int) -> int {
+  let header-alignment = header-byte-size(constructors, data-arg-num);
+  let data-arg-alignment =
+    if eq-int(data-arg-num, 0) {
+      1
+    } else {
+      pointer-byte-size()
+    };
+  fold-left(_larger(_larger(header-alignment, data-arg-alignment), 1), constructors, (acc, c) => {
+    _larger(constructor-alignment(c), acc)
+  })
+}
+
+inline-meta algebraic-cell-byte-size(!constructors: list(constructor), data-arg-num: int) -> int {
+  let start = payload-start(constructors, data-arg-num);
+  let used =
+    fold-left(start, constructors, (acc, c) => {
+      _larger(constructor-payload-end(c, start), acc)
+    });
+  align-up(algebraic-cell-alignment(constructors, data-arg-num), used)
+}
+
+inline nth-field-pointer(offset: int, x: pointer) -> pointer {
   shift(x, offset)
 }
 
-inline load-direct-field-slot(header: int, data-arg-num: int, cursor: int, x: pointer) -> int {
-  load-int(nth-field-slot-pointer(header, data-arg-num, cursor, x))
-}
-
-inline-meta field-slot<a>(
-  f: field,
-  header: int,
-  data-arg-num: int,
-  cursor: int,
-  x: '&a,
-) -> 'int {
+inline-meta field-slot<a>(f: field, cursor: int, x: '&a) -> 'int {
   match field-layout-of(f) {
-  | Direct =>
+  | Direct(width) =>
     quote {
-      let header-inner = unquote {promote {header}};
-      let data-arg-num-inner = unquote {promote {data-arg-num}};
-      let low-cursor = unquote {promote {cursor}};
+      let offset = unquote {promote {cursor}};
       let x-ptr = cast-inline<&a, pointer>(unquote {x});
-      load-direct-field-slot(header-inner, data-arg-num-inner, low-cursor, x-ptr)
+      let field-ptr = nth-field-pointer(offset, x-ptr);
+      unquote {load-at-width(width, quote {field-ptr})}
     }
   | Mixed(_) =>
     quote {
-      let header-inner = unquote {promote {header}};
-      let data-arg-num-inner = unquote {promote {data-arg-num}};
-      let low-cursor = unquote {promote {cursor}};
+      let offset = unquote {promote {cursor}};
       let x-ptr = cast-inline<&a, pointer>(unquote {x});
-      cast-inline<pointer, int>(nth-field-slot-pointer(header-inner, data-arg-num-inner, low-cursor, x-ptr))
+      cast-inline<pointer, int>(nth-field-pointer(offset, x-ptr))
     }
   }
 }

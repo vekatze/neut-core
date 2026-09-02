@@ -3,9 +3,17 @@ import {
   this::list {list},
 }
 
+data storage-width {
+| Width8
+| Width16
+| Width32
+| Width64
+| Width-Pointer
+}
+
 data field-layout {
-| Direct
-| Mixed(slot-count: int)
+| Direct(storage-width)
+| Mixed(chunks: list(int))
 }
 
 data field {

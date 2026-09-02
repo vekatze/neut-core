@@ -63,10 +63,6 @@ __attribute__((always_inline)) int neut_core_v0_57_wstopsig(int stat) {
 }
 #endif
 
-__attribute__((always_inline)) size_t neut_core_v0_57_word_size() {
-  return sizeof(void *);
-}
-
 __attribute__((always_inline)) int neut_core_v0_57_O_RDONLY() {
   return O_RDONLY;
 }

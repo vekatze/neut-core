@@ -1,5 +1,5 @@
 import {
-  this::memory.unsafe {load-int, load-pointer, store-int},
+  this::memory.unsafe {load-address-int, load-int, load-pointer, store-int},
   this::pointer {shift},
   this::unit,
   this::unsafe {cast},
@@ -9,8 +9,8 @@ import {
 
 inline _get-element-pointer<a>(xs: &vector(a), index: int) -> pointer {
   let vector-pointer = cast<&vector(a), pointer>(xs);
-  let from = load-int(shift(vector-pointer, this::word::size));
-  let buffer-pointer = load-pointer(shift(vector-pointer, mul-int(this::word::size, 4)));
+  let from = load-address-int(shift(vector-pointer, this::pointer::size));
+  let buffer-pointer = load-pointer(shift(vector-pointer, mul-int(this::pointer::size, 4)));
   shift(buffer-pointer, mul-int(this::word::size, add-int(from, index)))
 }
 

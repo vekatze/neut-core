@@ -2,11 +2,10 @@ import {
   this::array {array},
   this::c-size {to-c-size},
   this::memory {malloc},
-  this::memory.unsafe {free, load-int, load-pointer, memcpy},
+  this::memory.unsafe {free, load-address-int, load-pointer, memcpy},
   this::pointer {null-pointer, shift},
   this::unit,
   this::unsafe {cast-inline},
-  this::word,
 }
 
 inline-meta _get-stride<a>() -> 'int {
@@ -15,8 +14,8 @@ inline-meta _get-stride<a>() -> 'int {
 
 inline _get-element-pointer<a>(xs: &array(a), index: int) -> pointer {
   let array-pointer = cast-inline<&array(a), pointer>(xs);
-  let from = load-int(shift(array-pointer, this::word::size));
-  let buffer-pointer = load-pointer(shift(array-pointer, mul-int(this::word::size, 4)));
+  let from = load-address-int(shift(array-pointer, this::pointer::size));
+  let buffer-pointer = load-pointer(shift(array-pointer, mul-int(this::pointer::size, 4)));
   shift(buffer-pointer, mul-int(_get-stride::<a>(), add-int(from, index)))
 }
 

@@ -30,10 +30,10 @@ import {
   this::time {add-time, make-time, show-time},
   this::type-value {Algebraic, Constructor},
   this::type-value.meta {
-    algebraic-header-slot-count,
+    algebraic-header-byte-size,
     constructor-field-count,
     constructor-fields-with-cursors,
-    field-storage-slot-count,
+    field-storage-byte-size,
     field-type,
   },
   this::unit {Unit, unit},
@@ -104,14 +104,14 @@ define-meta inspect-mixed-slot-summary() -> 'int {
   let k = magic inspect-type(generic-mixed);
   match k {
   | Algebraic(_, _, !constructors) =>
-    let header = algebraic-header-slot-count(constructors);
+    let header = algebraic-header-byte-size(constructors, 0);
     match constructors {
     | Cons(!c, Nil) =>
       let field-count = constructor-field-count(c);
       match constructor-fields-with-cursors(c, 0) {
       | Cons(Pair(f1, cursor1), Cons(Pair(f2, cursor2), Nil)) =>
-        let first-slots = field-storage-slot-count(f1);
-        let second-slots = field-storage-slot-count(f2);
+        let first-slots = field-storage-byte-size(f1);
+        let second-slots = field-storage-byte-size(f2);
         if eq-int(header, 0) {
           if eq-int(cursor1, 0) {
             if eq-int(cursor2, first-slots) {

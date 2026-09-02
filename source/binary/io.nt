@@ -10,13 +10,12 @@ import {
   this::int.show {show-int},
   this::list {List},
   this::memory {malloc},
-  this::memory.unsafe {load-pointer, realloc, store-int, store-pointer},
+  this::memory.unsafe {load-pointer, realloc, store-address-int, store-pointer},
   this::pointer {extract, shift},
   this::string {format},
   this::system {Application-Error, report-system-error, system},
   this::unit {unit},
   this::unsafe {cast},
-  this::word,
 }
 
 define write@(d: descriptor, b: &binary) -> system(unit) {
@@ -31,7 +30,7 @@ define _read-inner@(
   current-length: int,
   buffer-size: int,
 ) -> system(binary) {
-  let u = this::word::size;
+  let u = this::pointer::size;
   let u2 = mul-int(u, 2);
   let u3 = mul-int(u, 3);
   let content-head-ptr = shift(base-ptr, u2);
@@ -43,7 +42,7 @@ define _read-inner@(
   if lt-int(bytes, 0) {
     report-system-error@()
   } else-if eq-int(bytes, 0) {
-    store-int(next-length, shift(base-ptr, u));
+    store-address-int(next-length, shift(base-ptr, u));
     Right(cast<pointer, binary>(base-ptr))
   } else-if lt-int(bytes, readable-size) {
     _read-inner@(data-source, base-ptr, next-length, buffer-size)
@@ -67,12 +66,12 @@ define read@(from: descriptor, initial-buffer-size: int) -> system(binary) {
       List::[show-int(initial-buffer-size)],
     )))
   } else {
-    let u = this::word::size;
+    let u = this::pointer::size;
     let u2 = mul-int(u, 2);
     let u3 = mul-int(u, 3);
     let ptr-size = add-int(u3, initial-buffer-size);
     let ptr = malloc(to-c-size(ptr-size));
-    store-int(0, ptr);
+    store-address-int(0, ptr);
     store-pointer(shift(ptr, u3), shift(ptr, u2));
     _read-inner@(from, ptr, 0, initial-buffer-size)
   }

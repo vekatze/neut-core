@@ -34,11 +34,11 @@ import {
   },
   this::type-value.meta {
     algebraic-discriminant,
-    algebraic-header-slot-count,
     constructor-switch,
     data-arg-count,
     field-slot,
     fields-with-cursors,
+    payload-start,
   },
   this::unsafe {cast, cast-inline},
   this::vector {vector},
@@ -95,8 +95,6 @@ inline-meta _equal-vector<a>(xs: '&vector(a), ys: '&vector(a)) -> 'bool {
 
 inline-meta _eq-data-adt-fields<a>(
   field-cursors: list(pair(field, int)),
-  data-arg-num: int,
-  header: int,
   x: '&a,
   y: '&a,
 ) -> 'bool {
@@ -109,11 +107,11 @@ inline-meta _eq-data-adt-fields<a>(
     let Field(_, t, _) = f;
     unpack-type t = t;
     quote {
-      let x-elem-ptr = cast-inline<int, &t>(unquote {field-slot(f, header, data-arg-num, cursor, x)});
-      let y-elem-ptr = cast-inline<int, &t>(unquote {field-slot(f, header, data-arg-num, cursor, y)});
+      let x-elem-ptr = cast-inline<int, &t>(unquote {field-slot(f, cursor, x)});
+      let y-elem-ptr = cast-inline<int, &t>(unquote {field-slot(f, cursor, y)});
       let is-eq = unquote {eq-data(quote {x-elem-ptr}, quote {y-elem-ptr})};
       if is-eq {
-        unquote {_eq-data-adt-fields(rest, data-arg-num, header, x, y)}
+        unquote {_eq-data-adt-fields(rest, x, y)}
       } else {
         False
       }
@@ -123,15 +121,14 @@ inline-meta _eq-data-adt-fields<a>(
 
 inline-meta _eq-data-adt<a>(
   constructors: list(constructor),
-  data-arg-num: int,
-  header: int,
+  start: int,
   disc: 'int,
   x: '&a,
   y: '&a,
 ) -> 'bool {
   constructor-switch(constructors, disc, quote {True}, (c) => {
     let Constructor(_, _, xts) = c;
-    _eq-data-adt-fields(fields-with-cursors(xts, 0), data-arg-num, header, x, y)
+    _eq-data-adt-fields(fields-with-cursors(xts, start), x, y)
   })
 }
 
@@ -139,15 +136,15 @@ define-meta eq-data<a>(x: '&a, y: '&a) -> 'bool {
   let k = magic inspect-type(a);
   match k {
   | Algebraic(_, data-args, !cons-info) =>
-    let data-arg-num = data-arg-count(data-args);
-    let header = algebraic-header-slot-count(cons-info);
+    let arg-num = data-arg-count(data-args);
+    let start = payload-start(cons-info, arg-num);
     quote {
-      let discriminant-x = unquote {algebraic-discriminant(cons-info, x)};
-      let discriminant-y = unquote {algebraic-discriminant(cons-info, y)};
+      let discriminant-x = unquote {algebraic-discriminant(cons-info, arg-num, x)};
+      let discriminant-y = unquote {algebraic-discriminant(cons-info, arg-num, y)};
       if ne-int(discriminant-x, discriminant-y) {
         False
       } else {
-        unquote {_eq-data-adt(cons-info, data-arg-num, header, quote {discriminant-x}, x, y)}
+        unquote {_eq-data-adt(cons-info, start, quote {discriminant-x}, x, y)}
       }
     }
   | Enum(_) =>

@@ -117,9 +117,10 @@ define spawn<a>(f: () -> a) -> thread(a) {
     };
   let u = this::word::size;
   let u2 = mul-int(u, 2);
+  let closure-field = this::pointer::size;
   let closure = cast<() -> unit, pointer>(thread-func);
-  let closure-env = load-pointer(shift(closure, u));
-  let closure-label = load-pointer(shift(closure, u2));
+  let closure-env = load-pointer(shift(closure, closure-field));
+  let closure-label = load-pointer(shift(closure, mul-int(closure-field, 2)));
   free(closure);
   let thread-id-pointer = malloc(THREAD_SIZE);
   let thread-create =

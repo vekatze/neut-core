@@ -7,7 +7,17 @@ import {
   this::int {abs-int, max-int, min-int},
   this::list {Cons, Nil, list},
   this::memory {malloc},
-  this::memory.unsafe {free, load-int, load-pointer, memmove, realloc, store-int, store-pointer},
+  this::memory.unsafe {
+    free,
+    load-address-int,
+    load-int,
+    load-pointer,
+    memmove,
+    realloc,
+    store-address-int,
+    store-int,
+    store-pointer,
+  },
   this::pair {Pair, pair},
   this::pointer {shift},
   this::unit {Unit, unit},
@@ -25,7 +35,7 @@ data vector(_: type) {
 }
 
 inline _header-size() -> int {
-  mul-int(this::word::size, 5)
+  mul-int(this::pointer::size, 5)
 }
 
 inline _allocation-size(capacity: int) -> int {
@@ -38,42 +48,42 @@ inline _inline-buffer-ptr(vector-ptr: pointer) -> pointer {
 
 inline get-capacity<a>(xs: &vector(a)) -> int {
   let vector-ptr = cast<&vector(a), pointer>(xs);
-  load-int(vector-ptr)
+  load-address-int(vector-ptr)
 }
 
 inline _get-from<a>(xs: &vector(a)) -> int {
   let vector-ptr = cast<&vector(a), pointer>(xs);
-  load-int(shift(vector-ptr, this::word::size))
+  load-address-int(shift(vector-ptr, this::pointer::size))
 }
 
 inline _get-to<a>(xs: &vector(a)) -> int {
   let vector-ptr = cast<&vector(a), pointer>(xs);
-  load-int(shift(vector-ptr, mul-int(this::word::size, 2)))
+  load-address-int(shift(vector-ptr, mul-int(this::pointer::size, 2)))
 }
 
 inline _get-elem-type<a>(xs: &vector(a)) -> type {
   let vector-ptr = cast<&vector(a), pointer>(xs);
-  cast<int, type>(load-int(shift(vector-ptr, mul-int(this::word::size, 3))))
+  cast<int, type>(load-address-int(shift(vector-ptr, mul-int(this::pointer::size, 3))))
 }
 
 inline _set-elem-type<a>(xs: &vector(a), b: type) -> unit {
   let vector-ptr = cast<&vector(a), pointer>(xs);
-  store-int(cast<type, int>(b), shift(vector-ptr, mul-int(this::word::size, 3)))
+  store-address-int(cast<type, int>(b), shift(vector-ptr, mul-int(this::pointer::size, 3)))
 }
 
 inline _get-buffer-ptr<a>(xs: &vector(a)) -> pointer {
   let vector-ptr = cast<&vector(a), pointer>(xs);
-  load-pointer(shift(vector-ptr, mul-int(this::word::size, 4)))
+  load-pointer(shift(vector-ptr, mul-int(this::pointer::size, 4)))
 }
 
 define _set-buffer-ptr<a>(xs: &vector(a), buffer-ptr: pointer) -> unit {
   let vector-ptr = cast<&vector(a), pointer>(xs);
-  store-pointer(buffer-ptr, shift(vector-ptr, mul-int(this::word::size, 4)))
+  store-pointer(buffer-ptr, shift(vector-ptr, mul-int(this::pointer::size, 4)))
 }
 
 define _set-capacity<a>(xs: &vector(a), capacity: int) -> unit {
   let vector-ptr = cast<&vector(a), pointer>(xs);
-  store-int(capacity, vector-ptr)
+  store-address-int(capacity, vector-ptr)
 }
 
 define _get-element-pointer<a>(xs: &vector(a), index: int) -> pointer {
@@ -96,11 +106,11 @@ inline with-slice<a, b>(xs: &vector(a), start: int, size: int, f: (&vector(a)) -
   let slice-from = add-int(from, start);
   let slice-to = add-int(slice-from, size);
   let slice-ptr = magic alloca(int, 5);
-  let word-size = this::word::size;
-  store-int(get-capacity(xs), slice-ptr);
-  store-int(slice-from, shift(slice-ptr, word-size));
-  store-int(slice-to, shift(slice-ptr, mul-int(word-size, 2)));
-  store-int(cast<type, int>(_get-elem-type(xs)), shift(slice-ptr, mul-int(word-size, 3)));
+  let word-size = this::pointer::size;
+  store-address-int(get-capacity(xs), slice-ptr);
+  store-address-int(slice-from, shift(slice-ptr, word-size));
+  store-address-int(slice-to, shift(slice-ptr, mul-int(word-size, 2)));
+  store-address-int(cast<type, int>(_get-elem-type(xs)), shift(slice-ptr, mul-int(word-size, 3)));
   store-pointer(_get-buffer-ptr(xs), shift(slice-ptr, mul-int(word-size, 4)));
   let slice = cast<pointer, &vector(a)>(slice-ptr);
   letbox-T result = f(slice);
@@ -109,38 +119,38 @@ inline with-slice<a, b>(xs: &vector(a), start: int, size: int, f: (&vector(a)) -
 
 inline _shift-from<a>(xs: &vector(a), offset: int) -> unit {
   let vector-ptr = cast<&vector(a), pointer>(xs);
-  let from-ptr = shift(vector-ptr, mul-int(this::word::size, 1));
-  let current-value = load-int(from-ptr);
-  store-int(add-int(current-value, offset), from-ptr)
+  let from-ptr = shift(vector-ptr, mul-int(this::pointer::size, 1));
+  let current-value = load-address-int(from-ptr);
+  store-address-int(add-int(current-value, offset), from-ptr)
 }
 
 inline _shift-to<a>(xs: &vector(a), offset: int) -> unit {
   let vector-ptr = cast<&vector(a), pointer>(xs);
-  let to-ptr = shift(vector-ptr, mul-int(this::word::size, 2));
-  let current-value = load-int(to-ptr);
-  store-int(add-int(current-value, offset), to-ptr)
+  let to-ptr = shift(vector-ptr, mul-int(this::pointer::size, 2));
+  let current-value = load-address-int(to-ptr);
+  store-address-int(add-int(current-value, offset), to-ptr)
 }
 
 inline _set-from<a>(xs: &vector(a), from: int) -> unit {
   let vector-ptr = cast<&vector(a), pointer>(xs);
-  store-int(from, shift(vector-ptr, this::word::size))
+  store-address-int(from, shift(vector-ptr, this::pointer::size))
 }
 
 inline _set-to<a>(xs: &vector(a), to: int) -> unit {
   let vector-ptr = cast<&vector(a), pointer>(xs);
-  store-int(to, shift(vector-ptr, mul-int(this::word::size, 2)))
+  store-address-int(to, shift(vector-ptr, mul-int(this::pointer::size, 2)))
 }
 
 define make<a>(initial-capacity: int) -> vector(a) {
   let abs-capacity = abs-int(initial-capacity);
-  let word-size = this::word::size;
+  let word-size = this::pointer::size;
   let vector-ptr = malloc(to-c-size(_allocation-size(abs-capacity)));
   let buffer-ptr = _inline-buffer-ptr(vector-ptr);
   let initial-cursor = match gt-int(initial-capacity, 0) {True => 0 | False => abs-capacity};
-  store-int(abs-capacity, vector-ptr);
-  store-int(initial-cursor, shift(vector-ptr, mul-int(word-size, 1)));
-  store-int(initial-cursor, shift(vector-ptr, mul-int(word-size, 2)));
-  store-int(cast<type, int>(pack-type {a}), shift(vector-ptr, mul-int(word-size, 3)));
+  store-address-int(abs-capacity, vector-ptr);
+  store-address-int(initial-cursor, shift(vector-ptr, mul-int(word-size, 1)));
+  store-address-int(initial-cursor, shift(vector-ptr, mul-int(word-size, 2)));
+  store-address-int(cast<type, int>(pack-type {a}), shift(vector-ptr, mul-int(word-size, 3)));
   store-pointer(buffer-ptr, shift(vector-ptr, mul-int(word-size, 4)));
   _Vector(magic cast(pointer, _vector-internal, vector-ptr))
 }

@@ -62,12 +62,12 @@ import {
   },
   this::type-value.meta {
     algebraic-discriminant,
-    algebraic-header-slot-count,
     constructor-switch,
     data-arg-count,
     enum-switch,
     field-slot,
     fields-with-cursors,
+    payload-start,
   },
   this::unsafe {cast-inline},
   this::vector {vector},
@@ -171,23 +171,19 @@ inline-meta _vector-doc<a>(xs: '&vector(a), enable-ansi: 'bool) -> 'doc {
 inline-meta _constructor-arg-doc<a>(
   !f: field,
   cursor: int,
-  header: int,
-  data-arg-num: int,
   x: '&a,
   enable-ansi: 'bool,
 ) -> 'doc {
   let Field(_, t, _) = f;
   unpack-type t = t;
   quote {
-    let x-elem-ptr = cast-inline<int, &t>(unquote {field-slot(f, header, data-arg-num, cursor, x)});
+    let x-elem-ptr = cast-inline<int, &t>(unquote {field-slot(f, cursor, x)});
     unquote {to-doc<t>(quote {x-elem-ptr}, enable-ansi)}
   }
 }
 
 inline-meta _constructor-args-doc<a>(
   field-cursors: list(pair(field, int)),
-  header: int,
-  data-arg-num: int,
   x: '&a,
   enable-ansi: 'bool,
 ) -> 'doc {
@@ -196,19 +192,18 @@ inline-meta _constructor-args-doc<a>(
     quote {empty}
   | Cons(entry, Nil) =>
     let Pair(f, cursor) = entry;
-    _constructor-arg-doc(f, cursor, header, data-arg-num, x, enable-ansi)
+    _constructor-arg-doc(f, cursor, x, enable-ansi)
   | Cons(entry, rest) =>
     let Pair(f, cursor) = entry;
-    let d1 = _constructor-arg-doc(f, cursor, header, data-arg-num, x, enable-ansi);
-    let d2 = _constructor-args-doc(rest, header, data-arg-num, x, enable-ansi);
+    let d1 = _constructor-arg-doc(f, cursor, x, enable-ansi);
+    let d2 = _constructor-args-doc(rest, x, enable-ansi);
     quote {join::[unquote {d1}, atom-N(","), break(" "), unquote {d2}]}
   }
 }
 
 inline-meta _algebraic-constructor-doc<a>(
   cons: constructor,
-  header: int,
-  data-arg-num: int,
+  start: int,
   x: '&a,
   enable-ansi: 'bool,
 ) -> 'doc {
@@ -228,7 +223,7 @@ inline-meta _algebraic-constructor-doc<a>(
   quote {
     Group(_nested-comma-seq(
       unquote {prefix},
-      unquote {_constructor-args-doc(fields-with-cursors(xts, 0), header, data-arg-num, x, enable-ansi)},
+      unquote {_constructor-args-doc(fields-with-cursors(xts, start), x, enable-ansi)},
       unquote {suffix},
     ))
   }
@@ -236,14 +231,13 @@ inline-meta _algebraic-constructor-doc<a>(
 
 inline-meta _algebraic-doc<a>(
   constructors: list(constructor),
-  header: int,
-  data-arg-num: int,
+  start: int,
   disc: 'int,
   x: '&a,
   enable-ansi: 'bool,
 ) -> 'doc {
   constructor-switch(constructors, disc, quote {empty}, (cons) => {
-    _algebraic-constructor-doc(cons, header, data-arg-num, x, enable-ansi)
+    _algebraic-constructor-doc(cons, start, x, enable-ansi)
   })
 }
 
@@ -251,11 +245,11 @@ define-meta to-doc<a>(x: '&a, enable-ansi: 'bool) -> 'doc {
   let k = magic inspect-type(a);
   match k {
   | Algebraic(_, data-args, !cons-info) =>
-    let data-arg-num = data-arg-count(data-args);
-    let header = algebraic-header-slot-count(cons-info);
+    let arg-num = data-arg-count(data-args);
+    let start = payload-start(cons-info, arg-num);
     quote {
-      let discriminant-x = unquote {algebraic-discriminant(cons-info, x)};
-      unquote {_algebraic-doc(cons-info, header, data-arg-num, quote {discriminant-x}, x, enable-ansi)}
+      let discriminant-x = unquote {algebraic-discriminant(cons-info, arg-num, x)};
+      unquote {_algebraic-doc(cons-info, start, quote {discriminant-x}, x, enable-ansi)}
     }
   | Enum(names) =>
     quote {

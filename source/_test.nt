@@ -104,7 +104,7 @@ define-meta inspect-mixed-slot-summary() -> 'int {
   let k = magic inspect-type(generic-mixed);
   match k {
   | Algebraic(_, _, !constructors) =>
-    let header = algebraic-header-byte-size(constructors, 0);
+    let header = algebraic-header-byte-size(constructors);
     match constructors {
     | Cons(!c, Nil) =>
       let field-count = constructor-field-count(c);

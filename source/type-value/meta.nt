@@ -99,14 +99,6 @@ inline-meta field-storage-byte-size(f: field) -> int {
   field-layout-byte-size(field-layout-of(f))
 }
 
-inline-meta _smaller(x: int, y: int) -> int {
-  if lt-int(x, y) {
-    x
-  } else {
-    y
-  }
-}
-
 inline-meta _larger(x: int, y: int) -> int {
   if gt-int(x, y) {
     x
@@ -178,60 +170,16 @@ inline-meta discriminant-width(constructors: list(constructor)) -> storage-width
   }
 }
 
-inline-meta _widest-within(at-least: int, within: int) -> int {
-  if ge-int(within, 8) {
-    8
-  } else-if ge-int(within, 4) {
-    _larger(4, at-least)
-  } else-if ge-int(within, 2) {
-    _larger(2, at-least)
-  } else {
-    at-least
-  }
-}
-
-inline-meta _first-field-start(narrow: int, c: constructor) -> int {
-  match constructor-fields(c) {
-  | Nil =>
-    8
-  | Cons(f, _) =>
-    align-up(field-alignment(f), narrow)
-  }
-}
-
-inline-meta _payload-reach(constructors: list(constructor), data-arg-num: int, narrow: int) -> int {
-  if gt-int(data-arg-num, 0) {
-    align-up(pointer-byte-size(), narrow)
-  } else {
-    fold-left(8, constructors, (acc, c) => {
-      _smaller(_first-field-start(narrow, c), acc)
-    })
-  }
-}
-
-inline-meta header-byte-size(!constructors: list(constructor), data-arg-num: int) -> int {
+inline-meta header-byte-size(!constructors: list(constructor)) -> int {
   if gt-int(length(constructors), 1) {
-    let narrow = storage-width-byte-size(discriminant-width(constructors));
-    _widest-within(narrow, _payload-reach(constructors, data-arg-num, narrow))
+    storage-width-byte-size(discriminant-width(constructors))
   } else {
     0
   }
 }
 
-inline-meta algebraic-header-byte-size(constructors: list(constructor), data-arg-num: int) -> int {
-  header-byte-size(constructors, data-arg-num)
-}
-
-inline-meta width-of-byte-size(byte-size: int) -> storage-width {
-  if eq-int(byte-size, 8) {
-    Width64
-  } else-if eq-int(byte-size, 4) {
-    Width32
-  } else-if eq-int(byte-size, 2) {
-    Width16
-  } else {
-    Width8
-  }
+inline-meta algebraic-header-byte-size(constructors: list(constructor)) -> int {
+  header-byte-size(constructors)
 }
 
 inline-meta load-at-width(width: storage-width, addr: 'pointer) -> 'int {
@@ -249,9 +197,9 @@ inline-meta load-at-width(width: storage-width, addr: 'pointer) -> 'int {
   }
 }
 
-inline-meta algebraic-discriminant<a>(!constructors: list(constructor), data-arg-num: int, x: '&a) -> 'int {
+inline-meta algebraic-discriminant<a>(!constructors: list(constructor), x: '&a) -> 'int {
   if gt-int(length(constructors), 1) {
-    let width = width-of-byte-size(header-byte-size(constructors, data-arg-num));
+    let width = discriminant-width(constructors);
     quote {
       let x-ptr = cast-inline<&a, pointer>(unquote {x});
       unquote {load-at-width(width, quote {x-ptr})}
@@ -363,7 +311,7 @@ inline-meta constructor-fields-with-cursors(c: constructor, cursor: int) -> list
 }
 
 inline-meta payload-start(constructors: list(constructor), data-arg-num: int) -> int {
-  let header = header-byte-size(constructors, data-arg-num);
+  let header = header-byte-size(constructors);
   if eq-int(data-arg-num, 0) {
     header
   } else {
@@ -373,7 +321,7 @@ inline-meta payload-start(constructors: list(constructor), data-arg-num: int) ->
 }
 
 inline-meta algebraic-cell-alignment(!constructors: list(constructor), data-arg-num: int) -> int {
-  let header-alignment = header-byte-size(constructors, data-arg-num);
+  let header-alignment = header-byte-size(constructors);
   let data-arg-alignment =
     if eq-int(data-arg-num, 0) {
       1

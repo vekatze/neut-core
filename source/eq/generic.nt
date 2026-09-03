@@ -139,8 +139,8 @@ define-meta eq-data<a>(x: '&a, y: '&a) -> 'bool {
     let arg-num = data-arg-count(data-args);
     let start = payload-start(cons-info, arg-num);
     quote {
-      let discriminant-x = unquote {algebraic-discriminant(cons-info, arg-num, x)};
-      let discriminant-y = unquote {algebraic-discriminant(cons-info, arg-num, y)};
+      let discriminant-x = unquote {algebraic-discriminant(cons-info, x)};
+      let discriminant-y = unquote {algebraic-discriminant(cons-info, y)};
       if ne-int(discriminant-x, discriminant-y) {
         False
       } else {

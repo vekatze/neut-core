@@ -248,7 +248,7 @@ define-meta to-doc<a>(x: '&a, enable-ansi: 'bool) -> 'doc {
     let arg-num = data-arg-count(data-args);
     let start = payload-start(cons-info, arg-num);
     quote {
-      let discriminant-x = unquote {algebraic-discriminant(cons-info, arg-num, x)};
+      let discriminant-x = unquote {algebraic-discriminant(cons-info, x)};
       unquote {_algebraic-doc(cons-info, start, quote {discriminant-x}, x, enable-ansi)}
     }
   | Enum(names) =>

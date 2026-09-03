@@ -53,6 +53,15 @@ define _expect-string(label: &string, actual: string, expected: &string) -> unit
   assert(label, eq-string(actual, expected))
 }
 
+define _expect-float-string(label: &string, parsed: ?float, expected: &string) -> unit {
+  match parsed {
+  | Left(_) =>
+    assert(label, False)
+  | Right(v) =>
+    _expect-string(label, show-float(v), expected)
+  }
+}
+
 define _expect-float-finite-positive(
   label: &string,
   actual: float-decimal,
@@ -124,7 +133,13 @@ define test-float() -> unit {
   _expect-no-float("float::parse: reject plus hex exponent\n", this::float.parse::parse-float@("0x1.0p+2"));
   _expect-float("float::parse: accept Ryu zero\n", this::float.parse::parse-float@("0e0"));
   _expect-float("float::parse: accept Ryu integer form\n", this::float.parse::parse-float@("1e0"));
-  _expect-string("float::show: Ryu zero\n", show-float(0.0), "0e0");
+  _expect-float-string("float::parse: hex with an exponent only\n", this::float.parse::parse-float@("0x1p4"), "16.0");
+  _expect-float-string("float::parse: hex with a fraction only\n", this::float.parse::parse-float@("0x1.8"), "1.5");
+  _expect-float-string("float::parse: hex with both\n", this::float.parse::parse-float@("0x1.Ap2"), "6.5");
+  _expect-no-float("float::parse: reject a hex integer\n", this::float.parse::parse-float@("0x10"));
+  _expect-string("float::show: zero\n", show-float(0.0), "0.0");
+  _expect-string("float::show: negative zero\n", show-float(-0.0), "-0.0");
+  _expect-string("float::show: float32 zero\n", show-float32(0.0), "0.0");
   _expect-string("float::show: fixed integer form\n", show-float(1.0), "1.0");
   _expect-string("float::show: fixed decimal form\n", show-float(1.234), "1.234");
   _expect-string("float::show: lower fixed boundary\n", show-float(0.0001), "0.0001");

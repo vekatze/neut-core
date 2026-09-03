@@ -129,26 +129,30 @@ define _size-chunk(c: &chunk) -> int {
   }
 }
 
+define _emit(k: &_doc-kit, t: string) -> string {
+  let width on t = this::string::length(t);
+  _shift-column(k, width);
+  t
+}
+
 define _layout-chunk(k: &_doc-kit, c: &chunk) -> string {
   case c {
   | Chunk-Empty =>
     *""
   | Chunk-String(t) =>
-    _shift-column(k, this::string::length(t));
-    *t
+    _emit(k, *t)
   | Chunk-Text(t) =>
-    _shift-column(k, this::string::length(from-text(*t)));
-    *from-text(*t)
+    _emit(k, *from-text(*t))
   | Chunk-Style(t) =>
     *t
   | Chunk-Style-Text(t) =>
     *from-text(*t)
   | Chunk-Int(x) =>
-    show-int(*x)
+    _emit(k, show-int(*x))
   | Chunk-Float(x) =>
-    show-float(*x)
+    _emit(k, show-float(*x))
   | Chunk-Rune(r) =>
-    this::string::singleton(*r)
+    _emit(k, this::string::singleton(*r))
   | Chunk-Line =>
     pin tmp = this::string::replicate(" ", _get-indentation(k));
     _set-column(k, _get-indentation(k));

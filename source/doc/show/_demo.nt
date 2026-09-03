@@ -1,14 +1,40 @@
 import {
   this::ansi {Blue, Yellow},
   this::binary,
-  this::doc {Group, Nest, ansi-fg, ansi-reset, atom, break, join},
+  this::debug {assert},
+  this::doc {Group, Nest, ansi-fg, ansi-reset, atom, atom-float, atom-int, atom-rune, break, doc, join},
   this::doc.show {show-doc},
-  this::string,
+  this::string {string},
+  this::string.eq {eq-string},
   this::string.io {print-line},
   this::unit {Unit, unit},
 }
 
+define _grouped() -> doc {
+  Group(join::[atom(*"abc"), break(" "), atom(*"def")])
+}
+
+define _expect-layout(label: &string, d: doc, width: int, expected: &string) -> unit {
+  pin d = d;
+  pin rendered = show-doc(d, width);
+  assert(label, eq-string(rendered, expected));
+}
+
+define _test-column-tracking() -> unit {
+  _expect-layout("doc: column after a string atom\n", join::[atom(*"1234567890"), _grouped()], 12, "1234567890abc\ndef");
+  _expect-layout("doc: column after an int atom\n", join::[atom-int(1234567890), _grouped()], 12, "1234567890abc\ndef");
+  _expect-layout("doc: column after a float atom\n", join::[atom-float(1234567890.0), _grouped()], 12, "1.23456789e9abc\ndef");
+  _expect-layout(
+    "doc: column after rune atoms\n",
+    join::[atom-rune(`x`), atom-rune(`y`), atom-rune(`z`), _grouped()],
+    9,
+    "xyzabc\ndef",
+  );
+  _expect-layout("doc: column after a short string atom\n", join::[atom(*"xyz"), _grouped()], 9, "xyzabc\ndef");
+}
+
 define zen() -> unit {
+  _test-column-tracking();
   pin item =
     Group(join::[
       ansi-fg(Blue),

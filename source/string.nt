@@ -265,7 +265,7 @@ define split(haystack: &string, needle: &string) -> list(string) {
       }
     };
   if eq-int(needle-len, 0) {
-    Nil
+    List::[_drop-N(haystack, 0)]
   } else {
     f(0, 0)
   }

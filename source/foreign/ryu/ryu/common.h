@@ -95,7 +95,7 @@ static inline int copy_special_str(char * const result, const bool sign, const b
     memcpy(result + sign, "inf", 3);
     return sign + 3;
   }
-  memcpy(result + sign, "0e0", 3);
+  memcpy(result + sign, "0.0", 3);
   return sign + 3;
 }
 

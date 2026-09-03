@@ -260,11 +260,11 @@ inline write-code(k: &ansi-kit, c: command) ->> system(unit) {
     | Up-Start(offset) =>
       try _ = write@(k, "\u{1B}[");
       try _ = write-int@(k, offset);
-      write@(k, "E")
+      write@(k, "F")
     | Down-Start(offset) =>
       try _ = write@(k, "\u{1B}[");
       try _ = write-int@(k, offset);
-      write@(k, "F")
+      write@(k, "E")
     | To-Column(column) =>
       try _ = write@(k, "\u{1B}[");
       try _ = write-int@(k, column);

@@ -10,20 +10,23 @@ import {
   this::binary,
   this::bool {False, True, all, and, any, bool, or},
   this::cell,
+  this::debug {assert},
   this::debug.dump {trace, vet},
-  this::either {Right, either},
+  this::either {Left, Right, either},
   this::eq.generic {eq-data},
+  this::float.show {show-float, show-float32},
   this::int.io {print-int-line},
-  this::int.parse,
+  this::int.parse {parse-hex, parse-int},
   this::int.show {show-int64},
   this::layer {axiom-T},
-  this::list {Cons, Nil, list},
+  this::list {Cons, Nil, length, list},
   this::list.meta,
   this::pair {Pair, pair},
   this::platform {get-cpu-count},
-  this::string {append, from-text, string, strip-prefix, strip-suffix},
+  this::string {append, from-text, replace, split, string, strip-prefix, strip-suffix},
   this::string.builder {String},
   this::string.builder.sync {* as string-builder-sync},
+  this::string.eq {eq-string},
   this::string.io {print, print-line},
   this::sync.mvar {make-mvar, receive, send},
   this::sync.pool {for-each-parallel},
@@ -443,7 +446,62 @@ define test-int64() -> unit {
   print-line(s4)
 }
 
+define _expect-int(label: &string, actual: ?int, expected: int) -> unit {
+  match actual {
+  | Right(v) =>
+    assert(label, eq-int(v, expected))
+  | Left(_) =>
+    assert(label, False)
+  }
+}
+
+define _expect-no-int(label: &string, actual: ?int) -> unit {
+  match actual {
+  | Right(_) =>
+    assert(label, False)
+  | Left(_) =>
+    Unit
+  }
+}
+
+define _expect-string(label: &string, actual: string, expected: &string) -> unit {
+  pin actual = actual;
+  assert(label, eq-string(actual, expected))
+}
+
+define test-int-parse-range() -> unit {
+  _expect-int("parse-int: max", parse-int@("9223372036854775807"), 9223372036854775807);
+  _expect-int("parse-int: min", parse-int@("-9223372036854775808"), -9223372036854775808);
+  _expect-int("parse-int: unsigned max", parse-int@("18446744073709551615"), -1);
+  _expect-int("parse-hex: unsigned max", parse-hex@("0xFFFFFFFFFFFFFFFF"), -1);
+  _expect-no-int("parse-int: unsigned max + 1", parse-int@("18446744073709551616"));
+  _expect-no-int("parse-int: min - 1", parse-int@("-9223372036854775809"));
+  _expect-no-int("parse-int: far beyond", parse-int@("99999999999999999999999999"));
+  _expect-no-int("parse-hex: 17 digits", parse-hex@("0x10000000000000000"));
+}
+
+define test-float-show-zero() -> unit {
+  _expect-string("show-float: 0.0", show-float(0.0), "0.0");
+  _expect-string("show-float: -0.0", show-float(-0.0), "-0.0");
+  _expect-string("show-float: 1.0", show-float(1.0), "1.0");
+  _expect-string("show-float32: 0.0", show-float32(0.0), "0.0");
+  _expect-string("show-float32: -0.0", show-float32(-0.0), "-0.0");
+}
+
+define test-string-empty-needle() -> unit {
+  pin pieces = split("abc", "");
+  assert("split: empty needle keeps the haystack", eq-int(length(pieces), 1));
+  _expect-string("replace: empty needle leaves the haystack", replace("abc", "", *"x"), "abc");
+  pin no-pieces = split("", "");
+  assert("split: empty needle on empty haystack", eq-int(length(no-pieces), 1));
+  pin pieces2 = split("a,b,,c", ",");
+  assert("split: separators", eq-int(length(pieces2), 4));
+}
+
 define main() -> unit {
+  test-int-parse-range();
+  test-float-show-zero();
+  test-string-empty-needle();
   test-int64();
   zen();
   ns-feature-check();

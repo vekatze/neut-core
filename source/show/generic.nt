@@ -125,25 +125,29 @@ inline-meta _array-doc<a>(xs: '&array(a), enable-ansi: 'bool) -> 'doc {
     let prefix = join::[_constructor-doc("Array", unquote {enable-ansi}), atom-N("[")];
     let suffix = atom-N("]");
     let len = this::array::length(unquote {xs});
-    let loop =
-      define self(index: int) -> doc {
-        if eq-int(index, len) {
-          empty
-        } else {
-          let x = access-unchecked(unquote {xs}, index);
-          let rest = self(add-int(index, 1));
-          if eq-int(add-int(index, 1), len) {
-            join::[unquote {to-doc(quote {x}, enable-ansi)}, rest]
+    if eq-int(len, 0) {
+      join::[prefix, suffix]
+    } else {
+      let loop =
+        define self(index: int) -> doc {
+          if eq-int(index, len) {
+            empty
           } else {
-            join::[unquote {to-doc(quote {x}, enable-ansi)}, atom-N(","), break(" "), rest]
+            let x = access-unchecked(unquote {xs}, index);
+            let rest = self(add-int(index, 1));
+            if eq-int(add-int(index, 1), len) {
+              join::[unquote {to-doc(quote {x}, enable-ansi)}, rest]
+            } else {
+              join::[unquote {to-doc(quote {x}, enable-ansi)}, atom-N(","), break(" "), rest]
+            }
           }
-        }
-      };
-    Group(_nested-comma-seq(
-      prefix,
-      loop(0),
-      suffix,
-    ))
+        };
+      Group(_nested-comma-seq(
+        prefix,
+        loop(0),
+        suffix,
+      ))
+    }
   }
 }
 
@@ -152,19 +156,23 @@ inline-meta _vector-doc<a>(xs: '&vector(a), enable-ansi: 'bool) -> 'doc {
     let prefix = join::[_constructor-doc("Vector", unquote {enable-ansi}), atom-N("[")];
     let suffix = atom-N("]");
     let len = this::vector::length(unquote {xs});
-    let content =
-      this::vector::fold-right-N(unquote {xs}, empty, (x: &a, acc: doc, i: int) => {
-        if eq-int(add-int(i, 1), len) {
-          join::[unquote {to-doc(quote {x}, enable-ansi)}, acc]
-        } else {
-          join::[unquote {to-doc(quote {x}, enable-ansi)}, atom-N(","), break(" "), acc]
-        }
-      });
-    Group(_nested-comma-seq(
-      prefix,
-      content,
-      suffix,
-    ))
+    if eq-int(len, 0) {
+      join::[prefix, suffix]
+    } else {
+      let content =
+        this::vector::fold-right-N(unquote {xs}, empty, (x: &a, acc: doc, i: int) => {
+          if eq-int(add-int(i, 1), len) {
+            join::[unquote {to-doc(quote {x}, enable-ansi)}, acc]
+          } else {
+            join::[unquote {to-doc(quote {x}, enable-ansi)}, atom-N(","), break(" "), acc]
+          }
+        });
+      Group(_nested-comma-seq(
+        prefix,
+        content,
+        suffix,
+      ))
+    }
   }
 }
 
@@ -208,24 +216,22 @@ inline-meta _algebraic-constructor-doc<a>(
   enable-ansi: 'bool,
 ) -> 'doc {
   let Constructor(cons-name, is-const-like, xts) = cons;
-  let prefix =
+  let name-doc = quote {_constructor-doc(unquote {promote {cons-name}}, unquote {enable-ansi})};
+  match fields-with-cursors(xts, start) {
+  | Nil =>
     if is-const-like {
-      quote {_constructor-doc(unquote {promote {cons-name}}, unquote {enable-ansi})}
+      name-doc
     } else {
-      quote {join::[_constructor-doc(unquote {promote {cons-name}}, unquote {enable-ansi}), atom-N("(")]}
-    };
-  let suffix =
-    if is-const-like {
-      quote {empty}
-    } else {
-      quote {atom-N(")")}
-    };
-  quote {
-    Group(_nested-comma-seq(
-      unquote {prefix},
-      unquote {_constructor-args-doc(fields-with-cursors(xts, start), x, enable-ansi)},
-      unquote {suffix},
-    ))
+      quote {join::[unquote {name-doc}, atom-N("()")]}
+    }
+  | field-cursors =>
+    quote {
+      Group(_nested-comma-seq(
+        join::[unquote {name-doc}, atom-N("(")],
+        unquote {_constructor-args-doc(field-cursors, x, enable-ansi)},
+        atom-N(")"),
+      ))
+    }
   }
 }
 

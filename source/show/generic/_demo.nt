@@ -1,0 +1,57 @@
+import {
+  this::binary,
+  this::bool {False},
+  this::debug {assert},
+  this::list {List, list},
+  this::show {Show},
+  this::show.generic {derive},
+  this::string {string},
+  this::string.eq {eq-string},
+  this::unit {Unit, unit},
+  this::vector {vector},
+}
+
+data node {
+| This-Constructor-Name-Is-Long-Enough-To-Exceed-The-Default-Ribbon
+| Paren-But-Empty()
+| Wrapped(int)
+}
+
+define _expect-node(label: &string, x: node, width: int, expected: &string) -> unit {
+  let Show{render} = derive::<node>()[max-ribbon-width := width, enable-ansi := False];
+  pin x = x;
+  pin rendered = render(x);
+  assert(label, eq-string(rendered, expected));
+}
+
+define _expect-list(label: &string, x: list(int), width: int, expected: &string) -> unit {
+  let Show{render} = derive::<list(int)>()[max-ribbon-width := width, enable-ansi := False];
+  pin x = x;
+  pin rendered = render(x);
+  assert(label, eq-string(rendered, expected));
+}
+
+define _expect-vector(label: &string, x: vector(int), width: int, expected: &string) -> unit {
+  let Show{render} = derive::<vector(int)>()[max-ribbon-width := width, enable-ansi := False];
+  pin x = x;
+  pin rendered = render(x);
+  assert(label, eq-string(rendered, expected));
+}
+
+define zen() -> unit {
+  _expect-node(
+    "show.generic: a long const-like constructor stays a name\n",
+    This-Constructor-Name-Is-Long-Enough-To-Exceed-The-Default-Ribbon,
+    50,
+    "This-Constructor-Name-Is-Long-Enough-To-Exceed-The-Default-Ribbon",
+  );
+  _expect-node("show.generic: a constructor with no argument keeps its parentheses\n", Paren-But-Empty(), 8, "Paren-But-Empty()");
+  _expect-node("show.generic: a constructor with an argument\n", Wrapped(1), 50, "Wrapped(1)");
+  _expect-node("show.generic: a constructor that breaks\n", Wrapped(1), 4, "Wrapped(\n  1,\n)");
+  _expect-list("show.generic: a const-like constructor of a wider type\n", List::[], 2, "Nil");
+  _expect-list("show.generic: a list that fits\n", List::[1, 2], 50, "Cons(1, Cons(2, Nil))");
+  _expect-list("show.generic: a list that breaks\n", List::[1, 2], 6, "Cons(\n  1,\n  Cons(\n    2,\n    Nil,\n  ),\n)");
+  _expect-vector("show.generic: an empty vector\n", this::vector::make(0), 6, "Vector[]");
+  _expect-vector("show.generic: a vector that fits\n", this::vector::Vector::[1, 2], 50, "Vector[1, 2]");
+  Unit
+}

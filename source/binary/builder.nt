@@ -342,9 +342,9 @@ inline _append-ansi(b: ^_binary-builder, c: command) -> ^_binary-builder {
     | Backward(offset) =>
       _append-ansi-offset(b, offset, "D")
     | Up-Start(offset) =>
-      _append-ansi-offset(b, offset, "E")
-    | Down-Start(offset) =>
       _append-ansi-offset(b, offset, "F")
+    | Down-Start(offset) =>
+      _append-ansi-offset(b, offset, "E")
     | To-Column(column) =>
       _append-ansi-offset(b, column, "G")
     | To(x, y) =>

@@ -39,14 +39,62 @@ import {
     write,
     write-code,
   },
+  this::ansi {Backward, Down, Down-Start, Erase, Forward, Move-Cursor, Screen, To, Up, Up-Start, command},
   this::binary,
   this::bool,
   this::control {loop-E},
+  this::debug {assert},
   this::either {Right},
-  this::file.descriptor {stdout},
-  this::string,
+  this::file.descriptor {close, pipe, stdout},
+  this::pair {Pair},
+  this::string {string},
+  this::string.builder {append-ansi, extract, make-string-builder, string-builder},
+  this::string.eq {eq-string},
+  this::string.io {read},
   this::system {system},
   this::unit {Unit, unit},
+}
+
+define _expect-built(label: &string, c: command, expected: &string) -> unit {
+  let b: string-builder = make-string-builder(8);
+  let _ on b = append-ansi(b, c);
+  pin built = extract(b);
+  assert(label, eq-string(built, expected))
+}
+
+define _expect-written(label: &string, c: command, expected: &string) ->> system(unit) {
+  try Pair(reader, writer) = pipe@();
+  pin k = make-ansi-kit@{sink := writer, capacity := 64};
+  try _ = write-code@(k, c);
+  try _ = flush@(k);
+  try _ = close@(writer);
+  try written = read@(reader, 64);
+  try _ = close@(reader);
+  pin written = written;
+  Right(assert(label, eq-string(written, expected)))
+}
+
+define _expect-code(label: &string, !c: command, expected: &string) ->> system(unit) {
+  _expect-built(label, c, expected);
+  _expect-written@(label, c, expected)
+}
+
+// ECMA-48: E moves to the beginning of the line n lines down, F n lines up
+define _test-cursor-codes() ->> system(unit) {
+  try _ = _expect-code@("ansi: cursor up\n", Move-Cursor(Up(2)), "\u{1B}[2A");
+  try _ = _expect-code@("ansi: cursor down\n", Move-Cursor(Down(2)), "\u{1B}[2B");
+  try _ = _expect-code@("ansi: cursor forward\n", Move-Cursor(Forward(2)), "\u{1B}[2C");
+  try _ = _expect-code@("ansi: cursor backward\n", Move-Cursor(Backward(2)), "\u{1B}[2D");
+  try _ = _expect-code@("ansi: cursor down to line start\n", Move-Cursor(Down-Start(2)), "\u{1B}[2E");
+  try _ = _expect-code@("ansi: cursor up to line start\n", Move-Cursor(Up-Start(2)), "\u{1B}[2F");
+  try _ = _expect-code@("ansi: cursor to column\n", Move-Cursor(To-Column(2)), "\u{1B}[2G");
+  try _ = _expect-code@("ansi: cursor to position\n", Move-Cursor(To(3, 5)), "\u{1B}[3;5H");
+  try _ = _expect-code@("ansi: erase a line from the cursor\n", Erase(Line, From-Cursor), "\u{1B}[0K");
+  try _ = _expect-code@("ansi: erase a line to the cursor\n", Erase(Line, To-Cursor), "\u{1B}[1K");
+  try _ = _expect-code@("ansi: erase a whole line\n", Erase(Line, Whole), "\u{1B}[2K");
+  try _ = _expect-code@("ansi: erase a screen from the cursor\n", Erase(Screen, From-Cursor), "\u{1B}[0J");
+  try _ = _expect-code@("ansi: erase a screen to the cursor\n", Erase(Screen, To-Cursor), "\u{1B}[1J");
+  _expect-code@("ansi: erase a whole screen\n", Erase(Screen, Whole), "\u{1B}[2J")
 }
 
 define _write-space(k: &ansi-kit) ->> system(unit) {
@@ -282,6 +330,7 @@ define zen() -> unit {
   pin k1 = make-ansi-kit@{sink := stdout, capacity := 100};
   pin k2 = make-ansi-kit-unbuffered@{sink := stdout};
   let _ = {
+    try _ = _test-cursor-codes@();
     try _ = _test-256@(k1);
     try _ = _test-256@(k2);
     try _ = _test-rgb@(k1);

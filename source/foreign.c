@@ -230,6 +230,9 @@ static int neut_core_v0_57_read_required_digits(
     if (*i >= length || !read_digit((unsigned char)str[*i], &digit)) {
       break;
     }
+    if (result > (UINT64_MAX - (neut_word)digit) / (neut_word)base) {
+      return 0;
+    }
     result = result * (neut_word)base + (neut_word)digit;
     (*i)++;
     has_digits = 1;
@@ -260,6 +263,9 @@ static neut_int neut_core_v0_57_parse_integer_literal(
     return -1;
   }
   if (sign < 0) {
+    if (result > ((neut_word)1 << 63)) {
+      return -1;
+    }
     *out_value = (neut_int)(0 - result);
   } else {
     *out_value = (neut_int)result;
@@ -456,6 +462,8 @@ static neut_int neut_core_v0_57_parse_hex_double(const char *str, neut_int lengt
                                                 double *out_value) {
   neut_int i = 0;
   neut_int sign = 1;
+  int has_fraction = 0;
+  int has_exponent = 0;
   neut_word ignored = 0;
   neut_core_v0_57_read_int_sign(str, length, &i, &sign);
   if (!neut_core_v0_57_read_prefix(str, length, &i, "0x", 2)) {
@@ -467,15 +475,21 @@ static neut_int neut_core_v0_57_parse_hex_double(const char *str, neut_int lengt
   }
   i = neut_core_v0_57_skip_underscores(str, length, i);
   if (i < length && str[i] == '.') {
+    has_fraction = 1;
     i++;
-  } else {
-    return -1;
+    if (!neut_core_v0_57_read_required_digits(
+            str, length, &i, neut_core_v0_57_hex_digit, 16, &ignored)) {
+      return -1;
+    }
+    i = neut_core_v0_57_skip_underscores(str, length, i);
   }
-  if (!neut_core_v0_57_read_required_digits(
-          str, length, &i, neut_core_v0_57_hex_digit, 16, &ignored)) {
-    return -1;
+  has_exponent = i < length && str[i] == 'p';
+  if (has_exponent) {
+    if (!neut_core_v0_57_read_float_exponent(str, length, &i, 'p')) {
+      return -1;
+    }
   }
-  if (!neut_core_v0_57_read_float_exponent(str, length, &i, 'p')) {
+  if (!has_fraction && !has_exponent) {
     return -1;
   }
   i = neut_core_v0_57_skip_underscores(str, length, i);

@@ -98,7 +98,7 @@ define length<a>(xs: &vector(a)) -> int {
   sub-int(to, from)
 }
 
-inline with-slice<a, b>(xs: &vector(a), start: int, size: int, f: (&vector(a)) -> +b) -> b {
+inline with-slice<a, b>(xs: &vector(a), start: int, size: int, f: (&vector(a)) -> ^b) -> b {
   let len = length(xs);
   let start = min-int(max-int(start, 0), len);
   let size = min-int(max-int(size, 0), sub-int(len, start));
@@ -280,7 +280,7 @@ define push-back<a>(xs: vector(a), x: a) -> vector(a) {
   }
 }
 
-define pop-front@<a>(xs: vector(a)) -> ?pair(a, vector(a)) {
+define pop-front<a>(xs: vector(a)) ->> ?pair(a, vector(a)) {
   let len on xs = length(xs);
   if eq-int(len, 0) {
     none
@@ -292,7 +292,7 @@ define pop-front@<a>(xs: vector(a)) -> ?pair(a, vector(a)) {
   }
 }
 
-define pop-back@<a>(xs: vector(a)) -> ?pair(vector(a), a) {
+define pop-back<a>(xs: vector(a)) ->> ?pair(vector(a), a) {
   let len on xs = length(xs);
   if eq-int(len, 0) {
     none
@@ -326,7 +326,7 @@ inline _access-unchecked<a>(xs: &vector(a), i: int) -> &a {
   cast<int, &a>(load-int(element-pointer))
 }
 
-define access@<a>(xs: &vector(a), i: int) -> ?&a {
+define access<a>(xs: &vector(a), i: int) ->> ?&a {
   if and::(le-int(0, i), lt-int(i, length(xs))) {
     Right(_access-unchecked(xs, i))
   } else {
@@ -980,10 +980,10 @@ define filter-some<a>(xs: vector(?a)) -> vector(a) {
   helper(0, 0, xs)
 }
 
-inline find@<a>(xs: &vector(a), !pred: (&a) -> bool) -> ?&a {
+inline find<a>(xs: &vector(a), !pred: (&a) -> bool) ->> ?&a {
   let len = length(xs);
   let f =
-    define self@(index: int) -> ?&a {
+    define self(index: int) ->> ?&a {
       if ge-int(index, len) {
         none
       } else {
@@ -1023,8 +1023,8 @@ define range(from: int, to: int) -> vector(int) {
   }
 }
 
-define lift-vector<a>(xs: vector(a), _: (a) -> +a) -> +vector(a) {
-  magic cast(vector(a), +vector(a), xs)
+define lift-vector<a>(xs: vector(a), _: (a) -> ^a) -> ^vector(a) {
+  magic cast(vector(a), ^vector(a), xs)
   // admissible:
   //   let base: +vector(a) = box {make(10)};
   //   list::fold-left(base, to-list(xs), function (acc, x) {
@@ -1036,10 +1036,10 @@ define lift-vector<a>(xs: vector(a), _: (a) -> +a) -> +vector(a) {
   //   })
 }
 
-define meta-vector-out<a>(xs: vector(+a)) -> +vector(a) {
+define meta-vector-out<a>(xs: vector(^a)) -> ^vector(a) {
   magic cast(_, _, xs)
 }
 
-define meta-vector-in<a>(xs: +vector(a)) -> vector(+a) {
+define meta-vector-in<a>(xs: ^vector(a)) -> vector(^a) {
   magic cast(_, _, xs)
 }

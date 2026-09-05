@@ -50,7 +50,7 @@ inline _parse_hex_digits(num-str-ptr: pointer, len: int, result-ptr: pointer) ->
   magic external neut_core_v0_57_parse_hex_digits(num-str-ptr, len, result-ptr)
 }
 
-define parse-binary@(t: &string) -> ?int {
+define parse-binary(t: &string) ->> ?int {
   let c-int-str = get-content-pointer(t);
   let len = this::string::byte-length(t);
   let result-ptr = magic alloca(int, 1);
@@ -63,7 +63,7 @@ define parse-binary@(t: &string) -> ?int {
   }
 }
 
-define parse-octal@(t: &string) -> ?int {
+define parse-octal(t: &string) ->> ?int {
   let c-int-str = get-content-pointer(t);
   let len = this::string::byte-length(t);
   let result-ptr = magic alloca(int, 1);
@@ -76,7 +76,7 @@ define parse-octal@(t: &string) -> ?int {
   }
 }
 
-define parse-int@(t: &string) -> ?int {
+define parse-int(t: &string) ->> ?int {
   let c-int-str = get-content-pointer(t);
   let len = this::string::byte-length(t);
   let result-ptr = magic alloca(int, 1);
@@ -89,7 +89,7 @@ define parse-int@(t: &string) -> ?int {
   }
 }
 
-define parse-hex@(t: &string) -> ?int {
+define parse-hex(t: &string) ->> ?int {
   let c-int-str = get-content-pointer(t);
   let len = this::string::byte-length(t);
   let result-ptr = magic alloca(int, 1);
@@ -102,7 +102,7 @@ define parse-hex@(t: &string) -> ?int {
   }
 }
 
-define parse-binary-digits@(t: &string) -> ?int {
+define parse-binary-digits(t: &string) ->> ?int {
   let c-int-str = get-content-pointer(t);
   let len = this::string::byte-length(t);
   let result-ptr = magic alloca(int, 1);
@@ -115,7 +115,7 @@ define parse-binary-digits@(t: &string) -> ?int {
   }
 }
 
-define parse-octal-digits@(t: &string) -> ?int {
+define parse-octal-digits(t: &string) ->> ?int {
   let c-int-str = get-content-pointer(t);
   let len = this::string::byte-length(t);
   let result-ptr = magic alloca(int, 1);
@@ -128,7 +128,7 @@ define parse-octal-digits@(t: &string) -> ?int {
   }
 }
 
-define parse-decimal-digits@(t: &string) -> ?int {
+define parse-decimal-digits(t: &string) ->> ?int {
   let c-int-str = get-content-pointer(t);
   let len = this::string::byte-length(t);
   let result-ptr = magic alloca(int, 1);
@@ -141,7 +141,7 @@ define parse-decimal-digits@(t: &string) -> ?int {
   }
 }
 
-define parse-hex-digits@(t: &string) -> ?int {
+define parse-hex-digits(t: &string) ->> ?int {
   let c-int-str = get-content-pointer(t);
   let len = this::string::byte-length(t);
   let result-ptr = magic alloca(int, 1);

@@ -20,7 +20,7 @@ foreign {
   neut_core_v0_57_sleep(float) -> int,
 }
 
-define sleep@(duration: float) -> system(unit) {
+define sleep(duration: float) ->> system(unit) {
   let result = magic external neut_core_v0_57_sleep(duration);
   if lt-int(result, 0) {
     report-system-error@()

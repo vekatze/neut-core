@@ -42,7 +42,7 @@ inline byte-length(t: &string) -> int {
   this::binary::length(ptr)
 }
 
-inline with-byte-slice<a>(t: &string, start: int, size: int, f: (&string) -> +a) -> a {
+inline with-byte-slice<a>(t: &string, start: int, size: int, f: (&string) -> ^a) -> a {
   let xs = magic cast(&string, &binary, t);
   this::binary::with-slice(xs, start, size, (slice) => {
     let slice = magic cast(&binary, &string, slice);
@@ -368,7 +368,7 @@ define _get-rune(t: &string, index: int) -> rune {
   load-rune(ptr)
 }
 
-define get-first-rune@(t: &string) -> ?rune {
+define get-first-rune(t: &string) ->> ?rune {
   if gt-int(byte-length(t), 0) {
     Right(_get-rune(t, 0))
   } else {
@@ -376,7 +376,7 @@ define get-first-rune@(t: &string) -> ?rune {
   }
 }
 
-define uncons@(t: string) -> ?pair(rune, string) {
+define uncons(t: string) ->> ?pair(rune, string) {
   let len on t = byte-length(t);
   if eq-int(len, 0) {
     none
@@ -410,7 +410,7 @@ define _find-pivot-end(char-len: int, len: int, t: &string, index: int, char-cou
   }
 }
 
-inline with-slice<a>(t: &string, start: int, size: int, f: (&string) -> +a) -> a {
+inline with-slice<a>(t: &string, start: int, size: int, f: (&string) -> ^a) -> a {
   let len = byte-length(t);
   let start-byte-index = _find-pivot(start, len, t, 0, 0);
   let end-byte-index = _find-pivot(size, len, t, start-byte-index, 0);
@@ -696,10 +696,10 @@ inline any(t: &string, !pred: (rune) -> bool) -> bool {
   f(0)
 }
 
-define find@(t: &string, !pred: (rune) -> bool) -> ?int {
+define find(t: &string, !pred: (rune) -> bool) ->> ?int {
   let len = byte-length(t);
   let f =
-    define self@(byte-index: int, index: int) -> ?int {
+    define self(byte-index: int, index: int) ->> ?int {
       if ge-int(byte-index, len) {
         none
       } else {
@@ -715,10 +715,10 @@ define find@(t: &string, !pred: (rune) -> bool) -> ?int {
   f@(0, 0)
 }
 
-define find-end@(t: &string, !pred: (rune) -> bool) -> ?int {
+define find-end(t: &string, !pred: (rune) -> bool) ->> ?int {
   let len = byte-length(t);
   let f =
-    define self@(t: &string, byte-index: int, index: int) -> ?int {
+    define self(t: &string, byte-index: int, index: int) ->> ?int {
       if lt-int(byte-index, 0) {
         none
       } else {

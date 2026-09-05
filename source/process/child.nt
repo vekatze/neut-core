@@ -65,7 +65,7 @@ data process-status {
 | Stopped(stopsig: c-int)
 }
 
-define _waitpid@(pid: c-pid) -> system(process-status) {
+define _waitpid(pid: c-pid) ->> system(process-status) {
   let status-ptr = malloc(to-c-size(this::word::size));
   let result = _posix.waitpid(pid, status-ptr, 0);
   if eq-c-pid(result, -1) {
@@ -100,7 +100,7 @@ define _make-argv(xs: list(pointer)) -> pointer {
   ptr
 }
 
-define _fork@() -> system(c-pid) {
+define _fork() ->> system(c-pid) {
   let result = _posix.fork();
   if eq-c-pid(result, -1) {
     report-system-error@()
@@ -151,11 +151,11 @@ define _exec<a>(command: string, args: list(string), error-writer: descriptor) -
   exit(v)
 }
 
-define run@(
+define run(
   ps: process-spec,
   stdout-initial-buffer-size: int,
   stderr-initial-buffer-size: int,
-) -> system(process-result) {
+) ->> system(process-result) {
   try Pair(in-reader, in-writer) = pipe@();
   try Pair(out-reader, out-writer) = pipe@();
   try Pair(error-reader, error-writer) = pipe@();

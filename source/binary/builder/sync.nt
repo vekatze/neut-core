@@ -41,7 +41,7 @@ inline _to-cell-N(b: &binary-builder) -> &cell(_binary-builder) {
 
 inline _mutate(
   b: &binary-builder,
-  f: (+_binary-builder) -> +_binary-builder,
+  f: (^_binary-builder) -> ^_binary-builder,
 ) -> unit {
   mutate(_to-cell-N(b), f)
 }

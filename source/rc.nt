@@ -117,19 +117,19 @@ inline borrow<a>(x: &rc(a)) -> &a {
   cast<int, &a>(load-int(_value-ptr(ptr)))
 }
 
-define downgrade<a>(x: &rc(a)) -> +weak(a) {
+define downgrade<a>(x: &rc(a)) -> ^weak(a) {
   let ptr = cast<&rc(a), pointer>(x);
   _increment-weak(ptr);
-  cast<weak(a), +weak(a)>(cast<pointer, weak(a)>(ptr))
+  cast<weak(a), ^weak(a)>(cast<pointer, weak(a)>(ptr))
 }
 
-define upgrade<a>(x: &weak(a)) -> +?rc(a) {
+define upgrade<a>(x: &weak(a)) -> ^?rc(a) {
   let ptr = cast<&weak(a), pointer>(x);
   let strong-count = load-int(ptr);
   if eq-int(strong-count, 0) {
-    cast<?rc(a), +?rc(a)>(none)
+    cast<?rc(a), ^?rc(a)>(none)
   } else {
     store-int(add-int(strong-count, 1), ptr);
-    cast<?rc(a), +?rc(a)>(Right(cast<pointer, rc(a)>(ptr)))
+    cast<?rc(a), ^?rc(a)>(Right(cast<pointer, rc(a)>(ptr)))
   }
 }

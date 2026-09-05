@@ -8,7 +8,7 @@ import {
   this::unit {unit},
 }
 
-define write-bool@(k: &buffer, x: bool) -> system(unit) {
+define write-bool(k: &buffer, x: bool) ->> system(unit) {
   if x {
     write@(k, "True")
   } else {
@@ -16,7 +16,7 @@ define write-bool@(k: &buffer, x: bool) -> system(unit) {
   }
 }
 
-define write-bool-line@(k: &buffer, x: bool) -> system(unit) {
+define write-bool-line(k: &buffer, x: bool) ->> system(unit) {
   if x {
     write-line@(k, "True")
   } else {

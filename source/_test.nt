@@ -53,7 +53,7 @@ data generic-point {
 }
 
 data generic-mixed {
-| Generic-Mixed(~generic-point, int)
+| Generic-Mixed(+generic-point, int)
 }
 
 define inspect-array-generics(xs: &array(pair(int, bool)), ys: &array(pair(int, bool))) -> bool {
@@ -185,9 +185,9 @@ define string-by-dest(x: &string) -> string {
   result
 }
 
-inline my-loop-func@(x: int) -> either(int, bool) {
+inline my-loop-func(x: int) ->> either(int, bool) {
   let inner =
-    define loop@(n: int) -> either(int, bool) {
+    define loop(n: int) ->> either(int, bool) {
       if eq-int(n, 0) {
         Right(True)
       } else {

@@ -75,7 +75,7 @@ inline _get-content-pointer(b: &buffer) -> pointer {
   shift(magic cast(&buffer, pointer, b), u3)
 }
 
-define flush@(b: &buffer) -> system(unit) {
+define flush(b: &buffer) ->> system(unit) {
   let descriptor = _get-descriptor(b);
   let current-size = _get-current-size(b);
   let content-pointer = _get-content-pointer(b);

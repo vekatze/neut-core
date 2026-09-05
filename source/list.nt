@@ -330,7 +330,7 @@ define partition<a, b>(xs: list(either(a, b))) -> pair(list(a), list(b)) {
   })
 }
 
-define uncons@<a>(xs: list(a)) -> ?pair(a, list(a)) {
+define uncons<a>(xs: list(a)) ->> ?pair(a, list(a)) {
   match xs {
   | Nil =>
     none
@@ -339,9 +339,9 @@ define uncons@<a>(xs: list(a)) -> ?pair(a, list(a)) {
   }
 }
 
-define unsnoc@<a>(xs: list(a)) -> ?pair(list(a), a) {
+define unsnoc<a>(xs: list(a)) ->> ?pair(list(a), a) {
   let f =
-    define _unsnoc@(xs: list(a), acc: list(a)) -> ?pair(list(a), a) {
+    define _unsnoc(xs: list(a), acc: list(a)) ->> ?pair(list(a), a) {
       match xs {
       | Nil =>
         Left(Unit)
@@ -375,9 +375,9 @@ define range(from: int, to: int) -> list(int) {
   }
 }
 
-inline find@<a>(xs: &list(a), pred: &(&a) -> bool) -> ?&a {
+inline find<a>(xs: &list(a), pred: &(&a) -> bool) ->> ?&a {
   let f =
-    define self@(ys: &list(a)) -> ?&a {
+    define self(ys: &list(a)) ->> ?&a {
       case ys {
       | Nil =>
         none

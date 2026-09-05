@@ -18,18 +18,18 @@ import {
   this::unsafe {cast},
 }
 
-define write@(d: descriptor, b: &binary) -> system(unit) {
+define write(d: descriptor, b: &binary) ->> system(unit) {
   let content-pointer = get-content-pointer(b);
   let len = length(b);
   write-all@(d, content-pointer, len)
 }
 
-define _read-inner@(
+define _read-inner(
   data-source: descriptor,
   base-ptr: pointer,
   current-length: int,
   buffer-size: int,
-) -> system(binary) {
+) ->> system(binary) {
   let u = this::pointer::size;
   let u2 = mul-int(u, 2);
   let u3 = mul-int(u, 3);
@@ -59,7 +59,7 @@ define _read-inner@(
   }
 }
 
-define read@(from: descriptor, initial-buffer-size: int) -> system(binary) {
+define read(from: descriptor, initial-buffer-size: int) ->> system(binary) {
   if le-int(initial-buffer-size, 0) {
     Left(Application-Error(format(
       "core.binary.io.read: initial-buffer-size must be positive, but got: {}",

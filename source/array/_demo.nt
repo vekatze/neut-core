@@ -23,8 +23,8 @@ data point {
 }
 
 data complex-item {
-| Wide(~point, ~item, ~point, bool, int)
-| Narrow(~item, ~point)
+| Wide(+point, +item, +point, bool, int)
+| Narrow(+item, +point)
 | Empty
 }
 
@@ -70,7 +70,7 @@ define _point-code(p: point) -> int {
 
 define _complex-code-N(x: &complex-item) -> int {
   case x {
-  | Wide(~p1, ~it, ~p2, b, n) =>
+  | Wide(+p1, +it, +p2, b, n) =>
     add-int(
       add-int(
         add-int(mul-int(_point-code-N(p1), 100000), mul-int(_item-code-N(it), 10)),
@@ -82,7 +82,7 @@ define _complex-code-N(x: &complex-item) -> int {
         sub-int(0, *n)
       },
     )
-  | Narrow(~it, ~p) =>
+  | Narrow(+it, +p) =>
     add-int(mul-int(_item-code-N(it), 10000), _point-code-N(p))
   | Empty =>
     -777
@@ -91,7 +91,7 @@ define _complex-code-N(x: &complex-item) -> int {
 
 define _complex-code(x: complex-item) -> int {
   match x {
-  | Wide(~p1, ~it, ~p2, b, n) =>
+  | Wide(+p1, +it, +p2, b, n) =>
     add-int(
       add-int(
         add-int(mul-int(_point-code(p1), 100000), mul-int(_item-code(it), 10)),
@@ -103,7 +103,7 @@ define _complex-code(x: complex-item) -> int {
         sub-int(0, n)
       },
     )
-  | Narrow(~it, ~p) =>
+  | Narrow(+it, +p) =>
     add-int(mul-int(_item-code(it), 10000), _point-code(p))
   | Empty =>
     -777
@@ -177,7 +177,7 @@ define _clone-complex-at(label: &string, xs: &array(complex-item), index: int) -
     panic(label)
   | Right(actual) =>
     case actual {
-    | Wide(~p1, ~it, ~p2, b, n) =>
+    | Wide(+p1, +it, +p2, b, n) =>
       case p1 {
       | Point(x1, y1) =>
         case p2 {
@@ -190,7 +190,7 @@ define _clone-complex-at(label: &string, xs: &array(complex-item), index: int) -
           }
         }
       }
-    | Narrow(~it, ~p) =>
+    | Narrow(+it, +p) =>
       case p {
       | Point(x, y) =>
         case it {

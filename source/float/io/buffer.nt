@@ -11,7 +11,7 @@ foreign {
   neut_core_v0_57_build_float_buf(pointer, int, float, int) -> int,
 }
 
-define write-float@(b: &buffer, x: float) -> system(unit) {
+define write-float(b: &buffer, x: float) ->> system(unit) {
   let size = 32;
   let add-newline = 0;
   let buffer-ptr = magic alloca(int, size);
@@ -23,7 +23,7 @@ define write-float@(b: &buffer, x: float) -> system(unit) {
   }
 }
 
-define write-float-line@(b: &buffer, x: float) -> system(unit) {
+define write-float-line(b: &buffer, x: float) ->> system(unit) {
   let size = 32;
   let add-newline = 1;
   let buffer-ptr = magic alloca(int, size);

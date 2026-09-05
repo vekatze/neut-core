@@ -23,9 +23,9 @@ define write(d: descriptor, p: pointer, size: c-size) -> c-ssize {
   this::file._syscall.unsafe::write(to-c-int(d), p, size)
 }
 
-define write-all@(d: descriptor, p: pointer, size: int) -> system(unit) {
+define write-all(d: descriptor, p: pointer, size: int) ->> system(unit) {
   let loop =
-    define write-loop@(acc: int) -> system(unit) {
+    define write-loop(acc: int) ->> system(unit) {
       let rest = sub-int(size, acc);
       let head-ptr = shift(p, acc);
       let bytes = write(d, head-ptr, to-c-size(rest));

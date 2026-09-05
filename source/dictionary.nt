@@ -285,7 +285,7 @@ define insert-with<k, v>(o: &ord(k), f: (v, v) -> v, d: dictionary(k, v), key-X:
   }
 }
 
-define lookup@<k, v>(o: &ord(k), d: &dictionary(k, v), needle: &k) -> ?&v {
+define lookup<k, v>(o: &ord(k), d: &dictionary(k, v), needle: &k) ->> ?&v {
   tie Ord{compare} = o;
   case d {
   | _Tip =>
@@ -319,7 +319,7 @@ define _lookup-LE-with-cand<k, v>(o: &ord(k), d: &dictionary(k, v), needle: &k, 
   }
 }
 
-define lookup-LE@<k, v>(o: &ord(k), d: &dictionary(k, v), needle: &k) -> ?pair(&k, &v) {
+define lookup-LE<k, v>(o: &ord(k), d: &dictionary(k, v), needle: &k) ->> ?pair(&k, &v) {
   tie Ord{compare} = o;
   case d {
   | _Tip =>
@@ -353,7 +353,7 @@ define _lookup-GE-with-cand<k, v>(o: &ord(k), d: &dictionary(k, v), needle: &k, 
   }
 }
 
-define lookup-GE@<k, v>(o: &ord(k), d: &dictionary(k, v), needle: &k) -> ?pair(&k, &v) {
+define lookup-GE<k, v>(o: &ord(k), d: &dictionary(k, v), needle: &k) ->> ?pair(&k, &v) {
   tie Ord{compare} = o;
   case d {
   | _Tip =>

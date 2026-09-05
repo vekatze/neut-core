@@ -12,7 +12,7 @@ import {
 }
 
 define zen() -> unit {
-  pin xs: vector(pair(&string, +string)) = this::vector::Vector::[Pair("a", box {*"b"}), Pair("c", box {*"d"})];
+  pin xs: vector(pair(&string, ^string)) = this::vector::Vector::[Pair("a", box {*"b"}), Pair("c", box {*"d"})];
   print-line("before");
   pin k: either(bool, list(float)) = Left(True);
   vet::(k);

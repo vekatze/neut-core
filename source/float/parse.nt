@@ -15,7 +15,7 @@ inline _parse_double(num-str-ptr: pointer, len: int, result-ptr: pointer) -> int
   magic external neut_core_v0_57_parse_double(num-str-ptr, len, result-ptr)
 }
 
-inline parse-float@(t: &string) -> ?float {
+inline parse-float(t: &string) ->> ?float {
   let c-float-str = get-content-pointer(t);
   let len = this::string::byte-length(t);
   let result-ptr = magic alloca(float, 1);

@@ -61,7 +61,7 @@ data ansi-kit {
   )
 }
 
-define flush@(k: &ansi-kit) -> system(unit) {
+define flush(k: &ansi-kit) ->> system(unit) {
   case k {
   | _ANSI-Kit{buffer} =>
     this::file.buffer::flush@(buffer)
@@ -70,16 +70,16 @@ define flush@(k: &ansi-kit) -> system(unit) {
   }
 }
 
-define make-ansi-kit@(sink: descriptor, capacity: int) -> ansi-kit {
+define make-ansi-kit(sink: descriptor, capacity: int) ->> ansi-kit {
   let buffer = make-buffer(sink, capacity);
   _ANSI-Kit{buffer}
 }
 
-define make-ansi-kit-unbuffered@(sink: descriptor) -> ansi-kit {
+define make-ansi-kit-unbuffered(sink: descriptor) ->> ansi-kit {
   _ANSI-Kit-Unbuffered{sink}
 }
 
-define write@(k: &ansi-kit, t: &string) -> system(unit) {
+define write(k: &ansi-kit, t: &string) ->> system(unit) {
   case k {
   | _ANSI-Kit{buffer} =>
     this::string.io.buffer::write@(buffer, t)
@@ -89,7 +89,7 @@ define write@(k: &ansi-kit, t: &string) -> system(unit) {
   }
 }
 
-define write-line@(k: &ansi-kit, t: &string) -> system(unit) {
+define write-line(k: &ansi-kit, t: &string) ->> system(unit) {
   case k {
   | _ANSI-Kit{buffer} =>
     this::string.io.buffer::write-line@(buffer, t)
@@ -99,7 +99,7 @@ define write-line@(k: &ansi-kit, t: &string) -> system(unit) {
   }
 }
 
-define write-int@(k: &ansi-kit, x: int) -> system(unit) {
+define write-int(k: &ansi-kit, x: int) ->> system(unit) {
   case k {
   | _ANSI-Kit{buffer} =>
     this::int.io.buffer::write-int@(buffer, x)
@@ -109,7 +109,7 @@ define write-int@(k: &ansi-kit, x: int) -> system(unit) {
   }
 }
 
-inline write-code@(k: &ansi-kit, c: command) -> system(unit) {
+inline write-code(k: &ansi-kit, c: command) ->> system(unit) {
   match c {
   | Set-Style(style) =>
     match style {

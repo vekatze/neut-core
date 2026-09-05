@@ -60,30 +60,30 @@ data cell(_: type) {
 | _Cell(_cell)
 }
 
-inline make-cell<a>(initial-value: +a) -> cell(a) {
+inline make-cell<a>(initial-value: ^a) -> cell(a) {
   _Cell(_new<a>(axiom-T(initial-value)))
 }
 
-inline modify<a, b>(ch: &cell(a), f: (+a) -> pair(+a, b)) -> b {
+inline modify<a, b>(ch: &cell(a), f: (^a) -> pair(^a, b)) -> b {
   let ch = cast<&cell(a), pointer>(ch);
   let u = this::word::size;
   let mutex-ptr = shift(ch, u);
   thread-mutex-lock(mutex-ptr);
   let val-base: int = load-int(ch);
-  let orig-val = cast<int, +a>(val-base);
+  let orig-val = cast<int, ^a>(val-base);
   let Pair(new-val, result) = f(orig-val);
-  store-int(cast<+a, int>(new-val), ch);
+  store-int(cast<^a, int>(new-val), ch);
   thread-mutex-unlock(mutex-ptr);
   result
 }
 
-inline mutate<a>(ch: &cell(a), f: (+a) -> +a) -> unit {
+inline mutate<a>(ch: &cell(a), f: (^a) -> ^a) -> unit {
   modify(ch, (x) => {
     Pair(f(x), Unit)
   })
 }
 
-inline borrow<a, b>(ch: &cell(a), f: (&a) -> +b) -> b {
+inline borrow<a, b>(ch: &cell(a), f: (&a) -> ^b) -> b {
   let ch = cast<&cell(a), pointer>(ch);
   let u = this::word::size;
   let mutex-ptr = shift(ch, u);
@@ -101,11 +101,11 @@ define clone<a>(ch: &cell(a)) -> a {
   })
 }
 
-inline extract<a>(c: cell(a)) -> +a {
+inline extract<a>(c: cell(a)) -> ^a {
   let u = this::word::size;
   letbox-T result on c = {
     let ch = cast<&cell(a), pointer>(c);
-    let result = cast<int, ++a>(load-int(ch));
+    let result = cast<int, ^^a>(load-int(ch));
     thread-mutex-destroy(shift(ch, u));
     result
   };

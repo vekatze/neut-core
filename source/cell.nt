@@ -47,7 +47,7 @@ data cell(_: type) {
 | _Cell(_cell)
 }
 
-inline make-cell<a>(initial-value: +a) -> cell(a) {
+inline make-cell<a>(initial-value: ^a) -> cell(a) {
   let u = this::word::size;
   let ptr = malloc(to-c-size(_cell-size));
   store-int(cast-inline<a, int>(axiom-T(initial-value)), ptr);
@@ -55,21 +55,21 @@ inline make-cell<a>(initial-value: +a) -> cell(a) {
   _Cell(magic cast(pointer, _cell, ptr))
 }
 
-inline modify<a, b>(r: &cell(a), f: (+a) -> pair(+a, b)) -> b {
+inline modify<a, b>(r: &cell(a), f: (^a) -> pair(^a, b)) -> b {
   let r = cast-inline<&cell(a), pointer>(r);
-  let orig-val = cast-inline<int, +a>(load-int(r));
+  let orig-val = cast-inline<int, ^a>(load-int(r));
   let Pair(new-val, result) = f(orig-val);
-  store-int(cast-inline<+a, int>(new-val), r);
+  store-int(cast-inline<^a, int>(new-val), r);
   result
 }
 
-inline mutate<a>(r: &cell(a), f: (+a) -> +a) -> unit {
+inline mutate<a>(r: &cell(a), f: (^a) -> ^a) -> unit {
   modify(r, (x) => {
     Pair(f(x), Unit)
   })
 }
 
-inline borrow<a, b>(r: &cell(a), f: (&a) -> +b) -> b {
+inline borrow<a, b>(r: &cell(a), f: (&a) -> ^b) -> b {
   let r = cast-inline<&cell(a), pointer>(r);
   let orig-val = cast-inline<int, &a>(load-int(r));
   letbox-T result = f(orig-val);
@@ -82,10 +82,10 @@ inline clone<a>(r: &cell(a)) -> a {
   })
 }
 
-inline extract<a>(c: cell(a)) -> +a {
+inline extract<a>(c: cell(a)) -> ^a {
   letbox-T result on c = {
     let r = cast-inline<&cell(a), pointer>(c);
-    cast-inline<int, ++a>(load-int(r))
+    cast-inline<int, ^^a>(load-int(r))
   };
   free(cast-inline<cell(a), pointer>(c));
   result

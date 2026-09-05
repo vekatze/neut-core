@@ -105,12 +105,12 @@ data float-decimal {
 | Float-NaN
 }
 
-inline _decimal-from-slots@(
+inline _decimal-from-slots(
   status: int,
   sign-ptr: pointer,
   mantissa-ptr: pointer,
   exponent-ptr: pointer,
-) -> float-decimal {
+) ->> float-decimal {
   if eq-int(status, 0) {
     if eq-int(load-int(sign-ptr), 0) {
       Float-Finite-Positive(load-int(mantissa-ptr), load-int(exponent-ptr))
@@ -128,7 +128,7 @@ inline _decimal-from-slots@(
   }
 }
 
-define decompose-float@(x: float) -> float-decimal {
+define decompose-float(x: float) ->> float-decimal {
   let sign-ptr = magic alloca(int, 1);
   let mantissa-ptr = magic alloca(int, 1);
   let exponent-ptr = magic alloca(int, 1);
@@ -136,7 +136,7 @@ define decompose-float@(x: float) -> float-decimal {
   _decimal-from-slots@(status, sign-ptr, mantissa-ptr, exponent-ptr)
 }
 
-define decompose-float32@(x: float32) -> float-decimal {
+define decompose-float32(x: float32) ->> float-decimal {
   let sign-ptr = magic alloca(int, 1);
   let mantissa-ptr = magic alloca(int, 1);
   let exponent-ptr = magic alloca(int, 1);

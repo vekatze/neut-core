@@ -15,11 +15,11 @@ foreign {
   neut_core_v0_57_write_line(descriptor, int, pointer) -> int,
 }
 
-define write@(f: descriptor, t: &string) -> system(unit) {
+define write(f: descriptor, t: &string) ->> system(unit) {
   this::binary.io::write@(f, to-binary(t))
 }
 
-define write-line@(d: descriptor, t: &string) -> system(unit) {
+define write-line(d: descriptor, t: &string) ->> system(unit) {
   let len = byte-length(t);
   let ptr = get-content-pointer(t);
   let result = magic external neut_core_v0_57_write_line(d, len, ptr);
@@ -48,11 +48,11 @@ define print-line(t: &string) -> unit {
   }
 }
 
-define read@(from: descriptor, initial-buffer-size: int) -> system(string) {
+define read(from: descriptor, initial-buffer-size: int) ->> system(string) {
   try bin = this::binary.io::read@(from, initial-buffer-size);
   Right(cast<binary, string>(bin))
 }
 
-define read-stdin@(initial-buffer-size: int) -> system(string) {
+define read-stdin(initial-buffer-size: int) ->> system(string) {
   read@(stdin, initial-buffer-size)
 }

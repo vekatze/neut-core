@@ -167,7 +167,7 @@ define remove-directory(dir-path: &string) -> system(unit) {
   }
 }
 
-define get-modification-time@(path: &string) -> system(time) {
+define get-modification-time(path: &string) ->> system(time) {
   pin c-str = from-string(path);
   let sec = magic alloca(int, 1);
   let nsec = magic alloca(int, 1);

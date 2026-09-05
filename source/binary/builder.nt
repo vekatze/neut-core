@@ -70,7 +70,7 @@ data _binary-builder {
   )
 }
 
-inline _prepare-state(b: +_binary-builder, fragment-size: int) -> +_binary-builder {
+inline _prepare-state(b: ^_binary-builder, fragment-size: int) -> ^_binary-builder {
   let _Binary-Builder{cursor, content} = axiom-T(b);
   let current-size on content = this::binary::length(content);
   if gt-int(add-int(cursor, fragment-size), current-size) {
@@ -87,11 +87,11 @@ inline _prepare-state(b: +_binary-builder, fragment-size: int) -> +_binary-build
 }
 
 inline _append-with-reserve(
-  b: +_binary-builder,
+  b: ^_binary-builder,
   reserve-size: int,
   fragment-size: int,
   write: (pointer) -> unit,
-) -> +_binary-builder {
+) -> ^_binary-builder {
   let _Binary-Builder{cursor, content} = axiom-T(_prepare-state(b, reserve-size));
   let content-head-ptr on content = shift(get-content-pointer(content), cursor);
   write(content-head-ptr);
@@ -99,20 +99,20 @@ inline _append-with-reserve(
 }
 
 inline _append(
-  b: +_binary-builder,
+  b: ^_binary-builder,
   fragment-size: int,
   write: (pointer) -> unit,
-) -> +_binary-builder {
+) -> ^_binary-builder {
   _append-with-reserve(b, fragment-size, fragment-size, write)
 }
 
-inline _append-int64(b: +_binary-builder, x: int) -> +_binary-builder {
+inline _append-int64(b: ^_binary-builder, x: int) -> ^_binary-builder {
   _append(b, this::word::size, (ptr) => {
     store-int(x, ptr)
   })
 }
 
-inline _append-int64-UTF8(b: +_binary-builder, x: int) -> +_binary-builder {
+inline _append-int64-UTF8(b: ^_binary-builder, x: int) -> ^_binary-builder {
   let fmt = this::string.pointer::get-content-pointer("%lld\0");
   let fragment-size = from-c-int(magic external snprintf(null-pointer, to-c-size(0), fmt)(int x));
   _append-with-reserve(b, add-int(fragment-size, 1), fragment-size, (ptr) => {
@@ -121,31 +121,31 @@ inline _append-int64-UTF8(b: +_binary-builder, x: int) -> +_binary-builder {
   })
 }
 
-inline _append-int32(b: +_binary-builder, x: int32) -> +_binary-builder {
+inline _append-int32(b: ^_binary-builder, x: int32) -> ^_binary-builder {
   _append(b, 4, (ptr) => {
     store-int32(x, ptr)
   })
 }
 
-inline _append-int16(b: +_binary-builder, x: int16) -> +_binary-builder {
+inline _append-int16(b: ^_binary-builder, x: int16) -> ^_binary-builder {
   _append(b, 2, (ptr) => {
     store-int16(x, ptr)
   })
 }
 
-inline _append-int8(b: +_binary-builder, x: int8) -> +_binary-builder {
+inline _append-int8(b: ^_binary-builder, x: int8) -> ^_binary-builder {
   _append(b, 1, (ptr) => {
     store-int8(x, ptr)
   })
 }
 
-inline _append-float64(b: +_binary-builder, x: float) -> +_binary-builder {
+inline _append-float64(b: ^_binary-builder, x: float) -> ^_binary-builder {
   _append(b, this::word::size, (ptr) => {
     store-float(x, ptr)
   })
 }
 
-inline _append-float64-UTF8(b: +_binary-builder, x: float) -> +_binary-builder {
+inline _append-float64-UTF8(b: ^_binary-builder, x: float) -> ^_binary-builder {
   let fmt = this::string.pointer::get-content-pointer("%lf\0");
   let fragment-size = from-c-int(magic external snprintf(null-pointer, to-c-size(0), fmt)(float x));
   _append-with-reserve(b, add-int(fragment-size, 1), fragment-size, (ptr) => {
@@ -154,19 +154,19 @@ inline _append-float64-UTF8(b: +_binary-builder, x: float) -> +_binary-builder {
   })
 }
 
-inline _append-float32(b: +_binary-builder, x: float32) -> +_binary-builder {
+inline _append-float32(b: ^_binary-builder, x: float32) -> ^_binary-builder {
   _append(b, 4, (ptr) => {
     magic store(float32, x, ptr)
   })
 }
 
-inline _append-float16(b: +_binary-builder, x: float16) -> +_binary-builder {
+inline _append-float16(b: ^_binary-builder, x: float16) -> ^_binary-builder {
   _append(b, 2, (ptr) => {
     magic store(float16, x, ptr)
   })
 }
 
-inline _append-binary(b: +_binary-builder, x: &binary) -> +_binary-builder {
+inline _append-binary(b: ^_binary-builder, x: &binary) -> ^_binary-builder {
   let x-ptr = get-content-pointer(x);
   let x-size = this::binary::length(x);
   _append(b, x-size, (ptr) => {
@@ -174,7 +174,7 @@ inline _append-binary(b: +_binary-builder, x: &binary) -> +_binary-builder {
   })
 }
 
-inline _append-string(b: +_binary-builder, x: &string) -> +_binary-builder {
+inline _append-string(b: ^_binary-builder, x: &string) -> ^_binary-builder {
   let x-ptr = this::string.pointer::get-content-pointer(x);
   let x-size = this::string::byte-length(x);
   _append(b, x-size, (ptr) => {
@@ -182,7 +182,7 @@ inline _append-string(b: +_binary-builder, x: &string) -> +_binary-builder {
   })
 }
 
-inline _append-rune-UTF8(b: +_binary-builder, x: rune) -> +_binary-builder {
+inline _append-rune-UTF8(b: ^_binary-builder, x: rune) -> ^_binary-builder {
   let rune-size = size(x);
   _append(b, rune-size, (ptr) => {
     let buffer-ptr = magic alloca(int32, 1);
@@ -192,16 +192,16 @@ inline _append-rune-UTF8(b: +_binary-builder, x: rune) -> +_binary-builder {
 }
 
 inline _append-ansi-offset(
-  b: +_binary-builder,
+  b: ^_binary-builder,
   offset: int,
   suffix: &string,
-) -> +_binary-builder {
+) -> ^_binary-builder {
   let b = _append-string(b, "\u{1B}[");
   let b = _append-int64-UTF8(b, offset);
   _append-string(b, suffix)
 }
 
-inline _append-ansi(b: +_binary-builder, c: command) -> +_binary-builder {
+inline _append-ansi(b: ^_binary-builder, c: command) -> ^_binary-builder {
   match c {
   | Set-Style(style) =>
     match style {

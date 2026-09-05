@@ -113,17 +113,17 @@ inline make-mvar<a>() -> mvar(a) {
   _new<a>()
 }
 
-define send<a>(ch: &mvar(a), x: +a) -> unit {
+define send<a>(ch: &mvar(a), x: ^a) -> unit {
   let _MVar-Info{flag-ptr, value-ptr, mutex-ptr, readable-cond-ptr, writable-cond-ptr} = _get-info(ch);
   thread-mutex-lock(mutex-ptr);
   let helper =
-    define loop(x: +a) -> unit {
+    define loop(x: ^a) -> unit {
       let flag = load-int(flag-ptr);
       if eq-int(flag, 1) {
         thread-cond-wait(writable-cond-ptr, mutex-ptr);
         loop(x)
       } else {
-        store-int(cast<+a, int>(x), value-ptr);
+        store-int(cast<^a, int>(x), value-ptr);
         store-int(1, flag-ptr);
         thread-cond-signal(readable-cond-ptr)
       }
@@ -132,17 +132,17 @@ define send<a>(ch: &mvar(a), x: +a) -> unit {
   thread-mutex-unlock(mutex-ptr);
 }
 
-define receive<a>(ch: &mvar(a)) -> +a {
+define receive<a>(ch: &mvar(a)) -> ^a {
   let _MVar-Info{flag-ptr, value-ptr, mutex-ptr, readable-cond-ptr, writable-cond-ptr} = _get-info(ch);
   thread-mutex-lock(mutex-ptr);
   let helper =
-    define loop() -> +a {
+    define loop() -> ^a {
       let flag = load-int(flag-ptr);
       if eq-int(flag, 0) {
         thread-cond-wait(readable-cond-ptr, mutex-ptr);
         loop()
       } else {
-        let result: +a = cast<int, +a>(load-int(value-ptr));
+        let result: ^a = cast<int, ^a>(load-int(value-ptr));
         store-int(0, flag-ptr);
         thread-cond-signal(writable-cond-ptr);
         result

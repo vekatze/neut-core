@@ -106,7 +106,7 @@ define setup-slice-ptr<a>(xs: &array(a), start: int, size: int, slice-ptr: point
   store-pointer(_get-buffer-ptr(xs), shift(slice-ptr, mul-int(word-size, 4)));
 }
 
-inline with-slice<a, b>(xs: &array(a), start: int, size: int, f: (&array(a)) -> +b) -> b {
+inline with-slice<a, b>(xs: &array(a), start: int, size: int, f: (&array(a)) -> ^b) -> b {
   let slice-ptr = magic alloca(int, 5);
   setup-slice-ptr(xs, start, size, slice-ptr);
   let slice = cast-inline<pointer, &array(a)>(slice-ptr);
@@ -283,7 +283,7 @@ define _extend-front-if-necessary<a>(xs: array(a)) -> array(a) {
   }
 }
 
-define push-front<sized a>(xs: array(a), ~x: a) -> array(a) {
+define push-front<sized a>(xs: array(a), +x: a) -> array(a) {
   let xs = _extend-front-if-necessary(xs);
   let _ on xs, x = _store-front-element-without-free(xs, x);
   free(cast-inline<a, pointer>(x));
@@ -309,7 +309,7 @@ define _store-back-element-without-free<a>(xs: &array(a), x: &a) -> unit {
   memcpy(element-ptr, value-ptr, stride);
 }
 
-define push-back<sized a>(xs: array(a), ~x: a) -> array(a) {
+define push-back<sized a>(xs: array(a), +x: a) -> array(a) {
   let xs = _extend-back-if-necessary(xs);
   let _ on xs, x = _store-back-element-without-free(xs, x);
   free(cast-inline<a, pointer>(x));
@@ -355,7 +355,7 @@ inline-meta put<a>(xs: 'array(a), i: 'int, x: 'a) -> 'array(a) {
   }
 }
 
-define pop-front@<a>(xs: array(a)) -> ?pair(a, array(a)) {
+define pop-front<a>(xs: array(a)) ->> ?pair(a, array(a)) {
   let len on xs = length(xs);
   if eq-int(len, 0) {
     none
@@ -368,7 +368,7 @@ define pop-front@<a>(xs: array(a)) -> ?pair(a, array(a)) {
   }
 }
 
-define pop-back@<a>(xs: array(a)) -> ?pair(array(a), a) {
+define pop-back<a>(xs: array(a)) ->> ?pair(array(a), a) {
   let len on xs = length(xs);
   if eq-int(len, 0) {
     none
@@ -386,7 +386,7 @@ inline _access-unchecked<a>(xs: &array(a), i: int) -> &a {
   cast-inline<pointer, &a>(element-pointer)
 }
 
-define access@<a>(xs: &array(a), i: int) -> ?&a {
+define access<a>(xs: &array(a), i: int) ->> ?&a {
   if and::(le-int(0, i), lt-int(i, length(xs))) {
     Right(_access-unchecked(xs, i))
   } else {

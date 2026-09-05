@@ -7,12 +7,12 @@ import {
   this::unit {Unit, unit},
 }
 
-define write-doc@(d: descriptor, x: &doc, ribbon-width: int) -> system(unit) {
+define write-doc(d: descriptor, x: &doc, ribbon-width: int) ->> system(unit) {
   pin tmp = show-doc(x, ribbon-width);
   write@(d, tmp)
 }
 
-define write-doc-line@(d: descriptor, x: &doc, ribbon-width: int) -> system(unit) {
+define write-doc-line(d: descriptor, x: &doc, ribbon-width: int) ->> system(unit) {
   pin tmp = show-doc(x, ribbon-width);
   write-line@(d, tmp)
 }

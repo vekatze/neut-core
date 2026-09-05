@@ -31,10 +31,10 @@ inline _get-next-content-pointer(b: &buffer) -> pointer {
   shift(content-pointer, _get-current-size(b))
 }
 
-define append@(b: &buffer, content-pointer: pointer, content-length: int) -> system(unit) {
+define append(b: &buffer, content-pointer: pointer, content-length: int) ->> system(unit) {
   let capacity = _get-capacity(b);
   let loop =
-    define _buffer-append-loop@(current-buffer-size: int, source-pointer: pointer, remaining: int) -> system(unit) {
+    define _buffer-append-loop(current-buffer-size: int, source-pointer: pointer, remaining: int) ->> system(unit) {
       let new-buffer-size = add-int(current-buffer-size, remaining);
       if le-int(new-buffer-size, capacity) {
         let next-content-pointer = _get-next-content-pointer(b);

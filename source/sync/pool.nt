@@ -14,7 +14,7 @@ import {
 
 data _message(a) {
 | _Stop
-| _Run(work: () -> +a, result-channel: &mvar(a))
+| _Run(work: () -> ^a, result-channel: &mvar(a))
 }
 
 data job(a) {
@@ -66,34 +66,34 @@ define _setup-workers<a>(message-channel: &channel(_message(a)), size: int) -> v
   })
 }
 
-inline with-pool<a, b, e>(size: int, env: e, f: (p: &pool(a), env: +e) -> +b) -> b {
+inline with-pool<a, b, e>(size: int, env: e, f: (p: &pool(a), env: ^e) -> ^b) -> b {
   let message-channel = cast<channel(_message(a)), &channel(_message(a))>(make-channel());
   let result-channels-cell = make-cell(box {this::vector::make(8)});
   let workers = _setup-workers(message-channel, size);
   let message-channel = cast<&channel(_message(a)), channel(_message(a))>(message-channel);
   let p = _Pool{workers, message-channel, result-channels-cell};
   let p = cast<pool(a), &pool(a)>(p);
-  let result = f(p, cast<e, +e>(env));
+  let result = f(p, cast<e, ^e>(env));
   _close-pool(cast<&pool(a), pool(a)>(p));
   axiom-T(result)
 }
 
-define submit<a>(k: &pool(a), f: () -> +a) -> job(a) {
+define submit<a>(k: &pool(a), f: () -> ^a) -> job(a) {
   tie _Pool{message-channel, result-channels-cell} = k;
   let result-chan = cast<mvar(a), &mvar(a)>(make-mvar<a>());
   mutate(result-channels-cell, (result-channels) => {
     box {
       letbox result-channels = result-channels;
-      letbox result-chan = cast<&mvar(a), +&mvar(a)>(result-chan);
+      letbox result-chan = cast<&mvar(a), ^&mvar(a)>(result-chan);
       push-back(result-channels, result-chan)
     }
   });
-  let message = cast<_message(a), +_message(a)>(_Run(f, result-chan));
+  let message = cast<_message(a), ^_message(a)>(_Run(f, result-chan));
   send(message-channel, message);
   _Job(result-chan)
 }
 
-define await<a>(i: job(a)) -> +a {
+define await<a>(i: job(a)) -> ^a {
   let _Job(result-chan) = i;
   this::sync.mvar::receive(result-chan)
 }

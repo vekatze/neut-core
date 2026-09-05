@@ -103,7 +103,7 @@ define insert<a>(t: intmap(a), k: int, x: a) -> intmap(a) {
   }
 }
 
-define lookup@<a>(t: &intmap(a), k: int) -> ?&a {
+define lookup<a>(t: &intmap(a), k: int) ->> ?&a {
   case t {
   | _Nil =>
     none

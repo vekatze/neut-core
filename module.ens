@@ -56,6 +56,7 @@
     ordering ["EQ", "GT", "LT", "ordering"],
     pair ["Pair", "pair"],
     show ["Show", "show"],
+    static ["from-static-value"],
     string ["string"],
     string.eq ["eq-string", "ne-string"],
     string.io ["print", "print-line"],

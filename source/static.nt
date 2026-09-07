@@ -1,0 +1,3 @@
+inline from-static-value<a>(x: $a) -> &a {
+  magic cast($a, &a, x)
+}

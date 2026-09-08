@@ -12,6 +12,8 @@ import {
 
 foreign {
   exit(c-int) -> void,
+  neut-unsafe-argc: int,
+  neut-unsafe-argv: pointer,
 }
 
 define exit<a>(status: c-int) -> a {
@@ -20,13 +22,13 @@ define exit<a>(status: c-int) -> a {
 }
 
 define get-argc() -> int {
-  let argc-ptr = magic global("neut-unsafe-argc", pointer);
+  let argc-ptr = magic external neut-unsafe-argc;
   load-int(argc-ptr)
 }
 
 define get-argv() -> list(string) {
   let argc = get-argc();
-  let argv-ptr = magic global("neut-unsafe-argv", pointer);
+  let argv-ptr = magic external neut-unsafe-argv;
   let argv = load-pointer(argv-ptr);
   let u = this::pointer::size;
   let f =

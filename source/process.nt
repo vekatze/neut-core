@@ -3,7 +3,7 @@ import {
   this::c-int {c-int},
   this::c-string {c-string, to-string},
   this::list {Cons, Nil, list},
-  this::memory.unsafe {load-int, load-pointer},
+  this::memory.unsafe {load-pointer},
   this::pointer {shift},
   this::string {string},
   this::unit {unit},
@@ -22,14 +22,12 @@ define exit<a>(status: c-int) -> a {
 }
 
 define get-argc() -> int {
-  let argc-ptr = magic external neut-unsafe-argc;
-  load-int(argc-ptr)
+  magic external neut-unsafe-argc
 }
 
 define get-argv() -> list(string) {
   let argc = get-argc();
-  let argv-ptr = magic external neut-unsafe-argv;
-  let argv = load-pointer(argv-ptr);
+  let argv = magic external neut-unsafe-argv;
   let u = this::pointer::size;
   let f =
     define get-argv-helper(i: int) -> list(string) {

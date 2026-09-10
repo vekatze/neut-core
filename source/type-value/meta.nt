@@ -23,7 +23,7 @@ import {
     storage-width,
     type-value,
   },
-  this::unit {Unit},
+  this::unit {Unit, unit},
   this::unsafe {cast-inline},
 }
 
@@ -180,6 +180,21 @@ inline-meta header-byte-size(!constructors: list(constructor)) -> int {
 
 inline-meta algebraic-header-byte-size(constructors: list(constructor)) -> int {
   header-byte-size(constructors)
+}
+
+inline-meta store-at-width(width: storage-width, value: 'int, addr: 'pointer) -> 'unit {
+  match width {
+  | Width8 =>
+    quote {this::memory.unsafe::store-int8(trunc-int-int8(unquote {value}), unquote {addr})}
+  | Width16 =>
+    quote {this::memory.unsafe::store-int16(trunc-int-int16(unquote {value}), unquote {addr})}
+  | Width32 =>
+    quote {this::memory.unsafe::store-int32(trunc-int-int32(unquote {value}), unquote {addr})}
+  | Width64 =>
+    quote {this::memory.unsafe::store-int(unquote {value}, unquote {addr})}
+  | Width-Pointer =>
+    quote {this::memory.unsafe::store-pointer(cast-inline<int, pointer>(unquote {value}), unquote {addr})}
+  }
 }
 
 inline-meta load-at-width(width: storage-width, addr: 'pointer) -> 'int {

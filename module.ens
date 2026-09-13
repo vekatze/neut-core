@@ -9,7 +9,7 @@
     test-wasm {
       main "_test-wasm.nt",
       platform "wasm32",
-      execute ["wasmtime", "{{executable}}"],
+      execute "wasmtime {{executable}}",
     },
     test-wasm-host {
       main "_test-wasm.nt",

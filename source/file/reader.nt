@@ -1,0 +1,243 @@
+import {
+  this::binary {binary},
+  this::bool,
+  this::c-int {C-Int},
+  this::c-size {to-c-size},
+  this::c-ssize {from-c-ssize},
+  this::either {Left, Right, none},
+  this::file.descriptor {descriptor, to-c-int},
+  this::file.descriptor.unsafe {from-c-int, read},
+  this::memory {malloc},
+  this::memory.unsafe {
+    free,
+    load-int,
+    load-int8,
+    memcpy,
+    memmove,
+    realloc,
+    store-address-int,
+    store-int,
+    store-pointer,
+  },
+  this::pointer {extract, shift},
+  this::string {string},
+  this::system {report-system-error, system},
+  this::unit {Unit, unit},
+  this::unsafe {cast},
+  this::word,
+}
+
+// internal representation: (start, end, capacity, descriptor, byte-0, byte-1, ..., byte-n)
+inline _header-size() -> int {
+  mul-int(this::word::size, 4)
+}
+
+inline _block-size(capacity: int) -> int {
+  add-int(_header-size(), capacity)
+}
+
+resource _reader-internal {
+  (x: pointer, _: int) => {
+    free(x)
+  },
+  (source-pointer: pointer, _: pointer) => {
+    let u2 = mul-int(this::word::size, 2);
+    let capacity = load-int(shift(source-pointer, u2));
+    let size = _block-size(capacity);
+    let new-pointer = malloc(to-c-size(size));
+    memcpy(new-pointer, source-pointer, size);
+    new-pointer
+  },
+  -1,
+}
+
+data reader {
+| _Reader(_reader-internal)
+}
+
+define make-reader(d: descriptor, capacity: int) -> reader {
+  let capacity =
+    if gt-int(capacity, 0) {
+      capacity
+    } else {
+      4096
+    };
+  let u = this::word::size;
+  let reader-pointer = malloc(to-c-size(_block-size(capacity)));
+  store-int(0, reader-pointer);
+  store-int(0, shift(reader-pointer, u));
+  store-int(capacity, shift(reader-pointer, mul-int(u, 2)));
+  let C-Int(fd) = to-c-int(d);
+  store-int(sext-int32-int(fd), shift(reader-pointer, mul-int(u, 3)));
+  _Reader(magic cast(pointer, _reader-internal, reader-pointer))
+}
+
+inline _base(r: &reader) -> pointer {
+  magic cast(&reader, pointer, r)
+}
+
+inline _get-start(r: &reader) -> int {
+  load-int(_base(r))
+}
+
+inline _set-start(r: &reader, value: int) -> unit {
+  store-int(value, _base(r))
+}
+
+inline _get-end(r: &reader) -> int {
+  load-int(shift(_base(r), this::word::size))
+}
+
+inline _set-end(r: &reader, value: int) -> unit {
+  store-int(value, shift(_base(r), this::word::size))
+}
+
+inline _get-capacity(r: &reader) -> int {
+  load-int(shift(_base(r), mul-int(this::word::size, 2)))
+}
+
+inline _get-descriptor(r: &reader) -> descriptor {
+  let u3 = mul-int(this::word::size, 3);
+  let stored = load-int(shift(_base(r), u3));
+  from-c-int(C-Int(trunc-int-int32(stored)))
+}
+
+inline _get-window(r: &reader) -> pointer {
+  shift(_base(r), _header-size())
+}
+
+define _find-newline(window: pointer, index: int, limit: int) -> int {
+  if ge-int(index, limit) {
+    -1
+  } else-if eq-int8(load-int8(shift(window, index)), 10) {
+    index
+  } else {
+    _find-newline(window, add-int(index, 1), limit)
+  }
+}
+
+inline _line-header-size() -> int {
+  mul-int(this::pointer::size, 3)
+}
+
+define _new-line-buffer(capacity: int) -> pointer {
+  let base-pointer = malloc(to-c-size(add-int(_line-header-size(), capacity)));
+  store-address-int(0, base-pointer);
+  store-address-int(0, shift(base-pointer, this::pointer::size));
+  store-pointer(
+    shift(base-pointer, _line-header-size()),
+    shift(base-pointer, mul-int(this::pointer::size, 2)),
+  );
+  base-pointer
+}
+
+define _grow-line-buffer(base-pointer: pointer, capacity: int, required: int) -> pointer {
+  if le-int(required, capacity) {
+    base-pointer
+  } else {
+    let new-pointer = realloc(base-pointer, to-c-size(add-int(_line-header-size(), required)));
+    if eq-int(extract(new-pointer), 0) {
+      let _ = free(base-pointer);
+      new-pointer
+    } else {
+      store-pointer(
+        shift(new-pointer, _line-header-size()),
+        shift(new-pointer, mul-int(this::pointer::size, 2)),
+      );
+      new-pointer
+    }
+  }
+}
+
+inline _next-capacity(capacity: int, required: int) -> int {
+  if le-int(required, capacity) {
+    capacity
+  } else-if le-int(required, mul-int(capacity, 2)) {
+    mul-int(capacity, 2)
+  } else {
+    required
+  }
+}
+
+define _finish-line(base-pointer: pointer, length: int) -> string {
+  store-address-int(length, shift(base-pointer, this::pointer::size));
+  cast<binary, string>(cast<pointer, binary>(base-pointer))
+}
+
+define _refill(r: &reader) ->> system(int) {
+  let start = _get-start(r);
+  let end = _get-end(r);
+  let window = _get-window(r);
+  let remaining = sub-int(end, start);
+  let _ =
+    if gt-int(start, 0) {
+      memmove(window, shift(window, start), remaining);
+      let _ = _set-start(r, 0);
+      _set-end(r, remaining)
+    } else {
+      Unit
+    };
+  let end = _get-end(r);
+  let capacity = _get-capacity(r);
+  let bytes = from-c-ssize(read(_get-descriptor(r), shift(window, end), to-c-size(sub-int(capacity, end))));
+  if lt-int(bytes, 0) {
+    report-system-error@()
+  } else {
+    let _ = _set-end(r, add-int(end, bytes));
+    Right(bytes)
+  }
+}
+
+define _read-line-inner(
+  r: &reader,
+  base-pointer: pointer,
+  length: int,
+  capacity: int,
+) ->> system(?string) {
+  let start = _get-start(r);
+  let end = _get-end(r);
+  let window = _get-window(r);
+  let newline-index = _find-newline(window, start, end);
+  if ge-int(newline-index, 0) {
+    let taken = sub-int(newline-index, start);
+    let required = add-int(length, taken);
+    let next-capacity = _next-capacity(capacity, required);
+    let base-pointer = _grow-line-buffer(base-pointer, capacity, next-capacity);
+    if eq-int(extract(base-pointer), 0) {
+      report-system-error@()
+    } else {
+      memcpy(shift(base-pointer, add-int(_line-header-size(), length)), shift(window, start), taken);
+      let _ = _set-start(r, add-int(newline-index, 1));
+      Right(Right(_finish-line(base-pointer, required)))
+    }
+  } else {
+    let taken = sub-int(end, start);
+    let required = add-int(length, taken);
+    let next-capacity = _next-capacity(capacity, required);
+    let base-pointer = _grow-line-buffer(base-pointer, capacity, next-capacity);
+    if eq-int(extract(base-pointer), 0) {
+      report-system-error@()
+    } else {
+      let _ = memcpy(shift(base-pointer, add-int(_line-header-size(), length)), shift(window, start), taken);
+      let _ = _set-start(r, end);
+      match _refill@(r) {
+      | Left(e) =>
+        let _ = free(base-pointer);
+        Left(e)
+      | Right(bytes) =>
+        if gt-int(bytes, 0) {
+          _read-line-inner@(r, base-pointer, required, next-capacity)
+        } else-if gt-int(required, 0) {
+          Right(Right(_finish-line(base-pointer, required)))
+        } else {
+          let _ = free(base-pointer);
+          Right(none)
+        }
+      }
+    }
+  }
+}
+
+define read-line(r: &reader) ->> system(?string) {
+  _read-line-inner@(r, _new-line-buffer(64), 0, 64)
+}

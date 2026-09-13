@@ -1,0 +1,29 @@
+import {
+  this::binary,
+  this::either {Left, Right},
+  this::file.descriptor {stdin},
+  this::file.reader {make-reader, read-line, reader},
+  this::string,
+  this::string.io {print},
+  this::unit {unit},
+}
+
+define _echo-lines(r: &reader) -> unit {
+  match read-line@(r) {
+  | Right(Right(line)) =>
+    pin line = line;
+    let _ = print("[");
+    let _ = print(line);
+    let _ = print("]\n");
+    _echo-lines(r)
+  | Right(Left(_)) =>
+    print("<eof>\n")
+  | Left(_) =>
+    print("<error>\n")
+  }
+}
+
+define zen() -> unit {
+  pin r = make-reader(stdin, 16);
+  _echo-lines(r)
+}

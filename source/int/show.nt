@@ -1,65 +1,77 @@
 import {
-  this::binary,
-  this::c-int {c-int, from-c-int},
-  this::c-size {c-size, to-c-size},
-  this::memory {malloc},
-  this::memory.unsafe {store-address-int, store-pointer},
-  this::pointer {null-pointer, shift},
+  this::binary {allocate},
+  this::binary.pointer {get-content-pointer},
+  this::bool {False, True, bool},
+  this::memory.unsafe {store-int8},
+  this::pointer {shift},
   this::show {Show, show},
   this::string {string},
-  this::string.pointer {get-content-pointer},
-  this::unit,
+  this::string.unsafe {from-binary},
+  this::unit {Unit, unit},
 }
 
-foreign {
-  snprintf(pointer, c-size, pointer) -> c-int,
-  sprintf(pointer, pointer) -> c-int,
+define _digit-count(magnitude: int, count: int) -> int {
+  let rest = udiv-int(magnitude, 10);
+  if eq-int(rest, 0) {
+    count
+  } else {
+    _digit-count(rest, add-int(count, 1))
+  }
 }
 
-define _show(c-fmt: &string, x: int) -> string {
-  let fmt = get-content-pointer(c-fmt);
-  let size = from-c-int(magic external snprintf(null-pointer, to-c-size(0), fmt)(int x));
-  let u = this::pointer::size;
-  let u2 = mul-int(u, 2);
-  let u3 = mul-int(u, 3);
-  let ptr = malloc(to-c-size(add-int(size, add-int(1, u3))));
-  store-address-int(0, ptr);
-  // ignore the trailing null character
-  store-address-int(size, shift(ptr, u));
-  let buffer = shift(ptr, u3);
-  store-pointer(buffer, shift(ptr, u2));
-  let _ = magic external sprintf(buffer, fmt)(int x);
-  magic cast(pointer, string, ptr)
+define _write-digits(last: pointer, magnitude: int) -> unit {
+  store-int8(trunc-int64-int8(add-int(48, urem-int(magnitude, 10))), last);
+  let rest = udiv-int(magnitude, 10);
+  if eq-int(rest, 0) {
+    Unit
+  } else {
+    _write-digits(shift(last, -1), rest)
+  }
+}
+
+define _show(negative: bool, magnitude: int) -> string {
+  let sign =
+    if negative {
+      1
+    } else {
+      0
+    };
+  let size = add-int(sign, _digit-count(magnitude, 1));
+  let content = allocate(size);
+  let _ on content = {
+    let head = get-content-pointer(content);
+    if negative {
+      store-int8(45, head)
+    } else {
+      Unit
+    };
+    _write-digits(shift(head, sub-int(size, 1)), magnitude)
+  };
+  from-binary(content)
+}
+
+define _show-signed(x: int) -> string {
+  if lt-int(x, 0) {
+    _show(True, sub-int(0, x))
+  } else {
+    _show(False, x)
+  }
 }
 
 constant as-show: show(int) {
   Show((x) => {
-    _show("%lld\0", *x)
+    _show-signed(*x)
   })
 }
 
 define show-int(x: int) -> string {
-  let Show{render} = as-show;
-  pin x = x;
-  render(x)
+  _show-signed(x)
 }
 
 define show-int64(x: int) -> string {
-  pin fmt = *"%lld\0";
-  let fmt = get-content-pointer(fmt);
-  let size = from-c-int(magic external snprintf(null-pointer, to-c-size(0), fmt)(int x));
-  let u = this::pointer::size;
-  let u2 = mul-int(u, 2);
-  let u3 = mul-int(u, 3);
-  let ptr = malloc(to-c-size(add-int(size, add-int(1, u3))));
-  store-address-int(0, ptr);
-  store-address-int(size, shift(ptr, u));
-  let buffer = shift(ptr, u3);
-  store-pointer(buffer, shift(ptr, u2));
-  let _ = magic external sprintf(buffer, fmt)(int x);
-  magic cast(pointer, string, ptr)
+  _show-signed(x)
 }
 
 define show-uint(x: int) -> string {
-  _show("%llu\0", x)
+  _show(False, x)
 }

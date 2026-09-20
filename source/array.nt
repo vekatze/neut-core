@@ -33,7 +33,7 @@ inline _inline-buffer-ptr(array-ptr: pointer) -> pointer {
   shift(array-ptr, _header-size())
 }
 
-define get-capacity<a>(xs: &array(a)) -> int {
+inline get-capacity<a>(xs: &array(a)) -> int {
   let array-ptr = cast-inline<&array(a), pointer>(xs);
   load-address-int(array-ptr)
 }
@@ -43,7 +43,7 @@ inline _get-from<a>(xs: &array(a)) -> int {
   load-address-int(shift(array-ptr, this::pointer::size))
 }
 
-define _get-to<a>(xs: &array(a)) -> int {
+inline _get-to<a>(xs: &array(a)) -> int {
   let array-ptr = cast-inline<&array(a), pointer>(xs);
   load-address-int(shift(array-ptr, mul-int(this::pointer::size, 2)))
 }
@@ -85,7 +85,7 @@ define _get-element-pointer-with-stride(xs: &array(pointer), stride: int, index:
   shift(buffer-ptr, mul-int(stride, add-int(from, index)))
 }
 
-define length<a>(xs: &array(a)) -> int {
+inline length<a>(xs: &array(a)) -> int {
   let from = _get-from(xs);
   let to = _get-to(xs);
   sub-int(to, from)
@@ -114,7 +114,7 @@ inline with-slice<a, b>(xs: &array(a), start: int, size: int, f: (&array(a)) -> 
   result
 }
 
-define _shift-from<a>(xs: &array(a), offset: int) -> unit {
+inline _shift-from<a>(xs: &array(a), offset: int) -> unit {
   let array-ptr = cast-inline<&array(a), pointer>(xs);
   let from-ptr = shift(array-ptr, mul-int(this::pointer::size, 1));
   let current-value = load-address-int(from-ptr);
@@ -128,7 +128,7 @@ inline _shift-to<a>(xs: &array(a), offset: int) -> unit {
   store-address-int(add-int(current-value, offset), to-ptr)
 }
 
-define _set-to<a>(xs: &array(a), to: int) -> unit {
+inline _set-to<a>(xs: &array(a), to: int) -> unit {
   let array-ptr = cast-inline<&array(a), pointer>(xs);
   store-address-int(to, shift(array-ptr, mul-int(this::pointer::size, 2)))
 }
@@ -146,7 +146,7 @@ define _make-raw<a>(capacity: int, initial-cursor: int, elem-type: type, stride:
   _Array(magic cast(pointer, _array-internal, array-ptr))
 }
 
-define _make-inner<a>(initial-capacity: int) -> array(a) {
+inline _make-inner<a>(initial-capacity: int) -> array(a) {
   let initial-capacity = initial-capacity;
   let abs-capacity = abs-int(initial-capacity);
   let initial-cursor = match gt-int(initial-capacity, 0) {True => 0 | False => abs-capacity};
@@ -267,14 +267,14 @@ inline _load-element<a>(element-ptr: pointer, stride: int) -> a {
   cast<pointer, a>(value-ptr)
 }
 
-define _store-front-element-without-free<a>(xs: &array(a), x: &a) -> unit {
+inline _store-front-element-without-free<a>(xs: &array(a), x: &a) -> unit {
   let stride = _get-stride::<a>();
   let element-ptr = _get-element-pointer(xs, -1);
   let value-ptr = cast-inline<&a, pointer>(x);
   memcpy(element-ptr, value-ptr, stride);
 }
 
-define _extend-front-if-necessary<a>(xs: array(a)) -> array(a) {
+inline _extend-front-if-necessary<a>(xs: array(a)) -> array(a) {
   let from on xs = _get-from(xs);
   if gt-int(from, 0) {
     xs
@@ -283,7 +283,7 @@ define _extend-front-if-necessary<a>(xs: array(a)) -> array(a) {
   }
 }
 
-define push-front<sized a>(xs: array(a), +x: a) -> array(a) {
+inline push-front<sized a>(xs: array(a), +x: a) -> array(a) {
   let xs = _extend-front-if-necessary(xs);
   let _ on xs, x = _store-front-element-without-free(xs, x);
   free(cast-inline<a, pointer>(x));
@@ -291,7 +291,7 @@ define push-front<sized a>(xs: array(a), +x: a) -> array(a) {
   xs
 }
 
-define _extend-back-if-necessary<a>(xs: array(a)) -> array(a) {
+inline _extend-back-if-necessary<a>(xs: array(a)) -> array(a) {
   let capacity on xs = get-capacity(xs);
   let to on xs = _get-to(xs);
   if lt-int(to, capacity) {
@@ -301,7 +301,7 @@ define _extend-back-if-necessary<a>(xs: array(a)) -> array(a) {
   }
 }
 
-define _store-back-element-without-free<a>(xs: &array(a), x: &a) -> unit {
+inline _store-back-element-without-free<a>(xs: &array(a), x: &a) -> unit {
   let stride = _get-stride::<a>();
   let len = length(xs);
   let element-ptr = _get-element-pointer(xs, len);
@@ -309,7 +309,7 @@ define _store-back-element-without-free<a>(xs: &array(a), x: &a) -> unit {
   memcpy(element-ptr, value-ptr, stride);
 }
 
-define push-back<sized a>(xs: array(a), +x: a) -> array(a) {
+inline push-back<sized a>(xs: array(a), +x: a) -> array(a) {
   let xs = _extend-back-if-necessary(xs);
   let _ on xs, x = _store-back-element-without-free(xs, x);
   free(cast-inline<a, pointer>(x));
@@ -317,7 +317,7 @@ define push-back<sized a>(xs: array(a), +x: a) -> array(a) {
   xs
 }
 
-define _is-valid-index<a>(xs: &array(a), i: int) -> bool {
+inline _is-valid-index<a>(xs: &array(a), i: int) -> bool {
   let len = length(xs);
   and::(le-int(0, i), lt-int(i, len))
 }
@@ -355,7 +355,7 @@ inline-meta put<a>(xs: 'array(a), i: 'int, x: 'a) -> 'array(a) {
   }
 }
 
-define pop-front<a>(xs: array(a)) ->> ?pair(a, array(a)) {
+inline pop-front<a>(xs: array(a)) ->> ?pair(a, array(a)) {
   let len on xs = length(xs);
   if eq-int(len, 0) {
     none
@@ -368,7 +368,7 @@ define pop-front<a>(xs: array(a)) ->> ?pair(a, array(a)) {
   }
 }
 
-define pop-back<a>(xs: array(a)) ->> ?pair(array(a), a) {
+inline pop-back<a>(xs: array(a)) ->> ?pair(array(a), a) {
   let len on xs = length(xs);
   if eq-int(len, 0) {
     none
@@ -386,12 +386,48 @@ inline _access-unchecked<a>(xs: &array(a), i: int) -> &a {
   cast-inline<pointer, &a>(element-pointer)
 }
 
-define access<a>(xs: &array(a), i: int) ->> ?&a {
+inline access<a>(xs: &array(a), i: int) ->> ?&a {
   if and::(le-int(0, i), lt-int(i, length(xs))) {
     Right(_access-unchecked(xs, i))
   } else {
     none
   }
+}
+
+inline fold-left-N<elem-type, result-type>(
+  acc: result-type,
+  xs: &array(elem-type),
+  !consumer: (result-type, &elem-type, int) -> result-type,
+) -> result-type {
+  let size = length(xs);
+  let helper =
+    define loop(cursor: int, acc: result-type, xs: &array(elem-type)) -> result-type {
+      if eq-int(cursor, size) {
+        acc
+      } else {
+        let y = _access-unchecked(xs, cursor);
+        loop(add-int(cursor, 1), consumer(acc, y, cursor), xs)
+      }
+    };
+  helper(0, acc, xs)
+}
+
+inline for-N<a>(xs: &array(a), f: (&a, int) -> unit) -> unit {
+  fold-left-N(Unit, xs, (_, x, i) => {
+    f(x, i)
+  })
+}
+
+rule-left Array {
+  inline-meta leaf<a>(size: int) -> 'array(a) {
+    quote {make(unquote {promote {size}})}
+  },
+  inline-meta node-left<sized a>(acc: 'array(a), x: 'a) -> 'array(a) {
+    quote {push-back(unquote {acc}, ~unquote {x})}
+  },
+  inline-meta root<a>(x: 'a) -> 'a {
+    x
+  },
 }
 
 define _swap-unchecked<a>(xs: array(a), i: int, j: int) -> array(a) {

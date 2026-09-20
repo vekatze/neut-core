@@ -1,5 +1,5 @@
 import {
-  this::array {access, array, length, make, pop-back, pop-front, push-back, push-front, put, to-list, with-slice},
+  this::array {Array, access, array, fold-left-N, for-N, length, make, pop-back, pop-front, push-back, push-front, put, to-list, with-slice},
   this::binary,
   this::bool {False, True, bool},
   this::cell {cell, clone, extract, make-cell, mutate},
@@ -412,6 +412,36 @@ define _test-set() -> unit {
   Unit
 }
 
+define _test-rule-and-folds() -> unit {
+  let xs: array(item) = Array::[Foo(1), Bar(True), Foo(3)];
+  let _ on xs = {
+    assert("array::Array length\n", eq-int(length(xs), 3));
+    _expect-item("array::Array first\n", xs, 0, 1);
+    _expect-item("array::Array second\n", xs, 1, 1000);
+    _expect-item("array::Array third\n", xs, 2, 3);
+    let total =
+      fold-left-N(0, xs, (acc, x, i) => {
+        add-int(acc, mul-int(add-int(i, 1), _item-code(*x)))
+      });
+    assert("array::fold-left-N\n", eq-int(total, 2010));
+    let seen = make-cell(lift {0});
+    let _ on seen =
+      for-N(xs, (_, i) => {
+        mutate(seen, (n) => {
+          letbox-T n = n;
+          lift {add-int(n, add-int(i, 1))}
+        })
+      });
+    letbox-T count = extract(seen);
+    assert("array::for-N\n", eq-int(count, 6))
+  };
+  let _ = xs;
+  let empty: array(item) = Array::[];
+  let _ on empty = assert("array::Array empty\n", eq-int(length(empty), 0));
+  let _ = empty;
+  Unit
+}
+
 define zen() -> unit {
   let xs: array(item) = make(0);
   let xs = push-back(xs, ~Foo(20));
@@ -467,6 +497,7 @@ define zen() -> unit {
   _test-complex-array();
   _test-cell-array();
   _test-set();
+  _test-rule-and-folds();
   print-line("all array assertions passed")
 }
 

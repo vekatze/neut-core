@@ -1,5 +1,6 @@
 import {
   this::ansi {command},
+  this::binary {binary},
   this::binary.builder {binary-builder, make-binary-builder},
   this::string {string},
   this::string.unsafe {from-binary},
@@ -26,6 +27,16 @@ define make-string-builder(size: int) -> string-builder {
 
 define extract(b: string-builder) -> string {
   from-binary(this::binary.builder::extract(_to-binary-builder(b)))
+}
+
+define clear(b: &string-builder) -> unit {
+  this::binary.builder::clear(_to-binary-builder-N(b))
+}
+
+inline borrow-content<actual a>(b: &string-builder, f: (&string) -> ^a) -> a {
+  this::binary.builder::borrow-content(_to-binary-builder-N(b), (slice: &binary) => {
+    f(magic cast(&binary, &string, slice))
+  })
 }
 
 define append-int64-UTF8(b: &string-builder, x: int) -> unit {

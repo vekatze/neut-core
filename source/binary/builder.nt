@@ -39,12 +39,12 @@ import {
     Yellow,
     command,
   },
-  this::binary {allocate, binary, take},
+  this::binary {allocate, binary, take, with-slice},
   this::binary.pointer {get-content-pointer},
   this::bool,
   this::c-int {c-int, from-c-int},
   this::c-size {c-size, to-c-size},
-  this::cell {cell, make-cell, mutate},
+  this::cell {borrow, cell, make-cell, mutate},
   this::control {discard},
   this::int {max-int},
   this::layer {axiom-T},
@@ -408,6 +408,21 @@ define make-binary-builder(size: int) -> binary-builder {
       },
     ),
   )
+}
+
+define clear(b: &binary-builder) -> unit {
+  mutate(_to-cell-N(b), (b) => {
+    let _Binary-Builder{cursor, content} = axiom-T(b);
+    let _ = cursor;
+    lift {_Binary-Builder{cursor := 0, content}}
+  })
+}
+
+inline borrow-content<actual a>(b: &binary-builder, f: (&binary) -> ^a) -> a {
+  borrow(_to-cell-N(b), (s) => {
+    tie _Binary-Builder{cursor, content} = s;
+    lift {with-slice(content, 0, *cursor, f)}
+  })
 }
 
 define append-int64(b: &binary-builder, x: int) -> unit {

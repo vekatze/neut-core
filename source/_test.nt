@@ -513,11 +513,47 @@ define test-string-format() -> unit {
   _expect-string("format: beyond ASCII", format("日本{}です", List::[*"語"]), "日本語です");
 }
 
+define test-builder-reuse() -> unit {
+  let b = this::string.builder::make-string-builder(8);
+  let _ on b = {
+    this::string.builder::append-string(b, "abc");
+    assert(
+      "builder: borrow-content sees what was appended",
+      this::string.builder::borrow-content(b, (x) => {
+        lift {eq-string(x, "abc")}
+      }),
+    );
+    let copy =
+      this::string.builder::borrow-content(b, (x) => {
+        lift {*x}
+      });
+    let _ on copy = assert("builder: a copy of the content", eq-string(copy, "abc"));
+    let _ = copy;
+    this::string.builder::clear(b);
+    assert(
+      "builder: clear empties the content",
+      this::string.builder::borrow-content(b, (x) => {
+        lift {eq-string(x, "")}
+      }),
+    );
+    this::string.builder::append-string(b, "de");
+    assert(
+      "builder: appending after clear",
+      this::string.builder::borrow-content(b, (x) => {
+        lift {eq-string(x, "de")}
+      }),
+    )
+  };
+  pin result = this::string.builder::extract(b);
+  assert("builder: extract after clear", eq-string(result, "de"))
+}
+
 define main() -> unit {
   test-int-parse-range();
   test-float-show-zero();
   test-string-empty-needle();
   test-string-format();
+  test-builder-reuse();
   test-int64();
   zen();
   ns-feature-check();

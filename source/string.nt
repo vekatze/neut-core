@@ -7,7 +7,7 @@ import {
   this::either {Right, none},
   this::list {Cons, List, Nil, list},
   this::memory {malloc},
-  this::memory.unsafe {load-int8, store-address-int, store-pointer},
+  this::memory.unsafe {load-int8, memcpy, store-address-int, store-pointer},
   this::pair {Pair, pair},
   this::pointer {shift},
   this::rune {to-int32},
@@ -283,28 +283,74 @@ define replace(haystack: &string, from: &string, to: string) -> string {
   intercalate(split(haystack, from), to)
 }
 
-// [x1], [y1, y2] => [x1]
-// [x1, x2], [y1, y2, y3] => [x1, y1, x2]
-// [x1, x2, x3], [y1, y2] => [x1, y1, x2, y2, x3]
-define _alternate<a>(xs: list(a), ys: list(a)) -> list(a) {
-  match xs, ys {
-  | Nil, _ =>
-    Nil
-  | Cons(x, Nil), _ =>
-    Cons(x, Nil)
-  | Cons(x1, Cons(x2, xs)), Nil =>
-    Cons(x1, Cons(x2, xs))
-  | Cons(x1, Cons(x2, xs)), Cons(y, ys) =>
-    Cons(x1, Cons(y, _alternate(Cons(x2, xs), ys)))
+define _is-hole(fmt: &string, limit: int, index: int) -> bool {
+  if ge-int(add-int(index, 1), limit) {
+    False
+  } else-if eq-int8(_get-byte(fmt, index), 0x7B) {
+    eq-int8(_get-byte(fmt, add-int(index, 1)), 0x7D)
+  } else {
+    False
   }
 }
 
-define _format(fmt: &string, args: list(string)) -> list(string) {
-  _alternate(split(fmt, "{}"), args)
+define _format-size(fmt: &string, limit: int, index: int, args: &list(string), acc: int) -> int {
+  if ge-int(index, limit) {
+    acc
+  } else-if _is-hole(fmt, limit, index) {
+    case args {
+    | Cons(arg, rest) =>
+      _format-size(fmt, limit, add-int(index, 2), rest, add-int(acc, byte-length(arg)))
+    | Nil =>
+      _format-size(fmt, limit, add-int(index, 2), args, acc)
+    }
+  } else {
+    _format-size(fmt, limit, add-int(index, 1), args, add-int(acc, 1))
+  }
+}
+
+define _format-write(
+  fmt: &string,
+  limit: int,
+  out: pointer,
+  from: int,
+  index: int,
+  at: int,
+  args: list(string),
+) -> unit {
+  if ge-int(index, limit) {
+    memcpy(shift(out, at), shift(_get-content-pointer(fmt), from), sub-int(index, from));
+    let _ = args;
+    Unit
+  } else-if _is-hole(fmt, limit, index) {
+    let width = sub-int(index, from);
+    memcpy(shift(out, at), shift(_get-content-pointer(fmt), from), width);
+    let next = add-int(index, 2);
+    let at = add-int(at, width);
+    match args {
+    | Nil =>
+      _format-write(fmt, limit, out, next, next, at, Nil)
+    | Cons(arg, rest) =>
+      let size on arg = byte-length(arg);
+      let _ on arg = memcpy(shift(out, at), _get-content-pointer(arg), size);
+      let _ = arg;
+      _format-write(fmt, limit, out, next, next, add-int(at, size), rest)
+    }
+  } else {
+    _format-write(fmt, limit, out, from, add-int(index, 1), at, args)
+  }
 }
 
 define format(fmt: &string, args: list(string)) -> string {
-  join(_format(fmt, args))
+  let limit = byte-length(fmt);
+  let size on args = _format-size(fmt, limit, 0, args, 0);
+  let u = this::pointer::size;
+  let base = malloc(to-c-size(add-int(size, mul-int(u, 3))));
+  store-address-int(0, base);
+  store-address-int(size, shift(base, u));
+  let content-ptr = shift(base, mul-int(u, 3));
+  store-pointer(content-ptr, shift(base, mul-int(u, 2)));
+  _format-write(fmt, limit, content-ptr, 0, 0, 0, args);
+  magic cast(pointer, string, base)
 }
 
 define _unpack(ptr: pointer, len: int, index: int, acc: list(rune)) -> list(rune) {

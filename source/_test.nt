@@ -19,11 +19,11 @@ import {
   this::int.parse {parse-hex, parse-int},
   this::int.show {show-int64},
   this::layer {axiom-T},
-  this::list {Cons, Nil, length, list},
+  this::list {Cons, List, Nil, length, list},
   this::list.meta,
   this::pair {Pair, pair},
   this::platform {get-cpu-count},
-  this::string {append, from-text, replace, split, string, strip-prefix, strip-suffix},
+  this::string {append, format, from-text, replace, split, string, strip-prefix, strip-suffix},
   this::string.builder {String},
   this::string.builder.sync {* as string-builder-sync},
   this::string.eq {eq-string},
@@ -498,10 +498,26 @@ define test-string-empty-needle() -> unit {
   assert("split: separators", eq-int(length(pieces2), 4));
 }
 
+define test-string-format() -> unit {
+  _expect-string("format: no hole", format("abc", Nil), "abc");
+  _expect-string("format: one hole", format("a{}c", List::[*"b"]), "abc");
+  _expect-string("format: two holes", format("/boards/{}/cards/{}", List::[*"3", *"7"]), "/boards/3/cards/7");
+  _expect-string("format: a hole with nothing to fill it is dropped", format("a{}b{}c", List::[*"1"]), "a1bc");
+  _expect-string("format: an argument with no hole is dropped", format("a{}c", List::[*"b", *"d"]), "abc");
+  _expect-string("format: no argument at all", format("{}{}", Nil), "");
+  _expect-string("format: an empty argument", format("a{}c", List::[*""]), "ac");
+  _expect-string("format: a brace that is not a hole", format("{ }", List::[*"x"]), "{ }");
+  _expect-string("format: braces around a hole", format("{{}}", List::[*"x"]), "{x}");
+  _expect-string("format: a lone brace at the end", format("ab{", List::[*"x"]), "ab{");
+  _expect-string("format: an empty template", format("", List::[*"x"]), "");
+  _expect-string("format: beyond ASCII", format("日本{}です", List::[*"語"]), "日本語です");
+}
+
 define main() -> unit {
   test-int-parse-range();
   test-float-show-zero();
   test-string-empty-needle();
+  test-string-format();
   test-int64();
   zen();
   ns-feature-check();

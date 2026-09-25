@@ -3,6 +3,7 @@ import {
   this::c-size {to-c-size},
   this::memory {malloc},
   this::memory.unsafe {free, load-address-int, load-pointer, memcpy},
+  this::pair {Pair, pair},
   this::pointer {null-pointer, shift},
   this::unit,
   this::unsafe {cast-inline},
@@ -35,6 +36,19 @@ define swap-unchecked<a>(xs: array(a), i: int, j: int) -> array(a) {
     free(tmp-pointer);
   };
   xs
+}
+
+define swap-between-unchecked<a>(xs: array(a), i: int, ys: array(a), j: int) ->> pair(array(a), array(a)) {
+  let stride = _get-stride::<a>();
+  let _ on xs, ys = {
+    let value-i-pointer = _get-element-pointer(xs, i);
+    let value-j-pointer = _get-element-pointer(ys, j);
+    let tmp-pointer = magic alloca(int8, stride);
+    memcpy(tmp-pointer, value-i-pointer, stride);
+    memcpy(value-i-pointer, value-j-pointer, stride);
+    memcpy(value-j-pointer, tmp-pointer, stride);
+  };
+  Pair(xs, ys)
 }
 
 inline-meta put-unchecked<a>(xs: 'array(a), i: 'int, x: 'a) -> 'array(a) {

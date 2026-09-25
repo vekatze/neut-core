@@ -600,7 +600,7 @@ define to-list<a>(xs: vector(a)) -> list(a) {
   loop(xs, 0)
 }
 
-define exchange<a>(xs: vector(a), index: int, value: a) -> either(vector(a), pair(a, vector(a))) {
+define exchange<a>(xs: vector(a), index: int, value: a) ->> either(vector(a), pair(a, vector(a))) {
   let len on xs = length(xs);
   if and::(le-int(0, index), lt-int(index, len)) {
     let value-ptr on xs = _get-element-pointer(xs, index);

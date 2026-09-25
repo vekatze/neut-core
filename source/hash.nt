@@ -1,0 +1,10 @@
+import {
+  this::bool {bool},
+}
+
+data hash(a) {
+| Hash(
+    hash-of: (&a) -> int,
+    equal: (&a, &a) -> bool,
+  )
+}

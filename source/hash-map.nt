@@ -1,0 +1,199 @@
+import {
+  this::array {array, length, make as make-array, push-back, put},
+  this::array.unsafe {access-unchecked, swap-between-unchecked, swap-unchecked},
+  this::bool {False, True, bool},
+  this::either {Right, none},
+  this::hash {Hash, hash},
+  this::int {max-int},
+  this::pair {Pair},
+  this::unit,
+}
+
+data _entry(k, v) {
+| _Vacant
+| _Kept(key: k, value: v)
+}
+
+data hash-map(k, v) {
+| _Hash-Map(entries: array(_entry(k, v)), count: int, shift: int)
+}
+
+define _vacant-entries<k, v>(entries: array(_entry(k, v)), left: int) -> array(_entry(k, v)) {
+  if eq-int(left, 0) {
+    entries
+  } else {
+    _vacant-entries(push-back(entries, ~_Vacant), sub-int(left, 1))
+  }
+}
+
+inline _capacity-of(shift: int) -> int {
+  shl-int(1, sub-int(64, shift))
+}
+
+define _shift-for(capacity: int, shift: int) -> int {
+  if ge-int(_capacity-of(shift), capacity) {
+    shift
+  } else {
+    _shift-for(capacity, sub-int(shift, 1))
+  }
+}
+
+inline _make-with-shift<k, v>(shift: int) -> hash-map(k, v) {
+  let capacity = _capacity-of(shift);
+  _Hash-Map(_vacant-entries(make-array(capacity), capacity), 0, shift)
+}
+
+define make<k, v>(capacity: int) -> hash-map(k, v) {
+  _make-with-shift(_shift-for(max-int(mul-int(capacity, 2), 8), 61))
+}
+
+define size<k, v>(m: &hash-map(k, v)) -> int {
+  tie _Hash-Map{count} = m;
+  *count
+}
+
+inline _home<k>(h: &hash(k), key: &k, shift: int) -> int {
+  tie Hash{hash-of} = h;
+  lshr-int(mul-int(hash-of(key), -7046029254386353131), shift)
+}
+
+inline _next(i: int, shift: int) -> int {
+  and-int(add-int(i, 1), sub-int(_capacity-of(shift), 1))
+}
+
+inline _distance(from: int, to: int, shift: int) -> int {
+  and-int(sub-int(to, from), sub-int(_capacity-of(shift), 1))
+}
+
+define _find<k, v>(h: &hash(k), entries: &array(_entry(k, v)), key: &k, i: int, shift: int) -> int {
+  case access-unchecked(entries, i) {
+  | _Vacant =>
+    i
+  | _Kept(other, _) =>
+    tie Hash{equal} = h;
+    if equal(other, key) {
+      i
+    } else {
+      _find(h, entries, key, _next(i, shift), shift)
+    }
+  }
+}
+
+inline _index-of<k, v>(h: &hash(k), entries: &array(_entry(k, v)), key: &k, shift: int) -> int {
+  _find(h, entries, key, _home(h, key, shift), shift)
+}
+
+inline _is-kept<k, v>(entries: &array(_entry(k, v)), i: int) -> bool {
+  case access-unchecked(entries, i) {
+  | _Vacant =>
+    False
+  | _Kept(_, _) =>
+    True
+  }
+}
+
+define _move-all<k, v>(
+  h: &hash(k),
+  from: array(_entry(k, v)),
+  to: array(_entry(k, v)),
+  i: int,
+  shift: int,
+) -> array(_entry(k, v)) {
+  let capacity on from = length(from);
+  if ge-int(i, capacity) {
+    let _ = from;
+    to
+  } else {
+    let kept on from = _is-kept(from, i);
+    if kept {
+      let j on from, to = {
+        case access-unchecked(from, i) {
+        | _Vacant =>
+          0 // unreachable
+        | _Kept(key, _) =>
+          _index-of(h, to, key, shift)
+        }
+      };
+      let Pair(from, to) = swap-between-unchecked@(from, i, to, j);
+      _move-all(h, from, to, add-int(i, 1), shift)
+    } else {
+      _move-all(h, from, to, add-int(i, 1), shift)
+    }
+  }
+}
+
+define _grow<k, v>(h: &hash(k), m: hash-map(k, v)) -> hash-map(k, v) {
+  let _Hash-Map(entries, count, shift) = m;
+  let larger-shift = sub-int(shift, 1);
+  let _Hash-Map(larger, _, _) = _make-with-shift<k, v>(larger-shift);
+  _Hash-Map(_move-all(h, entries, larger, 0, larger-shift), count, larger-shift)
+}
+
+define insert<k, v>(h: &hash(k), m: hash-map(k, v), key: k, value: v) -> hash-map(k, v) {
+  let full on m = {
+    tie _Hash-Map{count, shift} = m;
+    ge-int(mul-int(add-int(*count, 1), 2), _capacity-of(*shift))
+  };
+  let m =
+    if full {
+      _grow(h, m)
+    } else {
+      m
+    };
+  let _Hash-Map(entries, count, shift) = m;
+  let i on entries, key = _index-of(h, entries, key, shift);
+  let kept on entries = _is-kept(entries, i);
+  let count =
+    if kept {
+      count
+    } else {
+      add-int(count, 1)
+    };
+  _Hash-Map(put::(entries, i, _Kept(key, value)), count, shift)
+}
+
+define _close-gap<k, v>(
+  h: &hash(k),
+  entries: array(_entry(k, v)),
+  gap: int,
+  i: int,
+  shift: int,
+) -> array(_entry(k, v)) {
+  let home on entries = {
+    case access-unchecked(entries, i) {
+    | _Vacant =>
+      -1
+    | _Kept(key, _) =>
+      _home(h, key, shift)
+    }
+  };
+  if lt-int(home, 0) {
+    entries
+  } else-if ge-int(_distance(home, i, shift), _distance(gap, i, shift)) {
+    _close-gap(h, swap-unchecked(entries, gap, i), i, _next(i, shift), shift)
+  } else {
+    _close-gap(h, entries, gap, _next(i, shift), shift)
+  }
+}
+
+define delete<k, v>(h: &hash(k), m: hash-map(k, v), key: &k) -> hash-map(k, v) {
+  let _Hash-Map(entries, count, shift) = m;
+  let i on entries = _index-of(h, entries, key, shift);
+  let kept on entries = _is-kept(entries, i);
+  if kept {
+    let entries = put::(entries, i, _Vacant);
+    _Hash-Map(_close-gap(h, entries, i, _next(i, shift), shift), sub-int(count, 1), shift)
+  } else {
+    _Hash-Map(entries, count, shift)
+  }
+}
+
+define lookup<k, v>(h: &hash(k), m: &hash-map(k, v), key: &k) ->> ?&v {
+  tie _Hash-Map{entries, shift} = m;
+  case access-unchecked(entries, _index-of(h, entries, key, *shift)) {
+  | _Vacant =>
+    none
+  | _Kept(_, value) =>
+    Right(value)
+  }
+}

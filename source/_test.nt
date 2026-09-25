@@ -12,9 +12,19 @@ import {
   this::cell,
   this::debug {assert},
   this::debug.dump {trace, vet},
-  this::either {Left, Right, either},
+  this::either {Left, Right, either, none},
   this::eq.generic {eq-data},
   this::float.show {show-float, show-float32},
+  this::hash {hash},
+  this::hash-map {
+    delete as hash-map-delete,
+    hash-map,
+    insert as hash-map-insert,
+    lookup as hash-map-lookup,
+    make as make-hash-map,
+    size as hash-map-size,
+  },
+  this::int.hash {as-hash},
   this::int.io {print-int-line},
   this::int.parse {parse-hex, parse-int},
   this::int.show {show-int64},
@@ -548,7 +558,51 @@ define test-builder-reuse() -> unit {
   assert("builder: extract after clear", eq-string(result, "de"))
 }
 
+define _hash-map-fill(h: &hash(int), m: hash-map(int, int), i: int, n: int) -> hash-map(int, int) {
+  if ge-int(i, n) {
+    m
+  } else {
+    _hash-map-fill(h, hash-map-insert(h, m, i, mul-int(i, 10)), add-int(i, 1), n)
+  }
+}
+
+define _hash-map-drop-evens(h: &hash(int), m: hash-map(int, int), i: int, n: int) -> hash-map(int, int) {
+  if ge-int(i, n) {
+    m
+  } else {
+    let m on i = hash-map-delete(h, m, i);
+    _hash-map-drop-evens(h, m, add-int(i, 2), n)
+  }
+}
+
+define _hash-map-find(h: &hash(int), m: &hash-map(int, int), key: int) -> ?int {
+  pin key = key;
+  match hash-map-lookup@(h, m, key) {
+  | Right(v) =>
+    Right(*v)
+  | Left(_) =>
+    none
+  }
+}
+
+define test-hash-map() -> unit {
+  pin h = as-hash;
+  let m = _hash-map-fill(h, make-hash-map(0), 0, 1000);
+  let m = _hash-map-drop-evens(h, m, 0, 1000);
+  let m = hash-map-insert(h, m, 777, 7);
+  let replaced on m = _hash-map-find(h, m, 777);
+  _expect-int("hash-map replaces what it kept", replaced, 7);
+  let odd on m = _hash-map-find(h, m, 999);
+  _expect-int("hash-map keeps an odd key", odd, 9990);
+  let even on m = _hash-map-find(h, m, 998);
+  _expect-no-int("hash-map lets go of an even key", even);
+  let count on m = hash-map-size(m);
+  let _ = m;
+  assert("hash-map counts what it keeps", eq-int(count, 500))
+}
+
 define main() -> unit {
+  test-hash-map();
   test-int-parse-range();
   test-float-show-zero();
   test-string-empty-needle();

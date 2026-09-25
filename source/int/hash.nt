@@ -1,0 +1,19 @@
+import {
+  this::bool,
+  this::hash {Hash, hash},
+}
+
+constant as-hash: hash(int) {
+  Hash{
+    hash-of := {
+      (x) => {
+        *x
+      }
+    },
+    equal := {
+      (x, y) => {
+        eq-int(*x, *y)
+      }
+    },
+  }
+}

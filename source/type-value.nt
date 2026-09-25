@@ -16,16 +16,21 @@ data field-layout {
 | Mixed(chunks: list(int))
 }
 
+data field-type {
+| Concrete(type)
+| Existential
+}
+
 data field {
 | Field(
     name: text,
-    field-type: type,
+    field-type: field-type,
     layout: field-layout,
   )
 }
 
 data constructor {
-| Constructor(text, bool, list(field))
+| Constructor(text, bool, int, list(field))
 }
 
 data type-value {

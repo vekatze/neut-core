@@ -28,10 +28,10 @@ import {
   this::type-value {Algebraic, Constructor},
   this::type-value.meta {
     algebraic-header-byte-size,
+    concrete-field-type,
     constructor-field-count,
     constructor-fields-with-cursors,
     field-storage-byte-size,
-    field-type,
   },
   this::unit {Unit, unit},
   this::vector {product, push-back, vector},
@@ -62,11 +62,11 @@ define-meta inspect-sample-field-count() -> 'int {
   let _ = Inspect-Sample;
   let k = magic inspect-type(inspect-sample);
   match k {
-  | Algebraic(_, _, Cons(Constructor(_, _, fields), Nil)) =>
+  | Algebraic(_, _, Cons(Constructor(_, _, _, fields), Nil)) =>
     match fields {
     | Cons(f1, Cons(f2, Nil)) =>
-      unpack-type t1 = field-type(f1);
-      unpack-type t2 = field-type(f2);
+      unpack-type t1 = concrete-field-type(f1);
+      unpack-type t2 = concrete-field-type(f2);
       let b1 = magic eq-type(t1, int);
       let b2 = magic eq-type(t2, bool);
       if b1 {

@@ -38,9 +38,7 @@ import {
     Array,
     Binary,
     Box-T,
-    Constructor,
     Enum,
-    Field,
     Float16,
     Float32,
     Float64,
@@ -62,11 +60,14 @@ import {
   },
   this::type-value.meta {
     algebraic-discriminant,
+    concrete-field-type,
+    constructor-fields-with-cursors,
+    constructor-is-const-like,
+    constructor-name,
     constructor-switch,
     data-arg-count,
     enum-switch,
     field-slot,
-    fields-with-cursors,
     payload-start,
   },
   this::unsafe {cast-inline},
@@ -182,8 +183,7 @@ inline-meta _constructor-arg-doc<a>(
   x: '&a,
   enable-ansi: 'bool,
 ) -> 'doc {
-  let Field(_, t, _) = f;
-  unpack-type t = t;
+  unpack-type t = concrete-field-type(f);
   quote {
     let x-elem-ptr = cast-inline<int, &t>(unquote {field-slot(f, cursor, x)});
     unquote {to-doc<t>(quote {x-elem-ptr}, enable-ansi)}
@@ -210,14 +210,15 @@ inline-meta _constructor-args-doc<a>(
 }
 
 inline-meta _algebraic-constructor-doc<a>(
-  cons: constructor,
+  !cons: constructor,
   start: int,
   x: '&a,
   enable-ansi: 'bool,
 ) -> 'doc {
-  let Constructor(cons-name, is-const-like, xts) = cons;
+  let cons-name = constructor-name(cons);
+  let is-const-like = constructor-is-const-like(cons);
   let name-doc = quote {_constructor-doc(unquote {promote {cons-name}}, unquote {enable-ansi})};
-  match fields-with-cursors(xts, start) {
+  match constructor-fields-with-cursors(cons, start) {
   | Nil =>
     if is-const-like {
       name-doc

@@ -1,4 +1,5 @@
 import {
+  this::binary,
   this::bool {False, True, bool},
   this::either {Left, Right},
   this::list {Cons, Nil, list},
@@ -6,10 +7,14 @@ import {
   this::memory.unsafe {load-int, load-int16, load-int32, load-int8, load-pointer},
   this::pair {Pair, pair},
   this::pointer {shift},
+  this::string,
+  this::text.meta {append},
   this::type-value {
     Algebraic,
+    Concrete,
     Constructor,
     Direct,
+    Existential,
     Field,
     Mixed,
     Width-Pointer,
@@ -20,6 +25,7 @@ import {
     constructor,
     field,
     field-layout,
+    field-type,
     storage-width,
     type-value,
   },
@@ -32,9 +38,19 @@ inline-meta field-name(f: field) -> text {
   name
 }
 
-inline-meta field-type(f: field) -> type {
+inline-meta field-type-of(f: field) -> field-type {
   let Field(_, t, _) = f;
   t
+}
+
+inline-meta concrete-field-type(!f: field) -> type {
+  match field-type-of(f) {
+  | Concrete(t) =>
+    t
+  | Existential =>
+    let message = append(append("The type of the field `", field-name(f)), "` depends on a type variable of its constructor");
+    magic compile-error(message)
+  }
 }
 
 inline-meta field-layout-of(f: field) -> field-layout {
@@ -127,17 +143,22 @@ inline-meta field-alignment(f: field) -> int {
 }
 
 inline-meta constructor-name(c: constructor) -> text {
-  let Constructor(name, _, _) = c;
+  let Constructor(name, _, _, _) = c;
   name
 }
 
 inline-meta constructor-is-const-like(c: constructor) -> bool {
-  let Constructor(_, is-const-like, _) = c;
+  let Constructor(_, is-const-like, _, _) = c;
   is-const-like
 }
 
+inline-meta constructor-type-param-count(c: constructor) -> int {
+  let Constructor(_, _, type-param-count, _) = c;
+  type-param-count
+}
+
 inline-meta constructor-fields(c: constructor) -> list(field) {
-  let Constructor(_, _, fields) = c;
+  let Constructor(_, _, _, fields) = c;
   fields
 }
 
@@ -145,14 +166,30 @@ inline-meta constructor-field-count(c: constructor) -> int {
   length(constructor-fields(c))
 }
 
-inline-meta constructor-payload-end(c: constructor, start: int) -> int {
-  fold-left(start, constructor-fields(c), (acc, !f) => {
+inline-meta constructor-fields-start(c: constructor, start: int) -> int {
+  let type-param-count = constructor-type-param-count(c);
+  if eq-int(type-param-count, 0) {
+    start
+  } else {
+    let width = pointer-byte-size();
+    add-int(align-up(width, start), mul-int(width, type-param-count))
+  }
+}
+
+inline-meta constructor-payload-end(!c: constructor, start: int) -> int {
+  fold-left(constructor-fields-start(c, start), constructor-fields(c), (acc, !f) => {
     add-int(align-up(field-alignment(f), acc), field-storage-byte-size(f))
   })
 }
 
-inline-meta constructor-alignment(c: constructor) -> int {
-  fold-left(1, constructor-fields(c), (acc, f) => {
+inline-meta constructor-alignment(!c: constructor) -> int {
+  let type-param-alignment =
+    if eq-int(constructor-type-param-count(c), 0) {
+      1
+    } else {
+      pointer-byte-size()
+    };
+  fold-left(type-param-alignment, constructor-fields(c), (acc, f) => {
     _larger(field-alignment(f), acc)
   })
 }
@@ -321,8 +358,8 @@ inline-meta fields-with-cursors(fields: list(field), cursor: int) -> list(pair(f
   }
 }
 
-inline-meta constructor-fields-with-cursors(c: constructor, cursor: int) -> list(pair(field, int)) {
-  fields-with-cursors(constructor-fields(c), cursor)
+inline-meta constructor-fields-with-cursors(!c: constructor, cursor: int) -> list(pair(field, int)) {
+  fields-with-cursors(constructor-fields(c), constructor-fields-start(c, cursor))
 }
 
 inline-meta payload-start(constructors: list(constructor), data-arg-num: int) -> int {

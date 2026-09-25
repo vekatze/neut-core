@@ -157,6 +157,15 @@ inline-meta constructor-type-param-count(c: constructor) -> int {
   type-param-count
 }
 
+inline-meta ensure-constructible(!c: constructor) -> unit {
+  if eq-int(constructor-type-param-count(c), 0) {
+    Unit
+  } else {
+    let message = append(append("The constructor `", constructor-name(c)), "` binds a type variable of its own, so its values cannot be built from their fields");
+    magic compile-error(message)
+  }
+}
+
 inline-meta constructor-fields(c: constructor) -> list(field) {
   let Constructor(_, _, _, fields) = c;
   fields

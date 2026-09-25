@@ -1,0 +1,3 @@
+data code-variable {
+| Code-Variable<a>(id: int, code: 'a)
+}

@@ -458,17 +458,17 @@ define swap<a>(xs: array(a), i: int, j: int) -> array(a) {
 define to-list<a>(xs: array(a)) -> list(a) {
   let len on xs = length(xs);
   let loop =
-    define self(xs: array(a), index: int) -> list(a) {
-      if ge-int(index, len) {
+    define self(xs: array(a), index: int, acc: list(a)) -> list(a) {
+      if lt-int(index, 0) {
         let xs = cast<array(a), &array(a)>(xs);
         _free-array(xs);
-        Nil
+        acc
       } else {
         let element-ptr on xs = _get-element-pointer(xs, index);
         let stride = _get-stride::<a>();
         let value = _load-element(element-ptr, stride);
-        Cons(value, self(xs, add-int(index, 1)))
+        self(xs, sub-int(index, 1), Cons(value, acc))
       }
     };
-  loop(xs, 0)
+  loop(xs, sub-int(len, 1), Nil)
 }

@@ -14,6 +14,7 @@ import {
   this::rune.unsafe {load-rune, store-rune},
   this::rune.utf8 {size-by-head-byte},
   this::unit {Unit, unit},
+  this::vector {push-back, vector},
 }
 
 data string {
@@ -162,13 +163,16 @@ define find-string(haystack: &string, needle: &string) -> bool {
   f(0)
 }
 
-define intercalate(xs: list(string), sep: string) -> string {
-  join(this::list::intercalate(xs, sep))
-}
-
 define intercalate-N(xs: &list(string), sep: &string) -> string {
   let xs = magic cast(&list(string), &list(binary), xs);
   _String(this::binary::intercalate-N(xs, to-binary(sep)))
+}
+
+define intercalate(xs: list(string), sep: string) -> string {
+  let result on xs, sep = intercalate-N(xs, sep);
+  let _ = xs;
+  let _ = sep;
+  result
 }
 
 define _get-byte(t: &string, index: int) -> int8 {
@@ -242,45 +246,51 @@ define length(t: &string) -> int {
   _length(t, len, 0, 0)
 }
 
-define split(haystack: &string, needle: &string) -> list(string) {
+define split(haystack: &string, needle: &string) -> vector(string) {
   let haystack-ptr = _get-content-pointer(haystack);
   let needle-ptr = _get-content-pointer(needle);
   let len = byte-length(haystack);
   let needle-len = byte-length(needle);
   let f =
-    define loop(pivot: int, cursor: int) -> list(string) {
+    define loop(pivot: int, cursor: int, pieces: vector(string)) -> vector(string) {
       let rem-len = sub-int(len, add-int(pivot, cursor));
       if lt-int(rem-len, needle-len) {
-        List::[_drop-N(haystack, pivot)]
+        push-back(pieces, _drop-N(haystack, pivot))
       } else {
         let current-ptr = shift(haystack-ptr, add-int(pivot, cursor));
         if _match-string-content(current-ptr, needle-ptr, needle-len) {
           let piece = _slice-N(haystack, pivot, cursor);
           let next-pivot = add-int(pivot, add-int(cursor, needle-len));
-          let rest = loop(next-pivot, 0);
-          Cons(piece, rest)
+          loop(next-pivot, 0, push-back(pieces, piece))
         } else {
-          loop(pivot, add-int(cursor, 1))
+          loop(pivot, add-int(cursor, 1), pieces)
         }
       }
     };
   if eq-int(needle-len, 0) {
-    List::[_drop-N(haystack, 0)]
+    push-back(this::vector::make(1), _drop-N(haystack, 0))
   } else {
-    f(0, 0)
+    f(0, 0, this::vector::make(8))
   }
 }
 
-define lines(haystack: &string) -> list(string) {
+define lines(haystack: &string) -> vector(string) {
   split(haystack, "\n")
 }
 
-define unlines(xs: &list(string)) -> string {
-  intercalate-N(xs, "\n")
+define _intercalate-vector-N(xs: &vector(string), sep: &string) -> string {
+  let xs = magic cast(&vector(string), &vector(binary), xs);
+  _String(this::binary::intercalate-vector-N(xs, to-binary(sep)))
+}
+
+define unlines(xs: &vector(string)) -> string {
+  _intercalate-vector-N(xs, "\n")
 }
 
 define replace(haystack: &string, from: &string, to: string) -> string {
-  intercalate(split(haystack, from), to)
+  pin pieces = split(haystack, from);
+  pin to = to;
+  _intercalate-vector-N(pieces, to)
 }
 
 define _is-hole(fmt: &string, limit: int, index: int) -> bool {

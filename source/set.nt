@@ -55,16 +55,16 @@ define from-list<a>(o: &ord(a), xs: list(a)) -> set(a) {
   })
 }
 
-define _to-list-aux<a>(kvs: list(pair(a, unit)), acc: list(a)) -> list(a) {
+define _keys-reversed<a>(kvs: list(pair(a, unit)), acc: list(a)) -> list(a) {
   match kvs {
   | Nil =>
     acc
   | Cons(Pair(x, _), rest) =>
-    Cons(x, _to-list-aux(rest, acc))
+    _keys-reversed(rest, Cons(x, acc))
   }
 }
 
 define to-list<a>(s: set(a)) -> list(a) {
   let _Set(s) = s;
-  _to-list-aux(this::dictionary::to-list(s), Nil)
+  this::list::reverse(_keys-reversed(this::dictionary::to-list(s), Nil))
 }

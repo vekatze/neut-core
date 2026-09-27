@@ -419,17 +419,17 @@ inline fold-right<elem-type, result-type>(
   let sz on xs = length(xs);
   let helper =
     define loop(cursor: int, acc: result-type, xs: vector(elem-type)) -> result-type {
-      if eq-int(cursor, sz) {
+      if lt-int(cursor, 0) {
         let xs = cast<vector(elem-type), &vector(pointer)>(xs);
         _free-vector(xs);
         acc
       } else {
         let element-ptr on xs = _get-element-pointer(xs, cursor);
         let old-value = cast<int, elem-type>(load-int(element-ptr));
-        consumer(old-value, loop(add-int(cursor, 1), acc, xs), cursor)
+        loop(sub-int(cursor, 1), consumer(old-value, acc, cursor), xs)
       }
     };
-  helper(0, acc, xs)
+  helper(sub-int(sz, 1), acc, xs)
 }
 
 inline fold-right-N<elem-type, result-type>(
@@ -440,14 +440,14 @@ inline fold-right-N<elem-type, result-type>(
   let sz = length(xs);
   let helper =
     define loop(cursor: int, acc: result-type, xs: &vector(elem-type)) -> result-type {
-      if eq-int(cursor, sz) {
+      if lt-int(cursor, 0) {
         acc
       } else {
         let old-value = _access-unchecked(xs, cursor);
-        consumer(old-value, loop(add-int(cursor, 1), acc, xs), cursor)
+        loop(sub-int(cursor, 1), consumer(old-value, acc, cursor), xs)
       }
     };
-  helper(0, acc, xs)
+  helper(sub-int(sz, 1), acc, xs)
 }
 
 inline for-each<a, b>(xs: vector(a), !f: (a, int) -> b) -> vector(b) {
@@ -586,18 +586,18 @@ define from-list<a>(base-list: list(a)) -> vector(a) {
 define to-list<a>(xs: vector(a)) -> list(a) {
   let len on xs = length(xs);
   let loop =
-    define self(xs: vector(a), index: int) -> list(a) {
-      if ge-int(index, len) {
+    define self(xs: vector(a), index: int, acc: list(a)) -> list(a) {
+      if lt-int(index, 0) {
         let xs = cast<vector(a), &vector(a)>(xs);
         _free-vector(xs);
-        Nil
+        acc
       } else {
         let value-ptr on xs = _get-element-pointer(xs, index);
         let value = cast<int, a>(load-int(value-ptr));
-        Cons(value, self(xs, add-int(index, 1)))
+        self(xs, sub-int(index, 1), Cons(value, acc))
       }
     };
-  loop(xs, 0)
+  loop(xs, sub-int(len, 1), Nil)
 }
 
 define exchange<a>(xs: vector(a), index: int, value: a) ->> either(vector(a), pair(a, vector(a))) {

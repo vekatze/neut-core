@@ -27,17 +27,18 @@ import {
   this::int.hash {as-hash},
   this::int.io {print-int-line},
   this::int.parse {parse-hex, parse-int},
-  this::int.show {show-int64},
+  this::int.show {show-int, show-int64},
   this::layer {axiom-T},
   this::list {Cons, List, Nil, length, list},
   this::list.meta,
   this::pair {Pair, pair},
   this::platform {get-cpu-count},
   this::string {append, format, from-text, replace, split, string, strip-prefix, strip-suffix},
-  this::string.builder {String},
+  this::string.builder {String, make-string-builder},
   this::string.builder.sync {* as string-builder-sync},
   this::string.eq {eq-string},
   this::string.io {print, print-line},
+  this::string.parse,
   this::sync.mvar {make-mvar, receive, send},
   this::sync.pool {for-each-parallel},
   this::time {add-time, make-time, show-time},
@@ -500,12 +501,109 @@ define test-float-show-zero() -> unit {
 
 define test-string-empty-needle() -> unit {
   pin pieces = split("abc", "");
-  assert("split: empty needle keeps the haystack", eq-int(length(pieces), 1));
+  assert("split: empty needle keeps the haystack", eq-int(this::vector::length(pieces), 1));
   _expect-string("replace: empty needle leaves the haystack", replace("abc", "", *"x"), "abc");
   pin no-pieces = split("", "");
-  assert("split: empty needle on empty haystack", eq-int(length(no-pieces), 1));
+  assert("split: empty needle on empty haystack", eq-int(this::vector::length(no-pieces), 1));
   pin pieces2 = split("a,b,,c", ",");
-  assert("split: separators", eq-int(length(pieces2), 4));
+  assert("split: separators", eq-int(this::vector::length(pieces2), 4));
+}
+
+define _repeated(count: int, piece: &string) -> string {
+  let b = make-string-builder(mul-int(count, this::string::byte-length(piece)));
+  let _ on b = {
+    let f =
+      define loop(i: int) -> unit {
+        if ge-int(i, count) {
+          Unit
+        } else {
+          this::string.builder::append-string(b, piece);
+          loop(add-int(i, 1))
+        }
+      };
+    f(0)
+  };
+  this::string.builder::extract(b)
+}
+
+define _joined-ints(xs: &list(int)) -> string {
+  this::string::join(this::list::for-each-N(xs, (n) => {
+    show-int(*n)
+  }))
+}
+
+define test-long-inputs() -> unit {
+  let count = 1000000;
+  pin text = _repeated(count, "a\n");
+  pin pieces = this::string::lines(text);
+  assert("lines: a long text", eq-int(this::vector::length(pieces), add-int(count, 1)));
+  pin joined = this::string::unlines(pieces);
+  assert("unlines: a long text", eq-string(joined, text));
+  pin replaced = replace(text, "\n", *",");
+  assert("replace: a long text", eq-int(this::string::byte-length(replaced), this::string::byte-length(text)));
+  let total =
+    this::vector::fold-right-N(pieces, 0, (x, acc, _) => {
+      add-int(acc, this::string::byte-length(x))
+    });
+  assert("vector fold-right-N: a long vector", eq-int(total, count));
+  pin escapes = _repeated(count, "\\n");
+  match this::string.parse::parse-string(escapes) {
+  | Right(unescaped) =>
+    pin unescaped = unescaped;
+    assert("parse-string: a long text", eq-int(this::string::byte-length(unescaped), count))
+  | Left(_) =>
+    assert("parse-string: a long text", False)
+  }
+}
+
+define test-small-orders() -> unit {
+  pin order =
+    this::vector::fold-right(Vector::[*"a", *"b", *"c"], Nil, (x, acc, _) => {
+      Cons(x, acc)
+    });
+  pin joined = this::string::join-N(order);
+  assert("vector fold-right: the order of the elements", eq-string(joined, "abc"));
+  pin small = this::list::range(3, 6);
+  pin shown = _joined-ints(small);
+  assert("range: the order of the numbers", eq-string(shown, "345"));
+  pin empty-range = this::list::range(6, 3);
+  assert("range: an empty range", eq-int(length(empty-range), 0));
+  pin iterated =
+    this::list::iterate(4, (i) => {
+      mul-int(i, 2)
+    });
+  pin shown-iterated = _joined-ints(iterated);
+  assert("iterate: the order of the calls", eq-string(shown-iterated, "0246"));
+  pin from-vector = this::vector::to-list(Vector::[1, 2, 3]);
+  pin shown-from-vector = _joined-ints(from-vector);
+  assert("vector to-list: the order of the elements", eq-string(shown-from-vector, "123"));
+  let pairs: array(pair(int, int)) = this::array::make(0);
+  let pairs = this::array::push-back(pairs, ~Pair(1, 1));
+  let pairs = this::array::push-back(pairs, ~Pair(2, 2));
+  pin pair-list = this::array::to-list(pairs);
+  pin shown-pairs =
+    this::string::join(this::list::for-each-N(pair-list, (p) => {
+      tie Pair(x, _) = p;
+      show-int(*x)
+    }));
+  assert("array to-list: the order of the elements", eq-string(shown-pairs, "12"));
+  pin split-pieces = this::string::split("x,y,z", ",");
+  pin sequence = this::string::unlines(split-pieces);
+  assert("split and unlines", eq-string(sequence, "x\ny\nz"));
+  match this::string.parse::parse-string("a\\tb\\u{3042}\\\\") {
+  | Right(parsed) =>
+    pin parsed = parsed;
+    assert("parse-string: escapes", eq-string(parsed, "a\tbあ\\"))
+  | Left(_) =>
+    assert("parse-string: escapes", False)
+  };
+  match this::string.parse::parse-string("\\q") {
+  | Right(parsed) =>
+    let _ = parsed;
+    assert("parse-string: an unknown escape", False)
+  | Left(_) =>
+    Unit
+  }
 }
 
 define test-string-format() -> unit {
@@ -606,6 +704,8 @@ define main() -> unit {
   test-int-parse-range();
   test-float-show-zero();
   test-string-empty-needle();
+  test-long-inputs();
+  test-small-orders();
   test-string-format();
   test-builder-reuse();
   test-int64();

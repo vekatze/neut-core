@@ -10,6 +10,7 @@ import {
   this::pointer {shift},
   this::unit {Unit, unit},
   this::unsafe {cast},
+  this::vector {vector},
 }
 
 // int8-array
@@ -314,10 +315,6 @@ define drop-end-N(t: &binary, offset: int) -> binary {
   take-N(t, sub-int(len, offset))
 }
 
-define intercalate(xs: list(binary), sep: binary) -> binary {
-  join(this::list::intercalate(xs, sep))
-}
-
 define intercalate-N(xs: &list(binary), sep: &binary) -> binary {
   let base-len =
     fold-left-N(0, xs, (acc, x) => {
@@ -352,6 +349,40 @@ define intercalate-N(xs: &list(binary), sep: &binary) -> binary {
       }
     };
   loop(0, xs);
+  magic cast(pointer, binary, new-binary)
+}
+
+define intercalate(xs: list(binary), sep: binary) -> binary {
+  let result on xs, sep = intercalate-N(xs, sep);
+  let _ = xs;
+  let _ = sep;
+  result
+}
+
+define intercalate-vector-N(xs: &vector(binary), sep: &binary) -> binary {
+  let count = this::vector::length(xs);
+  let base-len =
+    this::vector::fold-left-N(0, xs, (acc, x, _) => {
+      add-int(acc, length(x))
+    });
+  let len = add-int(base-len, mul-int(length(sep), max-int(0, sub-int(count, 1))));
+  let new-binary = malloc(to-c-size(add-int(len, _header-size())));
+  let content-ptr = _initialize-header(new-binary, len);
+  let sep-ptr = _get-content-pointer(sep);
+  let sep-len = length(sep);
+  let _ =
+    this::vector::fold-left-N(0, xs, (offset, x, index) => {
+      let offset =
+        if gt-int(index, 0) {
+          memcpy(shift(content-ptr, offset), sep-ptr, sep-len);
+          add-int(offset, sep-len)
+        } else {
+          offset
+        };
+      let x-len = length(x);
+      memcpy(shift(content-ptr, offset), _get-content-pointer(x), x-len);
+      add-int(offset, x-len)
+    });
   magic cast(pointer, binary, new-binary)
 }
 

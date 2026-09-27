@@ -3,18 +3,12 @@ import {
   this::bool {and, any, bool},
   this::either {Left, Right, either},
   this::int.parse {parse-hex-digits},
-  this::list {Cons, List, Nil, concat, for-each-E, for-each-EN, intercalate, list},
-  this::pair {Pair},
+  this::list {List},
   this::rune,
-  this::string {
-    drop,
-    format,
-    length,
-    singleton,
-    split,
-    string,
-    take-while-N,
-  },
+  this::string {byte-length, format, singleton, string},
+  this::string.builder {append-rune-UTF8, extract, make-string-builder, string-builder},
+  this::string.unsafe {get-rune-unchecked, slice-N},
+  this::unit {Unit, unit},
 }
 
 define _is-hex-digit(r: rune) -> bool {
@@ -26,19 +20,6 @@ define _is-hex-digit(r: rune) -> bool {
 
 data error {
 | Parse-Error(string)
-}
-
-define _read-char(r: rune, t: string) -> either(error, string) {
-  match this::string::uncons@(t) {
-  | Right(Pair(r-found, rest)) =>
-    if eq-rune(r, r-found) {
-      Right(rest)
-    } else {
-      Left(Parse-Error(format("Expected `{}`, but got: `{}`", List::[singleton(r), singleton(r-found)])))
-    }
-  | Left(_) =>
-    Left(Parse-Error(format("Expected `{}`, but got: end of string", List::[singleton(r)])))
-  }
 }
 
 define _read-unicode-scalar-value(t: &string) -> either(error, rune) {
@@ -55,53 +36,101 @@ define _read-unicode-scalar-value(t: &string) -> either(error, rune) {
   }
 }
 
-define _unquote-string(t: string) -> either(error, list(string)) {
-  match this::string::uncons@(t) {
-  | Left(_) =>
-    Left(Parse-Error(*"Unexpected end of string after a backslash"))
-  | Right(Pair(c, rest)) =>
-    if eq-rune(c, `0`) {
-      Right(List::[*"\u{0}", rest])
-    } else-if eq-rune(c, `t`) {
-      Right(List::[*"\u{9}", rest])
-    } else-if eq-rune(c, `n`) {
-      Right(List::[*"\u{A}", rest])
-    } else-if eq-rune(c, `r`) {
-      Right(List::[*"\u{D}", rest])
-    } else-if eq-rune(c, `"`) {
-      Right(List::[*"\u{22}", rest])
-    } else-if eq-rune(c, `\\`) {
-      Right(List::[*"\u{5C}", rest])
-    } else-if eq-rune(c, `\``) {
-      Right(List::[*"\u{60}", rest])
-    } else-if eq-rune(c, `u`) {
-      try rest = _read-char(`{`, rest);
-      let hex-string on rest = take-while-N(rest, _is-hex-digit);
-      pin hex-string = hex-string;
-      let scalar-value-string-len = length(hex-string);
-      let rest = drop(rest, scalar-value-string-len);
-      try rest = _read-char(`}`, rest);
-      try r = _read-unicode-scalar-value(hex-string);
-      Right(List::[singleton(r), rest])
+define _expect-rune(r: rune, t: &string, index: int, len: int) -> either(error, int) {
+  if ge-int(index, len) {
+    Left(Parse-Error(format("Expected `{}`, but got: end of string", List::[singleton(r)])))
+  } else {
+    let found = get-rune-unchecked(t, index);
+    if eq-rune(r, found) {
+      Right(add-int(index, this::rune::size(found)))
     } else {
-      Left(Parse-Error(format("Unknown escape sequence: \\{}", List::[singleton(c)])))
+      Left(Parse-Error(format("Expected `{}`, but got: `{}`", List::[singleton(r), singleton(found)])))
     }
   }
 }
 
-define _parse-string-fragment(t: &string) -> either(error, list(string)) {
-  match split(t, "\\") {
-  | Nil =>
-    // unreachable
-    Left(Parse-Error(*"(core).string.parse._parse-string-fragment"))
-  | Cons(t, ts) =>
-    try fragment-lists = for-each-E(ts, _unquote-string);
-    Right(Cons(t, concat(fragment-lists)))
+define _hex-end(t: &string, index: int, len: int) -> int {
+  if ge-int(index, len) {
+    index
+  } else {
+    let r = get-rune-unchecked(t, index);
+    if _is-hex-digit(r) {
+      _hex-end(t, add-int(index, this::rune::size(r)), len)
+    } else {
+      index
+    }
+  }
+}
+
+define _escaped(c: rune) -> ?rune {
+  if eq-rune(c, `0`) {
+    Right(`\u{0}`)
+  } else-if eq-rune(c, `t`) {
+    Right(`\u{9}`)
+  } else-if eq-rune(c, `n`) {
+    Right(`\u{A}`)
+  } else-if eq-rune(c, `r`) {
+    Right(`\u{D}`)
+  } else-if eq-rune(c, `"`) {
+    Right(`\u{22}`)
+  } else-if eq-rune(c, `\\`) {
+    Right(`\u{5C}`)
+  } else-if eq-rune(c, `\``) {
+    Right(`\u{60}`)
+  } else {
+    Left(Unit)
+  }
+}
+
+define _append-escape(b: &string-builder, t: &string, index: int, len: int) -> either(error, int) {
+  if ge-int(index, len) {
+    Left(Parse-Error(*"Unexpected end of string after a backslash"))
+  } else {
+    let c = get-rune-unchecked(t, index);
+    let next = add-int(index, this::rune::size(c));
+    match _escaped(c) {
+    | Right(r) =>
+      append-rune-UTF8(b, r);
+      Right(next)
+    | Left(_) =>
+      if eq-rune(c, `u`) {
+        try digits-start = _expect-rune(`{`, t, next, len);
+        let digits-end = _hex-end(t, digits-start, len);
+        pin digits = slice-N(t, digits-start, sub-int(digits-end, digits-start));
+        try r = _read-unicode-scalar-value(digits);
+        try after = _expect-rune(`}`, t, digits-end, len);
+        append-rune-UTF8(b, r);
+        Right(after)
+      } else {
+        Left(Parse-Error(format("Unknown escape sequence: \\{}", List::[singleton(c)])))
+      }
+    }
+  }
+}
+
+define _parse-into(b: &string-builder, t: &string, index: int, len: int) -> either(error, unit) {
+  if ge-int(index, len) {
+    Right(Unit)
+  } else {
+    let r = get-rune-unchecked(t, index);
+    if eq-rune(r, `\\`) {
+      try next = _append-escape(b, t, add-int(index, 1), len);
+      _parse-into(b, t, next, len)
+    } else {
+      append-rune-UTF8(b, r);
+      _parse-into(b, t, add-int(index, this::rune::size(r)), len)
+    }
   }
 }
 
 define parse-string(t: &string) -> either(error, string) {
-  pin ts = split(t, "\\\\");
-  try tss = for-each-EN(ts, _parse-string-fragment);
-  Right(this::string::join(this::list::concat(intercalate(tss, List::[*"\\"]))))
+  let len = byte-length(t);
+  let b = make-string-builder(len);
+  let result on b = _parse-into(b, t, 0, len);
+  match result {
+  | Left(e) =>
+    Left(e)
+  | Right(_) =>
+    Right(extract(b))
+  }
 }

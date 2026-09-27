@@ -242,14 +242,14 @@ define reverse<a>(xs: list(a)) -> list(a) {
 
 inline iterate<a>(count: int, !f: (int) -> a) -> list(a) {
   let helper =
-    define self(cursor: int) -> list(a) {
+    define self(cursor: int, acc: list(a)) -> list(a) {
       if ge-int(cursor, count) {
-        Nil
+        reverse(acc)
       } else {
-        Cons(f(cursor), self(add-int(cursor, 1)))
+        self(add-int(cursor, 1), Cons(f(cursor), acc))
       }
     };
-  helper(0)
+  helper(0, Nil)
 }
 
 inline iterate-E<e, a>(count: int, !f: (int) -> either(e, a)) -> either(e, list(a)) {
@@ -367,12 +367,16 @@ define any(xs: &list(bool)) -> bool {
 }
 
 // right-open interval
-define range(from: int, to: int) -> list(int) {
-  if ge-int(from, to) {
-    Nil
+define _range-down(from: int, cursor: int, acc: list(int)) -> list(int) {
+  if lt-int(cursor, from) {
+    acc
   } else {
-    Cons(from, range(add-int(from, 1), to))
+    _range-down(from, sub-int(cursor, 1), Cons(cursor, acc))
   }
+}
+
+define range(from: int, to: int) -> list(int) {
+  _range-down(from, sub-int(to, 1), Nil)
 }
 
 inline find<a>(xs: &list(a), pred: &(&a) -> bool) ->> ?&a {

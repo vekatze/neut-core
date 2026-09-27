@@ -2,7 +2,7 @@ import {
   this::binary,
   this::bool {all, bool, not, or},
   this::either {Left, Right},
-  this::list {Cons, List, Nil, filter, length, list, reverse},
+  this::list {Cons, List, Nil, length, list, reverse},
   this::pair {Pair, pair},
   this::string {
     drop-end-N,
@@ -15,6 +15,7 @@ import {
     take-while-end-N,
   },
   this::string.eq {eq-string, eq-suffix},
+  this::vector,
 }
 
 constant separator-rune: rune {
@@ -68,13 +69,13 @@ define _clean-double-dots(is-abs: bool, components: list(string), acc: list(stri
 define clean(path: &string) -> string {
   let components = split(path, separator);
   let components =
-    filter(components, (component) => {
+    this::vector::filter(components, (component) => {
       all::[
         not(eq-string(component, "")),
         not(eq-string(component, ".")),
       ]
     });
-  let components = _clean-double-dots(is-absolute(path), components, List::[]);
+  let components = _clean-double-dots(is-absolute(path), this::vector::to-list(components), List::[]);
   if is-absolute(path) {
     let len on components = length(components);
     if eq-int(len, 0) {

@@ -317,6 +317,10 @@ inline push-back<sized a>(xs: array(a), +x: a) -> array(a) {
   xs
 }
 
+define is-empty<a>(xs: &array(a)) -> bool {
+  eq-int(length(xs), 0)
+}
+
 inline _is-valid-index<a>(xs: &array(a), i: int) -> bool {
   let len = length(xs);
   and::(le-int(0, i), lt-int(i, len))

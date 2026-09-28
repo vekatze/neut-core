@@ -8,7 +8,7 @@ import {
   },
   this::array {array},
   this::binary,
-  this::bool {False, True, all, and, any, bool, or},
+  this::bool {False, True, all, and, any, bool, not, or},
   this::cell,
   this::debug {assert},
   this::debug.dump {trace, vet},
@@ -51,7 +51,7 @@ import {
     field-storage-byte-size,
   },
   this::unit {Unit, unit},
-  this::vector {Vector, product, push-back, vector},
+  this::vector {Vector, make, product, push-back, to-list, vector},
 }
 
 data adt-with-text {
@@ -556,6 +556,63 @@ define test-long-inputs() -> unit {
   }
 }
 
+define _shown-ints(xs: &vector(int)) -> string {
+  this::string::join(to-list(this::vector::for-each-N(xs, (n, _) => {
+    show-int(*n)
+  })))
+}
+
+define _popped(xs: vector(int), index: int) -> string {
+  match this::vector::pop-at@(xs, index) {
+  | Right(Pair(value, rest)) =>
+    pin rest = rest;
+    format("{}:{}", List::[show-int(value), _shown-ints(rest)])
+  | Left(rest) =>
+    pin rest = rest;
+    format("-:{}", List::[_shown-ints(rest)])
+  }
+}
+
+define test-vector-edits() -> unit {
+  pin inserted = this::vector::insert(Vector::[1, 2, 4, 5], 2, 3);
+  _expect-string("vector insert: the middle", _shown-ints(inserted), "12345");
+  pin at-front = this::vector::insert(Vector::[2, 3], -4, 1);
+  _expect-string("vector insert: before the front", _shown-ints(at-front), "123");
+  pin at-back = this::vector::insert(Vector::[1, 2], 9, 3);
+  _expect-string("vector insert: after the back", _shown-ints(at-back), "123");
+  let grown =
+    this::list::fold-left(make(1), List::[1, 2, 3, 4, 5, 6, 7, 8], (xs, n) => {
+      this::vector::insert(xs, 1, n)
+    });
+  pin grown = grown;
+  _expect-string("vector insert: past the capacity", _shown-ints(grown), "18765432");
+  _expect-string("vector pop-at: near the front", _popped(Vector::[1, 2, 3, 4, 5, 6], 1), "2:13456");
+  _expect-string("vector pop-at: near the back", _popped(Vector::[1, 2, 3, 4, 5, 6], 4), "5:12346");
+  _expect-string("vector pop-at: the front", _popped(Vector::[1, 2, 3], 0), "1:23");
+  _expect-string("vector pop-at: the back", _popped(Vector::[1, 2, 3], 2), "3:12");
+  _expect-string("vector pop-at: out of range", _popped(Vector::[1, 2, 3], 3), "-:123");
+  pin deleted = this::vector::delete(Vector::[1, 2, 3, 4], 2);
+  _expect-string("vector delete", _shown-ints(deleted), "124");
+  pin updated =
+    this::vector::update(Vector::[1, 2, 3], 1, (n) => {
+      mul-int(n, 10)
+    });
+  _expect-string("vector update", _shown-ints(updated), "1203");
+  pin unchanged =
+    this::vector::update(Vector::[1, 2, 3], 3, (n) => {
+      mul-int(n, 10)
+    });
+  _expect-string("vector update: out of range", _shown-ints(unchanged), "123");
+  let nothing: vector(int) = make(0);
+  pin nothing = nothing;
+  let something: vector(int) = Vector::[1];
+  pin something = something;
+  assert("vector is-empty", and::(this::vector::is-empty(nothing), not(this::vector::is-empty(something))));
+  let no-pairs: array(pair(int, int)) = this::array::make(0);
+  pin no-pairs = no-pairs;
+  assert("array is-empty", this::array::is-empty(no-pairs));
+}
+
 define test-small-orders() -> unit {
   pin order =
     this::vector::fold-right(Vector::[*"a", *"b", *"c"], Nil, (x, acc, _) => {
@@ -706,6 +763,7 @@ define main() -> unit {
   test-string-empty-needle();
   test-long-inputs();
   test-small-orders();
+  test-vector-edits();
   test-string-format();
   test-builder-reuse();
   test-int64();

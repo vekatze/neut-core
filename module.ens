@@ -30,6 +30,9 @@
     output [
       "foreign.o",
     ],
+    link [
+      "foreign.o",
+    ],
     script [
       "{{clang}} -Isource/foreign/ryu -c -flto=thin -O2 source/foreign.c -o {{foreign}}/foreign.o",
     ],

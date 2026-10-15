@@ -6,6 +6,10 @@ inline malloc(size: c-size) -> pointer {
   magic malloc(size)
 }
 
+inline malloc-opaque(size: c-size) -> pointer {
+  magic malloc-opaque(size)
+}
+
 inline calloc(count: c-size, size: c-size) -> pointer {
   magic calloc(count, size)
 }

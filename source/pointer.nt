@@ -13,8 +13,7 @@ constant size: int {
 }
 
 inline shift(p: pointer, offset: int) -> pointer {
-  let addr = magic cast(pointer, int, p);
-  magic cast(int, pointer, add-int(addr, offset))
+  magic shift(p, offset)
 }
 
 define extract(p: pointer) -> int {

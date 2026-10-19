@@ -3,27 +3,25 @@ require {
 }
 
 import {
-  this::binary,
   this::bool {bool},
-  this::c-int {c-int, lt-c-int, ne-c-int},
-  this::c-pid {c-pid, eq-c-pid},
+  this::c-int {C-Int, c-int, lt-c-int, ne-c-int},
+  this::c-pid {C-PID, c-pid, eq-c-pid},
   this::c-size {to-c-size},
   this::c-string {c-string, from-string},
-  this::control {discard},
-  this::either {Left, Right},
-  this::file.descriptor {close, descriptor, dup2, pipe, stderr, stdin, stdout},
-  this::list {Cons, List, Nil, fold-left-with-index, length, list},
+  this::either {Left, Right, none},
+  this::file.descriptor {close, descriptor, to-c-int},
+  this::file.descriptor.unsafe {from-c-int},
+  this::list {Cons, List, fold-left-with-index, for-each, for-each-N, length, list},
   this::memory {malloc},
   this::memory.unsafe {free, load-c-int, store-int},
-  this::pair {Pair},
   this::pointer {extract, null-pointer, shift},
-  this::process {exit},
   this::process._posix {* as _posix},
-  this::string {string},
-  this::string.io {read, write},
-  this::string.pointer,
-  this::system {get-error-message, get-system-error, report-system-error, system},
-  this::unit {Unit},
+  this::string {byte-length, string},
+  this::string.io {read},
+  this::string.pointer {get-content-pointer},
+  this::sync.thread {join},
+  this::system {get-system-error, report-system-error, system},
+  this::unit {Unit, unit},
   this::word,
 }
 
@@ -65,7 +63,7 @@ data process-status {
 | Stopped(stopsig: c-int)
 }
 
-define _waitpid(pid: c-pid) ->> system(process-status) {
+define wait(pid: c-pid) ->> system(process-status) {
   let status-ptr = malloc(to-c-size(this::word::size));
   let result = _posix.waitpid(pid, status-ptr, 0);
   if eq-c-pid(result, -1) {
@@ -100,13 +98,43 @@ define _make-argv(xs: list(pointer)) -> pointer {
   ptr
 }
 
-define _fork() ->> system(c-pid) {
-  let result = _posix.fork();
-  if eq-c-pid(result, -1) {
-    report-system-error@()
-  } else {
-    Right(result)
-  }
+data stdio {
+| Piped
+| Inherited
+| Discarded
+}
+
+data process-group {
+| Parent-Group
+| New-Group
+}
+
+data child-spec {
+| Child-Spec(
+    command: string,
+    args: list(string),
+    cwd: ?string,
+    input: stdio,
+    output: stdio,
+    error-output: stdio,
+    group: process-group,
+  )
+}
+
+data child {
+| Child(
+    pid: c-pid,
+    input: ?descriptor,
+    output: ?descriptor,
+    error-output: ?descriptor,
+  )
+}
+
+data signal {
+| Hangup
+| Interrupt
+| Kill
+| Terminate
 }
 
 data process-spec {
@@ -126,29 +154,173 @@ data process-result {
   )
 }
 
-define _exec<a>(command: string, args: list(string), error-writer: descriptor) -> a {
-  let v = {
-    pin tmp =
-      this::list::for-each(Cons(command, args), (s) => {
-        pin s = s;
-        this::string::append(s, "\0")
-      });
-    let cmd =
-      case tmp {
-      | Nil =>
-        null-pointer
-      | Cons(c, _) =>
-        this::string.pointer::get-content-pointer(c)
-      };
-    let raw-args = this::list::for-each-N(tmp, this::string.pointer::get-content-pointer);
-    let cmd-args = _make-argv(this::list::append(raw-args, List::[null-pointer]));
-    _posix.execvp(cmd, cmd-args)
+data _launched {
+| _Launched(
+    pid: c-pid,
+    input: c-int,
+    output: c-int,
+    error-output: c-int,
+  )
+}
+
+define _mode(s: stdio) -> c-int {
+  match s {
+  | Piped =>
+    0
+  | Inherited =>
+    1
+  | Discarded =>
+    2
+  }
+}
+
+define _launch(
+  command: string,
+  args: list(string),
+  cwd: ?string,
+  input: stdio,
+  output: stdio,
+  error-output: stdio,
+  group: process-group,
+) ->> system(_launched) {
+  pin c-command = {
+    pin command = command;
+    from-string(command)
   };
-  let _ = {
-    pin message = get-error-message(get-system-error@());
-    write@(error-writer, message)
+  pin c-args =
+    for-each(args, (s) => {
+      pin s = s;
+      from-string(s)
+    });
+  pin c-cwd =
+    match cwd {
+    | Left(_) =>
+      Left(Unit)
+    | Right(dir) =>
+      pin dir = dir;
+      Right(from-string(dir))
+    };
+  let file = magic cast(&c-string, pointer, c-command);
+  let cwd-pointer =
+    case c-cwd {
+    | Left(_) =>
+      null-pointer
+    | Right(dir) =>
+      magic cast(&c-string, pointer, dir)
+    };
+  let new-group: c-int =
+    match group {
+    | Parent-Group =>
+      0
+    | New-Group =>
+      1
+    };
+  let arg-pointers =
+    for-each-N(c-args, (s) => {
+      magic cast(&c-string, pointer, s)
+    });
+  let argv = _make-argv(Cons(file, this::list::append(arg-pointers, List::[null-pointer])));
+  let slots = malloc(to-c-size(16));
+  let result =
+    _posix.spawn(
+      file,
+      argv,
+      cwd-pointer,
+      _mode(input),
+      _mode(output),
+      _mode(error-output),
+      new-group,
+      slots,
+      shift(slots, 4),
+    );
+  if lt-c-int(result, 0) {
+    let error = get-system-error@();
+    free(argv);
+    free(slots);
+    Left(error)
+  } else {
+    free(argv);
+    let pid = C-PID(magic load(int32, slots));
+    let input = C-Int(magic load(int32, shift(slots, 4)));
+    let output = C-Int(magic load(int32, shift(slots, 8)));
+    let error-output = C-Int(magic load(int32, shift(slots, 12)));
+    free(slots);
+    Right(_Launched{pid, input, output, error-output})
+  }
+}
+
+define _to-descriptor(end: c-int) -> ?descriptor {
+  if lt-c-int(end, 0) {
+    none
+  } else {
+    Right(from-c-int(end))
+  }
+}
+
+define spawn(spec: child-spec) ->> system(child) {
+  let Child-Spec{command, args, cwd, input, output, error-output, group} = spec;
+  try _Launched{pid, input, output, error-output} = _launch@(command, args, cwd, input, output, error-output, group);
+  Right(Child{
+    pid,
+    input := _to-descriptor(input),
+    output := _to-descriptor(output),
+    error-output := _to-descriptor(error-output),
+  })
+}
+
+define _sent(result: c-int) ->> system(unit) {
+  if lt-c-int(result, 0) {
+    report-system-error@()
+  } else {
+    Right(Unit)
+  }
+}
+
+define _signal-kind(s: signal) -> c-int {
+  match s {
+  | Hangup =>
+    0
+  | Interrupt =>
+    1
+  | Kill =>
+    2
+  | Terminate =>
+    3
+  }
+}
+
+define kill(pid: c-pid, s: signal) ->> system(unit) {
+  _sent@(_posix.send-signal(pid, _signal-kind(s), 0))
+}
+
+define kill-group(group: c-pid, s: signal) ->> system(unit) {
+  _sent@(_posix.send-signal(group, _signal-kind(s), 1))
+}
+
+define get-process-group() -> c-pid {
+  _posix.get-process-group()
+}
+
+define _feed(d: descriptor, input: string) ->> system(unit) {
+  let result on input = {
+    let content = get-content-pointer(input);
+    let size = to-c-size(byte-length(input));
+    _posix.write-until-closed(to-c-int(d), content, size)
   };
-  exit(v)
+  let _ = input;
+  if lt-c-int(result, 0) {
+    let error = get-system-error@();
+    let _ = close@(d);
+    Left(error)
+  } else {
+    close@(d)
+  }
+}
+
+define _drain(d: descriptor, initial-buffer-size: int) ->> system(string) {
+  let result = read@(d, initial-buffer-size);
+  try _ = close@(d);
+  result
 }
 
 define run(
@@ -156,52 +328,29 @@ define run(
   stdout-initial-buffer-size: int,
   stderr-initial-buffer-size: int,
 ) ->> system(process-result) {
-  try Pair(in-reader, in-writer) = pipe@();
-  try Pair(out-reader, out-writer) = pipe@();
-  try Pair(error-reader, error-writer) = pipe@();
-  try pid = _fork@();
-  if eq-c-pid(pid, -1) {
-    report-system-error@()
-  } else-if eq-c-pid(pid, 0) {
-    try _ = close@(in-writer);
-    try _ = close@(out-reader);
-    try _ = close@(error-reader);
-    try _ = dup2@(in-reader, stdin);
-    try _ = dup2@(out-writer, stdout);
-    try _ = dup2@(error-writer, stderr);
-    let Process-Spec{command, args, cwd} = ps;
-    match cwd {
-    | Left(_) =>
-      _exec(command, args, error-writer)
-    | Right(dir) =>
-      let s on dir = from-string(dir);
-      discard(dir);
-      let result on s = _posix.chdir(magic cast(&c-string, pointer, s));
-      let _ = s;
-      if lt-c-int(result, 0) {
-        let message = get-error-message(get-system-error@());
-        let _ on message = write@(stderr, message);
-        let _ = message;
-        exit(result)
-      } else {
-        _exec(command, args, error-writer)
-      }
-    }
-  } else {
-    try _ = close@(in-reader);
-    try _ = close@(out-writer);
-    try _ = close@(error-writer);
-    let Process-Spec{input} = ps;
-    try _ on input = write@(in-writer, input);
-    let _ = input;
-    try _ = close@(in-writer);
-    try stdout-string = read@(out-reader, stdout-initial-buffer-size);
-    try stderr-string = read@(error-reader, stderr-initial-buffer-size);
-    try status = _waitpid@(pid);
-    Right(Process-Result{
-      status,
-      stdout-string,
-      stderr-string,
-    })
-  }
+  let Process-Spec{command, args, cwd, input} = ps;
+  try _Launched{pid, input := writer, output := reader, error-output := error-reader} = _launch@(command, args, cwd, Piped, Piped, Piped, Parent-Group);
+  let writer = from-c-int(writer);
+  let reader = from-c-int(reader);
+  let error-reader = from-c-int(error-reader);
+  let feeding =
+    this::sync.thread::spawn(() => {
+      _feed@(writer, input)
+    });
+  let error-draining =
+    this::sync.thread::spawn(() => {
+      _drain@(error-reader, stderr-initial-buffer-size)
+    });
+  let stdout-string = _drain@(reader, stdout-initial-buffer-size);
+  let fed = join(feeding);
+  let stderr-string = join(error-draining);
+  try status = wait@(pid);
+  try _ = fed;
+  try stdout-string = stdout-string;
+  try stderr-string = stderr-string;
+  Right(Process-Result{
+    status,
+    stdout-string,
+    stderr-string,
+  })
 }

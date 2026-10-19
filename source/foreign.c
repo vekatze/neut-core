@@ -1,6 +1,5 @@
 #ifdef __linux__
-#define _XOPEN_SOURCE 700
-#define _DEFAULT_SOURCE
+#define _GNU_SOURCE
 #endif
 
 #include <dirent.h>
@@ -21,7 +20,11 @@
 
 #ifndef __wasi__
 #include <pthread.h>
+#include <signal.h>
+#include <spawn.h>
 #include <sys/wait.h>
+
+extern char **environ;
 #endif
 
 typedef int64_t neut_int;
@@ -61,6 +64,227 @@ __attribute__((always_inline)) int neut_core_v0_57_wcoredump(int stat) {
 __attribute__((always_inline)) int neut_core_v0_57_wstopsig(int stat) {
   return WSTOPSIG(stat);
 }
+
+static int neut_core_v0_57_open_cloexec_pipe(int fds[2]) {
+#ifdef __linux__
+  return pipe2(fds, O_CLOEXEC);
+#else
+  if (pipe(fds) != 0) {
+    return -1;
+  }
+  if (fcntl(fds[0], F_SETFD, FD_CLOEXEC) != 0 ||
+      fcntl(fds[1], F_SETFD, FD_CLOEXEC) != 0) {
+    int saved_errno = errno;
+    close(fds[0]);
+    close(fds[1]);
+    errno = saved_errno;
+    return -1;
+  }
+  return 0;
+#endif
+}
+
+static int neut_core_v0_57_add_spawn_chdir(posix_spawn_file_actions_t *actions,
+                                           const char *cwd) {
+#if defined(__APPLE__) && __MAC_OS_X_VERSION_MIN_REQUIRED >= 260000
+  return posix_spawn_file_actions_addchdir(actions, cwd);
+#else
+  return posix_spawn_file_actions_addchdir_np(actions, cwd);
+#endif
+}
+
+enum {
+  NEUT_CORE_V0_57_STREAM_PIPED = 0,
+  NEUT_CORE_V0_57_STREAM_INHERITED = 1,
+  NEUT_CORE_V0_57_STREAM_DISCARDED = 2,
+};
+
+static int neut_core_v0_57_add_stream(posix_spawn_file_actions_t *actions,
+                                      int mode, int child_end, int stream,
+                                      int discarding_flags) {
+  switch (mode) {
+  case NEUT_CORE_V0_57_STREAM_PIPED:
+    return posix_spawn_file_actions_adddup2(actions, child_end, stream);
+  case NEUT_CORE_V0_57_STREAM_INHERITED:
+#if defined(__APPLE__)
+    return posix_spawn_file_actions_addinherit_np(actions, stream);
+#else
+    return 0;
+#endif
+  default:
+    return posix_spawn_file_actions_addopen(actions, stream, "/dev/null",
+                                            discarding_flags, 0);
+  }
+}
+
+static int neut_core_v0_57_prepare_spawn(posix_spawn_file_actions_t *actions,
+                                         posix_spawnattr_t *attributes,
+                                         const char *cwd, const int modes[3],
+                                         const int child_ends[3],
+                                         int new_group) {
+  int result = neut_core_v0_57_add_stream(actions, modes[0], child_ends[0],
+                                          STDIN_FILENO, O_RDONLY);
+  if (result == 0) {
+    result = neut_core_v0_57_add_stream(actions, modes[1], child_ends[1],
+                                        STDOUT_FILENO, O_WRONLY);
+  }
+  if (result == 0) {
+    result = neut_core_v0_57_add_stream(actions, modes[2], child_ends[2],
+                                        STDERR_FILENO, O_WRONLY);
+  }
+  short flags = 0;
+#if defined(__APPLE__)
+  flags |= POSIX_SPAWN_CLOEXEC_DEFAULT;
+#elif defined(__GLIBC__) &&                                                    \
+    (__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 34))
+  if (result == 0) {
+    result =
+        posix_spawn_file_actions_addclosefrom_np(actions, STDERR_FILENO + 1);
+  }
+#endif
+  if (result == 0 && new_group) {
+    flags |= POSIX_SPAWN_SETPGROUP;
+    result = posix_spawnattr_setpgroup(attributes, 0);
+  }
+  if (result == 0 && flags != 0) {
+    result = posix_spawnattr_setflags(attributes, flags);
+  }
+  if (result == 0 && cwd != NULL) {
+    result = neut_core_v0_57_add_spawn_chdir(actions, cwd);
+  }
+  return result;
+}
+
+static int neut_core_v0_57_spawn_with(const char *file, char *const argv[],
+                                      const char *cwd, pid_t *pid,
+                                      const int modes[3],
+                                      const int child_ends[3],
+                                      int new_group) {
+  posix_spawn_file_actions_t actions;
+  posix_spawnattr_t attributes;
+  int result = posix_spawn_file_actions_init(&actions);
+  if (result != 0) {
+    return result;
+  }
+  result = posix_spawnattr_init(&attributes);
+  if (result != 0) {
+    posix_spawn_file_actions_destroy(&actions);
+    return result;
+  }
+  result = neut_core_v0_57_prepare_spawn(&actions, &attributes, cwd, modes,
+                                         child_ends, new_group);
+  if (result == 0) {
+    result = posix_spawnp(pid, file, &actions, &attributes, argv, environ);
+  }
+  posix_spawnattr_destroy(&attributes);
+  posix_spawn_file_actions_destroy(&actions);
+  return result;
+}
+
+static void neut_core_v0_57_close_if_open(int fd) {
+  if (fd >= 0) {
+    close(fd);
+  }
+}
+
+int neut_core_v0_57_spawn(const char *file, char *const argv[],
+                          const char *cwd, int input_mode, int output_mode,
+                          int error_output_mode, int new_group, pid_t *pid,
+                          int parent_ends[3]) {
+  const int modes[3] = {input_mode, output_mode, error_output_mode};
+  int pipes[3][2] = {{-1, -1}, {-1, -1}, {-1, -1}};
+  int child_ends[3] = {-1, -1, -1};
+  int result = 0;
+  for (int i = 0; i < 3 && result == 0; i++) {
+    if (modes[i] == NEUT_CORE_V0_57_STREAM_PIPED) {
+      if (neut_core_v0_57_open_cloexec_pipe(pipes[i]) != 0) {
+        result = errno;
+      } else {
+        int child_side = i == 0 ? 0 : 1;
+        child_ends[i] = pipes[i][child_side];
+        parent_ends[i] = pipes[i][1 - child_side];
+      }
+    }
+  }
+  if (result == 0) {
+    result = neut_core_v0_57_spawn_with(file, argv, cwd, pid, modes,
+                                        child_ends, new_group);
+  }
+  for (int i = 0; i < 3; i++) {
+    neut_core_v0_57_close_if_open(child_ends[i]);
+    if (result != 0 && child_ends[i] >= 0) {
+      neut_core_v0_57_close_if_open(parent_ends[i]);
+    }
+    if (child_ends[i] < 0) {
+      parent_ends[i] = -1;
+    }
+  }
+  if (result != 0) {
+    errno = result;
+    return -1;
+  }
+  return 0;
+}
+
+int neut_core_v0_57_send_signal(pid_t target, int signal_kind, int to_group) {
+  static const int signals[] = {SIGHUP, SIGINT, SIGKILL, SIGTERM};
+  if (to_group) {
+    return killpg(target, signals[signal_kind]);
+  }
+  return kill(target, signals[signal_kind]);
+}
+
+static int neut_core_v0_57_write_all(int fd, const char *buffer,
+                                     size_t length) {
+  size_t written = 0;
+  while (written < length) {
+    ssize_t bytes = write(fd, buffer + written, length - written);
+    if (bytes >= 0) {
+      written += (size_t)bytes;
+    } else if (errno != EINTR) {
+      return -1;
+    }
+  }
+  return 0;
+}
+
+#ifdef F_SETNOSIGPIPE
+int neut_core_v0_57_write_until_closed(int fd, const char *buffer,
+                                       size_t length) {
+  if (fcntl(fd, F_SETNOSIGPIPE, 1) != 0) {
+    return -1;
+  }
+  if (neut_core_v0_57_write_all(fd, buffer, length) != 0 && errno != EPIPE) {
+    return -1;
+  }
+  return 0;
+}
+#else
+int neut_core_v0_57_write_until_closed(int fd, const char *buffer,
+                                       size_t length) {
+  sigset_t sigpipe;
+  sigset_t pending;
+  sigset_t previous;
+  sigemptyset(&sigpipe);
+  sigaddset(&sigpipe, SIGPIPE);
+  sigpending(&pending);
+  bool was_pending = sigismember(&pending, SIGPIPE);
+  pthread_sigmask(SIG_BLOCK, &sigpipe, &previous);
+  int result = neut_core_v0_57_write_all(fd, buffer, length);
+  int saved_errno = errno;
+  if (result != 0 && saved_errno == EPIPE) {
+    result = 0;
+    sigpending(&pending);
+    if (!was_pending && sigismember(&pending, SIGPIPE)) {
+      int received;
+      sigwait(&sigpipe, &received);
+    }
+  }
+  pthread_sigmask(SIG_SETMASK, &previous, NULL);
+  errno = saved_errno;
+  return result;
+}
+#endif
 #endif
 
 __attribute__((always_inline)) int neut_core_v0_57_O_RDONLY() {

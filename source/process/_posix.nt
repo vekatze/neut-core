@@ -5,13 +5,15 @@ require {
 import {
   this::c-int {c-int},
   this::c-pid {c-pid},
+  this::c-size {c-size},
 }
 
 foreign {
-  execvp(pointer, pointer) -> c-int,
-  fork() -> c-pid,
+  neut_core_v0_57_spawn(pointer, pointer, pointer, c-int, c-int, c-int, c-int, pointer, pointer) -> c-int,
+  neut_core_v0_57_send_signal(c-pid, c-int, c-int) -> c-int,
+  getpgrp() -> c-pid,
+  neut_core_v0_57_write_until_closed(c-int, pointer, c-size) -> c-int,
   waitpid(c-pid, pointer, c-int) -> c-pid,
-  chdir(pointer) -> c-int,
   neut_core_v0_57_wifexited(c-int) -> c-int,
   neut_core_v0_57_wifsignaled(c-int) -> c-int,
   neut_core_v0_57_wifstopped(c-int) -> c-int,
@@ -21,20 +23,34 @@ foreign {
   neut_core_v0_57_wstopsig(c-int) -> c-int,
 }
 
-define execvp(cmd: pointer, args: pointer) -> c-int {
-  magic external execvp(cmd, args)
+define spawn(
+  file: pointer,
+  argv: pointer,
+  cwd: pointer,
+  input-mode: c-int,
+  output-mode: c-int,
+  error-output-mode: c-int,
+  new-group: c-int,
+  pid: pointer,
+  descriptors: pointer,
+) -> c-int {
+  magic external neut_core_v0_57_spawn(file, argv, cwd, input-mode, output-mode, error-output-mode, new-group, pid, descriptors)
 }
 
-define fork() -> c-pid {
-  magic external fork()
+define send-signal(target: c-pid, signal-kind: c-int, to-group: c-int) -> c-int {
+  magic external neut_core_v0_57_send_signal(target, signal-kind, to-group)
+}
+
+define get-process-group() -> c-pid {
+  magic external getpgrp()
+}
+
+define write-until-closed(fd: c-int, content: pointer, size: c-size) -> c-int {
+  magic external neut_core_v0_57_write_until_closed(fd, content, size)
 }
 
 define waitpid(pid: c-pid, status-ptr: pointer, option: c-int) -> c-pid {
   magic external waitpid(pid, status-ptr, option)
-}
-
-define chdir(path: pointer) -> c-int {
-  magic external chdir(path)
 }
 
 define wifexited(stat: c-int) -> c-int {

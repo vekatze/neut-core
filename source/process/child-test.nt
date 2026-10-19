@@ -1,0 +1,366 @@
+import {
+  this::binary,
+  this::bool {False, True, all, bool},
+  this::c-int {from-c-int},
+  this::c-pid {C-PID, c-pid},
+  this::debug {assert},
+  this::either {Left, Right, none},
+  this::file.descriptor {close},
+  this::file.reader {make-reader, read-line},
+  this::list {List, list},
+  this::process.child {
+    Child,
+    Child-Spec,
+    Discarded,
+    Exited,
+    Inherited,
+    New-Group,
+    Parent-Group,
+    Piped,
+    Process-Result,
+    Process-Spec,
+    Signaled,
+    Stopped,
+    Terminate,
+    child-spec,
+    get-process-group,
+    kill,
+    kill-group,
+    process-group,
+    process-result,
+    process-status,
+    run,
+    spawn,
+    wait,
+  },
+  this::string {byte-length, string},
+  this::string.builder {append-string, extract, make-string-builder},
+  this::string.eq {eq-string},
+  this::string.io {write-line},
+  this::sync.thread {join},
+  this::unit {Unit, unit},
+}
+
+define _repeated(count: int, piece: &string) -> string {
+  let b = make-string-builder(mul-int(count, byte-length(piece)));
+  let _ on b = {
+    let f =
+      define loop(i: int) -> unit {
+        if ge-int(i, count) {
+          Unit
+        } else {
+          append-string(b, piece);
+          loop(add-int(i, 1))
+        }
+      };
+    f(0)
+  };
+  extract(b)
+}
+
+define _run(command: &string, args: list(string), input: string) -> ?process-result {
+  let spec =
+    Process-Spec{
+      command := *command,
+      args,
+      cwd := Left(Unit),
+      input,
+    };
+  match run@(spec, 16, 16) {
+  | Right(result) =>
+    Right(result)
+  | Left(_) =>
+    Left(Unit)
+  }
+}
+
+define _exited-with(status: &process-status, code: int) -> bool {
+  case status {
+  | Exited(c) =>
+    eq-int(from-c-int(*c), code)
+  | Signaled(_, _) =>
+    False
+  | Stopped(_) =>
+    False
+  }
+}
+
+define _is-echoed(input: &string) -> bool {
+  match _run("cat", List::[], *input) {
+  | Right(result) =>
+    let Process-Result{status, stdout-string, stderr-string} = result;
+    pin status = status;
+    pin stdout-string = stdout-string;
+    pin stderr-string = stderr-string;
+    all::[
+      _exited-with(status, 0),
+      eq-string(stdout-string, input),
+      eq-string(stderr-string, ""),
+    ]
+  | Left(_) =>
+    False
+  }
+}
+
+define _echoes-repeatedly(count: int) -> bool {
+  if le-int(count, 0) {
+    True
+  } else-if _is-echoed("hello") {
+    _echoes-repeatedly(sub-int(count, 1))
+  } else {
+    False
+  }
+}
+
+define test-concurrent-runs() -> unit {
+  let t1 =
+    this::sync.thread::spawn(() => {
+      _echoes-repeatedly(200)
+    });
+  let t2 =
+    this::sync.thread::spawn(() => {
+      _echoes-repeatedly(200)
+    });
+  let t3 =
+    this::sync.thread::spawn(() => {
+      _echoes-repeatedly(200)
+    });
+  let t4 =
+    this::sync.thread::spawn(() => {
+      _echoes-repeatedly(200)
+    });
+  let t5 =
+    this::sync.thread::spawn(() => {
+      _echoes-repeatedly(200)
+    });
+  let t6 =
+    this::sync.thread::spawn(() => {
+      _echoes-repeatedly(200)
+    });
+  let t7 =
+    this::sync.thread::spawn(() => {
+      _echoes-repeatedly(200)
+    });
+  let t8 =
+    this::sync.thread::spawn(() => {
+      _echoes-repeatedly(200)
+    });
+  let finished = all::[join(t1), join(t2), join(t3), join(t4), join(t5), join(t6), join(t7), join(t8)];
+  assert("run: concurrent children see the end of their own input", finished)
+}
+
+define test-large-input() -> unit {
+  pin input = _repeated(1000000, "a");
+  assert("run: input larger than a pipe buffer", _is-echoed(input))
+}
+
+define test-large-stderr() -> unit {
+  let script = *"head -c 1000000 /dev/zero >&2; printf done";
+  match _run("sh", List::[*"-c", script], *"") {
+  | Right(result) =>
+    let Process-Result{status, stdout-string, stderr-string} = result;
+    pin status = status;
+    pin stdout-string = stdout-string;
+    pin stderr-string = stderr-string;
+    assert("run: stderr larger than a pipe buffer", all::[
+      _exited-with(status, 0),
+      eq-string(stdout-string, "done"),
+      eq-int(byte-length(stderr-string), 1000000),
+    ])
+  | Left(_) =>
+    assert("run: stderr larger than a pipe buffer", False)
+  }
+}
+
+define test-unread-input() -> unit {
+  pin input = _repeated(1000000, "a");
+  match _run("true", List::[], *input) {
+  | Right(result) =>
+    let Process-Result{status} = result;
+    pin status = status;
+    assert("run: a child that leaves its input unread", _exited-with(status, 0))
+  | Left(_) =>
+    assert("run: a child that leaves its input unread", False)
+  }
+}
+
+define test-cwd() -> unit {
+  let spec =
+    Process-Spec{
+      command := *"pwd",
+      args := List::[],
+      cwd := Right(*"/"),
+      input := *"",
+    };
+  match run@(spec, 16, 16) {
+  | Right(result) =>
+    let Process-Result{stdout-string} = result;
+    pin stdout-string = stdout-string;
+    assert("run: cwd", eq-string(stdout-string, "/\n"))
+  | Left(_) =>
+    assert("run: cwd", False)
+  }
+}
+
+define test-missing-command() -> unit {
+  match _run("neut-core-missing-command", List::[], *"") {
+  | Right(_) =>
+    assert("run: a missing command", False)
+  | Left(_) =>
+    Unit
+  }
+}
+
+define _signaled-with(status: &process-status, signal: int) -> bool {
+  case status {
+  | Signaled(s, _) =>
+    eq-int(from-c-int(*s), signal)
+  | Exited(_) =>
+    False
+  | Stopped(_) =>
+    False
+  }
+}
+
+define _waited-exit(pid: c-pid, code: int) -> bool {
+  match wait@(pid) {
+  | Right(status) =>
+    pin status = status;
+    _exited-with(status, code)
+  | Left(_) =>
+    False
+  }
+}
+
+define _waited-signal(pid: c-pid, signal: int) -> bool {
+  match wait@(pid) {
+  | Right(status) =>
+    pin status = status;
+    _signaled-with(status, signal)
+  | Left(_) =>
+    False
+  }
+}
+
+define _sh(script: &string, group: process-group) -> child-spec {
+  Child-Spec{
+    command := *"sh",
+    args := List::[*"-c", *script],
+    cwd := none,
+    input := Discarded,
+    output := Discarded,
+    error-output := Inherited,
+    group,
+  }
+}
+
+define _answered(writer: this::file.descriptor::descriptor, r: &this::file.reader::reader, line: &string) -> bool {
+  match write-line@(writer, line) {
+  | Right(_) =>
+    match read-line@(r) {
+    | Right(Right(answer)) =>
+      pin answer = answer;
+      eq-string(answer, line)
+    | _ =>
+      False
+    }
+  | Left(_) =>
+    False
+  }
+}
+
+define _ends(r: &this::file.reader::reader) -> bool {
+  match read-line@(r) {
+  | Right(Left(_)) =>
+    True
+  | _ =>
+    False
+  }
+}
+
+define test-spawn-talks-both-ways() -> unit {
+  let spec =
+    Child-Spec{
+      command := *"cat",
+      args := List::[],
+      cwd := none,
+      input := Piped,
+      output := Piped,
+      error-output := Inherited,
+      group := Parent-Group,
+    };
+  match spawn@(spec) {
+  | Right(Child{pid, input := Right(writer), output := Right(reader), error-output := Left(_)}) =>
+    let r = make-reader(reader, 64);
+    let talked on r = {
+      let first = _answered(writer, r, "first");
+      let second = _answered(writer, r, "second");
+      let _ = close@(writer);
+      all::[first, second, _ends(r)]
+    };
+    let _ = r;
+    let _ = close@(reader);
+    assert("spawn: a child answers each line before its input ends", all::[talked, _waited-exit(pid, 0)])
+  | _ =>
+    assert("spawn: a child answers each line before its input ends", False)
+  }
+}
+
+define test-spawn-discards() -> unit {
+  pin script = *"echo discarded; read line; exit 3";
+  match spawn@(_sh(script, Parent-Group)) {
+  | Right(Child{pid, input := Left(_), output := Left(_), error-output := Left(_)}) =>
+    assert("spawn: discarded streams give no descriptor", _waited-exit(pid, 3))
+  | _ =>
+    assert("spawn: discarded streams give no descriptor", False)
+  }
+}
+
+define test-kill() -> unit {
+  pin script = *"sleep 30";
+  match spawn@(_sh(script, Parent-Group)) {
+  | Right(Child{pid}) =>
+    match kill@(pid, Terminate) {
+    | Right(_) =>
+      assert("kill: terminates a child", _waited-signal(pid, 15))
+    | Left(_) =>
+      assert("kill: terminates a child", False)
+    }
+  | Left(_) =>
+    assert("kill: terminates a child", False)
+  }
+}
+
+define test-kill-group() -> unit {
+  pin script = *"sleep 30 & wait";
+  match spawn@(_sh(script, New-Group)) {
+  | Right(Child{pid}) =>
+    match kill-group@(pid, Terminate) {
+    | Right(_) =>
+      assert("kill-group: terminates a child that leads its own group", _waited-signal(pid, 15))
+    | Left(_) =>
+      assert("kill-group: terminates a child that leads its own group", False)
+    }
+  | Left(_) =>
+    assert("kill-group: terminates a child that leads its own group", False)
+  }
+}
+
+define test-own-process-group() -> unit {
+  let C-PID(group) = get-process-group();
+  assert("get-process-group: the caller belongs to a group", gt-int32(group, 0))
+}
+
+define zen() -> unit {
+  test-spawn-talks-both-ways();
+  test-spawn-discards();
+  test-kill();
+  test-kill-group();
+  test-own-process-group();
+  test-cwd();
+  test-missing-command();
+  test-unread-input();
+  test-large-stderr();
+  test-large-input();
+  test-concurrent-runs()
+}

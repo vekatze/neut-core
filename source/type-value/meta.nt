@@ -11,12 +11,12 @@ import {
   this::text.meta {append},
   this::type-value {
     Algebraic,
-    Concrete,
     Constructor,
     Direct,
-    Existential,
     Field,
+    Known,
     Mixed,
+    Unknown,
     Width-Pointer,
     Width16,
     Width32,
@@ -43,11 +43,11 @@ inline-meta field-type-of(f: field) -> field-type {
   t
 }
 
-inline-meta concrete-field-type(!f: field) -> type {
+inline-meta known-field-type(!f: field) -> type {
   match field-type-of(f) {
-  | Concrete(t) =>
+  | Known(t) =>
     t
-  | Existential =>
+  | Unknown =>
     let message = append(append("The type of the field `", field-name(f)), "` depends on a type variable of its constructor");
     magic compile-error(message)
   }
@@ -152,16 +152,16 @@ inline-meta constructor-is-const-like(c: constructor) -> bool {
   is-const-like
 }
 
-inline-meta constructor-type-param-count(c: constructor) -> int {
-  let Constructor(_, _, type-param-count, _) = c;
-  type-param-count
+inline-meta constructor-existential-param-count(c: constructor) -> int {
+  let Constructor(_, _, existential-param-count, _) = c;
+  existential-param-count
 }
 
 inline-meta ensure-constructible(!c: constructor) -> unit {
-  if eq-int(constructor-type-param-count(c), 0) {
+  if eq-int(constructor-existential-param-count(c), 0) {
     Unit
   } else {
-    let message = append(append("The constructor `", constructor-name(c)), "` binds a type variable of its own, so its values cannot be built from their fields");
+    let message = append(append("The constructor `", constructor-name(c)), "` binds an existential type parameter, so its values cannot be built from their fields");
     magic compile-error(message)
   }
 }
@@ -176,12 +176,12 @@ inline-meta constructor-field-count(c: constructor) -> int {
 }
 
 inline-meta constructor-fields-start(c: constructor, start: int) -> int {
-  let type-param-count = constructor-type-param-count(c);
-  if eq-int(type-param-count, 0) {
+  let existential-param-count = constructor-existential-param-count(c);
+  if eq-int(existential-param-count, 0) {
     start
   } else {
     let width = pointer-byte-size();
-    add-int(align-up(width, start), mul-int(width, type-param-count))
+    add-int(align-up(width, start), mul-int(width, existential-param-count))
   }
 }
 
@@ -192,13 +192,13 @@ inline-meta constructor-payload-end(!c: constructor, start: int) -> int {
 }
 
 inline-meta constructor-alignment(!c: constructor) -> int {
-  let type-param-alignment =
-    if eq-int(constructor-type-param-count(c), 0) {
+  let existential-param-alignment =
+    if eq-int(constructor-existential-param-count(c), 0) {
       1
     } else {
       pointer-byte-size()
     };
-  fold-left(type-param-alignment, constructor-fields(c), (acc, f) => {
+  fold-left(existential-param-alignment, constructor-fields(c), (acc, f) => {
     _larger(field-alignment(f), acc)
   })
 }

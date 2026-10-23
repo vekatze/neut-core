@@ -60,7 +60,6 @@ import {
   },
   this::type-value.meta {
     algebraic-discriminant,
-    concrete-field-type,
     constructor-fields-with-cursors,
     constructor-is-const-like,
     constructor-name,
@@ -68,6 +67,7 @@ import {
     data-arg-count,
     enum-switch,
     field-slot,
+    known-field-type,
     payload-start,
   },
   this::unsafe {cast-inline},
@@ -183,7 +183,7 @@ inline-meta _constructor-arg-doc<a>(
   x: '&a,
   enable-ansi: 'bool,
 ) -> 'doc {
-  unpack-type t = concrete-field-type(f);
+  unpack-type t = known-field-type(f);
   quote {
     let x-elem-ptr = cast-inline<int, &t>(unquote {field-slot(f, cursor, x)});
     unquote {to-doc<t>(quote {x-elem-ptr}, enable-ansi)}

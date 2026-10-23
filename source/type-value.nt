@@ -17,8 +17,8 @@ data field-layout {
 }
 
 data field-type {
-| Concrete(type)
-| Existential
+| Known(type)
+| Unknown
 }
 
 data field {

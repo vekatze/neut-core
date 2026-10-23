@@ -32,11 +32,11 @@ import {
   },
   this::type-value.meta {
     algebraic-discriminant,
-    concrete-field-type,
     constructor-fields-with-cursors,
     constructor-switch,
     data-arg-count,
     field-slot,
+    known-field-type,
     payload-start,
   },
   this::unsafe {cast, cast-inline},
@@ -103,7 +103,7 @@ inline-meta _eq-data-adt-fields<a>(
   | Cons(entry, rest) =>
     let Pair(f-raw, cursor) = entry;
     let !f = f-raw;
-    unpack-type t = concrete-field-type(f);
+    unpack-type t = known-field-type(f);
     quote {
       let x-elem-ptr = cast-inline<int, &t>(unquote {field-slot(f, cursor, x)});
       let y-elem-ptr = cast-inline<int, &t>(unquote {field-slot(f, cursor, y)});

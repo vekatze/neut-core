@@ -172,15 +172,14 @@ define string-by-dest(x: &string) -> string {
 }
 
 inline my-loop-func(x: int) ->> either(int, bool) {
-  let inner =
-    define loop(n: int) ->> either(int, bool) {
-      if eq-int(n, 0) {
-        Right(True)
-      } else {
-        loop@(sub-int(n, 1))
-      }
-    };
-  inner@(x)
+  define go(n: int) ->> either(int, bool) {
+    if eq-int(n, 0) {
+      Right(True)
+    } else {
+      go@(sub-int(n, 1))
+    }
+  };
+  go@(x)
 }
 
 define my-func(x: int) -> int {
@@ -318,46 +317,42 @@ define zen() -> unit {
 }
 
 inline-meta tdm-add-one(x: 'int) -> 'int {
-  let helper =
-    define-meta rec(y: 'int) -> 'int {
-      quote {add-int(1, unquote {y})}
-    };
-  helper(x)
+  define-meta go(y: 'int) -> 'int {
+    quote {add-int(1, unquote {y})}
+  };
+  go(x)
 }
 
 inline-meta tdm-memo(x: 'int) -> 'int {
-  let !helper =
-    define-meta dup<a>(y: 'a) -> 'a {
-      y
-    };
-  let a = helper<int>(x);
-  let b = helper<int>(x);
+  define-meta dup<a>(y: 'a) -> 'a {
+    y
+  };
+  let a = dup<int>(x);
+  let b = dup<int>(x);
   quote {add-int(unquote {a}, unquote {b})}
 }
 
 inline-meta tdm-knot(x: 'int) -> 'int {
-  let helper =
-    define-meta go<a>(flag: 'bool, base: 'a) -> 'a {
-      quote {
-        let f = unquote {flag};
-        if f {
-          unquote {base}
-        } else {
-          unquote {go(flag, base)}
-        }
+  define-meta go<a>(flag: 'bool, base: 'a) -> 'a {
+    quote {
+      let f = unquote {flag};
+      if f {
+        unquote {base}
+      } else {
+        unquote {go(flag, base)}
       }
-    };
-  helper(quote {True}, x)
+    }
+  };
+  go(quote {True}, x)
 }
 
 inline-meta tdm-hc(c: 'int) -> 'int {
-  let !helper =
-    define-meta rec<a>(tag: 'a) -> 'int {
-      let _ = tag;
-      c
-    };
-  let _ = helper<bool>(quote {True});
-  helper<int>(quote {1})
+  define-meta go<a>(tag: 'a) -> 'int {
+    let _ = tag;
+    c
+  };
+  let _ = go<bool>(quote {True});
+  go<int>(quote {1})
 }
 
 define use-item(c: int) -> unit {

@@ -85,15 +85,14 @@ define allocate(len: int) -> binary {
   let len = max-int(0, len);
   let base-pointer = malloc(to-c-size(add-int(len, _header-size())));
   let content-pointer = _initialize-header(base-pointer, len);
-  let store-values =
-    define self(index: int) -> unit {
-      if ge-int(index, len) {
-        Unit
-      } else {
-        store-int8(0, shift(content-pointer, index));
-        self(add-int(index, 1))
-      }
-    };
+  define store-values(index: int) -> unit {
+    if ge-int(index, len) {
+      Unit
+    } else {
+      store-int8(0, shift(content-pointer, index));
+      store-values(add-int(index, 1))
+    }
+  };
   store-values(0);
   cast<pointer, binary>(base-pointer)
 }
@@ -102,16 +101,15 @@ define from-list(xs: list(int8)) -> binary {
   let len on xs = this::list::length(xs);
   let base-pointer = malloc(to-c-size(add-int(len, _header-size())));
   let content-pointer = _initialize-header(base-pointer, len);
-  let store-values =
-    define self(values: list(int8), index: int) -> unit {
-      match values {
-      | Nil =>
-        Unit
-      | Cons(v, rest) =>
-        store-int8(v, shift(content-pointer, index));
-        self(rest, add-int(index, 1))
-      }
-    };
+  define store-values(values: list(int8), index: int) -> unit {
+    match values {
+    | Nil =>
+      Unit
+    | Cons(v, rest) =>
+      store-int8(v, shift(content-pointer, index));
+      store-values(rest, add-int(index, 1))
+    }
+  };
   store-values(xs, 0);
   cast<pointer, binary>(base-pointer)
 }
@@ -135,18 +133,17 @@ define replicate(t: &binary, n: int) -> binary {
     let len = mul-int(n, base-len);
     let new-binary = malloc(to-c-size(add-int(len, _header-size())));
     let content-ptr = _initialize-header(new-binary, len);
-    let loop =
-      define self(count: int, t: &binary) -> unit {
-        if ge-int(count, n) {
-          Unit
-        } else {
-          let current-content-ptr = shift(content-ptr, mul-int(count, base-len));
-          let x-ptr = _get-content-pointer(t);
-          memcpy(current-content-ptr, x-ptr, base-len);
-          self(add-int(count, 1), t)
-        }
-      };
-    loop(0, t);
+    define go(count: int, t: &binary) -> unit {
+      if ge-int(count, n) {
+        Unit
+      } else {
+        let current-content-ptr = shift(content-ptr, mul-int(count, base-len));
+        let x-ptr = _get-content-pointer(t);
+        memcpy(current-content-ptr, x-ptr, base-len);
+        go(add-int(count, 1), t)
+      }
+    };
+    go(0, t);
     magic cast(pointer, binary, new-binary)
   }
 }
@@ -158,21 +155,20 @@ define join(xs: list(binary)) -> binary {
     });
   let new-binary = malloc(to-c-size(add-int(len, _header-size())));
   let content-ptr = _initialize-header(new-binary, len);
-  let loop =
-    define self(offset: int, xs: list(binary)) -> unit {
-      match xs {
-      | Nil =>
-        Unit
-      | Cons(x, rest) =>
-        let current-content-ptr = shift(content-ptr, offset);
-        let x-ptr on x = _get-content-pointer(x);
-        let x-len on x = length(x);
-        memcpy(current-content-ptr, x-ptr, x-len);
-        discard(x);
-        self(add-int(offset, x-len), rest)
-      }
-    };
-  loop(0, xs);
+  define go(offset: int, xs: list(binary)) -> unit {
+    match xs {
+    | Nil =>
+      Unit
+    | Cons(x, rest) =>
+      let current-content-ptr = shift(content-ptr, offset);
+      let x-ptr on x = _get-content-pointer(x);
+      let x-len on x = length(x);
+      memcpy(current-content-ptr, x-ptr, x-len);
+      discard(x);
+      go(add-int(offset, x-len), rest)
+    }
+  };
+  go(0, xs);
   magic cast(pointer, binary, new-binary)
 }
 
@@ -183,20 +179,19 @@ define join-N(xs: &list(binary)) -> binary {
     });
   let new-binary = malloc(to-c-size(add-int(len, _header-size())));
   let content-ptr = _initialize-header(new-binary, len);
-  let loop =
-    define self(offset: int, xs: &list(binary)) -> unit {
-      case xs {
-      | Nil =>
-        Unit
-      | Cons(x, rest) =>
-        let current-content-ptr = shift(content-ptr, offset);
-        let x-ptr = _get-content-pointer(x);
-        let x-len = length(x);
-        memcpy(current-content-ptr, x-ptr, x-len);
-        self(add-int(offset, x-len), rest)
-      }
-    };
-  loop(0, xs);
+  define go(offset: int, xs: &list(binary)) -> unit {
+    case xs {
+    | Nil =>
+      Unit
+    | Cons(x, rest) =>
+      let current-content-ptr = shift(content-ptr, offset);
+      let x-ptr = _get-content-pointer(x);
+      let x-len = length(x);
+      memcpy(current-content-ptr, x-ptr, x-len);
+      go(add-int(offset, x-len), rest)
+    }
+  };
+  go(0, xs);
   magic cast(pointer, binary, new-binary)
 }
 
@@ -215,16 +210,15 @@ define append(t1: &binary, t2: &binary) -> binary {
   let content2 = load-pointer(shift(p2, _content-pointer-offset()));
   let new-binary = malloc(to-c-size(add-int(new-len, _header-size())));
   let str-pointer = _initialize-header(new-binary, new-len);
-  let !store-values =
-    define store-values(target-pointer: pointer, content-array: pointer, current-index: int, array-length: int) -> unit {
-      if eq-int(current-index, array-length) {
-        Unit
-      } else {
-        let char = load-int8(shift(content-array, current-index));
-        store-int8(char, shift(target-pointer, current-index));
-        store-values(target-pointer, content-array, add-int(current-index, 1), array-length)
-      }
-    };
+  define store-values(target-pointer: pointer, content-array: pointer, current-index: int, array-length: int) -> unit {
+    if eq-int(current-index, array-length) {
+      Unit
+    } else {
+      let char = load-int8(shift(content-array, current-index));
+      store-int8(char, shift(target-pointer, current-index));
+      store-values(target-pointer, content-array, add-int(current-index, 1), array-length)
+    }
+  };
   store-values(str-pointer, shift(content1, from1), 0, len1);
   store-values(shift(str-pointer, len1), shift(content2, from2), 0, len2);
   cast<pointer, binary>(new-binary)
@@ -325,30 +319,29 @@ define intercalate-N(xs: &list(binary), sep: &binary) -> binary {
   let len = add-int(base-len, mul-int(length(sep), sep-num));
   let new-binary = malloc(to-c-size(add-int(len, _header-size())));
   let content-ptr = _initialize-header(new-binary, len);
-  let loop =
-    define self(offset: int, xs: &list(binary)) -> unit {
-      case xs {
+  define go(offset: int, xs: &list(binary)) -> unit {
+    case xs {
+    | Nil =>
+      Unit
+    | Cons(x, rest) =>
+      let current-content-ptr = shift(content-ptr, offset);
+      let x-ptr = _get-content-pointer(x);
+      let x-len = length(x);
+      memcpy(current-content-ptr, x-ptr, x-len);
+      let new-offset = add-int(offset, x-len);
+      case rest {
       | Nil =>
-        Unit
-      | Cons(x, rest) =>
-        let current-content-ptr = shift(content-ptr, offset);
-        let x-ptr = _get-content-pointer(x);
-        let x-len = length(x);
-        memcpy(current-content-ptr, x-ptr, x-len);
-        let new-offset = add-int(offset, x-len);
-        case rest {
-        | Nil =>
-          self(new-offset, rest)
-        | Cons(_, _) =>
-          let current-content-ptr = shift(content-ptr, new-offset);
-          let sep-ptr = _get-content-pointer(sep);
-          let sep-len = length(sep);
-          memcpy(current-content-ptr, sep-ptr, sep-len);
-          self(add-int(new-offset, sep-len), rest)
-        };
-      }
-    };
-  loop(0, xs);
+        go(new-offset, rest)
+      | Cons(_, _) =>
+        let current-content-ptr = shift(content-ptr, new-offset);
+        let sep-ptr = _get-content-pointer(sep);
+        let sep-len = length(sep);
+        memcpy(current-content-ptr, sep-ptr, sep-len);
+        go(add-int(new-offset, sep-len), rest)
+      };
+    }
+  };
+  go(0, xs);
   magic cast(pointer, binary, new-binary)
 }
 
@@ -388,38 +381,36 @@ define intercalate-vector-N(xs: &vector(binary), sep: &binary) -> binary {
 
 define find(xs: &binary, !pred: (int8) -> bool) ->> ?int {
   let len = length(xs);
-  let f =
-    define self(index: int) ->> ?int {
-      if ge-int(index, len) {
-        none
+  define go(index: int) ->> ?int {
+    if ge-int(index, len) {
+      none
+    } else {
+      let ch = _access(xs, index);
+      if pred(ch) {
+        Right(index)
       } else {
-        let ch = _access(xs, index);
-        if pred(ch) {
-          Right(index)
-        } else {
-          self@(add-int(index, 1))
-        }
+        go@(add-int(index, 1))
       }
-    };
-  f@(0)
+    }
+  };
+  go@(0)
 }
 
 define find-end(xs: &binary, !pred: (int8) -> bool) ->> ?int {
   let len = length(xs);
-  let f =
-    define self(xs: &binary, index: int) ->> ?int {
-      if lt-int(index, 0) {
-        none
+  define go(xs: &binary, index: int) ->> ?int {
+    if lt-int(index, 0) {
+      none
+    } else {
+      let ch = _access(xs, index);
+      if pred(ch) {
+        Right(sub-int(len, add-int(index, 1)))
       } else {
-        let ch = _access(xs, index);
-        if pred(ch) {
-          Right(sub-int(len, add-int(index, 1)))
-        } else {
-          self@(xs, sub-int(index, 1))
-        }
+        go@(xs, sub-int(index, 1))
       }
-    };
-  f@(xs, sub-int(len, 1))
+    }
+  };
+  go@(xs, sub-int(len, 1))
 }
 
 define _get-matched-prefix-length(xs: &binary, ys: &binary, cursor: int, len: int) -> int {

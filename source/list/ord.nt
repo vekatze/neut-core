@@ -5,28 +5,25 @@ import {
 }
 
 inline as-ord<a>(o: ord(a)) -> ord(list(a)) {
-  let Ord{compare := !compare} = o;
-  Ord{
-    compare := {
-      define self(xs: &list(a), ys: &list(a)) -> ordering {
-        case xs, ys {
-        | Nil, Nil =>
-          EQ
-        | Nil, Cons(_, _) =>
-          LT
-        | Cons(_, _), Nil =>
-          GT
-        | Cons(x, xs), Cons(y, ys) =>
-          match compare(x, y) {
-          | LT =>
-            LT
-          | GT =>
-            GT
-          | EQ =>
-            self(xs, ys)
-          }
-        }
+  let Ord{compare := !compare-element} = o;
+  define compare(xs: &list(a), ys: &list(a)) -> ordering {
+    case xs, ys {
+    | Nil, Nil =>
+      EQ
+    | Nil, Cons(_, _) =>
+      LT
+    | Cons(_, _), Nil =>
+      GT
+    | Cons(x, xs), Cons(y, ys) =>
+      match compare-element(x, y) {
+      | LT =>
+        LT
+      | GT =>
+        GT
+      | EQ =>
+        compare(xs, ys)
       }
-    },
-  }
+    }
+  };
+  Ord{compare}
 }

@@ -50,19 +50,18 @@ define _close-pool<a>(k: pool(a)) -> unit {
 
 define _setup-workers<a>(message-channel: &channel(_message(a)), size: int) -> vector(thread(unit)) {
   grow(this::vector::make(8), max-int(size, 1), (acc, _) => {
-    push-back(acc, spawn(
-      define worker() -> unit {
-        let v = axiom-T(receive(message-channel));
-        match v {
-        | _Stop =>
-          Unit
-        | _Run(f, chan) =>
-          let result = f();
-          this::sync.mvar::send(chan, result);
-          worker();
-        }
-      },
-    ))
+    define worker() -> unit {
+      let v = axiom-T(receive(message-channel));
+      match v {
+      | _Stop =>
+        Unit
+      | _Run(f, chan) =>
+        let result = f();
+        this::sync.mvar::send(chan, result);
+        worker();
+      }
+    };
+    push-back(acc, spawn(worker))
   })
 }
 

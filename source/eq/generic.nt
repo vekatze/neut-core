@@ -52,22 +52,21 @@ inline-meta _equal-array<a>(xs: '&array(a), ys: '&array(a)) -> 'bool {
     let len-x = this::array::length(unquote {xs});
     let len-y = this::array::length(unquote {ys});
     if eq-int(len-x, len-y) {
-      let loop =
-        define self(index: int) -> bool {
-          if eq-int(index, len-x) {
-            True
+      define go(index: int) -> bool {
+        if eq-int(index, len-x) {
+          True
+        } else {
+          let x = access-unchecked(unquote {xs}, index);
+          let y = access-unchecked(unquote {ys}, index);
+          let is-eq = unquote {eq-data(quote {x}, quote {y})};
+          if is-eq {
+            go(add-int(index, 1))
           } else {
-            let x = access-unchecked(unquote {xs}, index);
-            let y = access-unchecked(unquote {ys}, index);
-            let is-eq = unquote {eq-data(quote {x}, quote {y})};
-            if is-eq {
-              self(add-int(index, 1))
-            } else {
-              False
-            }
+            False
           }
-        };
-      loop(0)
+        }
+      };
+      go(0)
     } else {
       False
     }

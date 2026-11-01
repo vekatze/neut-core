@@ -162,16 +162,15 @@ define delete<a>(t: intmap(a), k: int) -> intmap(a) {
 }
 
 inline from-list<v>(kvs: list(pair(int, v))) -> intmap(v) {
-  let f =
-    define self(kvs: list(pair(int, v)), acc: intmap(v)) -> intmap(v) {
-      match kvs {
-      | this::list::Nil =>
-        acc
-      | this::list::Cons(Pair(k, v), rest) =>
-        self(rest, insert(acc, k, v))
-      }
-    };
-  f(kvs, _Nil)
+  define go(kvs: list(pair(int, v)), acc: intmap(v)) -> intmap(v) {
+    match kvs {
+    | this::list::Nil =>
+      acc
+    | this::list::Cons(Pair(k, v), rest) =>
+      go(rest, insert(acc, k, v))
+    }
+  };
+  go(kvs, _Nil)
 }
 
 define _to-list-aux<v>(kvs: intmap(v), acc: list(pair(int, v))) -> list(pair(int, v)) {

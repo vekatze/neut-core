@@ -80,17 +80,17 @@ inline append-ansi(b: &string-builder, x: command) -> unit {
 }
 
 rule-left String {
-  inline-meta leaf(_: int) -> 'string-builder {
+  function leaf(_: int) -> 'string-builder {
     quote {make-string-builder(64)}
   },
-  inline-meta node-left(acc: 'string-builder, s: '&string) -> 'string-builder {
+  function node-left(acc: 'string-builder, s: '&string) -> 'string-builder {
     quote {
       let b = unquote {acc};
       let _ on b = this::string.builder::append-string(b, unquote {s});
       b
     }
   },
-  inline-meta root(acc: 'string-builder) -> 'string {
+  function root(acc: 'string-builder) -> 'string {
     quote {extract(unquote {acc})}
   },
 }

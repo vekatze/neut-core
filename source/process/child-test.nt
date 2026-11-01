@@ -44,16 +44,15 @@ import {
 define _repeated(count: int, piece: &string) -> string {
   let b = make-string-builder(mul-int(count, byte-length(piece)));
   let _ on b = {
-    let f =
-      define loop(i: int) -> unit {
-        if ge-int(i, count) {
-          Unit
-        } else {
-          append-string(b, piece);
-          loop(add-int(i, 1))
-        }
-      };
-    f(0)
+    define go(i: int) -> unit {
+      if ge-int(i, count) {
+        Unit
+      } else {
+        append-string(b, piece);
+        go(add-int(i, 1))
+      }
+    };
+    go(0)
   };
   extract(b)
 }

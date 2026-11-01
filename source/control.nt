@@ -5,56 +5,52 @@ import {
 }
 
 inline loop(count: int, !f: (int) -> unit) -> unit {
-  let helper =
-    define self(cursor: int) -> unit {
-      match ge-int(cursor, count) {
-      | True =>
-        Unit
-      | False =>
-        f(cursor);
-        self(add-int(cursor, 1))
-      }
-    };
-  helper(0)
+  define go(cursor: int) -> unit {
+    match ge-int(cursor, count) {
+    | True =>
+      Unit
+    | False =>
+      f(cursor);
+      go(add-int(cursor, 1))
+    }
+  };
+  go(0)
 }
 
 inline loop-E<e>(count: int, !f: (int) -> either(e, unit)) -> either(e, unit) {
-  let helper =
-    define self(cursor: int) -> either(e, unit) {
-      match ge-int(cursor, count) {
-      | True =>
-        Right(Unit)
-      | False =>
-        try _ = f(cursor);
-        self(add-int(cursor, 1))
-      }
-    };
-  helper(0)
+  define go(cursor: int) -> either(e, unit) {
+    match ge-int(cursor, count) {
+    | True =>
+      Right(Unit)
+    | False =>
+      try _ = f(cursor);
+      go(add-int(cursor, 1))
+    }
+  };
+  go(0)
 }
 
 inline grow<a>(seed: a, iteration: int, !step: (a, int) -> a) -> a {
-  let helper =
-    define self(acc: a, current: int) -> a {
-      if ge-int(current, iteration) {
-        acc
-      } else {
-        self(step(acc, current), add-int(current, 1))
-      }
-    };
-  helper(seed, 0)
+  define go(acc: a, current: int) -> a {
+    if ge-int(current, iteration) {
+      acc
+    } else {
+      go(step(acc, current), add-int(current, 1))
+    }
+  };
+  go(seed, 0)
 }
 
 inline grow-E<e, a>(seed: a, iteration: int, !step: (a, int) -> either(e, a)) -> either(e, a) {
-  let helper =
-    define self(acc: a, current: int) -> either(e, a) {
-      if ge-int(current, iteration) {
-        Right(acc)
-      } else {
-        try tmp = step(acc, current);
-        self(tmp, add-int(current, 1))
-      }
-    };
-  helper(seed, 0)
+  define go(acc: a, current: int) -> either(e, a) {
+    if ge-int(current, iteration) {
+      Right(acc)
+    } else {
+      try tmp = step(acc, current);
+      go(tmp, add-int(current, 1))
+    }
+  };
+  go(seed, 0)
 }
 
 define discard<a>(_: a) -> unit {

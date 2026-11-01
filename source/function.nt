@@ -25,14 +25,14 @@ inline uncurry<a, b, c>(f: (a) -> (b) -> c) -> (a, b) -> c {
 }
 
 rule-left pipeline {
-  inline-meta leaf<a>(_: int) -> '(a) -> a {
+  function leaf<a>(_: int) -> '(a) -> a {
     quote {
       (x: a) => {
         x
       }
     }
   },
-  inline-meta node-left<a, b, c>(acc: '(a) -> b, g: '(b) -> c) -> '(a) -> c {
+  function node-left<a, b, c>(acc: '(a) -> b, g: '(b) -> c) -> '(a) -> c {
     quote {
       (x: a) => {
         let acc-fn = unquote {acc};
@@ -41,7 +41,7 @@ rule-left pipeline {
       }
     }
   },
-  inline-meta root<a>(x: 'a) -> 'a {
+  function root<a>(x: 'a) -> 'a {
     x
   },
 }

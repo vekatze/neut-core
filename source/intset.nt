@@ -149,16 +149,15 @@ define delete(t: intset, k: int) -> intset {
 }
 
 define from-list(ks: list(int)) -> intset {
-  let f =
-    define self(ks: list(int), acc: intset) -> intset {
-      match ks {
-      | this::list::Nil =>
-        acc
-      | this::list::Cons(k, rest) =>
-        self(rest, insert(acc, k))
-      }
-    };
-  f(ks, _Nil)
+  define go(ks: list(int), acc: intset) -> intset {
+    match ks {
+    | this::list::Nil =>
+      acc
+    | this::list::Cons(k, rest) =>
+      go(rest, insert(acc, k))
+    }
+  };
+  go(ks, _Nil)
 }
 
 define _to-list-aux(s: intset, acc: list(int)) -> list(int) {

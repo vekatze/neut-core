@@ -371,16 +371,15 @@ define lookup-GE<k, v>(o: &ord(k), d: &dictionary(k, v), needle: &k) ->> ?pair(&
 }
 
 inline from-list<k, v>(o: &ord(k), kvs: list(pair(k, v))) -> dictionary(k, v) {
-  let f =
-    define self(kvs: list(pair(k, v)), acc: dictionary(k, v)) -> dictionary(k, v) {
-      match kvs {
-      | Nil =>
-        acc
-      | Cons(Pair(k, v), rest) =>
-        self(rest, insert(o, acc, k, v))
-      }
-    };
-  f(kvs, _Tip)
+  define go(kvs: list(pair(k, v)), acc: dictionary(k, v)) -> dictionary(k, v) {
+    match kvs {
+    | Nil =>
+      acc
+    | Cons(Pair(k, v), rest) =>
+      go(rest, insert(o, acc, k, v))
+    }
+  };
+  go(kvs, _Tip)
 }
 
 define _to-list-aux<k, v>(d: dictionary(k, v), acc: list(pair(k, v))) -> list(pair(k, v)) {

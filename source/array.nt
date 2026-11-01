@@ -404,16 +404,15 @@ inline fold-left-N<elem-type, result-type>(
   !consumer: (result-type, &elem-type, int) -> result-type,
 ) -> result-type {
   let size = length(xs);
-  let helper =
-    define loop(cursor: int, acc: result-type, xs: &array(elem-type)) -> result-type {
-      if eq-int(cursor, size) {
-        acc
-      } else {
-        let y = _access-unchecked(xs, cursor);
-        loop(add-int(cursor, 1), consumer(acc, y, cursor), xs)
-      }
-    };
-  helper(0, acc, xs)
+  define go(cursor: int, acc: result-type, xs: &array(elem-type)) -> result-type {
+    if eq-int(cursor, size) {
+      acc
+    } else {
+      let y = _access-unchecked(xs, cursor);
+      go(add-int(cursor, 1), consumer(acc, y, cursor), xs)
+    }
+  };
+  go(0, acc, xs)
 }
 
 inline for-N<a>(xs: &array(a), f: (&a, int) -> unit) -> unit {
@@ -423,13 +422,13 @@ inline for-N<a>(xs: &array(a), f: (&a, int) -> unit) -> unit {
 }
 
 rule-left Array {
-  inline-meta leaf<a>(size: int) -> 'array(a) {
+  function leaf<a>(size: int) -> 'array(a) {
     quote {make(unquote {promote {size}})}
   },
-  inline-meta node-left<sized a>(acc: 'array(a), x: 'a) -> 'array(a) {
+  function node-left<sized a>(acc: 'array(a), x: 'a) -> 'array(a) {
     quote {push-back(unquote {acc}, ~unquote {x})}
   },
-  inline-meta root<a>(x: 'a) -> 'a {
+  function root<a>(x: 'a) -> 'a {
     x
   },
 }
@@ -461,18 +460,17 @@ define swap<a>(xs: array(a), i: int, j: int) -> array(a) {
 
 define to-list<a>(xs: array(a)) -> list(a) {
   let len on xs = length(xs);
-  let loop =
-    define self(xs: array(a), index: int, acc: list(a)) -> list(a) {
-      if lt-int(index, 0) {
-        let xs = cast<array(a), &array(a)>(xs);
-        _free-array(xs);
-        acc
-      } else {
-        let element-ptr on xs = _get-element-pointer(xs, index);
-        let stride = _get-stride::<a>();
-        let value = _load-element(element-ptr, stride);
-        self(xs, sub-int(index, 1), Cons(value, acc))
-      }
-    };
-  loop(xs, sub-int(len, 1), Nil)
+  define go(xs: array(a), index: int, acc: list(a)) -> list(a) {
+    if lt-int(index, 0) {
+      let xs = cast<array(a), &array(a)>(xs);
+      _free-array(xs);
+      acc
+    } else {
+      let element-ptr on xs = _get-element-pointer(xs, index);
+      let stride = _get-stride::<a>();
+      let value = _load-element(element-ptr, stride);
+      go(xs, sub-int(index, 1), Cons(value, acc))
+    }
+  };
+  go(xs, sub-int(len, 1), Nil)
 }

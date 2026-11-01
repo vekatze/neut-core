@@ -37,44 +37,42 @@ define _find-higher<a>(o: &ord(a), vs: &vector(a), boundary: int, to: int, pivot
 }
 
 define vector-quicksort<a>(o: &ord(a), nes: &(a) -> ^a, xs: vector(a)) -> vector(a) {
-  let f =
-    define outer-loop(vs: vector(a), from: int, to: int) -> vector(a) {
-      if ge-int(from, to) {
-        vs
-      } else {
-        let pivot-index = div-int(add-int(from, to), 2);
-        letbox-T pivot on vs = nes(*access-unchecked(vs, pivot-index));
-        let pivot-swap-loop =
-          define inner-loop(
-            vs: vector(a),
-            current-from: int,
-            current-to: int,
-            pivot: a,
-            boundary: int,
-          ) -> vector(a) {
-            let lower on vs, pivot = _find-lower(o, vs, current-from, boundary, pivot);
-            let higher on vs, pivot = _find-higher(o, vs, boundary, current-to, pivot);
-            match lt-int(lower, 0), lt-int(higher, 0) {
-            | True, True =>
-              outer-loop(outer-loop(vs, from, boundary), add-int(boundary, 1), to)
-            | True, False =>
-              let hi = higher;
-              let vs = swap-unchecked(vs, hi, boundary);
-              inner-loop(vs, boundary, current-to, pivot, hi)
-            | False, True =>
-              let lo = lower;
-              let vs = swap-unchecked(vs, lo, boundary);
-              inner-loop(vs, current-from, boundary, pivot, lo)
-            | False, False =>
-              let lo = lower;
-              let hi = higher;
-              let vs = swap-unchecked(vs, lo, hi);
-              inner-loop(vs, add-int(lo, 1), sub-int(hi, 1), pivot, boundary)
-            }
-          };
-        pivot-swap-loop(vs, from, to, pivot, pivot-index)
-      }
-    };
+  define outer-loop(vs: vector(a), from: int, to: int) -> vector(a) {
+    if ge-int(from, to) {
+      vs
+    } else {
+      let pivot-index = div-int(add-int(from, to), 2);
+      letbox-T pivot on vs = nes(*access-unchecked(vs, pivot-index));
+      define inner-loop(
+        vs: vector(a),
+        current-from: int,
+        current-to: int,
+        pivot: a,
+        boundary: int,
+      ) -> vector(a) {
+        let lower on vs, pivot = _find-lower(o, vs, current-from, boundary, pivot);
+        let higher on vs, pivot = _find-higher(o, vs, boundary, current-to, pivot);
+        match lt-int(lower, 0), lt-int(higher, 0) {
+        | True, True =>
+          outer-loop(outer-loop(vs, from, boundary), add-int(boundary, 1), to)
+        | True, False =>
+          let hi = higher;
+          let vs = swap-unchecked(vs, hi, boundary);
+          inner-loop(vs, boundary, current-to, pivot, hi)
+        | False, True =>
+          let lo = lower;
+          let vs = swap-unchecked(vs, lo, boundary);
+          inner-loop(vs, current-from, boundary, pivot, lo)
+        | False, False =>
+          let lo = lower;
+          let hi = higher;
+          let vs = swap-unchecked(vs, lo, hi);
+          inner-loop(vs, add-int(lo, 1), sub-int(hi, 1), pivot, boundary)
+        }
+      };
+      inner-loop(vs, from, to, pivot, pivot-index)
+    }
+  };
   let len on xs = this::vector::length(xs);
-  f(xs, 0, sub-int(len, 1))
+  outer-loop(xs, 0, sub-int(len, 1))
 }

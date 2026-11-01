@@ -4,16 +4,15 @@ import {
 }
 
 define sum-int(xs: list(int)) -> int {
-  let f =
-    define loop(ys: list(int), acc: int) -> int {
-      match ys {
-      | Nil =>
-        acc
-      | Cons(z, zs) =>
-        loop(zs, add-int(z, acc))
-      }
-    };
-  f(xs, 0)
+  define go(ys: list(int), acc: int) -> int {
+    match ys {
+    | Nil =>
+      acc
+    | Cons(z, zs) =>
+      go(zs, add-int(z, acc))
+    }
+  };
+  go(xs, 0)
 }
 
 define min-int(x: int, y: int) -> int {
@@ -41,17 +40,16 @@ define abs-int(x: int) -> int {
 }
 
 define power-int(a: int, b: int) -> int {
-  let f =
-    define _power(a: int, b: int, result: int) -> int {
-      if le-int(b, 0) {
-        result
-      } else-if eq-int(rem-int(b, 2), 0) {
-        _power(mul-int(a, a), div-int(b, 2), result)
-      } else {
-        _power(mul-int(a, a), div-int(b, 2), mul-int(result, a))
-      }
-    };
-  f(a, b, 1)
+  define _power(a: int, b: int, result: int) -> int {
+    if le-int(b, 0) {
+      result
+    } else-if eq-int(rem-int(b, 2), 0) {
+      _power(mul-int(a, a), div-int(b, 2), result)
+    } else {
+      _power(mul-int(a, a), div-int(b, 2), mul-int(result, a))
+    }
+  };
+  _power(a, b, 1)
 }
 
 constant int-max: int {

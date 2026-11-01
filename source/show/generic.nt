@@ -129,23 +129,22 @@ inline-meta _array-doc<a>(xs: '&array(a), enable-ansi: 'bool) -> 'doc {
     if eq-int(len, 0) {
       join::[prefix, suffix]
     } else {
-      let loop =
-        define self(index: int) -> doc {
-          if eq-int(index, len) {
-            empty
+      define go(index: int) -> doc {
+        if eq-int(index, len) {
+          empty
+        } else {
+          let x = access-unchecked(unquote {xs}, index);
+          let rest = go(add-int(index, 1));
+          if eq-int(add-int(index, 1), len) {
+            join::[unquote {to-doc(quote {x}, enable-ansi)}, rest]
           } else {
-            let x = access-unchecked(unquote {xs}, index);
-            let rest = self(add-int(index, 1));
-            if eq-int(add-int(index, 1), len) {
-              join::[unquote {to-doc(quote {x}, enable-ansi)}, rest]
-            } else {
-              join::[unquote {to-doc(quote {x}, enable-ansi)}, atom-N(","), break(" "), rest]
-            }
+            join::[unquote {to-doc(quote {x}, enable-ansi)}, atom-N(","), break(" "), rest]
           }
-        };
+        }
+      };
       Group(_nested-comma-seq(
         prefix,
-        loop(0),
+        go(0),
         suffix,
       ))
     }

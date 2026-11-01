@@ -15,21 +15,20 @@ inline as-eq<a>(class: eq(a)) -> eq(vector(a)) {
         if ne-int(len1, len2) {
           False
         } else {
-          let f =
-            define loop(i: int) -> bool {
-              if ge-int(i, len1) {
-                True
+          define go(i: int) -> bool {
+            if ge-int(i, len1) {
+              True
+            } else {
+              let x = access-unchecked(xs, i);
+              let y = access-unchecked(ys, i);
+              if equal(x, y) {
+                go(add-int(i, 1))
               } else {
-                let x = access-unchecked(xs, i);
-                let y = access-unchecked(ys, i);
-                if equal(x, y) {
-                  loop(add-int(i, 1))
-                } else {
-                  False
-                }
+                False
               }
-            };
-          f(0)
+            }
+          };
+          go(0)
         }
       }
     },

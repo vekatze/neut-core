@@ -24,7 +24,7 @@ foreign {
   closedir(pointer) -> c-int,
   neut_core_v0_57_readdir(pointer, pointer) -> int,
   neut_core_v0_57_GET_DNAME(pointer) -> pointer,
-  neut_core_v0_57_GET_DTYPE(pointer) -> int8,
+  neut_core_v0_57_GET_DTYPE(pointer) -> int32,
   neut_core_v0_57_mkdir(pointer, int) -> int,
   neut_core_v0_57_get_modification_time(pointer, pointer, pointer) -> int,
   neut_core_v0_57_unlink(pointer) -> int,
@@ -64,7 +64,7 @@ define _read-directory(d: _directory) -> system(list(dirent)) {
   } else {
     let result = load-pointer(result-ptr);
     let name = to-string(magic cast(pointer, &c-string, magic external neut_core_v0_57_GET_DNAME(result)));
-    let kind = dtype-from-int(magic external neut_core_v0_57_GET_DTYPE(result));
+    let kind = dtype-from-int(trunc-int32-int8(magic external neut_core_v0_57_GET_DTYPE(result)));
     try rest = _read-directory(d);
     Right(Cons(Dirent{kind, name}, rest))
   }

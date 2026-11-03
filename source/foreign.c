@@ -1260,7 +1260,7 @@ neut_core_v0_57_GET_DNAME(struct dirent *d) {
   return d->d_name;
 }
 
-__attribute__((always_inline)) uint8_t
+__attribute__((always_inline)) int32_t
 neut_core_v0_57_GET_DTYPE(struct dirent *d) {
   return d->d_type;
 }
@@ -1274,31 +1274,31 @@ neut_int neut_core_v0_57_readdir(DIR *dir, struct dirent **entry) {
   return 1;
 }
 
-__attribute__((always_inline)) uint8_t neut_core_v0_57_DT_FIFO() {
+__attribute__((always_inline)) int32_t neut_core_v0_57_DT_FIFO() {
   return DT_FIFO;
 }
 
-__attribute__((always_inline)) uint8_t neut_core_v0_57_DT_CHR() {
+__attribute__((always_inline)) int32_t neut_core_v0_57_DT_CHR() {
   return DT_CHR;
 }
 
-__attribute__((always_inline)) uint8_t neut_core_v0_57_DT_DIR() {
+__attribute__((always_inline)) int32_t neut_core_v0_57_DT_DIR() {
   return DT_DIR;
 }
 
-__attribute__((always_inline)) uint8_t neut_core_v0_57_DT_BLK() {
+__attribute__((always_inline)) int32_t neut_core_v0_57_DT_BLK() {
   return DT_BLK;
 }
 
-__attribute__((always_inline)) uint8_t neut_core_v0_57_DT_REG() {
+__attribute__((always_inline)) int32_t neut_core_v0_57_DT_REG() {
   return DT_REG;
 }
 
-__attribute__((always_inline)) uint8_t neut_core_v0_57_DT_LNK() {
+__attribute__((always_inline)) int32_t neut_core_v0_57_DT_LNK() {
   return DT_LNK;
 }
 
-__attribute__((always_inline)) uint8_t neut_core_v0_57_DT_SOCK() {
+__attribute__((always_inline)) int32_t neut_core_v0_57_DT_SOCK() {
   return DT_SOCK;
 }
 

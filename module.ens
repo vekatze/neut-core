@@ -8,7 +8,7 @@
     },
     test-wasm {
       main "_test-wasm.nt",
-      platform "wasm32",
+      platform "*/wasm32-wasip1",
       execute "wasmtime {{executable}}",
     },
     test-wasm-host {
@@ -22,21 +22,24 @@
     },
   },
   universal false,
-  foreign {
-    input [
-      "source/foreign.c",
-      "source/foreign/",
-    ],
-    output [
-      "foreign.o",
-    ],
-    link [
-      "foreign.o",
-    ],
-    script [
-      "{{clang}} -Isource/foreign/ryu -c -flto=thin -O2 source/foreign.c -o {{foreign}}/foreign.o",
-    ],
-  },
+  foreign [
+    {
+      platform "*/*",
+      input [
+        "source/foreign.c",
+        "source/foreign/",
+      ],
+      output [
+        "foreign.o",
+      ],
+      link [
+        "foreign.o",
+      ],
+      script [
+        "{{clang}} -Isource/foreign/ryu -c -flto=thin -O2 source/foreign.c -o {{foreign}}/foreign.o",
+      ],
+    },
+  ],
   preset {
     array ["array"],
     binary ["binary"],

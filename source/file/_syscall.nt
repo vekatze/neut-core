@@ -20,7 +20,7 @@ define lseek(fd: c-int, offset: c-offset, origin: c-int) -> c-offset {
 
 define dup2(fd1: c-int, fd2: c-int) -> c-int {
   introspect target-os {
-  | wasi =>
+  | wasip1 =>
     let _ = fd1;
     let _ = fd2;
     C-Int(-1)

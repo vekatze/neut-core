@@ -25,7 +25,7 @@ define write(fd: c-int, content-pointer: pointer, len: c-size) -> c-ssize {
 
 define pipe(ptr: pointer) -> c-int {
   introspect target-os {
-  | wasi =>
+  | wasip1 =>
     let _ = ptr;
     C-Int(-1)
   | default =>
